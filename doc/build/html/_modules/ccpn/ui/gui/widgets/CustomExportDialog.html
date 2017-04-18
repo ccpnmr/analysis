@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.CustomExportDialog &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.CustomExportDialog</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Reimplementation of PyQtGraph</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt</span> <span class="kn">import</span> <span class="n">Ui_Form</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.exporters1D.ImageExporter</span> <span class="kn">import</span> <span class="n">ImageExporter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.exporters1D.SVGExporter</span> <span class="kn">import</span> <span class="n">SVGExporter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.exporters1D.TextExporter</span> <span class="kn">import</span> <span class="n">TextExporter</span>
+
+<span class="n">ExporterList</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1D&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ImageExporter</span><span class="p">,</span> <span class="n">SVGExporter</span><span class="p">,</span> <span class="n">TextExporter</span><span class="p">],</span>
+                <span class="s1">&#39;nD&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">SVGExporter</span><span class="p">]</span>
+                <span class="p">}</span>
+
+<div class="viewcode-block" id="CustomExportDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog">[docs]</a><span class="k">class</span> <span class="nc">CustomExportDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">titleName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spectrumDimension</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">shown</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentExporter</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowStaysOnTopHint</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowFlags</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowStaysOnTopHint</span><span class="p">)</span>
+
+    <span class="c1"># self.selectBox = QtGui.QGraphicsRectItem()</span>
+    <span class="c1"># self.selectBox.setPen(pg.functions.mkPen(&#39;y&#39;, width=3, style=QtCore.Qt.DashLine))</span>
+    <span class="c1"># self.selectBox.hide()</span>
+    <span class="c1"># self.scene.addItem(self.selectBox)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span>  <span class="n">Ui_Form</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setUiStyle</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">titleName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Export &#39;</span><span class="o">+</span><span class="n">titleName</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDimension</span> <span class="o">=</span> <span class="n">spectrumDimension</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">closeBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">exportBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exportClicked</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">copyBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copyClicked</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">currentItemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exportItemChanged</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">currentItemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exportFormatChanged</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setUiStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span> <span class="c1">#hide this part not needed</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span> <span class="c1">#hide this part not needed</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">label_2</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">label_3</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">paramTree</span><span class="o">.</span><span class="n">setAlternatingRowColors</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CustomExportDialog.updateFormatList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.updateFormatList">[docs]</a>  <span class="k">def</span> <span class="nf">updateFormatList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">currentItem</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">current</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exporterClasses</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">gotCurrent</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDimension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">exporterList</span> <span class="o">=</span> <span class="n">ExporterList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumDimension</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">exporterList</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">exporterList</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exporterList</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">exporterClasses</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="n">exp</span>
+        <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">current</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+          <span class="n">gotCurrent</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gotCurrent</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">formatList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+  
+<div class="viewcode-block" id="CustomExportDialog.show"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.show">[docs]</a>  <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1">## Select next exportable parent of the item originally clicked on</span>
+      <span class="k">while</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotItem</span><span class="p">)</span> <span class="ow">and</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parentItem</span><span class="p">()</span>
+      <span class="c1">## if this is a ViewBox inside a pg.PlotItem, select the parent instead.</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parentItem</span><span class="p">(),</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotItem</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parentItem</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">updateItemList</span><span class="p">(</span><span class="n">select</span><span class="o">=</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">activateWindow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">shown</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">shown</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">vcenter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">getViewWidget</span><span class="p">()</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">vcenter</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.updateItemList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.updateItemList">[docs]</a>  <span class="k">def</span> <span class="nf">updateItemList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">si</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">([</span><span class="s2">&quot;Entire Scene&quot;</span><span class="p">])</span>
+    <span class="n">si</span><span class="o">.</span><span class="n">gitem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">addTopLevelItem</span><span class="p">(</span><span class="n">si</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">setCurrentItem</span><span class="p">(</span><span class="n">si</span><span class="p">)</span>
+    <span class="n">si</span><span class="o">.</span><span class="n">setExpanded</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">parentItem</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateItemTree</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.updateItemTree"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.updateItemTree">[docs]</a>  <span class="k">def</span> <span class="nf">updateItemTree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">treeItem</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">si</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">):</span>
+      <span class="n">si</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">([</span><span class="s1">&#39;ViewBox&#39;</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotItem</span><span class="p">):</span>
+      <span class="n">si</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">([</span><span class="s1">&#39;Plot&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">si</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">si</span><span class="o">.</span><span class="n">gitem</span> <span class="o">=</span> <span class="n">item</span>
+      <span class="n">treeItem</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">si</span><span class="p">)</span>
+      <span class="n">treeItem</span> <span class="o">=</span> <span class="n">si</span>
+      <span class="k">if</span> <span class="n">si</span><span class="o">.</span><span class="n">gitem</span> <span class="ow">is</span> <span class="n">select</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">setCurrentItem</span><span class="p">(</span><span class="n">si</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">childItems</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">updateItemTree</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">treeItem</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.exportItemChanged"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.exportItemChanged">[docs]</a>  <span class="k">def</span> <span class="nf">exportItemChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">gitem</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">:</span>
+      <span class="n">newBounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">views</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">viewRect</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">newBounds</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">gitem</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span>
+    <span class="c1"># self.selectBox.setRect(newBounds)</span>
+    <span class="c1"># self.selectBox.show()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateFormatList</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CustomExportDialog.exportFormatChanged"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.exportFormatChanged">[docs]</a>  <span class="k">def</span> <span class="nf">exportFormatChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentExporter</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">paramTree</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+      <span class="k">return</span>
+    <span class="n">expClass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporterClasses</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())]</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">expClass</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">itemTree</span><span class="o">.</span><span class="n">currentItem</span><span class="p">()</span><span class="o">.</span><span class="n">gitem</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">paramTree</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">paramTree</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentExporter</span> <span class="o">=</span> <span class="n">exp</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">copyBtn</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">allowCopy</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.exportClicked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.exportClicked">[docs]</a>  <span class="k">def</span> <span class="nf">exportClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># self.selectBox.hide()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentExporter</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.copyClicked"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.copyClicked">[docs]</a>  <span class="k">def</span> <span class="nf">copyClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># self.selectBox.hide()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentExporter</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CustomExportDialog.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CustomExportDialog.CustomExportDialog.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># self.selectBox.setVisible(False)</span>
+    <span class="c1"># self.selectBox.hide()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div></div>
+
+
+
+  
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

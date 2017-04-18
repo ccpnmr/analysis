@@ -4,20 +4,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-11 15:15:27 +0100 (Tue, April 11, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -520,18 +526,6 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
-        
-  # def _mouseClicked(self, event):
-  #   print(event)
-
-
-  # def setStripToCurrent(self):
-  #   position = self.viewBox.mapSceneToView(pos)
-
-
-  # def mousePressEvent(self, event):
-  #
-  #   print('event')
 
   def _mouseMoved(self, positionPixel):
     """
@@ -577,7 +571,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       return
 
     position = self.viewBox.mapSceneToView(pos)
-    self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" %
+    if self.orderedAxes[1].code == 'intensity':
+      format = "%s: %.3f  %s: %.4g"
+    else:
+      format = "%s: %.2f  %s: %.2f"
+    self.guiSpectrumDisplay.positionBox.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
 

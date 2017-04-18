@@ -7,9 +7,6 @@ extensively modified by Geerten 1-7/12/2016; 11/04/2017
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -18,14 +15,23 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
                 " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:04 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip
+from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+
 
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator

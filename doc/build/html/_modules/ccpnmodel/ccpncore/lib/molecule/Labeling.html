@@ -1,0 +1,449 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.molecule.Labeling &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.molecule.Labeling</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Library functions for molecule labeling</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LABELLING</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="k">def</span> <span class="nf">_getIsotopomerSingleAtomFractions</span><span class="p">(</span><span class="n">isotopomers</span><span class="p">,</span> <span class="n">atomName</span><span class="p">,</span> <span class="n">subType</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Descrn: Get the isotope proportions for a names atom in over a set</span>
+<span class="sd">             of isotopomers. Fractions normalised to 1.0</span>
+<span class="sd">     Inputs: List of ChemCompLabel.Isotopomers, Word (ChemAtom.name), Word (ChemAtom.subType)</span>
+<span class="sd">     Output: Dict of Word:Float - IsotopeCode:fraction</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">fractionDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">isoWeightSum</span> <span class="o">=</span>  <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">])</span>
+
+  <span class="k">for</span> <span class="n">isotopomer</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">:</span>
+    <span class="n">atomLabels</span>  <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomName</span><span class="p">,</span><span class="n">subType</span><span class="o">=</span><span class="n">subType</span><span class="p">)</span>
+    <span class="n">atWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atomLabels</span><span class="p">])</span>
+    <span class="n">atFactor</span>    <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">weight</span>  <span class="o">/</span> <span class="n">isoWeightSum</span>
+
+    <span class="k">for</span> <span class="n">atomLabel</span> <span class="ow">in</span> <span class="n">atomLabels</span><span class="p">:</span>
+      <span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">atomLabel</span><span class="o">.</span><span class="n">isotopeCode</span>
+      <span class="n">contrib</span>     <span class="o">=</span> <span class="n">atFactor</span> <span class="o">*</span> <span class="n">atomLabel</span><span class="o">.</span><span class="n">weight</span> <span class="o">/</span> <span class="n">atWeightSum</span>
+      <span class="n">fractionDict</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">fractionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">contrib</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">fractionDict</span>
+
+
+<span class="k">def</span> <span class="nf">_getIsotopomerAtomPairFractions</span><span class="p">(</span><span class="n">isotopomers</span><span class="p">,</span> <span class="n">atomNames</span><span class="p">,</span> <span class="n">subTypes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)):</span>
+  <span class="sd">&quot;&quot;&quot;Descrn: Get the combined isotope proportions for a given pair of named</span>
+<span class="sd">             atoms within a set of isotopomers. Fractions normalised to 1.0</span>
+<span class="sd">     Inputs: List of ChemCompLabel.Isotopomers, 2-Tuple of Words (ChemAtom.name), 2-Tuple of Words (ChemAtom.subType)</span>
+<span class="sd">     Output: Dict of Tuple:Float - (IsotopeCode,IsotopeCode):fraction</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">fractionDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="n">isoWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">])</span>
+
+  <span class="n">atLabels</span>   <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+  <span class="n">sumWeights</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">isotopomer</span> <span class="ow">in</span> <span class="n">isotopomers</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">atLabels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomNames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                 <span class="n">subType</span><span class="o">=</span><span class="n">subTypes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+      <span class="n">sumWeights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atLabels</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+
+    <span class="c1"># Done this way to guard against the divisor becoming zero</span>
+    <span class="n">factor</span>  <span class="o">=</span> <span class="n">isotopomer</span><span class="o">.</span><span class="n">weight</span> <span class="o">/</span> <span class="n">isoWeightSum</span>
+    <span class="n">divisor</span> <span class="o">=</span> <span class="n">sumWeights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sumWeights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">atl0</span> <span class="ow">in</span> <span class="n">atLabels</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="k">for</span> <span class="n">atl1</span> <span class="ow">in</span> <span class="n">atLabels</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="n">atl0</span> <span class="ow">is</span> <span class="n">atl1</span><span class="p">:</span>
+          <span class="n">contrib</span> <span class="o">=</span> <span class="n">atl0</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">factor</span> <span class="o">/</span> <span class="n">sumWeights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">contrib</span> <span class="o">=</span> <span class="n">atl0</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">atl1</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">factor</span> <span class="o">/</span> <span class="n">divisor</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">atl0</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">atl1</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">)</span>
+        <span class="n">fractionDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">fractionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">contrib</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">fractionDict</span>
+
+
+<span class="k">def</span> <span class="nf">_singleAtomFractions</span><span class="p">(</span><span class="n">labeledMixture</span><span class="p">,</span> <span class="n">resId</span><span class="p">,</span> <span class="n">atName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get the isotopeCode:fraction dictionary for a labeledMixture</span>
+
+<span class="sd">  labeledMixture:  LabeledMixture object</span>
+<span class="sd">  resid, atName, residue serial and atom name for atom</span>
+<span class="sd">  Returns isotopeCode:fraction dictionary with fractions normalised to 1.0</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># set up</span>
+  <span class="n">molResidue</span> <span class="o">=</span> <span class="n">labeledMixture</span><span class="o">.</span><span class="n">labeledMolecule</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">findFirstMolResidue</span><span class="p">(</span>
+               <span class="n">serial</span><span class="o">=</span><span class="n">resId</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">molResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="n">chemAtom</span> <span class="o">=</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">findFirstChemAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">chemAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+  <span class="n">elementName</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">elementSymbol</span>
+  <span class="n">subType</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">subType</span>
+
+  <span class="c1"># get MolLabelFractions</span>
+  <span class="n">useLabel</span> <span class="o">=</span> <span class="n">labeledMixture</span><span class="o">.</span><span class="n">averageComposition</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">useLabel</span><span class="p">:</span>
+    <span class="n">molLabelFractions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">labeledMixture</span><span class="o">.</span><span class="n">molLabelFractions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">molLabelFractions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">useLabel</span> <span class="o">=</span> <span class="n">molLabelFractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">useLabel</span><span class="p">:</span>
+    <span class="c1"># average composition</span>
+    <span class="n">resLabel</span> <span class="o">=</span> <span class="n">useLabel</span><span class="o">.</span><span class="n">molLabel</span><span class="o">.</span><span class="n">findFirstResLabel</span><span class="p">(</span><span class="n">resId</span><span class="o">=</span><span class="n">resId</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_molLabelFractionsDict</span><span class="p">(</span><span class="n">resLabel</span><span class="p">,</span> <span class="n">atName</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">elementName</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># average over multiple molLabels</span>
+    <span class="n">molWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molLabelFractions</span><span class="p">])</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">mlf</span> <span class="ow">in</span> <span class="n">molLabelFractions</span><span class="p">:</span>
+      <span class="n">resLabel</span> <span class="o">=</span> <span class="n">mlf</span><span class="o">.</span><span class="n">molLabel</span><span class="o">.</span><span class="n">findFirstResLabel</span><span class="p">(</span><span class="n">resId</span><span class="o">=</span><span class="n">resId</span><span class="p">)</span>
+      <span class="n">partResult</span> <span class="o">=</span> <span class="n">_molLabelFractionsDict</span><span class="p">(</span><span class="n">resLabel</span><span class="p">,</span> <span class="n">atName</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">elementName</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">partResult</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">val</span> <span class="o">*</span> <span class="n">mlf</span><span class="o">.</span><span class="n">weight</span> <span class="o">/</span> <span class="n">molWeightSum</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_atomPairFractions</span><span class="p">(</span><span class="n">labeledMixture</span><span class="p">,</span> <span class="n">resIds</span><span class="p">,</span> <span class="n">atNames</span><span class="p">,):</span>
+  <span class="sd">&quot;&quot;&quot;get the isotope pair : fraction dictionary for a labeledMixture</span>
+
+<span class="sd">  labeledMixture:  LabeledMixture object</span>
+<span class="sd">  resIds: length-two tuple of residue serials</span>
+<span class="sd">  atNames: length-two tuple of atom names</span>
+
+<span class="sd">  Returns (isotopeCode1, isotopeCode2):fraction dictionary</span>
+<span class="sd">  with fractions normalised to 1.0</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resIds</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">raise</span><span class="p">(</span><span class="s2">&quot;Error: length of resIds </span><span class="si">%s</span><span class="s2"> must be 2&quot;</span> <span class="o">%</span> <span class="n">resIds</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atNames</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">raise</span><span class="p">(</span><span class="s2">&quot;Error: length of atNames </span><span class="si">%s</span><span class="s2"> must be 2&quot;</span>
+          <span class="o">%</span> <span class="n">atNames</span><span class="p">)</span>
+
+  <span class="c1"># calculate starting parameters</span>
+  <span class="n">elementNames</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">subTypes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">molResidue</span> <span class="o">=</span> <span class="n">labeledMixture</span><span class="o">.</span><span class="n">labeledMolecule</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">findFirstMolResidue</span><span class="p">(</span>
+                 <span class="n">serial</span><span class="o">=</span><span class="n">resIds</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">molResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="n">chemAtom</span> <span class="o">=</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">findFirstChemAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atNames</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">chemAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">elementName</span> <span class="o">=</span> <span class="n">chemAtom</span><span class="o">.</span><span class="n">elementSymbol</span>
+    <span class="n">elementNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elementName</span><span class="p">)</span>
+    <span class="n">subTypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chemAtom</span><span class="o">.</span><span class="n">subType</span><span class="p">)</span>
+
+  <span class="c1"># get MolLabelFractions</span>
+  <span class="n">avLabel</span> <span class="o">=</span> <span class="n">labeledMixture</span><span class="o">.</span><span class="n">averageComposition</span>
+  <span class="k">if</span> <span class="n">avLabel</span><span class="p">:</span>
+    <span class="n">molLabelFractions</span> <span class="o">=</span> <span class="p">[</span><span class="n">avLabel</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">molLabelFractions</span> <span class="o">=</span> <span class="n">labeledMixture</span><span class="o">.</span><span class="n">molLabelFractions</span>
+  <span class="n">molWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molLabelFractions</span><span class="p">])</span>
+
+  <span class="c1"># calculate result</span>
+  <span class="k">for</span> <span class="n">mlf</span> <span class="ow">in</span> <span class="n">molLabelFractions</span><span class="p">:</span>
+    <span class="n">molFactor</span> <span class="o">=</span> <span class="n">mlf</span><span class="o">.</span><span class="n">weight</span> <span class="o">/</span> <span class="n">molWeightSum</span>
+    <span class="n">molLabel</span> <span class="o">=</span> <span class="n">mlf</span><span class="o">.</span><span class="n">molLabel</span>
+
+    <span class="n">uncorrelatedAtoms</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">resIds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">resIds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="n">oneResLabel</span> <span class="o">=</span> <span class="n">molLabel</span><span class="o">.</span><span class="n">findFirstResLabel</span><span class="p">(</span><span class="n">resId</span><span class="o">=</span><span class="n">resIds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">oneResLabel</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">atomName</span><span class="o">=</span><span class="n">atNames</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span> <span class="ow">or</span>
+            <span class="n">oneResLabel</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">elementName</span><span class="o">=</span><span class="n">elementNames</span><span class="p">[</span><span class="n">ii</span><span class="p">])):</span>
+          <span class="n">uncorrelatedAtoms</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">uncorrelatedAtoms</span><span class="p">:</span>
+      <span class="c1"># isotope frequencies are uncorrelated at the residue level</span>
+      <span class="n">dds</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">resLabel</span> <span class="o">=</span> <span class="n">molLabel</span><span class="o">.</span><span class="n">findFirstResLabel</span><span class="p">(</span><span class="n">resId</span><span class="o">=</span><span class="n">resIds</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+        <span class="n">dds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_molLabelFractionsDict</span><span class="p">(</span><span class="n">resLabel</span><span class="p">,</span> <span class="n">atNames</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                     <span class="n">subTypes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">elementNames</span><span class="p">[</span><span class="n">ii</span><span class="p">]))</span>
+
+      <span class="k">for</span> <span class="n">iso0</span> <span class="ow">in</span> <span class="n">dds</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">iso1</span> <span class="ow">in</span> <span class="n">dds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+          <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">iso0</span><span class="p">,</span> <span class="n">iso1</span><span class="p">)</span>
+          <span class="n">contrib</span> <span class="o">=</span> <span class="n">dds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">iso0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">iso1</span><span class="p">]</span> <span class="o">*</span> <span class="n">molFactor</span>
+          <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">contrib</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># isotope frequencies are correlated at the residue level</span>
+      <span class="c1"># Only happens if both are from the same residue and neither has</span>
+      <span class="c1"># any AtomLabels. Loop over ResLabelFractions only</span>
+      <span class="n">resLabelFractions</span> <span class="o">=</span> <span class="n">oneResLabel</span><span class="o">.</span><span class="n">resLabelFractions</span>
+      <span class="n">rlfWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">resLabelFractions</span><span class="p">])</span>
+      <span class="k">for</span> <span class="n">rlf</span> <span class="ow">in</span> <span class="n">resLabelFractions</span><span class="p">:</span>
+        <span class="n">partResult</span> <span class="o">=</span> <span class="n">_getIsotopomerAtomPairFractions</span><span class="p">(</span><span class="n">rlf</span><span class="o">.</span><span class="n">iotopomers</span><span class="p">,</span> <span class="n">atNames</span><span class="p">,</span> <span class="n">subTypes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">partResult</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+          <span class="n">contrib</span> <span class="o">=</span> <span class="n">val</span> <span class="o">*</span> <span class="n">rlf</span><span class="o">.</span><span class="n">weight</span> <span class="o">*</span> <span class="n">molFactor</span> <span class="o">/</span> <span class="n">rlfWeightSum</span>
+          <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">contrib</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_molLabelFractionsDict</span><span class="p">(</span><span class="n">resLabel</span><span class="p">,</span> <span class="n">atName</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">elementName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get the isotopeCode:fraction dictionary for a single resLabel</span>
+
+<span class="sd">  resLabel: resLabel object</span>
+<span class="sd">  resid residue serial</span>
+<span class="sd">  atName, subType, elementName: atom name subType and element name for atom</span>
+
+<span class="sd">  Returns isotopeCode:fraction dictionary with fractions normalised to 1.0</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># set up</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="c1"># get atomLabels, if any</span>
+  <span class="n">atomLabels</span> <span class="o">=</span> <span class="n">resLabel</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">atomName</span><span class="o">=</span><span class="n">atName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">atomLabels</span><span class="p">:</span>
+    <span class="n">atomLabels</span> <span class="o">=</span> <span class="n">resLabel</span><span class="o">.</span><span class="n">findAllAtomLabels</span><span class="p">(</span><span class="n">elementName</span><span class="o">=</span><span class="n">elementName</span><span class="p">)</span>
+
+  <span class="c1"># calculate fractions for AtomLabels</span>
+  <span class="k">if</span> <span class="n">atomLabels</span><span class="p">:</span>
+    <span class="n">atWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atomLabels</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">atomLabel</span> <span class="ow">in</span> <span class="n">atomLabels</span><span class="p">:</span>
+      <span class="n">isotopeCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">atomLabel</span><span class="o">.</span><span class="n">massNumber</span><span class="p">,</span> <span class="n">elementName</span><span class="p">)</span>
+      <span class="n">result</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span>
+                             <span class="n">atomLabel</span><span class="o">.</span><span class="n">weight</span> <span class="o">/</span> <span class="n">atWeightSum</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># calculate fractions for ResLabelFractions</span>
+    <span class="n">resLabelFractions</span> <span class="o">=</span> <span class="n">resLabel</span><span class="o">.</span><span class="n">resLabelFractions</span>
+    <span class="n">rlfWeightSum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">resLabelFractions</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">rlf</span> <span class="ow">in</span> <span class="n">resLabelFractions</span><span class="p">:</span>
+      <span class="n">isotopomers</span> <span class="o">=</span> <span class="n">rlf</span><span class="o">.</span><span class="n">isotopomers</span>
+      <span class="n">isoFactor</span> <span class="o">=</span> <span class="n">rlf</span><span class="o">.</span><span class="n">weight</span>  <span class="o">/</span> <span class="n">rlfWeightSum</span>
+
+      <span class="n">fractionDict</span> <span class="o">=</span> <span class="n">_getIsotopomerSingleAtomFractions</span><span class="p">(</span><span class="n">isotopomers</span><span class="p">,</span> <span class="n">atName</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
+
+      <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">fractionDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">contrib</span> <span class="o">=</span> <span class="n">fractionDict</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">isotopeCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">isoFactor</span> <span class="o">*</span> <span class="n">contrib</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="molAtomLabelFractions"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelFractions">[docs]</a><span class="k">def</span> <span class="nf">molAtomLabelFractions</span><span class="p">(</span><span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">molResidue</span><span class="p">,</span> <span class="n">atomName</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get isotopeCode:percentage mapping for atom in molResidue, with given labeling</span>
+<span class="sd">  Will use molecule specific labeling if one exists, otherwise general labeling scheme.&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">labeledMolecule</span> <span class="o">=</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstLabeledMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">molResidue</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">labeledMolecule</span><span class="p">:</span>
+    <span class="n">labeledMixture</span> <span class="o">=</span> <span class="n">labeledMolecule</span><span class="o">.</span><span class="n">findFirstLabeledMixture</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">labeledMixture</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span>  <span class="n">_singleAtomFractions</span><span class="p">(</span><span class="n">labeledMixture</span><span class="p">,</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="n">atomName</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">chemAtomLabelFractions</span><span class="p">(</span><span class="n">molResidue</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">labeling</span><span class="p">,</span> <span class="n">molResidue</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">atomName</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="molAtomLabelPairFractions"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.Labeling.molAtomLabelPairFractions">[docs]</a><span class="k">def</span> <span class="nf">molAtomLabelPairFractions</span><span class="p">(</span><span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">molResiduePair</span><span class="p">:</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">atomNamePair</span><span class="p">:</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get isotopeCode:percentage mapping for atom (molResidue, atomName) pair with given labeling</span>
+<span class="sd">  Will use molecule specific labeling if one exists, otherwise general labeling scheme.&quot;&quot;&quot;</span>
+
+  <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">molResiduePair</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;molAtomLabelPairFractions: length of molResidues must be 2&quot;</span>
+  <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomNamePair</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;molAtomLabelPairFractions: length of atomNames must be 2&quot;</span>
+  <span class="k">if</span> <span class="n">molResiduePair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">molecule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">molResiduePair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">molecule</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;molResidues must belong to the same molecule&quot;</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">molResidue0</span> <span class="o">=</span> <span class="n">molResiduePair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">labeledMolecule</span> <span class="o">=</span> <span class="n">molResidue0</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstLabeledMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">molResidue0</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">labeledMolecule</span><span class="p">:</span>
+    <span class="c1"># There is a specifically labeled molecule - use corresponding function</span>
+    <span class="n">labeledMixture</span> <span class="o">=</span> <span class="n">labeledMolecule</span><span class="o">.</span><span class="n">findFirstLabeledMixture</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">labeledMixture</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span>  <span class="n">_atomPairFractions</span><span class="p">(</span><span class="n">labeledMixture</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">serial</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molResiduePair</span><span class="p">],</span> <span class="n">atomNamePair</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+    <span class="c1"># No specific labeled molecule</span>
+    <span class="k">if</span> <span class="n">molResidue0</span> <span class="ow">is</span> <span class="n">molResiduePair</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="c1"># intraresidue = use labeling scheme, if any</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">chemAtomPairLabelFractions</span><span class="p">(</span><span class="n">molResiduePair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">labeling</span><span class="p">,</span> <span class="n">molResidue0</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">,</span>
+                                          <span class="n">atomNamePair</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Uncorrelated atoms - use product of fractions for each atom</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">dictionaryProduct</span><span class="p">(</span>
+        <span class="n">chemAtomLabelFractions</span><span class="p">(</span><span class="n">molResidue0</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">labeling</span><span class="p">,</span> <span class="n">molResidue0</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">atomNamePair</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">chemAtomLabelFractions</span><span class="p">(</span><span class="n">molResidue0</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">labeling</span><span class="p">,</span> <span class="n">molResiduePair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">atomNamePair</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="chemAtomLabelFractions"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomLabelFractions">[docs]</a><span class="k">def</span> <span class="nf">chemAtomLabelFractions</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">atomName</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get isotopeCode:percentage mapping for atom in ChemComp with given labeling&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">labelingScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstLabelingScheme</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">labelingScheme</span><span class="p">:</span>
+    <span class="n">chemCompLabel</span> <span class="o">=</span> <span class="n">labelingScheme</span><span class="o">.</span><span class="n">findFirstChemCompLabel</span><span class="p">(</span><span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chemCompLabel</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span>  <span class="n">_getIsotopomerSingleAtomFractions</span><span class="p">(</span><span class="n">chemCompLabel</span><span class="o">.</span><span class="n">isotopomers</span><span class="p">,</span> <span class="n">atomName</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="chemAtomPairLabelFractions"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.Labeling.chemAtomPairLabelFractions">[docs]</a><span class="k">def</span> <span class="nf">chemAtomPairLabelFractions</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">atomNamePair</span><span class="p">:</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get isotopeCode:percentage mapping for atom pair in ChemComp with given labeling</span>
+<span class="sd">  Assumes that atoms are in the same residue&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">labelingScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstLabelingScheme</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">labelingScheme</span><span class="p">:</span>
+    <span class="n">chemCompLabel</span> <span class="o">=</span> <span class="n">labelingScheme</span><span class="o">.</span><span class="n">findFirstChemCompLabel</span><span class="p">(</span><span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chemCompLabel</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span>  <span class="n">_getIsotopomerAtomPairFractions</span><span class="p">(</span><span class="n">chemCompLabel</span><span class="o">.</span><span class="n">isotopomers</span><span class="p">,</span> <span class="n">atomNamePair</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="sampleChainLabeling"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.Labeling.sampleChainLabeling">[docs]</a><span class="k">def</span> <span class="nf">sampleChainLabeling</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Get labeling string for chain chainCode in sample</span>
+<span class="sd">  If chainCode does not match a SampleComponent, look for unambiguous global labeling:</span>
+<span class="sd">  Heuristics: If there is only one SampleComponent, use that labeling</span>
+<span class="sd">  If all SampleComponents with explicit chainCodes have the same labeling, use that labeling&quot;&quot;&quot;</span>
+
+  <span class="n">labeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELLING</span>
+
+  <span class="n">sampleComponents</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sortedSampleComponents</span><span class="p">()</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">labeling</span> <span class="o">=</span> <span class="n">sampleComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">labeling</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sampleComponents</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">chainCode</span> <span class="ow">in</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">chainCodes</span><span class="p">:</span>
+        <span class="n">labeling</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">labeling</span>
+        <span class="k">break</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">labelings</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">labeling</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">chainCodes</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labelings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Only one labeling in use in sample - use it</span>
+        <span class="n">labeling</span> <span class="o">=</span> <span class="n">labelings</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">labeling</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

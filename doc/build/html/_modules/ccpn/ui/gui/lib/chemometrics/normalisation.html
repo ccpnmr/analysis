@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.lib.chemometrics.normalisation &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.lib.chemometrics.normalisation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="PQN"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.ui.gui.lib.chemometrics.html#ccpn.ui.gui.lib.chemometrics.normalisation.PQN">[docs]</a><span class="k">def</span> <span class="nf">PQN</span><span class="p">(</span><span class="n">spectrumCluster</span><span class="p">):</span>
+
+  <span class="n">tsa</span> <span class="o">=</span> <span class="n">TSA</span><span class="p">(</span><span class="n">spectrumCluster</span><span class="p">)</span>
+  <span class="n">avg</span> <span class="o">=</span> <span class="n">tsa</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+  <span class="n">quotients</span> <span class="o">=</span> <span class="n">tsa</span><span class="o">/</span><span class="n">avg</span>
+  <span class="n">medians</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">quotients</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">pqn</span> <span class="o">=</span> <span class="p">(</span><span class="n">tsa</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">medians</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+  <span class="k">return</span> <span class="n">pqn</span></div>
+
+
+<div class="viewcode-block" id="TSA"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.ui.gui.lib.chemometrics.html#ccpn.ui.gui.lib.chemometrics.normalisation.TSA">[docs]</a><span class="k">def</span> <span class="nf">TSA</span><span class="p">(</span><span class="n">spectrumCluster</span><span class="p">):</span>
+
+  <span class="n">sums</span> <span class="o">=</span> <span class="n">spectrumCluster</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">tsa</span> <span class="o">=</span> <span class="p">(</span><span class="n">spectrumCluster</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">sums</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+  <span class="k">return</span> <span class="n">tsa</span></div>
+
+<div class="viewcode-block" id="getSpectrumCluster"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.ui.gui.lib.chemometrics.html#ccpn.ui.gui.lib.chemometrics.normalisation.getSpectrumCluster">[docs]</a><span class="k">def</span> <span class="nf">getSpectrumCluster</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+  <span class="n">pointCount</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">totalPointCounts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">array1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">),</span> <span class="n">pointCount</span><span class="p">])</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)):</span>
+    <span class="n">array1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">getSliceData</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="n">array1</span></div>
+
+<div class="viewcode-block" id="updateSpectrumCluster"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.ui.gui.lib.chemometrics.html#ccpn.ui.gui.lib.chemometrics.normalisation.updateSpectrumCluster">[docs]</a><span class="k">def</span> <span class="nf">updateSpectrumCluster</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">spectrumCluster</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)):</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span>
+    <span class="n">xData</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yData</span> <span class="o">=</span> <span class="n">spectrumCluster</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">plot</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">xData</span><span class="p">,</span> <span class="n">yData</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -5,20 +5,26 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-10 17:50:11 +0100 (Mon, April 10, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -223,8 +229,8 @@ class GeneralTab(QtGui.QWidget, Base):
       Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
       Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
       noiseLevelData = LineEdit(self)
-      if spectrum._apiDataSource.noiseLevel is not None:
-        noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.noiseLevel))
+      if spectrum.noiseLevel is not None:
+        noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
       else:
         noiseLevelData.setText('None')
     else:
@@ -235,11 +241,22 @@ class GeneralTab(QtGui.QWidget, Base):
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
 
       self.atomCodes = tuple(sorted(axisCodes))
-      self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys()))
-
+      itemsList = list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())
+      self.spectrumType.addItems(itemsList)
       # Get the text that was used in the pulldown from the refExperiment
-      apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
-      text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      # NBNB This could possibly give unpredictable results
+      # if there is an experiment with experimentName (user settable!)
+      # that happens to match the synonym for a different experiment type.
+      # But if people will ignore our defined vocabulary, on their head be it!
+      # Anyway, tha alternative (discarded) is to look into the ExpPrototype
+      # to compare RefExperiment names and synonyms
+      # or (too ugly for words) to have a third attribute in parallel with
+      # spectrum.experimentName and spectrum.experimentType
+      text = spectrum.experimentName
+      if text not in itemsList:
+        text = spectrum.experimentType
+      # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+      # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       # Added to account for renaming of experiments
       text = priorityNameRemapping.get(text, text)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
@@ -254,11 +271,11 @@ class GeneralTab(QtGui.QWidget, Base):
       noiseLevelData = LineEdit(self, vAlign='t', grid=(10, 1))
 
 
-      if spectrum._apiDataSource.noiseLevel is None:
-        noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.estimateNoise()))
+      if spectrum.noiseLevel is None:
+        noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))
       else:
 
-        noiseLevelData.setText('%.3d' % spectrum._apiDataSource.noiseLevel)
+        noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
 
 
   def _writeLoggingMessage(self, command):
@@ -483,7 +500,7 @@ class DimensionsTab(QtGui.QWidget, Base):
                                                                       spectralAssignmentToleranceData.text, i))
       # if spectrum.assignmentTolerances[i] is not None:
       #   spectralAssignmentToleranceData.setText(str("%.3f" % (spectrum.assignmentTolerances[i] or 0.0)))
-      value = spectrum.referencePoints[i]
+      value = spectrum.assignmentTolerances[i]
       spectralAssignmentToleranceData.setText('<None>' if value is None else str("%.3f" % value))
 
   def _writeLoggingMessage(self, command):
@@ -540,6 +557,9 @@ class ContoursTab(QtGui.QWidget, Base):
 
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
+
+    # TODO self._changes looks unused, as do all the functions put in it
+    # Check if the lot can be removed
     self._changes = dict()
 
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
@@ -580,10 +600,13 @@ class ContoursTab(QtGui.QWidget, Base):
       pix.fill(QtGui.QColor(item[0]))
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.positiveColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.positiveContourColour))
-      self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
+      indx = list(spectrumColours.keys()).index(spectrum.positiveContourColour)
     except ValueError:
-      pass
+      # Set to default (colour 0)
+      indx = 0
+      spectrum.positiveContourColour = list(spectrumColours.keys())[indx]
+    self.positiveColourBox.setCurrentIndex(indx)
+    self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
 
     self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
                                        icon='icons/colours', hPolicy='fixed')
@@ -618,7 +641,7 @@ class ContoursTab(QtGui.QWidget, Base):
     negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
     negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
-    negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='c', hAlign='l')
+    negativeContourColourLabel = Label(self, text="Negative Contour Colour",grid=(10, 0), vAlign='c', hAlign='l')
 
     self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
     for item in spectrumColours.items():
@@ -626,11 +649,15 @@ class ContoursTab(QtGui.QWidget, Base):
       pix.fill(QtGui.QColor(item[0]))
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.negativeColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.negativeContourColour))
-      self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
+      indx = list(spectrumColours.keys()).index(spectrum.negativeContourColour)
     except ValueError:
-      pass
-
+      # Set to default (colour 1)
+      indx = 1
+      spectrum.negativeContourColour = list(spectrumColours.keys())[indx]
+    self.negativeColourBox.setCurrentIndex(indx)
+    self.negativeColourBox.currentIndexChanged.connect(
+      partial(self._queueChangeNegColourComboIndex, spectrum)
+    )
     self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))

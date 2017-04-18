@@ -86,7 +86,7 @@ class IpythonConsole(Widget, Base):
       else:
         # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
         self.textEditor.insertPlainText(msg)
-        self.textEditor.insertPlainText('\n')
+        # self.textEditor.insertPlainText('\n')
         self.mainWindow.statusBar().showMessage(msg)
       if self.mainWindow.recordingMacro is True:
         self.mainWindow.macroEditor.textBox.insertPlainText(msg)

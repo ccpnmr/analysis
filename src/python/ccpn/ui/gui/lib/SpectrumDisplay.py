@@ -40,7 +40,7 @@ def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[Nmr
     return
 
   project = spectrumDisplay.project
-  project._startFunctionCommandBlock('makeStripPlot', spectrumDisplay, nmrAtomPairs, autoWidth, widths)
+  project._startCommandEchoBlock('makeStripPlot', spectrumDisplay, nmrAtomPairs, autoWidth, widths)
   try:
 
     numberOfStrips = len(spectrumDisplay.strips)
@@ -61,7 +61,7 @@ def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[Nmr
         widths = None
       navigateToNmrAtomsInStrip(strip, nmrAtomPairs[ii], widths=widths)
   finally:
-    project._appBase._endCommandBlock()
+    project._endCommandEchoBlock()
 
 
 def makeStripPlotFromSingles(spectrumDisplay:GuiSpectrumDisplay, nmrAtoms:List[NmrAtom], autoWidth=True):

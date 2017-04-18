@@ -4,20 +4,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -45,14 +51,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
-    #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
 
     GuiSpectrumView.__init__(self)
 
-    # if self.spectrum.sliceColour is None:
-    #   self.spectrum.sliceColour = list(spectrumColours.keys())[0]
-
-    ###self.data = self._apiDataSource.get1dSpectrumData()
     self.data = self.spectrum.positions, self.spectrum.intensities
 
     # for strip in self.strips:
@@ -135,8 +136,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
       
     hPhasingPivot = self.strip.hPhasingPivot
     if hPhasingPivot.isVisible():
-      dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
-      pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
+      xAxisIndex = self._displayOrderSpectrumDimensionIndices[0]
+      pivot = self.spectrum.mainSpectrumReferences[xAxisIndex].valueToPoint(hPhasingPivot.getXPos())
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
     else:
       pivot = 1
       
@@ -211,16 +214,16 @@ class GuiSpectrumView1d(GuiSpectrumView):
     print(self.plot)
     
 
-  # TBD: should function below be removed???
-  def getSliceData(self, spectrum=None):
-    """
-    Gets slice data for drawing 1d spectrum using specified spectrum.
-    """
-    if spectrum is None:
-      apiDataSource = self._apiDataSource
-    else:
-      apiDataSource = spectrum._apiDataSource
-    return apiDataSource.get1dSpectrumData()
+  # # TBD: should function below be removed???
+  # def getSliceData(self, spectrum=None):
+  #   """
+  #   Gets slice data for drawing 1d spectrum using specified spectrum.
+  #   """
+  #   if spectrum is None:
+  #     apiDataSource = self._apiDataSource
+  #   else:
+  #     apiDataSource = spectrum._apiDataSource
+  #   return apiDataSource.get1dSpectrumData()
 
   def update(self):
     self.plot.curve.setData(self.data[0], self.data[1])

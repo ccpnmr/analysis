@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.molecule.MoleculeModify &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.molecule.MoleculeModify</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;API (data storage) level functionality for creating and modifying molecules</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Code for generating and modifying Molecules and MolSystems&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.nef</span> <span class="kn">import</span> <span class="n">StarIo</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.ApiError</span> <span class="kn">import</span> <span class="n">ApiError</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.chemComp</span> <span class="kn">import</span> <span class="n">Io</span> <span class="k">as</span> <span class="n">chemCompIo</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.molecule</span> <span class="kn">import</span> <span class="n">MoleculeQuery</span>
+
+
+<span class="c1">###from ccp.general.Io import getChemComp</span>
+
+<span class="c1">#################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Molecule creation</span>
+<span class="c1">#</span>
+<span class="c1">##################################################################</span>
+
+<div class="viewcode-block" id="createMolecule"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMolecule">[docs]</a><span class="k">def</span> <span class="nf">createMolecule</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:(</span><span class="nb">list</span><span class="p">,</span><span class="nb">str</span><span class="p">),</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;protein&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;Molecule&quot;</span><span class="p">,</span>
+                 <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">isCyclic</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+  <span class="sd">&quot;&quot;&quot;Descrn: Makes Molecule for a given sequence</span>
+
+<span class="sd">     Inputs: Project,List of Words (ChemComp.CcpCode), Word (ChemComp.molType), </span>
+<span class="sd">     String ( Ccp.Molecule.Molecule.name) Int (first MolResidue.seqCode)</span>
+
+<span class="sd">     Output: Molecule</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># ensure name is unique</span>
+  <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span>
+  <span class="k">while</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ss</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">ss</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+    <span class="s2">&quot;CCPN molecule named </span><span class="si">%s</span><span class="s2"> already exists. New molecule has been named </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+    <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">ss</span><span class="p">))</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="n">ss</span>
+ 
+  <span class="n">molecule</span> <span class="o">=</span>  <span class="n">project</span><span class="o">.</span><span class="n">newMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">molecule</span><span class="o">.</span><span class="n">extendOneLetterMolResidues</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">startNumber</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">molecule</span><span class="o">.</span><span class="n">extendMolResidues</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">startNumber</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">molecule</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">pass</span>
+    <span class="k">raise</span> <span class="n">e</span>
+
+  <span class="k">return</span> <span class="n">molecule</span></div>
+
+  
+  
+<span class="k">def</span> <span class="nf">_getLinearChemCompData</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">linking</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Descrn: Implementation function, specific for addLinearSequence()</span>
+<span class="sd">     Inputs: Project object, and desired molType, ccpCode, linking (all strings)</span>
+<span class="sd">     Output: (dd,ll) tuple where dd is a dictionary for passing to the </span>
+<span class="sd">              MolResidue creation (as **dd), and ll is a list of the linkCodes</span>
+<span class="sd">              that are different from &#39;next&#39; and &#39;prev&#39;</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">seqLinks</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">otherLinkCodes</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="n">chemComp</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+  
+  <span class="n">isOther</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">isOther</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">chemComp</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="s1">&#39;other&#39;</span><span class="p">,</span> <span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">chemComp</span> <span class="o">=</span> <span class="n">chemCompIo</span><span class="o">.</span><span class="n">fetchChemComp</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;No chemComp for </span><span class="si">%s</span><span class="s2"> residue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">))</span>
+    
+  <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="n">linking</span><span class="p">,</span> <span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="n">linking</span><span class="p">)</span>
+  <span class="c1"># Note requiring a default var is too strict - not always set for</span>
+  <span class="c1"># imports from mol2/PDB etc</span>
+
+  <span class="k">if</span> <span class="n">isOther</span> <span class="ow">and</span> <span class="p">(</span><span class="n">chemCompVar</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+      <span class="n">linkEnd</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstLinkEnd</span><span class="p">(</span><span class="n">linkCode</span><span class="o">=</span><span class="s1">&#39;next&#39;</span><span class="p">)</span>
+     
+    <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
+      <span class="n">linkEnd</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstLinkEnd</span><span class="p">(</span><span class="n">linkCode</span><span class="o">=</span><span class="s1">&#39;prev&#39;</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">linkEnd</span> <span class="o">=</span> <span class="bp">None</span>
+      
+    <span class="k">if</span> <span class="n">linkEnd</span><span class="p">:</span>
+      <span class="n">otherLinkCodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">linkEnd</span><span class="o">.</span><span class="n">linkCode</span><span class="p">)</span>
+      <span class="n">chemCompVar</span> <span class="o">=</span> <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">()</span>            
+                
+  <span class="k">if</span> <span class="n">chemCompVar</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;No ChemCompVar found for </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> linking </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">linking</span><span class="p">))</span>
+  
+  <span class="n">molResData</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;chemComp&#39;</span><span class="p">:</span><span class="n">chemComp</span><span class="p">,</span> <span class="s1">&#39;linking&#39;</span><span class="p">:</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">linking</span><span class="p">,</span>
+                <span class="s1">&#39;descriptor&#39;</span><span class="p">:</span><span class="n">chemCompVar</span><span class="o">.</span><span class="n">descriptor</span><span class="p">}</span>
+  
+  <span class="k">for</span> <span class="n">linkEnd</span> <span class="ow">in</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">linkEnds</span><span class="p">:</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">linkEnd</span><span class="o">.</span><span class="n">linkCode</span>
+    
+    <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;next&#39;</span><span class="p">,</span><span class="s1">&#39;prev&#39;</span><span class="p">):</span>
+      <span class="n">seqLinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">otherLinkCodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">seqLinks</span> <span class="ow">and</span> <span class="n">seqLinks</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;next&#39;</span><span class="p">]:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Linking &#39;start&#39; must have just &#39;next&#39; linkEnd&quot;</span><span class="p">)</span>
+      
+  <span class="k">elif</span> <span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">seqLinks</span> <span class="ow">and</span> <span class="n">seqLinks</span> <span class="o">!=</span> <span class="p">[</span><span class="s1">&#39;prev&#39;</span><span class="p">]:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Linking &#39;end&#39; must have just &#39;prev&#39; linkEnd &quot;</span><span class="p">)</span>
+      
+  <span class="k">elif</span> <span class="n">linking</span> <span class="o">!=</span> <span class="s1">&#39;middle&#39;</span> <span class="ow">or</span> <span class="n">seqLinks</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">([</span><span class="s1">&#39;next&#39;</span><span class="p">,</span><span class="s1">&#39;prev&#39;</span><span class="p">],[</span><span class="s1">&#39;prev&#39;</span><span class="p">,</span><span class="s1">&#39;next&#39;</span><span class="p">]):</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Illegal linking </span><span class="si">%s</span><span class="s2"> with seqLinks </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">linking</span><span class="p">,</span><span class="n">seqLinks</span><span class="p">))</span>
+  
+  <span class="k">return</span> <span class="n">molResData</span><span class="p">,</span> <span class="n">otherLinkCodes</span>
+
+<div class="viewcode-block" id="createMoleculeFromNef"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.molecule.html#ccpnmodel.ccpncore.lib.molecule.MoleculeModify.createMoleculeFromNef">[docs]</a><span class="k">def</span> <span class="nf">createMoleculeFromNef</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+                          <span class="n">defaultType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;UNK&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create a Molecule from a sequence of NEF row dictionaries (or equivalent)&quot;&quot;&quot;</span>
+
+  <span class="n">residueName2chemCompId</span> <span class="o">=</span> <span class="n">MoleculeQuery</span><span class="o">.</span><span class="n">fetchStdResNameMap</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="n">stretches</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">splitNefSequence</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+  <span class="n">molecule</span> <span class="o">=</span>  <span class="n">project</span><span class="o">.</span><span class="n">newMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">stretch</span> <span class="ow">in</span> <span class="n">stretches</span><span class="p">:</span>
+
+    <span class="c1"># Try setting start number</span>
+    <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">]</span>
+    <span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="p">,</span><span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seqCode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">startNumber</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">startNumber</span> <span class="o">=</span> <span class="n">seqCode</span>
+
+    <span class="c1"># Create new MolResidues</span>
+    <span class="n">residueTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;residue_name&#39;</span><span class="p">,</span> <span class="n">defaultType</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">stretch</span><span class="p">]</span>
+    <span class="n">firstLinking</span> <span class="o">=</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residueTypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">lastLinking</span> <span class="o">=</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">firstLinking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="s1">&#39;nonlinear&#39;</span><span class="p">,</span> <span class="s1">&#39;dummy&#39;</span><span class="p">)</span> <span class="ow">or</span>
+          <span class="n">lastLinking</span> <span class="o">==</span> <span class="s1">&#39;end&#39;</span><span class="p">):</span>
+        <span class="n">isCyclic</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># We use isCyclic to set the ends to &#39;middle&#39;. It gets sorted out below</span>
+        <span class="n">isCyclic</span> <span class="o">=</span> <span class="bp">True</span>
+
+      <span class="n">molResidues</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">extendMolResidues</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">residueTypes</span><span class="p">,</span> <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span>
+                                               <span class="n">isCyclic</span><span class="o">=</span><span class="n">isCyclic</span><span class="p">)</span>
+
+      <span class="c1"># Adjust linking and descriptor</span>
+      <span class="k">if</span> <span class="n">isCyclic</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">firstLinking</span> <span class="o">!=</span> <span class="s1">&#39;cyclic&#39;</span> <span class="ow">or</span> <span class="n">lastLinking</span> <span class="o">!=</span> <span class="s1">&#39;cyclic&#39;</span><span class="p">:</span>
+          <span class="c1"># not cyclic after all - remove cyclising link</span>
+          <span class="n">cyclicLink</span> <span class="o">=</span> <span class="n">molResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">findFirstMolResLinkEnd</span><span class="p">(</span><span class="n">linkCode</span><span class="o">=</span><span class="s1">&#39;next&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">molResLink</span>
+          <span class="n">cyclicLink</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">firstLinking</span> <span class="o">!=</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+          <span class="n">ff</span> <span class="o">=</span> <span class="n">molResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span>
+          <span class="n">chemCompVar</span> <span class="o">=</span> <span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ff</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">))</span>
+          <span class="n">molResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;linking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;middle&#39;</span>
+          <span class="n">molResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;descriptor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">descriptor</span>
+        <span class="k">if</span> <span class="n">lastLinking</span> <span class="o">!=</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
+          <span class="n">ff</span> <span class="o">=</span> <span class="n">molResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span>
+          <span class="n">chemCompVar</span> <span class="o">=</span> <span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ff</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">))</span>
+          <span class="n">molResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;linking&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;middle&#39;</span>
+          <span class="n">molResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;descriptor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemCompVar</span><span class="o">.</span><span class="n">descriptor</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Only one residue</span>
+      <span class="n">residueType</span> <span class="o">=</span> <span class="n">residueTypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">residueType</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;dummy.&#39;</span><span class="p">):</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;dummy&#39;</span><span class="p">,</span><span class="n">residueType</span><span class="p">[</span><span class="mi">6</span><span class="p">:])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">residueName2chemCompId</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residueTypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">:</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Could not access ChemComp for </span><span class="si">%s</span><span class="s2"> - replacing with </span><span class="si">%s</span><span class="s2"></span>
+<span class="s2">NB - could be a failure in fetching remote information.</span>
+<span class="s2">Are you off line?&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">residueTypes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">defaultType</span><span class="p">))</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="n">residueName2chemCompId</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">defaultType</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">tt</span><span class="p">:</span>
+        <span class="n">chemComp</span> <span class="o">=</span> <span class="n">chemCompIo</span><span class="o">.</span><span class="n">fetchChemComp</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">chemComp</span><span class="p">:</span>
+          <span class="n">chemCompVar</span>  <span class="o">=</span> <span class="p">(</span><span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                          <span class="n">chemComp</span><span class="o">.</span><span class="n">findFirstChemCompVar</span><span class="p">())</span> <span class="c1"># just a default</span>
+          <span class="n">molResidues</span> <span class="o">=</span> <span class="p">[</span><span class="n">molecule</span><span class="o">.</span><span class="n">newMolResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span> <span class="n">chemCompVar</span><span class="o">=</span><span class="n">chemCompVar</span><span class="p">)]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Residue type </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">: Error in getting template information&quot;</span>
+                           <span class="o">%</span> <span class="p">(</span><span class="n">residueTypes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tt</span><span class="p">))</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Residue type </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span> <span class="o">%</span> <span class="n">residueTypes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">startNumber</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">residueTypes</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">molecule</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -5,20 +5,26 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:02 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -209,11 +215,11 @@ class SpectrumDisplay(AbstractWrapperObject):
   def resetAxisOrder(self):
     """Reset display to original axis order"""
 
-    self._startFunctionCommandBlock('resetAxisOrder')
+    self._startCommandEchoBlock('resetAxisOrder')
     try:
       self._wrappedData.resetAxisOrder()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def findAxis(self, axisCode):
     """Find axis """
@@ -224,12 +230,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     """
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
-    self._startFunctionCommandBlock('displaySpectrum', spectrum, values=locals(),
-                                    defaults={'axisOrder':()})
+    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+                                defaults={'axisOrder':()})
     try:
       self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
 
 # newSpectrumDisplay functions
@@ -267,8 +273,8 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
 
-  self._startFunctionCommandBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
-                                  parName='newSpectrumDisplay')
+  self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
+                              parName='newSpectrumDisplay')
   try:
     # Create SpectrumDisplay
     if independentStrips:
@@ -306,7 +312,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     #
     result = self._project._data2Obj.get(apiSpectrumDisplay)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return result
 Task.newSpectrumDisplay = _newSpectrumDisplay
@@ -391,8 +397,8 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
       "Display of sampled dimension spectra is not implemented yet")
     # # NBNB TBD FIXME
 
-  window._startFunctionCommandBlock('createSpectrumDisplay', spectrum, values=inputValues,
-                                  defaults=defaults, parName='newSpectrumDisplay')
+  window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
+                                defaults=defaults, parName='newSpectrumDisplay')
   try:
     display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
                                       independentStrips=independentStrips,
@@ -439,7 +445,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
         apiAxis.position = position
         apiAxis.width = width
   finally:
-    window._project._appBase._endCommandBlock()
+    window._endCommandEchoBlock()
 
   # Make spectrumView. NB We need notifiers on for these
   stripSerial = 1 if independentStrips else 0
@@ -462,6 +468,7 @@ del getter
 # Notifiers:
 
 # crosslinks window, nmrResidue
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
   ('_modifiedLink', {'classNames':('Window','SpectrumDisplay')},
   ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),

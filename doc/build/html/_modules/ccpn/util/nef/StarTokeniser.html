@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.nef.StarTokeniser &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.nef.StarTokeniser</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">STAR file tokenizer</span>
+
+<span class="sd"># Copyright © 2011, 2013 Global Phasing Ltd. All rights reserved.</span>
+<span class="sd">#</span>
+<span class="sd"># Author: Peter Keller</span>
+<span class="sd">#</span>
+<span class="sd"># This file forms part of the GPhL StarTools library.</span>
+<span class="sd">#</span>
+<span class="sd"># Redistribution and use in source and binary forms, with or without</span>
+<span class="sd"># modification, are permitted provided that the following conditions</span>
+<span class="sd"># are met:</span>
+<span class="sd">#</span>
+<span class="sd">#  Redistributions of source code must retain the above copyright</span>
+<span class="sd">#  notice, this list of conditions and the following disclaimer.</span>
+<span class="sd">#</span>
+<span class="sd">#  Redistributions in binary form must reproduce the above copyright</span>
+<span class="sd">#  notice, this list of conditions and the following disclaimer in the</span>
+<span class="sd">#  documentation and/or other materials provided with the</span>
+<span class="sd">#  distribution.</span>
+<span class="sd">#</span>
+<span class="sd">#  If the regular expression used to match STAR/CIF data in the</span>
+<span class="sd">#  redistribution is not identical to that in the original version,</span>
+<span class="sd">#  this fact must be stated wherever the copyright notice is</span>
+<span class="sd">#  reproduced.</span>
+<span class="sd">#</span>
+<span class="sd"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="sd"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="sd"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="sd"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE</span>
+<span class="sd"># COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,</span>
+<span class="sd"># INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES</span>
+<span class="sd"># (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR</span>
+<span class="sd"># SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
+<span class="sd"># HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,</span>
+<span class="sd"># STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span>
+<span class="sd"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED</span>
+<span class="sd"># OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on 25 Nov 2013</span>
+
+<span class="sd">@author: pkeller</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">#</span>
+<span class="sd"># Modified by Rasmus Fogh, CCPN project, 5/2/2016</span>
+<span class="sd">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="c1"># STAR parsing REGEX, following International Tables for Crystallography volume G section 2.1</span>
+<span class="n">_REGEX</span> <span class="o">=</span> <span class="s2">r&quot;&quot;&quot;(?xmi) # $Revision$  # No &#39;u&#39; flag for perl 5.8.8/RHEL5 compatibility</span>
+<span class="s2">^;([\S\s]*?)(?:\r\n|\s)^;(?:(?=\s)|$)  # Multi-line string</span>
+<span class="s2">|(?:^|(?&lt;=\s))(\#.*?)\r?$              # Comment</span>
+<span class="s2">|(?:^|(?&lt;=\s))(?:</span>
+<span class="s2">  (global_)                            # STAR global block</span>
+<span class="s2">  |(save_\S*)                          # STAR save frame header or terminator</span>
+<span class="s2">  |(\$\S+)                             # STAR save frame reference</span>
+<span class="s2">  |(stop_)                             # STAR nested loop terminator</span>
+<span class="s2">  |(data_\S+)                          # Data block header</span>
+<span class="s2">  |(loop_)                             # Loop header</span>
+<span class="s2">  |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # Invalid privileged construct</span>
+<span class="s2">  |(_\S+)                              # Data name</span>
+<span class="s2">  |&#39;(.*?)&#39;                             # Single-quoted string</span>
+<span class="s2">  |&quot;(.*?)&quot;                             # Double-quoted string</span>
+<span class="s2">  |(\.)                                # CIF null</span>
+<span class="s2">  |(\?)                                # CIF unknown/missing</span>
+<span class="s2">  |([\[\]]\S*)                         # Square bracketed constructs (reserved)</span>
+<span class="s2">  |((?:[^&#39;&quot;;_$\s]|(?&lt;!^);)\S*)         # Non-quoted string</span>
+<span class="s2">  |(\S+)                               # Catch-all bad token</span>
+<span class="s2">)</span>
+<span class="s2">(?:(?=\s)|$)&quot;&quot;&quot;</span>
+
+<span class="c1"># Compiled form of _REGEX</span>
+<span class="n">_star_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">_REGEX</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
+
+<span class="c1"># # Names of token types in order matching the group numbers returned from _REGEX</span>
+<span class="c1"># # NB must be kept synchronised with _REGEX</span>
+<span class="c1"># _DESCRIPTIVE_TOKEN_TYPES = [</span>
+<span class="c1">#         &quot;&quot;, &quot;MULTILINE&quot;, &quot;COMMENT&quot;, &quot;GLOBAL&quot;, &quot;SAVE_FRAME&quot;, &quot;SAVE_FRAME_REF&quot;,</span>
+<span class="c1">#         &quot;LOOP_STOP&quot;, &quot;DATA_BLOCK&quot;, &quot;LOOP&quot;, &quot;BAD_CONSTRUCT&quot;, &quot;DATA_NAME&quot;, &quot;SQUOTE_STRING&quot;,</span>
+<span class="c1">#         &quot;DQUOTE_STRING&quot;, &quot;NULL&quot;, &quot;UNKNOWN&quot;, &quot;SQUARE_BRACKET&quot;, &quot;STRING&quot;, &quot;BAD_TOKEN&quot; ]</span>
+
+
+<span class="c1"># Token types. NB numbers must be synced to regex - these are used directly!!!</span>
+<span class="n">TOKEN_MULTILINE</span>        <span class="o">=</span> <span class="mi">1</span>
+<span class="n">TOKEN_COMMENT</span>          <span class="o">=</span> <span class="mi">2</span>
+<span class="n">TOKEN_GLOBAL</span>           <span class="o">=</span> <span class="mi">3</span>
+<span class="n">TOKEN_SAVE_FRAME</span>       <span class="o">=</span> <span class="mi">4</span>
+<span class="n">TOKEN_SAVE_FRAME_REF</span>   <span class="o">=</span> <span class="mi">5</span>
+<span class="n">TOKEN_LOOP_STOP</span>        <span class="o">=</span> <span class="mi">6</span>
+<span class="n">TOKEN_DATA_BLOCK</span>       <span class="o">=</span> <span class="mi">7</span>
+<span class="n">TOKEN_LOOP</span>             <span class="o">=</span> <span class="mi">8</span>
+<span class="n">TOKEN_BAD_CONSTRUCT</span>    <span class="o">=</span> <span class="mi">9</span>
+<span class="n">TOKEN_DATA_NAME</span>        <span class="o">=</span> <span class="mi">10</span>
+<span class="n">TOKEN_SQUOTE_STRING</span>    <span class="o">=</span> <span class="mi">11</span>
+<span class="n">TOKEN_DQUOTE_STRING</span>    <span class="o">=</span> <span class="mi">12</span>
+<span class="n">TOKEN_NULL</span>             <span class="o">=</span> <span class="mi">13</span>
+<span class="n">TOKEN_UNKNOWN</span>          <span class="o">=</span> <span class="mi">14</span>
+<span class="n">TOKEN_SQUARE_BRACKET</span>   <span class="o">=</span> <span class="mi">15</span>
+<span class="n">TOKEN_STRING</span>           <span class="o">=</span> <span class="mi">16</span>
+<span class="n">TOKEN_BAD_TOKEN</span>        <span class="o">=</span> <span class="mi">17</span>
+
+<span class="c1"># Rasmus Fogh, CCPN project 5/2/2016</span>
+<span class="c1"># # Modified Tokeniser to</span>
+<span class="c1"># - use namedtuples instead of custom objects</span>
+<span class="c1"># - to use descriptive token types instead of integer codes. LATER UNDONE</span>
+<span class="c1"># - to use a string input instead of a memory map (which gave string/byte conflict errors)</span>
+<span class="c1"># - to wrap the regex iterator without a wrapping class.</span>
+
+<span class="c1">#</span>
+<span class="n">StarToken</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;StarToken&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">))</span>
+<span class="n">StarToken</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;StarToken named tuple (with fields &#39;type&#39;, &#39;value&#39;) returned by the STAR token iterator&quot;</span>
+
+<div class="viewcode-block" id="getTokenIterator"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarTokeniser.getTokenIterator">[docs]</a><span class="k">def</span> <span class="nf">getTokenIterator</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Iterator that returns an iterator over all STAR tokens in a generic STAR file&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">StarToken</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastindex</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastindex</span><span class="p">))</span>
+          <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_star_pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

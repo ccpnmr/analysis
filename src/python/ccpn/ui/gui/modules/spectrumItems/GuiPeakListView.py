@@ -4,19 +4,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
 #=========================================================================================
 __author__ = "$Author: Wayne Boucher $"
-__date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 
+__date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -160,7 +167,10 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     strip = self.spectrumView.strip
     plotWidget = strip.plotWidget
     viewRegion = plotWidget.viewRange()
-    dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
+    # dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
+    spectrumIndices = self.spectrumView._displayOrderSpectrumDimensionIndices
+    xAxisIndex = spectrumIndices[0]
+    yAxisIndex = spectrumIndices[1]
 
     x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
     xScale = width / (x1 - x0) / xCount
@@ -172,8 +182,10 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
     for peak in self.peakList.peaks:
       if strip.peakIsInPlane(peak):
-        xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
-        yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate
+        # xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
+        # yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate
+        xPpm = xScale*peak.position[xAxisIndex] + xTranslate
+        yPpm = yScale*peak.position[yAxisIndex] + yTranslate
         a0 = xPpm - peakHalfSize
         b0 = height - (yPpm - peakHalfSize)
         a1 = xPpm + peakHalfSize
@@ -314,19 +326,10 @@ class Peak1d(QtGui.QGraphicsItem):
 
     self.setSelected(peak in self.application.current.peaks)
 
-    # if not hasattr(peak, 'isSelected'):
-    #   peak.isSelected = False
-    # self.setSelected(peak.isSelected)
-    # This code does not make sense - you need its own spectrumView, not the zero'th
-    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
-    # dimensionOrdering deprecated
-    dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
-    xPpm = peak.position[dataDims[0].dimensionIndex]
-    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
-    # xDim = dimensionOrdering[0] - 1
-    # yDim = dimensionOrdering[1] - 1
-    # xPpm = peak.position[xDim]
-    # yPpm = peak.position[yDim]
+    # dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
+    # xPpm = peak.position[dataDims[0].dimensionIndex]
+    xAxisIndex = peakListView.spectrumView._displayOrderSpectrumDimensionIndices[0]
+    xPpm = peak.position[xAxisIndex]
     self.setPos(xPpm, peak.height)
     self.annotation.setupPeakAnnotation(self)
     peakListView.peakItems[self.peak] = self
@@ -626,19 +629,15 @@ class PeakNd(QtGui.QGraphicsItem):
     self.peak = peak
     if not hasattr(peak, '_isSelected'):
       peak._isSelected = False
-    # self.setSelected(peak.isSelected)
-    #####self.setSelected(self.peak in peakListView.spectrumView.application.current.peaks)
-    # This code does not make sense - you need its own spectrumView, not the zero'th
-    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
-    # dimensionOrdering deprecated
-    dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
-    xPpm = peak.position[dataDims[0].dimensionIndex]
-    yPpm = peak.position[dataDims[1].dimensionIndex]
-    # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
-    # xDim = dimensionOrdering[0] - 1
-    # yDim = dimensionOrdering[1] - 1
-    # xPpm = peak.position[xDim]
-    # yPpm = peak.position[yDim]
+
+    spectrumIndices = peakListView.spectrumView._displayOrderSpectrumDimensionIndices
+    xAxisIndex = spectrumIndices[0]
+    yAxisIndex = spectrumIndices[1]
+    xPpm = peak.position[xAxisIndex]
+    yPpm = peak.position[yAxisIndex]
+    # dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
+    # xPpm = peak.position[dataDims[0].dimensionIndex]
+    # yPpm = peak.position[dataDims[1].dimensionIndex]
     self.setPos(xPpm, yPpm)
     self.annotation.setupPeakAnnotationItem(self)
     peakListView.peakItems[self.peak] = self
@@ -919,10 +918,15 @@ def _refreshPeakPosition(peak:Peak):
   for peakListView in peak.peakList.peakListViews:
     peakItem = peakListView.peakItems.get(peak)
     if peakItem:
-      dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
-      xPpm = peak.position[dataDims[0].dimensionIndex]
+      spectrumIndices = peakListView.spectrumView._displayOrderSpectrumDimensionIndices
+      xAxisIndex = spectrumIndices[0]
+      yAxisIndex = spectrumIndices[1]
+      # dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
+      # xPpm = peak.position[dataDims[0].dimensionIndex]
+      xPpm = peak.position[xAxisIndex]
       if peakListView.spectrumView.spectrum.dimensionCount > 1:
-        yPpm = peak.position[dataDims[1].dimensionIndex]
+        # yPpm = peak.position[dataDims[1].dimensionIndex]
+        yPpm = peak.position[yAxisIndex]
         peakItem.setPos(xPpm, yPpm)
       else:
         peakItem.setPos(xPpm, peak.height)

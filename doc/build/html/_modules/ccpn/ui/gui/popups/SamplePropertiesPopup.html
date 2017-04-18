@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.SamplePropertiesPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.SamplePropertiesPopup</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;luca&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DateTime</span> <span class="kn">import</span> <span class="n">DateTime</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+
+
+
+<span class="n">OTHER_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µ&#39;</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">]</span>
+<span class="n">CONCENTRATION_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µM&#39;</span><span class="p">,</span> <span class="s1">&#39;mM&#39;</span><span class="p">,</span> <span class="s1">&#39;nM&#39;</span><span class="p">,</span> <span class="s1">&#39;pM&#39;</span><span class="p">]</span>
+<span class="n">VOLUME_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µL&#39;</span><span class="p">,</span> <span class="s1">&#39;mL&#39;</span><span class="p">,</span> <span class="s1">&#39;nL&#39;</span><span class="p">,</span> <span class="s1">&#39;pL&#39;</span><span class="p">]</span>
+<span class="n">MASS_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µg&#39;</span><span class="p">,</span><span class="s1">&#39;kg&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">,</span><span class="s1">&#39;mg&#39;</span><span class="p">,</span> <span class="s1">&#39;ng&#39;</span><span class="p">,</span> <span class="s1">&#39;pg&#39;</span><span class="p">]</span>
+<span class="n">SAMPLE_STATES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Liquid&#39;</span><span class="p">,</span> <span class="s1">&#39;Solid&#39;</span><span class="p">,</span> <span class="s1">&#39;Ordered&#39;</span><span class="p">,</span> <span class="s1">&#39;Powder&#39;</span><span class="p">,</span> <span class="s1">&#39;Crystal&#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">]</span>
+
+<span class="n">AMOUNT_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;mole&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SamplePropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SamplePropertiesPopup.SamplePropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">SamplePropertiesPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SamplePropertiesPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">(</span><span class="n">widgets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllWidgets</span><span class="p">(),</span> <span class="n">layout</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="c1">#L,T,R,B</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Sample Properties&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">410</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">420</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getWidgetsToSet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSampleNameWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setsampleAmountUnitWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setsampleAmountWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setsampleIonicStrengthWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSample_pHWidgets</span><span class="p">,</span>
+            <span class="c1"># self._setSampleDateWidgets,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setBatchIdentifierWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setPlateIdentifierWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSampleRowNumberWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSampleColumnNumberWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSampleCommentWidgets</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setPerformButtonWidgets</span>
+          <span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">setWidget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getWidgetsToSet</span><span class="p">():</span>
+      <span class="n">setWidget</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widgets</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">widgets</span><span class="p">):</span>
+      <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">position</span>
+      <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getAllWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    All widgets are ordered in the way they will be added to the layout EG:</span>
+<span class="sd">    1)Label1 -&gt; grid 0,0  ---- 2)LineEdit1 --&gt; grid 0,1</span>
+<span class="sd">    In this list are excluded the &#39;Cancel, Apply, Ok Buttons&#39; &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">amountQuantityLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">samplepHLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="p">,</span>
+              <span class="c1"># self.sampleDate, self.sampleDateWidget,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">sampleBatchIdentifierLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">samplePlateIdentifierLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">samplerowNumberLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">sampleColumnNumberLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">sampleCommentLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span>
+           <span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setSampleNameWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Name&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.sampleNameLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setsampleStateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStateLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">SAMPLE_STATES</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampleStateChanged</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setsampleAmountUnitWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Amount Unit&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">AMOUNT_UNIT</span><span class="p">,</span>
+                                         <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                         <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                         <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setsampleAmountWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">amountQuantityLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Amount&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.sampleAmountLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amount</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amount</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setsampleIonicStrengthWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Ionic Strength&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">ionicStrength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">ionicStrength</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setSample_pHWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplepHLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;pH &quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">14.00</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="c1"># self.samplepHDoubleSpinbox.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">pH</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">pH</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setSampleDateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleDate</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Sample Creation Date&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleDateWidget</span> <span class="o">=</span> <span class="n">DateTime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.sampleDateWidget.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleDateWidget</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">creationDate</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">setToday</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDate</span><span class="o">.</span><span class="n">currentDate</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sampleDateWidget</span><span class="o">.</span><span class="n">setDate</span><span class="p">(</span><span class="n">setToday</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setBatchIdentifierWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleBatchIdentifierLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Sample Batch Identifier&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.plateIdentifierLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;batchIdentifier&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">batchIdentifier</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setPlateIdentifierWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplePlateIdentifierLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Sample Plate Identifier&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.plateIdentifierLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">plateIdentifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">plateIdentifier</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setSampleRowNumberWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplerowNumberLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Sample Row Number&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.rowNumberLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">rowNumber</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">rowNumber</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setSampleColumnNumberWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleColumnNumberLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Sample Column Number&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># self.columnNumberLineEdit.setFixedWidth(203)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">columnNumber</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">columnNumber</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_setSampleCommentWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleCommentLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Comment&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+    <span class="c1"># self.commentTextEditor.setFixedWidth(215)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setPerformButtonWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okButton</span><span class="p">],</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Apply&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">])</span>
+    <span class="n">lastWidgetCount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllWidgets</span><span class="p">())</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span><span class="p">,</span> <span class="n">lastWidgetCount</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,)</span>
+
+  <span class="c1">######### Callbacks #########</span>
+
+  <span class="k">def</span> <span class="nf">_changeSampleName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_sampleAmountChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_sampleAmountUnitChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_samplepHchanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">pH</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">pH</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="k">def</span> <span class="nf">_sampleIonicStrengthChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">ionicStrength</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_sampleDateChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pressed</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">pressed</span><span class="p">,</span> <span class="s1">&#39;DateTime not yet implemented&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_batchIdentifierChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">batchIdentifier</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_plateIdentifierChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">plateIdentifier</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_rowNumberChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">rowNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_columnNumberChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">columnNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_commentChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="k">def</span> <span class="nf">_getCallBacksDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_changeSampleName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sampleAmountUnitChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sampleAmountChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_samplepHchanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_sampleIonicStrengthChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batchIdentifierChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_plateIdentifierChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_rowNumberChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_columnNumberChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_commentChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SamplePropertiesPopup.keyPressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SamplePropertiesPopup.SamplePropertiesPopup.keyPressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_okButton</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Escape</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

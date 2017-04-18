@@ -42,20 +42,26 @@ HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:00 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -248,6 +254,16 @@ class Spectrum(AbstractWrapperObject):
   @spinningRate.setter
   def spinningRate(self, value:float):
     self._wrappedData.experiment.spinningRate = value
+
+  @property
+  def noiseLevel(self) -> float:
+    """Estimated noise level for the spectrum,
+    defined as the estimated standard deviation of the points from the baseplane/baseline"""
+    return self._wrappedData.noiseLevel
+
+  @noiseLevel.setter
+  def noiseLevel(self, value:float):
+    self._wrappedData.noiseLevel = value
 
   @property
   def experimentType(self) -> str:
@@ -491,6 +507,34 @@ class Spectrum(AbstractWrapperObject):
       raise ValueError("SpectralWidth value must have length %s, was %s" %
                        (apiDataSource.numDim, value))
 
+    @property
+    def valuesPerPoint(self) -> Tuple[Optional[float], ...]:
+      """valuePerPoint for each dimension
+
+      in ppm for Frequency dimensions with a single, well-defined reference
+
+      None for Frequency dimensions without a single, well-defined reference
+
+      in time units (seconds) for FId dimensions
+
+      None for sampled dimensions"""
+
+      result = []
+      for dataDim in self._wrappedData.sortedDataDims():
+        if hasattr(dataDim, 'primaryDataDimRef'):
+          # FreqDataDim - get ppm valuePerPoint
+          ddr = dataDim.primaryDataDimRef
+          valuePerPoint = ddr and ddr.valuePerPoint
+        elif hasattr(dataDim, 'valuePerPoint'):
+          # FidDataDim - get time valuePerPoint
+          valuePerPoint = dataDim.valuePerPoint
+        else:
+          # Sampled DataDim - return None
+          valuePerPoint = None
+        #
+        result.append(valuePerPoint)
+      #
+      return tuple(result)
 
   @property
   def phases0(self) -> tuple:
@@ -628,6 +672,8 @@ class Spectrum(AbstractWrapperObject):
   def isotopeCodes(self, value:Sequence):
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
+      if value != self.isotopeCodes and self.peaks:
+        raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
         val = value[ii]
@@ -972,11 +1018,11 @@ Use axisCodes to set magnetisation transfers instead.""")
   def rename(self, value:str):
     """Rename Spectrum, changing its name and Pid"""
     if value:
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
     else:
       raise ValueError("Spectrum name must be set")
 
@@ -990,7 +1036,7 @@ Use axisCodes to set magnetisation transfers instead.""")
   def resetAssignmentTolerances(self):
     """Reset assignment tolerances to default values"""
 
-    self._startFunctionCommandBlock('resetAssignmentTolerances')
+    self._startCommandEchoBlock('resetAssignmentTolerances')
     try:
       tolerances = [[]] * self.dimensionCount
       for ii, isotopeCode in enumerate(self.isotopeCodes):
@@ -1008,7 +1054,7 @@ Use axisCodes to set magnetisation transfers instead.""")
 
       self.assignmentTolerances = tolerances
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def getPositionValue(self, position):
 
@@ -1034,6 +1080,12 @@ Use axisCodes to set magnetisation transfers instead.""")
 
   def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
     return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)
+
+  def get1dSpectrumData(self):
+    """Get position,scaledData numpy array for 1D spectrum.
+
+    Gives first 1D slice for nD"""
+    return self._apiDataSource.get1dSpectrumData()
 
   def reorderValues(self, values, newAxisCodeOrder):
     """Reorder values in spectrum dimension order to newAxisCodeOrder
@@ -1090,13 +1142,13 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None,
   else:
     values = {}
 
-  self._startFunctionCommandBlock('_createDummySpectrum', axisCodes, values=values,
-                                  parName='newSpectrum')
+  self._startCommandEchoBlock('_createDummySpectrum', axisCodes, values=values,
+                              parName='newSpectrum')
   try:
     result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name,
                                                                   shiftList=apiShiftList)]
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
 
 def _spectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):

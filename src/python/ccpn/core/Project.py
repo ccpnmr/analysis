@@ -3,19 +3,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:32 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -220,6 +227,9 @@ class Project(AbstractWrapperObject):
                                  changeDataLocations=changeDataLocations)
     if savedOk:
       self._resetIds()
+      application = self._appBase
+      if application is not None:
+        application._refreshAfterSave()
     #
     return savedOk
 
@@ -392,6 +402,21 @@ class Project(AbstractWrapperObject):
 
   def _registerApiNotifier(self, func, apiClassOrName, apiFuncName, parameterDict=None):
     """Register notifier for immediate action on current project (only)
+
+    func must be a function taking two parameters: the ccpn.core.Project and an Api object
+    matching apiClassOrName.
+
+    'apiFuncName' is either the name of an API modifier function (a setter, adder, remover),
+    in which case the notifier is triggered by this function
+    Or it is one of the following tags:
+    ('', '__init__', 'postInit', 'preDelete', 'delete', 'startDeleteBlock', 'endDeleteBlock').
+    '' registers the notifier to any modifier function call ( setter, adder, remover),
+    __init__ and postInit triggers the notifier at the end of object creation, before resp.
+    after execution of postConstructorCode, the four delete-related tags
+    trigger notifiers at four different points in the deletion process
+    (see memops.Implementation.DataObject.delete() code for details).
+
+
     ADVANCED, but free to use. Must be unregistered when any object referenced is deleted.
     Use return value as input parameter for _unregisterApiNotifier (if desired)"""
     tt = self.__class__._apiNotifierParameters(func, apiClassOrName, apiFuncName,

@@ -4,19 +4,25 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-04-11 17:22:50 +0100 (Tue, April 11, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Wayne Boucher $"
 
+__date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -282,15 +288,19 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
     # contextMenu.addAction('Delete', partial(self.removeItem, item))
-    contextMenu.addAction('Delete', partial(self._deleteItemObject, item))
-    contextMenu.popup(event.globalPos())
+    if item is not None:
+        objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+        if objFromPid is not None:
+          contextMenu.addAction('Delete', partial(self._deleteItemObject, objFromPid))
+          contextMenu.exec_(self.mapToGlobal(event.pos()))
 
 
-  def _deleteItemObject(self,  item:QtGui.QTreeWidgetItem):
+  def _deleteItemObject(self,  obj):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
-    self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
+    if obj:
+      obj.delete()
 
   def _createItem(self, obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.
@@ -418,13 +428,19 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     return result
 
+  def setProjectName(self, project:Project):
+    """
+    (re)set project name in sidebar header.
+    """
+
+    self.projectItem.setText(0, project.name)
+
   def fillSideBar(self, project:Project):
     """
     Fills the sidebar with the relevant data from the project.
     """
+    self.setProjectName(project)
 
-    self.projectItem.setText(0, project.name)
-    # pid2Obj = project._pid2Obj
     for className, cls in classesInSideBar.items():
       for obj in getattr(project, cls._pluralLinkName):
         self._createItem(obj)

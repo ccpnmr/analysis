@@ -3,20 +3,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:31 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -25,6 +31,7 @@ import collections
 import operator
 from typing import Union, Tuple
 
+from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
@@ -185,7 +192,7 @@ class NmrAtom(AbstractWrapperObject):
 
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     try:
       if value is None:
         self.deassign()
@@ -204,15 +211,15 @@ class NmrAtom(AbstractWrapperObject):
         #
         self._wrappedData.name = value
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def deassign(self):
     """Reset NmrAtom back to its originalName, cutting all assignment links"""
-    self._startFunctionCommandBlock('deassign')
+    self._startCommandEchoBlock('deassign')
     try:
       self._wrappedData.name = None
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, name:str=None, mergeToExisting=False) -> 'NmrAtom':
@@ -252,7 +259,7 @@ class NmrAtom(AbstractWrapperObject):
     apiResonance = self._apiResonance
     apiResonanceGroup = apiResonance.resonanceGroup
 
-    self._startFunctionCommandBlock('assignTo', values=locals(), defaults=defaults)
+    self._startCommandEchoBlock('assignTo', values=locals(), defaults=defaults)
     try:
       if sequenceCode is not None:
         sequenceCode = str(sequenceCode) or None
@@ -267,6 +274,13 @@ class NmrAtom(AbstractWrapperObject):
         if ss and Pid.altCharacter in ss:
           raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
                            % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
+
+      isotopeCode = self.isotopeCode
+      if name and isotopeCode not in (None, '?'):
+        # Check for isotope match
+        if name2IsotopeCode(name) not in (isotopeCode, None):
+          raise ValueError("Cannot reassign %s type NmrAtom to %s" % (isotopeCode, name))
+
 
       oldNmrResidue = self.nmrResidue
       nmrChain = self._project.fetchNmrChain(chainCode)
@@ -328,7 +342,7 @@ class NmrAtom(AbstractWrapperObject):
       if undo is not None and clearUndo:
         undo.clear()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     #
     return result
 
@@ -352,6 +366,17 @@ def setter(self:Atom, value:NmrAtom):
   else:
     value.atom = self
 Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+
+
+def getter(self: Residue) -> Tuple[NmrAtom]:
+  result = []
+  for nmrResidue in self.allNmrResidues:
+    result.extend(nmrResidue.nmrAtoms)
+  #
+  return tuple(result)
+Residue.allNmrAtoms = property(getter, None, None,
+                                  "All NmrAtoms corresponding to Residue - E.g. (for MR:A.87)"
+                                  " NmrAtoms in NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
 del getter
 del setter
@@ -413,8 +438,8 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
   if comment is None:
     dd['details'] = name
 
-  self._startFunctionCommandBlock('newNmrAtom', values=locals(), defaults=defaults,
-                                  parName='newNmrAtom')
+  self._startCommandEchoBlock('newNmrAtom', values=locals(), defaults=defaults,
+                              parName='newNmrAtom')
   result = None
   try:
     obj = nmrProject.newResonance(**dd)
@@ -429,14 +454,14 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
                                      %(result, name, result.name))
       result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 
 def _fetchNmrAtom(self:NmrResidue, name:str):
   """Fetch NmrAtom with name=name, creating it if necessary"""
   # resonanceGroup = self._wrappedData
-  self._startFunctionCommandBlock('fetchNmrAtom', name, parName='newNmrAtom')
+  self._startCommandEchoBlock('fetchNmrAtom', name, parName='newNmrAtom')
   try:
     # self.getNmrAtom(name.translate(Pid.remapSeparators))
     result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
@@ -444,7 +469,7 @@ def _fetchNmrAtom(self:NmrResidue, name:str):
     # result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
     #         self.newNmrAtom(name=name))
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 
@@ -458,8 +483,8 @@ def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
   defaults = collections.OrderedDict((('atomId', None), ('chainCode', None), ('sequenceCode', None),
                                      ('residueType', None), ('name', None), ))
 
-  self._startFunctionCommandBlock('_produceNmrAtom', values=locals(), defaults=defaults,
-                                  parName='newNmrAtom')
+  self._startCommandEchoBlock('_produceNmrAtom', values=locals(), defaults=defaults,
+                              parName='newNmrAtom')
   try:
     # Get ID parts to use
     if sequenceCode is not None:
@@ -487,7 +512,7 @@ def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
     result = nmrResidue.fetchNmrAtom(name)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
     
 # Connections to parents:

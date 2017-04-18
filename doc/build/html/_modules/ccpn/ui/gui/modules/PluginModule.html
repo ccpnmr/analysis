@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.PluginModule &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.PluginModule</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, TJ Ragan, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: TJ Ragan $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-24 10:20:58 +0000 (Fri, March 24, 2017) $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiGenerator</span> <span class="kn">import</span> <span class="n">generateWidget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiGenerator</span> <span class="kn">import</span> <span class="n">AUTOGEN_TAG</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+
+<span class="n">widgetGetters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CheckBox&#39;</span><span class="p">:</span> <span class="s1">&#39;get&#39;</span><span class="p">,</span>  <span class="c1">#returns Bool</span>
+                 <span class="s1">&#39;PulldownList&#39;</span><span class="p">:</span>  <span class="s1">&#39;get&#39;</span>               <span class="p">,</span>
+                 <span class="s1">&#39;LineEdit&#39;</span><span class="p">:</span>      <span class="s1">&#39;get&#39;</span>               <span class="p">,</span>
+                 <span class="s1">&#39;Label&#39;</span><span class="p">:</span>         <span class="s1">&#39;get&#39;</span>               <span class="p">,</span>
+                 <span class="s1">&#39;ListWidget&#39;</span><span class="p">:</span>   <span class="s1">&#39;getSelectedObjects&#39;</span><span class="p">,</span>  <span class="c1">#returns list. Not Tested</span>
+                 <span class="s1">&#39;DoubleSpinbox&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span>             <span class="p">,</span>
+                 <span class="s1">&#39;Spinbox&#39;</span><span class="p">:</span>       <span class="s1">&#39;value&#39;</span>             <span class="p">,</span>
+                 <span class="s1">&#39;Slider&#39;</span><span class="p">:</span>        <span class="s1">&#39;get&#39;</span>               <span class="p">,</span>
+                 <span class="s1">&#39;RadioButton&#39;</span><span class="p">:</span>   <span class="s1">&#39;isChecked&#39;</span>         <span class="p">,</span>  <span class="c1">#returns Bool</span>
+                 <span class="s1">&#39;RadioButtons&#39;</span><span class="p">:</span>  <span class="s1">&#39;getIndex&#39;</span>          <span class="p">,</span>  <span class="c1"># returns int index of the checked RB</span>
+                 <span class="s1">&#39;ObjectTable&#39;</span><span class="p">:</span>   <span class="s1">&#39;getSelectedObjects&#39;</span><span class="p">,</span>  <span class="c1"># returns int</span>
+                 <span class="s1">&#39;TextEditor&#39;</span><span class="p">:</span>    <span class="s1">&#39;getText&#39;</span>           <span class="p">,</span>
+                 <span class="s1">&#39;ToolButton&#39;</span><span class="p">:</span>    <span class="s1">&#39;getText&#39;</span>           <span class="p">,</span>
+                 <span class="p">}</span>
+
+<div class="viewcode-block" id="PluginModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.PluginModule">[docs]</a><span class="k">class</span> <span class="nc">PluginModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interactor</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span> <span class="o">=</span> <span class="n">interactor</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">interactor</span><span class="o">.</span><span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">interactor</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populateMainWidget</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">interactor</span><span class="o">.</span><span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_populateSettingsWidget</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_populateMainWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">generateWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">argsDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addRunButton</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_populateSettingsWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">generateWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">argsDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PluginModule.addRunButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.PluginModule.addRunButton">[docs]</a>  <span class="k">def</span> <span class="nf">addRunButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># TODO: put the run button at the bottom, not on the bottom right.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Run&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_runButtonCallback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="p">)</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_runButtonCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">autogenTagLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">AUTOGEN_TAG</span><span class="p">)</span>
+    <span class="n">mainWidgetChildren</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">children</span><span class="p">()</span>
+    <span class="n">settingsWidgetChildren</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">children</span><span class="p">()</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">mainWidgetChildren</span><span class="p">,</span> <span class="n">settingsWidgetChildren</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">widget</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">subchild</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+          <span class="n">n</span> <span class="o">=</span> <span class="n">subchild</span><span class="o">.</span><span class="n">objectName</span><span class="p">()</span>
+          <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">AUTOGEN_TAG</span><span class="p">):</span>
+            <span class="n">widgetType</span> <span class="o">=</span> <span class="n">subchild</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">subchild</span><span class="p">,</span> <span class="n">widgetGetters</span><span class="p">[</span><span class="n">widgetType</span><span class="p">])()</span>
+            <span class="n">parameters</span><span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="n">autogenTagLength</span><span class="p">:]]</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="c1"># for k,v in parameters.items():</span>
+    <span class="c1">#   print(k,v)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="c1"># self.interactor.run(**self._kwargs)</span>
+
+
+<div class="viewcode-block" id="PluginModule.issueMessage"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.PluginModule.issueMessage">[docs]</a>  <span class="k">def</span> <span class="nf">issueMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;Messages are not implemented yet.&#39;</span><span class="p">)</span></div></div>
+
+
+
+<span class="c1">##################### Qt Testing code #########################</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea</span> <span class="kn">import</span> <span class="n">Dock</span><span class="p">,</span> <span class="n">DockArea</span>
+
+
+
+<div class="viewcode-block" id="TestQt"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.TestQt">[docs]</a><span class="k">class</span> <span class="nc">TestQt</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">qtApp</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">qtMainWindow</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">pgDockArea</span> <span class="o">=</span> <span class="n">DockArea</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">pgDockArea</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pgDock</span> <span class="o">=</span> <span class="n">Dock</span><span class="p">(</span><span class="s2">&quot;Dock&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+    <span class="n">pgDockArea</span><span class="o">.</span><span class="n">addDock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pgDock</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TestQt.showWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.TestQt.showWidget">[docs]</a>  <span class="k">def</span> <span class="nf">showWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pgDock</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">Mock</span>
+
+  <span class="n">qtTestHarness</span> <span class="o">=</span> <span class="n">TestQt</span><span class="p">()</span>
+
+  <span class="n">application</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+  <span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>  <span class="c1"># HACK!!!</span>
+  <span class="n">qtTestHarness</span><span class="o">.</span><span class="n">qtApp</span><span class="o">.</span><span class="n">_ccpnApplication</span> <span class="o">=</span> <span class="n">application</span>
+
+  <span class="n">interactor</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+  <span class="n">interactor</span><span class="o">.</span><span class="n">PLUGINNAME</span> <span class="o">=</span> <span class="s1">&#39;Test Plugin...Test&#39;</span>  <span class="c1"># Same as above, but without checking</span>
+  <span class="n">interactor</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Fast&#39;</span><span class="p">,</span> <span class="s1">&#39;Slow&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;label&#39;</span>    <span class="p">:</span> <span class="s1">&#39;Param #1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Fast&#39;</span><span class="p">},</span>                        <span class="c1"># List</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param2&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">0</span><span class="p">},</span>                              <span class="c1"># checkbox 0 unchecked 2 checked</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param3&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">((</span><span class="s1">&#39;White 1&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="s1">&#39;Red 2&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">)),</span>  <span class="c1">#  RadioButtons</span>
+                        <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;Red 2&#39;</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param4&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">4</span><span class="p">},</span>                                <span class="c1"># List</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param5&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">)},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param6&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with default</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param7&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with stepsize</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param8&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with default and stepsize</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                        <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param9&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param10&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with default</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param11&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with stepsize</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span>
+                        <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param12&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with default and stepsize</span>
+                        <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param13&#39;</span><span class="p">,</span>                         <span class="c1"># LineEdit</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span><span class="s1">&#39;param13&#39;</span><span class="p">},</span>
+
+                       <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param14&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">((</span><span class="s1">&#39;Ford&#39;</span><span class="p">,</span> <span class="s1">&#39;Focus&#39;</span><span class="p">),</span>                    <span class="c1"># Mapped list</span>
+                                  <span class="p">(</span><span class="s1">&#39;BMW&#39;</span><span class="p">,</span> <span class="s1">&#39;320&#39;</span><span class="p">),</span>
+                                  <span class="p">(</span><span class="s1">&#39;Fiat&#39;</span><span class="p">,</span> <span class="s1">&#39;500&#39;</span><span class="p">)</span>
+                                 <span class="p">),</span>
+                        <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Focus&#39;</span><span class="p">},</span>
+                      <span class="p">]</span>
+  <span class="n">interactor</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param1s&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Fast&#39;</span><span class="p">,</span> <span class="s1">&#39;Slow&#39;</span><span class="p">),</span>
+                          <span class="s1">&#39;label&#39;</span>    <span class="p">:</span> <span class="s1">&#39;Param #1&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Fast&#39;</span><span class="p">},</span>                        <span class="c1"># List</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param2s&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">0</span><span class="p">},</span>                              <span class="c1"># checkbox 0 unchecked 2 checked</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param3s&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">((</span><span class="s1">&#39;White 1&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">),(</span><span class="s1">&#39;Red 2&#39;</span><span class="p">,</span><span class="bp">True</span><span class="p">)),</span>  <span class="c1">#  RadioButtons</span>
+                          <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;Red 2&#39;</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param4s&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">4</span><span class="p">},</span>                                <span class="c1"># List</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param5s&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">)},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param6s&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with default</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param7s&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with stepsize</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                          <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param8s&#39;</span><span class="p">,</span>                         <span class="c1"># Spinbox with default and stepsize</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                          <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param9s&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param10s&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with default</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param11s&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with stepsize</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span>
+                          <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;param12s&#39;</span><span class="p">,</span>                         <span class="c1"># Double Spinbox with default and stepsize</span>
+                          <span class="s1">&#39;value&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                          <span class="s1">&#39;stepsize&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param13s&#39;</span><span class="p">,</span>                         <span class="c1"># LineEdit</span>
+                          <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span><span class="s1">&#39;param13&#39;</span><span class="p">},</span>
+
+                         <span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;param14s&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">((</span><span class="s1">&#39;Ford&#39;</span><span class="p">,</span> <span class="s1">&#39;Focus&#39;</span><span class="p">),</span>                    <span class="c1"># Mapped list</span>
+                                    <span class="p">(</span><span class="s1">&#39;BMW&#39;</span><span class="p">,</span> <span class="s1">&#39;320&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Fiat&#39;</span><span class="p">,</span> <span class="s1">&#39;500&#39;</span><span class="p">)</span>
+                                   <span class="p">),</span>
+                          <span class="s1">&#39;default&#39;</span>  <span class="p">:</span> <span class="s1">&#39;Focus&#39;</span><span class="p">},</span>
+                      <span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Run clicked, &#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+  <span class="n">interactor</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">run</span>
+
+  <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">PluginModule</span><span class="p">(</span><span class="n">interactor</span><span class="p">)</span>
+  <span class="n">qtTestHarness</span><span class="o">.</span><span class="n">showWidget</span><span class="p">(</span><span class="n">pluginModule</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

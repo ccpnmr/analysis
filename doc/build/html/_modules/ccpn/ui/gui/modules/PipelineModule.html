@@ -1,0 +1,673 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.PipelineModule &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.PipelineModule</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GroupBox</span> <span class="kn">import</span> <span class="n">GroupBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">PipelineDropArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+
+<span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
+<span class="n">Qkeys</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span>
+
+<span class="c1"># styleSheets</span>
+<span class="n">transparentStyle</span> <span class="o">=</span> <span class="s2">&quot;background-color: transparent; border: 0px solid transparent&quot;</span>
+<span class="n">selectMethodLabel</span> <span class="o">=</span> <span class="s1">&#39;&lt; Select Method &gt;&#39;</span>
+
+
+<div class="viewcode-block" id="PipelineWorker"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.PipelineWorker">[docs]</a><span class="k">class</span> <span class="nc">PipelineWorker</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+  <span class="s1">&#39;Object managing the  auto run pipeline simulation&#39;</span>
+
+  <span class="n">stepIncreased</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PipelineWorker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_isRunning</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_maxSteps</span> <span class="o">=</span> <span class="mi">200000</span>
+
+<div class="viewcode-block" id="PipelineWorker.task"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.PipelineWorker.task">[docs]</a>  <span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRunning</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_isRunning</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maxSteps</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRunning</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">stepIncreased</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">)</span>
+      <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># if this time is too small or disabled you won&#39;t be able to stop the thread!</span></div>
+
+<div class="viewcode-block" id="PipelineWorker.stop"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.PipelineWorker.stop">[docs]</a>  <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_isRunning</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Pipeline Thread stopped&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GuiPipeline"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline">[docs]</a><span class="k">class</span> <span class="nc">GuiPipeline</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pipelineMethods</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">appSpecificMethods</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">GuiPipeline</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">nameCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;runPipeline&#39;</span><span class="p">):</span>
+        <span class="n">nameCount</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Pipeline-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameCount</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">templatePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">auxiliaryFilesPath</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentPipelineBoxNames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;NewPipeline&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="s1">&#39;NewPipeline&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;savePath&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">dataPath</span><span class="p">)),</span>
+                                               <span class="p">(</span><span class="s1">&#39;autoRun&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),(</span><span class="s1">&#39;addPosit&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;autoActive&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPipelineTemplates</span><span class="p">(</span><span class="n">templates</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPipelineMethods</span><span class="p">(</span><span class="n">pipelineMethods</span><span class="p">)</span>
+
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setIcons</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setPipelineThread</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSecondaryLayouts</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">appSpecificMethods</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">methodsPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setAppSpecificMethods</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWorker</span><span class="o">.</span><span class="n">stepIncreased</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runPipeline</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentRunningPipeline</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">def</span> <span class="nf">_setModuleName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">pipelineModules</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;GuiPipeline&#39;</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;GuiPipeline&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;runPipeline&#39;</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;runPipeline&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;isIST&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_getPipelineMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methods</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    methods = {name: object}</span>
+<span class="sd">    name = str will appear in the method pulldown</span>
+<span class="sd">    obj = any subclass of pipeline Box</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">methods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="nb">all</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">methodName</span><span class="p">(</span><span class="n">method</span><span class="p">),</span> <span class="n">method</span><span class="p">)</span>
+        <span class="nb">all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+      <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">all</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">{}</span>
+
+  <span class="k">def</span> <span class="nf">_getPipelineTemplates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">templates</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">templates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">templates</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Empty&#39;</span><span class="p">:</span><span class="s1">&#39;Empty&#39;</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">_setAppSpecificMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;set data in pull down if selected application specific method &#39;&#39;&#39;</span>
+    <span class="n">filteredMethod</span> <span class="o">=</span> <span class="p">[</span><span class="n">selectMethodLabel</span><span class="p">,]</span>
+    <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;applicationsSpecific&#39;</span><span class="p">):</span>
+        <span class="n">applicationsSpecific</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">applicationsSpecific</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationName</span> <span class="ow">in</span> <span class="n">applicationsSpecific</span><span class="p">:</span>
+          <span class="n">filteredMethod</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">methodName</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">filteredMethod</span><span class="p">))</span>
+
+<div class="viewcode-block" id="GuiPipeline.keyPressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.keyPressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KeyEvent</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">KeyEvent</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">runPipeline</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_setIcons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saveIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/save&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">openRecentIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/document_open_recent&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/play&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stopIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/stop&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/edit-find&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setSecondaryLayouts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goAreaLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineAreaLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goAreaLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineAreaLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createSettingButtonGroup</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createPipelineWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createSettingWidgets</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_createSettingButtonGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineNameLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;NewPipeline&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
+                                     <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_openSavedPipeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_savePipeline</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsPipelineWidgets</span><span class="p">],</span>
+                                     <span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">openRecentIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span><span class="p">],</span>
+                                     <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineNameLabel</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addMenuToOpenButton</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">transparentStyle</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setPipelineThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineThread</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineThread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWorker</span> <span class="o">=</span> <span class="n">PipelineWorker</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWorker</span><span class="o">.</span><span class="n">moveToThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineThread</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GuiPipeline.openJsonFile"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.openJsonFile">[docs]</a>  <span class="k">def</span> <span class="nf">openJsonFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">jf</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">jf</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">data</span></div>
+
+  <span class="k">def</span> <span class="nf">_getPathFromDialogBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Open Pipeline&quot;</span><span class="p">,</span>
+                        <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getPipelineBoxesFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">boxesNames</span><span class="p">):</span>
+    <span class="n">pipelineBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">boxesNames</span><span class="p">:</span>
+          <span class="n">pipelineMethod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+          <span class="n">pipelineBox</span> <span class="o">=</span> <span class="n">pipelineMethod</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">params</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+          <span class="n">pipelineBox</span><span class="o">.</span><span class="n">setActive</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+          <span class="n">pipelineBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pipelineBox</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pipelineBoxes</span>
+
+  <span class="k">def</span> <span class="nf">_openSavedPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPathFromDialogBox</span><span class="p">()</span>
+    <span class="n">state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">boxesNames</span><span class="p">,</span> <span class="n">pipelineSettings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openJsonFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">pipelineBoxes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPipelineBoxesFromFile</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">boxesNames</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_closeExistingPipelineBoxes</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pipelineBox</span> <span class="ow">in</span> <span class="n">pipelineBoxes</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">addBox</span><span class="p">(</span><span class="n">pipelineBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">pipelineSettings</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSettingsParams</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_addMenuToOpenButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">openButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+    <span class="n">templatesItem</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Templates&#39;</span><span class="p">)</span>
+    <span class="n">subMenu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">templatesSubItem</span> <span class="o">=</span> <span class="n">subMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+      <span class="n">openItem</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Open...&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openSavedPipeline</span><span class="p">)</span>
+      <span class="n">templatesItem</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">subMenu</span><span class="p">)</span>
+    <span class="n">openButton</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">menu</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_closeExistingPipelineBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">boxes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boxes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">boxes</span><span class="p">:</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_savePipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;jsonData = [{pipelineArea.state}, [boxes widgets params], [currentBoxesNames], pipelineSettingsParams]   &#39;&#39;&#39;</span>
+    <span class="n">currentBoxesNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentBoxesNames</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">widgetsParams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipelineBoxesWidgetParams</span><span class="p">(</span><span class="n">currentBoxesNames</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">saveState</span><span class="p">())</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetsParams</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentBoxesNames</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_saveToJson</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_saveToJson</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineNameLabel</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+      <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jsonData</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;File saved in: &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createPipelineWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addMethodPullDownWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addGoButtonWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addPipelineDropArea</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_addMethodPullDownWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goAreaLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMethodPullDownData</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GuiPipeline.setMethodPullDownData"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.setMethodPullDownData">[docs]</a>  <span class="k">def</span> <span class="nf">setMethodPullDownData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldownData</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldownData</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">selectMethodLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">methodPulldownData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectMethod</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GuiPipeline.eventFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.eventFilter">[docs]</a>  <span class="k">def</span> <span class="nf">eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Filter to disable the wheel event in the methods pulldown. Otherwise each scroll would add a box!&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QEvent</span><span class="o">.</span><span class="n">Wheel</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+  <span class="k">def</span> <span class="nf">_addGoButtonWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    First Two button are reserved for autoRun mode. They are hidden if the setting autoRun is not checked.</span>
+<span class="sd">    NB the stop callback needs to be a lambda call</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">],</span><span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stopIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">goIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">goIcon</span><span class="p">,],</span>
+                               <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="k">lambda</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineWorker</span><span class="o">.</span><span class="n">stop</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWorker</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runPipeline</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">transparentStyle</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goAreaLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="p">,</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">goAreaLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addPipelineDropArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span> <span class="o">=</span> <span class="n">PipelineDropArea</span><span class="p">()</span>
+    <span class="n">scroll</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">scroll</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="p">)</span>
+    <span class="n">scroll</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineAreaLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">scroll</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="GuiPipeline.runPipeline"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.runPipeline">[docs]</a>  <span class="k">def</span> <span class="nf">runPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentRunningPipeline</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="n">boxes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">orderedBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">topContainer</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">boxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">box</span><span class="o">.</span><span class="n">isActive</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="s1">&#39;runMethod&#39;</span><span class="p">):</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">runMethod</span><span class="p">()</span>
+          <span class="n">method</span> <span class="o">=</span> <span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">currentRunningPipeline</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_selectMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">==</span> <span class="n">selectMethodLabel</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="n">boxName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSerialName</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">selected</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addMethodBox</span><span class="p">(</span><span class="n">boxName</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">setIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getSerialName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boxName</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentPipelineBoxNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">boxName</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentPipelineBoxNames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPipelineBoxNames</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">boxName</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">boxName</span><span class="p">)])</span>
+
+
+  <span class="k">def</span> <span class="nf">_addMethodBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
+
+    <span class="n">objMethod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span><span class="p">[</span><span class="n">selected</span><span class="p">]</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span><span class="p">[</span><span class="s1">&#39;addPosit&#39;</span><span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWidget</span> <span class="o">=</span> <span class="n">objMethod</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">addDock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineWidget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+    <span class="n">autoActive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span><span class="p">[</span><span class="s1">&#39;autoActive&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineWidget</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">autoActive</span><span class="p">)</span>
+
+
+  <span class="sd">&#39;&#39;&#39; PIPELINE SETTINGS &#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_pipelineBoxesWidgetParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentBoxesNames</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineParams</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">boxName</span> <span class="ow">in</span> <span class="n">currentBoxesNames</span><span class="p">:</span>
+      <span class="n">boxMethod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineArea</span><span class="o">.</span><span class="n">docks</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">boxName</span><span class="p">)]</span>
+      <span class="n">state</span> <span class="o">=</span> <span class="n">boxMethod</span><span class="o">.</span><span class="n">isActive</span><span class="p">()</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="n">boxMethod</span><span class="o">.</span><span class="n">getWidgetsParams</span><span class="p">()</span>
+      <span class="n">newDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">boxMethod</span><span class="o">.</span><span class="n">methodName</span><span class="p">():</span> <span class="p">(</span><span class="n">boxName</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">state</span><span class="p">)}</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newDict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineParams</span>
+
+
+  <span class="k">def</span> <span class="nf">_createSettingWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createSettingsGroupBox</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createAllSettingWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hideSettingWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSettingsParams</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_createSettingsGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="s1">&#39;Pipeline Settings&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineAreaLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createAllSettingWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># R0w 0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Name&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameTextEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineNameLabel</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameTextEdit</span><span class="p">)</span>
+    <span class="c1"># R0w 1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputDataLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Input Data&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDataLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputDataPulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDataPulldownList</span><span class="p">)</span>
+    <span class="c1"># R0w 2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Auto Run&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoCheckBox</span><span class="p">)</span>
+    <span class="c1"># R0w 3</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Save in&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLineEdit</span><span class="p">)</span>
+    <span class="c1"># R0w 4</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addBoxLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Add Method On&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addBoxLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addBoxPosition</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">],</span> <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addBoxPosition</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">addBoxPosition</span><span class="p">)</span>
+    <span class="c1"># R0w 5</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoActiveLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Auto active&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoActiveLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoActiveCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoActiveCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoActiveCheckBox</span><span class="p">)</span>
+
+    <span class="c1"># R0w 6</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Methods filter&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterIcon</span><span class="p">,</span> <span class="n">callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterMethodPopup</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">transparentStyle</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterButton</span><span class="p">)</span>
+
+    <span class="c1"># R0w 7</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacerLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacerLabel</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacerLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyCancelsettingButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">],</span><span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cancelSettingsCallBack</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okSettingsCallBack</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyCancelsettingButtons</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GuiPipeline.settingsPipelineWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.settingsPipelineWidgets">[docs]</a>  <span class="k">def</span> <span class="nf">settingsPipelineWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">isHidden</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_showSettingWidget</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_cancelSettingsCallBack</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_updateSettingsParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameTextEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">rename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameTextEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">savePath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">autoRun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoCheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">addPosit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addBoxPosition</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">autoActive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoActiveCheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+      <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">rename</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;savePath&#39;</span><span class="p">,</span> <span class="n">savePath</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;autoRun&#39;</span><span class="p">,</span> <span class="n">autoRun</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;addPosit&#39;</span><span class="p">,</span> <span class="n">addPosit</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;autoActive&#39;</span><span class="p">,</span> <span class="n">autoActive</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span> <span class="o">=</span> <span class="n">params</span>
+
+
+  <span class="k">def</span> <span class="nf">_setSettingsParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineNameLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineReNameTextEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">savePipelineLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addBoxPosition</span><span class="o">.</span><span class="n">set</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">widgets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineSettingsParams</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+      <span class="n">widget</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_renamePipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_okSettingsCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_displayStopButton</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsParams</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSettingsParams</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hideSettingWidget</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_cancelSettingsCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSettingsParams</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hideSettingWidget</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_hideSettingWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="p">:</span>
+      <span class="n">widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_showSettingWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="p">:</span>
+      <span class="n">widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_displayStopButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">goButton</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GuiPipeline.filterMethodPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.filterMethodPopup">[docs]</a>  <span class="k">def</span> <span class="nf">filterMethodPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">FilterMethods</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widgets</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">widgets</span><span class="p">):</span>
+      <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">position</span>
+      <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FilterMethods"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.FilterMethods">[docs]</a><span class="k">class</span> <span class="nc">FilterMethods</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">FilterMethods</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Filter Methods&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Select All&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectAllCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSelectionScrollArea</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addMethodCheckBoxes</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyCancelButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">],</span>
+                                                <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okButtonCallBack</span><span class="p">],</span>
+                                                <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectAllCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checkAllMethods</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addMethodCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span><span class="o">.</span><span class="n">methodPulldownData</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">method</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateMethodCheckBoxes</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateSelectAllCheckBox</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FilterMethods.updateMethodCheckBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateMethodCheckBoxes">[docs]</a>  <span class="k">def</span> <span class="nf">updateMethodCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">texts</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">method</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FilterMethods.updateSelectAllCheckBox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateSelectAllCheckBox">[docs]</a>  <span class="k">def</span> <span class="nf">updateSelectAllCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">return</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectAllCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_checkAllMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getSelectedMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="n">selectMethodLabel</span><span class="p">,</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allMethodCheckBoxes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="n">methods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">methods</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setSelectionScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectAllCheckBox</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyCancelButtons</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,)</span>
+
+  <span class="k">def</span> <span class="nf">_okButtonCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span><span class="o">.</span><span class="n">methodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getSelectedMethods</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

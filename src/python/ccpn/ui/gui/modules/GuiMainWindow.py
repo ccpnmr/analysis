@@ -4,19 +4,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:38 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 
+__date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -225,7 +232,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     apiProject = self._project._wrappedData.root
     if hasattr(apiProject, '_temporaryDirectory'):
       return True
-    
+
     if apiProject.isProjectModified():
       ss = ' and any changes will be lost'
     else:
@@ -233,9 +240,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     result = MessageDialog.showYesNo(title,
           'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss),
           colourScheme=self.colourScheme)
-          
+
     return result
-    
+
 
   def loadProject(self, projectDir=None):
     """
@@ -419,6 +426,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # TODO: open as pop-out, not as part of MainWindow
     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
+  def _updateRestoreArchiveMenu(self):
+
+    action = self.getMenuAction('Project->Restore From Archive...')
+    action.setEnabled(bool(self.application._archivePaths()))
+
   def undo(self):
     self._project._undo.undo()
 
@@ -449,7 +461,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       except Exception as e:
         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
         return
-          
+
     prefFile = open(prefPath, 'w+')
     json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()

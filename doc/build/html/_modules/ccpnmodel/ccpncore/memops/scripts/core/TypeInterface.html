@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.core.TypeInterface &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.core.TypeInterface</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># interface for language types</span>
+
+<div class="viewcode-block" id="TypeInterface"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface">[docs]</a><span class="k">class</span> <span class="nc">TypeInterface</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">#</span>
+  <span class="c1"># Functions which must be implemented in subclasses</span>
+  <span class="c1">#</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># Functions return real language-specific types</span>
+
+<div class="viewcode-block" id="TypeInterface.elementVarType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.elementVarType">[docs]</a>  <span class="k">def</span> <span class="nf">elementVarType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TypeInterface.collectionType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.collectionType">[docs]</a>  <span class="k">def</span> <span class="nf">collectionType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elementOrString</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isUnique</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isOrdered</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">useCollection</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TypeInterface.implementationType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.implementationType">[docs]</a>  <span class="k">def</span> <span class="nf">implementationType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TypeInterface.interfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.interfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">interfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements TypeInterface</span>
+<div class="viewcode-block" id="TypeInterface.dictInterfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.dictInterfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">dictInterfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">valueType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements TypeInterface</span>
+<div class="viewcode-block" id="TypeInterface.listInterfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.listInterfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">listInterfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements TypeInterface</span>
+<div class="viewcode-block" id="TypeInterface.collectionInterfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.collectionInterfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">collectionInterfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collectionType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements TypeInterface</span>
+<div class="viewcode-block" id="TypeInterface.stackInterfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.stackInterfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">stackInterfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stackType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements TypeInterface</span>
+<div class="viewcode-block" id="TypeInterface.fileInterfaceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.TypeInterface.TypeInterface.fileInterfaceType">[docs]</a>  <span class="k">def</span> <span class="nf">fileInterfaceType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">):</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be overwritten&quot;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.CcpnModule &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.CcpnModule</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains CcpnModule base class</span>
+
+<span class="sd">intial version by Simon;</span>
+<span class="sd">Extensively modified by Geerten 1-12/12/2016</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: geertenv $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9605 $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.DockDrop</span> <span class="kn">import</span> <span class="n">DockDrop</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.Dock</span> <span class="kn">import</span> <span class="n">DockLabel</span><span class="p">,</span> <span class="n">Dock</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">moduleLabelFont</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1">#Module = Dock</span>
+<span class="c1">#ModuleLabel = DockLabel</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CcpnModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule">[docs]</a><span class="k">class</span> <span class="nc">CcpnModule</span><span class="p">(</span><span class="n">Dock</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Base class for CCPN modules</span>
+<span class="sd">  sets self.application, self.current, self.project and self.mainWindow</span>
+
+<span class="sd">  Overide parameters for settings widget as needed</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">moduleName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+  <span class="n">HORIZONTAL</span> <span class="o">=</span> <span class="s1">&#39;horizontal&#39;</span>
+  <span class="n">VERTICAL</span>   <span class="o">=</span> <span class="s1">&#39;vertical&#39;</span>
+  <span class="n">labelOrientation</span> <span class="o">=</span> <span class="n">HORIZONTAL</span>  <span class="c1"># toplabel orientation</span>
+
+  <span class="c1"># overide in specific module implementations</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
+  <span class="n">settingsOnTop</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">buttonParent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">buttonGrid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">closable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">closable</span><span class="o">=</span><span class="n">closable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span> <span class="o">=</span> <span class="n">closeFunc</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">moduleName</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="c1"># useful definitions to have</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+
+    <span class="c1"># GWV: logger seems not to work??</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;CcpnModule.__init__: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">))</span>
+
+    <span class="c1"># hide original dock label and generate a new CCPN one</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_originalLabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_originalLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">CcpnModuleLabel</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="n">closable</span><span class="p">,</span> <span class="n">closeCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">,</span>
+                                 <span class="n">showSettingsButton</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">,</span> <span class="n">settingsCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_settingsCallback</span>
+                                 <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoOrientation</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c1"># main widget area</span>
+    <span class="c1">#self.mainWidget = Frame(parent=self, fShape=&#39;styledPanel&#39;, fShadow=&#39;plain&#39;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1">#QtGui.QWidget(self)</span>
+
+    <span class="c1"># optional settings widget area</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># current state (not shown)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
+      <span class="c1">#self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="s1">&#39;styledPanel&#39;</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsOnTop</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># self.widgetArea.setStyleSheet(&quot;&quot;&quot;</span>
+    <span class="c1"># Dock &gt; QWidget {</span>
+    <span class="c1">#   padding: 0;</span>
+    <span class="c1">#   margin: 0px 0px 0px 0px;</span>
+    <span class="c1">#   border: 4px solid;</span>
+    <span class="c1"># }</span>
+    <span class="c1"># &quot;&quot;&quot;)</span>
+
+  <span class="c1"># @property</span>
+  <span class="c1"># def moduleName(self):</span>
+  <span class="c1">#   &#39;return  module name&#39;</span>
+  <span class="c1">#   if self is not None:</span>
+  <span class="c1">#     return CcpnModule.moduleName</span>
+  <span class="c1">#</span>
+  <span class="c1"># @moduleName.setter</span>
+  <span class="c1"># def moduleName(self, name):</span>
+  <span class="c1">#   CcpnModule.moduleName = name</span>
+
+
+<div class="viewcode-block" id="CcpnModule.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.resizeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelOrientation</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resizeOverlay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">())</span></div>
+
+    <span class="c1"># override the default dock settings</span>
+    <span class="c1"># self.widgetArea.setStyleSheet(&quot;&quot;&quot;</span>
+    <span class="c1"># Dock &gt; QWidget {</span>
+    <span class="c1">#   padding: 0;</span>
+    <span class="c1">#   margin: 0px 0px 0px 0px;</span>
+    <span class="c1">#   border: 0px;</span>
+    <span class="c1"># }</span>
+    <span class="c1"># &quot;&quot;&quot;)</span>
+
+<div class="viewcode-block" id="CcpnModule.placeSettingsButton"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.placeSettingsButton">[docs]</a>  <span class="k">def</span> <span class="nf">placeSettingsButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttonParent</span><span class="p">,</span> <span class="n">buttonGrid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Depreciated</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Depreciated code&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
+      <span class="n">settingsButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonParent</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">buttonGrid</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="n">toggle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">settingsButton</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggleSettingsWidget</span><span class="p">,</span> <span class="n">settingsButton</span><span class="p">))</span>
+      <span class="n">settingsButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CcpnModule.toggleSettingsWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.toggleSettingsWidget">[docs]</a>  <span class="k">def</span> <span class="nf">toggleSettingsWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Toggles display of settings widget in module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level &#39;</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_settingsCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Toggles display of settings widget in module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxSettingsState</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsState</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level &#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">closeFunc</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CcpnModule.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModule.dropEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;implements&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">implements</span><span class="p">(</span><span class="s1">&#39;dock&#39;</span><span class="p">):</span>
+      <span class="n">DockDrop</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+      <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="CcpnModuleLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel">[docs]</a><span class="k">class</span> <span class="nc">CcpnModuleLabel</span><span class="p">(</span><span class="n">DockLabel</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Subclassing DockLabel to modify appearance and functionality</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">labelSize</span> <span class="o">=</span> <span class="mi">16</span>
+
+  <span class="c1"># defined here, as the updateStyle routine is called from the</span>
+  <span class="c1"># DockLabel instanciation; changed later on</span>
+  <span class="n">backgroundColour</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+  <span class="n">foregroundColour</span> <span class="o">=</span> <span class="s1">&#39;#fdfdfc&#39;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">closeCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showSettingsButton</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">settingsCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">CcpnModuleLabel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">showCloseButton</span><span class="o">=</span><span class="n">showCloseButton</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">module</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fixedWidth</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">moduleLabelFont</span><span class="p">)</span>
+    <span class="c1">#print(&#39;&gt;&gt;&#39;, name, self.module.application.colourScheme)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColour</span> <span class="o">=</span> <span class="s1">&#39;#bd8413&#39;</span>
+      <span class="c1">#self.backgroundColour = &#39;#EDC151&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">foregroundColour</span> <span class="o">=</span> <span class="s1">&#39;#fdfdfc&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">backgroundColour</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">foregroundColour</span> <span class="o">=</span> <span class="s1">&#39;#fdfdfc&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="o">|</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">showCloseButton</span><span class="p">:</span>
+      <span class="c1"># button is already there because of the DockLabel init</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">))</span>
+      <span class="c1"># hardcoded because stylesheet appears not to work</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        QToolButton {</span>
+<span class="s2">          border-width: 0px;</span>
+<span class="s2">          padding: 0px;</span>
+<span class="s2">        }&quot;&quot;&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">closeCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested closeButton without callback&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">closeCallback</span><span class="p">)</span>
+
+    <span class="c1"># Settings</span>
+    <span class="k">if</span> <span class="n">showSettingsButton</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/settings&#39;</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">))</span>
+      <span class="c1"># hardcoded because stylesheet appears not to work</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        QToolButton {</span>
+<span class="s2">          border-width: 0px;</span>
+<span class="s2">          padding: 0px;</span>
+<span class="s2">        }&quot;&quot;&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">settingsCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Requested settingsButton without callback&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">settingsCallback</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateStyle</span><span class="p">()</span>
+
+  <span class="c1"># GWV: not sure why this was copied as it is identical to the routine in the parent class</span>
+  <span class="c1"># def mousePressEvent(self, ev):</span>
+  <span class="c1">#   if ev.button() == QtCore.Qt.LeftButton:</span>
+  <span class="c1">#     self.pressPos = ev.pos()</span>
+  <span class="c1">#     self.startedDrag = False</span>
+  <span class="c1">#     ev.accept()</span>
+
+<div class="viewcode-block" id="CcpnModuleLabel.updateStyle"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.updateStyle">[docs]</a>  <span class="k">def</span> <span class="nf">updateStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copied from the parent class to allow for modification in StyleSheet</span>
+<span class="sd">    However, that appears not to work;</span>
+
+<span class="sd">    TODO: this routine needs fixing so that colourschemes</span>
+<span class="sd">    are taken from the stylesheet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># GWV: many calls to the updateStyle are triggered during initialization</span>
+    <span class="c1"># probably from paint event</span>
+
+    <span class="c1">#print(&#39;&gt;updateStyle&gt;&#39;, self)</span>
+    <span class="c1">#return</span>
+
+    <span class="c1">#r = &#39;3px&#39;</span>
+    <span class="c1">#fg = &#39;#fdfdfc&#39;</span>
+    <span class="c1">#bg = &#39;#555D85&#39;</span>
+    <span class="c1">#border = bg</span>
+
+    <span class="c1"># Padding apears not to work; overriden somewhere else?</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
+<span class="s2">              background-color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">              color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">              border-width: 0px;</span>
+<span class="s2">          }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backgroundColour</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">foregroundColour</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vStyle</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;DockLabel {</span>
+<span class="s2">              background-color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">              color : </span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">              border-width: 0px;</span>
+<span class="s2">          }&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backgroundColour</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">foregroundColour</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hStyle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CcpnModuleLabel.paintEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.Gui.CcpnModuleLabel.paintEvent">[docs]</a>  <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copied from the parent VerticlLabel class to allow for modification in StyleSheet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1"># GWV: this moved the label in vertical mode and horizontal, after some trial and error</span>
+    <span class="c1"># NOTE: A QRect can be constructed with a set of left, top, width and height integers</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+      <span class="n">added</span> <span class="o">=</span> <span class="mi">2</span>
+      <span class="n">p</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span>
+      <span class="n">rgn</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">+</span><span class="n">added</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">rgn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contentsRect</span><span class="p">()</span>
+      <span class="c1">#print(&#39;&gt;&gt;&#39;, self.width(), self.height())</span>
+      <span class="c1">#print(rgn, rgn.left(), rgn.top())</span>
+      <span class="n">added</span> <span class="o">=</span> <span class="mi">2</span>
+      <span class="n">rgn</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="n">rgn</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">top</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">rgn</span><span class="o">.</span><span class="n">height</span><span class="p">()</span><span class="o">+</span><span class="n">added</span><span class="p">)</span>
+
+    <span class="c1">#align = self.alignment()</span>
+    <span class="c1"># GWV adjusted</span>
+    <span class="n">align</span>  <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="o">|</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">hint</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">rgn</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labelSize</span><span class="p">)</span></div></div>
+
+    <span class="c1"># if self.orientation == &#39;vertical&#39;:</span>
+    <span class="c1">#   self.setMaximumWidth(self.hint.height())</span>
+    <span class="c1">#   self.setMinimumWidth(0)</span>
+    <span class="c1">#   self.setMaximumHeight(16777215)</span>
+    <span class="c1">#   if self.forceWidth:</span>
+    <span class="c1">#     self.setMinimumHeight(self.hint.width())</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     self.setMinimumHeight(minSize)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   self.setMaximumHeight(self.hint.height())</span>
+    <span class="c1">#   self.setMinimumHeight(0)</span>
+    <span class="c1">#   self.setMaximumWidth(16777215)</span>
+    <span class="c1">#   if self.forceWidth:</span>
+    <span class="c1">#     self.setMinimumWidth(self.hint.width())</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     self.setMinimumWidth(minSize)</span>
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

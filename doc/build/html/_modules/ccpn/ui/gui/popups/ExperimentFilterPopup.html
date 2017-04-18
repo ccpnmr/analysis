@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.ExperimentFilterPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.ExperimentFilterPopup</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon1&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FilteringPulldownList</span> <span class="kn">import</span> <span class="n">FilteringPulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GroupBox</span> <span class="kn">import</span> <span class="n">GroupBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButton</span> <span class="kn">import</span> <span class="n">RadioButton</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype</span> <span class="kn">import</span> <span class="n">priorityNameRemapping</span>
+
+<div class="viewcode-block" id="ExperimentFilterPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExperimentFilterPopup.ExperimentFilterPopup">[docs]</a><span class="k">class</span> <span class="nc">ExperimentFilterPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;Experiment Type Filter&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ExperimentFilterPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="n">detectionBox</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">filterBox</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">selectionBox</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">transferSwitches</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentClassification</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">experimentClassifications</span>
+
+    <span class="c1"># filter by detection nucleus</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">cLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;C-detected&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">hLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;H-detected&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">otherCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">nLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">detectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Other&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+
+    <span class="c1"># filter by transfer technique</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">anyCheckbox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Any&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">throughSpaceCheckbox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;through space&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">relayedCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;relayed&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">relaxationCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;relaxation&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mqCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;MQ&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">quantificationCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;quantification&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">jResolvedCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;J resolved&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectedCheckBox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;projection&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noneOfTheAboveCheckbox</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">)</span>
+    <span class="n">Label</span><span class="p">(</span><span class="n">filterBox</span><span class="p">,</span> <span class="s1">&#39;None of the Above&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">anyCheckbox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">otherCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">experimentLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> experiment type&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                            <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentPulldown</span> <span class="o">=</span> <span class="n">FilteringPulldownList</span><span class="p">(</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypes</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_experimentTypeMap</span>
+    <span class="n">axisCodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">:</span>
+      <span class="n">axisCodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">isotopeCode</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]))</span>
+
+    <span class="n">atomCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">classifications</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimentClassification</span><span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomCodes</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypes</span><span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomCodes</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentNames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="c1"># ll = [x for x in self.classifications if x.name == v]</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifications</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">synonym</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateChoices</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="s1">&#39;Apply&#39;</span><span class="p">],</span>
+                           <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setExperimentType</span><span class="p">])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setExperimentType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">expType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">expType</span> <span class="o">=</span> <span class="n">expType</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExperimentFilterPopup.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExperimentFilterPopup.ExperimentFilterPopup.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">expType</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExperimentFilterPopup.updateChoices"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ExperimentFilterPopup.ExperimentFilterPopup.updateChoices">[docs]</a>  <span class="k">def</span> <span class="nf">updateChoices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">filteredExperimentObjects</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># filter by acquisition nucleus</span>
+    <span class="n">detectionNuclei</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="n">detectionNuclei</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;13C&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="n">detectionNuclei</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;1H&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">otherCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="n">detectionNuclei</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;15N&#39;</span><span class="p">,</span> <span class="s1">&#39;19F&#39;</span><span class="p">,</span> <span class="s1">&#39;23Na&#39;</span><span class="p">,</span> <span class="s1">&#39;79Br&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">anyCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+       <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">noneOfTheAboveCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isThroughSpace</span> <span class="ow">and</span>
+       <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isRelayed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isRelaxation</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isJResolved</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isMultipleQuantum</span>
+       <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isProjection</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">isQuantification</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughSpaceCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isThroughSpace</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relayedCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isRelayed</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxationCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isRelaxation</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jResolvedCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isJResolved</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mqCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isMultipleQuantum</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectedCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isProjection</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantificationCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">filteredExperimentObjects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isQuantification</span>
+       <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">acquisitionNucleus</span> <span class="ow">in</span> <span class="n">detectionNuclei</span><span class="p">]</span>
+
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">expObject</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">expObject</span> <span class="ow">in</span> <span class="n">filteredExperimentObjects</span><span class="p">:</span>
+        <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expObject</span><span class="p">)</span>
+        <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="n">objects</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

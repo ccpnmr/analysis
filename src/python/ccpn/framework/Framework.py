@@ -1,17 +1,23 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
-__license__   = "CCPN license. see http://www.ccpn.ac.uk"
-__reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y"
-
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-11 15:24:25 +0100 (Tue, April 11, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -38,7 +44,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
-
 from ccpn.framework import Version
 
 from ccpn.framework.Translation import languages, defaultLanguage
@@ -66,15 +71,38 @@ def printCreditsText(fp, programName, version):
   """Initial text to terminal """
   from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 
-  lines = []
+  lines = []                                                    # ejb
   lines.append("%s, version: %s" % (programName, version))
   lines.append("")
-  lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+  # lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+  lines.append("%s" % __copyright__)
+  lines.append("")
   lines.append("CCPN licence. See %s. Not to be distributed without prior consent!" % ccpnLicenceUrl)
   lines.append("")
-  lines.append("Written by:   %s" % __credits__)
+
+  try:
+    if isinstance(__credits__, str):
+      lines.append("Written by:   %s" % __credits__)
+    else:
+      if isinstance(__credits__, tuple):
+        lines.append("Written by:   %s" % __credits__[0])
+        for crLine in __credits__[1:]:
+          lines.append("              %s" % crLine)
+  except:
+    pass
+
   lines.append("")
-  lines.append("Please cite:  %s" % __reference__)
+  try:
+    if isinstance(__reference__, str):
+      lines.append("Please cite:  %s" % __reference__)
+    else:
+      if isinstance(__reference__, tuple):
+        lines.append("Please cite:  %s" % __reference__[0])
+        for refLine in __reference__[1:]:
+          lines.append("              %s" % refLine)
+  except:
+    pass
+
   lines.append("")
   lines.append("DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,")
   lines.append("              the Department of Molecular and Cell Biology, or the University of Leicester be")
@@ -290,7 +318,7 @@ class Framework:
     self.setAutoBackupTime('kill')
     # project._resetUndo(debug=_DEBUG)
     pass
-  
+
 
   def backupProject(self):
     apiIo.backupProject(self.project._wrappedData.parent)
@@ -325,6 +353,12 @@ class Framework:
       # The NoUi version has no mainWindow
       self.ui.initialize(None)
 
+  def _refreshAfterSave(self):
+    """Refresh user interface after project save (which may have caused project rename)"""
+
+    mainWindow = self.ui.mainWindow
+    if mainWindow is not None:
+      mainWindow.sideBar.setProjectName(self.project)
 
   def _getUI(self):
     if self.args.interface == 'Gui':
@@ -656,7 +690,8 @@ class Framework:
     |                          ]
     |      self.addApplicationMenuSpec(menuSpec)
 
-    
+
+
     More complicated menus are possible.  For example, to create the following menu
 
     | - Test
@@ -740,11 +775,9 @@ class Framework:
                ))
 
     ms.append(('Molecules', [
-      ("Create Molecule...", self.showMoleculePopup),
-      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-                                                    ('checkable', True),
-                                                    ('checked', False)
-                                                    ]),
+      ("Chain from FASTA...", lambda:self.loadData(text='Load FASTA')),
+      (),
+      ("Generate Chain...", self.showMoleculePopup),
       ("Inspect...", self.inspectMolecule, [('enabled', False)]),
       (),
       ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
@@ -761,6 +794,11 @@ class Framework:
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
+      (),
+      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
+                                                    ('checkable', True),
+                                                    ('checked', False)
+                                                    ]),
       (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
@@ -888,14 +926,6 @@ class Framework:
   def _loadNefFile(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
-    # mainWindow = None
-    # if hasattr(self.ui, 'mainWindow'):
-    #   mainWindow = self.ui.mainWindow
-    #
-    # if mainWindow is not None:
-    #   sys.stderr.write("==> NEF file loading not yet implemented for Gui interface. Aborting...")
-    #   return
-
     dataBlock = self.nefReader.getNefData(path)
     project = self.newProject(dataBlock.name)
     self._echoBlocking += 1
@@ -1009,7 +1039,8 @@ class Framework:
     if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
       return self.saveProjectAs()
     else:
-      return self._saveProject(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
+      return self._saveProject(newPath=newPath, createFallback=createFallback,
+                               overwriteExisting=overwriteExisting)
 
 
   def _updateRecentFiles(self, oldPath=None):
@@ -1084,19 +1115,46 @@ class Framework:
       popup.exec_()
 
   def archiveProject(self):
+
     project = self.project
     apiProject = project._wrappedData.parent
     fileName = apiIo.packageProject(apiProject, includeBackups=True, includeLogs=True,
-                                    includeArchives=False)
+                                    includeArchives=False, includeSummaries=True)
 
     MessageDialog.showInfo('Project Archived',
                            'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)
 
+    self.ui.mainWindow._updateRestoreArchiveMenu()
 
-  def restoreFromArchive(self, archive=None):
-    pass
+  def _archivePaths(self):
 
-  def _unpackCcpnTarfile(self, tarfilePath, outputPath=None):
+    archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
+    if os.path.exists(archivesDirectory):
+      fileNames = os.listdir(archivesDirectory)
+      paths = [os.path.join(archivesDirectory, fileName) for fileName in fileNames if fileName.endswith('.tgz')]
+    else:
+      paths = []
+
+    return paths
+
+  def restoreFromArchive(self, archivePath=None):
+
+    if not archivePath:
+      archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
+      dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Select Archive",
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                          directory=archivesDirectory, filter='*.tgz')
+      archivePath = dialog.selectedFile()
+
+    if archivePath:
+      directoryPrefix = archivePath[:-4] # -4 removes the .tgz
+      outputPath, temporaryDirectory = self._unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
+      pythonExe = os.path.join(Path.getTopDirectory(), Path.CCPN_PYTHON)
+      command = [pythonExe, sys.argv[0], outputPath]
+      from subprocess import Popen
+      Popen(command)
+
+  def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
     """
     # CCPN INTERNAL - called in loadData method of Project
     """
@@ -1106,7 +1164,7 @@ class Framework:
         os.makedirs(outputPath)
       temporaryDirectory = None
     else:
-      temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_')
+      temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
       outputPath = temporaryDirectory.name
 
     cwd = os.getcwd()

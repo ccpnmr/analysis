@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.IpythonConsole &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.IpythonConsole</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">fixedWidthFont</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">qtconsole.rich_jupyter_widget</span> <span class="kn">import</span> <span class="n">RichJupyterWidget</span>
+<span class="kn">from</span> <span class="nn">qtconsole.inprocess</span> <span class="kn">import</span> <span class="n">QtInProcessKernelManager</span>
+
+
+
+<div class="viewcode-block" id="IpythonConsole"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole">[docs]</a><span class="k">class</span> <span class="nc">IpythonConsole</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">historyFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+        <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="n">km</span> <span class="o">=</span> <span class="n">QtInProcessKernelManager</span><span class="p">()</span>
+        <span class="n">km</span><span class="o">.</span><span class="n">start_kernel</span><span class="p">()</span>
+        <span class="n">km</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s1">&#39;qt4&#39;</span>
+        <span class="n">kc</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">client</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span> <span class="o">=</span> <span class="n">RichJupyterWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gui_completion</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">styleSheet</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">_set_font</span><span class="p">(</span><span class="n">fixedWidthFont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_client</span> <span class="o">=</span> <span class="n">kc</span>
+        <span class="n">consoleLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">buttonLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">kc</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">consoleLayout</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">buttonLayout</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">consoleLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="p">)</span>
+
+        <span class="n">namespace</span><span class="p">[</span><span class="s1">&#39;runMacro&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runMacro</span>
+
+
+        <span class="n">runMacroButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">()</span>
+        <span class="n">runMacroButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">)</span>
+        <span class="n">runMacroButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Run Macro&#39;</span><span class="p">)</span>
+        <span class="n">buttonLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">runMacroButton</span><span class="p">)</span>
+
+        <span class="n">historyButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">()</span>
+        <span class="n">historyButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showHistory</span><span class="p">)</span>
+        <span class="n">historyButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Show History&#39;</span><span class="p">)</span>
+        <span class="n">buttonLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">historyButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">km</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">shell</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="IpythonConsole.setProject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole.setProject">[docs]</a>    <span class="k">def</span> <span class="nf">setProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span></div>
+
+    <span class="k">def</span> <span class="nf">_runMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">macroFile</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      # CCPN INTERNAL - called in runMacro method of GuiMainWindow.</span>
+<span class="sd">      Executes the specified macro file in the python console.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="k">if</span> <span class="n">macroFile</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1">un -i {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">macroFile</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_showHistory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Shows the history of commands executed inside the python console.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%hi</span><span class="s1">story&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      writes the specified string to the python console text box.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">moveCursor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">End</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">html</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">insertHtml</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># self.textEditor.textCursor().insertHtml(&quot;&lt;/div&gt;&lt;br&gt;&lt;div style=&#39;font-weight: normal; background-color: #FFF;&#39;&gt;&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">recordingMacro</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">macroEditor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_setUndoWaypoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Set Undo waypoint, if undo is present&quot;&quot;&quot;</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">):</span>
+        <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
+        <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+
+
+
+<div class="viewcode-block" id="IpythonConsole.writeConsoleCommand"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole.writeConsoleCommand">[docs]</a>    <span class="k">def</span> <span class="nf">writeConsoleCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">objectParameters</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Set keyword:value objectParameters to point to the relevant objects,</span>
+<span class="sd">      echo command in console, and set Undo</span>
+
+<span class="sd">      Example calls:</span>
+
+<span class="sd">      writeConsoleCommand(&quot;application.createSpectrumDisplay(spectrum)&quot;, spectrum=spectrumOrPid)</span>
+
+<span class="sd">      writeConsoleCommand(</span>
+<span class="sd">         &quot;newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]&quot; % axisCode,</span>
+<span class="sd">         peak=peakOrPid)</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+
+      <span class="c1"># write lines getting objects by their Pids</span>
+
+      <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">objectParameters</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">objectParameters</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+          <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> = project.getByPid(&#39;</span><span class="si">%s</span><span class="s2">&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+      <span class="c1"># execute command</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">command</span><span class="p">)</span>
+
+      <span class="c1"># set undo step</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_setUndoWaypoint</span><span class="p">()</span></div></div>
+
+
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

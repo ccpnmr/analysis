@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.lib.SpectrumDisplay &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.lib.SpectrumDisplay</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiSpectrumDisplay</span> <span class="kn">import</span> <span class="n">GuiSpectrumDisplay</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">navigateToNmrAtomsInStrip</span>
+
+<div class="viewcode-block" id="navigateToPeakPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakPosition">[docs]</a><span class="k">def</span> <span class="nf">navigateToPeakPosition</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">peak</span><span class="p">:</span><span class="n">Peak</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+   <span class="n">selectedDisplays</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">GuiSpectrumDisplay</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="p">:</span><span class="s1">&#39;GuiStrip&#39;</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays</span>
+<span class="sd">  to the positions specified by the peak.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">selectedDisplays</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+    <span class="n">selectedDisplays</span> <span class="o">=</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span>
+    <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No peak passed in&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+  <span class="n">positions</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span>
+  <span class="n">axisCodes</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">displayPid</span> <span class="ow">in</span> <span class="n">selectedDisplays</span><span class="p">:</span>
+      <span class="n">display</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">displayPid</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="makeStripPlot"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlot">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlot</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtomPairs</span><span class="p">:</span>
+    <span class="k">return</span>
+
+  <span class="n">project</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;makeStripPlot&#39;</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">,</span> <span class="n">autoWidth</span><span class="p">,</span> <span class="n">widths</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+
+    <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
+
+    <span class="c1"># Make sure there are enough strips to display nmrAtomPairs</span>
+    <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">)):</span>
+        <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># numberOfStrips &gt;= len(nmrAtomPairs):  # too many strips if &gt;</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nmrAtomPairs</span><span class="p">),</span> <span class="n">numberOfStrips</span><span class="p">):</span>
+        <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># loop through strips and navigate to appropriate position in strip</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="ow">not</span> <span class="n">widths</span><span class="p">:</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="makeStripPlotFromSingles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlotFromSingles">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlotFromSingles</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+  <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
+
+  <span class="c1"># Make sure there are enough strips to display nmrAtomPairs</span>
+  <span class="k">if</span> <span class="n">numberOfStrips</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfStrips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)):</span>
+      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+  <span class="c1"># print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))</span>
+  <span class="c1"># loop through strips and navigate to appropriate position in strip</span>
+  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">autoWidth</span><span class="p">:</span>
+      <span class="n">widths</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="p">[</span><span class="n">nmrAtoms</span><span class="p">[</span><span class="n">ii</span><span class="p">]],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

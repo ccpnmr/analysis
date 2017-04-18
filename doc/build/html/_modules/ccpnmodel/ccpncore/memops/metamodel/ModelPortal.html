@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.ModelPortal &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.ModelPortal</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Access to In-memory model. Independent of language and storage. </span>
+<span class="sd">All functions (except for __init__) are queries on the model</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.Version</span> <span class="kn">import</span> <span class="n">currentModelVersion</span>
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+  <span class="k">del</span> <span class="n">dd</span>
+
+<div class="viewcode-block" id="ModelPortal"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal">[docs]</a><span class="k">class</span> <span class="nc">ModelPortal</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot; Access to In-memory model. Independent of language and storage. </span>
+<span class="sd">  All functions (except for __init__) are queries on the model</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topPackage</span><span class="p">,</span> <span class="n">dataModelVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set up data, precalculated for later function calls.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set data model version</span>
+    <span class="k">if</span> <span class="n">dataModelVersion</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dataModelVersion</span> <span class="o">=</span> <span class="n">currentModelVersion</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dataModelVersion</span> <span class="o">=</span> <span class="n">dataModelVersion</span>
+    
+    <span class="c1"># check topPackage</span>
+    <span class="k">if</span>  <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">topPackage</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">)</span> 
+            <span class="ow">and</span> <span class="n">topPackage</span> <span class="ow">is</span> <span class="n">topPackage</span><span class="o">.</span><span class="n">topPackage</span><span class="p">()</span>
+    <span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">topPackage</span> <span class="o">=</span> <span class="n">topPackage</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;ModelPortal initialised with </span><span class="si">%s</span><span class="s2">, must be top package&quot;</span>
+       <span class="o">%</span> <span class="n">topPackage</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+      <span class="p">)</span>
+    
+    <span class="c1"># package selection</span>
+    <span class="n">leafPackages</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">branchPackages</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">topPackage</span><span class="p">]</span>
+    
+    <span class="c1"># take all packages</span>
+    <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+      <span class="n">childPackages</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">containedPackages</span>
+      <span class="k">if</span> <span class="n">childPackages</span><span class="p">:</span>
+        <span class="n">branchPackages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+        <span class="n">packages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">childPackages</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">leafPackages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+    
+    <span class="c1"># sort and finalize branchPackages</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_branchPackages</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">branchPackages</span><span class="p">,</span>
+                                                    <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">branchPackages</span>
+    
+    <span class="c1"># sort leafPackages by import (imported before importing)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_leafPackages</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">topologicalSortSubgraph</span><span class="p">(</span><span class="n">leafPackages</span><span class="p">,</span> 
+                                                          <span class="s1">&#39;accessedPackages&#39;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">leafPackages</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">resetObjectDicts</span><span class="p">()</span>
+  
+    <span class="c1"># add modelFlavours dictionary</span>
+    <span class="n">topPackage</span><span class="o">.</span><span class="n">_modelFlavours</span> <span class="o">=</span> <span class="p">{}</span>
+  
+<div class="viewcode-block" id="ModelPortal.resetObjectDicts"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.resetObjectDicts">[docs]</a>  <span class="k">def</span> <span class="nf">resetObjectDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  
+    <span class="c1"># get classes and dataTypes for leafPackages and store sorted by inheritance</span>
+    <span class="n">_classesDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classesDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_dataTypesDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataTypesDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_dataObjTypesDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataObjTypesDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_exceptionsDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exceptionsDict</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_leafPackages</span><span class="p">:</span>
+      <span class="n">_dataTypesDict</span><span class="p">[</span><span class="n">pp</span><span class="p">]</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByInheritance</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">dataTypes</span><span class="p">)</span>
+      <span class="n">_dataObjTypesDict</span><span class="p">[</span><span class="n">pp</span><span class="p">]</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByDataObjTypeDependency</span><span class="p">(</span>
+                              <span class="n">pp</span><span class="o">.</span><span class="n">dataObjTypes</span><span class="p">)</span>
+      <span class="n">_classesDict</span><span class="p">[</span><span class="n">pp</span><span class="p">]</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByInheritance</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+      <span class="n">_exceptionsDict</span><span class="p">[</span><span class="n">pp</span><span class="p">]</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByInheritance</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">exceptions</span><span class="p">)</span></div>
+  
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.branchPackages"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.branchPackages">[docs]</a>  <span class="k">def</span> <span class="nf">branchPackages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; branch packages, alphabetically sorted by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_branchPackages</span><span class="p">)</span></div>
+  
+  <span class="n">branchPackagesAlphabetic</span> <span class="o">=</span> <span class="n">branchPackages</span>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.twigPackages"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.twigPackages">[docs]</a>  <span class="k">def</span> <span class="nf">twigPackages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; branch packages directly containing leafPackages, alphabetically sorted by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_leafPackages</span><span class="p">:</span>
+      <span class="n">dd</span><span class="p">[</span><span class="n">pp</span><span class="o">.</span><span class="n">container</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span><span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  
+  <span class="n">twigPackagesAlphabetic</span> <span class="o">=</span> <span class="n">twigPackages</span>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.leafPackagesByImport"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.leafPackagesByImport">[docs]</a>  <span class="k">def</span> <span class="nf">leafPackagesByImport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; leaf packages sorted by import (imported before importing)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leafPackages</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.leafPackagesAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.leafPackagesAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">leafPackagesAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; leaf packages sorted alphabetically</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leafPackages</span><span class="p">,</span><span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.dataTypesByInheritance"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.dataTypesByInheritance">[docs]</a>  <span class="k">def</span> <span class="nf">dataTypesByInheritance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; data types sorted by inheritance (supertype before subtype)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataTypesDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.dataObjTypesByInheritance"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.dataObjTypesByInheritance">[docs]</a>  <span class="k">def</span> <span class="nf">dataObjTypesByInheritance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; data types sorted by inheritance (supertype before subtype)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataObjTypesDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.classesByInheritance"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.classesByInheritance">[docs]</a>  <span class="k">def</span> <span class="nf">classesByInheritance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; classes sorted by inheritance (supertype before subtype)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classesDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.exceptionsByInheritance"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.exceptionsByInheritance">[docs]</a>  <span class="k">def</span> <span class="nf">exceptionsByInheritance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; exceptions sorted by inheritance (supertype before subtype)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exceptionsDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.dataTypesAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.dataTypesAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">dataTypesAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; data types sorted alphabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">dataTypes</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.dataObjTypesAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.dataObjTypesAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">dataObjTypesAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; data types sorted alphabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">dataObjTypes</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.classesAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.classesAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">classesAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; classes sorted alphabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.exceptionsAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.exceptionsAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">exceptionsAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; exceptions sorted alphabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">exceptions</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.constantsAlphabetic"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.constantsAlphabetic">[docs]</a>  <span class="k">def</span> <span class="nf">constantsAlphabetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; constants sorted alphabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">constants</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.requiredInputElements"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.requiredInputElements">[docs]</a>  <span class="k">def</span> <span class="nf">requiredInputElements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complexDataType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return elements that must be passed to the constructor</span>
+<span class="sd">    Elements are sorted alpahabetically by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">complexDataType</span><span class="o">.</span><span class="n">getAllAttributes</span><span class="p">():</span>
+      <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">isDerived</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">isImplementation</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">isAutomatic</span>
+          <span class="ow">and</span> <span class="n">attr</span><span class="o">.</span><span class="n">locard</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">defaultValue</span><span class="p">):</span>
+        <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">complexDataType</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaClass</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">complexDataType</span><span class="o">.</span><span class="n">getAllRoles</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">role</span><span class="o">.</span><span class="n">isDerived</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">role</span><span class="o">.</span><span class="n">isImplementation</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">role</span><span class="o">.</span><span class="n">isAutomatic</span>
+            <span class="ow">and</span> <span class="n">role</span><span class="o">.</span><span class="n">locard</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">role</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">)):</span>
+          <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByAttribute</span><span class="p">(</span><span class="n">elems</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.metaObjFromQualName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.metaObjFromQualName">[docs]</a>  <span class="k">def</span> <span class="nf">metaObjFromQualName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; find MetaObject given qualified name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topPackage</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="n">qname</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.setModelFlavour"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.setModelFlavour">[docs]</a>  <span class="k">def</span> <span class="nf">setModelFlavour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set modelflavour tag, checking that it is not set already</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flavours</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topPackage</span><span class="o">.</span><span class="n">_modelFlavours</span>
+    <span class="n">flav</span> <span class="o">=</span> <span class="n">flavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flav</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">flav</span> <span class="o">!=</span> <span class="n">val</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;attempt to change model flavour from </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> to :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">flav</span><span class="p">,</span><span class="n">val</span><span class="p">,)</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">flavours</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+    
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelPortal.checkModelFlavour"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelPortal.ModelPortal.checkModelFlavour">[docs]</a>  <span class="k">def</span> <span class="nf">checkModelFlavour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; check that modelflavour for key is indeed val</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flavours</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topPackage</span><span class="o">.</span><span class="n">_modelFlavours</span>
+    <span class="n">flav</span> <span class="o">=</span> <span class="n">flavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flav</span> <span class="o">!=</span> <span class="n">val</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;found wrong model flavour </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">, should be :</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">flav</span><span class="p">,</span><span class="n">val</span><span class="p">,)</span>
+      <span class="p">)</span></div></div>
+    
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

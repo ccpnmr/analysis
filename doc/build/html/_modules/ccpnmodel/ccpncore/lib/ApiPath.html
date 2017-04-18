@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.ApiPath &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.ApiPath</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;API (data storage) level path and I/O handling utilities</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.ApiError</span> <span class="kn">import</span> <span class="n">ApiError</span>
+
+<span class="n">fileSuffix</span> <span class="o">=</span> <span class="s2">&quot;.xml&quot;</span>
+<span class="n">lenFileSuffix</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fileSuffix</span><span class="p">)</span>
+<span class="n">keySep</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
+
+<span class="n">CCPN_DIRECTORY_SUFFIX</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_DIRECTORY_SUFFIX</span>
+<span class="n">CCPN_ARCHIVES_DIRECTORY</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_ARCHIVES_DIRECTORY</span>
+
+<div class="viewcode-block" id="addCcpnDirectorySuffix"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.addCcpnDirectorySuffix">[docs]</a><span class="k">def</span> <span class="nf">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Add ccpn directory suffix (&#39;.ccpn&#39; to path, unless present already&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">+=</span> <span class="n">CCPN_DIRECTORY_SUFFIX</span>
+  <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="removeCcpnDirectorySuffix"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.removeCcpnDirectorySuffix">[docs]</a><span class="k">def</span> <span class="nf">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Remove ccpn directory suffix (&#39;.ccpn&#39;) from path, if present&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">)]</span>
+  <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="getProjectFile"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getProjectFile">[docs]</a><span class="k">def</span> <span class="nf">getProjectFile</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get project file given the repositoryPath and optionally the projectName</span>
+<span class="sd">     (if none given then determined from repositoryPath)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">projectName</span><span class="p">:</span>
+    <span class="n">projectName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">))</span>
+    
+  <span class="n">implDirectory</span> <span class="o">=</span> <span class="n">getImplementationDirectory</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">,</span> <span class="n">projectName</span> <span class="o">+</span> <span class="n">fileSuffix</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getImplementationDirectory"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getImplementationDirectory">[docs]</a><span class="k">def</span> <span class="nf">getImplementationDirectory</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get implementation directory from the repositoryPath</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_API_DIRECTORY</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">,</span>
+                       <span class="n">metaConstants</span><span class="o">.</span><span class="n">implementationPackageName</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getTopObjectFile"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getTopObjectFile">[docs]</a><span class="k">def</span> <span class="nf">getTopObjectFile</span><span class="p">(</span><span class="n">topObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get topObject file name (not path)</span>
+<span class="sd">  where topObject can be of class MemopsRoot or TopObject</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">getCcpFileString</span>
+  
+  <span class="k">if</span> <span class="n">topObject</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="n">topObject</span><span class="p">:</span>
+    <span class="c1"># This is MemopsRoot</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">fileSuffix</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">getCcpFileString</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">topObject</span><span class="o">.</span><span class="n">getFullKey</span><span class="p">()]</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topObject</span><span class="o">.</span><span class="n">guid</span> <span class="o">+</span> <span class="n">fileSuffix</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">keySep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">254</span><span class="p">:]</span></div>
+
+<div class="viewcode-block" id="getTopObjectPath"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getTopObjectPath">[docs]</a><span class="k">def</span> <span class="nf">getTopObjectPath</span><span class="p">(</span><span class="n">topObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get topObject (absolute) path</span>
+<span class="sd">  where topObject can be of class MemopsRoot or TopObject</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">repositories</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">activeRepositories</span>
+  <span class="k">if</span> <span class="n">repositories</span><span class="p">:</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">repositories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">packageLocator</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">()</span>
+
+  <span class="n">repositoryPath</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">getDataLocation</span><span class="p">()</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="n">findTopObjectPath</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">topObject</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="findTopObjectPath"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.findTopObjectPath">[docs]</a><span class="k">def</span> <span class="nf">findTopObjectPath</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">topObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get topObject absolute file path given the repositoryPath, </span>
+<span class="sd">  where topObject can be of class MemopsRoot or TopObject.</span>
+<span class="sd">  </span>
+<span class="sd">  Will find an existing file fitting the TopObject ID.</span>
+<span class="sd">  If none is found returns default file name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">suffix</span> <span class="o">=</span> <span class="n">fileSuffix</span>
+  <span class="n">lenSuffix</span> <span class="o">=</span> <span class="n">lenFileSuffix</span>
+  <span class="n">sep</span> <span class="o">=</span> <span class="n">keySep</span>
+  
+  <span class="k">if</span> <span class="n">topObject</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="n">topObject</span><span class="p">:</span>
+    <span class="c1"># MemopsRoot</span>
+    <span class="n">objId</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># other TopObject</span>
+    <span class="n">objId</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">guid</span>
+  
+  <span class="c1"># get default file name</span>
+  <span class="n">topObjectDir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_API_DIRECTORY</span><span class="p">,</span>
+                                <span class="o">*</span><span class="n">topObject</span><span class="o">.</span><span class="n">packageName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">topObjectDir</span><span class="p">,</span> <span class="n">getTopObjectFile</span><span class="p">(</span><span class="n">topObject</span><span class="p">))</span>
+  
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+    <span class="c1"># default file name is not there. Look for alternative file that fits ID </span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">topObjectDir</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">topObjectDir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">):</span>
+          <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="n">lenSuffix</span><span class="p">]</span> <span class="o">==</span> <span class="n">objId</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">topObjectDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">break</span>
+  
+  <span class="c1"># return whatever result we have</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="areAllTopObjectsPresent"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.areAllTopObjectsPresent">[docs]</a><span class="k">def</span> <span class="nf">areAllTopObjectsPresent</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Input: project</span>
+<span class="sd">  Output: Boolean - True if all loaded TopObjects exist in storage</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="c1"># set up</span>
+  <span class="n">findLocator</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span>
+  <span class="n">anyLocator</span> <span class="o">=</span> <span class="n">findLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">)</span>
+  <span class="n">allLocations</span> <span class="o">=</span> <span class="p">{}</span>
+  
+  <span class="c1"># check for topObject presence</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">topObjects</span><span class="p">:</span>
+ 
+    <span class="k">if</span> <span class="n">topObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">project</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">topObject</span><span class="o">.</span><span class="n">isLoaded</span><span class="p">:</span>
+ 
+      <span class="c1"># get locations</span>
+      <span class="n">locator</span> <span class="o">=</span> <span class="n">findLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">topObject</span><span class="o">.</span><span class="n">packageName</span><span class="p">)</span> <span class="ow">or</span> <span class="n">anyLocator</span>
+      <span class="n">locations</span> <span class="o">=</span> <span class="n">allLocations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">locations</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">getDataLocation</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">locator</span><span class="o">.</span><span class="n">repositories</span><span class="p">]</span>
+        <span class="n">allLocations</span><span class="p">[</span><span class="n">locator</span><span class="p">]</span> <span class="o">=</span> <span class="n">locations</span>
+ 
+      <span class="c1"># check for file presence</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">CCPN_API_DIRECTORY</span><span class="p">]</span> <span class="o">+</span> <span class="n">topObject</span><span class="o">.</span><span class="n">packageName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getTopObjectFile</span><span class="p">(</span><span class="n">topObject</span><span class="p">))</span>
+      <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="o">*</span><span class="n">ll</span><span class="p">)):</span>
+          <span class="c1"># file found</span>
+          <span class="k">break</span>
+          
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># no file found</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">break</span>
+  
+  <span class="c1"># </span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="doesRepositoryContainProject"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.doesRepositoryContainProject">[docs]</a><span class="k">def</span> <span class="nf">doesRepositoryContainProject</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Does repositoryPath contain project with specified projectName</span>
+<span class="sd">     (or default projectName if not specified)?</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">projectFile</span> <span class="o">=</span> <span class="n">getProjectFile</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="n">projectName</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">projectFile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getPossibleProjectFiles"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getPossibleProjectFiles">[docs]</a><span class="k">def</span> <span class="nf">getPossibleProjectFiles</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get the possible project files given the repositoryPath</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">):</span>
+    <span class="n">implDirectory</span> <span class="o">=</span> <span class="n">getImplementationDirectory</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">):</span>
+      <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">)</span>
+      <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">implDirectory</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span> <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="nb">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">fileSuffix</span><span class="p">)]</span>
+
+      <span class="k">return</span> <span class="n">files</span>
+
+  <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="getTopObjIdFromFileName"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.ApiPath.getTopObjIdFromFileName">[docs]</a><span class="k">def</span> <span class="nf">getTopObjIdFromFileName</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mustBeMultipart</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get project name or TopObject guid from file name (relative or absolute)</span>
+<span class="sd">  Note: TopObject ID is constrained to not need decoding</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+  <span class="n">ll</span> <span class="o">=</span> <span class="n">basename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">keySep</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">mustBeMultipart</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># no check on number of fields</span>
+    <span class="k">pass</span>
+    
+  <span class="k">elif</span> <span class="n">mustBeMultipart</span><span class="p">:</span>
+    <span class="c1"># must be multi-field (normal TopObject)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;TopObject fileName </span><span class="si">%s</span><span class="s2"> lacks field separators </span><span class="si">%s</span><span class="s2">&quot;</span> 
+                     <span class="o">%</span> <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">keySep</span><span class="p">))</span>
+                     
+  <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="c1"># must be single field (Implementation)</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;TopObject fileName </span><span class="si">%s</span><span class="s2"> has field separators </span><span class="si">%s</span><span class="s2">&quot;</span> 
+                   <span class="o">%</span> <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">keySep</span><span class="p">))</span>
+  
+  
+  <span class="k">return</span> <span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="n">lenFileSuffix</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_addModuleFunctionsToApiClass</span><span class="p">(</span><span class="n">relModuleName</span><span class="p">,</span> <span class="n">apiClass</span><span class="p">,</span> <span class="n">rootModuleName</span><span class="o">=</span><span class="s1">&#39;ccpnmodel.ccpncore.lib&#39;</span><span class="p">):</span>
+
+  <span class="c1"># We import from here, to be sure we get the API-contaning directory no matter what</span>
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.Path</span> <span class="kn">import</span> <span class="n">getPythonDirectory</span>
+
+  <span class="n">moduleName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">._</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rootModuleName</span><span class="p">,</span> <span class="n">relModuleName</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">moduleName</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">moduleName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getPythonDirectory</span><span class="p">(),</span> <span class="o">*</span><span class="n">ll</span><span class="p">)):</span>
+      <span class="c1"># The file exists, so there must be an error we should know about</span>
+      <span class="k">raise</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># This happens when there is just no library code for a class - quite common</span>
+      <span class="k">pass</span>
+    <span class="k">return</span>
+
+  <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+      <span class="k">continue</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="c1"># second condition below excludes functions defined in imported modules (like os, etc.)</span>
+    <span class="c1"># third condition checks whether this is a function (rather than a class, etc.)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">__module__</span> <span class="o">==</span> <span class="n">moduleName</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">apiClass</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

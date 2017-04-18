@@ -3,19 +3,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:36 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -115,15 +122,21 @@ Use print(current) to get a list of attribute, value pairs')
     self.registerNotify(self._updateSelectedPeaks, 'peaks')
 
   def registerNotify(self, notify, field):
-    # Notifiers are attached to the Current OBJECT, not to the class
-    # They are therefore removed when a new project is created/loaded
-    # Otherwise it is the responsibility of the adder to remove them when no longer relevant
-    # for which the notifier function object must be kept around.
-    # The function is attached to the field and is executed after the field value changes
-    # In practice this goes through the setter for (the equivalent of) Current.spectra
-    # The notifier function is passed the new value of the field as its only parameter.
-    # If you need a graphics object (e.g. a module) you must make and register a bound method
-    # on the module.
+    """Register notifier function 'notify' to be called on field 'field'
+
+    E.g. current.registerNotify(highlightSelectedPeaks, 'peaks')
+    Where highlightSelectedPeaks is a function that takes a list of peaks as its only input
+
+    Notifiers are attached to the Current OBJECT, not to the class
+    They are therefore removed when a new project is created/loaded
+    Otherwise it is the responsibility of the adder to remove them when no longer relevant
+    for which the notifier function object must be kept around.
+    The function is attached to the field and is executed after the field value changes
+    In practice this goes through the setter for (the equivalent of) Current.spectra
+    The notifier function is passed the new value of the field as its only parameter.
+    If you need a graphics object (e.g. a module) you must make and register a bound method
+    on the module.
+    """
 
     self._notifies[field].append(notify)
 
@@ -187,12 +200,14 @@ Use print(current) to get a list of attribute, value pairs')
       plural = param
       singular = param[:-1]  # It is assumed that param ends in plural 's'
       singularOnly = _currentExtraFields[param].get('singularOnly')
+      enforceType = None
     else:
       # param is a wrapper class
       plural = param._pluralLinkName
       singular = param.className
       singular = singular[0].lower() + singular[1:]
       singularOnly = _currentClasses[param].get('singularOnly')
+      enforceType = param
 
     # getter function for _field; getField(obj) returns obj._field:
     getField = operator.attrgetter('_' + plural)
@@ -201,9 +216,12 @@ Use print(current) to get a list of attribute, value pairs')
     getFieldItem = operator.itemgetter(plural)
 
     # setField(obj, value) sets obj._field = value and calls notifiers
-    def setField(self, value, plural=plural):
+    def setField(self, value, plural=plural, enforceType=enforceType):
       if len(set(value)) != len(value):
         raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+      if enforceType and any(x for x in value if not isinstance(x, enforceType)):
+        raise ValueError("Current values for %s must be of type %s"
+                         % (plural, enforceType))
       setattr(self, '_'+plural, value)
       funcs = getFieldItem(self._notifies) or ()
       for func in funcs:
@@ -232,7 +250,7 @@ Use print(current) to get a list of attribute, value pairs')
         if value not in values:
           setField(self, values + [value])
       #
-      setattr(cls, 'add' + singular.capitalize(), adder)
+      setattr(cls, 'add' + singular[0].upper() + singular[1:], adder)
 
       def remover(self, value):
         """Remove %s from current.%s""" % (singular, plural)
@@ -241,13 +259,13 @@ Use print(current) to get a list of attribute, value pairs')
           values.remove(value)
         setField(self, values)
       #
-      setattr(cls, 'remove' + singular.capitalize(), remover)
+      setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
 
       def clearer(self):
         """Clear current.%s""" % plural
         setField(self, [])
       #
-      setattr(cls, 'clear' + plural.capitalize(), clearer)
+      setattr(cls, 'clear' + plural[0].upper() + plural[1:], clearer)
 
     if not isinstance(param, str):
       # param is a class - Add notifiers for deleted objects

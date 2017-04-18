@@ -1,0 +1,741 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.CopyData &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.CopyData</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;API (data storage) level object tree copying</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Code for copying CCPN data model objects&quot;&quot;&quot;</span>
+
+  
+<span class="c1"># miscellaneous useful functions</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+
+
+<div class="viewcode-block" id="copySubTree"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.CopyData.copySubTree">[docs]</a><span class="k">def</span> <span class="nf">copySubTree</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">newParent</span><span class="p">,</span> <span class="n">maySkipCrosslinks</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">topObjectParameters</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objectMap</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Copy an api object and all its descendants within or between projects</span>
+
+<span class="sd">  :param sourceObj: CCPN api object to be copied</span>
+<span class="sd">  :param newParent: parent for the copied object</span>
+<span class="sd">  :param bool maySkipCrosslinks: Whether to skip crosslinks if copying them it not possible.</span>
+<span class="sd">  :param dict topObjectParameters: parameters to be passed to copy of source object</span>
+<span class="sd">  :param dict objectMap: oldObject:newObject mappings to use as targets for crosslinks</span>
+<span class="sd">  :result: copy of source object</span>
+
+<span class="sd">  </span>
+<span class="sd">  (Parts of) crosslinks to objects within the subtree are copied to</span>
+<span class="sd">  links to the new object copies;</span>
+<span class="sd">  (Parts of) crosslinks to objects not within the subtree are copied to</span>
+<span class="sd">  links to the old objects, provided this can be done without cutting </span>
+<span class="sd">  pre-existing links.</span>
+<span class="sd">  If the above will not work *and* maySkipCrosslinks is True, the routine</span>
+<span class="sd">  tries to set the crosslink using only the objects within the subtree.</span>
+<span class="sd">  If none of the above works, an error is thrown.</span>
+<span class="sd">  </span>
+<span class="sd">  The key,val pairs in the topObjectParameters dictionary are passed to </span>
+<span class="sd">  the top object constructor, and the pre-existing values in the sourceObj </span>
+<span class="sd">  are ignored. This can be used to set new values for the keys of sourceObj.</span>
+<span class="sd">  </span>
+<span class="sd">  If the top object has &#39;serial&#39; as the key and no valid serial is passed in</span>
+<span class="sd">  topObjectParameters, the routine will set the serial to the next available</span>
+<span class="sd">  value.</span>
+<span class="sd">  </span>
+<span class="sd">  Note that the function first builds all objects, then connects crosslinks,</span>
+<span class="sd">  then connects parent-to-child links. Finally all notifiers are called but in</span>
+<span class="sd">  random order. If there is an error the routine tries to delete all created</span>
+<span class="sd">  objects before re-raising the original error. A failed function call may</span>
+<span class="sd">  consume serial numbers if the key of the sourceObj is &#39;serial&#39;. Also, there is</span>
+<span class="sd">  a relatively high bug risk, as is always the case with functions that have to</span>
+<span class="sd">  clean up after an error. </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.MetaModel</span> <span class="kn">import</span> <span class="n">MemopsError</span>
+  <span class="k">if</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="n">sourceObj</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;copySubTree cannot be used to copy entire projects&quot;</span><span class="p">)</span>
+
+  <span class="c1"># Copy objectMap as it is modified lower down</span>
+  <span class="c1"># NB topObjectParameters may be modified too if the top object has a serial key</span>
+  <span class="c1"># but in that case we need to keep teh modification for redo</span>
+  <span class="n">oldToNew</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">objectMap</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">objectMap</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+  <span class="n">undo</span> <span class="o">=</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_transferData</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">oldToNew</span><span class="o">=</span><span class="n">oldToNew</span><span class="p">,</span>
+                           <span class="n">targetObjParams</span><span class="o">=</span><span class="n">topObjectParameters</span><span class="p">,</span>
+                           <span class="n">ignoreMissing</span><span class="o">=</span><span class="n">maySkipCrosslinks</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">delete</span><span class="p">,</span> <span class="n">copySubTree</span><span class="p">,</span> <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">sourceObj</span><span class="p">,</span> <span class="n">newParent</span><span class="p">),</span>
+                 <span class="n">redoKwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;maySkipCrosslinks&#39;</span><span class="p">:</span><span class="n">maySkipCrosslinks</span><span class="p">,</span>
+                               <span class="s1">&#39;topObjectParameters&#39;</span><span class="p">:</span><span class="n">topObjectParameters</span><span class="p">,</span>
+                               <span class="s1">&#39;objectMap&#39;</span><span class="p">:</span><span class="n">objectMap</span><span class="p">})</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+  
+ 
+<div class="viewcode-block" id="newGuid"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.CopyData.newGuid">[docs]</a><span class="k">def</span> <span class="nf">newGuid</span><span class="p">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+ 
+  <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_&#39;</span> <span class="o">%</span> <span class="n">prefix</span>
+
+  <span class="c1"># slightly modelled on memops.api.Implementation.MemopsRoot.newGuid()</span>
+
+  <span class="n">timeStamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y_%m_</span><span class="si">%d</span><span class="s2">_%H_%M_%S&quot;</span><span class="p">)</span>
+  <span class="n">user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;USER&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+
+  <span class="n">guid</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">guid</span></div>
+
+
+<span class="k">def</span> <span class="nf">_transferData</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">oldToNew</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">oldVersionStr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">targetObjParams</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">ignoreMissing</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">useOptLinks</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Copy sourceObj and recursively all its children,</span>
+<span class="sd">  to a new tree where the new targetObj is a child of newParent</span>
+
+<span class="sd">  - If oldVersionStr is set, do as  backwards compatibility, </span>
+<span class="sd">  including minor post-processing,</span>
+<span class="sd">  otherwise do as subtree copying, including resetting of _ID</span>
+
+<span class="sd">  - targetObjParams: parameters to be passed to the copy of sourceObj.</span>
+<span class="sd">    Only meaningful for subtree copy, and ignored for</span>
+<span class="sd">    backwards compatibility.</span>
+
+<span class="sd">  - oldToNew is an old-to-new-object dictionary, serves for either</span>
+
+<span class="sd">  - useOptLinks controls if optional links (basically the -to-one</span>
+<span class="sd">    direction of one-to-many links) should be followed. For compatibility</span>
+<span class="sd">    this is a waste of time (but harmless), but for copySubTree it is</span>
+<span class="sd">    necessary</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_logger</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+  
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.xml.memops</span> <span class="kn">import</span> <span class="n">Implementation</span> <span class="k">as</span> <span class="n">xmlImplementation</span>
+  
+  <span class="n">serialTag</span> <span class="o">=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">serial_attribute</span>
+  <span class="c1"># NB serialDictTag hardwired to avoid using the varNames dictionary</span>
+  <span class="n">serialDictTag</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">serialdict_attribute</span>
+    
+  <span class="n">globalMapping</span> <span class="o">=</span> <span class="n">xmlImplementation</span><span class="o">.</span><span class="n">getGlobalMap</span><span class="p">(</span><span class="n">oldVersionStr</span><span class="p">)</span>
+  
+  <span class="c1"># mapsByGuid = globalMapping[&#39;mapsByGuid&#39;]</span>
+  
+  <span class="k">if</span> <span class="n">targetObjParams</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">targetObjParams</span> <span class="o">=</span> <span class="p">{}</span>
+  
+  <span class="k">if</span> <span class="n">oldToNew</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">oldToNew</span> <span class="o">=</span> <span class="p">{}</span>
+  
+  <span class="c1"># decide which links to follow</span>
+  <span class="k">if</span> <span class="n">useOptLinks</span><span class="p">:</span>
+    <span class="n">followTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;headerAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;simpleAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;cplxAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;optLinks&#39;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">followTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;headerAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;simpleAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;cplxAttrs&#39;</span><span class="p">)</span>
+  
+  <span class="n">localOldToNew</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">emptyList</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">oneElemList</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+  <span class="c1"># emptySet = set()</span>
+  <span class="n">crossLinkData</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">appCrossLinkData</span> <span class="o">=</span> <span class="n">crossLinkData</span><span class="o">.</span><span class="n">append</span>
+  <span class="n">delayDataDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="c1"># stack of child objects to map - these are old objects</span>
+  <span class="n">oldChildStack</span> <span class="o">=</span> <span class="p">[[</span><span class="n">sourceObj</span><span class="p">]]</span>
+  <span class="c1"># stack of parent objects to attach to - these are new objects</span>
+  <span class="n">newParentStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">newParent</span><span class="p">]</span>
+  <span class="c1"># objects to notify on - for correct ordering of notifiers when copying subtree</span>
+  <span class="c1"># should not put newParent in notifyObjects because already exists</span>
+  <span class="c1">#notifyObjects = [newParent]</span>
+  <span class="n">notifyObjects</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="n">targetObj</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">try</span><span class="p">:</span>
+ 
+    <span class="n">nextDd</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">while</span> <span class="n">oldChildStack</span><span class="p">:</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">oldChildStack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="n">oldObj</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+ 
+        <span class="c1"># current object map</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">oldObj</span><span class="o">.</span><span class="n">packageShortName</span>
+        <span class="n">curMap</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">ss</span><span class="p">][</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">][</span><span class="n">oldObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;skip&#39;</span><span class="p">:</span>
+          <span class="c1"># skip this one</span>
+          <span class="k">continue</span>
+ 
+        <span class="c1"># create or get new object</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">newParentStack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+ 
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">newParent</span><span class="p">:</span>
+          <span class="c1"># this is the target object - special case</span>
+             
+          <span class="c1"># fix serial key for sourceObj if copying subtree</span>
+          <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># we are copying a subtree</span>
+            <span class="k">if</span> <span class="n">serialTag</span> <span class="ow">in</span> <span class="n">sourceObj</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">keyNames</span><span class="p">:</span>
+              <span class="c1"># serial key for top</span>
+              <span class="k">if</span> <span class="n">serialTag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">targetObjParams</span><span class="p">:</span>
+                <span class="c1"># not being passed in explicitly - we must fix it (special case)</span>
+                <span class="c1"># NB _serialDict is hardwired to avoid using the varNames di</span>
+                <span class="n">serialDict</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">serialDictTag</span><span class="p">,{})</span>
+                <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;fromParent&#39;</span><span class="p">],</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">targetObjParams</span><span class="p">[</span><span class="n">serialTag</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldSerial</span> <span class="o">+</span> <span class="mi">1</span>
+          
+          <span class="c1"># new object not already there - make it and transfer from old</span>
+          <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="n">newParent</span><span class="p">:</span>
+            <span class="c1"># targetObj is a TopObject</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">targetObj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">,</span> <span class="n">isReading</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                              <span class="o">**</span><span class="n">targetObjParams</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># targetObj is not a TopObject (and we are doing subtree copying)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">topObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">targetObj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">targetObjParams</span><span class="p">)</span>
+          
+          <span class="n">notifyObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+ 
+          <span class="n">objId</span> <span class="o">=</span> <span class="n">obj</span>
+          <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextDd</span>
+          <span class="k">if</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_transf&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">oldToNew</span><span class="p">[</span><span class="n">oldObj</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">localOldToNew</span><span class="p">[</span><span class="n">oldObj</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+          <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">emptyList</span><span class="p">):</span>
+            <span class="n">nextDd</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+ 
+          <span class="n">content</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+          <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cplxAttrs&#39;</span><span class="p">,</span> <span class="n">emptyList</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dobj&#39;</span><span class="p">:</span>
+              <span class="n">nextDd</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+ 
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># normal object</span>
+ 
+          <span class="k">if</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;cplx&#39;</span><span class="p">:</span>
+            <span class="c1"># complex data type</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">override</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ 
+            <span class="n">objId</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextDd</span>
+            <span class="n">localOldToNew</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">oldObj</span><span class="p">)]</span> <span class="o">=</span> <span class="n">obj</span>
+ 
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># type class</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">](</span><span class="n">parent</span><span class="p">)</span>
+ 
+            <span class="n">objId</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextDd</span>
+            <span class="k">if</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_transf&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+              <span class="n">oldToNew</span><span class="p">[</span><span class="n">oldObj</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">localOldToNew</span><span class="p">[</span><span class="n">oldObj</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="n">delayDataDict</span><span class="p">[</span><span class="n">parent</span><span class="p">][</span><span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;fromParent&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+ 
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;children&#39;</span><span class="p">,</span> <span class="n">emptyList</span><span class="p">):</span>
+              <span class="n">nextDd</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="n">notifyObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+ 
+          <span class="c1"># add list for complex data type attrs</span>
+          <span class="n">content</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+          <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cplxAttrs&#39;</span><span class="p">,</span> <span class="n">emptyList</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dobj&#39;</span><span class="p">:</span>
+              <span class="n">nextDd</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+ 
+        <span class="c1"># put objects on stack</span>
+        <span class="n">childList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">oldChildStack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">childList</span><span class="p">)</span>
+        <span class="n">newParentStack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">contDict</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+ 
+        <span class="c1"># transfer object contents</span>
+        <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">followTags</span><span class="p">:</span>
+          <span class="n">tags</span> <span class="o">=</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">emptyList</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="n">targetObj</span> <span class="ow">and</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">targetObjParams</span><span class="p">:</span>
+              <span class="c1"># special case: parameters passed in directly to targetObj</span>
+              <span class="c1"># needed for tree copying only</span>
+              <span class="k">continue</span>
+ 
+            <span class="n">tmpMap</span> <span class="o">=</span> <span class="n">contDict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">tmpMap</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">oldObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+ 
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="c1"># no value - skip empties</span>
+              <span class="k">continue</span>
+ 
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+              <span class="c1"># convert to list for future processing</span>
+              <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
+                <span class="n">valIsList</span> <span class="o">=</span> <span class="bp">True</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># no values - skip empties</span>
+                <span class="k">continue</span>
+ 
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">valIsList</span> <span class="o">=</span> <span class="bp">False</span>
+ 
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">tmpMap</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;attr&#39;</span><span class="p">:</span>
+              <span class="c1"># simple type attribute</span>
+ 
+              <span class="n">proc</span> <span class="o">=</span> <span class="n">tmpMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">)</span>
+ 
+              <span class="k">if</span> <span class="n">proc</span> <span class="o">==</span> <span class="s1">&#39;delay&#39;</span><span class="p">:</span>
+                <span class="c1"># pass to compatibility processing - making sure it is a list</span>
+                <span class="k">if</span> <span class="n">valIsList</span><span class="p">:</span>
+                  <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+ 
+              <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># fix list/nonlist and set</span>
+                <span class="k">if</span> <span class="n">tmpMap</span><span class="p">[</span><span class="s1">&#39;hicard&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="n">valIsList</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                      <span class="k">break</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">vv</span>
+                  <span class="k">if</span> <span class="n">proc</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>
+                    <span class="c1"># direct setting if simple non-constrained attribute</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                  <span class="k">elif</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;_ID&#39;</span><span class="p">:</span>
+                    <span class="c1"># We are doing tree copy, not compatibility. Reset _ID.</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                  <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="k">if</span> <span class="ow">not</span> <span class="n">valIsList</span><span class="p">:</span>
+                    <span class="c1"># optimisation - avoid creating temporary lists</span>
+                    <span class="n">oneElemList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">oneElemList</span>
+                  <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+ 
+            <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;child&#39;</span><span class="p">:</span>
+              <span class="c1"># normal child</span>
+              <span class="k">if</span> <span class="n">valIsList</span><span class="p">:</span>
+                <span class="n">childList</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">childList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+ 
+            <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;dobj&#39;</span><span class="p">:</span>
+              <span class="c1"># normal DataTypeObject</span>
+ 
+              <span class="k">if</span> <span class="ow">not</span> <span class="n">valIsList</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+ 
+              <span class="c1"># put on stack for further processing</span>
+              <span class="n">childList</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+ 
+              <span class="k">if</span> <span class="n">tmpMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;delay&#39;</span><span class="p">:</span>
+                <span class="c1"># delayed - put in delayDataDict</span>
+                <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+ 
+              <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># convert to ID and put in crossLinkData to resolve links later</span>
+                <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">appCrossLinkData</span><span class="p">([</span><span class="nb">id</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">val</span><span class="p">])</span>
+                <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">tmpMap</span><span class="p">)</span>
+ 
+            <span class="k">else</span><span class="p">:</span>
+              <span class="c1"># typ in (&#39;link&#39;, &#39;exolink&#39;, &#39;exotop&#39;)</span>
+ 
+              <span class="k">if</span> <span class="ow">not</span> <span class="n">valIsList</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+ 
+              <span class="k">if</span> <span class="n">tmpMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proc&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;delay&#39;</span><span class="p">:</span>
+                <span class="n">delayDataDict</span><span class="p">[</span><span class="n">objId</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+ 
+              <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># put in crossLinkData to resolve links later</span>
+                <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">appCrossLinkData</span><span class="p">(</span><span class="n">tmpMap</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># this is tree copying</span>
+          <span class="n">nextDd</span> <span class="o">=</span> <span class="p">{}</span>
+          
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># this is backwards compatibility</span>
+          <span class="c1"># clear old object to keep memory use down</span>
+          <span class="n">nextDd</span> <span class="o">=</span> <span class="n">oldObj</span><span class="o">.</span><span class="n">__dict__</span>
+          <span class="n">nextDd</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+ 
+ 
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># no children left - go up a step</span>
+        <span class="n">oldChildStack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">lastParent</span> <span class="o">=</span> <span class="n">newParentStack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lastParent</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaDataObjType&#39;</span><span class="p">:</span>
+          <span class="c1"># parent is complex data type</span>
+          <span class="n">lastParent</span><span class="o">.</span><span class="n">endOverride</span><span class="p">()</span>
+ 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">newParentStack</span><span class="p">:</span>
+          <span class="c1"># back at root - put root back in</span>
+          <span class="n">newParentStack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lastParent</span><span class="p">)</span>
+      
+    <span class="c1"># update local oldToNew map</span>
+    <span class="n">localOldToNew</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">oldToNew</span><span class="p">)</span>
+
+    <span class="c1"># postprocess objects - set links now all objects are done</span>
+    <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># copy subtree</span>
+      <span class="n">_delayedLoadLinksCopy</span><span class="p">(</span><span class="n">localOldToNew</span><span class="p">,</span> <span class="n">crossLinkData</span><span class="p">,</span>
+                       <span class="n">ignoreMissing</span><span class="o">=</span><span class="n">ignoreMissing</span><span class="p">)</span>
+ 
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># backwards compatibility.</span>
+
+      <span class="c1"># first dereference links</span>
+      <span class="n">_delayedLoadLinksComp</span><span class="p">(</span><span class="n">localOldToNew</span><span class="p">,</span> <span class="n">crossLinkData</span><span class="p">)</span>
+
+      <span class="c1"># minor post-processing</span>
+      <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.format.compatibility.Converters1</span> <span class="kn">import</span> <span class="n">minorPostProcess</span>
+      <span class="n">minorPostProcess</span><span class="p">(</span><span class="n">oldVersionStr</span><span class="p">,</span> <span class="n">targetObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">localOldToNew</span><span class="p">)</span>
+ 
+      <span class="c1"># set TopObjects into TopObjects dictionary.</span>
+      <span class="n">newTopObjByGuid</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">]</span>
+      <span class="n">guid</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">guid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newTopObjByGuid</span><span class="p">:</span>
+        <span class="n">newTopObjByGuid</span><span class="p">[</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetObj</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CCPN API error: </span><span class="si">%s</span><span class="s2">: guid </span><span class="si">%s</span><span class="s2"> already in use&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]))</span>
+ 
+    <span class="n">newTopObj</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">topObject</span>
+    
+    <span class="c1"># set parent-to-child links</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">newTopObj</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">shortName</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+      <span class="c1"># filter out deleted targetObj - could happen in minor postprocessing</span>
+      <span class="n">xmlImplementation</span><span class="o">.</span><span class="n">linkChildData</span><span class="p">(</span><span class="n">delayDataDict</span><span class="p">,</span> <span class="n">targetObj</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span>
+                                      <span class="n">linkTopToParent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  
+  
+  <span class="k">except</span><span class="p">:</span>
+    <span class="c1"># try cleaning up</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">exc_info</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="c1"># NB &#39;[]&#39; only put in for Python 2.1</span>
+    <span class="n">objsToBeDeleted</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">delayDataDict</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">,)])</span>
+    <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_singleDelete</span><span class="p">(</span><span class="n">objsToBeDeleted</span><span class="p">)</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;WARNING Error in deleting object of class </span><span class="si">%s</span><span class="s2">, id </span><span class="si">%s</span><span class="s2">&quot;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)))</span>
+  
+    <span class="k">if</span> <span class="n">targetObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">topObj</span> <span class="o">=</span> <span class="n">targetObj</span><span class="o">.</span><span class="n">topObject</span>
+        <span class="n">topObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="n">deleteFailed</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="n">deleteFailed</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Error in clean-up of incorrectly copied data tree.</span>
+<span class="s1">      Data may be left in an illegal state&#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;NOTE created objects deleted without error&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># re-raise original exception</span>
+    <span class="k">raise</span> <span class="n">exc_info</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">exc_info</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">exc_info</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+  
+  <span class="c1"># unset isReading and set to modified</span>
+  <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isReading&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isModified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    
+ 
+  <span class="k">if</span> <span class="n">oldVersionStr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># we are copying a subtree</span>
+    
+    <span class="k">if</span> <span class="n">targetObj</span> <span class="ow">is</span> <span class="n">newTopObj</span><span class="p">:</span>
+      <span class="c1"># root is a TopObject - we need to set isLoaded</span>
+      <span class="n">root</span> <span class="o">=</span> <span class="n">newTopObj</span><span class="o">.</span><span class="n">root</span>
+      <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">guid</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">newGuid</span><span class="p">()</span>
+      <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">guid</span>
+      <span class="n">root</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;topObjects&#39;</span><span class="p">][</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newTopObj</span>
+      
+    <span class="c1">#check validity</span>
+    <span class="n">targetObj</span><span class="o">.</span><span class="n">checkAllValid</span><span class="p">()</span>
+ 
+    <span class="c1"># notify - list gicves you parent-before-child order</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">notifyObjects</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">xx</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="p">()):</span>
+        <span class="n">notify</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">notifyObjects</span>
+    
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># we are doing backwards compatibility.</span>
+    <span class="c1"># Set to loaded and leave teh rest to others</span>
+    <span class="n">newTopObj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isLoaded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+ 
+  <span class="c1"># clean up</span>
+  <span class="n">delayDataDict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+  
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">targetObj</span>
+
+<span class="k">def</span> <span class="nf">_delayedLoadLinksComp</span><span class="p">(</span><span class="n">objectDict</span><span class="p">,</span> <span class="n">linkData</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Set links (of whatever kind) derefencing as you go using objectDict.</span>
+<span class="sd">  Skips objects not found in the map.</span>
+<span class="sd">  For backwards compatibility rather than compatibility </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+  
+  <span class="n">popLinkData</span> <span class="o">=</span> <span class="n">linkData</span><span class="o">.</span><span class="n">pop</span>
+  <span class="n">getObj</span> <span class="o">=</span> <span class="n">objectDict</span><span class="o">.</span><span class="n">get</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">while</span> <span class="n">linkData</span><span class="p">:</span>
+      <span class="c1"># setup</span>
+      <span class="n">curMap</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+      <span class="n">obj</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+
+      <span class="c1"># map values</span>
+      <span class="n">valueList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+        <span class="n">oo</span> <span class="o">=</span> <span class="n">getObj</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">valueList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oo</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">valueList</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        <span class="n">hicard</span> <span class="o">=</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hicard&#39;</span><span class="p">)</span>
+        <span class="c1"># set element</span>
+        <span class="k">if</span> <span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">ov</span> <span class="o">=</span> <span class="n">valueList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">hicard</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">ov</span> <span class="o">=</span> <span class="n">valueList</span><span class="p">[:</span><span class="n">hicard</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">ov</span> <span class="o">=</span> <span class="n">valueList</span>
+
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ov</span><span class="p">)</span>
+
+  <span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Error during link dereferencing. Object was: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">    values were: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">    tag name was: </span><span class="si">%s</span><span class="s1">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+    <span class="k">raise</span>
+
+
+<span class="k">def</span> <span class="nf">_delayedLoadLinksCopy</span><span class="p">(</span><span class="n">objectDict</span><span class="p">,</span> <span class="n">linkData</span><span class="p">,</span> <span class="n">ignoreMissing</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Set links (of whatever kind) derefencing as you go using objectDict.</span>
+<span class="sd">  For copySubTree rather than compatibility </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">popLinkData</span> <span class="o">=</span> <span class="n">linkData</span><span class="o">.</span><span class="n">pop</span>
+  <span class="n">getObj</span> <span class="o">=</span> <span class="n">objectDict</span><span class="o">.</span><span class="n">get</span>
+   
+  <span class="k">while</span> <span class="n">linkData</span><span class="p">:</span>
+    
+    <span class="c1"># set up </span>
+    <span class="n">curMap</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">popLinkData</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="n">hicard</span> <span class="o">=</span> <span class="n">curMap</span><span class="p">[</span><span class="s1">&#39;hicard&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># locard = curMap[&#39;locard&#39;]</span>
+    <span class="n">copyOverride</span> <span class="o">=</span> <span class="n">curMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;copyOverride&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># NB copyOverride determines whether you are allowed to set links</span>
+    <span class="c1"># that modifies object outside the subtree</span>
+    
+    <span class="k">if</span> <span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    
+      <span class="c1"># get new value</span>
+      <span class="n">vv</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">newVal</span> <span class="o">=</span> <span class="n">getObj</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">newVal</span><span class="p">:</span>
+        <span class="c1"># linked-to object replaced by new object</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">newVal</span><span class="p">)</span>
+      
+      <span class="k">elif</span> <span class="n">copyOverride</span><span class="p">:</span>
+        <span class="c1"># try setting link to old object</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vv</span><span class="p">)</span>
+          
+        <span class="k">except</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">ignoreMissing</span><span class="p">:</span>
+            <span class="c1"># we can skip the link</span>
+            <span class="k">pass</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># link could not be handled</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+             <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Out-of-subtree -to-one link </span><span class="si">%s</span><span class="s2"> cannot be copied&quot;</span>
+             <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># -to-many link</span>
+      
+      <span class="c1"># get new values</span>
+      <span class="n">others</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">newies</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">foundAll</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">getObj</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">other</span><span class="p">:</span>
+          <span class="n">newies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+          <span class="n">others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">foundAll</span> <span class="o">=</span> <span class="bp">False</span>
+          <span class="n">others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span>
+      
+      <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+          
+      <span class="k">if</span> <span class="n">foundAll</span> <span class="ow">or</span> <span class="n">copyOverride</span><span class="p">:</span>
+        <span class="c1"># try making link to full set of objects</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">others</span><span class="p">)</span>
+          <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+          <span class="k">pass</span>
+      
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">foundAll</span> <span class="ow">and</span> <span class="n">ignoreMissing</span><span class="p">:</span>
+        <span class="c1"># try making link to the subset of objects found in subtree</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">newies</span><span class="p">)</span>
+          <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+          <span class="k">pass</span>
+          
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+        <span class="c1"># link could not be handled</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+         <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Out-of-subtree link </span><span class="si">%s</span><span class="s2"> cannot be copied&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

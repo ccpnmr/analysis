@@ -46,19 +46,25 @@ By Mouse button:
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-12 13:41:56 +0100 (Wed, April 12, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Wayne Boucher $"
 
+__date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -79,6 +85,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
   leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
+
 
 class CrossHair():
   "class to implement a cross-hair"
@@ -226,14 +233,27 @@ class ViewBox(pg.ViewBox):
       orderedAxes = self.current.strip.orderedAxes
       for orderedAxis in orderedAxes[2:]:
         position.append(orderedAxis.position)
+      peaks = list(self.current.peaks)
+      peakLists = []
+
       for spectrumView in self.current.strip.spectrumViews:
-        peakList = spectrumView.spectrum.peakLists[0]
+        if not spectrumView.peakListViews:
+          continue
+        peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
+        if not peakListView.isVisible():
+          continue
+        peakList = peakListView.peakList
         peak = peakList.newPeak(position=position)
         # note, the height below is not derived from any fitting
         # but is a weighted average of the values at the neighbouring grid points
         peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-        self.current.addPeak(peak)
+        #self.current.addPeak(peak)
         # peak.isSelected = True
+        peaks.append(peak)
+        peakLists.append(peakList)
+
+      self.current.peaks = peaks
+      for peakList in peakLists:
         self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
@@ -397,6 +417,8 @@ class ViewBox(pg.ViewBox):
             selectedRegion.append((n.region[0], n.region[1]))
 
         minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
+        peaks = list(self.current.peaks)
+
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue
@@ -430,10 +452,14 @@ class ViewBox(pg.ViewBox):
             newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
           # Add the new peaks to selection
-          for peak in newPeaks:
-            # peak.isSelected = True
-            self.current.addPeak(peak)
+          #for peak in newPeaks:
+          #  # peak.isSelected = True
+          #  self.current.addPeak(peak)
+          peaks.extend(newPeaks)
 
+        self.current.peaks = peaks
+
+        for spectrumView in self.current.strip.spectrumViews:
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
               for strip in spectrumDisplay.strips:
@@ -462,6 +488,7 @@ class ViewBox(pg.ViewBox):
           zPositions = None
         # selectedPeaks = []
         #self.current.clearPeaks()
+        peaks = list(self.current.peaks)
         for spectrumView in self.current.strip.spectrumViews:
           for peakListView in spectrumView.peakListViews:
             if not peakListView.isVisible():
@@ -481,7 +508,8 @@ class ViewBox(pg.ViewBox):
                 height = peak.height # * scale # TBD: is the scale already taken into account in peak.height???
                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                   # peak.isSelected = True
-                  self.current.addPeak(peak)
+                  #self.current.addPeak(peak)
+                  peaks.append(peak)
             else:
               # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
               # Fixed 13/3/2016 Rasmus Fogh
@@ -500,11 +528,13 @@ class ViewBox(pg.ViewBox):
                     # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                     if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                       # peak.isSelected = True
-                      self.current.addPeak(peak)
+                      #self.current.addPeak(peak)
+                      peaks.append(peak)
                   else:
                     # peak.isSelected = True
-                    self.current.addPeak(peak)
-
+                    #self.current.addPeak(peak)
+                    peaks.append(peak)
+        self.current.peaks = peaks
     elif controlMiddleMouse(event):
       # Control(Cmd)+middle drag: move a selected peak
 

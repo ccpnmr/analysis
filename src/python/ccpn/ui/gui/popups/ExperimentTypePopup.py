@@ -1,4 +1,27 @@
-__author__ = 'simon1'
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: simon1 $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from PyQt4 import QtGui, QtCore
 
@@ -42,8 +65,19 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
                         hPolicy='fixed', icon='icons/applications-system')
 
       # Get the text that was used in the pulldown from the refExperiment
-      apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
-      text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      # NBNB This could possibly give unpredictable results
+      # if there is an experiment with experimentName (user settable!)
+      # that happens to match the synonym for a differnet experiment type.
+      # But if people will ignore our defined vocabulary, on their head be it!
+      # Anyway, tha alternative (discarded) is to look into the ExpPrototype
+      # to compare RefExperiment names and synonyums
+      # or (too ugly for words) to have a third attribute in parallel with
+      # spectrum.experimentName and spectrum.experimentType
+      text = spectrum.experimentName
+      if text not in self.pulldownItems:
+        text = spectrum.experimentType
+      # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+      # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       text = priorityNameRemapping.get(text, text)
       self.spPulldown.setCurrentIndex(self.spPulldown.findText(text))
 

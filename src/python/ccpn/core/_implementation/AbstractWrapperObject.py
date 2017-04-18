@@ -3,19 +3,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:00 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -754,8 +761,11 @@ class AbstractWrapperObject():
       elif oldSerial == maxSerial:
         serialDict[downlink] = max(downdict)
 
-  def _startFunctionCommandBlock(self, funcName, *params, values=None, defaults=None, parName=None):
-    """Execute StartCommandBlock for an object creation function,
+  def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None):
+    """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+
+    *params, values, and defaults are used by coreUtil.commandParameterString to set the function
+    parameter string - see the documentation of commandParameterString for details
     """
 
     #CCPNINTERNAL
@@ -773,6 +783,10 @@ class AbstractWrapperObject():
       command = ''.join((parName, ' = ', command))
 
     project._appBase._startCommandBlock(command)
+
+  def _endCommandEchoBlock(self):
+    """End block for command echoing"""
+    self._project._appBase._endCommandBlock()
 
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

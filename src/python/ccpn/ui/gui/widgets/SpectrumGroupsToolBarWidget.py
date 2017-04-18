@@ -4,20 +4,24 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = ": rhfogh $"
-__date__ = ": 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__version__ = ": 7686 $"
-
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-10 10:02:29 +0100 (Mon, April 10, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: rhfogh $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -40,7 +44,6 @@ class SpectrumGroupsWidget(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
     self.project = project
     self.strip = strip
-    self.setColours()
     self.spectrumGroup = self.project.getByPid(spectrumGroupPid)
     self.spectrumGroupButton = Button(self, text=self.spectrumGroup.id,toggle=True)
     self.spectrumGroupButton.setChecked(True)
@@ -60,8 +63,10 @@ class SpectrumGroupsWidget(QtGui.QWidget):
     self.peakListViews = [peakListView for peakListView in self.strip.spectrumDisplay.peakListViews ]
     self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.strip.spectrumDisplay.peakListViews ]
 
-  def onContextMenu(self, point):
-    self.popMenu.exec_(self.spectrumGroupButton.mapToGlobal(point))
+  def onContextMenu(self, points):
+    positions = self.spectrumGroupButton.mapToGlobal(points)
+    self.popMenu.move(positions.x(), positions.y() + 10)
+    self.popMenu.exec()
 
   def toggleSpectrumGroups(self):
     spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews
@@ -104,17 +109,3 @@ class SpectrumGroupsWidget(QtGui.QWidget):
       for peakListView in self.strip.spectrumDisplay.peakListViews:
         if peakList == peakListView.peakList:
           peakListView.setVisible(True)
-
-  def setColours(self):
-
-    self.colourScheme = self.project._appBase.colourScheme
-    if self.colourScheme == 'dark':
-      self.setStyleSheet("""
-                      Button::checked {background-color: #020F31;}
-                      Button {background-color: #2a3358; }
-                      """)
-    else:
-      self.setStyleSheet("""
-                      Button::checked {background-color: #bd8413;}
-                      Button {background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043}
-                      """)

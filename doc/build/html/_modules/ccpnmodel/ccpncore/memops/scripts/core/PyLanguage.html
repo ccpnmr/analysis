@@ -1,0 +1,1337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.core.PyLanguage &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.core.PyLanguage</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Python language writing. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.MetaModel</span> <span class="kn">import</span> <span class="n">MemopsError</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">TextWriter</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.scripts.core</span> <span class="kn">import</span> <span class="n">LanguageInterface</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">basestring</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+
+<div class="viewcode-block" id="PyLanguage"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage">[docs]</a><span class="k">class</span> <span class="nc">PyLanguage</span><span class="p">(</span><span class="n">LanguageInterface</span><span class="o">.</span><span class="n">LanguageInterface</span><span class="p">,</span> <span class="n">TextWriter</span><span class="o">.</span><span class="n">TextWriter</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">TextWriter</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;python&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">LanguageInterface</span><span class="o">.</span><span class="n">mandatoryAttributes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot; PyLanguage lack mandatory </span><span class="si">%s</span><span class="s2"> attribute&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># </span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PyLanguage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.createDir"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.createDir">[docs]</a>  <span class="k">def</span> <span class="nf">createDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirName</span><span class="p">):</span>
+
+    <span class="n">TextWriter</span><span class="o">.</span><span class="n">TextWriter</span><span class="o">.</span><span class="n">createDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirName</span><span class="p">)</span>
+    <span class="n">fullfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirName</span><span class="p">,</span> <span class="s1">&#39;__init__.py&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullfile</span><span class="p">):</span>
+      <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullfile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+      <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.setVar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.setVar">[docs]</a>  <span class="k">def</span> <span class="nf">setVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">castType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.castVar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.castVar">[docs]</a>  <span class="k">def</span> <span class="nf">castVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">castType</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">var</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.defineVar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.defineVar">[docs]</a>  <span class="k">def</span> <span class="nf">defineVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">varType</span><span class="p">):</span>
+
+    <span class="k">pass</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.returnStatement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.returnStatement">[docs]</a>  <span class="k">def</span> <span class="nf">returnStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;return&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;return </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.noStatement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.noStatement">[docs]</a>  <span class="k">def</span> <span class="nf">noStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;pass&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.lenString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.lenString">[docs]</a>  <span class="k">def</span> <span class="nf">lenString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;len(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">string</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.toLiteral"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.toLiteral">[docs]</a>  <span class="k">def</span> <span class="nf">toLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">==</span> <span class="s1">&#39;nan&#39;</span><span class="p">:</span>
+      <span class="c1"># special case - we have NaN defined as an API constant in all API files</span>
+      <span class="k">return</span> <span class="s1">&#39;NaN&#39;</span>
+    <span class="k">elif</span> <span class="nb">eval</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="p">{})</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;value cannot be converted to literal: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.collectionIsEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.collectionIsEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">collectionIsEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;not </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">collection</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.collectionIsNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.collectionIsNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">collectionIsNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">collection</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.collectionNotNoneAndNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.collectionNotNoneAndNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">collectionNotNoneAndNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">collection</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.valueNotNoneAndIfCollectionNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.valueNotNoneAndIfCollectionNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">valueNotNoneAndIfCollectionNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.lenCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.lenCollection">[docs]</a>  <span class="k">def</span> <span class="nf">lenCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;len(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">collection</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.newCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.newCollection">[docs]</a>  <span class="k">def</span> <span class="nf">newCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">initValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">isFrozen</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">needDeclType</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">useAdd</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; initValues must be a string variable name (referring to an iterable)</span>
+<span class="sd">    an iterable of literals, or None&quot;&quot;&quot;</span>
+    
+    <span class="c1"># convert input if list of literals</span>
+    <span class="n">haveListInitValues</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">initValues</span><span class="p">:</span>
+      <span class="n">initValues</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+      
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initValues</span><span class="p">,</span> <span class="n">StringType</span><span class="p">):</span>
+      <span class="n">haveListInitValues</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">initValues</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">,)&#39;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">initValues</span><span class="p">])</span>
+    
+    <span class="c1"># make newCollection string</span>
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">isFrozen</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="s1">&#39;frozenset(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">initValues</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="s1">&#39;set(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">initValues</span>
+        
+    <span class="k">elif</span> <span class="n">haveListInitValues</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">isFrozen</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">initValues</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="n">initValues</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">isFrozen</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="s1">&#39;tuple(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">initValues</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="s1">&#39;list(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">initValues</span>
+        
+    <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">c</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.addCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.addCollection">[docs]</a>  <span class="k">def</span> <span class="nf">addCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;add&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;append&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.addAllCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.addAllCollection">[docs]</a>  <span class="k">def</span> <span class="nf">addAllCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;update&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;extend&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.popCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.popCollection">[docs]</a>  <span class="k">def</span> <span class="nf">popCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span>
+                    <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">castType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">.pop()&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getCollection">[docs]</a>  <span class="k">def</span> <span class="nf">getCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get first element from ordered collection, </span>
+<span class="sd">    and random element from others. Works whether modifiable or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">defineVar</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">varType</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s2">&quot;next(iter(</span><span class="si">%s</span><span class="s2">))&quot;</span> <span class="o">%</span> <span class="n">collection</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">[0]&quot;</span> <span class="o">%</span> <span class="n">collection</span>
+    
+    <span class="k">if</span> <span class="n">var</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">ss</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span></div>
+      
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getListSlice"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getListSlice">[docs]</a>  <span class="k">def</span> <span class="nf">getListSlice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">lo</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hi</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get slice out of list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">hi</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">:]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">lo</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">lo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[:</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.reverseList"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.reverseList">[docs]</a>  <span class="k">def</span> <span class="nf">reverseList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.reverse()&#39;</span> <span class="o">%</span> <span class="n">collection</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.removeCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.removeCollection">[docs]</a>  <span class="k">def</span> <span class="nf">removeCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.remove(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.isInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.isInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">isInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.countInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.countInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">countInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> 
+                        <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">isUnique</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1"> and 1 or 0&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.count(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.replaceInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.replaceInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">replaceInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldvar</span><span class="p">,</span> <span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> 
+                          <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; resulting code may raise KeyError (for unique, nonordered)</span>
+<span class="sd">     or ValueError (for all others)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="c1"># implemented as set</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">removeCollection</span><span class="p">(</span><span class="n">oldvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">startIf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isInCollection</span><span class="p">(</span><span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addCollection</span><span class="p">(</span><span class="n">oldvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">raiseApiError</span><span class="p">(</span><span class="s2">&quot;replacement value already in unique collection &quot;</span><span class="p">,</span>
+                         <span class="n">newvar</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">elseIf</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addCollection</span><span class="p">(</span><span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endIf</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># all others implemented as lists</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setVar</span><span class="p">(</span><span class="s1">&#39;replaceIndex&#39;</span><span class="p">,</span> 
+       <span class="bp">self</span><span class="o">.</span><span class="n">indexInCollection</span><span class="p">(</span><span class="n">oldvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">),</span>
+       <span class="n">varType</span>
+      <span class="p">)</span>
+      <span class="k">if</span> <span class="n">isUnique</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setByIndexInCollection</span><span class="p">(</span>
+         <span class="s1">&#39;replaceIndex&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startIf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isInCollection</span><span class="p">(</span><span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setByIndexInCollection</span><span class="p">(</span>
+         <span class="s1">&#39;replaceIndex&#39;</span><span class="p">,</span> <span class="n">oldvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raiseApiError</span><span class="p">(</span><span class="s2">&quot;replacement value already in unique collection &quot;</span><span class="p">,</span>
+                           <span class="n">newvar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elseIf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setByIndexInCollection</span><span class="p">(</span>
+         <span class="s1">&#39;replaceIndex&#39;</span><span class="p">,</span> <span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endIf</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setByIndexInCollection</span><span class="p">(</span>
+         <span class="s1">&#39;replaceIndex&#39;</span><span class="p">,</span> <span class="n">newvar</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span>
+        <span class="p">)</span></div>
+           
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.indexInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.indexInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">indexInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> 
+                        <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;indexInCollection not defined for isUnique=</span><span class="si">%s</span><span class="s2">, isOrdered=</span><span class="si">%s</span><span class="s2">&quot;</span>
+       <span class="o">%</span> <span class="p">(</span><span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">)</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.index(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span></div>
+      
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getByIndexInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getByIndexInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">getByIndexInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> 
+                        <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                        
+    <span class="k">if</span> <span class="n">isUnique</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;getByIndexInCollection not defined for isOrdered=</span><span class="si">%s</span><span class="s2">&quot;</span>
+       <span class="o">%</span> <span class="n">isOrdered</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+    
+      
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="PyLanguage.setByIndexInCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.setByIndexInCollection">[docs]</a>  <span class="k">def</span> <span class="nf">setByIndexInCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexvar</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> 
+                             <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isOrdered</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;setByIndexInCollection not defined for isOrdered=</span><span class="si">%s</span><span class="s2">&quot;</span>
+       <span class="o">%</span> <span class="n">isOrdered</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">indexvar</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="PyLanguage.concatenateCollection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.concatenateCollection">[docs]</a>  <span class="k">def</span> <span class="nf">concatenateCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newCollection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span>
+                            <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">collections</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newCollection</span><span class="p">,</span> <span class="s1">&#39; + &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">collections</span><span class="p">)))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.newStack"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.newStack">[docs]</a>  <span class="k">def</span> <span class="nf">newStack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">initValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">needDeclType</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">initValues</span><span class="p">:</span>
+      <span class="n">initValues</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">initValues</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">initValues</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = [</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">initValues</span><span class="p">))</span></div>
+      
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stackIsEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stackIsEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">stackIsEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;not </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">stack</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stackIsNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stackIsNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">stackIsNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">stack</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.pushStack"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.pushStack">[docs]</a>  <span class="k">def</span> <span class="nf">pushStack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.append(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.popStack"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.popStack">[docs]</a>  <span class="k">def</span> <span class="nf">popStack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">castType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doWrite</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doWrite</span><span class="p">:</span>
+      <span class="k">assert</span> <span class="ow">not</span> <span class="n">var</span>
+
+    <span class="k">if</span> <span class="n">var</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = &#39;</span> <span class="o">%</span> <span class="n">var</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">doWrite</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">.pop()&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">stack</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.pop()&#39;</span> <span class="o">%</span> <span class="n">stack</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.peekStack"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.peekStack">[docs]</a>  <span class="k">def</span> <span class="nf">peekStack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">castType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">var</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">[-1]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">stack</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[-1]&#39;</span> <span class="o">%</span> <span class="n">stack</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stackSize"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stackSize">[docs]</a>  <span class="k">def</span> <span class="nf">stackSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;len(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">stack</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.inEnumeration"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.inEnumeration">[docs]</a>  <span class="k">def</span> <span class="nf">inEnumeration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">enumeration</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">enumeration</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.constructorFuncname"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.constructorFuncname">[docs]</a>  <span class="k">def</span> <span class="nf">constructorFuncname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;__init__&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startFunc">[docs]</a>  <span class="k">def</span> <span class="nf">startFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">docString</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">returnType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">throwsTypes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">paramString</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">def </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">):&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">funcname</span><span class="p">,</span> <span class="n">paramString</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    
+    <span class="k">if</span> <span class="n">docString</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeMultilineComment</span><span class="p">(</span><span class="n">docString</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endFunc">[docs]</a>  <span class="k">def</span> <span class="nf">endFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.callFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.callFunc">[docs]</a>  <span class="k">def</span> <span class="nf">callFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doWrite</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; call function with normal parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pars</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">coerceToList</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING, conversion of &#39;false&#39; will disappear&quot;</span><span class="p">)</span>
+        <span class="n">par</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+      <span class="k">elif</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING, conversion of &#39;true&#39; will disappear&quot;</span><span class="p">)</span>
+        <span class="n">par</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+      <span class="n">pars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pars</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pars</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">doWrite</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">s</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.callKwFunc"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.callKwFunc">[docs]</a>  <span class="k">def</span> <span class="nf">callKwFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setVarTo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kwDict</span><span class="o">=</span><span class="p">{}):</span>
+    
+    <span class="c1"># NBNB TBD in use? remove?</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">coerceToList</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">kwDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">))</span>
+    <span class="c1">#</span>
+    
+    <span class="k">if</span> <span class="n">setVarTo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">callFunc</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> 
+                    <span class="p">(</span><span class="n">setVarTo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">callFunc</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">doWrite</span><span class="o">=</span><span class="bp">False</span><span class="p">)))</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startBlock"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startBlock">[docs]</a>  <span class="k">def</span> <span class="nf">startBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">pass</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endBlock"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endBlock">[docs]</a>  <span class="k">def</span> <span class="nf">endBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">pass</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.exceptionClass"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.exceptionClass">[docs]</a>  <span class="k">def</span> <span class="nf">exceptionClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">exception</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">ee</span> <span class="o">=</span> <span class="s1">&#39;Exception&#39;</span>
+    <span class="k">elif</span> <span class="n">exception</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;KeyError&#39;</span><span class="p">,</span> <span class="s1">&#39;ApiError&#39;</span><span class="p">):</span>
+      <span class="n">ee</span> <span class="o">=</span> <span class="n">exception</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Unexpected exceptionClass&quot;</span> <span class="o">%</span> <span class="n">exception</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ee</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startTry"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startTry">[docs]</a>  <span class="k">def</span> <span class="nf">startTry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;try:&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.catchException"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.catchException">[docs]</a>  <span class="k">def</span> <span class="nf">catchException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">exceptionVar</span> <span class="o">=</span> <span class="s1">&#39;ex&#39;</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="k">if</span> <span class="n">exception</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;except:&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;except </span><span class="si">%s</span><span class="s1"> as </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exception</span><span class="p">,</span> <span class="n">exceptionVar</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.finaliseException"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.finaliseException">[docs]</a>  <span class="k">def</span> <span class="nf">finaliseException</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;finally:&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endTry"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endTry">[docs]</a>  <span class="k">def</span> <span class="nf">endTry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.reraiseException"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.reraiseException">[docs]</a>  <span class="k">def</span> <span class="nf">reraiseException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exceptionVar</span> <span class="o">=</span> <span class="s1">&#39;exc&#39;</span><span class="p">,</span> <span class="n">exceptionClass</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;raise&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startLoop">[docs]</a>  <span class="k">def</span> <span class="nf">startLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">isUnique</span><span class="p">,</span> <span class="n">isOrdered</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+      
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">collection</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endLoop">[docs]</a>  <span class="k">def</span> <span class="nf">endLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.continueLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.continueLoop">[docs]</a>  <span class="k">def</span> <span class="nf">continueLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;continue&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.breakLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.breakLoop">[docs]</a>  <span class="k">def</span> <span class="nf">breakLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;break&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startIndexLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startIndexLoop">[docs]</a>  <span class="k">def</span> <span class="nf">startIndexLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iVar</span><span class="p">,</span> <span class="n">nVar</span><span class="p">,</span> <span class="n">isReversed</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+      
+    <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;range(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">nVar</span>
+    <span class="k">if</span> <span class="n">isReversed</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;reversed(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">ss</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iVar</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endIndexLoop"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endIndexLoop">[docs]</a>  <span class="k">def</span> <span class="nf">endIndexLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startWhile"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startWhile">[docs]</a>  <span class="k">def</span> <span class="nf">startWhile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;while </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">condition</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endWhile"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endWhile">[docs]</a>  <span class="k">def</span> <span class="nf">endWhile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startIf"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startIf">[docs]</a>  <span class="k">def</span> <span class="nf">startIf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;if (</span><span class="si">%s</span><span class="s1">):&#39;</span> <span class="o">%</span> <span class="n">condition</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.elseIf"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.elseIf">[docs]</a>  <span class="k">def</span> <span class="nf">elseIf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="k">if</span> <span class="n">condition</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;else:&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;elif (</span><span class="si">%s</span><span class="s1">):&#39;</span> <span class="o">%</span> <span class="n">condition</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.endIf"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.endIf">[docs]</a>  <span class="k">def</span> <span class="nf">endIf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.negate"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.negate">[docs]</a>  <span class="k">def</span> <span class="nf">negate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">condition</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;not (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">condition</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.boolean"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.boolean">[docs]</a>  <span class="k">def</span> <span class="nf">boolean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">expression</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.comparison"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.comparison">[docs]</a>  <span class="k">def</span> <span class="nf">comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression1</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">expression2</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">expression1</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">expression2</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.equals"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.equals">[docs]</a>  <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression1</span><span class="p">,</span> <span class="n">expression2</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> == </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">expression1</span><span class="p">,</span> <span class="n">expression2</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.logicalOp"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.logicalOp">[docs]</a>  <span class="k">def</span> <span class="nf">logicalOp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">expression2</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">expression1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">expression2</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.newDict"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.newDict">[docs]</a>  <span class="k">def</span> <span class="nf">newDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keyType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">valueType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">needDeclType</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="n">dictVar</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;{}&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = {}&#39;</span> <span class="o">%</span> <span class="n">dictVar</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+  <span class="c1"># below assumes key is variable not literal</span>
+<div class="viewcode-block" id="PyLanguage.getDictEntry"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getDictEntry">[docs]</a>  <span class="k">def</span> <span class="nf">getDictEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">castType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                   <span class="n">defaultValue</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">keyIsMandatory</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+
+    <span class="k">assert</span> <span class="n">defaultValue</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">keyIsMandatory</span>
+
+    <span class="k">if</span> <span class="n">keyIsMandatory</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">defaultValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.get(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.get(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+  <span class="c1"># below assumes key is variable not literal</span>
+<div class="viewcode-block" id="PyLanguage.setDictEntry"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.setDictEntry">[docs]</a>  <span class="k">def</span> <span class="nf">setDictEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">[</span><span class="si">%s</span><span class="s2">] = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+  <span class="c1"># below assumes key is variable not literal</span>
+<div class="viewcode-block" id="PyLanguage.removeDictEntry"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.removeDictEntry">[docs]</a>  <span class="k">def</span> <span class="nf">removeDictEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;del </span><span class="si">%s</span><span class="s2">[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+  <span class="c1"># below assumes key is variable not literal</span>
+  <span class="c1"># NB probably unnecessary - same as removeDictEntry. Removed</span>
+  <span class="c1">#def popDictEntry(self, dictVar, key):</span>
+  <span class="c1">#</span>
+  <span class="c1">#  self.writeOne(&quot;%s.pop(%s)&quot; % (dictVar, key))</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.keyIsInDict"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.keyIsInDict">[docs]</a>  <span class="k">def</span> <span class="nf">keyIsInDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyLanguage.getDictKeys"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getDictKeys">[docs]</a>  <span class="k">def</span> <span class="nf">getDictKeys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.keys()&#39;</span> <span class="o">%</span> <span class="n">dictVar</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyLanguage.getDictValues"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getDictValues">[docs]</a>  <span class="k">def</span> <span class="nf">getDictValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.values()&#39;</span> <span class="o">%</span> <span class="n">dictVar</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.startLoopOverDictKeys"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.startLoopOverDictKeys">[docs]</a>  <span class="k">def</span> <span class="nf">startLoopOverDictKeys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">,</span> <span class="n">keyVar</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">.keys():&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">keyVar</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.lenDict"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.lenDict">[docs]</a>  <span class="k">def</span> <span class="nf">lenDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;len(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">dictVar</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.dictIsEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.dictIsEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">dictIsEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;not </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dictVar</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.dictIsNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.dictIsNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">dictIsNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictVar</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dictVar</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.incrementInteger"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.incrementInteger">[docs]</a>  <span class="k">def</span> <span class="nf">incrementInteger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1"> + 1&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># below assumes var are variables not literals</span>
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.subtractIntegers"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.subtractIntegers">[docs]</a>  <span class="k">def</span> <span class="nf">subtractIntegers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.arithmetic"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.arithmetic">[docs]</a>  <span class="k">def</span> <span class="nf">arithmetic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">expression2</span><span class="p">):</span>
+  
+    <span class="k">if</span> <span class="n">op</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;arithmetic operation </span><span class="si">%s</span><span class="s2"> not supported&quot;</span> <span class="o">%</span> <span class="n">op</span> <span class="p">)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">expression1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">expression2</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stringReplace"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stringReplace">[docs]</a>  <span class="k">def</span> <span class="nf">stringReplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">stringToMatch</span><span class="p">,</span> <span class="n">stringToReplace</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.replace(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">stringToMatch</span><span class="p">,</span> <span class="n">stringToReplace</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stringIsNotEmpty"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stringIsNotEmpty">[docs]</a>  <span class="k">def</span> <span class="nf">stringIsNotEmpty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">val</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.stringSlice"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.stringSlice">[docs]</a>  <span class="k">def</span> <span class="nf">stringSlice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">fromStart</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fromEnd</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Slice string. Uses Python convention with positive and negative indices&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">fromEnd</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">fromStart</span><span class="p">,</span> <span class="n">fromEnd</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[</span><span class="si">%s</span><span class="s1">:]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">fromStart</span><span class="p">)</span></div>
+
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.currentTime"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.currentTime">[docs]</a>  <span class="k">def</span> <span class="nf">currentTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;time.ctime()&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.printMessage"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.printMessage">[docs]</a>  <span class="k">def</span> <span class="nf">printMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">objs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;print(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">objs</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.isInstance"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.isInstance">[docs]</a>  <span class="k">def</span> <span class="nf">isInstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">className</span><span class="p">):</span>
+    
+    <span class="k">return</span> <span class="s2">&quot;isinstance(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">className</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyLanguage.getClass"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getClass">[docs]</a>  <span class="k">def</span> <span class="nf">getClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get class of object passed in. Expression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.__class__&quot;</span> <span class="o">%</span> <span class="n">var</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyLanguage.getClassname"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getClassname">[docs]</a>  <span class="k">def</span> <span class="nf">getClassname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get string class name of object passed in. Expression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.__class__.__name__&quot;</span> <span class="o">%</span> <span class="n">var</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.raiseApiError"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.raiseApiError">[docs]</a>  <span class="k">def</span> <span class="nf">raiseApiError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">obj2</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">obj3</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">inOp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;NB obj and obj2 and obj3 must evaluate to a single Python object</span>
+<span class="sd">    More specifically you can pass in a tuple, like &#39;(a,b,c)&#39;</span>
+<span class="sd">    but not a comma-separated list, like &#39;a,b,c&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">inOp</span> <span class="ow">and</span> <span class="n">inOp</span><span class="o">.</span><span class="n">scope</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">classifier_level</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="n">inOp</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;raise ApiError(&quot;&quot;&quot;</span><span class="si">%s%s</span><span class="s1">:</span>
+<span class="s1"> </span><span class="si">%s</span><span class="s1">&quot;&quot;&quot; &#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">))</span>
+    
+    <span class="k">elif</span> <span class="n">inOp</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>          <span class="c1"># NBNB Deliberate. False and None are treated differently</span>
+      <span class="c1"># special case - we are not in a CCPN object</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;raise ApiError(&quot;&quot;&quot;</span><span class="si">%s</span><span class="s1">:</span>
+<span class="s1"> </span><span class="si">%s</span><span class="s1">&quot;&quot;&quot; &#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;raise ApiError(&quot;&quot;&quot;</span><span class="si">%s</span><span class="s1">&quot;&quot;&quot; &#39;&#39;&#39;</span> <span class="o">%</span> <span class="n">errorMsg</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;raise ApiError(&quot;&quot;&quot;</span><span class="si">%%</span><span class="s1">s</span><span class="si">%s</span><span class="s1">:</span>
+<span class="s1"> </span><span class="si">%s</span><span class="s1">&quot;&quot;&quot; </span><span class="si">%%</span><span class="s1"> self.qualifiedName&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span><span class="p">,</span> <span class="n">errorMsg</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">obj2</span> <span class="ow">and</span> <span class="n">obj3</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39; + &quot;: </span><span class="si">%%</span><span class="s1">s:</span><span class="si">%%</span><span class="s1">s:</span><span class="si">%%</span><span class="s1">s&quot; </span><span class="si">%%</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj2</span><span class="p">,</span> <span class="n">obj3</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">obj</span> <span class="ow">and</span> <span class="n">obj2</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39; + &quot;: </span><span class="si">%%</span><span class="s1">s:</span><span class="si">%%</span><span class="s1">s&quot; </span><span class="si">%%</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj2</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39; + &quot;: </span><span class="si">%%</span><span class="s1">s&quot; </span><span class="si">%%</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">,)&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="p">)</span>
+      
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># language-specific functions that interrogate the model.</span>
+  
+  <span class="c1"># NB TBD should maybe be split off in the future</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getFuncParams"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getFuncParams">[docs]</a>  <span class="k">def</span> <span class="nf">getFuncParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">defineFunc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="n">defineFunc</span> <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">scope</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">instance_level</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+      
+      <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">direction</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">:</span>
+      
+        <span class="n">pName</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span>
+ 
+        <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">taggedValues</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">):</span>
+          <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># keywordValue parameters (dict)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;**&#39;</span> <span class="o">+</span> <span class="n">pName</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># normal parameters (list)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="n">pName</span><span class="p">)</span>
+ 
+        <span class="k">elif</span> <span class="n">defineFunc</span> <span class="ow">and</span> <span class="p">((</span><span class="n">par</span><span class="o">.</span><span class="n">locard</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">par</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+              <span class="ow">or</span> <span class="n">par</span><span class="o">.</span><span class="n">defaultValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+          <span class="c1"># optional parameter. NB the or statement is currently superflous</span>
+          <span class="c1"># but we might allow defaults for hicard!= 1 later</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">defaultValue</span><span class="p">)))</span>
+ 
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># mandatory parameter</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pName</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getDocString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getDocString">[docs]</a>  <span class="k">def</span> <span class="nf">getDocString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">breakString</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">documentation</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getOpValueType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getOpValueType">[docs]</a>  <span class="k">def</span> <span class="nf">getOpValueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    
+    <span class="c1"># Python has no type</span>
+    
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getReturnType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getReturnType">[docs]</a>  <span class="k">def</span> <span class="nf">getReturnType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    
+    <span class="c1"># Python has no returntype</span>
+    
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.getThrowsTypes"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.getThrowsTypes">[docs]</a>  <span class="k">def</span> <span class="nf">getThrowsTypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    
+    <span class="c1"># Python has no exception reporting at start of function</span>
+    
+    <span class="k">return</span> <span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># implements LanguageInterface</span>
+<div class="viewcode-block" id="PyLanguage.funcDeclaration"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyLanguage.PyLanguage.funcDeclaration">[docs]</a>  <span class="k">def</span> <span class="nf">funcDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    <span class="c1"># NBNB TBD move to IntGen</span>
+
+    <span class="k">pass</span> <span class="c1"># this used only in interface, which does not exist in Python</span></div></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

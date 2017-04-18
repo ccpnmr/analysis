@@ -4,20 +4,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-11 15:15:27 +0100 (Tue, April 11, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -301,8 +307,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       ph1 = phasingFrame.slider1.value()
       pivotPpm = phasingFrame.pivotEntry.get()
       direction = phasingFrame.getDirection()
-      dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-      pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+      axisIndex = self._displayOrderSpectrumDimensionIndices[direction]
+      pivot = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
     else:
       ph0 = ph1 = direction = 0
       pivot = 1
@@ -621,10 +629,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-    if self.positiveContourBase == 10000.0: # horrid
+    if self.spectrum.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
-      self.positiveContourBase = self.spectrum.estimateNoise()
-      self.negativeContourBase = - self.positiveContourBase
+      self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
+      self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
 
     if self.displayPositiveContours:
       posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
@@ -999,8 +1007,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def _getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
 
-    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
-    valueToPoint = dataDim.primaryDataDimRef.valueToPoint
+    # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
+    # valueToPoint = dataDim.primaryDataDimRef.valueToPoint
+
+    axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
+    valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
         
     strip = self.strip
     plotWidget = strip.plotWidget

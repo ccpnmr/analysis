@@ -3,20 +3,26 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+               "Simon P Skinner & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:31 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
 
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -306,7 +312,7 @@ class NmrResidue(AbstractWrapperObject):
     elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
       raise ValueError("Cannot make cyclical connected NmrChain")
 
-    self._startFunctionCommandBlock('connectNext', value)
+    self._startCommandEchoBlock('connectNext', value)
     try:
       if apiNmrChain.isConnected:
         # At this point, self must be the last NmrResidue in a connected chain
@@ -354,7 +360,7 @@ class NmrResidue(AbstractWrapperObject):
           value._wrappedData.directNmrChain = newApiNmrChain
         result = value.nmrChain
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     #
     return result
 
@@ -368,7 +374,7 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-    self._startFunctionCommandBlock('disconnectNext')
+    self._startCommandEchoBlock('disconnectNext')
     try:
       if apiNmrChain is None:
         # offset residue: no-op
@@ -407,7 +413,7 @@ class NmrResidue(AbstractWrapperObject):
               rg.directNmrChain = newNmrChain
           newNmrChain.__dict__['mainResonanceGroups'].reverse()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   @property
   def previousNmrResidue(self) -> typing.Optional['NmrResidue']:
@@ -485,7 +491,7 @@ class NmrResidue(AbstractWrapperObject):
     elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
       raise ValueError("Cannot make cyclical connected NmrChain")
 
-    self._startFunctionCommandBlock('connectPrevious', value)
+    self._startCommandEchoBlock('connectPrevious', value)
     try:
       if apiNmrChain.isConnected:
         # At this point, self must be the first NmrResidue in a connected chain
@@ -528,7 +534,7 @@ class NmrResidue(AbstractWrapperObject):
           apiResonanceGroup.directNmrChain = newApiNmrChain
         result = value.nmrChain
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     #
     return result
 
@@ -542,7 +548,7 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-    self._startFunctionCommandBlock('disconnectPrevious')
+    self._startCommandEchoBlock('disconnectPrevious')
     try:
       if apiNmrChain is None:
         # offset residue: no-op
@@ -581,7 +587,7 @@ class NmrResidue(AbstractWrapperObject):
               rg.directNmrChain = newNmrChain
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def disconnect(self):
     """Move NmrResidue from connected NmrChain to default chain,
@@ -590,7 +596,7 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-    self._startFunctionCommandBlock('disconnect')
+    self._startCommandEchoBlock('disconnect')
     try:
       if apiNmrChain is None:
         # offset residue: no-op
@@ -632,7 +638,7 @@ class NmrResidue(AbstractWrapperObject):
             self.disconnectNext()
             apiResonanceGroup.directNmrChain = defaultChain
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   @property
   def probableResidues(self) -> typing.Tuple[typing.Tuple[Residue,float], ...]:
@@ -674,13 +680,13 @@ class NmrResidue(AbstractWrapperObject):
 
   def deassign(self):
     """Reset sequenceCode and residueType assignment to default values"""
-    self._startFunctionCommandBlock('deassign')
+    self._startCommandEchoBlock('deassign')
     try:
       apiResonanceGroup = self._apiResonanceGroup
       apiResonanceGroup.sequenceCode = None
       apiResonanceGroup.resetResidueType(None)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def rename(self, value:str=None):
     """Rename NmrResidue. changing its sequenceCode, residueType, or both.
@@ -710,12 +716,12 @@ class NmrResidue(AbstractWrapperObject):
       if ll and ll != [self]:
         raise ValueError("Cannot rename %s to %s - assignment already exists" % (self, value))
     #
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     try:
       apiResonanceGroup.sequenceCode = sequenceCode
       apiResonanceGroup.resetResidueType(residueType)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def moveToNmrChain(self, newNmrChain:Union['NmrChain', str]=None):
     """Reset NmrChain, breaking connected NmrChain if necessary.
@@ -738,11 +744,11 @@ class NmrResidue(AbstractWrapperObject):
     else:
       apiNmrChain = newNmrChain._wrappedData
 
-    self._startFunctionCommandBlock('moveToNmrChain', values=values)
+    self._startCommandEchoBlock('moveToNmrChain', values=values)
     try:
       apiResonanceGroup.moveToNmrChain(apiNmrChain)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
                residueType:str=None, mergeToExisting:bool=False) -> 'NmrResidue':
@@ -779,8 +785,8 @@ class NmrResidue(AbstractWrapperObject):
     clearUndo = False
     undo = apiResonanceGroup.root._undo
 
-    self._startFunctionCommandBlock('assignTo', values=locals(), defaults=defaults,
-                                    parName='mergedNmrResidue')
+    self._startCommandEchoBlock('assignTo', values=locals(), defaults=defaults,
+                                parName='mergedNmrResidue')
     try:
 
       sequenceCode = str(sequenceCode) if sequenceCode else None
@@ -878,7 +884,7 @@ class NmrResidue(AbstractWrapperObject):
         if undo is not None:
           undo.clear()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     #
     return result
 
@@ -893,17 +899,6 @@ class NmrResidue(AbstractWrapperObject):
 def getter(self:Residue) -> NmrResidue:
   return self._project.getNmrResidue(self._id)
 
-  # apiResidue = self._wrappedData
-  # apiNmrProject = self._project._wrappedData
-  # apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)
-  # if apiNmrChain is not None:
-  #   obj = apiNmrChain.findFirstResonanceGroup(seqCode=apiResidue.seqCode,
-  #                                             seqInsertCode=apiResidue.seqInsertCode.strip() or None,
-  #                                             relativeOffset=None)
-  #   if obj is not None:
-  #     return self._project._data2Obj.get(obj)
-  # return None
-
 def setter(self:Residue, value:NmrResidue):
   oldValue = self.nmrResidue
   if oldValue is value:
@@ -915,6 +910,40 @@ def setter(self:Residue, value:NmrResidue):
     value.residue = self
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
+def getter(self:Residue) -> typing.Tuple[NmrResidue]:
+  result = []
+
+  nmrChain = self.chain.nmrChain
+  if nmrChain:
+    nmrResidue = self.nmrResidue
+    if nmrResidue is not None:
+      result = [nmrResidue]
+
+    for offset in set(x.relativeOffset for x in nmrChain.nmrResidues):
+      if offset is not None:
+        residue = self
+        if offset > 0:
+          for ii in range(offset):
+            residue = residue.previousResidue
+            if residue is None:
+              break
+        elif offset < 0:
+          for ii in range(offset):
+            residue = residue.nextResidue
+            if residue is None:
+              break
+        #
+        if residue is not None:
+          ll = residue.split(Pid.IDSEP)
+          ll[-2] = '%s%+d' % (ll[-2], offset)
+          nmrResidue = self._project.getNmrResidue(Pid.IDSEP.join(ll))
+          if nmrResidue is not None:
+            result.append(nmrResidue)
+  #
+  return tuple(sorted(result))
+Residue.allNmrResidues = property(getter, None, None,
+                                  "AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)"
+                                  " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
 def getter(self:NmrChain) -> typing.Tuple[NmrResidue]:
   result = list(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)
@@ -944,8 +973,8 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
   dd = {'name':residueType, 'details':comment,
         'residueType':residueType,'directNmrChain':apiNmrChain}
 
-  self._startFunctionCommandBlock('newNmrResidue', values=locals(), defaults=defaults,
-                                  parName='newNmrResidue')
+  self._startCommandEchoBlock('newNmrResidue', values=locals(), defaults=defaults,
+                              parName='newNmrResidue')
   self._project.blankNotification() # delay notifiers till NmrResidue is fully ready
   try:
 
@@ -964,23 +993,6 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
       if ll:
         raise ValueError("Existing %s clashes with id %s.%s.%s" %
                          (ll[0].longPid, self.shortName, sequenceCode,residueType or ''))
-      # # Superseded as the code was too slow
-      # previous = None
-      # if Pid.IDSEP in sequenceCode:
-      #   # sequenceCode contains '.' - check against remapped sequenceCode
-      #   matchString = sequenceCode.translate(Pid.remapSeparators) + '.'
-      #   for nr in self.nmrResidues:
-      #     if nr._id.startswith(matchString):
-      #       previous = nr
-      #       break
-      # else:
-      #   # No '.' - can check in API directly (faster)
-      #   obj0 = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-      #   if obj0 is not None:
-      #     previous = self._project._data2Obj[obj0]
-      # if previous is not None:
-      #   raise ValueError("Existing %s clashes with id %s.%s.%s" %
-      #                    (previous.longPid, self.shortName, sequenceCode,residueType or ''))
 
       # Handle reserved names
       if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
@@ -1019,7 +1031,7 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
         obj.molType, obj.ccpCode = tt
   finally:
     self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   # Do creation notifications
   if serial is not None:
@@ -1042,8 +1054,8 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
 
   defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None)))
 
-  self._startFunctionCommandBlock('fetchNmrResidue', values=locals(),
-                                  parName='newNmrResidue')
+  self._startCommandEchoBlock('fetchNmrResidue', values=locals(),
+                              parName='newNmrResidue')
   try:
     if sequenceCode is None:
       # Make new NmrResidue always
@@ -1077,7 +1089,7 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
             "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
           )
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 

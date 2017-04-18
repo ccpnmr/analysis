@@ -1,4 +1,5 @@
-"""Module Documentation here
+"""
+Base class for gridding
 
 """
 #=========================================================================================
@@ -15,7 +16,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code

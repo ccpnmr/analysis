@@ -1,8 +1,9 @@
 """
-This file contains SequenceModule module
+This file contains the SequenceModule module
 
 intial version by Simon;
-modified by Geerten 1-9/12/2016
+GWV: modified 1-9/12/2016
+GWV: 13/04/2017: Disconnected from Sequence Graph; Needs rafactoring
 
 """
 #=========================================================================================
@@ -19,7 +20,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code

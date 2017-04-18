@@ -9,8 +9,8 @@ __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s1
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -569,7 +569,7 @@ class Framework:
       self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
-    self.project._logger.debug('startCommandBlock. command=%s, echoBlocking=%s, undo.blocking=%s'
+    self.project._logger.debug('command=%s, echoBlocking=%s, undo.blocking=%s'
                                % (command, self._echoBlocking, undo.blocking))
 
 
@@ -578,7 +578,7 @@ class Framework:
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
-    self.project._logger.debug('endCommandBlock. echoBlocking=%s' % self._echoBlocking)
+    self.project._logger.debug('echoBlocking=%s' % self._echoBlocking)
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
@@ -1338,7 +1338,7 @@ class Framework:
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
-    nmrResidueTableModule = NmrResidueTableModule(self.ui.mainWindow, self.project)
+    nmrResidueTableModule = NmrResidueTableModule(self.ui.mainWindow)
     #nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
     #nmrResidueTableModule.layout.addWidget(nmrResidueTable)
     self.ui.mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)

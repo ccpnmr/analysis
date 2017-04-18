@@ -56,8 +56,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: Wayne Boucher $"
-__date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -74,116 +74,11 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 logger = getLogger()
 
-
-def doDebug(msg):
-  if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
-    sys.stderr.write(msg +'\n')
-
-def controlShiftLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('DEBUG mouse: Control-shift-left-Mouse event at %s' % event.pos())
-  return result
-
-def controlLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-left-Mouse event at %s' % event.pos())
-  return result
-
-def shiftLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-left-Mouse event at %s' % event.pos())
-  return result
-
-def leftMouse(event:QtGui.QMouseEvent):
-  # Return True for left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Left-Mouse event at %s' % event.pos())
-  return result
-
-def controlShiftRightMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-shift-right-Mouse event at %s' % event.pos())
-  return result
-
-def controlRightMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-right-Mouse event at %s' % event.pos())
-  return result
-
-def shiftRightMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-right-Mouse event at %s' % event.pos())
-  return result
-
-def rightMouse(event:QtGui.QMouseEvent):
-  # Return True for right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Right-Mouse event at %s' % event.pos())
-  return result
-
-def controlShiftMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-shift-middle-Mouse event at %s' % event.pos())
-  return result
-
-def controlMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-middle-Mouse event at %s' % event.pos())
-  return result
-
-def shiftMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-middle-Mouse event at %s' % event.pos())
-  return result
-
-def middleMouse(event:QtGui.QMouseEvent):
-  # Return True for middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Middle-Mouse event at %s' % event.pos())
-  return result
-
+# GWV: moved to ccpn.ui.gui.lib.mouseEvents on 17/04/2017
+from ccpn.ui.gui.lib.mouseEvents import \
+  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 
 class CrossHair():
   "class to implement a cross-hair"
@@ -241,7 +136,8 @@ class CrossHair():
 
 class ViewBox(pg.ViewBox):
   """
-  Base-class to implement mouse and drag events in in PlotWidget.py; it will inherit the same parent as PlotWidget
+  Base-class to implement mouse and drag events in in PlotWidget.py; 
+  it will inherit the same parent as PlotWidget
   """
   sigClicked = QtCore.Signal(object)
 

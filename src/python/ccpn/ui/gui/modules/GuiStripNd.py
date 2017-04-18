@@ -1,5 +1,24 @@
-"""Module Documentation here
+"""
+This widget implements the nD (n>2) strip. 
+Strips are contained within a SpectrumDisplay.
 
+Some of the available methods:
+
+changeZPlane(n:int=0, planeCount:int=None, position:float=None): Changes the position 
+    of the z axis of the strip by number of planes or a ppm position, depending
+    on which is specified.
+nextZPlane(n:int=0): Decreases z ppm position by one plane
+prevZPlane(n:int=0): Decreases z ppm position by one plane
+
+resetZoom(axis=None): Resets zoom of strip axes to limits of maxima and minima of 
+    the limits of the displayed spectra.
+    
+toggleHorizontalTrace(self): Toggles display of the horizontal trace.
+toggleVerticalTrace(self): Toggles display of the vertical trace.
+
+setStripLabelText(text:str):  set the text of the stripLabel
+getStripLabelText() -> str:  get the text of the stripLabel
+showStripLabel(doShow:bool):  show/hide the stripLabel
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -14,14 +33,13 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
+
 
 #from PyQt4 import QtGui, QtCore, QtOpenGL
 from PyQt4 import QtGui, QtCore
@@ -76,6 +94,22 @@ class GuiStripNd(GuiStrip):
     self.logger = self._project._logger
     self.mouseDragEvent = self._mouseDragEvent
     self.updateRegion = self._updateRegion
+
+  def setStripLabelText(self, text: str):
+    """set the text of the stripLabel"""
+    if text is not None:
+      self.planeToolbar.spinSystemLabel.setText(text)
+
+  def getStripLabelText(self) -> str:
+    """return the text of the stripLabel"""
+    return self.planeToolbar.spinSystemLabel.text()
+
+  def showStripLabel(self, doShow: bool):
+    """show / hide the stripLabel"""
+    if doShow:
+      self.planeToolbar.spinSystemLabel.show()
+    else:
+      self.planeToolbar.spinSystemLabel.hide()
 
   def _mouseDragEvent(self, event):
     """
@@ -339,7 +373,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.nextZPlane()" % self.pid)
+    self.logger.info("application.getByGid(%r).nextZPlane()" % self.pid)
 
   def prevZPlane(self, n:int=0):
     """
@@ -347,7 +381,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.prevZPlane()" % self.pid)
+    self.logger.info("application.getByGid(%r).prevZPlane()" % self.pid)
 
   def _addPlaneToolbar(self):
     """

@@ -14,8 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: Wayne Boucher $"
-__date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -52,6 +52,8 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.guiSettings import sidebarFont
+
+from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -106,7 +108,9 @@ NEW_ITEM_DICT = {
 
 class SideBar(DropBase, QtGui.QTreeWidget):
   def __init__(self, parent=None ):
+
     QtGui.QTreeWidget.__init__(self, parent)
+    DropBase.__init__(self, parent._appBase)
 
     self._typeToItem = dd = {}
 
@@ -438,7 +442,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         text = item.text(0)
         if ':' in text:
           itemData = json.dumps({'pids':[text]})
-          event.mimeData().setData('ccpnmr-json', itemData)
+          event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
 
 

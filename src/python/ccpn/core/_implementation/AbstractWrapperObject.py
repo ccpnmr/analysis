@@ -13,9 +13,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -716,7 +715,8 @@ class AbstractWrapperObject():
       else:
         for dd in iterator:
           for notifier in dd:
-            self._project._logger.debug('finaliseAction notifier: %s; %s; %s'
+            # GWV: Maybe only at the higest debug level
+            self._project._logger.debug('Notifier: %s; %s; %s'
                                         % (action, self, notifier))
             notifier(self)
 

@@ -16,7 +16,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -30,6 +30,7 @@ logger = getLogger()
 
 NULL = object()
 
+NOTIFIERS = '_notifiers'
 
 class CompoundBaseWidget(Frame):
   """
@@ -54,9 +55,13 @@ class CompoundBaseWidget(Frame):
     self._widgets = []    # list of all the widgets; use addWidget to add using the layoutDict
 
     # notifiers
-    self._notifiers = []  # list of all notifiers for this widget
+    if not hasattr(self, NOTIFIERS):
+      setattr(self, NOTIFIERS, []) # list of all notifiers for this widget
+    nf = getattr(self, NOTIFIERS)
+    if not isinstance(nf, list):
+      raise RuntimeError('Invalid notifiers attribute (%s)' % nf)
 
-  def addWidget(self, widget):
+  def _addWidget(self, widget):
     "Add widget, using the layout as defined previously by layoutDict and orientation"
     if len(self._gridding) < len(self._widgets)+1:
       raise RuntimeError('Cannot add widget; invalid gridding')
@@ -68,17 +73,17 @@ class CompoundBaseWidget(Frame):
     "Set minimumwidths of widgets"
     if len(minimumWidths) < len(self._widgets):
       raise RuntimeError('Not enough values to set minimum widths of all widgets')
-    for i, width in enumerate(minimumWidths):
+    for i, width in enumerate(minimumWidths[0:len(self._widgets)]):
       self._widgets[i].setMinimumWidth(width)
 
   def setMaximumWidths(self, maximumWidths):
     "Set maximumWidths of widgets"
     if len(maximumWidths) < len(self._widgets):
       raise RuntimeError('Not enough values to set maximum widths of all widgets')
-    for i, width in enumerate(maximumWidths):
+    for i, width in enumerate(maximumWidths[0:len(self._widgets)]):
       self._widgets[i].setMaximumWidth(width)
 
-  def addNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
+  def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
     """
     Add and store a notifier with widget; 
 
@@ -91,9 +96,16 @@ class CompoundBaseWidget(Frame):
     :return: Notifier instance
     """
     notifier = Notifier(theObject, triggers, targetName, func, *args, **kwds)
-    self._notifiers.append(notifier)
-    logger.debug('Added notifier %s to widget %s' % (notifier, self))
+    self.addNotifier(notifier)
     return notifier
+
+  def addNotifier(self, notifier):
+    "add a notifer to the widget"
+    if not hasattr(self, NOTIFIERS):
+      raise RuntimeError('Widget has no notifiers attribute')
+    nf = getattr(self, NOTIFIERS)
+    nf.append(notifier)
+    logger.debug('Added notifier %s to widget %s' % (notifier, self))
 
   def deleteNotifiers(self):
     "Delete all notifiers associated with the widget"

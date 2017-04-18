@@ -1,6 +1,8 @@
-"""Module Documentation here
-
 """
+Define a drop-able widget
+GWV April-2017: added setDropEventCallback
+"""
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -14,13 +16,14 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+import json
 
 from ccpn.core import Project
 from ccpn.core.lib import Util as ccpnUtil
@@ -28,29 +31,95 @@ from ccpn.ui.gui.Base import Base as GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
+from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
+
+from ccpn.util.Logging import getLogger
+logger = getLogger()
+
 
 class DropBase(GuiBase):
+  """
+  Class to implement drop and drag
+  Callback signature on drop: dropEventCallback(dataDict)
+  """
+
+  # drop targets
+  URLS = 'urls'
+  TEXT = 'text'
+  PIDS = 'pids'
+  IDS  = 'ids'
+  _dropTargets = (URLS, TEXT, PIDS, IDS)
+
+  JSONDATA = ccpnmrJsonData #TODO: check why this comes from model
 
   def __init__(self, appBase, *args, **kw):
 
     GuiBase.__init__(self, appBase, *args, **kw)
+    self._dropEventCallback = None
+    # for now: set 'old-style' behavior
+    self.setDropEventCallback(self._dropCallback)
+
+  def setDropEventCallback(self, callback):
+    "Set the callback function for drop event"
+    self._dropEventCallback = callback
 
   def dragEnterEvent(self, event):
     event.accept()
 
   def dropEvent(self, event):
-    """Catch dropEvent and dispatch to processing"""
-    from ccpn.ui.gui.lib import Qt as qtUtil
+    """
+    Catch dropEvent and dispatch to processing
+    'Native' treatment of CcpnModule instances
+    """
+    if self.acceptDrops():
+      dataDict = self.parseEvent(event)
+      logger.debug('Accepted drop with data:%s' % dataDict)
 
-    data, dataType = qtUtil.interpretEvent(event)
-    if data and dataType:
-      event.accept()
-      self.processDropData(data, dataType, event)
+      if dataDict is not None and len(dataDict) > 1:
+        event.accept()
+        if self._dropEventCallback is not None:
+          self._dropEventCallback(dataDict)
+      else:
+        # restore the native module drop event.
+        # NB: This has to be after the parseEvent; do not know why (GWV)
+        if isinstance(self, CcpnModule):
+          CcpnModule.dropEvent(self, event)
     else:
-      if isinstance(self, CcpnModule):# restore the native  module drop event.
-        CcpnModule.dropEvent(self, event)
+      logger.debug('Widget not droppable')
 
+  def parseEvent(self, event):
+    """ 
+    Interpret drop event; extract urls, text or JSONDATA dicts 
+    return a dict with (type, data) key, value pairs
+    """
+    data = dict(
+      event = event
+    )
+    mimeData = event.mimeData()
 
+    if mimeData.hasFormat(DropBase.JSONDATA):
+      data['isCcpnJson'] = True
+      jsonData = json.loads(mimeData.text())
+      if jsonData != None and len(jsonData) > 0:
+        data.update(jsonData)
+
+    elif event.mimeData().hasUrls():
+      filePaths = [url.path() for url in event.mimeData().urls()]
+      data['urls'] = filePaths
+
+    elif event.mimeData().hasText():
+      data['text'] = event.mimeData().text()
+
+    return data
+
+  # 'old-style' drag and drop;
+  # TODO: refactor below to be defined in objects receiving the drops via appropriate callback
+  # TODO as a GuiNotifier instance
+  def _dropCallback(self, data):
+    "just a stub for now to call the old processDropData"
+    for dataType, data in data.items():
+      if dataType in self._dropTargets:
+        self.processDropData(data, dataType)
 
   def processDropData(self, data, dataType='pids', event=None):
     """ Process dropped-in data
@@ -59,6 +128,7 @@ class DropBase(GuiBase):
     project = self._appBase.project
     if dataType == 'text':
       # data is a text string
+      # THIS is so UGLY! and prone to errors!
       if hasattr(self, 'processText'):
         self.processText(data)
 
@@ -123,6 +193,8 @@ class DropBase(GuiBase):
 
       # process pids
       if pids:
+
+        # THIS is so UGLY! and prone to errors!
 
         tags = [ccpnUtil.pid2PluralName(x) for x in pids]
         tags = [x[0].upper() + x[1:] for x in tags]

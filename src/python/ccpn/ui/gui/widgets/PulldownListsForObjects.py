@@ -17,13 +17,13 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.PulldownList import PulldownListCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
 
@@ -74,8 +74,8 @@ class _Pulldown(PulldownListCompoundWidget):
                                             callback=callback, default=default, **kwds)
         # add a notifier to update the pulldown list
         self.updatePulldownList(project,
-                                 [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], self.className,
-                                  getPids, self.attributeName)
+                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], self.className,
+                                getPids, self.attributeName)
 
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className

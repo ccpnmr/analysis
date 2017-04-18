@@ -1,38 +1,118 @@
-__author__ = 'simon1'
+"""
+This module defines a specific Toolbar class for the strip display 
+The NmrResidueLabel allows drag and drop of the ids displayed in them
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from functools import partial
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.SpinSystemLabel import SpinSystemLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
+
+import json
+from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
+from ccpn.core.NmrResidue import NmrResidue
 
 
 from PyQt4 import QtGui, QtCore
 
-class PlaneToolbar(ToolBar):
 
+class _StripLabel(DropBase, Label):
+  """
+  Specific Label to be used in Strip displays
+  """
+  def __init__(self, parent, text, appBase, **kwds):
+
+    Label.__init__(self, parent, text, **kwds)
+    DropBase.__init__(self, appBase, **kwds)
+    self.parent = parent
+    self.mousePressEvent = self._mousePressEvent
+    self.setAcceptDrops(True)
+    # disable any drop event callback's until explicitly defined later
+    self.setDropEventCallback(None)
+
+  def _mousePressEvent(self, event:QtGui.QMouseEvent):
+    """
+    Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
+    containing its id and a modifier key to encode the direction to drop the strip.
+    """
+    event.accept()
+    mimeData = QtCore.QMimeData()
+    # create the dataDict
+    dataDict = {'ids':[self.text()]}
+    # update the dataDict with all mouseEvents
+    dataDict.update(getMouseEventDict(event))
+    # convert into json
+    itemData = json.dumps(dataDict)
+    mimeData.setData(DropBase.JSONDATA, self.text())
+    mimeData.setText(itemData)
+    drag = QtGui.QDrag(self)
+    drag.setMimeData(mimeData)
+    if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
+      pass
+    else:
+      self.show()
+
+  @staticmethod
+  def _updateLabelText(nmrResidue:NmrResidue, oldPid:str):
+    """Effect rename for NmrResidueLabel
+       For notifiers
+       #CCPN INTERNAL: used in ui.gui.Gui.py to set a notifier on rename of NmrResidue  
+    """
+    #oldId = oldPid.split(Pid.PREFIXSEP, 1)[-1]
+    oldId = oldPid.id
+    for strip in nmrResidue.project.strips:
+      if strip.planeToolbar.spinSystemLabel.text() == oldId:
+        strip.planeToolbar.spinSystemLabel.setText(nmrResidue.id)
+
+
+class PlaneToolbar(ToolBar):
+  #TODO: undocumented and needs refactoring as a widget;
+  #TODO: also: its is not a Toolbar and should be renamed
   def __init__(self, strip, callbacks, **kw):
 
     ToolBar.__init__(self, strip.stripFrame, **kw)
 
-    self.stripLabel = SpinSystemLabel(self, text='.'.join(strip.pid.id.split('.')[2:]),
+    self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
+                            hAlign='center', vAlign='top')
+    self.stripIdLabel.setFixedHeight(15)
+    self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+#    self.spinSystemLabel = Label(self, text='',
+#                                 hAlign='center', vAlign='top')
+    # Drop/draggable label
+    self.spinSystemLabel = _StripLabel(self, text='',
                                       appBase=strip._parent._appBase,
-                                      hAlign='center', vAlign='top', strip=strip)
-    self.stripLabel.setFixedHeight(15)
-    self.stripLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    self.spinSystemLabel = Label(self, text='',
-                                 hAlign='center', vAlign='top')
-    # self.spinSystemLabel.dropEvent = self.dropCallback
-    # self.spinSystemLabel.setText("Spin systems shown here")
+                                      hAlign='center', vAlign='top'
+    )
+
     self.spinSystemLabel.setFixedHeight(15)
     self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    self.addWidget(self.stripLabel)
+    self.addWidget(self.stripIdLabel)
     self.addWidget(self.spinSystemLabel)
-    # self.spinSystemLabel.pid = self.pid
-    # print(self.pid)lo
+
     self.planeLabels = []
     self.planeCounts = []
     for i in range(len(strip.orderedAxes)-2):

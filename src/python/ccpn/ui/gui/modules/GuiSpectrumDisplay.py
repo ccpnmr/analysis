@@ -14,14 +14,12 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 # import importlib, os
 
@@ -255,7 +253,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     strip = self._appBase.current.strip
     # # Rasmus HACK!
     # # This code broke because it got triggered (via a current notifier) when strips
-    # # were deleted but self was not. A bigger fix is needed, but for now try this
+    # # were deleted but self was not. A bigger fix is needed (TODO), but for now try this
     myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
     if len(myStrips) <= 1 or not strip in myStrips:
       # current.strip not in display, or only 1 strip in display, so disable removeStrip button

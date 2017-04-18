@@ -1,11 +1,12 @@
-"""Module Documentation here
+"""
+CheckBox widget
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -14,14 +15,12 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 
@@ -36,13 +35,27 @@ class CheckBox(QtGui.QCheckBox, Base):
     if text:
       self.setText(text)
     Base.__init__(self, **kw)
-
     if callback:
       self.setCallback(callback)
 
   def get(self):
-
     return self.isChecked()
 
   def setCallback(self, callback):
     self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+
+  app = TestApplication()
+
+  def callback():
+    print('callback')
+
+  popup = BasePopup(title='Test CheckBox')
+
+  checkBox1 = CheckBox(parent=popup, text="test", callback=callback, grid=(0, 0)
+                      )
+  app.start()

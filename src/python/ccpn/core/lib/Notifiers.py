@@ -4,7 +4,7 @@ function, displatching the 'user' callback if required.
 The Notifier can be defined relative to any valid V3 core object and the current
 object as it first checks if the triggered signature is valid.
 The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature,
-preventing unnecesary code duplication.
+preventing unnecessary code duplication.
 
 The callback function is passed a callback dictionary with relevant info (see
 docstring of Notifier class. This idea was copied from the Traitlets package.
@@ -14,9 +14,9 @@ April 2017: First design by Geerten Vuister
 """
 #TODO: test implementation for current
 
-# =========================================================================================
+#=========================================================================================
 # Licence, Reference and Credits
-# =========================================================================================
+#=========================================================================================
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
@@ -25,20 +25,21 @@ __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
                  " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
-# =========================================================================================
+#=========================================================================================
 # Last code modification:
-# =========================================================================================
+#=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
-# =========================================================================================
+#=========================================================================================
 # Start of code
-# =========================================================================================
+#=========================================================================================
 
 from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
 from ccpn.framework.Current import Current
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -69,7 +70,7 @@ class Notifier(object):
                                             notifier                  targetName==None: monitor theObject itself
 
    Notifier.RENAME    className or None     theObject, object         targetName: valid child className of theObject
-                                            targetName, previousName, (any for project instances)
+                                            targetName, oldPid,       (any for project instances)
                                             trigger                   targetName==None: monitor theObject itself
 
    Notifier.CHANGE    className or None     theObject, object         targetName: valid child className of theObject
@@ -84,12 +85,17 @@ class Notifier(object):
                                             value, previousValue,     targetName: valid attribute name of current
                                             trigger, notifier         NB: should only be used in isolation; i.e. not
                                                                       combined with other triggers
+
   Implemention:
 
-    Uses current notifier system from Project
-    filters for child objects of type targetName in theObject.
-    targetName does need to denote a valid child-class of theObject, except for Project instances
-    which can be triggered by all classes
+    Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
+    TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
+    which can be triggered by all classes (see Table).
+    The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
+    defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
+    Note that this dict also contains a reference to the Notifier object itself; this way it can be used 
+    to pass-on additional implementation specfic information to the callback function.
+    
   """
   _currentIndex = 0
 
@@ -126,10 +132,12 @@ class Notifier(object):
       self._project = None
       self._isProject = False
       self._isCurrent = True
-    else:
+    elif isinstance(theObject, AbstractWrapperObject):
       self._project = theObject.project # toplevel Project instance for theObject
       self._isProject = (theObject == self._project) # theObject is the toplevel Project instance
       self._isCurrent = False
+    else:
+      raise RuntimeError('Invalid object (%s)', theObject)
 
     self._value = None # used to store the value of attribute to monitor for change
     triggerForTheObject = False  # flag to denote if triggers are firing for theObject, not children
@@ -212,9 +220,10 @@ class Notifier(object):
       raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                          (theObject, targetName, triggers))
 
-  # def __del__(self):
   # GV: can't use __del__ at the moment as it crashes on closing the program (when used in python console)
   # Improper destructor sequences?
+  #
+  # def __del__(self):
   #   "del( notifier ) does not trigger this call immediately, as circular references exists"
   #   print('__del__>', self)
   #   self.unRegister()
@@ -235,24 +244,6 @@ class Notifier(object):
         self._project.unRegisterNotifier(targetName, trigger, func)
     self._notifiers = []
     self._unregister = []
-
-  def delete(self):
-    """
-    Delete self from theObject; assumes is was initialised using the setNotifier
-    method of theObject
-    Convienience method to be able to delete notifier (at some time; e.g. in a destructor) using a local
-    variable pointing to it; ie.
-
-      notifier = ccpnObj.setNotifier([Notifier.CREATE], 'Peak', myCallback)
-      ..
-      notifier.delete()
-      del(notifier)
-      
-      Not implemented for now!
-    """
-    if not hasattr(self._theObject, 'deleteNotifier'):
-      raise RuntimeError('Notifier.delete: Object %s does not have deleteNotifier method' % self._theObject)
-    self._theObject.deleteNotifier(self)
 
   def setDebug(self, flag:bool):
     "Set debug output on/off"
@@ -302,7 +293,7 @@ class Notifier(object):
         targetName=targetName,
       )
       if trigger==self.RENAME and parameter2 is not None:
-        callbackDict['previousName'] = parameter2
+        callbackDict['oldPid'] = parameter2
       self._callback(callbackDict, *self._args, **self._kwargs)
 
     return
@@ -311,15 +302,18 @@ class Notifier(object):
     return '<Notifier (%d): theObject=%s, notifiers=%s>' % \
            (self._index, self._theObject, self._notifiers)
 
-  # convienience methods
+  # convenience methods
 
   @staticmethod
-  def _getChildClasses(obj:Any, recursion:bool) -> list:
+  def _getChildClasses(obj:AbstractWrapperObject, recursion:bool) -> list:
     """
     :param obj: valid V3 object
     :param recursion: use recursion to also add child objects
     :return: list of valid child classes of obj
     """
+    #if not isinstance(obj, AbstractWrapperObject):
+    #  raise RuntimeError('Ivalid object type (%s)' % obj)
+
     cls = []
     for child in obj._childClasses:
       cls.append(child)
@@ -329,12 +323,14 @@ class Notifier(object):
     return cls
 
   @staticmethod
-  def _getChildObjects(obj:Any, recursion:bool=False) -> list:
+  def _getChildObjects(obj:AbstractWrapperObject, recursion:bool=False) -> list:
     """
     depth-first extraction of all child objects, optionally using recursion
     :param obj: valid V3 object
     :return: list of child objects
     """
+    #if not isinstance(obj, AbstractWrapperObject):
+    #  raise RuntimeError('Invalid object type (%s)' % obj)
 
     children = []
     for cls in obj._childClasses:
@@ -433,9 +429,12 @@ class Notifier(object):
 #   """
 #
 #   def _deleteNotifiers(obj):
-#     if not hasattr(obj, NOTIFIERS) or len(obj._notifiers) == 0:
+#     if not hasattr(obj, NOTIFIERS) or len() == 0:
 #       return
-#     for notifier in obj._notifiers.values():
+#     objNotifiers = getattr(obj, NOTIFIERS)
+#     if len(objNotifiers) == 0:
+#       return
+#     for notifier in objNotifiers.values():
 #       obj.deleteNotifier(notifier)
 #     return
 #

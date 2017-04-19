@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, List
 
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
@@ -403,25 +403,104 @@ class Strip(AbstractWrapperObject):
     #
     return False
 
-    # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
-    #   dataSource=peak._wrappedData.peakList.dataSource)
+  def peakPickPosition(self, position:List[float]) -> Tuple[Peak]:
+    """Pick peak at position for all spectra currently displayed in strip"""
+
+    result = []
+
+    self._startCommandEchoBlock('peakPickPosition', position)
+    self._project.blankNotification()
+    try:
+      for spectrumView in self.spectrumViews:
+        if not spectrumView.peakListViews:
+          continue
+        peakListView = spectrumView.peakListViews[0]
+        # TODO: is there some way of specifying which peakListView
+        if not peakListView.isVisible():
+          continue
+        peakList = peakListView.peakList
+
+        peak = peakList.newPeak(position=position)
+        # note, the height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
+        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+        result.append(peak)
+    finally:
+      self._endCommandEchoBlock()
+      self._project.unblankNotification()
+
+    for peak in result:
+      peak._finaliseAction('create')
     #
-    # if apiSpectrumView is None:
-    #   return False
+    return tuple(result)
+
+  def peakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
+    """Peak pick all spectra currently displayed in strip in selectedRegion """
+
+    result = []
+
+    project = self.project
+    minDropfactor = project._appBase.preferences.general.peakDropFactor
+
+    self._startCommandEchoBlock('peakPickRegion', selectedRegion)
+    self._project.blankNotification()
+    try:
+
+      for spectrumView in self.spectrumViews:
+        if not spectrumView.isVisible():
+          continue
+        peakListView = spectrumView.peakListViews[0]
+        # TODO: is there some way of specifying which peakListView
+        if not peakListView.isVisible():
+          continue
+        peakList = peakListView.peakList
+
+        if spectrumView.spectrum.dimensionCount > 1:
+          sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+          spectrumAxisCodes = spectrumView.spectrum.axisCodes
+          stripAxisCodes = self.axisCodes
+          sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+
+          remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+          for n, axisCode in enumerate(spectrumAxisCodes):
+            # idx = stripAxisCodes.index(axisCode)
+            idx = remapIndices[n]
+            sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+          newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                                          doPos=spectrumView.displayPositiveContours,
+                                          doNeg=spectrumView.displayNegativeContours,
+                                          fitMethod='gaussian', minDropfactor=minDropfactor)
+        else:
+          # 1D's
+          # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
+          newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
+          # y0 = startPosition.y()
+          # y1 = endPosition.y()
+          # y0, y1 = min(y0, y1), max(y0, y1)
+          # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+
+        result.extend(newPeaks)
+
+        # # Add the new peaks to selection
+        # for peak in newPeaks:
+        #   # peak.isSelected = True
+        #   self.current.addPeak(peak)
+
+        # for window in project.windows:
+        #   for spectrumDisplay in window.spectrumDisplays:
+        #     for strip in spectrumDisplay.strips:
+        #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
+        #       if peakList.spectrum in spectra:
+        #               strip.showPeaks(peakList)
+
+    finally:
+      self._endCommandEchoBlock()
+      self._project.unblankNotification()
+
+    for peak in result:
+      peak._finaliseAction('create')
     #
-    # orderedAxes = self.orderedAxes
-    # for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
-    #   if zDataDim:
-    #     zPosition = peak.position[zDataDim.dimensionIndex]
-    #     # NBNB W3e do not think this should add anything - the region should be set correctly.
-    #     # RHF, WB
-    #     # zPlaneSize = zDataDim.getDefaultPlaneSize()
-    #     zRegion = orderedAxes[2+ii].region
-    #     zWidth = orderedAxes[2+ii].width
-    #     if zRegion[0]-zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1]+zWidth:
-    #       return True
-    #
-    # return False
+    return tuple(result)
 
 
 # newStrip functions

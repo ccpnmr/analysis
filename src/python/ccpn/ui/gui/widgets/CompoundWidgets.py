@@ -323,6 +323,10 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     if maximumWidths is not None:
       self.setMinimumWidths(maximumWidths)
 
+  def isChecked(self):
+    "Convenience: Return whether checkBox is checked"
+    return self.checkBox.isChecked()
+
 
 class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
   """

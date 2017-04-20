@@ -21,7 +21,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: Geerten Vuister $"
 
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -50,11 +50,11 @@ class Label(QtGui.QLabel, Base):
   """
 
   def __init__(self, parent, text='', textColour=None, textSize=12, bold=False,
-               margins=[2, 1, 2, 1], **kw):
+               margins=[2, 1, 2, 1], **kwds):
 
     text = translator.translate(text)
     QtGui.QLabel.__init__(self, text, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, **kwds)
 
     # if textColor:
     #   self.setStyleSheet('QLabel {color: %s}' % textColor)
@@ -105,9 +105,7 @@ if __name__ == '__main__':
   count = 0
 
   def func():
-
     global count
-
     count += 1
     label.set(msg + ' ' + str(count))
     print(label.get())

@@ -34,7 +34,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.core.lib import CcpnSorting
-from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -69,6 +68,7 @@ class NmrResidueTableModule(CcpnModule):
     # project, current, application and mainWindow are inherited from CcpnModule
 
     # settings
+
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
     self.displaysWidget = ListCompoundWidget(self.settingsWidget, grid=(0,0), vAlign='top',
@@ -187,7 +187,7 @@ class NmrResidueTable(ObjectTable):
                          )
     # Notifier object to update the table if the nmrChain changes
     self._chainNotifier = None
-    #TODO: see how to handle peaks as this is costly
+    #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
     # self._peaksNotifier = Notifier(self._project,

@@ -25,7 +25,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
+__author__ = "$Author: Geerten Vuister $"
 
 __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from functools import partial
@@ -100,20 +100,24 @@ class CcpnModule(Dock):
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      self._scrollArea = ScrollArea(parent=self)
-      self._scrollArea.setWidgetResizable(True)
-      self._scrollArea.setMinimumWidth(self.settingsMinimumSizes[0])
-      self._scrollArea.setMinimumHeight(self.settingsMinimumSizes[1])
-      #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
-      self.settingsWidget = Frame(parent=self, showBorder=True, fShape='styledPanel', fShadow='plain')
-      self._scrollArea.setWidget(self.settingsWidget)
+      # self._scrollArea = ScrollArea(parent=self, scrollBarPolicies=('always','asNeeded'))
+      # self._scrollArea.setWidgetResizable(True)
+      # self._scrollArea.setMinimumWidth(self.settingsMinimumSizes[0])
+      # self._scrollArea.setMinimumHeight(self.settingsMinimumSizes[1])
+      # #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
+      # self.settingsWidget = Frame(parent=self._scrollArea, showBorder=True, fShape='styledPanel', fShadow='plain')
+      # self._scrollArea.setWidget(self.settingsWidget)
+
+      self.settingsWidget = ScrollableFrame(parent=self, scrollBarPolicies=('always','asNeeded'),
+                                            minimumSizes=self.settingsMinimumSizes
+                                           )
       if self.settingsOnTop:
-        self.addWidget(self._scrollArea, 0, 0)
+        self.addWidget(self.settingsWidget.scrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
-        self.addWidget(self._scrollArea, 1, 0)
-      self._scrollArea.hide()
+        self.addWidget(self.settingsWidget.scrollArea, 1, 0)
+      self.settingsWidget.scrollArea.hide()
     else:
       self.addWidget(self.mainWidget, 0, 0)
 
@@ -179,12 +183,12 @@ class CcpnModule(Dock):
       self.settingsState = (self.settingsState + 1) % self.maxSettingsState
       if self.settingsState == 0:
         self.mainWidget.show()
-        self._scrollArea.hide()
+        self.settingsWidget.scrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
-        self._scrollArea.show()
+        self.settingsWidget.scrollArea.show()
       elif self.settingsState == 2:
-        self._scrollArea.show()
+        self.settingsWidget.scrollArea.show()
         self.mainWidget.hide()
     else:
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')

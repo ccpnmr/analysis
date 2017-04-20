@@ -65,28 +65,28 @@ POLICY_DICT = {
   'ignored': QtGui.QSizePolicy.Ignored,
 }
 
-FRAME_DICT = {
-  # Shadow
-  'plain': QtGui.QFrame.Plain,
-  'raised': QtGui.QFrame.Raised,
-  'sunken': QtGui.QFrame.Sunken,
-  # Shapes
-  'noFrame': QtGui.QFrame.NoFrame,
-  'box': QtGui.QFrame.Box,
-  'panel': QtGui.QFrame.Panel,
-  'styledPanel': QtGui.QFrame.StyledPanel,
-  'hLine': QtGui.QFrame.HLine,
-  'vLine': QtGui.QFrame.VLine,
-}
-
 
 class Base():
 
-  def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
-               hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
-               fShape=None, fShadow=None,
-               bgColor=None, fgColor=None,
-               isFloatWidget=False):
+  def __init__(self, tipText=None,
+                     grid=(None, None), gridSpan=(1,1), stretch=(0,0),
+                     hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
+                     bgColor=None, fgColor=None,
+                     isFloatWidget=False):
+    """
+    
+    :param tipText:  add tiptext to widget
+    :param grid:     insert widget at (row,col) of parent layout (if available)
+    :param gridSpan: extend widget over (rows,cols); default (1,1)
+    :param stretch:  stretch (row,col) of widget (True/False); default (False,False)
+    :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)
+    :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)
+    :param hPolicy:  horizontal policy: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
+    :param vPolicy:  vertical policy: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
+    :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead
+    :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead
+    :param isFloatWidget: indicates widget to be floating
+    """
 
     # Tool tips
     if tipText:
@@ -133,25 +133,25 @@ class Base():
     # Setup colour overrides (styles used primarily)
     if bgColor:
       self.setAutoFillBackground(True)
-      rgb = QtGui.QColor(bgColor).getRgb()[:3]
-      self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
+      #rgb = QtGui.QColor(bgColor).getRgb()[:3]
+      self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  bgColor)
 
     if fgColor:
       self.setAutoFillBackground(True)
-      rgb = QtGui.QColor(fgColor).getRgb()[:3]
-      self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  rgb)
+      #rgb = QtGui.QColor(fgColor).getRgb()[:3]
+      self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  fgColor)
 
-    # define frame styles
-    if fShape or fShadow:
-      """
-      Define frame properties:
-      TODO: GWV: routine is called but appears not to change much in the appearance
-      """
-      shape = FRAME_DICT.get(fShape, QtGui.QFrame.NoFrame)
-      shadow = FRAME_DICT.get(fShadow, 0)
-      #print('Base.framestyle>', shape | shadow)
-      self.setFrameStyle(shape | shadow)
-      self.setMidLineWidth(2)
+    layout = self.getLayout()
+    if layout is not None:
+      layout.setContentsMargins(0, 0, 0, 0)
+
+  def getLayout(self):
+    "return the layout of self"
+    if isinstance(self, Dock):
+      layout = self.widgetArea.layout()
+    else:
+      layout = self.layout()
+    return layout
 
   def _getRowCol(self, grid):
 

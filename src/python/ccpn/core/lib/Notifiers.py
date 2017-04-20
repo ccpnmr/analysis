@@ -177,7 +177,7 @@ class Notifier(object):
 
         notifier = (trigger, targetName, triggerForTheObject)
         # current has its own notifier system
-        func = theObject.registerNotifier(partial(self, notifier=notifier), targetName)
+        func = theObject.registerNotify(partial(self, notifier=notifier), targetName)
         self._notifiers.append(notifier)
         self._unregister.append((targetName, Notifier.CURRENT, func))
 
@@ -239,7 +239,7 @@ class Notifier(object):
     """
     for targetName, trigger, func in self._unregister:
       if trigger == Notifier.CURRENT:
-        self._theObject.unRegisterNotifier(func, targetName)
+        self._theObject.unRegisterNotify(func, targetName)
       else:
         self._project.unRegisterNotifier(targetName, trigger, func)
     self._notifiers = []
@@ -255,22 +255,43 @@ class Notifier(object):
     """
     trigger, targetName, triggerForTheObject = notifier
 
-    # MONITOR/CURRENT special cases
-    if trigger == Notifier.MONITOR or trigger == Notifier.CURRENT:
+    # CURRENT special case
+    if trigger == Notifier.CURRENT:
+      value = getattr(self._theObject, targetName)
+      if value != self._value:
+        if self._debug:
+          logger.info('>>> Notifier (%d): obj=%s  callback for %s: %s obj=%s parameter2=%s' % \
+                       (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                      )
+        callbackDict = dict(
+          notifier = self,
+          trigger = trigger,
+          theObject = self._theObject,
+          object = self._theObject,  # triggerForTheObject is True
+          value = value,
+          targetName = targetName,
+          previousValue = self._value
+        )
+        self._callback(callbackDict, *self._args, **self._kwargs)
+        self._value = value
+
+    # MONITOR special case
+    elif trigger == Notifier.MONITOR:
       if (triggerForTheObject and obj.id == self._theObject.id):
         value = getattr(self._theObject, targetName)
         if value != self._value:
           if self._debug:
             logger.info('>>> Notifier (%d): obj=%s  callback for %s: %s obj=%s parameter2=%s' % \
-                         (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                        (self._index, self._theObject, notifier, self._callback, obj, parameter2)
                         )
           callbackDict = dict(
-            notifier = self,
-            trigger = trigger,
-            theObject = self._theObject,
-            value = value,
-            targetName = targetName,
-            previousValue = self._value
+            notifier=self,
+            trigger=trigger,
+            theObject=self._theObject,
+            object = self._theObject,  # triggerForTheObject is True
+            value=value,
+            targetName=targetName,
+            previousValue=self._value
           )
           self._callback(callbackDict, *self._args, **self._kwargs)
           self._value = value

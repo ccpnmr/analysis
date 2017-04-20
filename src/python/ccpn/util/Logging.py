@@ -78,6 +78,7 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a',
 
   assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
 
+  #TODO: remove Api calls
   from ccpnmodel.ccpncore.lib.Io import Api as apiIo
   repositoryPath = apiIo.getRepositoryPath(project, 'userData')
   logDirectory = os.path.join(repositoryPath, 'logs')
@@ -128,8 +129,8 @@ def _setupHandler(handler, level):
   # handler = logging.StreamHandler(stream)
   handler.setLevel(level)
 
-  #format = '%(levelname)s:%(module)s:%(funcName)s:%(asctime)s:%(message)s'
-  format = '%(levelname)s:%(module)s:%(funcName)s: %(message)s'
+  #format = '%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s'
+  format = '%(levelname)-7s: %(module)s.%(funcName)s : %(message)s'
   formatter = logging.Formatter(format)
   handler.setFormatter(formatter)
 

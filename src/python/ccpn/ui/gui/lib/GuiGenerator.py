@@ -12,6 +12,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 #   argsDict[arg] = value
 AUTOGEN_TAG = 'Auto-generated input:'
 
+#TODO: document
+#TODO: removed hard-coded strings
 
 def generateWidget(params, widget, argsDict=None, columns=1):
 

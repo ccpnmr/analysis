@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from functools import partial
 
@@ -65,6 +66,7 @@ class CcpnModule(Dock):
   includeSettingsWidget = False
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
+  settingsMinimumSizes = (0, 0)
 
 
   def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
@@ -98,15 +100,20 @@ class CcpnModule(Dock):
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
+      self._scrollArea = ScrollArea(parent=self)
+      self._scrollArea.setWidgetResizable(True)
+      self._scrollArea.setMinimumWidth(self.settingsMinimumSizes[0])
+      self._scrollArea.setMinimumHeight(self.settingsMinimumSizes[1])
       #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
       self.settingsWidget = Frame(parent=self, showBorder=True, fShape='styledPanel', fShadow='plain')
+      self._scrollArea.setWidget(self.settingsWidget)
       if self.settingsOnTop:
-        self.addWidget(self.settingsWidget, 0, 0)
+        self.addWidget(self._scrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
-        self.addWidget(self.settingsWidget, 1, 0)
-      self.settingsWidget.hide()
+        self.addWidget(self._scrollArea, 1, 0)
+      self._scrollArea.hide()
     else:
       self.addWidget(self.mainWidget, 0, 0)
 
@@ -172,12 +179,12 @@ class CcpnModule(Dock):
       self.settingsState = (self.settingsState + 1) % self.maxSettingsState
       if self.settingsState == 0:
         self.mainWidget.show()
-        self.settingsWidget.hide()
+        self._scrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
-        self.settingsWidget.show()
+        self._scrollArea.show()
       elif self.settingsState == 2:
-        self.settingsWidget.show()
+        self._scrollArea.show()
         self.mainWidget.hide()
     else:
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')

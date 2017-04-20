@@ -23,36 +23,72 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: Geerten $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+import sys
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 
+
 class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
 
-  def __init__(self, parent, value=None, min=None, max=None, showButtons=True, **kw):
+  def __init__(self, parent, value=None, min=None, max=None, step=None, showButtons=True,
+               decimals=None, callback=None, **kwds):
+    """
+    From the QTdocumentation 
+    Constructs a spin box with a step value of 1.0 and a precision of 2 decimal places.
+    Change the default 0.0 minimum value to -sys.float_info.max
+    Change the default 99.99  maximum value to sys.float_info.max      
+    The value is default set to 0.00. 
+    
+    The spin box has the given parent.
+    """
 
     QtGui.QDoubleSpinBox.__init__(self, parent)
+    Base.__init__(self, **kwds)
+
     if value is not None:
       self.setValue(value)
+
     if min is not None:
       self.setMinimum(min)
+    else:
+      self.setMinimum(-1.0*sys.float_info.max)
+
     if max is not None:
       self.setMaximum(max)
-    Base.__init__(self, **kw)
+    else:
+      self.setMaximum(sys.float_info.max)
+
     self.isSelected = False
 
+    if step is not None:
+      self.setSingleStep(step)
+
+    if decimals is not None:
+      self.setDecimals(decimals)
 
     if showButtons is False:
       self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+
+    self._callback = None
+    self.setCallback(callback)
 
   def setSelected(self):
     self.isSelected = True
 
   def focusInEvent(self, QFocusEvent):
     self.setSelected()
+
+  def setCallback(self, callback):
+    "Sets callback; disconnects if callback=None"
+    if self._callback is not None:
+      self.disconnect(self, QtCore.SIGNAL('valueChanged(double)'), self._callback)
+    if callback:
+      self.connect(self, QtCore.SIGNAL("valueChanged(double)"), callback)
+    self._callback = callback

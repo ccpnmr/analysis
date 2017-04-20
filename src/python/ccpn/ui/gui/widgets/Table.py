@@ -1,91 +1,110 @@
 """
 
+Basic Usage:
+  
+  define a list of Column(columnName, func, tipText=tipText) objects, 
+  where func obtains the value for the object displayed in a row and
+   tipText is optional;
+  
+  e.g. Column('index', lambda row: row.index, tipText='index of the row')
+  
+  define a list of objects (or empty):
+  objectList = list(myObjects) if myObjects is not None else []
+  
+  define optional actionCallback and/or selectionCallback functions
+  
+  ObjectTable(parent=parent, columns=columnList, objects=objectList, 
+              actionCallback=actionCallback, selectionCallback=selectionCallback,
+              ....)
+  
+  use setObjects(objects) method to set objects
+  use show() to show
+  use clearTable() to clear the table
+
+
 Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html)
 
 QTableView Class Reference
 [QtGui module]
-
 The QTableView class provides a default model/view implementation of a table view. More...
-
 Inherits QAbstractItemView.
-
 Inherited by QTableWidget.
 
 Methods
 
-__init__ (self, QWidget parent = None)
-clearSpans (self)
-int columnAt (self, int x)
-columnCountChanged (self, int oldCount, int newCount)
-columnMoved (self, int column, int oldIndex, int newIndex)
-columnResized (self, int column, int oldWidth, int newWidth)
-int columnSpan (self, int row, int column)
-int columnViewportPosition (self, int column)
-int columnWidth (self, int column)
-currentChanged (self, QModelIndex current, QModelIndex previous)
-Qt.PenStyle gridStyle (self)
-hideColumn (self, int column)
-hideRow (self, int row)
-QHeaderView horizontalHeader (self)
-int horizontalOffset (self)
-horizontalScrollbarAction (self, int action)
-QModelIndex indexAt (self, QPoint p)
-bool isColumnHidden (self, int column)
-bool isCornerButtonEnabled (self)
-bool isIndexHidden (self, QModelIndex index)
-bool isRowHidden (self, int row)
-bool isSortingEnabled (self)
-QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)
-paintEvent (self, QPaintEvent e)
-resizeColumnsToContents (self)
-resizeColumnToContents (self, int column)
-resizeRowsToContents (self)
-resizeRowToContents (self, int row)
-int rowAt (self, int y)
-rowCountChanged (self, int oldCount, int newCount)
-int rowHeight (self, int row)
-rowMoved (self, int row, int oldIndex, int newIndex)
-rowResized (self, int row, int oldHeight, int newHeight)
-int rowSpan (self, int row, int column)
-int rowViewportPosition (self, int row)
-scrollContentsBy (self, int dx, int dy)
-scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)
-selectColumn (self, int column)
-list-of-QModelIndex selectedIndexes (self)
-selectionChanged (self, QItemSelection selected, QItemSelection deselected)
-selectRow (self, int row)
-setColumnHidden (self, int column, bool hide)
-setColumnWidth (self, int column, int width)
-setCornerButtonEnabled (self, bool enable)
-setGridStyle (self, Qt.PenStyle style)
-setHorizontalHeader (self, QHeaderView header)
-setModel (self, QAbstractItemModel model)
-setRootIndex (self, QModelIndex index)
-setRowHeight (self, int row, int height)
-setRowHidden (self, int row, bool hide)
-setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)
-setSelectionModel (self, QItemSelectionModel selectionModel)
-setShowGrid (self, bool show)
-setSortingEnabled (self, bool enable)
-setSpan (self, int row, int column, int rowSpan, int columnSpan)
-setVerticalHeader (self, QHeaderView header)
-setWordWrap (self, bool on)
-showColumn (self, int column)
-bool showGrid (self)
-showRow (self, int row)
-int sizeHintForColumn (self, int column)
-int sizeHintForRow (self, int row)
-sortByColumn (self, int column)
-sortByColumn (self, int column, Qt.SortOrder order)
-timerEvent (self, QTimerEvent event)
-updateGeometries (self)
-QHeaderView verticalHeader (self)
-int verticalOffset (self)
-verticalScrollbarAction (self, int action)
-QStyleOptionViewItem viewOptions (self)
-QRect visualRect (self, QModelIndex index)
-QRegion visualRegionForSelection (self, QItemSelection selection)
-bool wordWrap (self)
+    __init__ (self, QWidget parent = None)
+    clearSpans (self)
+    int columnAt (self, int x)
+    columnCountChanged (self, int oldCount, int newCount)
+    columnMoved (self, int column, int oldIndex, int newIndex)
+    columnResized (self, int column, int oldWidth, int newWidth)
+    int columnSpan (self, int row, int column)
+    int columnViewportPosition (self, int column)
+    int columnWidth (self, int column)
+    currentChanged (self, QModelIndex current, QModelIndex previous)
+    Qt.PenStyle gridStyle (self)
+    hideColumn (self, int column)
+    hideRow (self, int row)
+    QHeaderView horizontalHeader (self)
+    int horizontalOffset (self)
+    horizontalScrollbarAction (self, int action)
+    QModelIndex indexAt (self, QPoint p)
+    bool isColumnHidden (self, int column)
+    bool isCornerButtonEnabled (self)
+    bool isIndexHidden (self, QModelIndex index)
+    bool isRowHidden (self, int row)
+    bool isSortingEnabled (self)
+    QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)
+    paintEvent (self, QPaintEvent e)
+    resizeColumnsToContents (self)
+    resizeColumnToContents (self, int column)
+    resizeRowsToContents (self)
+    resizeRowToContents (self, int row)
+    int rowAt (self, int y)
+    rowCountChanged (self, int oldCount, int newCount)
+    int rowHeight (self, int row)
+    rowMoved (self, int row, int oldIndex, int newIndex)
+    rowResized (self, int row, int oldHeight, int newHeight)
+    int rowSpan (self, int row, int column)
+    int rowViewportPosition (self, int row)
+    scrollContentsBy (self, int dx, int dy)
+    scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)
+    selectColumn (self, int column)
+    list-of-QModelIndex selectedIndexes (self)
+    selectionChanged (self, QItemSelection selected, QItemSelection deselected)
+    selectRow (self, int row)
+    setColumnHidden (self, int column, bool hide)
+    setColumnWidth (self, int column, int width)
+    setCornerButtonEnabled (self, bool enable)
+    setGridStyle (self, Qt.PenStyle style)
+    setHorizontalHeader (self, QHeaderView header)
+    setModel (self, QAbstractItemModel model)
+    setRootIndex (self, QModelIndex index)
+    setRowHeight (self, int row, int height)
+    setRowHidden (self, int row, bool hide)
+    setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)
+    setSelectionModel (self, QItemSelectionModel selectionModel)
+    setShowGrid (self, bool show)
+    setSortingEnabled (self, bool enable)
+    setSpan (self, int row, int column, int rowSpan, int columnSpan)
+    setVerticalHeader (self, QHeaderView header)
+    setWordWrap (self, bool on)
+    showColumn (self, int column)
+    bool showGrid (self)
+    showRow (self, int row)
+    int sizeHintForColumn (self, int column)
+    int sizeHintForRow (self, int row)
+    sortByColumn (self, int column)
+    sortByColumn (self, int column, Qt.SortOrder order)
+    timerEvent (self, QTimerEvent event)
+    updateGeometries (self)
+    QHeaderView verticalHeader (self)
+    int verticalOffset (self)
+    verticalScrollbarAction (self, int action)
+    QStyleOptionViewItem viewOptions (self)
+    QRect visualRect (self, QModelIndex index)
+    QRegion visualRegionForSelection (self, QItemSelection selection)
+    bool wordWrap (self)
 
 """
 #=========================================================================================
@@ -138,8 +157,8 @@ from collections import OrderedDict
 
 class ObjectTable(QtGui.QTableView, Base):
 
-  columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums
-  rowSizeHint = 200  # total size hint (total size for all rows
+  columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums)
+  rowSizeHint = 200  # total size hint (total size for all rows)
 
   def __init__(self, parent, columns,
                objects=None,
@@ -227,6 +246,12 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.tableContextMenu)
 
+  def clearTable(self):
+    "remove all objects from the table"
+    self._silenceCallback = True
+    self.setObjects([])
+    self._silenceCallback = False
+
   def sizeHint(self):
 
     return QtCore.QSize(max(10, self.columnSizeHint*len(self.columns)), self.rowSizeHint)
@@ -280,22 +305,6 @@ class ObjectTable(QtGui.QTableView, Base):
 
     if self._silenceCallback:
       return
-    #
-    # if self.graphPanel and self.graphPanel.isVisible():
-    #   graph = self.graphPanel.graph
-    #   graph.coordsOff()
-    #   rows = self.getSelectedRows()
-    #   vLines = []
-    #   hLines = []
-    #
-    #   for row in rows:
-    #     for dataSet in graph.dataSets:
-    #       x, y = dataSet.dataPoints[row][:2]
-    #       vLines.append(x)
-    #       hLines.append(y)
-    #
-    #   graph.drawVerticalLines(vLines)
-    #   graph.drawHorizontalLines(hLines)
 
     elif self.selectionCallback:
       index = self.getCurrentIndex()
@@ -1088,6 +1097,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
     else:
       return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
+
 class ObjectHeaderView(QtGui.QHeaderView):
 
   def __init__(self, orient, parent):
@@ -1135,9 +1145,6 @@ EXPORT_FORMATS = (TAB_FORMAT, COMMA_FORMAT)
 
 class ObjectTableExport(QtGui.QDialog, Base):
 
-
-  # def __init__(self, table):
-
   def __init__(self, table=None, **kw):
     super(ObjectTableExport, self).__init__(table)
     # BasePopup.__init__(self, title='Export Table Text', transient=True, modal=True)
@@ -1151,14 +1158,10 @@ class ObjectTableExport(QtGui.QDialog, Base):
     values = [True] * len(labels)
     label = Label(self, 'Export format:', grid=(3,0))
     self.formatPulldown = PulldownList(self, EXPORT_FORMATS, grid=(3,1))
-
-
-
     self.setMaximumWidth(300)
 
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
-
 
 
 class ObjectTableFilter(QtGui.QDialog):

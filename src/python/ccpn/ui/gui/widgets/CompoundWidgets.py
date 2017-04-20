@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.util.Colour import spectrumColours
 
@@ -213,7 +214,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
       texts = list(texts)
     # pulldown default index
     index = 0
-    if default is not None and texts is not None:
+    if default is not None and texts is not None and len(texts)> 0:
       if default in texts:
         index = texts.index(default)
       else:
@@ -233,6 +234,10 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
   def getText(self):
     "Convenience: Return selected text in Pulldown"
     return self.pulldownList.currentText()
+
+  def select(self, item):
+    "Convenience: Set item in Pulldown; works with text or item"
+    return self.pulldownList.select(item)
 
   def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
     """
@@ -317,6 +322,81 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
     if maximumWidths is not None:
       self.setMinimumWidths(maximumWidths)
+
+
+class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
+  """
+  Compound class comprising a Label and a DoubleSpinBox, combined in a CompoundBaseWidget (i.e. a Frame)
+
+    orientation       widget layout
+    ------------      ------------------------    
+    left:             Label          DoubleSpinBox         
+
+    right:            DoubleSpinBox  Label   
+
+    top:              Label
+                      DoubleSpinBox       
+
+    bottom:           DoubleSpinBox       
+                      Label
+
+  """
+  layoutDict = dict(
+    # grid positions for label and checkBox for the different orientations
+    left   = [(0, 0), (0, 1)],
+    right  = [(0, 1), (0, 0)],
+    top    = [(0, 0), (1, 0)],
+    bottom = [(1, 0), (0, 0)],
+  )
+
+  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+               labelText='', value=None, range=(None,None), step=None, showButtons=True,
+               decimals=None, callback=None, **kwds):
+    """
+    :param parent: parent widget
+    :param showBorder: flag to display the border of Frame (True, False)
+    :param orientation: flag to determine the orientation of the labelText relative to the DoubleSpinBox widget.
+                        Allowed values: 'left', 'right', 'top', 'bottom'
+    :param minimumWidths: tuple of two values specifying the minimum width of the Label and DoubleSpinBox widget, respectively
+    :param maximumWidths: tuple of two values specifying the maximum width of the Label and DoubleSpinBox widget, respectively
+    :param labelText: Text for the Label
+    :param value: initial value for the DoubleSpinBox
+    :param range: (minimumValue, maximumValue) tuple for the DoubleSpinBox
+    :param step: initial step for the increment of the DoubleSpinBox buttons
+    :param decimals: number of decimals the DoubleSpinBox to display
+    :param showButtons: flag to display the DoubleSpinBox buttons (True, False)
+    :param kwds: (optional) keyword, value pairs for the gridding of Frame
+    """
+
+    CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                showBorder=showBorder, **kwds)
+
+    self.label = Label(parent=self, text=labelText, vAlign='center')
+    self._addWidget(self.label)
+
+    hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+    minimumValue = range[0] if range[0] is not None else None
+    maximumValue = range[1] if range[1] is not None else None
+    self.doubleSpinBox = DoubleSpinbox(parent=self, value=value, min=minimumValue, max=maximumValue,
+                                       step=step, showButtons=showButtons, decimals=decimals, hAlign=hAlign,
+                                       callback=callback
+                                      )
+    self._addWidget(self.doubleSpinBox)
+
+    if minimumWidths is not None:
+      self.setMinimumWidths(minimumWidths)
+
+    if maximumWidths is not None:
+      self.setMinimumWidths(maximumWidths)
+
+  def getValue(self)-> float:
+    "get the value from the DoubleSpinBox"
+    return self.doubleSpinBox.value()
+
+  def setValue(self, value:float):
+    "set the value from the DoubleSpinBox"
+    return self.doubleSpinBox.setValue(value)
+
 
 
 class SelectorWidget(QtGui.QWidget, Base):
@@ -466,5 +546,15 @@ if __name__ == '__main__':
                               callback=callback2, grid=(row,1), defaults=[0,2],
                                 **policyDict)
   listWidget2.showPulldownList(False)
+
+  row += 1
+  doubleSpinBox = DoubleSpinBoxCompoundWidget(parent=popup, labelText='doubleSpinBox: rage (-3,10)', grid=(row,0),
+                                              callback = callback1, range=(-3,10)
+                                              )
+
+  row += 1
+  doubleSpinBox2 = DoubleSpinBoxCompoundWidget(parent=popup, labelText='doubleSpinBox no buttons', grid=(row,0),
+                                              showButtons=False, callback = callback1
+                                              )
 
   app.start()

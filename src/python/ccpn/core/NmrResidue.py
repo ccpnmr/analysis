@@ -914,7 +914,7 @@ def getter(self:Residue) -> typing.Tuple[NmrResidue]:
   result = []
 
   nmrChain = self.chain.nmrChain
-  if nmrChain:
+  if nmrChain is not None:
     nmrResidue = self.nmrResidue
     if nmrResidue is not None:
       result = [nmrResidue]
@@ -928,17 +928,17 @@ def getter(self:Residue) -> typing.Tuple[NmrResidue]:
             if residue is None:
               break
         elif offset < 0:
-          for ii in range(offset):
+          for ii in range(-offset):
             residue = residue.nextResidue
             if residue is None:
               break
         #
         if residue is not None:
-          ll = residue.split(Pid.IDSEP)
-          ll[-2] = '%s%+d' % (ll[-2], offset)
-          nmrResidue = self._project.getNmrResidue(Pid.IDSEP.join(ll))
-          if nmrResidue is not None:
-            result.append(nmrResidue)
+          sequenceCode = '%s%+d' % (residue.sequenceCode, offset)
+          ll = [x for x in nmrChain.nmrResidues if x.sequenceCode == sequenceCode]
+          if ll:
+            result.extend(ll)
+
   #
   return tuple(sorted(result))
 Residue.allNmrResidues = property(getter, None, None,

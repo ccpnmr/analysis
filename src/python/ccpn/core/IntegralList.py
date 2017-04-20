@@ -148,9 +148,13 @@ def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
   apiDataSource = self._wrappedData
   self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
                               parName='newIntegralList')
+  dd = {'name':title, 'details':comment, 'dataType':'Integral'}
+  if symbolColour:
+    dd['symbolColour'] = symbolColour
+  if textColour:
+    dd['textColour'] = textColour
   try:
-    obj = apiDataSource.newPeakList(name=title, details=comment, dataType='Integral',
-                                    symbolColour=symbolColour, textColour=textColour)
+    obj = apiDataSource.newPeakList(**dd)
   finally:
     self._endCommandEchoBlock()
   return self._project._data2Obj.get(obj)

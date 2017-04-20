@@ -458,10 +458,15 @@ def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
   self._startCommandEchoBlock('newPeakList', values=locals(), defaults=defaults,
                               parName='newPeakList')
   result = None
+  dd = {'name':title, 'details':comment, 'isSimulated':isSimulated}
+  if symbolColour:
+    dd['symbolColour'] = symbolColour
+  if symbolStyle:
+    dd['symbolStyle'] = symbolStyle
+  if textColour:
+    dd['textColour'] = textColour
   try:
-    obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated,
-                                    symbolStyle=symbolStyle, symbolColour=symbolColour,
-                                    textColour=textColour)
+    obj = apiDataSource.newPeakList(**dd)
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:

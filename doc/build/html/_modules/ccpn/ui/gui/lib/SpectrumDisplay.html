@@ -89,7 +89,7 @@
     <span class="k">return</span>
 
   <span class="n">project</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">project</span>
-  <span class="n">project</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;makeStripPlot&#39;</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">,</span> <span class="n">autoWidth</span><span class="p">,</span> <span class="n">widths</span><span class="p">)</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;makeStripPlot&#39;</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">,</span> <span class="n">autoWidth</span><span class="p">,</span> <span class="n">widths</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
 
     <span class="n">numberOfStrips</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span>
@@ -110,7 +110,7 @@
         <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
       <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+    <span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="makeStripPlotFromSingles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.makeStripPlotFromSingles">[docs]</a><span class="k">def</span> <span class="nf">makeStripPlotFromSingles</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">:</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">autoWidth</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>

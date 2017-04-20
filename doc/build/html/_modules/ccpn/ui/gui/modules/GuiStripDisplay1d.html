@@ -54,24 +54,30 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon&#39;</span>
 
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
@@ -101,38 +107,6 @@
     <span class="c1"># TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)</span>
     <span class="c1">###self.inactivePeakItems = set() # contains unused peakItems</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">inactivePeakItemDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># maps peakListView to apiPeak to set of peaks which are not being displayed</span>
-    <span class="c1"># below not needed in 1D???</span>
-    <span class="c1">#self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed</span>
-    <span class="c1"># cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called</span>
-    <span class="c1"># TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)</span>
-    <span class="c1">#self.inactivePeakItems = set() # contains unused peakItems</span>
-    <span class="c1">#self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed</span>
-
-  <span class="c1"># def addSpectrum(self, spectrum):</span>
-  <span class="c1">#</span>
-  <span class="c1">#   apiDataSource = spectrum._wrappedData</span>
-  <span class="c1">#   apiSpectrumView = self._apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   #axisCodes = spectrum.axisCodes</span>
-  <span class="c1">#   axisCodes = LibSpectrum.getAxisCodes(spectrum)</span>
-  <span class="c1">#   axisCodes = axisCodes + (&#39;intensity&#39;,)</span>
-  <span class="c1">#   if axisCodes != self._apiSpectrumDisplay.axisCodes:</span>
-  <span class="c1">#     raise Exception(&#39;Cannot overlay that spectrum on this display&#39;)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)</span>
-  <span class="c1">#   # # guiSpectrumView.name = apiSpectrumDislay1d.name</span>
-  <span class="c1">#   # for guiStrip in self.guiStrips:</span>
-  <span class="c1">#   #   guiStrip.addSpectrum(apiStripDisplay1d, guiSpectrumView)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if not apiSpectrumView:</span>
-  <span class="c1">#     ##axisCodes=spectrum.axisCodes</span>
-  <span class="c1">#     dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum</span>
-  <span class="c1">#     apiSpectrumView = self._apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,</span>
-  <span class="c1">#                           dimensionOrdering=dimensionOrdering)</span>
-  <span class="c1">#   guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   for guiStrip in self.guiStrips:</span>
-  <span class="c1">#     guiStrip.addSpectrum(spectrum, guiSpectrumView)</span>
 
 <div class="viewcode-block" id="GuiStripDisplay1d.showPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d.showPeaks">[docs]</a>  <span class="k">def</span> <span class="nf">showPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakListView</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

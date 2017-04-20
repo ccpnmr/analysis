@@ -55,27 +55,35 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:33 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span> <span class="k">as</span> <span class="n">OD</span>
 <span class="c1"># from collections import Counter</span>
@@ -89,11 +97,11 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.nef</span> <span class="kn">import</span> <span class="n">Specification</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.nef</span> <span class="kn">import</span> <span class="n">StarIo</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreConstants</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumGroup</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Complex</span> <span class="kn">import</span> <span class="n">Complex</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Integral</span> <span class="kn">import</span> <span class="n">Integral</span>
@@ -104,7 +112,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="c1"># from ccpn.core.Residue import Residue</span>
 <span class="c1"># from ccpn.core.Atom import Atom</span>
-<span class="c1"># from ccpn.core.NmrChain import NmrChain</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 <span class="c1"># from ccpn.core.NmrAtom import NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
@@ -128,7 +136,7 @@
   <span class="s1">&#39;nef_molecular_system&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_sample&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_substance&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;ccpn_assignments&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;ccpn_assignment&#39;</span><span class="p">,</span>
   <span class="s1">&#39;nef_chemical_shift_list&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_dataset&#39;</span><span class="p">,</span>
   <span class="s1">&#39;nef_distance_restraint_list&#39;</span><span class="p">,</span>
@@ -136,6 +144,7 @@
   <span class="s1">&#39;nef_rdc_restraint_list&#39;</span><span class="p">,</span>
   <span class="s1">&#39;nef_nmr_spectrum&#39;</span><span class="p">,</span>
   <span class="s1">&#39;nef_peak_restraint_links&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;ccpn_complex&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_spectrum_group&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_restraint_list&#39;</span><span class="p">,</span>
   <span class="s1">&#39;ccpn_notes&#39;</span><span class="p">,</span>
@@ -578,6 +587,14 @@
     <span class="p">(</span><span class="s1">&#39;restraint_id&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
   <span class="p">)),</span>
 
+  <span class="s1">&#39;ccpn_complex&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
+    <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;ccpn_complex_chain&#39;</span><span class="p">,</span><span class="n">_isALoop</span><span class="p">),</span>
+  <span class="p">)),</span>
+  <span class="s1">&#39;ccpn_complex_chain&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
+    <span class="p">(</span><span class="s1">&#39;complex_chain_code&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
+  <span class="p">)),</span>
+
   <span class="s1">&#39;ccpn_spectrum_group&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
     <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;ccpn_group_spectrum&#39;</span><span class="p">,</span><span class="n">_isALoop</span><span class="p">),</span>
@@ -614,7 +631,7 @@
     <span class="p">(</span><span class="s1">&#39;lower_limits_4&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;upper_limits_4&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;annotation&#39;</span><span class="p">,</span><span class="s1">&#39;annotation&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;details&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;comment&#39;</span><span class="p">),</span>
   <span class="p">)),</span>
 
   <span class="c1"># NB Sample crosslink to spectrum is handled on the spectrum side</span>
@@ -673,7 +690,7 @@
     <span class="p">(</span><span class="s1">&#39;synonym&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
   <span class="p">)),</span>
 
-  <span class="s1">&#39;ccpn_assignments&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
+  <span class="s1">&#39;ccpn_assignment&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
     <span class="p">(</span><span class="s1">&#39;nmr_chain&#39;</span><span class="p">,</span><span class="n">_isALoop</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;nmr_residue&#39;</span><span class="p">,</span><span class="n">_isALoop</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;nmr_atom&#39;</span><span class="p">,</span><span class="n">_isALoop</span><span class="p">),</span>
@@ -684,7 +701,7 @@
     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="s1">&#39;label&#39;</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;is_connected&#39;</span><span class="p">,</span><span class="s1">&#39;isConnected&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;details&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;comment&#39;</span><span class="p">),</span>
   <span class="p">)),</span>
 
   <span class="s1">&#39;nmr_residue&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
@@ -692,7 +709,7 @@
     <span class="p">(</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">,</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;residue_name&#39;</span><span class="p">,</span><span class="s1">&#39;residueType&#39;</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;details&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;comment&#39;</span><span class="p">),</span>
   <span class="p">)),</span>
 
   <span class="s1">&#39;nmr_atom&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
@@ -701,7 +718,7 @@
     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;isotopeCode&#39;</span><span class="p">,</span><span class="s1">&#39;isotopeCode&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;details&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="s1">&#39;comment&#39;</span><span class="p">),</span>
   <span class="p">)),</span>
 
   <span class="s1">&#39;ccpn_dataset&#39;</span><span class="p">:</span><span class="n">OD</span><span class="p">((</span>
@@ -878,6 +895,187 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">programVersion</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationVersion</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span> <span class="o">=</span> <span class="p">{}</span>
 
+<div class="viewcode-block" id="CcpnNefWriter.exportObjects"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportObjects">[docs]</a>  <span class="k">def</span> <span class="nf">exportObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                    <span class="n">chains</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Chain</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">chemicalShiftLists</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ChemicalShiftList</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">restraintLists</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">RestraintList</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">peakLists</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PeakList</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">samples</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Sample</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">substances</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Substance</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">nmrChains</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NmrChain</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">dataSets</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">DataSet</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">complexes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Complex</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">spectrumGroups</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">SpectrumGroup</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+                    <span class="n">notes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Note</span><span class="p">]</span><span class="o">=</span><span class="p">(),):</span>
+    <span class="sd">&quot;&quot;&quot;Export objects passed in and objects they are linked to.</span>
+
+<span class="sd">    if expandSelection is True (strongly recommended):</span>
+<span class="sd">    Will add PeakLists (Spectra) from SpectrumGroups (first peakList only),</span>
+<span class="sd">    Samples and ChemicalShiftLists from peakLists (Spectra)</span>
+<span class="sd">    Samples from SpectrumHits,</span>
+<span class="sd">    Substances from Samples</span>
+<span class="sd">    RestraintLists from DataSets</span>
+<span class="sd">    NmrChains from ChemicalShifts</span>
+<span class="sd">    and Chains from Substances, SampleComponents, NmrChains, and Complexes&quot;&quot;&quot;</span>
+
+    <span class="c1"># set-up</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">saveFrames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+
+    <span class="k">if</span> <span class="n">expandSelection</span><span class="p">:</span>
+      <span class="c1"># Add linked-to objects - we can not skip these without altering the data:</span>
+
+      <span class="c1"># SpectrumGroups and PeakLists</span>
+      <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peakLists</span><span class="p">)</span>
+      <span class="n">spectrumSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">peakLists</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="n">spectrumGroups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spectrumSet</span><span class="p">:</span>
+            <span class="n">spectrumSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+            <span class="n">pl</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span>
+            <span class="k">if</span> <span class="n">pl</span><span class="p">:</span>
+              <span class="c1"># Add one of the peakLists</span>
+              <span class="n">peakLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">peakLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">())</span>
+      <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">peakLists</span><span class="p">)</span>
+
+      <span class="c1"># ChemicalShiftLists</span>
+      <span class="n">chemicalShiftListSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chemicalShiftLists</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">peakLists</span><span class="p">:</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">chemicalShiftList</span>
+        <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;PeakList </span><span class="si">%s</span><span class="s2"> has no ChemicalShiftList attached and cannot be exported to NEF&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">chemicalShiftListSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      <span class="n">chemicalShiftLists</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chemicalShiftListSet</span><span class="p">)</span>
+
+      <span class="c1"># Samples</span>
+      <span class="n">sampleSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumSet</span><span class="p">:</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">sample</span>
+        <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">sampleSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">spectrumHit</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">:</span>
+          <span class="n">sample</span> <span class="o">=</span> <span class="n">spectrumHit</span><span class="o">.</span><span class="n">sample</span>
+          <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sampleSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+      <span class="n">samples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sampleSet</span><span class="p">)</span>
+
+      <span class="c1"># restraintLists</span>
+      <span class="n">restraintListSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">restraintLists</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">dataSet</span> <span class="ow">in</span> <span class="n">dataSets</span><span class="p">:</span>
+        <span class="n">restraintListSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dataSet</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">)</span>
+      <span class="n">restraintLists</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraintListSet</span><span class="p">)</span>
+
+      <span class="c1"># ChemicalShiftLists and NmrChains</span>
+      <span class="n">nmrChainSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nmrChains</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">chemicalShiftList</span> <span class="ow">in</span> <span class="n">chemicalShiftLists</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chemicalShift</span> <span class="ow">in</span> <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">:</span>
+          <span class="n">nmrChainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
+      <span class="n">nmrChains</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">nmrChainSet</span><span class="p">)</span>
+
+      <span class="c1"># NmrChains and Chains</span>
+      <span class="n">chainSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chains</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">nmrChain</span> <span class="ow">in</span> <span class="n">nmrChains</span><span class="p">:</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">chain</span>
+        <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">chainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+
+      <span class="c1"># Complexes and Chains</span>
+      <span class="k">for</span> <span class="nb">complex</span> <span class="ow">in</span> <span class="n">complexes</span><span class="p">:</span>
+        <span class="n">chainSet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">complex</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
+
+      <span class="c1"># Samples, Substances and Chains</span>
+      <span class="n">substanceSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">substances</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+          <span class="n">substance</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span>
+          <span class="k">if</span> <span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">substanceSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">substance</span><span class="p">)</span>
+          <span class="n">chain</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">chain</span>
+          <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">chainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+      <span class="n">substances</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">substanceSet</span><span class="p">)</span>
+
+      <span class="c1"># Substances and Chains</span>
+      <span class="k">for</span> <span class="n">substance</span> <span class="ow">in</span> <span class="n">substances</span><span class="p">:</span>
+          <span class="n">chain</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">chain</span>
+          <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">chainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+      <span class="n">chains</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chainSet</span><span class="p">)</span>
+
+    <span class="c1"># MetaData</span>
+    <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeNefMetaData</span><span class="p">(</span><span class="n">project</span><span class="p">))</span>
+
+    <span class="c1"># Chains</span>
+    <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains2Nef</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">chains</span><span class="p">)))</span>
+
+    <span class="c1"># ChemicalShiftLists</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chemicalShiftLists</span><span class="p">):</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftList2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># RestraintLists and</span>
+    <span class="n">restraintLists</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraintLists</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;restraintType&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">))</span>
+    <span class="n">singleDataSet</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">restraintLists</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dataSet</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">restraintLists</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">restraintLists</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintList2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">singleDataSet</span><span class="o">=</span><span class="n">singleDataSet</span><span class="p">))</span>
+
+    <span class="c1"># PeakLists/Spectra</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">peakLists</span><span class="p">):</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># restraint-peak links</span>
+    <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakRestraintLinks2Nef</span><span class="p">(</span><span class="n">restraintLists</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+
+    <span class="c1"># Now add CCPN-specific data:</span>
+
+    <span class="c1"># TODO temporarily blanked out, pending bug fixes</span>
+    <span class="c1"># # NmrChains</span>
+    <span class="c1"># saveFrames.append(self.assignments2Nef(project))</span>
+
+    <span class="c1"># SpectrumGroups</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># Samples</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># Substances</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">substances</span><span class="p">):</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substance2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># SpectrumGroups</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">complexes</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">complex2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="c1"># TODO temporarily blanked out, pending bug fixes</span>
+    <span class="c1"># # DataSets - NB does not include RestraintLists, which are given above</span>
+    <span class="c1"># for obj in project.dataSets:</span>
+    <span class="c1">#   saveFrames.append(self.dataSet2Nef(obj))</span>
+
+    <span class="c1"># Notes</span>
+    <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes2Nef</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">notes</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+
+    <span class="c1"># Additional data</span>
+    <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalData2Nef</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
+
+    <span class="c1"># make and return dataBlock with saveframes in export order</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveFrameNefOrder</span><span class="p">(</span><span class="n">saveFrames</span><span class="p">):</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">],</span> <span class="n">saveFrame</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="CcpnNefWriter.exportDataSet"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportDataSet">[docs]</a>  <span class="k">def</span> <span class="nf">exportDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataSet</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get dataSet and all objects linked to therein as NEF object tree for export&quot;&quot;&quot;</span>
@@ -898,6 +1096,15 @@
 
 <div class="viewcode-block" id="CcpnNefWriter.exportProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportProject">[docs]</a>  <span class="k">def</span> <span class="nf">exportProject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get project and all contents as NEF object tree for export&quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exportObjects</span><span class="p">(</span><span class="n">expandSelection</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">chains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">chemicalShiftLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">,</span>
+                              <span class="n">restraintLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">,</span> <span class="n">peakLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span>
+                              <span class="n">samples</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">substances</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">,</span>
+                              <span class="n">nmrChains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">,</span> <span class="n">dataSets</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">,</span>
+                              <span class="n">complexes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">complexes</span><span class="p">,</span> <span class="n">spectrumGroups</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">,</span>
+                              <span class="n">notes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">saveFrames</span> <span class="o">=</span> <span class="p">[]</span>
@@ -932,9 +1139,13 @@
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
 
     <span class="c1"># Now add CCPN-specific data:</span>
-    <span class="c1"># # SpectrumGroups</span>
-    <span class="c1"># for obj in project.spectrumGroups:</span>
-    <span class="c1">#   saveFrames.append(self.spectrumGroup2Nef(obj))</span>
+
+    <span class="c1"># NmrChains</span>
+    <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignments2Nef</span><span class="p">(</span><span class="n">project</span><span class="p">))</span>
+
+    <span class="c1"># SpectrumGroups</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
+      <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroup2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
     <span class="c1"># Samples</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">):</span>
@@ -943,9 +1154,6 @@
     <span class="c1"># Substances</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">):</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substance2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-
-    <span class="c1"># # NmrChains</span>
-    <span class="c1"># saveFrames.append(self.nmrChains2Nef(project.nmrChains))</span>
 
     <span class="c1"># # DataSets - NB does not include RestraintLists, which are given above</span>
     <span class="c1"># for obj in project.dataSets:</span>
@@ -1075,20 +1283,6 @@
       <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">serial</span>
       <span class="n">nmrChainLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
 
-      <span class="c1"># # NB this makes sure that connected stretches are given in order.</span>
-      <span class="c1"># nmrResidues = nmrChain.mainNmrResidues</span>
-      <span class="c1"># for nmrResidue in nmrResidues:</span>
-      <span class="c1">#   rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)</span>
-      <span class="c1">#   rowdata[&#39;serial&#39;] = nmrResidue.serial</span>
-      <span class="c1">#   nmrResidueLoop.newRow(rowdata)</span>
-      <span class="c1">#</span>
-      <span class="c1">#   nmrResidues.extend(nmrResidue.offsetNmrResidues)</span>
-      <span class="c1">#</span>
-      <span class="c1">#   for nmrAtom in nmrResidue.nmrAtoms:</span>
-      <span class="c1">#     rowdata = self._loopRowData(nmrAtomLoopName, nmrAtom)</span>
-      <span class="c1">#     rowdata[&#39;serial&#39;] = nmrAtom.serial</span>
-      <span class="c1">#     nmrAtomLoop.newRow(rowdata)</span>
-
       <span class="c1"># Use sorting - should give correct results</span>
       <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">):</span>
         <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">nmrResidueLoopName</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">)</span>
@@ -1145,27 +1339,35 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-  <span class="c1"># def dataSet2Nef(self, dataSet:DataSet) -&gt; StarIo.NmrSaveFrame:</span>
-  <span class="c1">#   &quot;&quot;&quot;Convert DataSet to CCPN NEF saveframe&quot;&quot;&quot;</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Set up frame</span>
-  <span class="c1">#   category = &#39;ccpn_dataset&#39;</span>
-  <span class="c1">#   result = self._newNefSaveFrame(dataSet, category, str(dataSet.serial))</span>
-  <span class="c1">#   result[&#39;creation_date&#39;] =</span>
-  <span class="c1">#</span>
-  <span class="c1">#   self.ccpn2SaveFrameName[dataSet] = result[&#39;sf_framecode&#39;]</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Fill in loop</span>
-  <span class="c1">#   loopName = &#39;ccpn_sample_component&#39;</span>
-  <span class="c1">#   loop = result[loopName]</span>
-  <span class="c1">#   components = sample.sampleComponents</span>
-  <span class="c1">#   if components:</span>
-  <span class="c1">#     for sampleComponent in components:</span>
-  <span class="c1">#       loop.newRow(self._loopRowData(loopName, sampleComponent))</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     del result[loopName]</span>
-  <span class="c1">#   #</span>
-  <span class="c1">#   return result</span>
+<div class="viewcode-block" id="CcpnNefWriter.dataSet2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.dataSet2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">dataSet2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataSet</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert DataSet to CCPN NEF saveframe&quot;&quot;&quot;</span>
+
+    <span class="c1"># Set up frame</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ccpn_dataset&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newNefSaveFrame</span><span class="p">(</span><span class="n">dataSet</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dataSet</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="p">[</span><span class="n">dataSet</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Fill in loops</span>
+    <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_calculation_step&#39;</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+    <span class="n">calculationSteps</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">calculationSteps</span>
+    <span class="k">if</span> <span class="n">calculationSteps</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">calculationStep</span> <span class="ow">in</span> <span class="n">calculationSteps</span><span class="p">:</span>
+        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">calculationStep</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+
+    <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_calculation_data&#39;</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+    <span class="n">calculationData</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">if</span> <span class="n">calculationData</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">calculationData</span><span class="p">:</span>
+        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">obj</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
   <span class="c1"># &#39;ccpn_dataset&#39;:OD((</span>
@@ -1290,7 +1492,7 @@
 <div class="viewcode-block" id="CcpnNefWriter.spectrum2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.spectrum2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">spectrum2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Convert spectrum to NEF saveframes - one per peaklist</span>
 
-<span class="sd">    Will crate a peakList if none are present&quot;&quot;&quot;</span>
+<span class="sd">    Will create a peakList if none are present&quot;&quot;&quot;</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -1303,7 +1505,7 @@
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="CcpnNefWriter.peakList2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakList2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">peakList2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">exportCompleteSpectrum</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+<div class="viewcode-block" id="CcpnNefWriter.peakList2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakList2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">peakList2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">exportCompleteSpectrum</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Convert PeakList to CCPN NEF saveframe.</span>
 <span class="sd">    Used for all spectrum export, as there is one frame per PeakList</span>
@@ -1520,9 +1722,6 @@
           <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">lowerlimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;upperLimits&#39;</span><span class="p">]):</span>
           <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">upperLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-        <span class="c1"># row._set(&#39;slopes&#39;, integral.slopes)</span>
-        <span class="c1"># row._set(&#39;lower_limits&#39;, lowerlimits)</span>
-        <span class="c1"># row._set(&#39;upper_limits&#39;, upperLimits)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ccpn_integral_list&#39;</span><span class="p">]</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ccpn_integral&#39;</span><span class="p">]</span>
@@ -1577,6 +1776,29 @@
     <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
         <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="CcpnNefWriter.complex2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.complex2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">complex2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">complex</span><span class="p">:</span><span class="n">Complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert Complex to CCPN NEF saveframe&quot;&quot;&quot;</span>
+
+    <span class="c1"># Set up frame</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ccpn_complex&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newNefSaveFrame</span><span class="p">(</span><span class="nb">complex</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="nb">complex</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="p">[</span><span class="nb">complex</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Fill in loop</span>
+    <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_complex_chain&#39;</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+    <span class="n">chains</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">complex</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chains</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains</span><span class="p">:</span>
+        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
     <span class="c1">#</span>
@@ -1787,6 +2009,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">defaultDataSetSerial</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">defaultNmrChain</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainDataSetSerial</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">defaultChemicalShiftList</span> <span class="o">=</span> <span class="bp">None</span>
 
 
 <div class="viewcode-block" id="CcpnNefReader.getNefData"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.getNefData">[docs]</a>  <span class="k">def</span> <span class="nf">getNefData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
@@ -1800,22 +2023,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">dataBlock</span></div>
-
-  <span class="c1"># def loadNewProject(self, path:str):</span>
-  <span class="c1">#   &quot;&quot;&quot;Load NEF file at path into project&quot;&quot;&quot;</span>
-  <span class="c1">#</span>
-  <span class="c1">#   dataBlock = self.getNefData(path)</span>
-  <span class="c1">#   project = self.application.newProject(dataBlock.name)</span>
-  <span class="c1">#   self.application._echoBlocking += 1</span>
-  <span class="c1">#   self.application.project._undo.increaseBlocking()</span>
-  <span class="c1">#   try:</span>
-  <span class="c1">#     self.importNewProject(project, dataBlock)</span>
-  <span class="c1">#   finally:</span>
-  <span class="c1">#     self.application._echoBlocking -= 1</span>
-  <span class="c1">#     self.application.project._undo.decreaseBlocking()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   #</span>
-  <span class="c1">#   return project</span>
 
   <span class="k">def</span> <span class="nf">_getSaveFramesInOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OD</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get saveframes in fixed reading order as Ordereddict(category:[saveframe,])&quot;&quot;&quot;</span>
@@ -1862,7 +2069,7 @@
     <span class="n">saveFrame</span> <span class="o">=</span> <span class="n">dataBlock</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_assignment&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">saveFrameName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_assignment&#39;</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">load_ccpn_assignments</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">load_ccpn_assignment</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">)</span>
       <span class="k">del</span> <span class="n">saveframeOrderedDict</span><span class="p">[</span><span class="s1">&#39;ccpn_assignment&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">preloadAssignmentData</span><span class="p">(</span><span class="n">dataBlock</span><span class="p">)</span>
@@ -2159,6 +2366,12 @@
     <span class="c1"># Make main object</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newChemicalShiftList</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChemicalShiftList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># ChemicalShiftList should default to the unique ChemicalShIftList in the file</span>
+      <span class="c1"># A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists</span>
+      <span class="c1"># given for all spectra- but this is nto hte place for validity checking</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">defaultChemicalShiftList</span> <span class="o">=</span> <span class="n">result</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
       <span class="c1"># When testing you want the values to remain as read</span>
       <span class="n">result</span><span class="o">.</span><span class="n">autoUpdate</span> <span class="o">=</span> <span class="bp">False</span>
@@ -2416,6 +2629,10 @@
       <span class="n">frameCode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chemical_shift_list&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">frameCode</span><span class="p">:</span>
         <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="p">[</span><span class="n">frameCode</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Defaults to first (there should be only one, but we want the read to work) ShiftList</span>
+        <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChemicalShiftList</span>
+
 
       <span class="n">frameCode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_sample&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">frameCode</span><span class="p">:</span>
@@ -2453,12 +2670,12 @@
         <span class="n">storageParameters</span><span class="p">[</span><span class="s1">&#39;numPoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pointCounts</span>
         <span class="n">spectrum</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">addDataStore</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="o">**</span><span class="n">storageParameters</span><span class="p">)</span>
 
-    <span class="c1"># Load CCPN dimensions before peaks</span>
-    <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_spectrum_dimension&#39;</span>
-    <span class="c1"># Those are treated elsewhere</span>
-    <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loopName</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">load_ccpn_spectrum_dimension</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+      <span class="c1"># Load CCPN dimensions before peaks</span>
+      <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_spectrum_dimension&#39;</span>
+      <span class="c1"># Those are treated elsewhere</span>
+      <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loopName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_ccpn_spectrum_dimension</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
 
     <span class="c1"># Make PeakLst</span>
     <span class="n">peakList</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="o">**</span><span class="n">peakListParameters</span><span class="p">)</span>
@@ -2582,7 +2799,7 @@
         <span class="k">else</span><span class="p">:</span>
           <span class="n">point</span> <span class="o">=</span> <span class="n">referencePoints</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
           <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-          <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumReference</span><span class="o">.</span><span class="n">point2Value</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+          <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumReference</span><span class="o">.</span><span class="n">pointToValue</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">referencePoints</span> <span class="o">=</span> <span class="n">points</span>
     <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span> <span class="o">=</span> <span class="n">values</span>
 
@@ -2877,8 +3094,6 @@
 
 <div class="viewcode-block" id="CcpnNefReader.load_ccpn_spectrum_group"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_spectrum_group">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_spectrum_group</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
 
-    <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;ccpn_spectrum_group reading is not implemented yet&quot;</span><span class="p">)</span>
-
     <span class="c1"># Get ccpn-to-nef mappping for saveframe</span>
     <span class="n">category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_category&#39;</span><span class="p">]</span>
     <span class="n">framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">]</span>
@@ -2887,7 +3102,7 @@
     <span class="n">parameters</span><span class="p">,</span> <span class="n">loopNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
 
     <span class="c1"># Make main object</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newChemicalShiftList</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
 
     <span class="c1"># Load loops, with object as parent</span>
     <span class="k">for</span> <span class="n">loopName</span> <span class="ow">in</span> <span class="n">loopNames</span><span class="p">:</span>
@@ -2908,7 +3123,7 @@
       <span class="n">peakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nmr_spectrum_id&#39;</span><span class="p">))</span>
       <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-          <span class="s2">&quot;No Spectrum saveframe found with framecode </span><span class="si">%s</span><span class="s2">. Skipping peak_restraint_link&quot;</span>
+          <span class="s2">&quot;No Spectrum saveframe found with framecode </span><span class="si">%s</span><span class="s2">. Skipping Spectrum from SpectrumGroup&quot;</span>
           <span class="o">%</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nmr_spectrum_id&#39;</span><span class="p">)</span>
         <span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
@@ -2917,6 +3132,48 @@
     <span class="n">parent</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">spectra</span></div>
   <span class="c1">#</span>
   <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_group_spectrum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_group_spectrum</span>
+
+
+<div class="viewcode-block" id="CcpnNefReader.load_ccpn_complex"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_complex">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_complex</span><span class="p">(</span><span class="bp">self</span> <span class="p">,</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
+
+    <span class="c1"># Get ccpn-to-nef mappping for saveframe</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_category&#39;</span><span class="p">]</span>
+    <span class="n">framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">]</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">nef2CcpnMap</span><span class="p">[</span><span class="n">category</span><span class="p">]</span>
+
+    <span class="n">parameters</span><span class="p">,</span> <span class="n">loopNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+
+    <span class="c1"># Make main object</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newComplex</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+
+    <span class="c1"># Load loops, with object as parent</span>
+    <span class="k">for</span> <span class="n">loopName</span> <span class="ow">in</span> <span class="n">loopNames</span><span class="p">:</span>
+      <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loopName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
+        <span class="n">importer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">importers</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
+        <span class="n">importer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  <span class="c1">#</span>
+  <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_complex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_complex</span>
+
+<div class="viewcode-block" id="CcpnNefReader.load_ccpn_complex_chain"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_complex_chain">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_complex_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Complex</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrLoop</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;load ccpn_complex_chain loop&quot;&quot;&quot;</span>
+
+    <span class="n">chains</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+      <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;complex_chain_code&#39;</span><span class="p">))</span>
+      <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;No Chain found with code </span><span class="si">%s</span><span class="s2">. Skipping Chain from Complex&quot;</span>
+          <span class="o">%</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;complex_chain_code&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">chains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="n">chains</span></div>
+  <span class="c1">#</span>
+  <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_complex_chain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_complex_chain</span>
 
 
 <div class="viewcode-block" id="CcpnNefReader.load_ccpn_sample"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_sample">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
@@ -3029,7 +3286,7 @@
   <span class="c1">#</span>
   <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_substance_synonym&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_substance_synonym</span>
 
-<div class="viewcode-block" id="CcpnNefReader.load_ccpn_assignments"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_assignments">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_assignments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnNefReader.load_ccpn_assignment"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_assignment">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
 
     <span class="c1"># the saveframe contains nothing but three loops:</span>
     <span class="n">nmrChainLoopName</span> <span class="o">=</span> <span class="s1">&#39;nmr_chain&#39;</span>
@@ -3077,7 +3334,7 @@
       <span class="c1"># NB former call was BROKEN!</span>
       <span class="c1"># modelUtil.resetSerial(nmrAtom, row[&#39;serial&#39;], &#39;nmrAtoms&#39;)</span>
   <span class="c1">#</span>
-  <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_assignments&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_assignments</span>
+  <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_assignment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_assignment</span>
 
 
 <div class="viewcode-block" id="CcpnNefReader.load_ccpn_notes"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_notes">[docs]</a>  <span class="k">def</span> <span class="nf">load_ccpn_notes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
@@ -3795,12 +4052,11 @@
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-  <span class="kn">import</span> <span class="nn">sys</span>
   <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span> <span class="p">,))</span>
+  <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(path)</span>
-  <span class="c1"># nefpath = _exportToNef(path)</span>
-  <span class="c1"># _testNefIo(nefpath)</span>
+  <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">nefpath</span><span class="p">)</span>
   <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(nefpath, skipPrefixes=(&#39;ccpn&#39;,))</span>
   <span class="c1"># print(_extractVariantsTable(path))</span>

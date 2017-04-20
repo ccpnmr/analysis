@@ -2327,21 +2327,21 @@ and puts those in a new peakList3.  Assumes a common spectrum for now.</p>
 <dt id="ccpn.core.PeakList.PeakList.symbolColour">
 <code class="descname">symbolColour</code><a class="headerlink" href="#ccpn.core.PeakList.PeakList.symbolColour" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
-Symbol colour for peak annotation display</p>
+Symbol colour for peak annotation display in all displays</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.PeakList.PeakList.symbolStyle">
 <code class="descname">symbolStyle</code><a class="headerlink" href="#ccpn.core.PeakList.PeakList.symbolStyle" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
-Symbol style for peak annotation display</p>
+Symbol style for peak annotation display in all displays</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.PeakList.PeakList.textColour">
 <code class="descname">textColour</code><a class="headerlink" href="#ccpn.core.PeakList.PeakList.textColour" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
-Text colour for peak annotation display</p>
+Text colour for peak annotation display in all displays</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3207,7 +3207,7 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dt id="ccpn.core.PseudoDimension.PseudoDimension">
 <em class="property">class </em><code class="descclassname">ccpn.core.PseudoDimension.</code><code class="descname">PseudoDimension</code><a class="reference internal" href="../_modules/ccpn/core/PseudoDimension.html#PseudoDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PseudoDimension.PseudoDimension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>ADVANCED. A sampled SPectrum axis with non-gridded values. Used to describe
+<p>ADVANCED. A sampled Spectrum axis with non-gridded values. Used to describe
 sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1
 experiments.</p>
 <dl class="attribute">
@@ -3314,6 +3314,20 @@ SpectrumHits (for screening/metabolomics) that refer to individual points in the
 <em class="property">class </em><code class="descclassname">ccpn.core.Residue.</code><code class="descname">Residue</code><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>A molecular Residue, contained in a Chain, and containing Atoms.</p>
+<dl class="attribute">
+<dt id="ccpn.core.Residue.Residue.allNmrAtoms">
+<code class="descname">allNmrAtoms</code><a class="headerlink" href="#ccpn.core.Residue.Residue.allNmrAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.NmrAtom.NmrAtom]</em>, <em>immutable</em> - 
+All NmrAtoms corresponding to Residue - E.g. (for MR:A.87) NmrAtoms in NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Residue.Residue.allNmrResidues">
+<code class="descname">allNmrResidues</code><a class="headerlink" href="#ccpn.core.Residue.Residue.allNmrResidues" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.NmrResidue.NmrResidue]</em>, <em>immutable</em> - 
+AllNmrResidues corresponding to Residue - E.g. (for MR:A.87) NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Residue.Residue.atoms" title="Permalink to this definition">¶</a></dt>
@@ -4386,6 +4400,13 @@ Gaussian broadening per dimension. Always None for sampled dimensions.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.get1dSpectrumData">
+<code class="descname">get1dSpectrumData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.get1dSpectrumData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.get1dSpectrumData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position,scaledData numpy array for 1D spectrum.</p>
+<p>Gives first 1D slice for nD</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getInAxisOrder">
 <code class="descname">getInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getInAxisOrder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get attributeName in order defined by axisCodes :
@@ -4588,6 +4609,14 @@ level multiplier for negative contours</p>
 <dt id="ccpn.core.Spectrum.Spectrum.newSpectrumReference">
 <code class="descname">newSpectrumReference</code><span class="sig-paren">(</span><em>dimension: int, spectrometerFrequency: float, isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift', maxAliasedFrequency: float = None, minAliasedFrequency: float = None, foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0, referenceValue: float = 0.0</em><span class="sig-paren">)</span> &rarr; ccpn.core.SpectrumReference.SpectrumReference<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newSpectrumReference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new SpectrumReference within Spectrum</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.noiseLevel">
+<code class="descname">noiseLevel</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.noiseLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>float</em>, <em>mutable</em> - 
+Estimated noise level for the spectrum,
+defined as the estimated standard deviation of the points from the baseplane/baseline</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5130,8 +5159,8 @@ minimum possible peak frequency (in ppm) for this reference</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.SpectrumReference.SpectrumReference.point2Value">
-<code class="descname">point2Value</code><span class="sig-paren">(</span><em>point: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.point2Value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.point2Value" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.SpectrumReference.SpectrumReference.pointToValue">
+<code class="descname">pointToValue</code><span class="sig-paren">(</span><em>point: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.pointToValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.pointToValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Axis (ppm) value corresponding to point</p>
 </dd></dl>
 
@@ -5184,8 +5213,8 @@ Spectrum containing spectrumReference.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.SpectrumReference.SpectrumReference.value2Point">
-<code class="descname">value2Point</code><span class="sig-paren">(</span><em>value: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.value2Point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.value2Point" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.SpectrumReference.SpectrumReference.valueToPoint">
+<code class="descname">valueToPoint</code><span class="sig-paren">(</span><em>value: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.valueToPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.valueToPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Point number (float) corresponding to (ppm) value</p>
 </dd></dl>
 

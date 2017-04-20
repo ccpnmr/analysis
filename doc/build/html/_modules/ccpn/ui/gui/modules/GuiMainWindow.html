@@ -54,19 +54,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:38 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: TJ Ragan $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -275,7 +282,7 @@
     <span class="n">apiProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiProject</span><span class="p">,</span> <span class="s1">&#39;_temporaryDirectory&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">True</span>
-    
+
     <span class="k">if</span> <span class="n">apiProject</span><span class="o">.</span><span class="n">isProjectModified</span><span class="p">():</span>
       <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39; and any changes will be lost&#39;</span>
     <span class="k">else</span><span class="p">:</span>
@@ -283,9 +290,9 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span>
           <span class="s1">&#39;Do you really want to </span><span class="si">%s</span><span class="s1"> project (current project will be closed</span><span class="si">%s</span><span class="s1">)?&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">phrase</span><span class="p">,</span> <span class="n">ss</span><span class="p">),</span>
           <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
-          
+
     <span class="k">return</span> <span class="n">result</span>
-    
+
 
 <div class="viewcode-block" id="GuiMainWindow.loadProject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.loadProject">[docs]</a>  <span class="k">def</span> <span class="nf">loadProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projectDir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -413,25 +420,38 @@
                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">clearRecentMacros</span><span class="p">))</span>
 
 
+  <span class="k">def</span> <span class="nf">_addPluginSubMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Plugin</span><span class="p">):</span>
+    <span class="n">targetMenu</span> <span class="o">=</span> <span class="n">pluginsMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="s1">&#39;Plugins&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;...&#39;</span> <span class="ow">in</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">:</span>
+      <span class="n">package</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">targetMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">topMenuAction</span><span class="o">=</span><span class="n">pluginsMenu</span><span class="p">)</span>
+      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">targetMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addMenu</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">targetMenu</span><span class="o">=</span><span class="n">pluginsMenu</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">Action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPlugin</span><span class="p">,</span> <span class="n">Plugin</span><span class="o">=</span><span class="n">Plugin</span><span class="p">))</span>
+    <span class="n">targetMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+
   <span class="k">def</span> <span class="nf">_fillPluginsMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.framework.lib.ExtensionLoader</span> <span class="kn">import</span> <span class="n">getPlugins</span>
-    <span class="n">targetMenu</span> <span class="o">=</span> <span class="n">pluginsMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="s1">&#39;Plugins&#39;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">pluginPath</span>
+
+    <span class="n">pluginsMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="s1">&#39;Plugins&#39;</span><span class="p">)</span>
     <span class="n">pluginsMenu</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-    <span class="n">Plugins</span> <span class="o">=</span> <span class="n">getPlugins</span><span class="p">()</span>
+    <span class="n">Plugins</span> <span class="o">=</span> <span class="n">getPlugins</span><span class="p">(</span><span class="n">pluginPath</span><span class="p">)</span>
     <span class="n">Plugins</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Plugins</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">p</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">Plugin</span> <span class="ow">in</span> <span class="n">Plugins</span><span class="p">:</span>  <span class="c1"># TODO: add user extension path</span>
-      <span class="k">if</span> <span class="s1">&#39;...&#39;</span> <span class="ow">in</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">:</span>
-        <span class="n">package</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-          <span class="n">targetMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">topMenuAction</span><span class="o">=</span><span class="n">pluginsMenu</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-          <span class="n">targetMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addMenu</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">targetMenu</span><span class="o">=</span><span class="n">pluginsMenu</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">Plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span>
-      <span class="n">action</span> <span class="o">=</span> <span class="n">Action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">translate</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                      <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPlugin</span><span class="p">,</span> <span class="n">Plugin</span><span class="o">=</span><span class="n">Plugin</span><span class="p">))</span>
-      <span class="n">targetMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">Plugin</span> <span class="ow">in</span> <span class="n">Plugins</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_addPluginSubMenu</span><span class="p">(</span><span class="n">Plugin</span><span class="p">)</span>
+
+    <span class="n">pluginsMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+    <span class="n">Plugins</span> <span class="o">=</span> <span class="n">getPlugins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userPluginPath</span><span class="p">)</span>
+    <span class="n">Plugins</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Plugins</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">p</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">Plugin</span> <span class="ow">in</span> <span class="n">Plugins</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_addPluginSubMenu</span><span class="p">(</span><span class="n">Plugin</span><span class="p">)</span>
     <span class="n">pluginsMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
     <span class="n">pluginsMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">Action</span><span class="p">(</span><span class="n">pluginsMenu</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Reload&#39;</span><span class="p">,</span>
                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fillPluginsMenu</span><span class="p">))</span>
@@ -448,13 +468,18 @@
         <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PluginModule</span> <span class="kn">import</span> <span class="n">PluginModule</span>
         <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">PluginModule</span><span class="p">(</span><span class="n">interactor</span><span class="o">=</span><span class="n">plugin</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">guiModule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">,</span>
+      <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">guiModule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">plugin</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                                       <span class="n">interactor</span><span class="o">=</span><span class="n">plugin</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
     <span class="n">plugin</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="n">pluginModule</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">pluginModules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pluginModule</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">pluginModule</span><span class="p">)</span></div>
     <span class="c1"># TODO: open as pop-out, not as part of MainWindow</span>
     <span class="c1"># self.moduleArea.moveModule(pluginModule, position=&#39;above&#39;, neighbor=None)</span>
+
+  <span class="k">def</span> <span class="nf">_updateRestoreArchiveMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="s1">&#39;Project-&gt;Restore From Archive...&#39;</span><span class="p">)</span>
+    <span class="n">action</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_archivePaths</span><span class="p">()))</span>
 
 <div class="viewcode-block" id="GuiMainWindow.undo"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.undo">[docs]</a>  <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span></div>
@@ -486,7 +511,7 @@
       <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Preferences not saved: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
         <span class="k">return</span>
-          
+
     <span class="n">prefFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prefPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="p">,</span> <span class="n">prefFile</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">))</span>
     <span class="n">prefFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

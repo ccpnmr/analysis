@@ -54,19 +54,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Wayne Boucher $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -210,7 +217,10 @@
     <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span>
     <span class="n">plotWidget</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span>
     <span class="n">viewRegion</span> <span class="o">=</span> <span class="n">plotWidget</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()</span>
-    <span class="n">dataDims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">orderedDataDims</span>
+    <span class="c1"># dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims</span>
+    <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+    <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="n">x1</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">viewRegion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># TBD: relies on axes being backwards</span>
     <span class="n">xScale</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">xCount</span>
@@ -222,8 +232,10 @@
 
     <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">peakIsInPlane</span><span class="p">(</span><span class="n">peak</span><span class="p">):</span>
-        <span class="n">xPpm</span> <span class="o">=</span> <span class="n">xScale</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">xTranslate</span>
-        <span class="n">yPpm</span> <span class="o">=</span> <span class="n">yScale</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">yTranslate</span>
+        <span class="c1"># xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate</span>
+        <span class="c1"># yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate</span>
+        <span class="n">xPpm</span> <span class="o">=</span> <span class="n">xScale</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">xTranslate</span>
+        <span class="n">yPpm</span> <span class="o">=</span> <span class="n">yScale</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">yAxisIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">yTranslate</span>
         <span class="n">a0</span> <span class="o">=</span> <span class="n">xPpm</span> <span class="o">-</span> <span class="n">peakHalfSize</span>
         <span class="n">b0</span> <span class="o">=</span> <span class="n">height</span> <span class="o">-</span> <span class="p">(</span><span class="n">yPpm</span> <span class="o">-</span> <span class="n">peakHalfSize</span><span class="p">)</span>
         <span class="n">a1</span> <span class="o">=</span> <span class="n">xPpm</span> <span class="o">+</span> <span class="n">peakHalfSize</span>
@@ -364,19 +376,10 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
 
-    <span class="c1"># if not hasattr(peak, &#39;isSelected&#39;):</span>
-    <span class="c1">#   peak.isSelected = False</span>
-    <span class="c1"># self.setSelected(peak.isSelected)</span>
-    <span class="c1"># This code does not make sense - you need its own spectrumView, not the zero&#39;th</span>
-    <span class="c1"># dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering</span>
-    <span class="c1"># dimensionOrdering deprecated</span>
-    <span class="n">dataDims</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">orderedDataDims</span>
-    <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span>
-    <span class="c1"># dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering</span>
-    <span class="c1"># xDim = dimensionOrdering[0] - 1</span>
-    <span class="c1"># yDim = dimensionOrdering[1] - 1</span>
-    <span class="c1"># xPpm = peak.position[xDim]</span>
-    <span class="c1"># yPpm = peak.position[yDim]</span>
+    <span class="c1"># dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims</span>
+    <span class="c1"># xPpm = peak.position[dataDims[0].dimensionIndex]</span>
+    <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">xPpm</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">setupPeakAnnotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">peakListView</span><span class="o">.</span><span class="n">peakItems</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span></div>
@@ -676,19 +679,15 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="n">peak</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="s1">&#39;_isSelected&#39;</span><span class="p">):</span>
       <span class="n">peak</span><span class="o">.</span><span class="n">_isSelected</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="c1"># self.setSelected(peak.isSelected)</span>
-    <span class="c1">#####self.setSelected(self.peak in peakListView.spectrumView.application.current.peaks)</span>
-    <span class="c1"># This code does not make sense - you need its own spectrumView, not the zero&#39;th</span>
-    <span class="c1"># dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering</span>
-    <span class="c1"># dimensionOrdering deprecated</span>
-    <span class="n">dataDims</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">orderedDataDims</span>
-    <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span>
-    <span class="n">yPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span>
-    <span class="c1"># dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering</span>
-    <span class="c1"># xDim = dimensionOrdering[0] - 1</span>
-    <span class="c1"># yDim = dimensionOrdering[1] - 1</span>
-    <span class="c1"># xPpm = peak.position[xDim]</span>
-    <span class="c1"># yPpm = peak.position[yDim]</span>
+
+    <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+    <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span>
+    <span class="n">yPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">yAxisIndex</span><span class="p">]</span>
+    <span class="c1"># dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims</span>
+    <span class="c1"># xPpm = peak.position[dataDims[0].dimensionIndex]</span>
+    <span class="c1"># yPpm = peak.position[dataDims[1].dimensionIndex]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">xPpm</span><span class="p">,</span> <span class="n">yPpm</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">setupPeakAnnotationItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">peakListView</span><span class="o">.</span><span class="n">peakItems</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
@@ -969,10 +968,15 @@
   <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
     <span class="n">peakItem</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakItems</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">peakItem</span><span class="p">:</span>
-      <span class="n">dataDims</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">orderedDataDims</span>
-      <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span>
+      <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+      <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">yAxisIndex</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="c1"># dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims</span>
+      <span class="c1"># xPpm = peak.position[dataDims[0].dimensionIndex]</span>
+      <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span>
       <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">yPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dataDims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionIndex</span><span class="p">]</span>
+        <span class="c1"># yPpm = peak.position[dataDims[1].dimensionIndex]</span>
+        <span class="n">yPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">yAxisIndex</span><span class="p">]</span>
         <span class="n">peakItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">xPpm</span><span class="p">,</span> <span class="n">yPpm</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">peakItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">xPpm</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>

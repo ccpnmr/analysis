@@ -1,17 +1,16 @@
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
 ModuleArea = DockArea
 Module = Dock
 
 class CcpnModuleArea(ModuleArea):
-  def __init__(self, **kw):
-    super(CcpnModuleArea, self).__init__(self)
+
+  def __init__(self, mainWindow):
+    super(CcpnModuleArea, self).__init__(mainWindow)
     self.modules = self.docks
     self.moveModule = self.moveDock
-    # self.closeModule = self.closeDock
+    self.mainWindow = mainWindow  # a link back to the parent MainWindow
 
   @property
   def currentModules(self) -> list:
@@ -35,20 +34,18 @@ class CcpnModuleArea(ModuleArea):
       modules.update({moduleObj.__class__.__name__: moduleName})
     return modules
 
-  def addModule(self, module=None, position=None, relativeTo=None, **kwds):
+  def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.
     """
-
     if module is None:
-      module = CcpnModule(name='New Module',**kwds)
+      raise RuntimeError('No module given')
 
     if position is None:
       position = 'top'
 
     if position == 'bottom':
       self.checkPythonConsole()
-
 
     neededContainer = {
         'bottom': 'vertical',
@@ -58,9 +55,6 @@ class CcpnModuleArea(ModuleArea):
         'above': 'tab',
         'below': 'tab'
         }[position]
-
-
-
 
     if relativeTo is None:
       neighbor = None
@@ -126,7 +120,6 @@ class CcpnModuleArea(ModuleArea):
   #   elif typ == 'tab':
   #     new = TContainer(self)
   #   return new
-
 
   def apoptose(self):
     if self.temporary and self.topContainer.count() == 0:

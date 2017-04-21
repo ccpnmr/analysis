@@ -141,9 +141,9 @@ class Base():
       #rgb = QtGui.QColor(fgColor).getRgb()[:3]
       self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  fgColor)
 
-    layout = self.getLayout()
-    if layout is not None:
-      layout.setContentsMargins(0, 0, 0, 0)
+    #layout = self.getLayout()
+    #if layout is not None:
+    #  layout.setContentsMargins(0, 0, 0, 0)
 
   def getLayout(self):
     "return the layout of self"

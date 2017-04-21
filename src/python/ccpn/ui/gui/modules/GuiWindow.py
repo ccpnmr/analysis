@@ -42,7 +42,7 @@ from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui.DropBase import DropBase
-from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay, BlankDisplay
 
 class GuiWindow(DropBase):
   
@@ -50,12 +50,14 @@ class GuiWindow(DropBase):
     
     DropBase.__init__(self, self._parent._appBase)
 
-    self.moduleArea = CcpnModuleArea()
+    self.moduleArea = CcpnModuleArea(mainWindow=self)
     # self.moduleArea = DockArea()
-    self.moduleArea.guiWindow = self
+    self.moduleArea.guiWindow = self  # GWV: keep this for compatibility for now;
+                                      # CcpnModuleArea sets its mainWindow attribute
     self.moduleArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
-      blankDisplay = GuiBlankDisplay(self.moduleArea)
+      #blankDisplay = GuiBlankDisplay(self.moduleArea)
+      blankDisplay = BlankDisplay()
       self.moduleArea.addModule(blankDisplay, position=None)
 
             

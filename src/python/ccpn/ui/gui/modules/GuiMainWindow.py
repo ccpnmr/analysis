@@ -453,8 +453,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Saves application preferences. Displays message box asking user to save project or not.
     Closes Application.
     """
-    prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-    directory = os.path.dirname(prefPath)
+    from ccpn.framework.PathsAndUrls import userPreferencesPath
+    #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
+    #TODO: move all of this to "preferences"
+    directory = os.path.dirname(userPreferencesPath)
     if not os.path.exists(directory):
       try:
         os.makedirs(directory)
@@ -462,17 +464,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
         return
 
-    prefFile = open(prefPath, 'w+')
+    prefFile = open(userPreferencesPath, 'w+')
     json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                         ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                          colourScheme=self.colourScheme)
+                                     ['Save and Quit', 'Quit without Saving', 'Cancel'],
+                                   )
     if reply == 'Save and Quit':
       if event:
         event.accept()
-      prefFile = open(prefPath, 'w+')
+      prefFile = open(userPreferencesPath, 'w+')
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
       self._appBase.saveProject()
@@ -482,7 +484,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     elif reply == 'Quit without Saving':
       if event:
         event.accept()
-      prefFile = open(prefPath, 'w+')
+      prefFile = open(userPreferencesPath, 'w+')
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
       self._appBase._closeProject()

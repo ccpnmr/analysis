@@ -27,9 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.ui.gui.widgets.Base import Base as CoreBase
+from ccpn.ui.gui.widgets.Base import Base as WidgetsBase
 
-class Base(CoreBase):
+class Base(WidgetsBase):
   
   def __init__(self, appBase, *args, **kw):
     
@@ -39,7 +39,7 @@ class Base(CoreBase):
     self.gui = appBase.ui
     self.application = self.gui.application
 
-    CoreBase.__init__(self, *args, **kw)
+    WidgetsBase.__init__(self, *args, **kw)
     
   def getByPid(self, pid):
   

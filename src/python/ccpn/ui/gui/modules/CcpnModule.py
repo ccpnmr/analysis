@@ -78,7 +78,9 @@ class CcpnModule(Dock):
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.current = self.application.current
     self.project = self.application.project
-    self.mainWindow = self.application.ui.mainWindow
+    # This does not work as on initialization mainWindow is still None
+    # Hence: change into a property
+    #self.mainWindow = self.application.ui.mainWindow
 
     # GWV: logger seems not to work??
     self.project._logger.debug('module:"%s", project:%r' % (name, self.project))
@@ -128,6 +130,10 @@ class CcpnModule(Dock):
     #   border: 4px solid;
     # }
     # """)
+
+  @property
+  def mainWindow(self):
+    return QtCore.QCoreApplication.instance()._ccpnApplication.ui.mainWindow
 
   # @property
   # def moduleName(self):

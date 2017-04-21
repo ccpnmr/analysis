@@ -44,18 +44,16 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 import typing
 
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.widgets.Frame import Frame as GuiFrame
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.modules.GuiModule import GuiModule
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
 
-class GuiSpectrumDisplay(DropBase, GuiModule):
+class GuiSpectrumDisplay(GuiModule):
 
   def __init__(self):
     GuiModule.__init__(self)
-    # DropBase.__init__(self, self._appBase, self.dropCallback)
     self.setAcceptDrops(True)
     self.closeModule = self._closeModule
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))

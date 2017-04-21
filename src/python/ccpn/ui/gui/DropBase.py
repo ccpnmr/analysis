@@ -43,7 +43,9 @@ from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 logger = getLogger()
 
-
+# TODO NB This is the OLD Dropbase class; to be retired
+#
+#
 class DropBase(GuiBase):
   """
   Class to implement drop and drag
@@ -62,62 +64,60 @@ class DropBase(GuiBase):
   def __init__(self, appBase, *args, **kw):
 
     GuiBase.__init__(self, appBase, *args, **kw)
-    self._dropEventCallback = None
-    # for now: set 'old-style' behavior
-    self.setDropEventCallback(self._dropCallback)
+#    self._dropEventCallback = None
 
-  def setDropEventCallback(self, callback):
-    "Set the callback function for drop event"
-    self._dropEventCallback = callback
-
-  def dragEnterEvent(self, event):
-    event.accept()
-
-  def dropEvent(self, event):
-    """
-    Catch dropEvent and dispatch to processing
-    'Native' treatment of CcpnModule instances
-    """
-    if self.acceptDrops():
-      dataDict = self.parseEvent(event)
-      logger.debug('Accepted drop with data:%s' % dataDict)
-
-      if dataDict is not None and len(dataDict) > 1:
-        event.accept()
-        if self._dropEventCallback is not None:
-          self._dropEventCallback(dataDict)
-      else:
-        # restore the native module drop event.
-        # NB: This has to be after the parseEvent; do not know why (GWV)
-        if isinstance(self, CcpnModule):
-          CcpnModule.dropEvent(self, event)
-    else:
-      logger.debug('Widget not droppable')
-
-  def parseEvent(self, event):
-    """ 
-    Interpret drop event; extract urls, text or JSONDATA dicts 
-    return a dict with (type, data) key, value pairs
-    """
-    data = dict(
-      event = event
-    )
-    mimeData = event.mimeData()
-
-    if mimeData.hasFormat(DropBase.JSONDATA):
-      data['isCcpnJson'] = True
-      jsonData = json.loads(mimeData.text())
-      if jsonData != None and len(jsonData) > 0:
-        data.update(jsonData)
-
-    elif event.mimeData().hasUrls():
-      filePaths = [url.path() for url in event.mimeData().urls()]
-      data['urls'] = filePaths
-
-    elif event.mimeData().hasText():
-      data['text'] = event.mimeData().text()
-
-    return data
+  # def setDropEventCallback(self, callback):
+  #   "Set the callback function for drop event"
+  #   self._dropEventCallback = callback
+  #
+  # def dragEnterEvent(self, event):
+  #   event.accept()
+  #
+  # def dropEvent(self, event):
+  #   """
+  #   Catch dropEvent and dispatch to processing
+  #   'Native' treatment of CcpnModule instances
+  #   """
+  #   if self.acceptDrops():
+  #     dataDict = self.parseEvent(event)
+  #     logger.debug('Accepted drop with data:%s' % dataDict)
+  #
+  #     if dataDict is not None and len(dataDict) > 1:
+  #       event.accept()
+  #       if self._dropEventCallback is not None:
+  #         self._dropEventCallback(dataDict)
+  #     else:
+  #       # restore the native module drop event.
+  #       # NB: This has to be after the parseEvent; do not know why (GWV)
+  #       if isinstance(self, CcpnModule):
+  #         CcpnModule.dropEvent(self, event)
+  #   else:
+  #     logger.debug('Widget not droppable')
+  #
+  # def parseEvent(self, event):
+  #   """
+  #   Interpret drop event; extract urls, text or JSONDATA dicts
+  #   return a dict with (type, data) key, value pairs
+  #   """
+  #   data = dict(
+  #     event = event
+  #   )
+  #   mimeData = event.mimeData()
+  #
+  #   if mimeData.hasFormat(DropBase.JSONDATA):
+  #     data['isCcpnJson'] = True
+  #     jsonData = json.loads(mimeData.text())
+  #     if jsonData != None and len(jsonData) > 0:
+  #       data.update(jsonData)
+  #
+  #   elif event.mimeData().hasUrls():
+  #     filePaths = [url.path() for url in event.mimeData().urls()]
+  #     data['urls'] = filePaths
+  #
+  #   elif event.mimeData().hasText():
+  #     data['text'] = event.mimeData().text()
+  #
+  #   return data
 
   # 'old-style' drag and drop;
   # TODO: refactor below to be defined in objects receiving the drops via appropriate callback

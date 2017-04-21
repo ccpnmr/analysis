@@ -366,6 +366,8 @@ class Framework:
       from ccpn.ui.gui.Gui import Gui
       ui = Gui(self)
       ui.qtApp._ccpnApplication = self
+      # ui.mainWindow is None upon initialization: gets filled later
+      #print('frameWork>', self, ui, ui.mainWindow)
     else:
       from ccpn.ui.Ui import NoUi
       ui = NoUi(self)

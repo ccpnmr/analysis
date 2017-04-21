@@ -45,8 +45,7 @@ class Widget(QtGui.QWidget, Base):
   def __init__(self, parent=None, setLayout=False, **kwds):
 
     QtGui.QWidget.__init__(self, parent)
-    self.setAcceptDrops(True)
-    Base.__init__(self, **kwds)
+    Base.__init__(self, acceptDrops=True, **kwds)
     if setLayout:
       layout = QtGui.QGridLayout()
       self.setLayout(layout)

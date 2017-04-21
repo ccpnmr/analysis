@@ -41,7 +41,7 @@ from typing import Callable, Any
 
 from PyQt4 import QtGui
 
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -63,7 +63,8 @@ class GuiNotifier(object):
   trigger             targetName           callbackDict keys          Notes
   ____________________________________________________________________________________________________________________
 
-  Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtGui.QWidget and be droppable
+  Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtGui.QWidget and 
+                                                                      be droppable
                                             trigger, notifier,        targetName: optional dropTargets to filter for
                                             event, isCcpnJson,        before callback (None to skip, defined in DropBase)
                                             [dropTargets]
@@ -99,10 +100,12 @@ class GuiNotifier(object):
 
     # some sanity checks
     if not isinstance(theObject, QtGui.QWidget):
-      raise RuntimeError('Invalid object (%s)', theObject)
+      raise RuntimeError('Invalid object (%r), expected object of type QWidget' % theObject)
 
-    if triggers is None or len(triggers) == 0:
-      raise RuntimeError('Invalid triggers (%s)', triggers)
+    if triggers is None:
+      if not (isinstance(triggers, list) or isinstance(triggers, tuple)) \
+         or len(triggers) == 0:
+        raise RuntimeError('Invalid trigger (%r)' % triggers)
 
     self._index = GuiNotifier._currentIndex
     GuiNotifier._currentIndex += 1

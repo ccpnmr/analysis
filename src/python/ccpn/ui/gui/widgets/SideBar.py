@@ -39,7 +39,7 @@ from ccpn.core.Project import Project
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core import _coreClassMap
 from ccpn.core.lib import Pid
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.Base import Base
 
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
@@ -112,18 +112,17 @@ NEW_ITEM_DICT = {
 }
 ### Flag example code removed in revision 7686
 
-class SideBar(DropBase, QtGui.QTreeWidget):
+class SideBar(QtGui.QTreeWidget, Base):
   def __init__(self, parent=None ):
 
     QtGui.QTreeWidget.__init__(self, parent)
-    DropBase.__init__(self, parent._appBase)
+    Base.__init__(self, acceptDrops=True)
 
     self._typeToItem = dd = {}
 
     self.setFont(sidebarFont)
     self.header().hide()
     self.setDragEnabled(True)
-    self._appBase = parent._appBase
     self.setExpandsOnDoubleClick(False)
     self.setDragDropMode(self.InternalMove)
     self.setMinimumWidth(200)

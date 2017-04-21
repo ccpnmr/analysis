@@ -29,11 +29,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 from ccpn.ui.gui.widgets.Base import Base as WidgetsBase
 
+#TODO: this class needs to go
 class Base(WidgetsBase):
   
   def __init__(self, appBase, *args, **kw):
     
-    self._appBase = appBase
+    #self._appBase = appBase
 
     # TODO: Change this to get the gui from somewhere else
     self.gui = appBase.ui

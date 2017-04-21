@@ -34,11 +34,10 @@ from typing import Sequence
 
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.Pid import Pid
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsToolBar
-
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 
 class BlankDisplay(CcpnModule):
@@ -50,8 +49,30 @@ class BlankDisplay(CcpnModule):
     CcpnModule.__init__(self, name='GVs Blank Display')
     # project, current, application and mainWindow are inherited from CcpnModule
 
-    self.label2 = Label(self.mainWidget, text='Drag Spectrum Here',
-                        textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center')
+    self.mainWidget.setAcceptDrops(True)
+    self.label2 = Label(self.mainWidget, acceptDrops=True, stretch=(1,1), text='Drag Spectrum Here',
+                        textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center'
+                       )
+    self.droppedNotifier = GuiNotifier(self.mainWidget,
+                                       [GuiNotifier.DROPEVENT], ['urls','pids'],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    This routine processes the items dropped on the canvas
+    These are either urls or pids, as the notfier will have filtered for this
+    """
+    for url in data.get('urls',[]):
+      print('dropped:', url)
+      results = self.project.loadData(url)
+      if results is not None and len(results) > 0:
+        for result in results:
+          print('result>', result)
+          if isinstance(result, Spectrum):
+            self.mainWindow.createSpectrumDisplay(result)
+
+    for pid in data.get('pids',[]):
+      print('dropped:', pid)
 
   def processSpectra(self, pids: Sequence[str], event):
     """Display spectra defined by list of Pid strings"""
@@ -123,7 +144,7 @@ class BlankDisplay(CcpnModule):
     self._appBase.project._logger.info('Shortcut "ND" to open a new blank display')
 
 
-class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else the drop events are not processed
+class GuiBlankDisplay(CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
   includeSettingsWidget = False
 
@@ -136,8 +157,6 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
 
     self.label2 = Label(self.mainWidget, text='Drag Spectrum Here',
                         textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center')
-
-    DropBase.__init__(self, moduleArea.guiWindow._appBase)
 
   def processSpectra(self, pids:Sequence[str], event):
     """Display spectra defined by list of Pid strings"""

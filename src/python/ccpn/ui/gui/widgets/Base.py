@@ -30,10 +30,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
-
-from ccpn.framework.Translation import Translation
-
 from pyqtgraph.dockarea import Dock
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
@@ -66,13 +64,15 @@ POLICY_DICT = {
 }
 
 
-class Base():
+class Base(DropBase):
 
   def __init__(self, tipText=None,
                      grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                      hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
                      bgColor=None, fgColor=None,
-                     isFloatWidget=False):
+                     isFloatWidget=False,
+                     acceptDrops=False
+               ):
     """
     
     :param tipText:  add tiptext to widget
@@ -87,6 +87,9 @@ class Base():
     :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead
     :param isFloatWidget: indicates widget to be floating
     """
+
+    # define the 'droppable' methods
+    DropBase.__init__(self, acceptDrops=acceptDrops)
 
     # Tool tips
     if tipText:
@@ -173,8 +176,18 @@ class Base():
 
     return row, col
 
+  # Temporary hacks for now
+  @property
+  def _appBase(self):
+    return QtCore.QCoreApplication.instance()._ccpnApplication
 
+  # @property
+  # def mainWindow(self):
+  #   return QtCore.QCoreApplication.instance()._ccpnApplication.ui.mainWindow
 
+  # @property
+  # def __project(self):
+  #   return QtCore.QCoreApplication.instance()._ccpnApplication.project
 
 
 

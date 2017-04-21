@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 import json
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.NmrResidue import NmrResidue
 
@@ -46,14 +46,13 @@ from ccpn.core.NmrResidue import NmrResidue
 from PyQt4 import QtGui, QtCore
 
 
-class _StripLabel(DropBase, Label):
+class _StripLabel(Label):
   """
   Specific Label to be used in Strip displays
   """
   def __init__(self, parent, text, appBase, **kwds):
 
     Label.__init__(self, parent, text, **kwds)
-    DropBase.__init__(self, appBase, **kwds)
     self.parent = parent
     self.mousePressEvent = self._mousePressEvent
     self.setAcceptDrops(True)

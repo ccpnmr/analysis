@@ -35,11 +35,10 @@ import pyqtgraph as pg
 from PyQt4 import QtGui, QtOpenGL
 
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui import ViewBox
 from ccpn.ui.gui.widgets.Base import Base
 
-class PlotWidget(DropBase, pg.PlotWidget, Base):
+class PlotWidget(pg.PlotWidget, Base):
 
   def __init__(self, parent=None, appBase=None, useOpenGL=False, strip=None, **kw):
   # def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
@@ -47,8 +46,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     #pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)
     pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent), axes=None, enableMenu=True)
     Base.__init__(self, **kw)
-    DropBase.__init__(self, appBase)
-    # DropBase.__init__(self, appBase, dropCallback)
     self.setInteractive(True)
     self.strip = strip
     self.plotItem.setAcceptHoverEvents(True)

@@ -570,7 +570,7 @@ class ContoursTab(QtGui.QWidget, Base):
       else:
         positiveContoursCheckBox.setChecked(False)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
-    positiveContoursCheckBox.stateChanged.connect(self._queueChangePositivieContourDisplay)
+    positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
     positiveBaseLevelData = DoubleSpinbox(self, grid=(2, 1), vAlign='t')
@@ -668,8 +668,8 @@ class ContoursTab(QtGui.QWidget, Base):
     self.logger.info(command)
 
 
-  def _queueChangePositivieContourDisplay(self, state):
-    self._changes['positivieContourDisplay'] = partial(self._changePositiveContourDisplay, state)
+  def _queueChangePositiveContourDisplay(self, state):
+    self._changes['positiveContourDisplay'] = partial(self._changePositiveContourDisplay, state)
 
   def _changePositiveContourDisplay(self, state):
     if state == QtCore.Qt.Checked:

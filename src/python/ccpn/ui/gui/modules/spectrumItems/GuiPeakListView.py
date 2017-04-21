@@ -330,7 +330,7 @@ class Peak1d(QtGui.QGraphicsItem):
     # xPpm = peak.position[dataDims[0].dimensionIndex]
     xAxisIndex = peakListView.spectrumView._displayOrderSpectrumDimensionIndices[0]
     xPpm = peak.position[xAxisIndex]
-    self.setPos(xPpm, peak.height)
+    self.setPos(xPpm, peak.height or 0)
     self.annotation.setupPeakAnnotation(self)
     peakListView.peakItems[self.peak] = self
 
@@ -433,10 +433,9 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setText(text)
 
   def updatePos(self):
-    pass
 
     peakItem = self.peakItem
-    if peakItem.peakHeight >= 0:
+    if peakItem.peakHeight and peakItem.peakHeight > 0:
       # Translate first to rotate around bottom left corner
       self.translate(0, -self.boundingRect().height())
       self.setRotation(0)
@@ -929,5 +928,5 @@ def _refreshPeakPosition(peak:Peak):
         yPpm = peak.position[yAxisIndex]
         peakItem.setPos(xPpm, yPpm)
       else:
-        peakItem.setPos(xPpm, peak.height)
+        peakItem.setPos(xPpm, peak.height or 0)
 Peak._refreshPeakPosition = _refreshPeakPosition

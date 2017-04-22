@@ -302,16 +302,22 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
   """1D bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
+    print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
     _GuiStripDisplay1d.__init__(self)
+    # hack for now
+    self._appBase = project._appBase
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
 class StripDisplayNd(coreClass, _GuiStripDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
+    print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
     _GuiStripDisplayNd.__init__(self)
+    # hack for now
+    self._appBase = project._appBase
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""

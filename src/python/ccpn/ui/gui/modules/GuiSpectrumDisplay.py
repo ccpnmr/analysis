@@ -44,19 +44,30 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 import typing
 
-from ccpn.ui.gui.widgets.Frame import Frame as GuiFrame
+from ccpn.ui.gui.widgets.Frame import Frame as Frame
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
-from ccpn.ui.gui.modules.GuiModule import GuiModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-class GuiSpectrumDisplay(GuiModule):
+class GuiSpectrumDisplay(QtGui.QWidget):
 
   def __init__(self):
-    GuiModule.__init__(self)
-    self.setAcceptDrops(True)
+
+    #GuiModule.__init__(self)
+    # hack for now
+    super(GuiSpectrumDisplay, self).__init__()
+
+    self.moduleArea = self.window.moduleArea
+    self.module = CcpnModule(name=self._wrappedData.name, size=(1100,1300), autoOrientation=False)
+    self.moduleArea.addModule(self.module, position='right')
+    #hack for now
+    self.mainWindow = self.module.mainWindow
+    self.application = self.module.application
+    self.current = self.module.current
+
     self.closeModule = self._closeModule
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
@@ -64,7 +75,7 @@ class GuiSpectrumDisplay(GuiModule):
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
-    self.resize(self.sizeHint())
+    #self.resize(self.sizeHint())
 
     # Toolbar
     self.spectrumUtilToolBar = ToolBar(self.module)#, grid=(0, 2), gridSpan=(1, 2))
@@ -72,7 +83,7 @@ class GuiSpectrumDisplay(GuiModule):
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
     self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
-    if self._appBase.preferences.general.showToolbar:
+    if self.application.preferences.general.showToolbar:
       self.spectrumUtilToolBar.show()
     else:
       self.spectrumUtilToolBar.hide()
@@ -85,12 +96,12 @@ class GuiSpectrumDisplay(GuiModule):
     # scroll area
     self.scrollArea = ScrollArea(self.module, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
-    self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0))
+    self.stripFrame = Frame(self.scrollArea, grid=(0, 0))
     self.stripFrame.guiSpectrumDisplay = self
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
     
-    self.setEnabled(True)
+    #self.setEnabled(True)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
@@ -101,11 +112,18 @@ class GuiSpectrumDisplay(GuiModule):
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                        self._processDroppedItems)
 
+    # GWV: this came from previous code, but I am not sure why it was there
+    # commented for now
+    # self.hoverEvent = self._hoverEvent
+
+  # def _hoverEvent(self, event):
+  #   event.accept()
+
   def _processDroppedItems(self, data):
     "Process the pids"
     for ii, pid in enumerate(data.get('pids',[])):
       print('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
-      obj = self._appBase.project.getByPid(pid)
+      obj = self.application.project.getByPid(pid)
       if obj is not None and isinstance(obj, Spectrum):
         self.displaySpectrum(obj)
 
@@ -163,13 +181,13 @@ class GuiSpectrumDisplay(GuiModule):
     """
     for strip in self.strips:
       strip._unregisterStrip()
-    if len(self._appBase.project.spectrumDisplays) == 1:
-      # if self._appBase.ui.mainWindow is not None:
-      #   mainWindow = self._appBase.ui.mainWindow
+    if len(self.application.project.spectrumDisplays) == 1:
+      # if self.application.ui.mainWindow is not None:
+      #   mainWindow = self.application.ui.mainWindow
       # else:
-      #   mainWindow = self._appBase._mainWindow
+      #   mainWindow = self.application._mainWindow
       # mainWindow.addBlankDisplay()
-      self.gui.addBlankDisplay()
+      self.mainWindow.addBlankDisplay()
     # self.module.close()
     self.delete()
 
@@ -193,7 +211,7 @@ class GuiSpectrumDisplay(GuiModule):
     #self.orderedStrips[-1].delete()
     if len(self.orderedStrips) > 1:
       if not strip:
-        strip = self._appBase.current.strip
+        strip = self.current.strip
       if strip:
         strip._unregisterStrip()
         strip.delete()
@@ -216,11 +234,11 @@ class GuiSpectrumDisplay(GuiModule):
 
   def _restoreZoom(self):
     """Restores last saved zoom of current strip."""
-    self._appBase.current.strip._restoreZoom()
+    self.current.strip._restoreZoom()
 
   def _storeZoom(self):
     """Saves zoomed region of current strip."""
-    self._appBase.current.strip._storeZoom()
+    self.current.strip._storeZoom()
     
   def toggleCrossHair(self):
     """Toggles whether cross hair is displayed in all strips of spectrum display."""
@@ -270,11 +288,11 @@ class GuiSpectrumDisplay(GuiModule):
     # CCPN INTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
     and from Framework to set up initial state
     """
-    strip = self._appBase.current.strip
+    strip = self.current.strip
     # # Rasmus HACK!
     # # This code broke because it got triggered (via a current notifier) when strips
     # # were deleted but self was not. A bigger fix is needed (TODO), but for now try this
-    myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
+    myStrips = [self.project._data2Obj.get(x) for x in self._wrappedData.strips]
     if len(myStrips) <= 1 or not strip in myStrips:
       # current.strip not in display, or only 1 strip in display, so disable removeStrip button
       enabled = False

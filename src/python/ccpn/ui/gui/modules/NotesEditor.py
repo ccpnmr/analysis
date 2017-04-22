@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt4 import QtGui
 
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -33,7 +32,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 
-class NotesEditor(DropBase, CcpnModule):
+class NotesEditor(CcpnModule):
 
   def __init__(self, parent, project, name='Notes Editor', note=None):
     CcpnModule.__init__(self, name=name)

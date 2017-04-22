@@ -41,6 +41,7 @@ class MainWindow(QtGui.QMainWindow, Base):
 
     self.mainFrame = Frame(self)
     self.setCentralWidget(self.mainFrame)
+    self.mainFrame.setAccessibleName('MainWindow Frame')
 
     self.setWindowTitle(title)
 

@@ -42,10 +42,10 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 class Widget(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, setLayout=False, **kwds):
-
+  def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
+    "General widget; default accepts drops (for now)"
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, acceptDrops=True, **kwds)
+    Base.__init__(self, acceptDrops=acceptDrops, **kwds)
     if setLayout:
       layout = QtGui.QGridLayout()
       self.setLayout(layout)

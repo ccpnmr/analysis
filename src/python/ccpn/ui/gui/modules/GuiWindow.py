@@ -41,7 +41,8 @@ from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
-from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay, BlankDisplay
+from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
 class GuiWindow():
   
@@ -53,13 +54,9 @@ class GuiWindow():
                                       # CcpnModuleArea sets its mainWindow attribute
     self.moduleArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
-      blankDisplay = GuiBlankDisplay(self.moduleArea)
-      #blankDisplay = BlankDisplay()
+      #blankDisplay = GuiBlankDisplay(self.moduleArea)
+      blankDisplay = BlankDisplay()
       self.moduleArea.addModule(blankDisplay, position=None)
-
-    #patch for now:
-    self._appBase = QtCore.QCoreApplication.instance()._ccpnApplication
-
             
   def deleteBlankDisplay(self):
     """

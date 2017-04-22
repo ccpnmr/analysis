@@ -345,6 +345,7 @@ class Framework:
 
     self.project = project
     if hasattr(self, '_mainWindow'):
+      print('>>>framework._initialseProject:')
       self.ui.initialize(self._mainWindow)
 
       # Get the mainWindow out of the application top level once it's been transferred to ui
@@ -367,7 +368,7 @@ class Framework:
       ui = Gui(self)
       ui.qtApp._ccpnApplication = self
       # ui.mainWindow is None upon initialization: gets filled later
-      #print('frameWork>', self, ui, ui.mainWindow)
+      print('frameWork._getUI>>>', self, ui, ui.mainWindow)
     else:
       from ccpn.ui.Ui import NoUi
       ui = NoUi(self)
@@ -1023,7 +1024,7 @@ class Framework:
     else:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
-      self._updateRecentFiles()
+      self.ui.mainWindow._fillRecentProjectsMenu()
       self._saveLayout()
 
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
@@ -1044,12 +1045,34 @@ class Framework:
       return self._saveProject(newPath=newPath, createFallback=createFallback,
                                overwriteExisting=overwriteExisting)
 
+  # This routine should not be used as it calls the graphics mainWindow routine
+  #
+  # def _updateRecentFiles(self, oldPath=None):
+  #   project = self.project
+  #   path = project.path
+  #   recentFiles = self.preferences.recentFiles
+  #   mainWindow = self.ui.mainWindow or self._mainWindow
+  #
+  #   if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
+  #     if path in recentFiles:
+  #       recentFiles.remove(path)
+  #     elif oldPath in recentFiles:
+  #       recentFiles.remove(oldPath)
+  #     elif len(recentFiles) >= 10:
+  #       recentFiles.pop()
+  #     recentFiles.insert(0, path)
+  #   recentFiles = uniquify(recentFiles)
+  #   mainWindow._fillRecentProjectsMenu()
+  #   self.preferences.recentFiles = recentFiles
 
-  def _updateRecentFiles(self, oldPath=None):
+  def _getRecentFiles(self, oldPath=None) -> list:
+    """Get and return a list of recent files, setting reference to
+       self as first element, unless it is a temp project
+       update the preferences with the new list
+    """
     project = self.project
     path = project.path
     recentFiles = self.preferences.recentFiles
-    mainWindow = self.ui.mainWindow or self._mainWindow
 
     if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
       if path in recentFiles:
@@ -1060,9 +1083,8 @@ class Framework:
         recentFiles.pop()
       recentFiles.insert(0, path)
     recentFiles = uniquify(recentFiles)
-    mainWindow._fillRecentProjectsMenu()
     self.preferences.recentFiles = recentFiles
-
+    return recentFiles
 
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
@@ -1079,7 +1101,8 @@ class Framework:
       successful = False
       self.project._logger.info("Project not saved - no valid destination selected")
 
-    self._updateRecentFiles(oldPath=oldPath)
+    self._getRecentFiles(oldPath=oldPath) # this will also update the list
+    self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
     return successful
 

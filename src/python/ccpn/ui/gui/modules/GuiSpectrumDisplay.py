@@ -49,6 +49,8 @@ from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.modules.GuiModule import GuiModule
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 class GuiSpectrumDisplay(GuiModule):
 
@@ -94,6 +96,18 @@ class GuiSpectrumDisplay(GuiModule):
     self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
+
+    self.droppedNotifier = GuiNotifier(self.stripFrame,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    "Process the pids"
+    for ii, pid in enumerate(data.get('pids',[])):
+      print('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
+      obj = self._appBase.project.getByPid(pid)
+      if obj is not None and isinstance(obj, Spectrum):
+        self.displaySpectrum(obj)
 
   def _updatePivot(self):
     """Updates pivot in all strips contained in the spectrum display."""

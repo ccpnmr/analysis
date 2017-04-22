@@ -194,7 +194,7 @@ class Gui(Ui):
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
 
-    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+    from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
     try:
       if 'Blank Display' in self.mainWindow.moduleArea.findAll()[1]:
         blankDisplay = self.mainWindow.moduleArea.findAll()[1]['Blank Display']
@@ -203,7 +203,7 @@ class Gui(Ui):
         else:
           self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
       else:
-        blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
+        blankDisplay = BlankDisplay()
         self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
       return blankDisplay
     finally:

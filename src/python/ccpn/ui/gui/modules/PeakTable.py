@@ -30,7 +30,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
@@ -99,7 +98,7 @@ class PeakTable(CcpnModule):
 
 
 
-class PeakListSimple(QtGui.QWidget, DropBase, Base):
+class PeakListSimple(QtGui.QWidget, Base):
 
   def __init__(self, parent=None, selectedList=None, columnSettings=None, **kw):
 

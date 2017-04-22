@@ -67,7 +67,7 @@ from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 #
 #   return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
   
-class GuiStrip(Widget): # DropBase needs to be first, else the drop events are not processed
+class GuiStrip(Widget):
 
   sigClicked = QtCore.Signal(object, object)
 
@@ -76,18 +76,15 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
-    Widget.__init__(self)
-    # DropBase.__init__(self, self._parent._appBase)
-    # DropBase.__init__(self, self._parent._appBase, self.dropCallback)
+    Widget.__init__(self, acceptDrops=True)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
                                  useOpenGL=useOpenGL, strip=self)
-              # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
+
     # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
     self.stripFrame.layout().addWidget(self.plotWidget, 0,
                                        self.guiSpectrumDisplay.orderedStrips.index(self))
 
-    self._appBase = self._parent._appBase
     self.current = self._appBase.current
 
     self.colourScheme = self._appBase.colourScheme

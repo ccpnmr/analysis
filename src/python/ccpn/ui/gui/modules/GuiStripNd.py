@@ -95,13 +95,18 @@ class GuiStripNd(GuiStrip):
     self.planeLabel = None
     self.axesSwapped = False
     self._addPlaneToolbar()
-    if self._appBase.ui.mainWindow is not None:
-      self.pythonConsole = self._appBase.ui.mainWindow.pythonConsole
-    else:
-      self.pythonConsole = self._appBase._mainWindow.pythonConsole
+    # dynamically obtained now
+    # if self._appBase.ui.mainWindow is not None:
+    #   self.pythonConsole = self._appBase.ui.mainWindow.pythonConsole
+    # else:
+    #   self.pythonConsole = self._appBase._mainWindow.pythonConsole
     self.logger = self._project._logger
     self.mouseDragEvent = self._mouseDragEvent
     self.updateRegion = self._updateRegion
+
+  @property
+  def pythonConsole(self):
+    return self._appBase.ui.mainWindow.pythonConsole
 
   def setStripLabelText(self, text: str):
     """set the text of the stripLabel"""

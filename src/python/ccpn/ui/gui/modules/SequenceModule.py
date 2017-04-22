@@ -40,7 +40,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import textFontHuge
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
@@ -169,15 +169,14 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
         i += 1
 
 
-class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
+class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
   fontSize = 20
 
   def __init__(self, parent, project, residue, scene, labelPosition, index, yPosition):
 
     QtGui.QGraphicsTextItem.__init__(self)
-    DropBase.__init__(self, project._appBase)
-    self.setAcceptDrops(True)
+    Base.__init__(self, acceptDrops=True)
 
     self.project = project
     self.residue = residue

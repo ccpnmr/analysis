@@ -52,13 +52,21 @@ from ccpn.util.Common import uniquify
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def __init__(self):
-    QtGui.QMainWindow.__init__(self)
 
+    QtGui.QMainWindow.__init__(self)
     self.setGeometry(540, 40, 900, 900)
 
+    #patch for now:
+    self._appBase = QtCore.QCoreApplication.instance()._ccpnApplication
+    self._appBase._mainWindow = self
+    self.application = self._appBase
+    print('GuiWindow>> _appBase from QtCore..:', self._appBase)
+    print('GuiWindow>> _appBase.project:', self._appBase.project)
+    print('GuiWindow>> _appBase._mainWindow:', self._appBase._mainWindow)
+
     GuiWindow.__init__(self)
-    # self._appBase._mainWindow = self
-    self.application._mainWindow = self
+    # inherits _appBase from GuiWindow
+
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
@@ -71,7 +79,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.feedbackPopup = None
     self.updatePopup = None
-
 
   def _initProject(self):
     """
@@ -91,7 +98,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeConsoleCommand(msg2)
 
     self.colourScheme = self._appBase.colourScheme
-    self._appBase._updateRecentFiles()
+    self._fillRecentProjectsMenu()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
     if hasattr(self.application.project._wrappedData.root, '_temporaryDirectory'):
@@ -284,13 +291,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects
     specified in the preferences file.
     """
-    recentFileLocations = uniquify(self.application.preferences.recentFiles)
+    recentFileLocations = self.application._getRecentFiles()
     recentFileMenu = self.getMenuAction('Project->Open Recent')
     recentFileMenu.clear()
     for recentFile in recentFileLocations:
-     action = Action(self, text=recentFile, translate=False,
+      action = Action(self, text=recentFile, translate=False,
                      callback=partial(self.application.loadProject, path=recentFile))
-     recentFileMenu.addAction(action)
+      recentFileMenu.addAction(action)
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                     callback=self.application.clearRecentProjects))

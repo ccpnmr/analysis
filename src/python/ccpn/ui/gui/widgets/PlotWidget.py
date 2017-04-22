@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -37,6 +39,8 @@ from PyQt4 import QtGui, QtOpenGL
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui import ViewBox
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 class PlotWidget(pg.PlotWidget, Base):
 
@@ -44,8 +48,10 @@ class PlotWidget(pg.PlotWidget, Base):
   # def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
 
     #pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)
-    pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent), axes=None, enableMenu=True)
-    Base.__init__(self, **kw)
+    pg.PlotWidget.__init__(self, parent=parent,
+                           viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent),
+                           axes=None, enableMenu=True)
+    Base.__init__(self, acceptDrops=True, **kw)
     self.setInteractive(True)
     self.strip = strip
     self.plotItem.setAcceptHoverEvents(True)
@@ -55,11 +61,19 @@ class PlotWidget(pg.PlotWidget, Base):
     self.plotItem.axes['right']['item'].show()
     self.hideButtons()
 
-
-
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+
+    # as it turns out; self is Not the widget receiving the drops!!??
+    self.droppedNotifier1 = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+
+  def _processDroppedItems(self, data):
+    "Process the pids"
+    print('PlotWidget._processDroppedItems>>>', data)
 
 
   def __getattr__(self, attr):

@@ -32,7 +32,6 @@ from PyQt4 import QtCore, QtGui
 import collections
 
 from ccpn.util import Colour
-from ccpn.ui.gui.Base import Base as GuiBase
 
 import pyqtgraph as pg
 
@@ -45,7 +44,7 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'maxAliasedFrequency',
                                                                    'dataDim'))
 
-class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
+class GuiSpectrumView(QtGui.QGraphicsItem):
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):
@@ -56,7 +55,6 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     """
     
     QtGui.QGraphicsItem.__init__(self, scene=self.strip.plotWidget.scene())
-    GuiBase.__init__(self, self._project._appBase)
 
     self._apiDataSource = self._wrappedData.spectrumView.dataSource
     self.spectrumGroupsToolBar = None

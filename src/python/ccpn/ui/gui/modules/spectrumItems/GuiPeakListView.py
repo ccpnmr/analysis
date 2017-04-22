@@ -129,7 +129,8 @@ class GuiPeakListView(QtGui.QGraphicsItem):
   def __init__(self):
     """ peakList is the CCPN wrapper object
     """
-
+    #FIXME: apparently it gets passed an object which already has crucial attributes
+    # A big NONO!!!
     strip = self.spectrumView.strip
     scene = strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, scene=scene)

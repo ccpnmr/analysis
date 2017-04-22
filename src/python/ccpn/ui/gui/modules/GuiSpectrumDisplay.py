@@ -45,12 +45,16 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 import typing
 
 from ccpn.ui.gui.widgets.Frame import Frame as Frame
-from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
+# suppress messages
+#TODO: fix the root cause of this HACK!!!
+QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiSpectrumDisplay(QtGui.QWidget):
 

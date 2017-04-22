@@ -304,20 +304,20 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
     """Local override init for Qt subclass"""
     print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStripDisplay1d.__init__(self)
     # hack for now
     self._appBase = project._appBase
+    _GuiStripDisplay1d.__init__(self)
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
 class StripDisplayNd(coreClass, _GuiStripDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
-    print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
+    print('StripDisplayNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStripDisplayNd.__init__(self)
     # hack for now
     self._appBase = project._appBase
+    _GuiStripDisplayNd.__init__(self)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
@@ -335,7 +335,10 @@ class Strip1d(coreClass, _GuiStrip1d):
   """1D strip"""
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
+    print('Strip1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # Strip1d utimately is a widget which gets appBase from widgets.Base
+    # self._appBase = project._appBase
     _GuiStrip1d.__init__(self)
 
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd
@@ -343,7 +346,10 @@ class StripNd(coreClass, _GuiStripNd):
   """ND strip """
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
+    print('StripNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # StripNd utimately is a widget which gets appBase from widgets.Base
+    # self._appBase = project._appBase
     _GuiStripNd.__init__(self)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
@@ -369,6 +375,9 @@ class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
     _GuiSpectrumView1d.__init__(self)
 
 from ccpn.ui.gui.modules.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
@@ -377,6 +386,9 @@ class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
     _GuiSpectrumViewNd.__init__(self)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
@@ -398,6 +410,9 @@ class _PeakListView(coreClass, _GuiPeakListView):
   def __init__(self, project:Project, wrappedData:'ApiStripPeakListView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
     _GuiPeakListView.__init__(self)
 
 Gui._factoryFunctions[coreClass.className] = _PeakListView

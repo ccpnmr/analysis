@@ -263,6 +263,9 @@ class Gui(Ui):
 ## Window class
 coreClass = _coreClassMap['Window']
 
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
@@ -294,6 +297,12 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Mark class - put in namespace for documentation
 Mark = _coreClassMap['Mark']
 
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+# Also Rename
+# SpectrumDisplay1d.py; contains SpectrumDisplay1d (formerly StripDisplay1d) and
+#                       GuiStripDisplay
+# SpectrumDisplayNd.py: likeWise
 
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
@@ -328,6 +337,9 @@ def _factoryFunction(project:Project, wrappedData) -> coreClass:
 
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 ## Strip class
 coreClass = _coreClassMap['Strip']
 from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d as _GuiStrip1d
@@ -366,7 +378,9 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Axis class - put in namespace for documentation
 Axis = _coreClassMap['Axis']
 
-
+# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 ## SpectrumView class
 coreClass = _coreClassMap['SpectrumView']
 from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
@@ -402,6 +416,9 @@ def _factoryFunction(project:Project, wrappedData) -> coreClass:
 
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
+# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 ## PeakListView class
 coreClass = _coreClassMap['PeakListView']
 from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView as _GuiPeakListView

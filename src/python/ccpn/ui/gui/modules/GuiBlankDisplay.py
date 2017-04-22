@@ -43,7 +43,7 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 
-
+#TODO:LUCA: remove file when you are done with updating the callbacks elsewhere
 class GuiBlankDisplay(CcpnModule):
   includeSettingsWidget = False
 

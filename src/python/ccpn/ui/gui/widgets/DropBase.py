@@ -58,7 +58,7 @@ class DropBase():
   IDS  = 'ids'
   _dropTargets = (URLS, TEXT, PIDS, IDS)
 
-  JSONDATA = ccpnmrJsonData #TODO: check why this comes from model
+  JSONDATA = ccpnmrJsonData #TODO:RASMUS: check why this comes from ccpncore
 
   def __init__(self, acceptDrops, *args, **kw):
 
@@ -76,16 +76,19 @@ class DropBase():
 
   def dropEvent(self, event):
     """
-    Catch dropEvent and dispatch to processing
+    Catch dropEvent and dispatch to processing callback
     'Native' treatment of CcpnModule instances
     """
-    from ccpn.ui.gui.modules import CcpnModule
+
+    # Needs to be here to prevent circular imports as CcpnModule imports sevral Widgets which import DropBase
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
     if isinstance(self, CcpnModule):
       CcpnModule.dropEvent(self, event)
       return
 
     if self.acceptDrops():
+
       dataDict = self.parseEvent(event)
       logger.debug('Accepted drop with data:%s' % dataDict)
       print('New-DropBase-event>', self, self.accessibleName(), dataDict)

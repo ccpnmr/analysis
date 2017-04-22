@@ -33,19 +33,15 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
+
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-from ccpn.ui.gui.widgets.Button import Button
+
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 
-from functools import partial
-
-#Module = Dock
-#ModuleLabel = DockLabel
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -68,9 +64,11 @@ class CcpnModule(Dock):
   settingsOnTop = True
   settingsMinimumSizes = (0, 0)
 
-
-  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
+  #logger=None, buttonParent=None, buttonGrid=None,
+  def __init__(self, name, closable=True, closeFunc=None, **kw):
     super(CcpnModule, self).__init__(name, self, closable=closable)
+    print('CcpnModule>>>', self, type(self))
+
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
 
@@ -102,14 +100,6 @@ class CcpnModule(Dock):
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      # self._scrollArea = ScrollArea(parent=self, scrollBarPolicies=('always','asNeeded'))
-      # self._scrollArea.setWidgetResizable(True)
-      # self._scrollArea.setMinimumWidth(self.settingsMinimumSizes[0])
-      # self._scrollArea.setMinimumHeight(self.settingsMinimumSizes[1])
-      # #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
-      # self.settingsWidget = Frame(parent=self._scrollArea, showBorder=True, fShape='styledPanel', fShadow='plain')
-      # self._scrollArea.setWidget(self.settingsWidget)
-
       self.settingsWidget = ScrollableFrame(parent=self, scrollBarPolicies=('always','asNeeded'),
                                             minimumSizes=self.settingsMinimumSizes
                                            )
@@ -158,28 +148,6 @@ class CcpnModule(Dock):
     #   border: 0px;
     # }
     # """)
-
-  def placeSettingsButton(self, buttonParent, buttonGrid):
-    """
-    Depreciated
-    """
-    logger.warning('Depreciated code')
-    if self.includeSettingsWidget:
-      settingsButton = Button(buttonParent, icon='icons/applications-system', grid=buttonGrid, hPolicy='fixed', toggle=True)
-      settingsButton.toggled.connect(partial(self.toggleSettingsWidget, settingsButton))
-      settingsButton.setChecked(False)
-
-  def toggleSettingsWidget(self, button=None):
-    """
-    Toggles display of settings widget in module.
-    """
-    if self.includeSettingsWidget:
-      if button.isChecked():
-        self.settingsWidget.show()
-      else:
-        self.settingsWidget.hide()
-    else:
-      logger.debug('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def _settingsCallback(self):
     """

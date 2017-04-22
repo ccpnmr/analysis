@@ -55,6 +55,8 @@ class BlankDisplay(CcpnModule):
                                           [GuiNotifier.DROPEVENT], ['urls','pids'],
                                           self._processDroppedItems)
 
+  #TODO:LUCA: add handling for SpectrumGroup Pids; also do in GuiSpectrumView
+  #TODO:LUCA: check undo for these actions!
   def _processDroppedItems(self, data):
     """
     This routine processes the items dropped on the canvas
@@ -83,6 +85,7 @@ class BlankDisplay(CcpnModule):
     """Create a spectrumDisplay if obj is a Spectrum instance
        return True on success
     """
+    #TODO:LUCA: the createSpectrumDisplay should do the reporting to console and log
     if isinstance(obj, Spectrum):
       self.mainWindow.createSpectrumDisplay(obj)
       self.mainWindow.pythonConsole.writeConsoleCommand( \

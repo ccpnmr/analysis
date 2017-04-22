@@ -55,9 +55,18 @@ class _StripLabel(Label):
     Label.__init__(self, parent, text, **kwds)
     self.parent = parent
     self.mousePressEvent = self._mousePressEvent
+    self.dragMoveEvent= self._dragMoveEvent
     self.setAcceptDrops(True)
+    #self.setDragEnabled(True) not possile for Label
+
     # disable any drop event callback's until explicitly defined later
     self.setDropEventCallback(None)
+
+  def _dragMoveEvent(self, event:QtGui.QMouseEvent):
+    """
+    Required function to enable dragging and dropping within the sidebar.
+    """
+    event.accept()
 
   def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """
@@ -95,7 +104,7 @@ class _StripLabel(Label):
 
 
 class PlaneToolbar(ToolBar):
-  #TODO: undocumented and needs refactoring as a widget;
+  #TODO: undocumented and needs refactoring ;
   #TODO: also: its is not a Toolbar and should be renamed
   def __init__(self, strip, callbacks, **kw):
 

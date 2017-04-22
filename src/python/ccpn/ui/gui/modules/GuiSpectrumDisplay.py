@@ -53,8 +53,9 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 # suppress messages
-#TODO: fix the root cause of this HACK!!!
+#TODO:WAYNE: fix the root cause of this HACK!!!
 QtCore.qInstallMsgHandler(lambda *args: None)
+
 
 class GuiSpectrumDisplay(QtGui.QWidget):
 
@@ -64,24 +65,22 @@ class GuiSpectrumDisplay(QtGui.QWidget):
     # hack for now
     super(GuiSpectrumDisplay, self).__init__()
 
-    self.moduleArea = self.window.moduleArea
-    self.module = CcpnModule(name=self._wrappedData.name, size=(1100,1300), autoOrientation=False)
-    self.moduleArea.addModule(self.module, position='right')
+    self.module = CcpnModule(name=self._wrappedData.name, closeFunc=self._closeModule,
+                             size=(1100,1300), autoOrientation=False)
+    self.window.moduleArea.addModule(self.module, position='right')
     #hack for now
     self.mainWindow = self.module.mainWindow
     self.application = self.module.application
     self.current = self.module.current
 
-    self.closeModule = self._closeModule
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
-    self.module.label.closeButton.clicked.connect(self.closeModule)
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     #self.resize(self.sizeHint())
 
-    # Toolbar
+    # Utilities Toolbar
     self.spectrumUtilToolBar = ToolBar(self.module)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
@@ -102,7 +101,6 @@ class GuiSpectrumDisplay(QtGui.QWidget):
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = Frame(self.scrollArea, grid=(0, 0))
     self.stripFrame.guiSpectrumDisplay = self
-    self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
     
     #self.setEnabled(True)
@@ -112,6 +110,7 @@ class GuiSpectrumDisplay(QtGui.QWidget):
                                      directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
 
+    self.stripFrame.setAcceptDrops(True)
     self.droppedNotifier = GuiNotifier(self.stripFrame,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                        self._processDroppedItems)
@@ -123,6 +122,7 @@ class GuiSpectrumDisplay(QtGui.QWidget):
   # def _hoverEvent(self, event):
   #   event.accept()
 
+  #TODO:LUCA: add handling for SpectrumGroup Pids; also do so in BlankDisplay
   def _processDroppedItems(self, data):
     "Process the pids"
     for ii, pid in enumerate(data.get('pids',[])):
@@ -289,9 +289,10 @@ class GuiSpectrumDisplay(QtGui.QWidget):
 
   def _resetRemoveStripAction(self):
     """
-    # CCPN INTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
+    # CCPNINTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
     and from Framework to set up initial state
     """
+    #TODO:WAYNE: FrameWork should not have anything to do with this
     strip = self.current.strip
     # # Rasmus HACK!
     # # This code broke because it got triggered (via a current notifier) when strips

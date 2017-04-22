@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-
+#TODO:LUCA: turn into popup widget
 class ShortcutModule(CcpnModule):
 
   def __init__(self, mainWindow):
@@ -71,13 +71,13 @@ class ShortcutModule(CcpnModule):
     self.save()
     self.close()
 
-
+#TODO:LUCA: Use ScrollableWidget class
 class ShortcutWidget(QtGui.QWidget, Base):
 
   def __init__(self, parent, mainWindow, **kw):
     QtGui.QWidget.__init__(self, parent)
     from functools import partial
-    self.mainWindow = mainWindow
+    #self.mainWindow = mainWindow
     self.preferences = mainWindow._appBase.preferences
     Base.__init__(self, **kw)
     i=0

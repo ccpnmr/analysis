@@ -32,6 +32,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 # from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
+#TODO:WAYNE: move to CcpnModule/CcpnModuleArea/GuiMainWindow, depending what it is used for
+# remove the file when complete
+
 MODULE_DICT = {
   'Sequence Graph'           : 'showSequenceGraph',
   'Peak Assigner'            : 'showPeakAssigner',
@@ -52,6 +55,8 @@ MODULE_DICT = {
   'Blank Display'            : 'addBlankDisplay',
   # 'NOTES EDITOR'             : 'showNotesEditor'
                }
+
+#TODO:WAYNE: move to guiSettings
 
 LINE_COLOURS = {
   'CA': '#0000FF',
@@ -77,7 +82,7 @@ LINE_COLOURS = {
   'NH': '#FFFF00',
 }
 
-
+#TODO:WAYNE: move to GuistripNd or GuiSpectrumDisplay or somewhere relevant
 def markPositions(project, axisCodes, atomPositions):
     """
     Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.

@@ -610,6 +610,7 @@ class Framework:
                                % (command, self._echoBlocking, undo.blocking))
 
 
+  #TODO:TJ: Why is this a private method; it is and should be used all over the code?
   def _endCommandBlock(self):
     """End block for command echoing,
 
@@ -1421,11 +1422,11 @@ class Framework:
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
-    nmrResidueTableModule = NmrResidueTableModule(self.ui.mainWindow)
-    #nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
-    #nmrResidueTableModule.layout.addWidget(nmrResidueTable)
-    self.ui.mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
+
+    mainWindow = self.ui.mainWindow
+    nmrResidueTableModule = NmrResidueTableModule(mainWindow, application=self)
+    mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
 

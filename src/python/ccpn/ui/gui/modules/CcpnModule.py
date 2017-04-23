@@ -67,21 +67,20 @@ class CcpnModule(Dock):
   #logger=None, buttonParent=None, buttonGrid=None,
   def __init__(self, name, closable=True, closeFunc=None, **kw):
     super(CcpnModule, self).__init__(name, self, closable=closable)
-    print('CcpnModule>>>', self, type(self))
+    print('CcpnModule>>>', type(self))
+    # GWV: logger seems not to work??
+    logger.debug('module:"%s"' % (name,))
 
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
 
     # useful definitions to have
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.current = self.application.current
-    self.project = self.application.project
+    #self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    #self.current = self.application.current
+    #self.project = self.application.project
     # This does not work as on initialization mainWindow is still None
     # Hence: change into a property
     #self.mainWindow = self.application.ui.mainWindow
-
-    # GWV: logger seems not to work??
-    self.project._logger.debug('module:"%s", project:%r' % (name, self.project))
 
     # hide original dock label and generate a new CCPN one
     self._originalLabel = self.label
@@ -113,17 +112,9 @@ class CcpnModule(Dock):
     else:
       self.addWidget(self.mainWidget, 0, 0)
 
-    # self.widgetArea.setStyleSheet("""
-    # Dock > QWidget {
-    #   padding: 0;
-    #   margin: 0px 0px 0px 0px;
-    #   border: 4px solid;
-    # }
-    # """)
-
-  @property
-  def mainWindow(self):
-    return QtCore.QCoreApplication.instance()._ccpnApplication.ui.mainWindow
+  # @property
+  # def mainWindow(self):
+  #   return QtCore.QCoreApplication.instance()._ccpnApplication.ui.mainWindow
 
   # @property
   # def moduleName(self):
@@ -203,7 +194,10 @@ class CcpnModuleLabel(DockLabel):
     self.fixedWidth = True
     self.setFont(moduleLabelFont)
     #print('>>', name, self.module.application.colourScheme)
-    if self.module.application.colourScheme == 'light':
+
+    from ccpn.ui.gui.guiSettings import getColourScheme
+    self.colourScheme = getColourScheme()
+    if self.colourScheme == 'light':
       self.backgroundColour = '#bd8413'
       #self.backgroundColour = '#EDC151'
       self.foregroundColour = '#fdfdfc'

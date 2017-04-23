@@ -61,11 +61,11 @@ class NmrResidueTableModule(CcpnModule):
   className = 'NmrResidueTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, parent=None, name=None, callback=None):
+  def __init__(self, parent, application, name='NmrResidue Table'):
 
-    name = 'NmrResidue Table' if name is None else name
-    CcpnModule.__init__(self, name=name)
-    # project, current, application and mainWindow are inherited from CcpnModule
+    CcpnModule.__init__(self, parent=parent, name=name)
+    # derive project, current, and mainWindow from application
+    self.application = application
 
     # settings
 
@@ -76,7 +76,7 @@ class NmrResidueTableModule(CcpnModule):
                                              maximumWidths=(150, 150, 150),
                                              orientation = 'left',
                                              labelText="Display module(s):",
-                                             texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                             )
     #self.displaysWidget.listWidget.setHeight(40)
 
@@ -107,9 +107,8 @@ class NmrResidueTableModule(CcpnModule):
                                             )
 
     # main window
-    if callback is None: callback = self.navigateToNmrResidue
     self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,
-                                           actionCallback=callback,
+                                           actionCallback=self.navigateToNmrResidue,
                                            grid=(0,0)
                                           )
 
@@ -120,7 +119,7 @@ class NmrResidueTableModule(CcpnModule):
     gids = self.displaysWidget.getTexts()
     if len(gids) == 0: return displays
     if ALL in gids:
-        displays = self.mainWindow.spectrumDisplays
+        displays = self.application.ui.mainWindow.spectrumDisplays
     else:
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
@@ -140,7 +139,7 @@ class NmrResidueTableModule(CcpnModule):
     try:
         # optionally clear the marks
         if self.autoClearMarksWidget.checkBox.isChecked():
-            self.mainWindow.clearMarks()
+            self.application.ui.mainWindow.clearMarks()
 
         # navigate the displays
         for display in displays:

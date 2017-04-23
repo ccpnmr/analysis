@@ -68,10 +68,15 @@ class GuiSpectrumDisplay(QtGui.QWidget):
     self.module = CcpnModule(name=self._wrappedData.name, closeFunc=self._closeModule,
                              size=(1100,1300), autoOrientation=False)
     self.window.moduleArea.addModule(self.module, position='right')
-    #hack for now
-    self.mainWindow = self.module.mainWindow
-    self.application = self.module.application
-    self.current = self.module.current
+
+    # hack for now
+    # inherit application from wrapper insertion
+    # self.application = self.module.application
+    # derive current and mainWindow from application
+    self.mainWindow = self.application.ui.mainWindow
+    self.current = self.application.current
+    # cannot set self.project because it is a wrapper object
+    # self.project = self.application.project
 
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
     self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))

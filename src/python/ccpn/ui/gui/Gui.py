@@ -325,6 +325,7 @@ class StripDisplayNd(coreClass, _GuiStripDisplayNd):
     print('StripDisplayNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
     # hack for now
+    self.application = project._appBase
     self._appBase = project._appBase
     _GuiStripDisplayNd.__init__(self)
 

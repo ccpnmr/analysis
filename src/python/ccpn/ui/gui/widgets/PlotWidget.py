@@ -4,8 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -39,15 +37,14 @@ from PyQt4 import QtGui, QtOpenGL
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui import ViewBox
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
+#TODO:WAYNE: this class could be moved into GuiStrip
+# as it is only there and is just a small wrapper arount a pyqtgraph class
+#TODO:WAYNE: should this inherit from Base!! is layout in pyqtgraph is different to Base???
 class PlotWidget(pg.PlotWidget, Base):
 
   def __init__(self, parent=None, appBase=None, useOpenGL=False, strip=None, **kw):
-  # def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):
 
-    #pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)
     pg.PlotWidget.__init__(self, parent=parent,
                            viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent),
                            axes=None, enableMenu=True)
@@ -65,19 +62,10 @@ class PlotWidget(pg.PlotWidget, Base):
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
-    # as it turns out; self is Not the widget receiving the drops!!??
-    self.droppedNotifier1 = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                       self._processDroppedItems)
-
-
-  def _processDroppedItems(self, data):
-    "Process the pids"
-    print('PlotWidget._processDroppedItems>>>', data)
-
-
   def __getattr__(self, attr):
-    """Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail."""
+    """
+    Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.
+    """
     try:
       return super().__getattr__(attr)
     except NameError:
@@ -92,70 +80,70 @@ class PlotWidget(pg.PlotWidget, Base):
     # self.plotItem.axes['bottom']['item'].show()
     # self.plotItem.axes['right']['item'].show()
 
-  def processSpectra(self, pids:Sequence[str], event:QtGui.QMouseEvent):
-    """Display spectra defined by list of Pid strings"""
-    guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-    displayPid = guiSpectrumDisplay.pid
-    if guiSpectrumDisplay.isGrouped:
-      print('single spectra cannot be dropped onto grouped displays. Open another Blank Display (N,D)')
-      return
-
-    for ss in pids:
-      guiSpectrumDisplay.displaySpectrum(ss)
-      # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
-      #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
-
-      if self._appBase.ui.mainWindow is not None:
-        mainWindow = self._appBase.ui.mainWindow
-      else:
-        mainWindow = self._appBase._mainWindow
-      mainWindow.pythonConsole.writeConsoleCommand(
-        "module.displaySpectrum(spectrum)", module=displayPid, spectrum=ss
-      )
-      self._appBase.project._logger.info("module = ui.getByGid(%s)" % displayPid)
-      self._appBase.project._logger.info("module.displaySpectrum(spectrum)")
-
-  def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
-    '''
-    Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.
-    If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
-    one already in.
-    '''
-    if len(self._appBase.project.getByPid(pids[0]).spectra)>0:
-      guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-      for spectrumView in guiSpectrumDisplay.spectrumViews:
-        if len(spectrumView.spectrum.spectrumGroups)>0:
-          displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
-                                     for spectrumView in guiSpectrumDisplay.spectrumViews]
-
-          spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
-                       if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
-
-        else:
-          for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
-            guiSpectrumDisplay.displaySpectrum(spectrum)
-
-        if hasattr(guiSpectrumDisplay, 'isGrouped'):
-          if guiSpectrumDisplay.isGrouped:
-            if len(spectrumGroups)>0:
-
-              spectrumGroupsToolBar = guiSpectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar
-              spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
-              spectrumGroupsToolBar.addWidget(spectrumGroupButton)
-              for spectrum in spectrumGroups[0].spectra:
-                guiSpectrumDisplay.displaySpectrum(spectrum)
-          else:
-            print("SpectrumGroups cannot be displayed in a display with already spectra in it."
-                  "\nSpectrumGroup's spectra are added as single item in the display  ")
-
-
-  def processSamples(self, pids:Sequence[str], event):
-    """Display sample spectra defined by list of Pid strings"""
-    for ss in pids:
-      spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      self.processSpectra(spectrumPids, event)
-
-  def processSampleComponents(self, pids:Sequence[str], event):
-    """Display sampleComponent spectrum defined by its Pid string"""
-    sampleComponent = self._appBase.project.getByPid(pids[0])
-    self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)
+  # def processSpectra(self, pids:Sequence[str], event:QtGui.QMouseEvent):
+  #   """Display spectra defined by list of Pid strings"""
+  #   guiSpectrumDisplay = self.parent.guiSpectrumDisplay
+  #   displayPid = guiSpectrumDisplay.pid
+  #   if guiSpectrumDisplay.isGrouped:
+  #     print('single spectra cannot be dropped onto grouped displays. Open another Blank Display (N,D)')
+  #     return
+  #
+  #   for ss in pids:
+  #     guiSpectrumDisplay.displaySpectrum(ss)
+  #     # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
+  #     #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
+  #
+  #     if self._appBase.ui.mainWindow is not None:
+  #       mainWindow = self._appBase.ui.mainWindow
+  #     else:
+  #       mainWindow = self._appBase._mainWindow
+  #     mainWindow.pythonConsole.writeConsoleCommand(
+  #       "module.displaySpectrum(spectrum)", module=displayPid, spectrum=ss
+  #     )
+  #     self._appBase.project._logger.info("module = ui.getByGid(%s)" % displayPid)
+  #     self._appBase.project._logger.info("module.displaySpectrum(spectrum)")
+  #
+  # def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
+  #   '''
+  #   Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.
+  #   If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
+  #   one already in.
+  #   '''
+  #   if len(self._appBase.project.getByPid(pids[0]).spectra)>0:
+  #     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
+  #     for spectrumView in guiSpectrumDisplay.spectrumViews:
+  #       if len(spectrumView.spectrum.spectrumGroups)>0:
+  #         displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
+  #                                    for spectrumView in guiSpectrumDisplay.spectrumViews]
+  #
+  #         spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
+  #                      if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
+  #
+  #       else:
+  #         for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
+  #           guiSpectrumDisplay.displaySpectrum(spectrum)
+  #
+  #       if hasattr(guiSpectrumDisplay, 'isGrouped'):
+  #         if guiSpectrumDisplay.isGrouped:
+  #           if len(spectrumGroups)>0:
+  #
+  #             spectrumGroupsToolBar = guiSpectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar
+  #             spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
+  #             spectrumGroupsToolBar.addWidget(spectrumGroupButton)
+  #             for spectrum in spectrumGroups[0].spectra:
+  #               guiSpectrumDisplay.displaySpectrum(spectrum)
+  #         else:
+  #           print("SpectrumGroups cannot be displayed in a display with already spectra in it."
+  #                 "\nSpectrumGroup's spectra are added as single item in the display  ")
+  #
+  #
+  # def processSamples(self, pids:Sequence[str], event):
+  #   """Display sample spectra defined by list of Pid strings"""
+  #   for ss in pids:
+  #     spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
+  #     self.processSpectra(spectrumPids, event)
+  #
+  # def processSampleComponents(self, pids:Sequence[str], event):
+  #   """Display sampleComponent spectrum defined by its Pid string"""
+  #   sampleComponent = self._appBase.project.getByPid(pids[0])
+  #   self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)

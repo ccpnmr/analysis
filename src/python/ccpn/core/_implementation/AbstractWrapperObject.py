@@ -356,7 +356,7 @@ class AbstractWrapperObject():
 
     Returns None for invalid or unrecognised input strings.
     """
-
+    #TODO:RASMUS: Raise exception when this is a deleted project
     if pidstring is None:
       return None
 

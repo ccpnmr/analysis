@@ -61,11 +61,14 @@ class GuiSpectrumDisplay(QtGui.QWidget):
 
   def __init__(self):
 
-    #GuiModule.__init__(self)
-    # hack for now
     super(GuiSpectrumDisplay, self).__init__()
 
-    self.module = CcpnModule(name=self._wrappedData.name, closeFunc=self._closeModule,
+    #TODO:RASMUS: GuiSpectrumDisplay inherits window from somewhere, presumably from the wrapper layer
+    # This is something temporary, as it should be application.ui.mainWindow, but that has not been set
+    # yet; we need to dicuss the temporary nameing/assigment of these object while restoring them
+
+    self.module = CcpnModule(parent=self.window.moduleArea,
+                             name=self._wrappedData.name, closeFunc=self._closeModule,
                              size=(1100,1300), autoOrientation=False)
     self.window.moduleArea.addModule(self.module, position='right')
 
@@ -75,7 +78,7 @@ class GuiSpectrumDisplay(QtGui.QWidget):
     # derive current and mainWindow from application
     self.mainWindow = self.application.ui.mainWindow
     self.current = self.application.current
-    # cannot set self.project because it is a wrapper object
+    # cannot set self.project because self is a wrapper object
     # self.project = self.application.project
 
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))

@@ -519,7 +519,7 @@ class GuiStrip(Widget):
             
   def _initRulers(self):
     
-    for mark in self.spectrumDisplay.window.task.marks:
+    for mark in self.spectrumDisplay.mainWindow.task.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)

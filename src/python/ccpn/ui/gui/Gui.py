@@ -141,7 +141,7 @@ class Gui(Ui):
 
     self.mainWindow._fillMacrosMenu()
     self.mainWindow._updateRestoreArchiveMenu()
-    self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
+    self.mainWindow.setUserShortcuts(self.application.preferences)
     project = self.application.project
     self.application.experimentClassifications = getExperimentClassifications(project)
 
@@ -271,9 +271,20 @@ class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiMainWindow.__init__(self)
+
+    application = project._appBase
+    _GuiMainWindow.__init__(self, application = application)
+
+    #patch for now:
+    application._mainWindow = self
+    application.ui.mainWindow = self
+    print('MainWindow>> application from QtCore..:', application)
+    print('MainWindow>> application.project:',  application.project)
+    print('MainWindow>> application._mainWindow:', application._mainWindow)
+    print('MainWindow>> application.ui.mainWindow:', application.ui.mainWindow)
 
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
+#TODO:RASMUS: copy from MainWindow
 class SideWindow(coreClass, _GuiWindow):
   """GUI side window, corresponds to OS window"""
   def __init__(self, project:Project, wrappedData:'ApiWindow'):
@@ -307,6 +318,9 @@ Mark = _coreClassMap['Mark']
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d as _GuiStripDisplay1d
+#TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
+#chaning the init signature of the GuiStripDisplay1d and passing the parameters along to
+# GuiSpectrumDisplay
 class StripDisplay1d(coreClass, _GuiStripDisplay1d):
   """1D bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
@@ -318,16 +332,27 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
     _GuiStripDisplay1d.__init__(self)
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
-class StripDisplayNd(coreClass, _GuiStripDisplayNd):
+#TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
+# NB: GWV had to change the order of subclassing as name conflict other wise made it not work
+# conflicts existed between the 'name' attribute of the two classes and the 'window' attribute
+# the pyqtgraph decendents need name(), project had 'window', but that could be replaced with
+# mainWindow throughout
+class StripDisplayNd(_GuiStripDisplayNd, coreClass):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
     print('StripDisplayNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    # hack for now
+
+    # hack for now;
     self.application = project._appBase
     self._appBase = project._appBase
-    _GuiStripDisplayNd.__init__(self)
+
+    _GuiStripDisplayNd.__init__(self, parent=self.application.ui.mainWindow.moduleArea,
+                                      name=self._wrappedData.name,
+                                      application = self.application
+                                )
+    self.application.ui.mainWindow.moduleArea.addModule(self.module, position='right')
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""

@@ -44,14 +44,16 @@ from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
+#TODO:WAYNE: incorporate all functionality in GuiMainWindow
 class GuiWindow():
   
   def __init__(self):
+    # inherits .application from self
 
     self.moduleArea = CcpnModuleArea(mainWindow=self)
-    # self.moduleArea = DockArea()
-    self.moduleArea.guiWindow = self  # GWV: keep this for compatibility for now;
-                                      # CcpnModuleArea sets its mainWindow attribute
+    #TODO:WAYNE: check and remove
+    # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
+    self.moduleArea.guiWindow = self
     self.moduleArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
       #blankDisplay = GuiBlankDisplay(self.moduleArea)
@@ -76,7 +78,7 @@ class GuiWindow():
     if text is None:
       text='Load Data'
     if paths is None:
-      dialog = FileDialog(self, fileMode=0, text=text, preferences=self._appBase.preferences.general)
+      dialog = FileDialog(self, fileMode=0, text=text, preferences=self.application.preferences.general)
       paths = dialog.selectedFiles()[0]
 
     # NBNB TBD I assume here that path is either a string or a list lf string paths.
@@ -105,7 +107,7 @@ class GuiWindow():
     # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current),
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self.application.current),
                     context=context)
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
@@ -140,7 +142,7 @@ class GuiWindow():
     # NBNB Moved here from Current
     # NBNB TODO: more general deletion
 
-    current = self._appBase.current
+    current = self.application.current
     peaks = current.peaks
     if peaks:
       n = len(peaks)
@@ -160,7 +162,7 @@ class GuiWindow():
 
 
   def getCurrentPositionAndStrip(self):
-    current = self._appBase.current
+    current = self.application.current
     current.strip = current.viewBox.parentObject().parent
     cursorPosition = (current.viewBox.position.x(),
                       current.viewBox.position.y())
@@ -186,7 +188,7 @@ class GuiWindow():
       peak.lineWidths = lineWidths
 
   def refitCurrentPeaks(self):
-    peaks = self._appBase.current.peaks
+    peaks = self.application.current.peaks
     if not peaks:
       return
 
@@ -253,14 +255,14 @@ class GuiWindow():
       spectrumDisplay.togglePhaseConsole()
       
   def newPhasingTrace(self):
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip._newPhasingTrace()
 
       
   def setPhasingPivot(self):
     
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip._setPhasingPivot()
     
@@ -268,7 +270,7 @@ class GuiWindow():
     """
     Removes all phasing traces from all strips.
     """
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip.removePhasingTraces()
 
@@ -277,8 +279,8 @@ class GuiWindow():
     """
     Sets current.peaks to an empty list.
     """
-    # self._appBase.current.peaks = []
-    self._appBase.current.clearPeaks()
+    # self.application.current.peaks = []
+    self.application.current.clearPeaks()
 
   def toggleCrossHairAll(self):
     """
@@ -299,7 +301,7 @@ class GuiWindow():
     """
     Creates a mark at the current cursor position in the current strip.
     """
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and self.task:
       strip._createMarkAtCursorPosition(self.task)
     

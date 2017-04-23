@@ -1469,26 +1469,40 @@ class Framework:
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
 
+  # def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   """
+  #   Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
+  #   """
+  #   from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
+  #
+  #   if hasattr(self, 'assigner'):
+  #     return
+  #
+  #   self.assigner = SequenceGraph(self, project=self.project)
+  #   if hasattr(self, 'backboneModule'):
+  #     self.backboneModule._connectSequenceGraph(self.assigner)
+  #
+  #   if relativeTo is not None:
+  #     self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
+  #   else:
+  #     self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
+  #   self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+  #   self.project._logger.info("application.showSequenceGraph()")
+  #   return self.assigner
+
+
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """
-    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
+    Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.
     """
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
 
-    if hasattr(self, 'assigner'):
-      return
-
-    self.assigner = SequenceGraph(self, project=self.project)
-    if hasattr(self, 'backboneModule'):
-      self.backboneModule._connectSequenceGraph(self.assigner)
-
-    if relativeTo is not None:
-      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
-    else:
-      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+    mainWindow = self.ui.mainWindow
+    self.sequenceGraph = SequenceGraph(parent=mainWindow, application=self)
+    mainWindow.moduleArea.addModule(self.sequenceGraph, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
-    return self.assigner
+    return self.sequenceGraph
 
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""

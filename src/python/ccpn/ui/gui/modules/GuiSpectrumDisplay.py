@@ -57,20 +57,25 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 QtCore.qInstallMsgHandler(lambda *args: None)
 
 
-class GuiSpectrumDisplay(QtGui.QWidget):
+class GuiSpectrumDisplay(CcpnModule):
 
-  def __init__(self):
+  def __init__(self, parent, name, application):
 
-    super(GuiSpectrumDisplay, self).__init__()
+    super(GuiSpectrumDisplay, self).__init__(parent=parent,
+                                             name=name, closeFunc=self._closeModule,
+                                             size=(1100, 1300), autoOrientation=False
+                                             )
+    self.module = self
+    self.application = application
 
     #TODO:RASMUS: GuiSpectrumDisplay inherits window from somewhere, presumably from the wrapper layer
     # This is something temporary, as it should be application.ui.mainWindow, but that has not been set
     # yet; we need to dicuss the temporary nameing/assigment of these object while restoring them
 
-    self.module = CcpnModule(parent=self.window.moduleArea,
-                             name=self._wrappedData.name, closeFunc=self._closeModule,
-                             size=(1100,1300), autoOrientation=False)
-    self.window.moduleArea.addModule(self.module, position='right')
+    #self.module = CcpnModule(parent=self.window.moduleArea,
+    #                         name=self._wrappedData.name, closeFunc=self._closeModule,
+    #                         size=(1100,1300), autoOrientation=False)
+    #self.window.moduleArea.addModule(self.module, position='right')
 
     # hack for now
     # inherit application from wrapper insertion
@@ -129,6 +134,10 @@ class GuiSpectrumDisplay(QtGui.QWidget):
 
   # def _hoverEvent(self, event):
   #   event.accept()
+
+  #def getName(self):
+  #  return super(GuiSpectrumDisplay, self).name()
+  #name = getName
 
   def _processDroppedItems(self, data):
     "Process the pids"

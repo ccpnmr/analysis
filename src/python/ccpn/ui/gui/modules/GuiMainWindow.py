@@ -51,21 +51,12 @@ from ccpn.util.Common import uniquify
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
-  def __init__(self):
+  def __init__(self, application):
 
     QtGui.QMainWindow.__init__(self)
-    self.setGeometry(540, 40, 900, 900)
-
-    #patch for now:
-    self._appBase = QtCore.QCoreApplication.instance()._ccpnApplication
-    self._appBase._mainWindow = self
-    self.application = self._appBase
-    print('GuiWindow>> _appBase from QtCore..:', self._appBase)
-    print('GuiWindow>> _appBase.project:', self._appBase.project)
-    print('GuiWindow>> _appBase._mainWindow:', self._appBase._mainWindow)
-
+    self.setGeometry(200, 40, 1100, 900)
+    self.application = application
     GuiWindow.__init__(self)
-    # inherits _appBase from GuiWindow
 
     self.recordingMacro = False
     self._setupWindow()
@@ -97,7 +88,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
-    self.colourScheme = self._appBase.colourScheme
+    self.colourScheme = self.application.colourScheme
     self._fillRecentProjectsMenu()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
@@ -260,7 +251,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if result:
       if projectDir is None:
         dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                            acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
+                            acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
         projectDir = dialog.selectedFile()
 
       if projectDir:
@@ -472,7 +463,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return
 
     prefFile = open(userPreferencesPath, 'w+')
-    json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+    json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
@@ -482,19 +473,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.accept()
       prefFile = open(userPreferencesPath, 'w+')
-      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self._appBase.saveProject()
+      self.application.saveProject()
       # Close and clean up project
-      self._appBase._closeProject()
+      self.application._closeProject()
       QtGui.QApplication.quit()
     elif reply == 'Quit without Saving':
       if event:
         event.accept()
       prefFile = open(userPreferencesPath, 'w+')
-      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self._appBase._closeProject()
+      self.application._closeProject()
       QtGui.QApplication.quit()
     else:
       if event:
@@ -519,9 +510,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     if macroFile is None:
       dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
-                          acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
-      if os.path.exists(self._appBase.preferences.general.userMacroPath):
-        dialog.setDirectory(self._appBase.preferences.general.userMacroPath)
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
+      if os.path.exists(self.application.preferences.general.userMacroPath):
+        dialog.setDirectory(self.application.preferences.general.userMacroPath)
       macroFile = dialog.selectedFile()
       if not macroFile:
         return
@@ -538,7 +529,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
 
-    current = self._appBase.current
+    current = self.application.current
     if not spectrumDisplayOrStrip:
       spectrumDisplayOrStrip = current.spectrumDisplay
     if not spectrumDisplayOrStrip and current.strip:

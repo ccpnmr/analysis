@@ -1,3 +1,5 @@
+#TODO:ED: Insert header
+
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project

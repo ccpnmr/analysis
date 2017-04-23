@@ -46,7 +46,7 @@ from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-  def __init__(self):
+  def __init__(self, parent, name, application):
 
     # below are so we can reuse PeakItems and only create them as needed
     self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
@@ -55,7 +55,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
     
-    GuiSpectrumDisplay.__init__(self)
+    GuiSpectrumDisplay.__init__(self, parent=parent,
+                                      name=name,
+                                      application = application
+                                )
+    #self.window.moduleArea.addModule(self.module, position='right')
 
     self.isGrouped = False
     

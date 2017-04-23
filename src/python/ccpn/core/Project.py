@@ -782,7 +782,7 @@ class Project(AbstractWrapperObject):
     # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    # TODO suspension temporarily disabled
+    # TODO:RASMUS suspension temporarily disabled
     if False and self._notificationSuspension:
       ll = self._pendingNotifications
       for dd in iterator:
@@ -796,45 +796,59 @@ class Project(AbstractWrapperObject):
   # Library functions
 
   def loadData(self, path:str) -> typing.Optional[typing.List]:
-    """Load data from path, determining type first."""
-
-    dataType, subType, usePath = ioFormats.analyseUrl(path)
+    """
+    Load data from path, determining type first.
+    Return None for Un-recognised or un-parsable files; return empty list for ???
+    """
 
     # urlInfo is list of triplets of (type, subType, modifiedUrl),
-
     # e.g. ('Spectrum', 'Bruker', newUrl)
+    dataType, subType, usePath = ioFormats.analyseUrl(path)
+
+    #TODO:RASMUS: Replace prints by logger calls
+    #TODO:RASMUS: Fix all return types; define properly first
     if dataType is None:
       print("Skipping: file data type not recognised for %s" % usePath)
+      return None
 
     elif dataType == 'Dirs':
       # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
       paths = usePath
+      #TODO:RASMUS: Undefined return type
       for path in paths:
         self.loadData(path)
 
     elif not os.path.exists(usePath):
       print("Skipping: no file found at %s" % usePath)
+      return []
+
     elif dataType == 'Text':
       # Special case - you return the text instead of a list of Pids
+      # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+      # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
+      #TODO:RASMUS: return type is not a list
       return open(usePath).read()
 
     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+      # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
       self._appBase.runMacro(usePath)
 
     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
       projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
       project = self.loadProject(projectPath, ioFormats.CCPN)
+      #TODO:RASMSU: use python tmpdir or V3 calss
       project._wrappedData.root._temporaryDirectory = temporaryDirectory
       return [project]
 
     else:
-
+      # No idea what is going on here
+      #TODO: use a dictionary to define
       funcname = '_load' + dataType
       if funcname == '_loadProject':
         return [self.loadProject(usePath, subType)]
 
       elif funcname == '_loadSpectrum':
-        # NBNB TBD FIXME check if loadSpectrum should start with underscore
+        # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
         # (NB referred to elsewhere
         return self.loadSpectrum(usePath, subType)
 
@@ -844,7 +858,7 @@ class Project(AbstractWrapperObject):
       else:
         print("Skipping: project has no function %s" % funcname)
 
-    return None
+    return []
 
   # Data loaders and dispatchers
   def _loadSequence(self, path:str, subType:str) -> list:
@@ -889,7 +903,7 @@ class Project(AbstractWrapperObject):
   def loadSpectrum(self, path:str, subType:str) -> list:
     """Load spectrum from file into application"""
 
-    # NBNB TBD FIXME check for rename
+    # #TODO:RASMUS FIXME check for rename
 
     apiDataSource = self._wrappedData.loadDataSource(path, subType)
     if apiDataSource is None:

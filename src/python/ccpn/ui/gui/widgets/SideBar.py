@@ -57,7 +57,11 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.guiSettings import sidebarFont
+
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
 
@@ -195,7 +199,21 @@ class SideBar(QtGui.QTreeWidget, Base):
     self.dragMoveEvent = self._dragMoveEvent
     self.dragEnterEvent = self._dragEnterEvent
 
+    self.setAcceptDrops(True)
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                       self._processDroppedItems)
 
+  #TODO:RASMUS: assure that there is a save query first before loading a project
+  # onto oan existing roject
+  #TODO:RASMUS: assure proper message once the project.loadData has been celaned up
+  def _processDroppedItems(self, data):
+    "Handle the dropped urls"
+    for url in data.get('urls',[]):
+      print('SideBar._processDroppedItems>>> dropped:', url)
+      objects = self.project.loadData(url)
+      if objects is None or len(objects) == 0:
+        showWarning('Invalid File', 'Cannot handle "%s"' % url)
 
   def setProject(self, project:Project):
     """
@@ -218,8 +236,7 @@ class SideBar(QtGui.QTreeWidget, Base):
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
     project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
-    # TODO Add similar set of notifiers, and similar function for Complex/Chain
-
+    # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
 
   def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers

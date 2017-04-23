@@ -122,14 +122,21 @@ class GuiSpectrumDisplay(QtGui.QWidget):
   # def _hoverEvent(self, event):
   #   event.accept()
 
-  #TODO:LUCA: add handling for SpectrumGroup Pids; also do so in BlankDisplay
   def _processDroppedItems(self, data):
     "Process the pids"
     for ii, pid in enumerate(data.get('pids',[])):
       print('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
-      obj = self.application.project.getByPid(pid)
-      if obj is not None and isinstance(obj, Spectrum):
-        self.displaySpectrum(obj)
+      self._handlePid(pid)
+
+  #TODO:LUCA: add handling for SpectrumGroup Pids; also do so in BlankDisplay
+  def _handlePid(self, pid):
+    "handle a; return True in case it is a Spectrum or a SpectrumGroup"
+    success = False
+    obj = self.project.getByPid(pid)
+    if obj is not None and isinstance(obj, Spectrum):
+      self.displaySpectrum(obj)
+      success = True
+    return success
 
   def _updatePivot(self):
     """Updates pivot in all strips contained in the spectrum display."""

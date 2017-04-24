@@ -82,19 +82,19 @@ class GuiSpectrumDisplay(CcpnModule):
     # cannot set self.project because self is a wrapper object
     # self.project = self.application.project
 
-    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self)#, grid=(0, 0), gridSpan=(1, 2))
-    self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
+    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self, grid=(0, 0), gridSpan=(1, 2))
+    #self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     #self.resize(self.sizeHint())
 
     # Utilities Toolbar
-    self.spectrumUtilToolBar = ToolBar(self.module)#, grid=(0, 2), gridSpan=(1, 2))
+    self.spectrumUtilToolBar = ToolBar(self.module, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
-    self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
+    #self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
     if self.application.preferences.general.showToolbar:
       self.spectrumUtilToolBar.show()
     else:
@@ -106,7 +106,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 3)
 
     # scroll area
-    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4))
+    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4), showBorder=True)
     self.stripFrame.guiSpectrumDisplay = self
     self.setScrollbarPolicies(horizontal='always')
 
@@ -216,7 +216,7 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     for strip in self.strips:
       strip._unregisterStrip()
-    if len(self.application.project.spectrumDisplays) == 1:
+    if len(self.mainWindow.spectrumDisplays) == 1:
       # if self.application.ui.mainWindow is not None:
       #   mainWindow = self.application.ui.mainWindow
       # else:
@@ -224,7 +224,8 @@ class GuiSpectrumDisplay(CcpnModule):
       # mainWindow.addBlankDisplay()
       self.mainWindow.addBlankDisplay()
     # self.module.close()
-    self.delete()
+    #self.delete()
+    CcpnModule._closeModule(self)
 
   def _fillToolBar(self):
     """

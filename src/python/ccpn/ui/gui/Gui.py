@@ -188,6 +188,8 @@ class Gui(Ui):
     return self.application.project.getByPid(gid)
 
 
+  #TODO:TJ There are also addBlankDisplay and dleteBlankDisplay in the GuiWMainindow class;
+  # This should be refactored properly with the graphics aspects delt with by GuiMainWindow
   def addBlankDisplay(self, position='right', relativeTo=None):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
@@ -249,16 +251,16 @@ class Gui(Ui):
     #     self.application._endCommandBlock()
 
 
-########################################################
-#
-#  Wrapper notifier functions
-
-
 
 #######################################################################################
 #
 #  Ui classes that map ccpn.ui._implementation
 #
+#######################################################################################
+
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+
 
 ## Window class
 coreClass = _coreClassMap['Window']
@@ -272,10 +274,16 @@ class MainWindow(coreClass, _GuiMainWindow):
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
+    print('MainWindow>> project:', project)
+    print('MainWindow>> project._appBase:', project._appBase)
+
     application = project._appBase
     _GuiMainWindow.__init__(self, application = application)
 
-    #patch for now:
+    # patches for now:
+    project._mainWindow = self
+    print('MainWindow>> project._mainWindow:', project._mainWindow)
+
     application._mainWindow = self
     application.ui.mainWindow = self
     print('MainWindow>> application from QtCore..:', application)
@@ -333,11 +341,12 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
 #TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
-# NB: GWV had to change the order of subclassing as name conflict other wise made it not work
-# conflicts existed between the 'name' attribute of the two classes and the 'window' attribute
-# the pyqtgraph decendents need name(), project had 'window', but that could be replaced with
+# NB: GWV had to comment out the name property to make it work
+# conflicts existed between the 'name' and 'window' attributes of the two classes
+# the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
 # mainWindow throughout
-class StripDisplayNd(_GuiStripDisplayNd, coreClass):
+
+class StripDisplayNd(coreClass, _GuiStripDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
@@ -363,8 +372,6 @@ def _factoryFunction(project:Project, wrappedData) -> coreClass:
 
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
-#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
-# Any Factory function to _implementation or abstractWrapper
 #
 ## Strip class
 coreClass = _coreClassMap['Strip']

@@ -103,7 +103,10 @@ class CcpnModuleArea(ModuleArea):
       container = self.topContainer
       container.insert(module, insertPos, neighbor)
     module.area = self
-    self.modules[module.name()] = module
+#    self.modules[module.getName()] = module
+    # explicitly calling the CcpnModule.name() method as GuiDisplay modules have their name masked by
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+    self.modules[CcpnModule.name(module)] = module
     # self.movePythonConsole()
     return module
 

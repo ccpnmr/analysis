@@ -73,11 +73,18 @@ class SpectrumDisplay(AbstractWrapperObject):
     """short form of name, corrected to use for id"""
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
-  @property
-  def name(self) -> str:
-    """SpectrumDisplay name"""
+  #GWV: deactivated because of conflict with GuiSpectrumDisplay
+  # @property
+  # def name(self) -> str:
+  #   """SpectrumDisplay name"""
+  #   return self._wrappedData.name
+
+  def getName(self):
+    """Return name of self; alternative for name as GuiSpectrumDisplay is subclassed 
+    from this wrapper object and from CcpnModule
+    """
     return self._wrappedData.name
-    
+
   @property
   def _parent(self) -> Task:
     """Task containing spectrumDisplay."""

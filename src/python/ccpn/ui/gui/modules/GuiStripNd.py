@@ -81,7 +81,7 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 class GuiStripNd(GuiStrip):
 
   def __init__(self):
-    GuiStrip.__init__(self, useOpenGL=True)
+    GuiStrip.__init__(self, parent, application, useOpenGL=True)
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer

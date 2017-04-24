@@ -48,27 +48,10 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
-# def _sufficientlyDifferentWidth(region1, region2):
-#
-#   w1 = abs(region1[1] - region1[0])
-#   w2 = abs(region2[1] - region2[0])
-#   d = abs(w1 - w2)
-#
-#   return d > 1.0e-5 * max(w1, w2)
-#
-# def _scaleRegion(otherPreviousRegion, region, previousRegion):
-#
-#   otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
-#   regionWidth = abs(region[1] - region[0])
-#   previousRegionWidth = abs(previousRegion[1] - previousRegion[0])
-#
-#   otherRegionWidth = otherPreviousRegionWidth * regionWidth / previousRegionWidth
-#   otherRegionPosition = 0.5 * (otherPreviousRegion[1] + otherPreviousRegion[0])
-#
-#   return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
   
 class GuiStrip(Widget):
 
+  # GWV: used for!?
   sigClicked = QtCore.Signal(object, object)
 
   def __init__(self, useOpenGL=False):
@@ -87,6 +70,7 @@ class GuiStrip(Widget):
 
     self.current = self._appBase.current
 
+    #TODO:GEERTEN: Fix with proper stylesheet
     self.colourScheme = self._appBase.colourScheme
     if self.colourScheme == 'light':
       self.background = '#f7ffff'
@@ -613,6 +597,7 @@ class GuiStrip(Widget):
     """
     Creates and displays a popup for zooming to a region in the strip.
     """
+    #TODO:WAYNE: rework using ui.gui.widget classes
     self.zoomPopup = QtGui.QDialog()
     layout = QtGui.QGridLayout()
     layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)

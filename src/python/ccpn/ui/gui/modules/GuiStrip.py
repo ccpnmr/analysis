@@ -47,31 +47,49 @@ import typing
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
+from ccpn.core.lib.Notifiers import Notifier
 
-  
+from ccpn.util.Logging import getLogger
+logger = getLogger()
+
 class GuiStrip(Widget):
 
   # GWV: used for!?
   sigClicked = QtCore.Signal(object, object)
 
-  def __init__(self, useOpenGL=False):
-    
+  def __init__(self, qtParent, spectrumDisplay, application, useOpenGL=False):
+    """
+
+    :param qtParent: QT parent to place widgets
+    :param application: application instance
+
+    This module inherits attributes from the Strip wrapper class
+    """
+    self.application = application
+    self.current = application.current
+    # For now, cannot set this attribute as it is owned by the wrapper class
+    # self.spectrumDisplay = spectrumDisplay
+
+    # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
+    #TODO:GEERTEN: find cause and fix this
+    Widget.__init__(self, acceptDrops=True, hPolicy='expanding', vPolicy='expanding')
+    #self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
     self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
-    Widget.__init__(self, acceptDrops=True)
-    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-                                 useOpenGL=useOpenGL, strip=self)
+    self.plotWidget = PlotWidget(qtParent, appBase=self._parent._appBase,
+                                 useOpenGL=useOpenGL, strip=self,
+                                 hPolicy='expanding', vPolicy='expanding'
+                                 )
 
     # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
     self.stripFrame.layout().addWidget(self.plotWidget, 0,
                                        self.guiSpectrumDisplay.orderedStrips.index(self))
 
-    self.current = self._appBase.current
 
     #TODO:GEERTEN: Fix with proper stylesheet
-    self.colourScheme = self._appBase.colourScheme
+    self.colourScheme = self.application.colourScheme
     if self.colourScheme == 'light':
       self.background = '#f7ffff'
       self.foreground = '#080000'
@@ -82,15 +100,12 @@ class GuiStrip(Widget):
       self.gridColour = '#f7ffff'
     self.plotWidget.setBackground(self.background)
 
-    self.current.registerNotify(self._highlightCurrentStrip, 'strips')
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.parent = self
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
-
-    self._appBase.project.registerNotifier('Peak', 'create', self._updateDisplayedPeaks)
 
 
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
@@ -105,7 +120,6 @@ class GuiStrip(Widget):
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.setPen(color=self.foreground)
     self.gridShown = True
-
 
     # self.viewBox.sigClicked.connect(self._mouseClicked)
     self.grid = CcpnGridItem(self.gridColour)
@@ -142,29 +156,33 @@ class GuiStrip(Widget):
     self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
     self.haveSetVPhasingPivot = False
 
-    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
-    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
-    # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
-    # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
+    #self.application.project.registerNotifier('Peak', 'create', self._updateDisplayedPeaks)
+    #self.current.registerNotify(self._highlightCurrentStrip, 'strips')
 
-
-  def _updateDisplayedPeaks(self, peak):
-    self.showPeaks(peak.peakList)
+    self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+    self._peakNotifier = Notifier(self.project, [Notifier.CREATE], 'Peak', self._updateDisplayedPeaks)
+    #self._stripNotifier.setDebug(True)
+    #self._peakNotifier.setDebug(True)
 
   def _unregisterStrip(self):
-    self.current.unRegisterNotify(self._highlightCurrentStrip, 'strips')
-    self._appBase.project.unRegisterNotifier('Peak', 'create', self._updateDisplayedPeaks)
+    #self.current.unRegisterNotify(self._highlightCurrentStrip, 'strips')
+    #self.application.project.unRegisterNotifier('Peak', 'create', self._updateDisplayedPeaks)
+    self._stripNotifier.unRegister()
+    self._peakNotifier.unRegister()
 
-  def _highlightCurrentStrip(self, strips=None):
+  def _updateDisplayedPeaks(self, data):
+    self.showPeaks(data['object'].peakList)
 
-    if self._appBase.colourScheme == 'light':
+  def _highlightCurrentStrip(self, data):
+    "Highlight the axes of current strip"
+    if self.application.colourScheme == 'light':
       axisColour = '#3333ff'
-    elif self._appBase.colourScheme == 'dark':
+    elif self.application.colourScheme == 'dark':
       axisColour = '#00ff00'
     else:
-      return
+      logger.warning('Undefined colourScheme; setting highlight colour to red')
+      axisColour = 'red'
 
-    # if self is self.current.strips[0]:
     if self is self.current.strip:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
@@ -338,7 +356,7 @@ class GuiStrip(Widget):
       
   def _updatePhasing(self):
     #colour = '#ffffff' if self.background == 'k' else '#000000'
-    colour = '#e4e15b' if self._appBase.colourScheme == 'dark' else '#000000'
+    colour = '#e4e15b' if self.application.colourScheme == 'dark' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
@@ -405,7 +423,7 @@ class GuiStrip(Widget):
     self.plotWidget.addItem(self.hLine, ignoreBounds=True)
     self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
     self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    if self._appBase.preferences.general.doubleCrossHair is True:
+    if self.application.preferences.general.doubleCrossHair is True:
       self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
       self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
 
@@ -564,7 +582,7 @@ class GuiStrip(Widget):
     """
     Zooms strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(*xRegion, padding=padding)
     self.viewBox.setYRange(*yRegion, padding=padding)
 
@@ -572,21 +590,21 @@ class GuiStrip(Widget):
     """
     Zooms x axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x1, x2, padding=padding)
 
   def zoomY(self, y1:float, y2:float):
     """
     Zooms y axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setYRange(y1, y2, padding=padding)
 
   def resetZoom(self):
     """
     Zooms both axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.autoRange(padding=padding)
 
   def _zoomTo(self, x1:float, x2:float, y1:float, y2:float):
@@ -636,7 +654,7 @@ class GuiStrip(Widget):
     """
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
-      padding = self._appBase.preferences.general.stripRegionPadding
+      padding = self.application.preferences.general.stripRegionPadding
       self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
       self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
     else:

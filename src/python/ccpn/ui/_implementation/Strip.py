@@ -129,10 +129,12 @@ class Strip(AbstractWrapperObject):
     """get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
     return parent._wrappedData.sortedStrips()
 
+  #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
+  #TODO:ED: confer with rasmus and me to refactor while writing tests
   def delete(self):
     """Overrides normal delete"""
 
-    # NBNB TODO - should this not be moved to the corresponding GUI class?
+    #TODO:RASMUS - should this not be moved to the corresponding GUI class?
     # Is there always a layout, regardless of application?
 
     # NB - echoing should be done normally, through the delete command
@@ -473,6 +475,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
 SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
 
+#TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
 # SpectrumDisplay.orderedStrips property
 def getter(self) -> Tuple[Strip, ...]:
   ff = self._project._data2Obj.get
@@ -485,5 +488,6 @@ SpectrumDisplay.orderedStrips = property(getter, setter, None,
 del getter
 del setter
 
+# SHOULD NOT BE HERE like this
 # Drag-n-drop functions:
-Strip.processSpectrum = Strip.displaySpectrum
+#Strip.processSpectrum = Strip.displaySpectrum

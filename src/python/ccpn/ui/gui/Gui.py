@@ -357,7 +357,7 @@ class StripDisplayNd(coreClass, _GuiStripDisplayNd):
     self.application = project._appBase
     self._appBase = project._appBase
 
-    _GuiStripDisplayNd.__init__(self, parent=self.application.ui.mainWindow.moduleArea,
+    _GuiStripDisplayNd.__init__(self, qtParent=self.application.ui.mainWindow.moduleArea,
                                       name=self._wrappedData.name,
                                       application = self.application
                                 )
@@ -382,6 +382,9 @@ class Strip1d(coreClass, _GuiStrip1d):
     """Local override init for Qt subclass"""
     print('Strip1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
+
+    # hack for now;
+    self.application = project._appBase
     # Strip1d utimately is a widget which gets appBase from widgets.Base
     # self._appBase = project._appBase
     _GuiStrip1d.__init__(self)
@@ -393,9 +396,15 @@ class StripNd(coreClass, _GuiStripNd):
     """Local override init for Qt subclass"""
     print('StripNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    # StripNd utimately is a widget which gets appBase from widgets.Base
+
+    # hack for now;
+    application = project._appBase
+    # StripNd utimately is a widget which gets _appBase from widgets.Base (for now)
     # self._appBase = project._appBase
-    _GuiStripNd.__init__(self)
+    print('StripNd>> spectrumDisplay:', self.spectrumDisplay)
+    _GuiStripNd.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
+                               spectrumDisplay=self.spectrumDisplay,
+                               application=application)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""

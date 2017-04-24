@@ -232,6 +232,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     """Find axis """
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
+  #TODO:RASMUS;
+  #TODO:ED: not a wrapper method; move to Gui class
   def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
     """Display additional spectrum, with spectrum axes ordered according ton axisOrder
     """

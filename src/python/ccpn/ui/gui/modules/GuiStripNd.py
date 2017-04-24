@@ -80,8 +80,21 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
 class GuiStripNd(GuiStrip):
 
-  def __init__(self):
-    GuiStrip.__init__(self, parent, application, useOpenGL=True)
+  def __init__(self, qtParent, spectrumDisplay, application):
+    """
+    Main spectrum display Module object
+
+    :param qtParent: QT parent to place widgets
+    :param application: application instance
+
+    This module inherits the following attributes from the Strip wrapper class
+    """
+    # TODO:ED: complete the above; also port to GuiStrip1d
+
+    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay, application=application, useOpenGL=True)
+    self.application = application
+    # For now, cannot set this attribute as it is owned by the wrapper class
+    # self.spectrumDisplay = spectrumDisplay
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
@@ -106,7 +119,7 @@ class GuiStripNd(GuiStrip):
 
   @property
   def pythonConsole(self):
-    return self._appBase.ui.mainWindow.pythonConsole
+    return self.application.ui.mainWindow.pythonConsole
 
   def setStripLabelText(self, text: str):
     """set the text of the stripLabel"""

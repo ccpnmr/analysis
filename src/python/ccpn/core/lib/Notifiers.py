@@ -170,16 +170,25 @@ class Notifier(object):
 
         if not hasattr(theObject, targetName):
           raise RuntimeWarning(
-            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
+            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
 
         triggerForTheObject = True
         self._value = getattr(theObject, targetName)
 
         notifier = (trigger, targetName, triggerForTheObject)
         # current has its own notifier system
-        func = theObject.registerNotify(partial(self, notifier=notifier), targetName)
+
+        #TODO:RASMUS: change this and remove this hack
+        # to register strip, the keywords is strips!
+        tName = targetName + 's' if targetName=='strip' else targetName
+        func = theObject.registerNotify(partial(self, notifier=notifier), tName)
         self._notifiers.append(notifier)
-        self._unregister.append((targetName, Notifier.CURRENT, func))
+        self._unregister.append((tName, Notifier.CURRENT, func))
+        if self._debug:
+          # logger.info
+          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                (self._index, self._theObject, trigger, tName, self._callback)
+                )
 
       # MONITOR special case, as the current underpinning implementation does not allow this directly
       # Hence, we track all changes to the object class, filtering those that apply
@@ -195,6 +204,11 @@ class Notifier(object):
         func = self._project.registerNotifier(theObject.className, Notifier.CHANGE, partial(self, notifier=notifier))
         self._notifiers.append(notifier)
         self._unregister.append((theObject.className, Notifier.CHANGE, func))
+        if self._debug:
+          # logger.info
+          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                (self._index, self._theObject, trigger, targetName, self._callback)
+                )
 
       # All other triggers; if targetName == None, respond to changes in the object itself.
       else:
@@ -215,6 +229,11 @@ class Notifier(object):
         func = self._project.registerNotifier(targetName, trigger, partial(self, notifier=notifier))
         self._notifiers.append(notifier)
         self._unregister.append((targetName,trigger,func))
+        if self._debug:
+          # logger.info
+          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                (self._index, self._theObject, trigger, targetName, self._callback)
+                )
 
     if len(self._notifiers) == 0:
       raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
@@ -238,6 +257,11 @@ class Notifier(object):
     unregister the notifiers
     """
     for targetName, trigger, func in self._unregister:
+      if self._debug:
+        # logger.info # logger apears not to work
+        print('>>> Notifier (%d): unregister %r, %r, %r, %r' % \
+              (self._index, self._theObject, trigger, targetName, self._callback)
+              )
       if trigger == Notifier.CURRENT:
         self._theObject.unRegisterNotify(func, targetName)
       else:
@@ -260,7 +284,8 @@ class Notifier(object):
       value = getattr(self._theObject, targetName)
       if value != self._value:
         if self._debug:
-          logger.info('>>> Notifier (%d): obj=%s  callback for %s: %s obj=%s parameter2=%s' % \
+          #logger.info
+          print ('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
                        (self._index, self._theObject, notifier, self._callback, obj, parameter2)
                       )
         callbackDict = dict(
@@ -281,8 +306,9 @@ class Notifier(object):
         value = getattr(self._theObject, targetName)
         if value != self._value:
           if self._debug:
-            logger.info('>>> Notifier (%d): obj=%s  callback for %s: %s obj=%s parameter2=%s' % \
-                        (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+            # logger.info
+            print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
+                  (self._index, self._theObject, notifier, self._callback, obj, parameter2)
                         )
           callbackDict = dict(
             notifier=self,
@@ -302,8 +328,9 @@ class Notifier(object):
       or  obj._parent.id == self._theObject.id:
 
       if self._debug:
-        logger.info('>>> Notifier (%d): obj=%s  callback for %s: %s obj=%s parameter2=%s' % \
-                     (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+        # logger.info
+        print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
+              (self._index, self._theObject, notifier, self._callback, obj, parameter2)
                     )
 
       callbackDict = dict(

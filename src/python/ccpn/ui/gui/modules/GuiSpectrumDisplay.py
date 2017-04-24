@@ -61,10 +61,19 @@ QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiSpectrumDisplay(CcpnModule):
 
-  def __init__(self, parent, name, application):
+  def __init__(self, qtParent, name, application):
+    """
+    Main spectrum display Module object
+    
+    :param qtParent: QT parent to place widgets
+    :param name: Title-bar name for the Module
+    :param application: application instance
+    
+    This module inherits the following attributes from the SpectralDisplay wrapper class
+    """
+    #TODO:ED: complete the above
 
-    super(GuiSpectrumDisplay, self).__init__(parent=parent,
-                                             name=name, closeFunc=self._closeModule,
+    super(GuiSpectrumDisplay, self).__init__(parent=qtParent, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
     self.module = self
@@ -106,7 +115,8 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 3)
 
     # scroll area
-    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4), showBorder=True)
+    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4), showBorder=True,
+                                      hPolicy='expanding', vPolicy='expanding')
     self.stripFrame.guiSpectrumDisplay = self
     self.setScrollbarPolicies(horizontal='always')
 
@@ -217,11 +227,6 @@ class GuiSpectrumDisplay(CcpnModule):
     for strip in self.strips:
       strip._unregisterStrip()
     if len(self.mainWindow.spectrumDisplays) == 1:
-      # if self.application.ui.mainWindow is not None:
-      #   mainWindow = self.application.ui.mainWindow
-      # else:
-      #   mainWindow = self.application._mainWindow
-      # mainWindow.addBlankDisplay()
       self.mainWindow.addBlankDisplay()
     # self.module.close()
     #self.delete()

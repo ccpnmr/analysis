@@ -123,6 +123,8 @@ Use print(current) to get a list of attribute, value pairs')
 
   def registerNotify(self, notify, field):
     """Register notifier function 'notify' to be called on field 'field'
+    
+    Return notify
 
     E.g. current.registerNotify(highlightSelectedPeaks, 'peaks')
     Where highlightSelectedPeaks is a function that takes a list of peaks as its only input
@@ -139,10 +141,19 @@ Use print(current) to get a list of attribute, value pairs')
     """
 
     self._notifies[field].append(notify)
+    return notify
 
   def unRegisterNotify(self, notify, field):
-    """Remove 'current' notifier"""
-    self._notifies[field].remove(notify)
+    """Remove notifier for field"""
+    try:
+      callbacks = self._notifies[field]
+    except:
+      KeyError('field "%s" not found; unable to unRegister from current' % field)
+
+    try:
+      callbacks.remove(notify)
+    except:
+      IndexError('callback not found; unable to unRegister from current')
 
   def _updateSelectedPeaks(self, currentPeaks):
     """ Update selected status of peaks.
@@ -162,6 +173,9 @@ Use print(current) to get a list of attribute, value pairs')
     return self._project
 
   def __str__(self):
+    return '<Current>'
+
+  def asString(self):
     """
     Return string representation of self listing all attribute, value pairs
     """

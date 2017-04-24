@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Base import Base
 
 #TODO:WAYNE: this class could be moved into GuiStrip
 # as it is only there and is just a small wrapper arount a pyqtgraph class
+# goes together with AxisTextItem
 #TODO:WAYNE: should this inherit from Base!! is layout in pyqtgraph is different to Base???
 class PlotWidget(pg.PlotWidget, Base):
 

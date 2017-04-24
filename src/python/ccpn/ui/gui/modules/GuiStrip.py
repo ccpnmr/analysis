@@ -65,6 +65,7 @@ class GuiStrip(Widget):
 
     This module inherits attributes from the Strip wrapper class
     """
+
     self.application = application
     self.current = application.current
     # For now, cannot set this attribute as it is owned by the wrapper class
@@ -78,7 +79,7 @@ class GuiStrip(Widget):
     self.stripFrame = self._parent.stripFrame
     self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
 
-    self.plotWidget = PlotWidget(qtParent, appBase=self._parent._appBase,
+    self.plotWidget = PlotWidget(qtParent, appBase=self.application,
                                  useOpenGL=useOpenGL, strip=self,
                                  hPolicy='expanding', vPolicy='expanding'
                                  )
@@ -86,7 +87,6 @@ class GuiStrip(Widget):
     # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
     self.stripFrame.layout().addWidget(self.plotWidget, 0,
                                        self.guiSpectrumDisplay.orderedStrips.index(self))
-
 
     #TODO:GEERTEN: Fix with proper stylesheet
     self.colourScheme = self.application.colourScheme
@@ -106,7 +106,6 @@ class GuiStrip(Widget):
     self.viewBox = self.plotItem.vb
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
-
 
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
@@ -156,17 +155,12 @@ class GuiStrip(Widget):
     self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
     self.haveSetVPhasingPivot = False
 
-    #self.application.project.registerNotifier('Peak', 'create', self._updateDisplayedPeaks)
-    #self.current.registerNotify(self._highlightCurrentStrip, 'strips')
-
     self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
     self._peakNotifier = Notifier(self.project, [Notifier.CREATE], 'Peak', self._updateDisplayedPeaks)
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
   def _unregisterStrip(self):
-    #self.current.unRegisterNotify(self._highlightCurrentStrip, 'strips')
-    #self.application.project.unRegisterNotifier('Peak', 'create', self._updateDisplayedPeaks)
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
 
@@ -248,7 +242,6 @@ class GuiStrip(Widget):
   #   print('spectrumViews', newStrip.spectrumViews)
   #   for spectrumView in newStrip.spectrumViews:
   #     spectrumView.connectStrip(newStrip)
-
 
   #
   #
@@ -820,7 +813,7 @@ def _setupGuiStrip(project:Project, apiStrip):
 
   orderedAxes = strip.orderedAxes
   axisOrder = strip.axisOrder
-  padding = strip._appBase.preferences.general.stripRegionPadding
+  padding = strip.application.preferences.general.stripRegionPadding
 
   strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)

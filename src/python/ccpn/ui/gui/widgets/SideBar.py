@@ -199,14 +199,14 @@ class SideBar(QtGui.QTreeWidget, Base):
     self.dragMoveEvent = self._dragMoveEvent
     self.dragEnterEvent = self._dragEnterEvent
 
+    self.setDragDropMode(self.DragDrop)
     self.setAcceptDrops(True)
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self._processDroppedItems)
 
-  #TODO:RASMUS: assure that there is a save query first before loading a project
-  # onto oan existing roject
-  #TODO:RASMUS: assure proper message once the project.loadData has been celaned up
+  #TODO:RASMUS: assure that there is a save query first before loading a project onto an existing roject
+  #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     for url in data.get('urls',[]):

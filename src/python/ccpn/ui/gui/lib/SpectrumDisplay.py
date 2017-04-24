@@ -1,4 +1,4 @@
-#TODO:ED: Insert header
+#TODO:GEERTEN: Move to other places, like SpectrumDisplay or Strip
 
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak

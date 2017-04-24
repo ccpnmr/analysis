@@ -203,7 +203,7 @@ class Gui(Ui):
         else:
           self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
       else:
-        blankDisplay = BlankDisplay()
+        blankDisplay = BlankDisplay(parent=self.mainWindow.moduleArea, application=self.application)
         self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
       return blankDisplay
     finally:

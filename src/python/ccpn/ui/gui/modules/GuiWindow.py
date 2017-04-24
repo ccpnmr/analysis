@@ -44,53 +44,21 @@ from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
-#TODO:WAYNE: incorporate all functionality in GuiMainWindow
+#TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
+# For readability there should be a class
+# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
+# The latter should all be private methods!
+
 class GuiWindow():
   
-  def __init__(self):
-    # inherits .application from self
+  def __init__(self, application):
+    self.application = application
 
     self.moduleArea = CcpnModuleArea(mainWindow=self)
     #TODO:WAYNE: check and remove
     # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
     self.moduleArea.guiWindow = self
     self.moduleArea.setGeometry(0, 0, 12000, 8000)
-    if not self._wrappedData.modules:
-      #blankDisplay = GuiBlankDisplay(self.moduleArea)
-      blankDisplay = BlankDisplay()
-      self.moduleArea.addModule(blankDisplay, position=None)
-            
-  def deleteBlankDisplay(self):
-    """
-    Removes blank display from main window modulearea if one is present.
-    """
-    if 'Blank Display' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
-      blankDisplay.close()
-    # if self.blankDisplay:
-    #   self.blankDisplay.setParent(None)
-    #   self.blankDisplay = None
-    #
-  def loadData(self, paths=None, text=None):
-    """
-    Opens a file dialog box and loads data from selected file.
-    """
-    if text is None:
-      text='Load Data'
-    if paths is None:
-      dialog = FileDialog(self, fileMode=0, text=text, preferences=self.application.preferences.general)
-      paths = dialog.selectedFiles()[0]
-
-    # NBNB TBD I assume here that path is either a string or a list lf string paths.
-    # NBNB FIXME if incorrect
-
-    if not paths:
-      return
-    elif isinstance(paths,str):
-      paths = [paths]
-
-    self.processDropData(paths, dataType='urls')
-
 
   def _setShortcuts(self):
     """
@@ -150,16 +118,6 @@ class GuiWindow():
       msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
       if MessageDialog.showYesNo(title, msg, parent):
         current.project.deleteObjects(*peaks)
-        # no longer needed - echo done from function
-        # for peak in peaks[:]:
-        #   if current.project._appBase.ui.mainWindow is not None:
-        #     mainWindow = current.project._appBase.ui.mainWindow
-        #   else:
-        #     mainWindow = current.project._appBase._mainWindow
-        #   mainWindow.pythonConsole.writeConsoleCommand('peak.delete()', peak=peak)
-        #   peak.delete()
-
-
 
   def getCurrentPositionAndStrip(self):
     current = self.application.current
@@ -172,7 +130,6 @@ class GuiWindow():
     # current.position = tuple(position)
     current.cursorPosition = cursorPosition
     return current.strip, current.cursorPosition
-
 
   def _getPeaksParams(self, peaks):
     params = []

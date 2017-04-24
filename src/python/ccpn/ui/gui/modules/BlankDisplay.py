@@ -43,10 +43,15 @@ class BlankDisplay(CcpnModule):
 
   includeSettingsWidget = False
 
-  def __init__(self):
+  def __init__(self, parent, application):
 
-    CcpnModule.__init__(self, name='Blank Display')
-    # project, current, application and mainWindow are inherited from CcpnModule
+    CcpnModule.__init__(self, parent=parent, name='Blank Display')
+    # Derive project, current and mainWindow from application; do not set local copies, as the first time
+    # BlankDisplay is called, application.ui.mainWindow is still None
+    self.application = application
+    self.project = application.project
+    self.current = application.current
+    #self.mainWindow = application.ui.mainWindow
 
     self.label2 = Label(self.mainWidget, acceptDrops=True, stretch=(1,1), text='Drag Spectrum Here',
                         textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center'
@@ -77,14 +82,14 @@ class BlankDisplay(CcpnModule):
             self.project = obj
           if isinstance(obj, (Spectrum)):
             success = success or self._handlePid(obj.pid)  # pass the object as its pid so we use
-                                                         # the same call to process the pids
+                                                           # the same method used to process the pids
     # process pids
     for ii, pid in enumerate(data.get('pids',[])):
       print('BlankDisplay._processDroppedItems>>> dropped:', pid)
       success = success or self._handlePid(pid)
 
     if success:
-      self.mainWindow.deleteBlankDisplay()
+      self.application.ui.mainWindow.deleteBlankDisplay()
       logger.info('application.deleteBlankDisplay()')
 
   #TODO:LUCA: add handling for SpectrumGroup Pids; also do in GuiSpectrumDisplay
@@ -98,12 +103,12 @@ class BlankDisplay(CcpnModule):
     return success
 
   def _createSpectrumDisplay(self, spectrum):
-    self.mainWindow.createSpectrumDisplay(spectrum)
+    self.application.ui.mainWindow.createSpectrumDisplay(spectrum)
     # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-    # This routine can then be ommitted and the call abobe replaced by the one remaining line
-    self.mainWindow.pythonConsole.writeConsoleCommand(
+    # This routine can then be ommitted and the call above replaced by the one remaining line
+    self.application.ui.mainWindow.pythonConsole.writeConsoleCommand(
       "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-    self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+    self.application.ui.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
     logger.info('spectrum = project.getByPid(%r)' % spectrum.id)
     logger.info('application.createSpectrumDisplay(spectrum)')
 

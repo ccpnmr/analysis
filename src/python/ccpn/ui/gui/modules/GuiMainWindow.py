@@ -39,6 +39,8 @@ from ccpn.util.Svg import Svg
 
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
+from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
@@ -55,21 +57,31 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     QtGui.QMainWindow.__init__(self)
     self.setGeometry(200, 40, 1100, 900)
+    # connect a close event, cleaning up things as needed
+    self.closeEvent = self._closeEvent
+    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
+
+    GuiWindow.__init__(self, application)
     self.application = application
-    GuiWindow.__init__(self)
 
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
     self._initProject()
-    self.closeEvent = self._closeEvent
-    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
+    self._setShortcuts()
 
     # do not need an unRegisterNotify because those removed when mainWindow / project destroyed
     self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
 
     self.feedbackPopup = None
     self.updatePopup = None
+
+    # open a blank display if no modules present
+    if not self._wrappedData.modules:
+      blankDisplay = BlankDisplay(parent=self.moduleArea, application=self.application)
+      self.moduleArea.addModule(blankDisplay, position=None)
+
+    self.statusBar().showMessage('Ready')
 
   def _initProject(self):
     """
@@ -88,7 +100,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
-    self.colourScheme = self.application.colourScheme
     self._fillRecentProjectsMenu()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
@@ -124,7 +135,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return a.menu() or a
     raise ValueError('Menu item not found.')
 
-
   def _setupWindow(self):
     """
     Sets up SideBar, python console and splitters to divide up main window properly.
@@ -146,6 +156,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                                     """)
 
+    # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,
                       'preferences': self.application.preferences,
@@ -162,15 +173,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
     self.sideBar = SideBar(parent=self)
-    self.sideBar.setDragDropMode(self.sideBar.DragDrop)
     self.splitter3.addWidget(self.sideBar)
     self.splitter1.addWidget(self.splitter3)
     self.sideBar.itemDoubleClicked.connect(self._raiseObjectProperties)
     self.splitter1.addWidget(self.moduleArea)
     self.setCentralWidget(self.splitter1)
-    self.statusBar().showMessage('Ready')
-    self._setShortcuts()
-
 
   def _setupMenus(self):
     """
@@ -236,8 +243,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       ss = ''
     result = MessageDialog.showYesNo(title,
-          'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss),
-          colourScheme=self.colourScheme)
+          'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss))
 
     return result
 
@@ -256,7 +262,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
       if projectDir:
         self.application.loadProject(projectDir)
-
 
 
   def _raiseObjectProperties(self, item):
@@ -297,8 +302,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _fillMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
-    TODO: make sure that running a macro adds it to the prefs and calls this function
     """
+    #TODO: make sure that running a macro adds it to the prefs and calls this function
 
     runMacrosMenu = self.getMenuAction('Macro->Run Recent')
     runMacrosMenu.clear()
@@ -443,7 +448,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def displayProjectSummary(self):
     info = MessageDialog.showInfo('Not implemented yet',
-          'This function has not been implemented in the current version', colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
 
 
   def _closeEvent(self, event=None):
@@ -453,7 +458,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     from ccpn.framework.PathsAndUrls import userPreferencesPath
     #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-    #TODO: move all of this to "preferences"
+    #TODO:TJ move all of the saving of preferences to FrameWork
     directory = os.path.dirname(userPreferencesPath)
     if not os.path.exists(directory):
       try:
@@ -491,6 +496,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
+  def deleteBlankDisplay(self):
+    """
+    Removes blank display from main window modulearea if one is present.
+    """
+    if 'Blank Display' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
+      blankDisplay.close()
+
+  def addBlankDisplay(self):
+    if not self._wrappedData.modules:
+      blankDisplay = BlankDisplay(parent=self.moduleArea, application=self.application)
+      self.moduleArea.addModule(blankDisplay, position=None)
 
   def newMacroFromLog(self):
     """
@@ -502,7 +519,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     editor.textBox.setText(text)
 
 
-  # the below is in Framework (slightly different implementation) so presumably does not belong here???
+  #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
+  #Framework owns the command, this part juts get the file to run
   def runMacro(self, macroFile:str=None):
     """
     Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
@@ -528,6 +546,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       spectrumDisplay._resetRemoveStripAction()
 
   def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
+    #TODO:LUCA: Docstring needed
 
     current = self.application.current
     if not spectrumDisplayOrStrip:

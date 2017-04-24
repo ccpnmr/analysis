@@ -861,9 +861,6 @@ class Framework:
   ## MENU callbacks:  Project
   ###################################################################################################################
 
-
-
-
   def createNewProject(self):
     okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                          phrase='create a new')
@@ -962,6 +959,9 @@ class Framework:
       text = 'Load Data'
 
     if paths is None:
+      #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
+      # NBNB TBD I assume here that path is either a string or a list lf string paths.
+      # NBNB #FIXME if incorrect
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                           acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
       path = dialog.selectedFile()
@@ -972,7 +972,8 @@ class Framework:
     elif isinstance(paths, str):
       paths = [paths]
 
-    self.ui.mainWindow.processDropData(paths, dataType='urls')
+    for path in paths:
+      self.project.loadData(path)
 
   def _saveLayout(self):
     moduleArea = self.ui.mainWindow.moduleArea
@@ -997,6 +998,7 @@ class Framework:
         import ccpn.ui.gui.modules as gm
         ccpnModules = gm.importCcpnModules(modulesDict)
         for ccpnModule in ccpnModules:
+          #FIXME: is this correct?
           newModule = ccpnModule(self.project)
           self.ui.mainWindow.moduleArea.addModule(newModule)
 
@@ -1468,29 +1470,6 @@ class Framework:
       SelectSpectrumDisplayPopup(project=self.project).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
-
-  # def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   """
-  #   Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
-  #   """
-  #   from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
-  #
-  #   if hasattr(self, 'assigner'):
-  #     return
-  #
-  #   self.assigner = SequenceGraph(self, project=self.project)
-  #   if hasattr(self, 'backboneModule'):
-  #     self.backboneModule._connectSequenceGraph(self.assigner)
-  #
-  #   if relativeTo is not None:
-  #     self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
-  #   else:
-  #     self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
-  #   self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
-  #   self.project._logger.info("application.showSequenceGraph()")
-  #   return self.assigner
-
-
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """
     Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.
@@ -1507,7 +1486,7 @@ class Framework:
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
     from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
-    self.atomSelector = AtomSelector(parent=self.ui.mainWindow, project=self.project)
+    self.atomSelector = AtomSelector(parent=self.ui.mainWindow, application=self)
     self.ui.mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")

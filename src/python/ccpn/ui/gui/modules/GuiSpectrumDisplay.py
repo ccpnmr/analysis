@@ -68,10 +68,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module = self
     self.application = application
 
-    #TODO:RASMUS: GuiSpectrumDisplay inherits window from somewhere, presumably from the wrapper layer
-    # This is something temporary, as it should be application.ui.mainWindow, but that has not been set
-    # yet; we need to dicuss the temporary nameing/assigment of these object while restoring them
-
+    #TODO:GEERTEN; remove this once it has been established that GuiSpectrumDisplay can safely be subcalssed from CcpnModule
     #self.module = CcpnModule(parent=self.window.moduleArea,
     #                         name=self._wrappedData.name, closeFunc=self._closeModule,
     #                         size=(1100,1300), autoOrientation=False)

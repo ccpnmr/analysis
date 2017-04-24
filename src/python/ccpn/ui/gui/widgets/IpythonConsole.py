@@ -13,7 +13,7 @@ class IpythonConsole(Widget, Base):
 
     def __init__(self, parent=None, namespace=None, mainWindow=None, historyFile=None, **kw):
 
-        Widget.__init__(self)
+        Widget.__init__(self, parent=parent)
         Base.__init__(self, **kw)
 
         km = QtInProcessKernelManager()
@@ -23,10 +23,13 @@ class IpythonConsole(Widget, Base):
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
+        #TODO:GEERTEN: Sort Stylesheet issues
         self.setStyleSheet(self.mainWindow.styleSheet())
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
+        #TODO:LUCA:The Widget class already has a layout: can juts do grid=(row,col)
+        #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()
         self.setMinimumHeight(100)

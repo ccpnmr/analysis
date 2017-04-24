@@ -54,12 +54,6 @@ class GuiWindow():
   def __init__(self, application):
     self.application = application
 
-    self.moduleArea = CcpnModuleArea(mainWindow=self)
-    #TODO:WAYNE: check and remove
-    # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
-    self.moduleArea.guiWindow = self
-    self.moduleArea.setGeometry(0, 0, 12000, 8000)
-
   def _setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar

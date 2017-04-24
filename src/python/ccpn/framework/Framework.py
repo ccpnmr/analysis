@@ -1531,6 +1531,8 @@ class Framework:
       else:
         self.ui.mainWindow.moduleArea.moveModule(self.ui.mainWindow.pythonConsoleModule, 'bottom', None)
     else:
+      #TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);
+      # initialise in GuiMainWindow on __init__; set appropriate Menu callbacks
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
       self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console', closeFunc=closeFunc)

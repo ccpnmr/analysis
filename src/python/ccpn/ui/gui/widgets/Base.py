@@ -150,6 +150,7 @@ class Base(DropBase):
 
   def getLayout(self):
     "return the layout of self"
+    #TODO:WAYNE: complete this routine to be failsave/robust
     if isinstance(self, Dock):
       layout = self.widgetArea.layout()
     else:

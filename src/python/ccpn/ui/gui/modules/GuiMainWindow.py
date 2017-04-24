@@ -15,18 +15,18 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
 __dateModified__ = "$dateModified: 2017-04-07 11:40:38 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-
 __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import datetime
 import json
 import os
@@ -48,7 +48,21 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
+
 from ccpn.util.Common import uniquify
+
+
+#TODO:WAYNE: incorporate most functionality from GuiWindow and
+#TODO:TJ: functionality from FrameWork
+# For readability there should be a class:
+# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
+# The latter should all be private methods!
+# For readability there should be a class:
+# _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
+# The latter should all be private methods!
+#
+# The docstring of GuiMainWindow should detail how this setup is
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
@@ -63,6 +77,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     GuiWindow.__init__(self, application)
     self.application = application
+
+    # Module area
+    self.moduleArea = CcpnModuleArea(mainWindow=self)
+    # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
+    #self.moduleArea.guiWindow = self
+    self.moduleArea.setGeometry(0, 0, 12000, 8000)
 
     self.recordingMacro = False
     self._setupWindow()
@@ -143,6 +163,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
 
+    #TODO:GEERTEN: deal with Stylesheet issue
     self.setStyleSheet("""QSplitter{
                                     background-color: #bec4f3;
                                     }
@@ -169,8 +190,20 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                       'loadProject': self.application.loadProject,
                       'newProject': self.application.newProject,
                      }
-    self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
+    #TODO:WAYNE: We are passing in self as parent and MainWindow; is this correct?
+    self.pythonConsole = IpythonConsole(parent=self, namespace=self.namespace, mainWindow=self)
 
+    #TODO:LUCA: find out where the string is stored when you type '?' in the console; prepend this string
+#     self.pythonConsole.ipythonWidget.__doc__ = \
+# """
+# CcpNmr IPython Console Area (shortcut 'PY' to toggle)
+#
+# Access to:
+#
+#     application, project, current, ui, mainWindow, preferences
+#     redo(), undo(), loadProject(), newProject()
+#
+# """ + self.pythonConsole.ipythonWidget.__doc__
 
     self.sideBar = SideBar(parent=self)
     self.splitter3.addWidget(self.sideBar)

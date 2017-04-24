@@ -39,18 +39,20 @@ from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 import typing
 
-from ccpn.ui.gui.widgets.Frame import Frame as Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
+from ccpn.util.Logging import getLogger
+logger = getLogger()
 
 # suppress messages
 #TODO:WAYNE: fix the root cause of this HACK!!!
@@ -74,9 +76,6 @@ class GuiSpectrumDisplay(CcpnModule):
     #                         size=(1100,1300), autoOrientation=False)
     #self.window.moduleArea.addModule(self.module, position='right')
 
-    # hack for now
-    # inherit application from wrapper insertion
-    # self.application = self.module.application
     # derive current and mainWindow from application
     self.mainWindow = self.application.ui.mainWindow
     self.current = self.application.current
@@ -107,17 +106,19 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 3)
 
     # scroll area
-    self.scrollArea = ScrollArea(self.module, grid=(1, 0), gridSpan=(1, 4))
-    self.scrollArea.setWidgetResizable(True)
-    self.stripFrame = Frame(self.scrollArea, grid=(0, 0))
+    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4))
     self.stripFrame.guiSpectrumDisplay = self
-    self.scrollArea.setWidget(self.stripFrame)
-    
+    self.setScrollbarPolicies(horizontal='always')
+
+    #
     #self.setEnabled(True)
 
     includeDirection = not self.is1D
-    self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
-                                     directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
+    self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection,
+                                     callback=self._updatePhasing,
+                                     returnCallback=self._updatePivot,
+                                     directionCallback=self._changedPhasingDirection,
+                                     grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
 
     self.stripFrame.setAcceptDrops(True)
@@ -151,6 +152,15 @@ class GuiSpectrumDisplay(CcpnModule):
       self.displaySpectrum(obj)
       success = True
     return success
+
+  def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
+    "Set the scrolbar policies"
+    from ccpn.ui.gui.widgets.Frame import SCROLLBAR_POLICY_DICT
+
+    if horizontal not in SCROLLBAR_POLICY_DICT or \
+       vertical not in SCROLLBAR_POLICY_DICT:
+      logger.warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
+    self.stripFrame.setScrollBarPolicies((horizontal, vertical))
 
   def _updatePivot(self):
     """Updates pivot in all strips contained in the spectrum display."""

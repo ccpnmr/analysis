@@ -43,7 +43,6 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 
 from ccpn.util.Logging import getLogger
-
 logger = getLogger()
 
 class CcpnModule(Dock):

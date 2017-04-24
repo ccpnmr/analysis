@@ -75,6 +75,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.ScrollArea import SCROLLBAR_POLICY_DICT
 
 
 class Frame(QtGui.QFrame, Base):
@@ -128,7 +129,7 @@ class Frame(QtGui.QFrame, Base):
       """
       Define frame properties:
       """
-      #TODO: GWV: routine is called but appears not to change much in the appearance on OSX
+      #TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX
       shape = self.FRAME_DICT.get(fShape, QtGui.QFrame.NoFrame)
       shadow = self.FRAME_DICT.get(fShadow, 0)
       #print('>>', shape, shadow)
@@ -160,6 +161,9 @@ class ScrollableFrame(Frame):
     self.scrollArea.setWidget(self)
     self.scrollArea.getLayout().addWidget(self)
 
+  def setScrollBarPolicies(self, policies=('asNeeded','asNeeded')):
+    "Set the scrolbar policy: always, never, asNeeded"
+    self.scrollArea.setScrollBarPolicies(policies)
 
 if __name__ == '__main__':
 

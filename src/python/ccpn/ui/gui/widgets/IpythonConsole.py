@@ -11,9 +11,12 @@ from qtconsole.inprocess import QtInProcessKernelManager
 
 class IpythonConsole(Widget, Base):
 
-    def __init__(self, parent=None, namespace=None, mainWindow=None, historyFile=None, **kw):
+    def __init__(self, mainWindow, namespace=None, **kw):
 
-        Widget.__init__(self, parent=parent)
+        if namespace is None:
+          namespace = mainWindow.namespace
+
+        Widget.__init__(self, parent=mainWindow)
         Base.__init__(self, **kw)
 
         km = QtInProcessKernelManager()
@@ -28,7 +31,7 @@ class IpythonConsole(Widget, Base):
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
-        #TODO:LUCA:The Widget class already has a layout: can juts do grid=(row,col)
+        #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
         #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()

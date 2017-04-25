@@ -190,8 +190,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                       'loadProject': self.application.loadProject,
                       'newProject': self.application.newProject,
                      }
-    #TODO:WAYNE: We are passing in self as parent and MainWindow; is this correct?
-    self.pythonConsole = IpythonConsole(parent=self, namespace=self.namespace, mainWindow=self)
+
+    self.pythonConsole = IpythonConsole(self)
 
     #TODO:LUCA: find out where the string is stored when you type '?' in the console; prepend this string
 #     self.pythonConsole.ipythonWidget.__doc__ = \

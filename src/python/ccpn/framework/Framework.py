@@ -1527,19 +1527,21 @@ class Framework:
     Toggles whether python console is displayed at bottom of the main window.
     """
 
-    if 'Python Console' in self.ui.mainWindow.moduleArea.findAll()[1]:
-      if self.ui.mainWindow.pythonConsoleModule.isVisible():
-        self.ui.mainWindow.pythonConsoleModule.hide()
+    mainWindow = self.ui.mainWindow
+
+    if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
+      if mainWindow.pythonConsoleModule.isVisible():
+        mainWindow.pythonConsoleModule.hide()
       else:
-        self.ui.mainWindow.moduleArea.moveModule(self.ui.mainWindow.pythonConsoleModule, 'bottom', None)
+        mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
     else:
       #TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);
       # initialise in GuiMainWindow on __init__; set appropriate Menu callbacks
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
-      self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console', closeFunc=closeFunc)
-      self.ui.mainWindow.pythonConsoleModule.layout.addWidget(self.ui.mainWindow.pythonConsole)
-      self.ui.mainWindow.moduleArea.addModule(self.ui.mainWindow.pythonConsoleModule, 'bottom')
+      mainWindow.pythonConsoleModule = CcpnModule(mainWindow, name='Python Console', closeFunc=closeFunc)
+      mainWindow.pythonConsoleModule.layout.addWidget(mainWindow.pythonConsole)
+      mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
 
   #################################################################################################

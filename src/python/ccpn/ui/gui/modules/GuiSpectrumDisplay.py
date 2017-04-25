@@ -61,11 +61,12 @@ QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiSpectrumDisplay(CcpnModule):
 
-  def __init__(self, qtParent, name, application):
+  def __init__(self, qtParent, mainWindow, name, application):
     """
     Main spectrum display Module object
     
     :param qtParent: QT parent to place widgets
+    :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
     :param application: application instance
     
@@ -76,7 +77,8 @@ class GuiSpectrumDisplay(CcpnModule):
     super(GuiSpectrumDisplay, self).__init__(parent=qtParent, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
-    self.module = self
+
+    self.mainWindow = mainWindow
     self.application = application
 
     #TODO:GEERTEN; remove this once it has been established that GuiSpectrumDisplay can safely be subcalssed from CcpnModule
@@ -84,6 +86,8 @@ class GuiSpectrumDisplay(CcpnModule):
     #                         name=self._wrappedData.name, closeFunc=self._closeModule,
     #                         size=(1100,1300), autoOrientation=False)
     #self.window.moduleArea.addModule(self.module, position='right')
+    # Hack for now
+    self.module = self
 
     # derive current and mainWindow from application
     self.mainWindow = self.application.ui.mainWindow

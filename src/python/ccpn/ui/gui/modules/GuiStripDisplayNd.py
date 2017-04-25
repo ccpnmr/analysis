@@ -46,11 +46,12 @@ from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-  def __init__(self, qtParent, name, application):
+  def __init__(self, qtParent, mainWindow, name, application):
     """
     spectrum display object for Nd spectra
 
     :param qtParent: QT parent to place widgets
+    :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
     :param application: application instance
 
@@ -65,9 +66,11 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
     
     GuiSpectrumDisplay.__init__(self, qtParent=qtParent,
+                                      mainWindow=mainWindow,
                                       name=name,
                                       application = application
                                 )
+    self.mainWindow = mainWindow
     #self.window.moduleArea.addModule(self.module, position='right')
 
     self.isGrouped = False

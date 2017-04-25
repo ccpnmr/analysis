@@ -50,9 +50,7 @@ class Gui(Ui):
   def __init__(self, application):
     
     Ui.__init__(self, application)
-
     self._initQtApp()
-
 
   def _initQtApp(self):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
@@ -132,13 +130,6 @@ class Gui(Ui):
 
   def start(self):
 
-    # show splash screen
-    # GWV comment out to speed up loading and reduce memory footprint
-    #splash = SplashScreen()
-    #self.qtApp.processEvents()  # needed directly after splashScreen show to show something
-    #splash.close()
-    #splash.finish(self.mainWindow)
-
     self.mainWindow._fillMacrosMenu()
     self.mainWindow._updateRestoreArchiveMenu()
     self.mainWindow.setUserShortcuts(self.application.preferences)
@@ -147,7 +138,6 @@ class Gui(Ui):
 
     sys.stderr.write('==> Gui interface is ready\n' )
     self.qtApp.start()
-
 
   def _showRegisterPopup(self):
     """Display registration popup"""
@@ -170,12 +160,10 @@ class Gui(Ui):
     mainWindow.namespace['current'] = self.application.current
     return mainWindow
 
-
   def echoCommands(self, commands:typing.List[str]):
     """Echo commands strings, one by one, to logger
     and store them in internal list for perusal
     """
-
     console = self.application.ui.mainWindow.pythonConsole
     logger = self.application.project._logger
 
@@ -183,20 +171,19 @@ class Gui(Ui):
       console._write(command + '\n')
       logger.info(command)
 
-
+  #TODO:RASMUS: should discuss how application should deal with it
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
 
-  #TODO:TJ There are also addBlankDisplay and dleteBlankDisplay in the GuiWMainindow class;
-  # This should be refactored properly with the graphics aspects delt with by GuiMainWindow
+  #TODO:TJ There are also addBlankDisplay and deleteBlankDisplay in the GuiWMainindow class;
+  # This should be refactored properly with the graphics aspects delt with by GuiMainWindow (passing poition,relative)
+  # to it
   def addBlankDisplay(self, position='right', relativeTo=None):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
-
-    from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
     try:
       if 'Blank Display' in self.mainWindow.moduleArea.findAll()[1]:
         blankDisplay = self.mainWindow.moduleArea.findAll()[1]['Blank Display']
@@ -205,8 +192,7 @@ class Gui(Ui):
         else:
           self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
       else:
-        blankDisplay = BlankDisplay(parent=self.mainWindow.moduleArea, application=self.application)
-        self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
+        blankDisplay = self.mainWindow.addBlankDisplay()
       return blankDisplay
     finally:
       self.application._endCommandBlock()
@@ -358,6 +344,7 @@ class StripDisplayNd(coreClass, _GuiStripDisplayNd):
     self._appBase = project._appBase
 
     _GuiStripDisplayNd.__init__(self, qtParent=self.application.ui.mainWindow.moduleArea,
+                                      mainWindow= self.application.ui.mainWindow,
                                       name=self._wrappedData.name,
                                       application = self.application
                                 )

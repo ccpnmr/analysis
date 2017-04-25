@@ -42,7 +42,6 @@ from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class

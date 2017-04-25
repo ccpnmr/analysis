@@ -1,4 +1,6 @@
-"""Module Documentation here
+"""
+This Module implements the main graphics window functionality
+It works in concert with a wrapper object for storing/retrieving attibute values
 
 """
 #=========================================================================================
@@ -96,10 +98,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.feedbackPopup = None
     self.updatePopup = None
 
-    # open a blank display if no modules present
-    if not self._wrappedData.modules:
-      blankDisplay = BlankDisplay(parent=self.moduleArea, application=self.application)
-      self.moduleArea.addModule(blankDisplay, position=None)
+    # open a blank display
+    self.addBlankDisplay()
 
     self.statusBar().showMessage('Ready')
 
@@ -538,8 +538,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       blankDisplay.close()
 
   def addBlankDisplay(self):
+    "Adds blank display; returns BlankDisplay instance"
     if not self._wrappedData.modules:
-      blankDisplay = BlankDisplay(parent=self.moduleArea, application=self.application)
+      blankDisplay = BlankDisplay(mainWindow=self)
       self.moduleArea.addModule(blankDisplay, position=None)
 
   def newMacroFromLog(self):

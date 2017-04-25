@@ -105,7 +105,6 @@ class _StripLabel(Label):
 
 class PlaneToolbar(ToolBar):
   #TODO: undocumented and needs refactoring ;
-  #TODO: also: its is not a Toolbar and should be renamed
   def __init__(self, strip, callbacks, **kw):
 
     ToolBar.__init__(self, strip.stripFrame, **kw)

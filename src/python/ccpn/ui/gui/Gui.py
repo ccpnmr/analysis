@@ -343,10 +343,8 @@ class StripDisplayNd(coreClass, _GuiStripDisplayNd):
     self.application = project._appBase
     self._appBase = project._appBase
 
-    _GuiStripDisplayNd.__init__(self, qtParent=self.application.ui.mainWindow.moduleArea,
-                                      mainWindow= self.application.ui.mainWindow,
-                                      name=self._wrappedData.name,
-                                      application = self.application
+    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
+                                      name=self._wrappedData.name
                                 )
     self.application.ui.mainWindow.moduleArea.addModule(self.module, position='right')
 

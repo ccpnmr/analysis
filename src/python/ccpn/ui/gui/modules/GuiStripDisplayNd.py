@@ -46,14 +46,12 @@ from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
-  def __init__(self, qtParent, mainWindow, name, application):
+  def __init__(self, mainWindow, name):
     """
     spectrum display object for Nd spectra
 
-    :param qtParent: QT parent to place widgets
     :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
-    :param application: application instance
 
     This module inherits attributes from the SpectralDisplay wrapper class (see GuiSpectrumDislay)
     """
@@ -65,13 +63,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
     
-    GuiSpectrumDisplay.__init__(self, qtParent=qtParent,
-                                      mainWindow=mainWindow,
-                                      name=name,
-                                      application = application
-                                )
-    self.mainWindow = mainWindow
-    #self.window.moduleArea.addModule(self.module, position='right')
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name)
+    # .mainWindow, .current and .application are set by GuiSpectrumDisplay
+    # .project is set by the wrapper
 
     self.isGrouped = False
     
@@ -85,10 +79,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     Creates a new strip by duplicating the first strip in the display.
     """
     newStrip = self.strips[0].clone()
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
+    mainWindow = self.mainWindow
     mainWindow.pythonConsole.writeConsoleCommand(
         "strip.clone()", strip=self.strips[0].clone())
     self.project._logger.info("strip = ui.getByGid('%s'); strip.clone()" % self.strips[0].pid)
@@ -155,10 +146,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
         spectrumView.update()
-        if self._appBase.ui.mainWindow is not None:
-          mainWindow = self._appBase.ui.mainWindow
-        else:
-          mainWindow = self._appBase._mainWindow
+
+        mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -195,10 +184,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
         spectrumView.update()
-        if self._appBase.ui.mainWindow is not None:
-          mainWindow = self._appBase.ui.mainWindow
-        else:
-          mainWindow = self._appBase._mainWindow
+
+        mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -232,10 +219,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour count - change that one only
           spectrumView.negativeContourCount += 1
 
-        if self._appBase.ui.mainWindow is not None:
-          mainWindow = self._appBase.ui.mainWindow
-        else:
-          mainWindow = self._appBase._mainWindow
+        mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -273,10 +257,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           if spectrumView.negativeContourCount:
             spectrumView.negativeContourCount -= 1
 
-        if self._appBase.ui.mainWindow is not None:
-          mainWindow = self._appBase.ui.mainWindow
-        else:
-          mainWindow = self._appBase._mainWindow
+        mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(

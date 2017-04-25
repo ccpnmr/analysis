@@ -61,27 +61,29 @@ QtCore.qInstallMsgHandler(lambda *args: None)
 
 class GuiSpectrumDisplay(CcpnModule):
 
-  def __init__(self, qtParent, mainWindow, name, application):
+  def __init__(self, mainWindow, name):
     """
     Main spectrum display Module object
     
-    :param qtParent: QT parent to place widgets
     :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
-    :param application: application instance
     
     This module inherits the following attributes from the SpectralDisplay wrapper class
     """
     #TODO:ED: complete the above
 
-    super(GuiSpectrumDisplay, self).__init__(parent=qtParent, name=name,
+    super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
 
     self.mainWindow = mainWindow
-    self.application = application
+    self.application = mainWindow.application
+    # derive current from application
+    self.current = mainWindow.application.current
+    # cannot set self.project because self is a wrapper object
+    # self.project = mainWindow.application.project
 
-    #TODO:GEERTEN; remove this once it has been established that GuiSpectrumDisplay can safely be subcalssed from CcpnModule
+    #TODO:GEERTEN; remove this once it has been established that GuiSpectrumDisplay can safely be subclassed from CcpnModule
     #self.module = CcpnModule(parent=self.window.moduleArea,
     #                         name=self._wrappedData.name, closeFunc=self._closeModule,
     #                         size=(1100,1300), autoOrientation=False)
@@ -89,21 +91,16 @@ class GuiSpectrumDisplay(CcpnModule):
     # Hack for now
     self.module = self
 
-    # derive current and mainWindow from application
-    self.mainWindow = self.application.ui.mainWindow
-    self.current = self.application.current
-    # cannot set self.project because self is a wrapper object
-    # self.project = self.application.project
-
-    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self, grid=(0, 0), gridSpan=(1, 2))
+    #TODO:GEERTEN These need to go into self.mainWidget
+    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self, grid=(0, 0), gridSpan=(1, 4))
     #self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     #self.resize(self.sizeHint())
 
-    # Utilities Toolbar
-    self.spectrumUtilToolBar = ToolBar(self.module, grid=(0, 2), gridSpan=(1, 2))
+    # Utilities Toolbar; filled later-on!?
+    self.spectrumUtilToolBar = ToolBar(self.module, grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
@@ -112,14 +109,13 @@ class GuiSpectrumDisplay(CcpnModule):
       self.spectrumUtilToolBar.show()
     else:
       self.spectrumUtilToolBar.hide()
-    # toolBarColour = QtGui.QColor(214,215,213)
 
     # position box
     self.positionBox = Label(self.module)
-    self.module.addWidget(self.positionBox, 0, 3)
+    self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
-    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 4), showBorder=True,
+    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7), showBorder=True,
                                       hPolicy='expanding', vPolicy='expanding')
     self.stripFrame.guiSpectrumDisplay = self
     self.setScrollbarPolicies(horizontal='always')
@@ -146,10 +142,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
   # def _hoverEvent(self, event):
   #   event.accept()
-
-  #def getName(self):
-  #  return super(GuiSpectrumDisplay, self).name()
-  #name = getName
 
   def _processDroppedItems(self, data):
     "Process the pids"

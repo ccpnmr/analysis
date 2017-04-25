@@ -26,7 +26,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-
 __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 # Start of code
@@ -63,23 +62,17 @@ class CcpnModule(Dock):
   settingsOnTop = True
   settingsMinimumSizes = (0, 0)
 
-  #logger=None, buttonParent=None, buttonGrid=None,
-  def __init__(self, name, closable=True, closeFunc=None, **kw):
-    super(CcpnModule, self).__init__(name, self, closable=closable)
+  def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
+
+    #TODO:GEERTEN: make mainWindow actually do something
+
+    super(CcpnModule, self).__init__(name, self, closable=closable, **kwds)
     print('CcpnModule>>>', type(self))
     # GWV: logger seems not to work??
     logger.debug('module:"%s"' % (name,))
 
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
-
-    # useful definitions to have
-    #self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    #self.current = self.application.current
-    #self.project = self.application.project
-    # This does not work as on initialization mainWindow is still None
-    # Hence: change into a property
-    #self.mainWindow = self.application.ui.mainWindow
 
     # hide original dock label and generate a new CCPN one
     self._originalLabel = self.label
@@ -110,20 +103,6 @@ class CcpnModule(Dock):
       self.settingsWidget.scrollArea.hide()
     else:
       self.addWidget(self.mainWidget, 0, 0)
-
-  # @property
-  # def mainWindow(self):
-  #   return QtCore.QCoreApplication.instance()._ccpnApplication.ui.mainWindow
-
-  # @property
-  # def moduleName(self):
-  #   'return  module name'
-  #   if self is not None:
-  #     return CcpnModule.moduleName
-  #
-  # @moduleName.setter
-  # def moduleName(self, name):
-  #   CcpnModule.moduleName = name
 
   def getName(self):
     "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a warpper object as well"

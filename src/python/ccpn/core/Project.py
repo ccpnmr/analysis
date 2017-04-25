@@ -782,7 +782,7 @@ class Project(AbstractWrapperObject):
     # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    # TODO:RASMUS suspension temporarily disabled
+    # TODO:RASMUS suspension temporarily disabled; decide on this
     if False and self._notificationSuspension:
       ll = self._pendingNotifications
       for dd in iterator:

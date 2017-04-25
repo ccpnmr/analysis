@@ -61,11 +61,15 @@ class NmrResidueTableModule(CcpnModule):
   className = 'NmrResidueTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, parent, application, name='NmrResidue Table'):
+  def __init__(self, mainWindow, name='NmrResidue Table'):
 
-    CcpnModule.__init__(self, parent=parent, name=name)
-    # derive project, current, and mainWindow from application
-    self.application = application
+    CcpnModule.__init__(self, parent=mainWindow.moduleArea, name=name)
+
+    # Derive application, project, and current from mainWindow
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     # settings
 

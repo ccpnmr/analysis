@@ -1426,7 +1426,7 @@ class Framework:
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
 
     mainWindow = self.ui.mainWindow
-    nmrResidueTableModule = NmrResidueTableModule(mainWindow, application=self)
+    nmrResidueTableModule = NmrResidueTableModule(mainWindow)
     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
@@ -1477,7 +1477,7 @@ class Framework:
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
 
     mainWindow = self.ui.mainWindow
-    self.sequenceGraph = SequenceGraph(parent=mainWindow, application=self)
+    self.sequenceGraph = SequenceGraph(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(self.sequenceGraph, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
@@ -1486,9 +1486,11 @@ class Framework:
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
     from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
-    self.atomSelector = AtomSelector(parent=self.ui.mainWindow, application=self)
-    self.ui.mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
+
+    mainWindow = self.ui.mainWindow
+    self.atomSelector = AtomSelector(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 

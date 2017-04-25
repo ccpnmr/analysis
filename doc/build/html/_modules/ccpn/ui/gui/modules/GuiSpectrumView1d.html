@@ -54,20 +54,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -95,14 +101,9 @@
 <span class="sd">        dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions</span>
 <span class="sd">        (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)</span>
 
     <span class="n">GuiSpectrumView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="c1"># if self.spectrum.sliceColour is None:</span>
-    <span class="c1">#   self.spectrum.sliceColour = list(spectrumColours.keys())[0]</span>
-
-    <span class="c1">###self.data = self._apiDataSource.get1dSpectrumData()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span>
 
     <span class="c1"># for strip in self.strips:</span>
@@ -185,8 +186,10 @@
       
     <span class="n">hPhasingPivot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">hPhasingPivot</span>
     <span class="k">if</span> <span class="n">hPhasingPivot</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-      <span class="n">dataDim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStripSpectrumView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">orderedDataDims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">pivot</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">hPhasingPivot</span><span class="o">.</span><span class="n">getXPos</span><span class="p">())</span>
+      <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">pivot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">mainSpectrumReferences</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">hPhasingPivot</span><span class="o">.</span><span class="n">getXPos</span><span class="p">())</span>
+      <span class="c1"># dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]</span>
+      <span class="c1"># pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">pivot</span> <span class="o">=</span> <span class="mi">1</span>
       
@@ -261,16 +264,16 @@
     <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">)</span>
     
 
-  <span class="c1"># TBD: should function below be removed???</span>
-<div class="viewcode-block" id="GuiSpectrumView1d.getSliceData"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.getSliceData">[docs]</a>  <span class="k">def</span> <span class="nf">getSliceData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets slice data for drawing 1d spectrum using specified spectrum.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">apiDataSource</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span>
-    <span class="k">return</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()</span></div>
+  <span class="c1"># # TBD: should function below be removed???</span>
+  <span class="c1"># def getSliceData(self, spectrum=None):</span>
+  <span class="c1">#   &quot;&quot;&quot;</span>
+  <span class="c1">#   Gets slice data for drawing 1d spectrum using specified spectrum.</span>
+  <span class="c1">#   &quot;&quot;&quot;</span>
+  <span class="c1">#   if spectrum is None:</span>
+  <span class="c1">#     apiDataSource = self._apiDataSource</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     apiDataSource = spectrum._apiDataSource</span>
+  <span class="c1">#   return apiDataSource.get1dSpectrumData()</span>
 
 <div class="viewcode-block" id="GuiSpectrumView1d.update"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.update">[docs]</a>  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>

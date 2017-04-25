@@ -32,6 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import random
 import os
+import sys
 import time
 import typing
 from datetime import datetime
@@ -4002,7 +4003,6 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
 
 
 if __name__ == '__main__':
-  import sys
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)

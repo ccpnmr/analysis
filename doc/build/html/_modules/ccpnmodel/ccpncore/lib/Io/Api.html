@@ -54,20 +54,26 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:31 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -571,8 +577,6 @@
 
 <span class="sd">  If userData does not exist then throws IOError.</span>
 <span class="sd">  If newPath is not specified then it is set to oldPath.</span>
-<span class="sd">  If newProjectName is not specified then it is set to oldProjectName if</span>
-<span class="sd">  newPath==oldPath, otherwise it is set to basename(newPath).</span>
 <span class="sd">  If changeBackup, then also changes backup URL path for project.</span>
 <span class="sd">  If createFallback, then makes copy of existing modified topObjects</span>
 <span class="sd">  files (in newPath, not oldPath) before doing save::</span>
@@ -1138,7 +1142,7 @@
   <span class="k">return</span> <span class="n">repository</span></div>
 
 <div class="viewcode-block" id="packageProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.packageProject">[docs]</a><span class="k">def</span> <span class="nf">packageProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">filePrefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">includeBackups</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">includeData</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">includeLogs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">includeArchives</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                   <span class="n">includeArchives</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">includeSummaries</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Package up project userData into one gzipped tar file.</span>
 <span class="sd">  If filePrefix is None then instead use the userData path.</span>
@@ -1146,6 +1150,9 @@
 <span class="sd">  By default only \*.xml files are packaged up.</span>
 <span class="sd">  If includeBackups then also \*.xml.bak files are included.</span>
 <span class="sd">  If includeData then also dataStores located inside project directory are included.</span>
+<span class="sd">  If includeLogs then logs are included.</span>
+<span class="sd">  If includeArchives then archives are included.</span>
+<span class="sd">  If includeSummaries then summaries are included.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="c1"># NBNB TBD FIXME check how many dataLocations to package (and make sure you reset first)</span>
@@ -1182,7 +1189,9 @@
         <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
       <span class="k">elif</span> <span class="n">includeBackups</span> <span class="ow">and</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml.bak&#39;</span><span class="p">):</span>
         <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">elif</span> <span class="n">includeLogs</span> <span class="ow">and</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;logs&#39;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">includeLogs</span> <span class="ow">and</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">==</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">CCPN_LOGS_DIRECTORY</span><span class="p">:</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">elif</span> <span class="n">includeSummaries</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">==</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">CCPN_SUMMARIES_DIRECTORY</span><span class="p">:</span>
         <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
       <span class="k">elif</span> <span class="n">includeData</span> <span class="ow">and</span> <span class="n">fullfile</span> <span class="ow">in</span> <span class="n">includedDataPaths</span><span class="p">:</span>
         <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>

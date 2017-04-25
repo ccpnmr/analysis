@@ -30,6 +30,73 @@ __version__ = "$Revisgion: 8885 $"
 #=========================================================================================
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
+class ResidueAllNmrResiduesTest(WrapperTesting):
+
+  # Path of project to load (None for new project
+  projectPath = None
+
+  def setUp(self):
+
+    with self.initialSetup():
+      self.chain = self.project.createChain(sequence='CDEFGHI', molType='protein',
+                                            shortName='A')
+
+  def testAllNmrResidues(self):
+
+    allResidues = [(),
+                   ('NR:A.3-1.',),
+                   ('NR:A.3.GLU', 'NR:A.3+0.', 'NR:A.4-1.'),
+                   ('NR:A.4.PHE', 'NR:A.4+0.', 'NR:A.5-1.'),
+                   ('NR:A.3+2.', 'NR:A.5.GLY', 'NR:A.5+0.'),
+                   ('NR:A.4+2.',),
+                   ('NR:A.5+2.',)]
+    allAtoms = [(),
+                ('NA:A.3-1..N', 'NA:A.3-1..CA'),
+                ('NA:A.3.GLU.N', 'NA:A.3.GLU.CA', 'NA:A.3+0..N', 'NA:A.3+0..CA', 'NA:A.4-1..N',
+                 'NA:A.4-1..CA'),
+                ('NA:A.4.PHE.N', 'NA:A.4.PHE.CA', 'NA:A.4+0..N', 'NA:A.4+0..CA', 'NA:A.5-1..N',
+                 'NA:A.5-1..CA'),
+                ('NA:A.3+2..N', 'NA:A.3+2..CA', 'NA:A.5.GLY.N', 'NA:A.5.GLY.CA', 'NA:A.5+0..N',
+                 'NA:A.5+0..CA'),
+                ('NA:A.4+2..N', 'NA:A.4+2..CA'),
+                ('NA:A.5+2..N', 'NA:A.5+2..CA'),
+    ]
+
+    for res in self.chain.residues:
+      self.assertEquals(res.allNmrResidues, ())
+      self.assertEquals(res.allNmrAtoms, ())
+
+    nmrResidues = []
+    nmrChain = self.project.newNmrChain(isConnected=True)
+
+    for residueType in ['GLU', 'PHE', 'GLY']:
+      nr = nmrChain.newNmrResidue(residueType=residueType)
+      nmrResidues.append(nr)
+      for suffix in ('-1', '+0', '+2'):
+        nmrResidues.append(nmrChain.newNmrResidue(sequenceCode=nr.sequenceCode + suffix))
+
+    for nr in nmrResidues:
+      nr.newNmrAtom(name='N')
+      nr.newNmrAtom(name='CA')
+
+    nmrChain.assignConnectedResidues(self.chain.residues[2])
+
+    self.assertEquals([x.pid for x in nmrResidues],
+                      ['NR:A.3.GLU', 'NR:A.3-1.', 'NR:A.3+0.', 'NR:A.3+2.',
+                       'NR:A.4.PHE', 'NR:A.4-1.', 'NR:A.4+0.', 'NR:A.4+2.',
+                       'NR:A.5.GLY', 'NR:A.5-1.', 'NR:A.5+0.', 'NR:A.5+2.']
+                      )
+    for ii, residue in enumerate(self.chain.residues):
+      self.assertEquals(tuple(x.pid for x in residue.allNmrResidues), allResidues[ii])
+      self.assertEquals(tuple(x.pid for x in residue.allNmrAtoms), allAtoms[ii])
+
+    self.assertIs(nmrResidues[4].previousNmrResidue, nmrResidues[0])
+    self.assertIs(nmrResidues[8].previousNmrResidue, nmrResidues[4])
+    self.assertIs(nmrResidues[0].nextNmrResidue, nmrResidues[4])
+    self.assertIs(nmrResidues[4].nextNmrResidue, nmrResidues[8])
+    self.assertFalse(nmrResidues[0].nmrChain.isConnected)
+
+
 class NmrStretchTest(WrapperTesting):
 
   # Path of project to load (None for new project

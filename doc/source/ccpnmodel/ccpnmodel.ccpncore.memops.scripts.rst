@@ -58,4 +58,12 @@ ccpnmodel.ccpncore.memops.scripts.makePython module
     :undoc-members:
     :show-inheritance:
 
+ccpnmodel.ccpncore.memops.scripts.partialLoadModel module
+---------------------------------------------------------
+
+.. automodule:: ccpnmodel.ccpncore.memops.scripts.partialLoadModel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

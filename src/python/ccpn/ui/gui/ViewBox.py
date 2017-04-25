@@ -233,28 +233,32 @@ class ViewBox(pg.ViewBox):
       orderedAxes = self.current.strip.orderedAxes
       for orderedAxis in orderedAxes[2:]:
         position.append(orderedAxis.position)
-      peaks = list(self.current.peaks)
-      peakLists = []
 
-      for spectrumView in self.current.strip.spectrumViews:
-        if not spectrumView.peakListViews:
-          continue
-        peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
-        if not peakListView.isVisible():
-          continue
-        peakList = peakListView.peakList
-        peak = peakList.newPeak(position=position)
-        # note, the height below is not derived from any fitting
-        # but is a weighted average of the values at the neighbouring grid points
-        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-        #self.current.addPeak(peak)
-        # peak.isSelected = True
-        peaks.append(peak)
-        peakLists.append(peakList)
+      newPeaks = self.current.strip.peakPickPosition(position)
+      self.current.peaks = newPeaks
 
-      self.current.peaks = peaks
-      for peakList in peakLists:
-        self.current.strip.showPeaks(peakList)
+      # peaks = list(self.current.peaks)
+      # peakLists = []
+      #
+      # for spectrumView in self.current.strip.spectrumViews:
+      #   if not spectrumView.peakListViews:
+      #     continue
+      #   peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
+      #   if not peakListView.isVisible():
+      #     continue
+      #   peakList = peakListView.peakList
+      #   peak = peakList.newPeak(position=position)
+      #   # note, the height below is not derived from any fitting
+      #   # but is a weighted average of the values at the neighbouring grid points
+      #   peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+      #   #self.current.addPeak(peak)
+      #   # peak.isSelected = True
+      #   peaks.append(peak)
+      #   peakLists.append(peakList)
+      #
+      # self.current.peaks = peaks
+      # for peakList in peakLists:
+      #   self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
       # Control-left-click; (de-)select peak and add/remove to selection
@@ -416,56 +420,59 @@ class ViewBox(pg.ViewBox):
           for n in orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
 
-        minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
-        peaks = list(self.current.peaks)
-
-        for spectrumView in self.current.strip.spectrumViews:
-          if not spectrumView.isVisible():
-            continue
-          peakList = spectrumView.spectrum.peakLists[0]
-          if self.current.project._appBase.ui.mainWindow is not None:
-            mainWindow = self.current.project._appBase.ui.mainWindow
-          else:
-            mainWindow = self.current.project._appBase._mainWindow
-          console = mainWindow.pythonConsole
-
-          if spectrumView.spectrum.dimensionCount > 1:
-            sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-            spectrumAxisCodes = spectrumView.spectrum.axisCodes
-            stripAxisCodes = self.current.strip.axisCodes
-            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-
-            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-            for n, axisCode in enumerate(spectrumAxisCodes):
-              # idx = stripAxisCodes.index(axisCode)
-              idx = remapIndices[n]
-              sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                            doPos=spectrumView.displayPositiveContours,
-                                            doNeg=spectrumView.displayNegativeContours,
-                                            fitMethod='gaussian', minDropfactor=minDropfactor)
-          else:
-            # 1D's
-            y0 = startPosition.y()
-            y1 = endPosition.y()
-            y0, y1 = min(y0, y1), max(y0, y1)
-            newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
-
-          # Add the new peaks to selection
-          #for peak in newPeaks:
-          #  # peak.isSelected = True
-          #  self.current.addPeak(peak)
-          peaks.extend(newPeaks)
-
+        peaks = self.current.strip.peakPickRegion(selectedRegion)
         self.current.peaks = peaks
 
-        for spectrumView in self.current.strip.spectrumViews:
-          for window in self.current.project.windows:
-            for spectrumDisplay in window.spectrumDisplays:
-              for strip in spectrumDisplay.strips:
-                spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-                if peakList.spectrum in spectra:
-                  strip.showPeaks(peakList)
+        # minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
+        # peaks = list(self.current.peaks)
+        #
+        # for spectrumView in self.current.strip.spectrumViews:
+        #   if not spectrumView.isVisible():
+        #     continue
+        #   peakList = spectrumView.spectrum.peakLists[0]
+        #   if self.current.project._appBase.ui.mainWindow is not None:
+        #     mainWindow = self.current.project._appBase.ui.mainWindow
+        #   else:
+        #     mainWindow = self.current.project._appBase._mainWindow
+        #   console = mainWindow.pythonConsole
+        #
+        #   if spectrumView.spectrum.dimensionCount > 1:
+        #     sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+        #     spectrumAxisCodes = spectrumView.spectrum.axisCodes
+        #     stripAxisCodes = self.current.strip.axisCodes
+        #     sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+        #
+        #     remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+        #     for n, axisCode in enumerate(spectrumAxisCodes):
+        #       # idx = stripAxisCodes.index(axisCode)
+        #       idx = remapIndices[n]
+        #       sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+        #     newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+        #                                     doPos=spectrumView.displayPositiveContours,
+        #                                     doNeg=spectrumView.displayNegativeContours,
+        #                                     fitMethod='gaussian', minDropfactor=minDropfactor)
+        #   else:
+        #     # 1D's
+        #     y0 = startPosition.y()
+        #     y1 = endPosition.y()
+        #     y0, y1 = min(y0, y1), max(y0, y1)
+        #     newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+        #
+        #   # Add the new peaks to selection
+        #   #for peak in newPeaks:
+        #   #  # peak.isSelected = True
+        #   #  self.current.addPeak(peak)
+        #   peaks.extend(newPeaks)
+        #
+        # self.current.peaks = peaks
+        #
+        # for spectrumView in self.current.strip.spectrumViews:
+        #   for window in self.current.project.windows:
+        #     for spectrumDisplay in window.spectrumDisplays:
+        #       for strip in spectrumDisplay.strips:
+        #         spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
+        #         if peakList.spectrum in spectra:
+        #           strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
       # Control(Cmd)+left drag: selects peaks
@@ -586,22 +593,6 @@ class ViewBox(pg.ViewBox):
             project._appBase.ui.echoCommands(
               ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
-
-      # try:
-      #   for peak in peaks:
-      #     if not hasattr(peak, 'startPosition'):
-      #       peak.startPosition = peak.position
-      #     indices = peakListToIndicesDict[peak.peakList]
-      #     position = list(peak.startPosition)
-      #     for n, index in enumerate(indices):
-      #       position[index] += deltaPosition[n]
-      #     peak.position = position
-      #
-      # finally: # play safe so put in finally block
-      #   if event.isFinish():
-      #     for peak in peaks:
-      #       if hasattr(peak, 'startPosition'):
-      #         delattr(peak, 'startPosition')
 
     elif middleMouse(event) or \
          shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):

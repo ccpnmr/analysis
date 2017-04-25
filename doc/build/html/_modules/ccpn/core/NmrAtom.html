@@ -52,20 +52,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:31 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,6 +80,7 @@
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
@@ -234,7 +241,7 @@
 
     <span class="c1"># NB This is a VERY special case</span>
     <span class="c1"># - API code and notifiers will take care of resetting id and Pid</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deassign</span><span class="p">()</span>
@@ -253,15 +260,15 @@
         <span class="c1">#</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NmrAtom.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom.deassign">[docs]</a>  <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset NmrAtom back to its originalName, cutting all assignment links&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;deassign&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;deassign&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NmrAtom.assignTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom.assignTo">[docs]</a>  <span class="k">def</span> <span class="nf">assignTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">:</span>
@@ -301,7 +308,7 @@
     <span class="n">apiResonance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span>
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="n">apiResonance</span><span class="o">.</span><span class="n">resonanceGroup</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
@@ -316,6 +323,13 @@
         <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.NmrAtom id : </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
                            <span class="o">%</span> <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+      <span class="n">isotopeCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopeCode</span>
+      <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">isotopeCode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">):</span>
+        <span class="c1"># Check for isotope match</span>
+        <span class="k">if</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reassign </span><span class="si">%s</span><span class="s2"> type NmrAtom to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
 
       <span class="n">oldNmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span>
       <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
@@ -377,7 +391,7 @@
       <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">clearUndo</span><span class="p">:</span>
         <span class="n">undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
@@ -401,6 +415,17 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="n">value</span><span class="o">.</span><span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span>
 <span class="n">Atom</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;NmrAtom to which Atom is assigned&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Residue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]:</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allNmrResidues</span><span class="p">:</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="n">Residue</span><span class="o">.</span><span class="n">allNmrAtoms</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                                  <span class="s2">&quot;All NmrAtoms corresponding to Residue - E.g. (for MR:A.87)&quot;</span>
+                                  <span class="s2">&quot; NmrAtoms in NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.&quot;</span><span class="p">)</span>
 
 <span class="k">del</span> <span class="n">getter</span>
 <span class="k">del</span> <span class="n">setter</span>
@@ -462,8 +487,8 @@
   <span class="k">if</span> <span class="n">comment</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">newResonance</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
@@ -478,14 +503,14 @@
                                      <span class="o">%</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
       <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span>
 
 <span class="k">def</span> <span class="nf">_fetchNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Fetch NmrAtom with name=name, creating it if necessary&quot;&quot;&quot;</span>
   <span class="c1"># resonanceGroup = self._wrappedData</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;fetchNmrAtom&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;fetchNmrAtom&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="c1"># self.getNmrAtom(name.translate(Pid.remapSeparators))</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span> <span class="ow">or</span>
@@ -493,7 +518,7 @@
     <span class="c1"># result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or</span>
     <span class="c1">#         self.newNmrAtom(name=name))</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span>
 
@@ -507,8 +532,8 @@
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;atomId&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                                      <span class="p">(</span><span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">))</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;_produceNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_produceNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="c1"># Get ID parts to use</span>
     <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -536,7 +561,7 @@
     <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
   <span class="k">return</span> <span class="n">result</span>
     
 <span class="c1"># Connections to parents:</span>

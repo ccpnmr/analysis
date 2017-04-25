@@ -52,20 +52,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:33 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -603,7 +609,7 @@
     <span class="k">elif</span>  <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">labelling</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.Sample.labelling&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">)</span>
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
     <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
@@ -636,7 +642,7 @@
     <span class="k">finally</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 
     <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">oldName</span><span class="p">,</span><span class="n">oldLabelling</span><span class="p">),</span>
                  <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">,))</span></div>
@@ -700,8 +706,8 @@
     <span class="s1">&#39;details&#39;</span><span class="p">:</span><span class="n">comment</span>
   <span class="p">}</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">substanceType</span> <span class="o">==</span> <span class="s1">&#39;Material&#39;</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">oldSubstance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span> <span class="o">!=</span> <span class="s1">&#39;Substance&#39;</span><span class="p">:</span>
@@ -734,7 +740,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Substance type </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span> <span class="o">%</span> <span class="n">substanceType</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
 
@@ -749,8 +755,8 @@
   <span class="c1"># TODO add sequence matching and name matching to avoid unnecessary duplicates</span>
   <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;fetchNefSubstance&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;fetchNefSubstance&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
   <span class="k">try</span><span class="p">:</span>
 
@@ -764,7 +770,7 @@
       <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">fetchMolComponent</span><span class="p">(</span><span class="n">apiMolecule</span><span class="p">)</span>
     <span class="p">]</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
   <span class="c1">#</span>
   <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
@@ -828,9 +834,9 @@
   <span class="k">elif</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Molecule name </span><span class="si">%s</span><span class="s2"> is already in use for API Molecule&quot;</span><span class="p">)</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;createPolymerSubstance&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
-                                  <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newPolymerSubstance&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;createPolymerSubstance&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                              <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newPolymerSubstance&#39;</span><span class="p">)</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">MoleculeModify</span><span class="o">.</span><span class="n">createMolecule</span><span class="p">(</span><span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span>
@@ -844,7 +850,7 @@
                             <span class="n">apiMolecule</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)]</span>
     <span class="n">result</span><span class="o">.</span><span class="n">userCode</span> <span class="o">=</span> <span class="n">userCode</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
 
   <span class="c1"># DO creation notifications</span>
@@ -869,14 +875,14 @@
   <span class="n">apiRefComponentStore</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
   <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiRefComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;fetchSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;fetchSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSubstance&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">apiResult</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="o">=</span><span class="n">labelling</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
   <span class="k">return</span> <span class="n">result</span>
 <span class="c1">#</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">fetchSubstance</span> <span class="o">=</span> <span class="n">_fetchSubstance</span>

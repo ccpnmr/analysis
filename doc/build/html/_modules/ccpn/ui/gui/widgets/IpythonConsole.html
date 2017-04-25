@@ -135,7 +135,7 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># self.textEditor.textCursor().insertHtml(&quot;&lt;/div&gt;&lt;br&gt;&lt;div style=&#39;font-weight: normal; background-color: #FFF;&#39;&gt;&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># self.textEditor.insertPlainText(&#39;\n&#39;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">recordingMacro</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">macroEditor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

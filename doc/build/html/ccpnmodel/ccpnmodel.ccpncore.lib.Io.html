@@ -222,13 +222,16 @@ If yes, delete.  If no return None.</dd>
 
 <dl class="function">
 <dt id="ccpnmodel.ccpncore.lib.Io.Api.packageProject">
-<code class="descclassname">ccpnmodel.ccpncore.lib.Io.Api.</code><code class="descname">packageProject</code><span class="sig-paren">(</span><em>project</em>, <em>filePrefix=None</em>, <em>includeBackups=False</em>, <em>includeData=False</em>, <em>includeLogs=False</em>, <em>includeArchives=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/Io/Api.html#packageProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.Io.Api.packageProject" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpnmodel.ccpncore.lib.Io.Api.</code><code class="descname">packageProject</code><span class="sig-paren">(</span><em>project</em>, <em>filePrefix=None</em>, <em>includeBackups=False</em>, <em>includeData=False</em>, <em>includeLogs=False</em>, <em>includeArchives=False</em>, <em>includeSummaries=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/Io/Api.html#packageProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.Io.Api.packageProject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Package up project userData into one gzipped tar file.
 If filePrefix is None then instead use the userData path.
 The tar file is filePrefix+&#8221;.tgz&#8221;.
 By default only *.xml files are packaged up.
 If includeBackups then also *.xml.bak files are included.
-If includeData then also dataStores located inside project directory are included.</p>
+If includeData then also dataStores located inside project directory are included.
+If includeLogs then logs are included.
+If includeArchives then archives are included.
+If includeSummaries then summaries are included.</p>
 </dd></dl>
 
 <dl class="function">
@@ -241,8 +244,6 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 queue are left active, so you can undo backwards.</p>
 <p>If userData does not exist then throws IOError.
 If newPath is not specified then it is set to oldPath.
-If newProjectName is not specified then it is set to oldProjectName if
-newPath==oldPath, otherwise it is set to basename(newPath).
 If changeBackup, then also changes backup URL path for project.
 If createFallback, then makes copy of existing modified topObjects
 files (in newPath, not oldPath) before doing save:</p>
@@ -351,40 +352,6 @@ Header records are given in the first list</p>
 </div>
 <div class="section" id="module-ccpnmodel.ccpncore.lib.Io.PyMMLibPDB">
 <span id="ccpnmodel-ccpncore-lib-io-pymmlibpdb-module"></span><h2>ccpnmodel.ccpncore.lib.Io.PyMMLibPDB module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.Io.PyMMLibPDB" title="Permalink to this headline">¶</a></h2>
-<p>Brookhaven PDB v2.2 file parser. All records in the PDB v2.2
-specification have corresponding classes defined here. PDB files are
-loaded into a list of these classes, and also can be constructed/modified
-and written back out as PDB files.</p>
-<p>Modified from PyMMLib pdb.py 17/11/2015
-By Rasmus Fogh and Geerten Vuister, CCPN project.</p>
-<p>The PyMMLib original version is governed by the Artistic license v2.0,
-and the authors of the modified version do not claim copyright on their modifications</p>
-<p>Original authors:</p>
-<div class="section" id="project-lead">
-<h3>Project Lead<a class="headerlink" href="#project-lead" title="Permalink to this headline">¶</a></h3>
-<p>Dr. Ethan Merritt &lt;<a class="reference external" href="mailto:merritt&#37;&#52;&#48;u&#46;washington&#46;edu">merritt<span>&#64;</span>u<span>&#46;</span>washington<span>&#46;</span>edu</a>&gt;</p>
-</div>
-<div class="section" id="programmer">
-<h3>Programmer<a class="headerlink" href="#programmer" title="Permalink to this headline">¶</a></h3>
-<p>Jay Painter &lt;<a class="reference external" href="mailto:jpaint&#37;&#52;&#48;u&#46;washington&#46;edu">jpaint<span>&#64;</span>u<span>&#46;</span>washington<span>&#46;</span>edu</a>&gt;
-Christoph Champ &lt;<a class="reference external" href="mailto:champc&#37;&#52;&#48;u&#46;washington&#46;edu">champc<span>&#64;</span>u<span>&#46;</span>washington<span>&#46;</span>edu</a>&gt;</p>
-<p>Original copyright statement:</p>
-<p>## Copyright 2002-2010 by PyMMLib Development Group (see AUTHORS file)
-## This code is part of the PyMMLib distribution and governed by
-## its license.  Please see the LICENSE file that should have been
-## included as part of this package.</p>
-<p>Modifications:
-- Changed syntax and imports to conform to Python 3
-- replaced fpformat calls by &#8216;%&#8217; formatting
-- Changed prodessing of REMARK resorcs, merging remark number into main text field
-- Changed ATOM resName records to 4-char (18-21), as some programs use</p>
-<blockquote>
-<div>4-char residue types.</div></blockquote>
-<p>Compared to earlier, CING-specific modified version, this:
-- uses a newer PyMMlib version, with different file I/O code
-- lacks CING-specific warning and error tracking, and progress bar handling
-- lacks wrapper I/O functionality (e.g. reading zipped files), which should be done elsewhere
-- Writes out ATOM.esNames shorter than 3 characters in accordance with the original specification.</p>
 <dl class="class">
 <dt id="ccpnmodel.ccpncore.lib.Io.PyMMLibPDB.ANISOU">
 <em class="property">class </em><code class="descclassname">ccpnmodel.ccpncore.lib.Io.PyMMLibPDB.</code><code class="descname">ANISOU</code><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/Io/PyMMLibPDB.html#ANISOU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.Io.PyMMLibPDB.ANISOU" title="Permalink to this definition">¶</a></dt>
@@ -1132,7 +1099,6 @@ them to the correct PDB record objects, then yields them.</p>
 
 </div>
 </div>
-</div>
 
 
           </div>
@@ -1149,11 +1115,7 @@ them to the correct PDB record objects, then yields them.</p>
 <li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.Io.FastaIo">ccpnmodel.ccpncore.lib.Io.FastaIo module</a></li>
 <li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.Io.Formats">ccpnmodel.ccpncore.lib.Io.Formats module</a></li>
 <li><a class="reference internal" href="#ccpnmodel-ccpncore-lib-io-pdb-module">ccpnmodel.ccpncore.lib.Io.Pdb module</a></li>
-<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.Io.PyMMLibPDB">ccpnmodel.ccpncore.lib.Io.PyMMLibPDB module</a><ul>
-<li><a class="reference internal" href="#project-lead">Project Lead</a></li>
-<li><a class="reference internal" href="#programmer">Programmer</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.Io.PyMMLibPDB">ccpnmodel.ccpncore.lib.Io.PyMMLibPDB module</a></li>
 </ul>
 </li>
 </ul>

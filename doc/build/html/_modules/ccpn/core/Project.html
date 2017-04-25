@@ -52,20 +52,26 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:32 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -270,6 +276,9 @@
                                  <span class="n">changeDataLocations</span><span class="o">=</span><span class="n">changeDataLocations</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">savedOk</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
+      <span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span>
+      <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">application</span><span class="o">.</span><span class="n">_refreshAfterSave</span><span class="p">()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">savedOk</span></div>
 
@@ -442,6 +451,21 @@
 
   <span class="k">def</span> <span class="nf">_registerApiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">apiClassOrName</span><span class="p">,</span> <span class="n">apiFuncName</span><span class="p">,</span> <span class="n">parameterDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Register notifier for immediate action on current project (only)</span>
+
+<span class="sd">    func must be a function taking two parameters: the ccpn.core.Project and an Api object</span>
+<span class="sd">    matching apiClassOrName.</span>
+
+<span class="sd">    &#39;apiFuncName&#39; is either the name of an API modifier function (a setter, adder, remover),</span>
+<span class="sd">    in which case the notifier is triggered by this function</span>
+<span class="sd">    Or it is one of the following tags:</span>
+<span class="sd">    (&#39;&#39;, &#39;__init__&#39;, &#39;postInit&#39;, &#39;preDelete&#39;, &#39;delete&#39;, &#39;startDeleteBlock&#39;, &#39;endDeleteBlock&#39;).</span>
+<span class="sd">    &#39;&#39; registers the notifier to any modifier function call ( setter, adder, remover),</span>
+<span class="sd">    __init__ and postInit triggers the notifier at the end of object creation, before resp.</span>
+<span class="sd">    after execution of postConstructorCode, the four delete-related tags</span>
+<span class="sd">    trigger notifiers at four different points in the deletion process</span>
+<span class="sd">    (see memops.Implementation.DataObject.delete() code for details).</span>
+
+
 <span class="sd">    ADVANCED, but free to use. Must be unregistered when any object referenced is deleted.</span>
 <span class="sd">    Use return value as input parameter for _unregisterApiNotifier (if desired)&quot;&quot;&quot;</span>
     <span class="n">tt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_apiNotifierParameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">apiClassOrName</span><span class="p">,</span> <span class="n">apiFuncName</span><span class="p">,</span>

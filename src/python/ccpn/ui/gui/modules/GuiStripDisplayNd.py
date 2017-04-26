@@ -29,20 +29,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
-
-from ccpn.core.Project import Project
-from ccpn.core.Peak import Peak
-
-
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-
-from ccpn.ui.gui.widgets.Icon import Icon
-
 import typing
 
+from ccpn.core.Peak import Peak
+from ccpn.core.Project import Project
+from ccpn.ui.gui.modules import GuiPeakListView
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
@@ -266,7 +261,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
     
-  def showPeaks(self, peakListView:GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
+  def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
     """
     Displays specified peaks in all strips of the display using peakListView
     """

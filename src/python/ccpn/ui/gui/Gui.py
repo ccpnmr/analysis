@@ -40,7 +40,6 @@ from ccpn.ui.gui.widgets.Application import Application
 
 
 # This import initializes relative paths for QT style-sheets.  Do not remove!
-from ccpn.ui.gui.widgets import resources_rc
 
 class Gui(Ui):
 
@@ -87,7 +86,7 @@ class Gui(Ui):
     project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
     project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
 
-    from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
+    from ccpn.ui.gui.modules import GuiPeakListView
     project.registerNotifier('PeakListView', 'create',
                              GuiPeakListView.GuiPeakListView._createdPeakListView)
     project.registerNotifier('PeakListView', 'delete',
@@ -453,7 +452,7 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 #
 ## PeakListView class
 coreClass = _coreClassMap['PeakListView']
-from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView as _GuiPeakListView
+from ccpn.ui.gui.modules.GuiPeakListView import GuiPeakListView as _GuiPeakListView
 class _PeakListView(coreClass, _GuiPeakListView):
   """Peak List View for 1D or nD PeakList"""
   def __init__(self, project:Project, wrappedData:'ApiStripPeakListView'):

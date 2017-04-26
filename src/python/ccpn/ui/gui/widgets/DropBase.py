@@ -41,7 +41,7 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 
-class DropBase():
+class DropBase:
   """
   Class to implement drop and drag
   Callback signature on drop: dropEventCallback(dataDict)

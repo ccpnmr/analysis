@@ -233,18 +233,18 @@ class SpectrumDisplay(AbstractWrapperObject):
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
   #TODO:RASMUS;
-  #TODO:ED: not a wrapper method; move to Gui class
-  def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
-    """Display additional spectrum, with spectrum axes ordered according ton axisOrder
-    """
-    spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-
-    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
-                                defaults={'axisOrder':()})
-    try:
-      self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
-    finally:
-      self._endCommandEchoBlock()
+  #TODO:ED: not a wrapper method; move to Gui class - moved
+  # def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
+  #   """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+  #   """
+  #   spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+  #
+  #   self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+  #                               defaults={'axisOrder':()})
+  #   try:
+  #     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+  #   finally:
+  #     self._endCommandEchoBlock()
 
 
 # newSpectrumDisplay functions
@@ -509,4 +509,4 @@ Project._apiNotifiers.extend(
 )
 
 # Drag-n-drop functions:
-SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
+# SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum     # ejb moved to GuiSpectrumDisplay

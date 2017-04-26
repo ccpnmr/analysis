@@ -370,6 +370,18 @@ class GuiSpectrumDisplay(CcpnModule):
     #   enabled = True
     # self.removeStripAction.setEnabled(enabled)
 
+  def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
+    """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+    """
+    spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+
+    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+                                defaults={'axisOrder':()})
+    try:
+      self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+    finally:
+      self._endCommandEchoBlock()
+
 def _deletedPeak(peak:Peak):
   """Function for notifiers.
   #CCPNINTERNAL """
@@ -397,3 +409,5 @@ def _deletedSpectrumView(project:Project, apiSpectrumView):
   if action:
     spectrumDisplay.spectrumToolBar.removeAction(action)
     del spectrumDisplay.spectrumActionDict[apiDataSource]
+
+GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum   # ejb - from SpectrumDisplay

@@ -345,7 +345,7 @@ class Framework:
 
     self.project = project
     if hasattr(self, '_mainWindow'):
-      print('>>>framework._initialseProject:')
+      print('>>>framework._initialiseProject:')
       self.ui.initialize(self._mainWindow)
 
       # Get the mainWindow out of the application top level once it's been transferred to ui

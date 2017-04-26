@@ -197,14 +197,12 @@ class GuiStripNd(GuiStrip):
     #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
     #   self.navigateToMenu.addAction(spectrumDisplay)
 
-
-
-    self.crossHairAction.setChecked(self.vLine.isVisible())
-
-    if self.grid.isVisible():
-      self.gridAction.setChecked(True)
-    else:
-      self.gridAction.setChecked(False)
+    self.crossHairAction.setChecked(self.crossHairIsVisible)
+    self.gridAction.setChecked(self.gridIsVisible)
+    # if self.gridShown:
+    #   self.gridAction.setChecked(True)
+    # else:
+    #   self.gridAction.setChecked(False)
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 

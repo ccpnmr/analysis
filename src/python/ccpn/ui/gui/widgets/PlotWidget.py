@@ -23,7 +23,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: Geerten Vuister"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -37,6 +37,8 @@ from PyQt4 import QtGui, QtOpenGL
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui import ViewBox
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
+
 
 #TODO:WAYNE: this class could be moved into GuiStrip
 # as it is only there and is just a small wrapper arount a pyqtgraph class
@@ -44,24 +46,76 @@ from ccpn.ui.gui.widgets.Base import Base
 #TODO:WAYNE: should this inherit from Base!! is layout in pyqtgraph is different to Base???
 class PlotWidget(pg.PlotWidget, Base):
 
-  def __init__(self, parent=None, appBase=None, useOpenGL=False, strip=None, **kw):
+  def __init__(self, parent, application, useOpenGL=False, strip=None, showDoubleCrosshair=True, **kw):
 
+    self.viewBox = ViewBox.ViewBox(current=application.current, parent=parent, strip=strip)
     pg.PlotWidget.__init__(self, parent=parent,
-                           viewBox=ViewBox.ViewBox(current=appBase.current, parent=parent),
-                           axes=None, enableMenu=True)
+                                 viewBox=self.viewBox,
+                                 axes=None, enableMenu=True)
+
     Base.__init__(self, acceptDrops=True, **kw)
-    self.setInteractive(True)
+
+    self.application = application
     self.strip = strip
-    self.plotItem.setAcceptHoverEvents(True)
     self.parent = parent
+
+    self.plotItem.setAcceptHoverEvents(True)
+    self.setInteractive(True)
     self.plotItem.setAcceptDrops(True)
-    self.plotItem.axes['left']['item'].hide()
-    self.plotItem.axes['right']['item'].show()
+    self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
+
     self.hideButtons()
 
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+
+    #TODO:GEERTEN: Fix with proper stylesheet
+    if self.application.colourScheme == 'light':
+      self.background = '#f7ffff'
+      self.foreground = '#080000'
+      self.gridColour = '#080000'
+      self.highlightColour = '#3333ff'
+    else:
+      self.background = '#080000'
+      self.foreground = '#f7ffff'
+      self.gridColour = '#f7ffff'
+      self.highlightColour = '#00ff00'
+    self.setBackground(self.background)
+    #self.setForeground(self.foreground) # does not seem to have this (or typo?)
+
+    # axes
+    self.plotItem.axes['left']['item'].hide()
+    self.plotItem.axes['right']['item'].show()
+    for orientation in ('left', 'top'):
+      axisItem = self.plotItem.axes[orientation]['item']
+      axisItem.hide()
+    for orientation in ('right', 'bottom'):
+      axisItem = self.plotItem.axes[orientation]['item']
+      axisItem.setPen(color=self.foreground)
+
+    # add grid
+    self.grid = CcpnGridItem(self.gridColour)
+    self.addItem(self.grid)
+
+    # Add two crosshairs
+    self.crossHair1 = ViewBox.CrossHair(parent=self, show=True, colour=self.foreground)
+    self.crossHair2 = ViewBox.CrossHair(parent=self, show=showDoubleCrosshair, colour=self.foreground)
+
+  def highlightAxes(self, state=False):
+    "Highlight the axes on/of"
+    if state:
+      for orientation in ('right', 'bottom'):
+        axisItem = self.plotItem.axes[orientation]['item']
+        axisItem.setPen(color=self.highlightColour)
+    else:
+      for orientation in ('right', 'bottom'):
+        axisItem = self.plotItem.axes[orientation]['item']
+        axisItem.setPen(color=self.foreground)
+
+  def toggleGrid(self):
+    "Toggle grid state"
+    self.grid.setVisible(not self.grid.isVisible())
 
   def __getattr__(self, attr):
     """
@@ -77,74 +131,3 @@ class PlotWidget(pg.PlotWidget, Base):
     Adds specified graphics object to the Graphics Scene of the PlotWidget.
     """
     self.scene().addItem(item)
-    # # self.plotItem.axes['top']['item'].hide()
-    # self.plotItem.axes['bottom']['item'].show()
-    # self.plotItem.axes['right']['item'].show()
-
-  # def processSpectra(self, pids:Sequence[str], event:QtGui.QMouseEvent):
-  #   """Display spectra defined by list of Pid strings"""
-  #   guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-  #   displayPid = guiSpectrumDisplay.pid
-  #   if guiSpectrumDisplay.isGrouped:
-  #     print('single spectra cannot be dropped onto grouped displays. Open another Blank Display (N,D)')
-  #     return
-  #
-  #   for ss in pids:
-  #     guiSpectrumDisplay.displaySpectrum(ss)
-  #     # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
-  #     #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
-  #
-  #     if self._appBase.ui.mainWindow is not None:
-  #       mainWindow = self._appBase.ui.mainWindow
-  #     else:
-  #       mainWindow = self._appBase._mainWindow
-  #     mainWindow.pythonConsole.writeConsoleCommand(
-  #       "module.displaySpectrum(spectrum)", module=displayPid, spectrum=ss
-  #     )
-  #     self._appBase.project._logger.info("module = ui.getByGid(%s)" % displayPid)
-  #     self._appBase.project._logger.info("module.displaySpectrum(spectrum)")
-  #
-  # def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):
-  #   '''
-  #   Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.
-  #   If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
-  #   one already in.
-  #   '''
-  #   if len(self._appBase.project.getByPid(pids[0]).spectra)>0:
-  #     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-  #     for spectrumView in guiSpectrumDisplay.spectrumViews:
-  #       if len(spectrumView.spectrum.spectrumGroups)>0:
-  #         displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
-  #                                    for spectrumView in guiSpectrumDisplay.spectrumViews]
-  #
-  #         spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
-  #                      if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
-  #
-  #       else:
-  #         for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
-  #           guiSpectrumDisplay.displaySpectrum(spectrum)
-  #
-  #       if hasattr(guiSpectrumDisplay, 'isGrouped'):
-  #         if guiSpectrumDisplay.isGrouped:
-  #           if len(spectrumGroups)>0:
-  #
-  #             spectrumGroupsToolBar = guiSpectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar
-  #             spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
-  #             spectrumGroupsToolBar.addWidget(spectrumGroupButton)
-  #             for spectrum in spectrumGroups[0].spectra:
-  #               guiSpectrumDisplay.displaySpectrum(spectrum)
-  #         else:
-  #           print("SpectrumGroups cannot be displayed in a display with already spectra in it."
-  #                 "\nSpectrumGroup's spectra are added as single item in the display  ")
-  #
-  #
-  # def processSamples(self, pids:Sequence[str], event):
-  #   """Display sample spectra defined by list of Pid strings"""
-  #   for ss in pids:
-  #     spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-  #     self.processSpectra(spectrumPids, event)
-  #
-  # def processSampleComponents(self, pids:Sequence[str], event):
-  #   """Display sampleComponent spectrum defined by its Pid string"""
-  #   sampleComponent = self._appBase.project.getByPid(pids[0])
-  #   self.processSpectra([sampleComponent.substance.referenceSpectra[0].pid], event)

@@ -95,7 +95,7 @@ class CrossHair():
        stetting color, using rgb or colour, which-ever is
                        not None (default to grey) + optional **kwds
        setting visibility
-       add CrossHair to parent using addItem method
+       it adds CrossHair hLine and vLine plot items to parent using addItem method
     """
     if rgb:
       pen = pg.functions.mkPen(color=rgb, **kwds)
@@ -110,13 +110,29 @@ class CrossHair():
     parent.addItem(self.hLine, ignoreBounds=True)
     self._parent = parent
 
-    self.setPosition(position)
+    self.setPointPosition(position)
     if show:
       self.show()
     else:
       self.hide()
 
-  def setPosition(self, position):
+  def setPosition(self, xPos, yPos):
+    "Set position in world xPos, yPos coordinates"
+    self.setVline(xPos)
+    self.setHline(yPos)
+
+  def setVline(self, xPos):
+    "Set vertical line in world xPos coordinates"
+    if xPos is not None:
+      self.vLine.setPos(xPos)
+
+  def setHline(self, yPos):
+    "Set horizontal  in world xPos coordinates"
+    if yPos is not None:
+      self.hLine.setPos(yPos)
+
+  def setPointPosition(self, position):
+    "Set position in Point syntax"
     self.vLine.setPos(position)
     self.hLine.setPos(position)
     self._position = position  # last set position
@@ -148,13 +164,14 @@ class ViewBox(pg.ViewBox):
   """
   sigClicked = QtCore.Signal(object)
 
-  def __init__(self, current=None, parent=None, *args, **kwds):
+  def __init__(self, current, parent, strip, *args, **kwds):
     pg.ViewBox.__init__(self, *args, **kwds)
-    self.current = current
-    self.menu = None # Override pyqtgraph ViewBoxMenu
+
+    # Override pyqtgraph ViewBoxMenu
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
     self.current = current
     self.parent = parent
+    self.strip = strip
 
     # self.rbScaleBox: Native pyQTgraph; used for Zoom
 
@@ -216,7 +233,7 @@ class ViewBox(pg.ViewBox):
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     click events.
     """
-    self.current.strip = self.parentObject().parent
+    self.current.strip = self.strip
     xPosition = self.mapSceneToView(event.pos()).x()
     yPosition = self.mapSceneToView(event.pos()).y()
     self.current.positions = [xPosition, yPosition]
@@ -283,7 +300,7 @@ class ViewBox(pg.ViewBox):
         self._resetBoxes()
         self._successiveClicks = Point(event.pos())
         position = self.mapSceneToView(event.pos())
-        self.crossHair.setPosition(position)
+        self.crossHair.setPointPosition(position)
         self.crossHair.show()
       else:
         self._setView(Point(self._successiveClicks), Point(event.pos()))
@@ -394,8 +411,8 @@ class ViewBox(pg.ViewBox):
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     drag events.
     """
+    self.current.strip = self.strip
 
-    self.current.strip = self.parentObject().parent
     if leftMouse(event):
       # Left-drag: Panning of the spectrum
       pg.ViewBox.mouseDragEvent(self, event)
@@ -422,57 +439,6 @@ class ViewBox(pg.ViewBox):
 
         peaks = self.current.strip.peakPickRegion(selectedRegion)
         self.current.peaks = peaks
-
-        # minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
-        # peaks = list(self.current.peaks)
-        #
-        # for spectrumView in self.current.strip.spectrumViews:
-        #   if not spectrumView.isVisible():
-        #     continue
-        #   peakList = spectrumView.spectrum.peakLists[0]
-        #   if self.current.project._appBase.ui.mainWindow is not None:
-        #     mainWindow = self.current.project._appBase.ui.mainWindow
-        #   else:
-        #     mainWindow = self.current.project._appBase._mainWindow
-        #   console = mainWindow.pythonConsole
-        #
-        #   if spectrumView.spectrum.dimensionCount > 1:
-        #     sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-        #     spectrumAxisCodes = spectrumView.spectrum.axisCodes
-        #     stripAxisCodes = self.current.strip.axisCodes
-        #     sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-        #
-        #     remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-        #     for n, axisCode in enumerate(spectrumAxisCodes):
-        #       # idx = stripAxisCodes.index(axisCode)
-        #       idx = remapIndices[n]
-        #       sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-        #     newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-        #                                     doPos=spectrumView.displayPositiveContours,
-        #                                     doNeg=spectrumView.displayNegativeContours,
-        #                                     fitMethod='gaussian', minDropfactor=minDropfactor)
-        #   else:
-        #     # 1D's
-        #     y0 = startPosition.y()
-        #     y1 = endPosition.y()
-        #     y0, y1 = min(y0, y1), max(y0, y1)
-        #     newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
-        #
-        #   # Add the new peaks to selection
-        #   #for peak in newPeaks:
-        #   #  # peak.isSelected = True
-        #   #  self.current.addPeak(peak)
-        #   peaks.extend(newPeaks)
-        #
-        # self.current.peaks = peaks
-        #
-        # for spectrumView in self.current.strip.spectrumViews:
-        #   for window in self.current.project.windows:
-        #     for spectrumDisplay in window.spectrumDisplays:
-        #       for strip in spectrumDisplay.strips:
-        #         spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-        #         if peakList.spectrum in spectra:
-        #           strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
       # Control(Cmd)+left drag: selects peaks
@@ -632,6 +598,7 @@ class ViewBox(pg.ViewBox):
     # implemented zoom stack, which could amount to a memory leak
     #self.axHistoryPointer += 1
     #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+
 
 def _peaksVisibleInStrip(peaks, strip):
 

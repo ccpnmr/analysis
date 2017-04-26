@@ -79,9 +79,11 @@ class GuiStrip(Widget):
     Widget.__init__(self, acceptDrops=True, hPolicy='expanding', vPolicy='expanding',
                           grid=(0, self.spectrumDisplay.orderedStrips.index(self))
                     )
+    self.setMinimumWidth(200)
 
-    self.plotWidget = PlotWidget(parent=self, appBase=self.application,
+    self.plotWidget = PlotWidget(parent=self, application=self.application,
                                  useOpenGL=useOpenGL, strip=self,
+                                 showDoubleCrosshair=application.preferences.general.doubleCrossHair,
                                  hPolicy='expanding', vPolicy='expanding'
                                  )
 
@@ -89,7 +91,9 @@ class GuiStrip(Widget):
     qtParent.layout().addWidget(self.plotWidget, 0,
                                        self.spectrumDisplay.orderedStrips.index(self))
 
-    #TODO:GEERTEN: Fix with proper stylesheet
+
+
+    # #TODO:GEERTEN: Fix with proper stylesheet
     self.colourScheme = self.application.colourScheme
     if self.colourScheme == 'light':
       self.background = '#f7ffff'
@@ -99,11 +103,11 @@ class GuiStrip(Widget):
       self.background = '#080000'
       self.foreground = '#f7ffff'
       self.gridColour = '#f7ffff'
-    self.plotWidget.setBackground(self.background)
+#    self.plotWidget.setBackground(self.background)
 
     self.plotItem = self.plotWidget.plotItem
-    self.plotItem.parent = self
-    self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
+    #self.plotItem.parent = self
+    #self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
@@ -113,29 +117,31 @@ class GuiStrip(Widget):
     #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
     #                  viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
 
-    for orientation in ('left', 'top'):
-      axisItem = self.plotItem.axes[orientation]['item']
-      axisItem.hide()
-    for orientation in ('right', 'bottom'):
-      axisItem = self.plotItem.axes[orientation]['item']
-      axisItem.setPen(color=self.foreground)
-    self.gridShown = True
+    # for orientation in ('left', 'top'):
+    #   axisItem = self.plotItem.axes[orientation]['item']
+    #   axisItem.hide()
+    # for orientation in ('right', 'bottom'):
+    #   axisItem = self.plotItem.axes[orientation]['item']
+    #   axisItem.setPen(color=self.foreground)
+    #self.gridShown = True
 
     # self.viewBox.sigClicked.connect(self._mouseClicked)
-    self.grid = CcpnGridItem(self.gridColour)
-    self.plotWidget.addItem(self.grid)
-    self.setMinimumWidth(200)
-    self._createCrossHair()
+    # self.grid = CcpnGridItem(self.gridColour)
+    # self.plotWidget.addItem(self.grid)
+    #self._createCrossHair()
+    self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
+    self._showCrossHair()
     self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
     self.storedZooms = []
     
     self.beingUpdated = False
     self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
-    
+
+    # need to keep track of mouse position because Qt shortcuts don't provide
+    # the widget or the position of where the cursor is
     self.axisPositionDict = {}  # axisCode --> position
-    # need to keep track of mouse position because Qt shortcuts don't provide the widget or the position of where the cursor is
-    
+
     self.vRulerLineDict = {}  # ruler --> vertical line for that ruler
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
     self.rulerLabelDict = {}  # ruler --> label for that ruler
@@ -161,31 +167,27 @@ class GuiStrip(Widget):
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
+  @property
+  def gridIsVisible(self):
+    "True if grid is visible"
+    return self.plotWidget.grid.isVisible()
+
+  @property
+  def crossHairIsVisible(self):
+    "True if crosshair is visible"
+    return self.plotWidget.crossHair1.isVisible()
+
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
 
   def _updateDisplayedPeaks(self, data):
+    "Callback when peaks have changed"
     self.showPeaks(data['object'].peakList)
 
   def _highlightCurrentStrip(self, data):
-    "Highlight the axes of current strip"
-    if self.application.colourScheme == 'light':
-      axisColour = '#3333ff'
-    elif self.application.colourScheme == 'dark':
-      axisColour = '#00ff00'
-    else:
-      logger.warning('Undefined colourScheme; setting highlight colour to red')
-      axisColour = 'red'
-
-    if self is self.current.strip:
-      for orientation in ('right', 'bottom'):
-        axisItem = self.plotItem.axes[orientation]['item']
-        axisItem.setPen(color=axisColour)
-    else:
-      for orientation in ('right', 'bottom'):
-        axisItem = self.plotItem.axes[orientation]['item']
-        axisItem.setPen(color=self.foreground)
+    "Callback to highlight the axes of current strip"
+    self.plotWidget.highlightAxes(self is self.current.strip)
 
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
@@ -220,7 +222,7 @@ class GuiStrip(Widget):
 
     fontsize = 10
     for n, tick in enumerate(xMajorTicks):
-      if self.grid.isVisible():
+      if self.plotWidget.grid.isVisible():
         printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
       printer.writeLine(tick, printer.y0, tick, printer.y0+xTickHeight)
       text = xMajorText[n]
@@ -231,33 +233,11 @@ class GuiStrip(Widget):
       printer.writeLine(printer.x0, printer.y1-tick, printer.x0+0.5*yTickHeight, printer.y1-tick)
 
     for n, tick in enumerate(yMajorTicks):
-      if self.grid.isVisible():
+      if self.plotWidget.grid.isVisible():
         printer.writeLine(printer.x0, printer.y1-tick, printer.x1, printer.y1-tick, colour='#888888')
       printer.writeLine(printer.x0, printer.y1-tick, printer.x0+yTickHeight, printer.y1-tick)
       text = yMajorText[n]
       printer.writeText(text, printer.x0+yTickHeight+0.5*fontsize*0.7, printer.y1-tick+0.5*fontsize)
-
-  # def addStrip(self):
-  #
-  #   newStrip = self.strips[0].clone()
-  #   print('spectrumViews', newStrip.spectrumViews)
-  #   for spectrumView in newStrip.spectrumViews:
-  #     spectrumView.connectStrip(newStrip)
-
-  #
-  #
-  # def setupAxes(self):
-  #
-  #   # this is called from GuiSpectrumView because the axes are not ready when the strip is created
-  #   # TBD: but that means this is called for every spectrum in the strip, which is not what we want
-  #   self.viewBox.setXRange(*self.orderedAxes[0].region)
-  #   self.viewBox.setYRange(*self.orderedAxes[1].region)
-  #   self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
-  #                                 axisCode=self.orderedAxes[0].code)
-  #   self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
-  #                                 axisCode=self.orderedAxes[1].code)
-  #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-  #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
   def _newPhasingTrace(self):
     for spectrumView in self.spectrumViews:
@@ -358,7 +338,6 @@ class GuiStrip(Widget):
       
   def _updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
-    
     # this code is complicated because need to keep viewBox region and axis region in sync
     # and there can be different viewBoxes with the same axis
 
@@ -401,59 +380,60 @@ class GuiStrip(Widget):
       item.setPos(x, y)
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
-  # def hideCrossHairs(self):
+  # def _createCrossHair(self):
   #   """
-  #   Hides all crosshairs in all strips in parent spectrum display.
+  #   Creates a single or double cross hair depending on specification in application preferences.
   #   """
-  #   for strip in self.spectrumDisplay.guiStrips:
-  #     strip.hideCrossHair()
-
-  def _createCrossHair(self):
-    """
-    Creates a single or double cross hair depending on specification in application preferences.
-    """
-    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    self.plotWidget.addItem(self.vLine, ignoreBounds=True)
-    self.plotWidget.addItem(self.hLine, ignoreBounds=True)
-    self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    if self.application.preferences.general.doubleCrossHair is True:
-      self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
-      self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
+  #   self.vLine = self.plotWidget.crossHair1.vLine
+  #   self.hLine = self.plotWidget.crossHair1.hLine
+  #   self.vLine2 = self.plotWidget.crossHair2.vLine
+  #   self.hLine2 = self.plotWidget.crossHair2.hLine
+    # self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+    # self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+    # self.plotWidget.addItem(self.vLine, ignoreBounds=True)
+    # self.plotWidget.addItem(self.hLine, ignoreBounds=True)
+    # self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
+    # self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
+    # if self.application.preferences.general.doubleCrossHair is True:
+    #   self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
+    #   self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
 
   def _toggleCrossHair(self):
-    """
-    Toggles whether crosshair is visible.
-    """
-    self.vLine.setVisible(not self.vLine.isVisible())
-    self.hLine.setVisible(not self.hLine.isVisible())
-    self.vLine2.setVisible(not self.vLine2.isVisible())
-    self.hLine2.setVisible(not self.hLine2.isVisible())
+    " Toggles whether crosshair is visible"
+    # self.vLine.setVisible(not self.vLine.isVisible())
+    # self.hLine.setVisible(not self.hLine.isVisible())
+    # self.vLine2.setVisible(not self.vLine2.isVisible())
+    # self.hLine2.setVisible(not self.hLine2.isVisible())
+    # return
+    self.plotWidget.crossHair1.toggle()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.toggle()
 
   def _showCrossHair(self):
-    """
-    Displays cross hair in strip.
-    """
-    self.vLine.show()
-    self.hLine.show()
-    self.vLine2.show()
-    self.hLine2.show()
+    "Displays crosshair in strip"
+    # self.vLine.show()
+    # self.hLine.show()
+    # self.vLine2.show()
+    # self.hLine2.show()
+    # return
+    self.plotWidget.crossHair1.show()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.show()
 
   def _hideCrossHair(self):
-    """
-    Hides cross hair in strip.
-    """
-    self.vLine.hide()
-    self.hLine.hide()
-    self.vLine2.hide()
-    self.hLine2.hide()
+    "Hides crosshair in strip."
+    # self.vLine.hide()
+    # self.hLine.hide()
+    # self.vLine2.hide()
+    # self.hLine2.hide()
+    # return
+    # self.plotWidget.crossHair1.hide()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.hide()
 
   def toggleGrid(self):
-    """
-    Toggles whether grid is visible in the strip.
-    """
-    self.grid.setVisible(not self.grid.isVisible())
+    "Toggles whether grid is visible in the strip."
+    self.plotWidget.toggleGrid()
 
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
@@ -466,18 +446,16 @@ class GuiStrip(Widget):
     Called in _setCrossHairPosition method of GuiSpectrumDisplay
     """
     axes = self.orderedAxes
-    position = axisPositionDict.get(self._crosshairCode(axes[0].code))
-    position2 = axisPositionDict.get(self._crosshairCode(axes[1].code))
-    if position is not None:
-      self.vLine.setPos(position)
-    if position2 is not None:
-      self.vLine2.setPos(position2)
-    position = axisPositionDict.get(self._crosshairCode(axes[1].code))
-    position2 = axisPositionDict.get(self._crosshairCode(axes[0].code))
-    if position is not None:
-      self.hLine.setPos(position)
-    if position2 is not None:
-      self.hLine2.setPos(position2)
+    xPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
+    yPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
+    # print('>>', xPos, yPos)
+    self.plotWidget.crossHair1.setPosition(xPos,yPos)
+
+    #TODO:SOLIDS This is clearly not correct; it should take the offset as defined
+    if self.showDoubleCrossHair:
+      xPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
+      yPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
+      self.plotWidget.crossHair2.setPosition(xPos, yPos)
 
   def _createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
@@ -538,7 +516,7 @@ class GuiStrip(Widget):
       axisPositionDict = self.axisPositionDict
       position = []
       for n, axis in enumerate(self.orderedAxes):
-        # TBD: what if x and y have the same (or related) axis codes?
+        #TODO:WAYNE: what if x and y have the same (or related) axis codes?
         if n == 0:
           pos = mousePoint.x()
         elif n == 1:
@@ -548,15 +526,9 @@ class GuiStrip(Widget):
         axisPositionDict[self._crosshairCode(axis.code)] = pos
         position.append(pos)
       self.mousePosition = tuple(position) # position is in ppm
-      for window in self._project.windows:
+      #TODO:WAYNE: replace with appropriate mechanism base on QT notifier
+      for window in self.application.project.windows:
         window._setCrossHairPosition(axisPositionDict)
-      ###self.vLine.setPos(mousePoint.x())
-      ###self.hLine.setPos(mousePoint.y())
-      ###for vLine in self.spectrumDisplay._appBase.vLines:
-      ###  vLine.setPos(self.mousePoint.x())
-      ###for hLine in self.spectrumDisplay._appBase.hLines:
-      ###  hLine.setPos(self.mousePoint.y())
-    ###return self.mousePoint
 
   def _showMousePosition(self, pos:QtCore.QPointF):
     """

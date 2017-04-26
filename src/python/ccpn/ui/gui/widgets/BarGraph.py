@@ -11,7 +11,7 @@ current = []
 labelsColor = 'b'
 selectedLabelColor = 'g'
 
-
+#TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed
 
 class BarGraph(pg.BarGraphItem):
   def __init__(self,viewBox = None, xValues=None, yValues=None, objects=None, brush=None, **kw):

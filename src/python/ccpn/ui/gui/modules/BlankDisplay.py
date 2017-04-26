@@ -48,7 +48,7 @@ class BlankDisplay(CcpnModule):
 
   def __init__(self, mainWindow):
 
-    CcpnModule.__init__(self, parent=mainWindow.moduleArea, name='Blank Display')
+    CcpnModule.__init__(self, parent=mainWindow.moduleArea, mainWindow=mainWindow, name='Blank Display')
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application

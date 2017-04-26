@@ -157,11 +157,11 @@ class TestPandasData(WrapperTesting):
     self.data.sort_values('origIndex', inplace=True)
     self.data.index = self.data['origIndex']
 
-    # namedTuple = self.data.as_namedtuples()[4]
-    # AtomRecord = namedTuple.__class__
-    # self.assertEqual(namedTuple, AtomRecord(Index=5, x=1.0, y=2.0, z=nan, modelNumber=1, chainCode='A', sequenceId=2,
-    #                                    atomName='HG2', nmrAtomName='HG2', nmrChainCode='#2', nmrSequenceCode='12',
-    #                                    origIndex=15))
+    namedTuple = self.data.as_namedtuples()[4]
+    AtomRecord = namedTuple.__class__
+    self.assertEqual(str(namedTuple), str(AtomRecord(Index=5, x=1.0, y=2.0, z=nan, modelNumber=1, chainCode='B', sequenceId=2,
+                                       atomName='HG12', nmrAtomName='HG12', nmrChainCode='#12', nmrSequenceCode='12',
+                                       origIndex=5)))
 
     self.data.deleteRow(7, inplace=True)
     self.undo.undo()      # ejb
@@ -178,7 +178,7 @@ class TestPandasData(WrapperTesting):
     self.data.setValues(2, x=1.0, y=1.0)
 
     self.data.deleteCol('z', axis=1, inplace=True)
-    self.undo.undo()      # ejb - does not work on 'drop'
+    self.undo.undo()      # ejb - does not work on 'drop', added to deleteCol
     self.undo.redo()
 
     namedTuples = self.data.as_namedtuples()
@@ -238,6 +238,8 @@ class TestPandasData(WrapperTesting):
     ))
 
     self.data.deleteCol('y', axis=1, inplace=True)
+    self.undo.undo()      # ejb - does not work on 'drop'
+    self.undo.redo()
 
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__

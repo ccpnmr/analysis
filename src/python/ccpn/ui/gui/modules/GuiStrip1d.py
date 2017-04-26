@@ -37,8 +37,22 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 class GuiStrip1d(GuiStrip):
 
-  def __init__(self):
-    GuiStrip.__init__(self)
+  def __init__(self, qtParent, spectrumDisplay, application):
+    """
+        
+        :param qtParent: QT parent to place widgets
+        :param spectrumDisplay Main spectrum display Module object
+        :param application: application instance
+        
+        This module inherits the following attributes from the Strip wrapper class
+    """
+
+
+    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay, application=application)
+
+    # self.spectrumDisplay = spectrumDisplay
+    self.application = application
+
     self.viewBox.invertX()
     self.plotWidget.showGrid(x=True, y=True)
     self.gridShown = True
@@ -48,16 +62,6 @@ class GuiStrip1d(GuiStrip):
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
-    # below causes a problem because wrapper not ready yet at this point
-    #for spectrumView in self.spectrumViews:
-    #  spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],
-    #                        spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
-    #                        strip=self)
-
-
-  # def _printToFile(self, printer):
-  #   self.showExportDialog()
-    # raise Exception('1D printing not enabled yet')
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -86,7 +90,6 @@ class GuiStrip1d(GuiStrip):
       self.gridAction.setChecked(False)
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
-    # self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
     self.contextMenu.addAction("Print to File...", self.showExportDialog)
     self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     return self.contextMenu
@@ -110,29 +113,9 @@ class GuiStrip1d(GuiStrip):
     """
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x2, x1, padding=padding)
 
-  # def showPeaks(self, peakList:PeakList, peaks=None):
-  #   """
-  #   Displays peaks in specified peaklist in the strip.
-  #   """
-  #   if not peaks:
-  #     peaks = peakList.peaks
-  #
-  #   peakListView = self._findPeakListView(peakList)
-  #   if not peakListView:
-  #     return
-  #
-  #   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-  #   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-  # def hidePeaks(self, peakList:PeakList):
-  #   """
-  #   Hides peaks in specified peaklist from strip.
-  #   """
-  #   peakListView = self._findPeakListView(peakList)
-  #   peakListView.setVisible(False)
 
   def _findPeakListView(self, peakList:PeakList):
 

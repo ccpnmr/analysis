@@ -322,8 +322,11 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
     print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
     # hack for now
-    self._appBase = project._appBase
-    _GuiStripDisplay1d.__init__(self)
+    self.application = project._appBase
+
+    _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
+                                      name=self._wrappedData.name)
+    self.application.ui.mainWindow.moduleArea.addModule(self.module, position='right')
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
 #TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
@@ -372,7 +375,9 @@ class Strip1d(coreClass, _GuiStrip1d):
     self.application = project._appBase
     # Strip1d utimately is a widget which gets appBase from widgets.Base
     # self._appBase = project._appBase
-    _GuiStrip1d.__init__(self)
+    _GuiStrip1d.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
+                               spectrumDisplay=self.spectrumDisplay,
+                               application=self.application)
 
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd
 class StripNd(coreClass, _GuiStripNd):

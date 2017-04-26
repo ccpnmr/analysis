@@ -29,7 +29,7 @@ from functools import reduce
 from PyQt4 import QtGui
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -42,9 +42,13 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 class ShortcutModule(CcpnModule):
 
   def __init__(self, mainWindow):
-    CcpnModule.__init__(self, name='Define User Shortcuts')
+    CcpnModule.__init__(self,mainWindow=mainWindow, name='Define User Shortcuts')
+
 
     self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
+    self.preferences = self.application.preferences
+
     self.mainWindow.moduleArea.addModule(self)
     self.rowCount = 0
     self.scrollArea = ScrollArea(self.mainWidget, grid=(0, 0), gridSpan=(1, 2))
@@ -64,7 +68,7 @@ class ShortcutModule(CcpnModule):
 
   def save(self):
     newShortcuts = self.shortcutWidget.getShortcuts()
-    self.mainWindow._appBase.preferences.shortcuts = newShortcuts
+    self.preferences.shortcuts = newShortcuts
 
 
   def saveAndQuit(self):
@@ -72,14 +76,15 @@ class ShortcutModule(CcpnModule):
     self.close()
 
 #TODO:LUCA: Use ScrollableWidget class
-class ShortcutWidget(QtGui.QWidget, Base):
+class ShortcutWidget(ScrollableFrame):
 
   def __init__(self, parent, mainWindow, **kw):
-    QtGui.QWidget.__init__(self, parent)
+    ScrollableFrame.__init__(self)
     from functools import partial
-    #self.mainWindow = mainWindow
-    self.preferences = mainWindow._appBase.preferences
-    Base.__init__(self, **kw)
+    self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
+    self.preferences = self.application.preferences
+
     i=0
     self.widgets = []
     for shortcut in sorted(self.preferences.shortcuts):

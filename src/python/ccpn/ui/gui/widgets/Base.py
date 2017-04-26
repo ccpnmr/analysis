@@ -100,6 +100,7 @@ class Base(DropBase):
 
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
     # print('parent',parent)
+    #TODO:GEERTEN: should not first check if there is already a gridding layout!?
     if parent and not isFloatWidget:
       # Setup gridding within parent
       if isinstance(parent, Dock):

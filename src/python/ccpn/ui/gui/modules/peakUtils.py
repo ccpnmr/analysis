@@ -1,4 +1,5 @@
-
+#TODO:ED: incorporate elsewhere or at least move to /lib
+# Alos: put in header if remains
 def getPeakPosition(peak, dim, unit='ppm'):
 
   if len(peak.dimensionNmrAtoms) > dim:

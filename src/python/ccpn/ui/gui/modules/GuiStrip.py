@@ -66,10 +66,10 @@ class GuiStrip(Widget):
     This module inherits attributes from the Strip wrapper class
     """
 
+    # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
+    # self.spectrumDisplay = spectrumDisplay
     self.application = application
     self.current = application.current
-    # For now, cannot set this attribute as it is owned by the wrapper class
-    # self.spectrumDisplay = spectrumDisplay
 
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
@@ -712,7 +712,7 @@ def _axisRegionChanged(axis:'Axis'):
               if peakListView.isVisible():
                 peakList = peakListView.peakList
                 peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
-                strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+                strip.spectrumDisplay.showPeaks(peakListView, peaks)
 
         if len(strip.axisOrder) > 2:
           n = index - 2

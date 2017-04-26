@@ -35,6 +35,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -48,6 +49,9 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
+from ccpn.ui.gui.widgets.BasePopup import BasePopup
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
@@ -117,6 +121,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # scroll area
     self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7), showBorder=True,
                                       hPolicy='expanding', vPolicy='expanding')
+    #TODO:GEERTEN check for this naming
     self.stripFrame.guiSpectrumDisplay = self
     self.setScrollbarPolicies(horizontal='always')
 
@@ -157,7 +162,22 @@ class GuiSpectrumDisplay(CcpnModule):
     if obj is not None and isinstance(obj, Spectrum):
       self.displaySpectrum(obj)
       success = True
+    elif obj is not None and isinstance(obj, PeakList):
+      self._handlePeakList(obj)
+    else:
+      showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup or PeakList')
     return success
+
+  def _handlePeakList(self, peakList):
+    "See if peaklist can be copied"
+        spectrum = peakList.spectrum
+    #TODO:GEERTEN: Ask rasmus how to match axis codes
+    if spectrum.dimensionCount != self.strips[0].spectra[0].dimensionCount or \
+      not True: # peakList.spectrum.axisCodes match
+      showWarning('Dropped PeakList "%s"' % peakList.pid, 'Cannot copy: Axes do not match')
+      return
+    #TODO:implement
+    showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
     "Set the scrolbar policies"

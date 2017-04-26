@@ -57,3 +57,17 @@ class LineEdit(QtGui.QLineEdit, Base):
 
     #text = translator.translate(text)
     self.setText(text)
+
+class FloatLineEdit(LineEdit):
+
+  def get(self):
+
+    result = LineEdit.get(self)
+    if result:
+      return float(result)
+    else:
+      return None
+
+  def set(self, text=''):
+
+    LineEdit.set(str(text))

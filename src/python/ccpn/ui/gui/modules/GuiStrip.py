@@ -37,7 +37,10 @@ from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget
 
 from ccpn.util.Colour import Colour
@@ -600,40 +603,36 @@ class GuiStrip(Widget):
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.autoRange(padding=padding)
 
-  def _zoomTo(self, x1:float, x2:float, y1:float, y2:float):
-    self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
-    self.zoomPopup.close()
-
   def showZoomPopup(self):
     """
     Creates and displays a popup for zooming to a region in the strip.
     """
-    #TODO:WAYNE: rework using ui.gui.widget classes
-    self.zoomPopup = QtGui.QDialog()
-    layout = QtGui.QGridLayout()
-    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
-    x1 = QtGui.QLineEdit()
-    layout.addWidget(x1, 0, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
-    x2 = QtGui.QLineEdit()
-    layout.addWidget(x2, 0, 3, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
-    y1 = QtGui.QLineEdit()
-    layout.addWidget(y1, 1, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
-    y2 = QtGui.QLineEdit()
-    layout.addWidget(y2, 1, 3, 1, 1)
-    okButton = QtGui.QPushButton(text="OK")
-    okButton.clicked.connect(partial(self._zoomTo, float(x1.text()), float(x2.text()),
-                                                   float(y1.text()), float(y2.text())
-                                     )
-                             )
-    cancelButton = QtGui.QPushButton(text='Cancel')
-    layout.addWidget(okButton,2, 1)
-    layout.addWidget(cancelButton, 2, 3)
-    cancelButton.clicked.connect(self.zoomPopup.close)
-    self.zoomPopup.setLayout(layout)
-    self.zoomPopup.exec_()
+    zoomPopup = QtGui.QDialog()
+
+    Label(zoomPopup, text='x1', grid=(0, 0))
+    x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))
+    Label(zoomPopup, text='x2', grid=(0, 2))
+    x2LineEdit = FloatLineEdit(zoomPopup, grid=(0, 3))
+    Label(zoomPopup, text='y1', grid=(1, 0))
+    y1LineEdit = FloatLineEdit(zoomPopup, grid=(1, 1))
+    Label(zoomPopup, text='y2', grid=(1, 2))
+    y2LineEdit = FloatLineEdit(zoomPopup, grid=(1, 3))
+
+    def _zoomTo():
+      x1 = x1LineEdit.get()
+      y1 = y1LineEdit.get()
+      x2 = x2LineEdit.get()
+      y2 = y2LineEdit.get()
+      if None in (x1, y1, x2, y2):
+        logger.warning('Zoom: must specify region completely')
+        return
+      self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
+      zoomPopup.close()
+
+    Button(zoomPopup, text='OK', callback=_zoomTo, grid=(2, 0), gridSpan=(1, 2))
+    Button(zoomPopup, text='Cancel', callback=zoomPopup.close, grid=(2, 2), gridSpan=(1, 2))
+
+    zoomPopup.exec_()
 
   def _storeZoom(self):
     """

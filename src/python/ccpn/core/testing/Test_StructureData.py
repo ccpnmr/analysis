@@ -58,7 +58,7 @@ class TestPandasData(WrapperTesting):
       self.data = self.ensemble.data
 
   #=========================================================================================
-  # setUp       initialise a newStructureEnsemble
+  # testOccupancySorting
   #=========================================================================================
 
   def test_float_column_1(self):
@@ -83,6 +83,8 @@ class TestPandasData(WrapperTesting):
 
   def test_sorting(self):
     self.data['x'] = [2,2,2,2,1,1,1,1] * 2
+    self.undo.undo()      # ejb - undo new row 17
+    self.undo.redo()
     self.data['y'] = [2,1,2,1,2,1,2,1] * 2
     self.data['z'] = None
     self.data['modelNumber'] = [2,2,2,2,1,1,1,1] * 2
@@ -93,9 +95,17 @@ class TestPandasData(WrapperTesting):
     self.data['nmrChainCode'] = ['@12', '@12', '@2', '@2', '#12', '#12', '#2', '#2'] * 2
     self.data['nmrSequenceCode'] = ['12', '2b'] * 8
     self.data.setValues(17)
+
+    self.undo.undo()      # ejb - undo new row 17
+    self.undo.redo()
+
     self.assertEquals(list(self.data.loc[17])[3:],  [None] * 7)
     self.assertTrue(all(math.isnan(x) for x in self.data.loc[17][:3]))
     self.data.addRow()
+
+    self.undo.undo()      # ejb - undo new row with 'addRow'
+    self.undo.redo()      #       should be the same as above
+
     self.assertEquals(list(self.data.loc[18])[3:],  [None] * 7)
     self.assertTrue(all(math.isnan(x) for x in self.data.loc[18][:3]))
 
@@ -107,6 +117,9 @@ class TestPandasData(WrapperTesting):
 
     ll = ['modelNumber', 'chainCode', 'sequenceId']
     self.data.ccpnSort(*ll)
+
+    # ejb - [2:] because of the inserted rows being sorted to the head of the list
+
     self.assertEquals(list(self.data['modelNumber'])[2:], ([1] * 8 + [2] * 8))
     self.assertEquals(list(self.data['chainCode'])[2:], (['A'] * 4 + ['B'] * 4) * 2)
     self.assertEquals(list(self.data['sequenceId'])[2:], ([1,1,2,2] *4))
@@ -144,16 +157,30 @@ class TestPandasData(WrapperTesting):
     self.data.sort_values('origIndex', inplace=True)
     self.data.index = self.data['origIndex']
 
-    self.data.drop(7, inplace=True)
+    # namedTuple = self.data.as_namedtuples()[4]
+    # AtomRecord = namedTuple.__class__
+    # self.assertEqual(namedTuple, AtomRecord(Index=5, x=1.0, y=2.0, z=nan, modelNumber=1, chainCode='A', sequenceId=2,
+    #                                    atomName='HG2', nmrAtomName='HG2', nmrChainCode='#2', nmrSequenceCode='12',
+    #                                    origIndex=15))
+
+    self.data.deleteRow(7, inplace=True)
+    self.undo.undo()      # ejb
+    self.undo.redo()
+
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
     ll = ['modelNumber', 'chainCode', 'sequenceId', 'atomName']
     self.data.ccpnSort(*ll)
+
     self.assertEquals(list(self.data['origIndex']),
                       [17, 18, 8, 16, 15, 5, 6, 14, 13, 4, 12, 3, 11, 2, 10, 1, 9])
     self.data.setValues(1, x=1.0, y=1.0)
     self.data.setValues(2, x=1.0, y=1.0)
-    self.data.drop('z', axis=1, inplace=True)
+
+    self.data.deleteCol('z', axis=1, inplace=True)
+    self.undo.undo()      # ejb - does not work on 'drop'
+    self.undo.redo()
+
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__
     self.assertEquals(namedTuples, (
@@ -210,6 +237,22 @@ class TestPandasData(WrapperTesting):
                  origIndex=9)
     ))
 
+    self.data.deleteCol('y', axis=1, inplace=True)
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[2], AtomRecord(Index=3, x=1.0, modelNumber=1, chainCode='A', sequenceId=1,
+                       atomName='HG12', nmrAtomName='HG12', nmrChainCode='#2', nmrSequenceCode='2b',
+                       origIndex=8))
+    # self.undo.undo()
+    # namedTuples = self.data.as_namedtuples()
+    # AtomRecord = namedTuples[0].__class__
+    # self.assertEquals(namedTuples[2], AtomRecord(Index=3, x=1.0, y=1.0, modelNumber=1, chainCode='A', sequenceId=1,
+    #                    atomName='HG12', nmrAtomName='HG12', nmrChainCode='#2', nmrSequenceCode='2b',
+    #                    origIndex=8))
+
+  # TODO: test the undo redo function on drop and setValues
+
   def test_structureData_ChainCode(self):
     self.data['chainCode'] = ['B','B','A','A','B','B','A','A']
 
@@ -241,15 +284,54 @@ class TestPandasData(WrapperTesting):
     except Exception as e:
       print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
 
-  def test_structureData_testSelectors(self):
-    self.data['atomName'] = ['CA', 'C', 'N', 'O', 'H'
-                             ,'CB', 'HB1', ' HB2', 'HB3'
-                             ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-                             ,'CE', 'HE1', 'HE2', 'HE3'
-                             ,'CG', 'HG1', 'HG2', 'HG3'
-                             ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    self.data['residueName'] = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
+#=========================================================================================
+# TestSelectors
+#=========================================================================================
 
+class TestSelectors(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
+  #=========================================================================================
+  # setUp       initialise a newStructureEnsemble with ensemble.data
+  #=========================================================================================
+
+  def setUp(self):
+    """
+    Create a valid empty structureEnsemble
+    """
+    with self.initialSetup():
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+                       ,'CB', 'HB1', ' HB2', 'HB3'
+                       ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+                       ,'CE', 'HE1', 'HE2', 'HE3'
+                       ,'CG', 'HG1', 'HG2', 'HG3'
+                       ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumbers = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumbers
+      # self.testIds = [CH+'.'+str(SI)+'.'+RN+'.'+AT for AT, RN, CH, SI in zip(testAtomName
+      #                                                              , testResidueName
+      #                                                              , testChainCode
+      #                                                              , testSequenceId)]
+      # self.data['ids'] = testIds
+      # Ids are set automatically, code is above just for visible check
+
+  #=========================================================================================
+  # test_structureData_testSelectors
+  #=========================================================================================
+
+  def test_structureData_testSelectors(self):
     self.assertEquals(list(self.data.backboneSelector), [True]*5+[False]*28)
     self.assertEquals(list(self.data.amideProtonSelector), [False]*4+[True]+[False]*28)
     self.assertEquals(list(self.data.amideNitrogenSelector), [False]*2+[True]+[False]*30)
@@ -268,31 +350,9 @@ class TestPandasData(WrapperTesting):
   #   self.pd = self.data.from_pdb(dataPath)
 
   def test_structureData_extract(self):
-    testAtomName = ['CA', 'C', 'N', 'O', 'H'
-                   ,'CB', 'HB1', ' HB2', 'HB3'
-                   ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-                   ,'CE', 'HE1', 'HE2', 'HE3'
-                   ,'CG', 'HG1', 'HG2', 'HG3'
-                   ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
-    testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-    testModelNumbers = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-    # testIds = [CH+'.'+str(SI)+'.'+RN+'.'+AT for AT, RN, CH, SI in zip(testAtomName
-    #                                                              , testResidueName
-    #                                                              , testChainCode
-    #                                                              , testSequenceId)]
-
-    self.data['atomName'] = testAtomName
-    self.data['residueName'] = testResidueName
-    self.data['chainCode'] = testChainCode
-    self.data['sequenceId'] = testSequenceId
-    self.data['modelNumber'] = testModelNumbers
-    # self.data['ids'] = testIds
-
     self.ed = self.data.extract()                               # select everything
-    self.assertEquals(list(self.ed['atomName']), testAtomName)
-    self.assertEquals(list(self.ed['residueName']), testResidueName)
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName)
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName)
 
     self.ed = self.data.extract(inverse=True)                   # select nothing
     self.assertEquals(list(self.ed['atomName']), [])
@@ -309,12 +369,12 @@ class TestPandasData(WrapperTesting):
       self.ed = self.data.extract(pd.Series((True,)))                     # only 1 element
 
     self.ed = self.data.extract(index=range(1, 5))                        # select nothing
-    self.assertEquals(list(self.ed['atomName']), testAtomName[:4])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[:4])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[:4])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[:4])
 
     self.ed = self.data.extract(index=1)                                  # select nothing
-    self.assertEquals(list(self.ed['atomName']), [testAtomName[0]])       # remember, list of 1 element
-    self.assertEquals(list(self.ed['residueName']), [testResidueName[0]])
+    self.assertEquals(list(self.ed['atomName']), [self.testAtomName[0]])       # remember, list of 1 element
+    self.assertEquals(list(self.ed['residueName']), [self.testResidueName[0]])
 
     self.ed = self.data.extract(index='1, 2, 6-7, 9')                     # select numbered elements
     self.assertEquals(list(self.ed['atomName']), ['CA', 'C', 'CB', 'HB1', 'HB3'])
@@ -325,42 +385,44 @@ class TestPandasData(WrapperTesting):
     self.assertEquals(list(self.ed['residueName']), ['ALA']*4)
 
     self.ed = self.data.extract(sequenceIds=[1, 2])
-    self.assertEquals(list(self.ed['atomName']), testAtomName[:9])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[:9])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[:9])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[:9])
 
     self.ed = self.data.extract(sequenceIds=2)
-    self.assertEquals(list(self.ed['atomName']), testAtomName[5:9])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[5:9])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[5:9])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[5:9])
 
     self.ed = self.data.extract(sequenceIds='2-3')
-    self.assertEquals(list(self.ed['atomName']), testAtomName[5:17])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[5:17])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[5:17])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[5:17])
     self.ed = self.data.extract(sequenceIds='4,5,6')
-    self.assertEquals(list(self.ed['atomName']), testAtomName[17:])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[17:])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[17:])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[17:])
 
     self.ed = self.data.extract(modelNumbers=[1, 2])
-    self.assertEquals(list(self.ed['atomName']), testAtomName[:9])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[:9])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[:9])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[:9])
 
     self.ed = self.data.extract(modelNumbers=2)
-    self.assertEquals(list(self.ed['atomName']), testAtomName[5:9])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[5:9])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[5:9])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[5:9])
 
     self.ed = self.data.extract(modelNumbers='2-3')
-    self.assertEquals(list(self.ed['atomName']), testAtomName[5:17])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[5:17])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[5:17])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[5:17])
     self.ed = self.data.extract(modelNumbers='4,5,6')
-    self.assertEquals(list(self.ed['atomName']), testAtomName[17:])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[17:])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[17:])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[17:])
 
     self.ed = self.data.extract(ids='A.1.ALA.C')
-    self.assertEquals(list(self.ed['atomName']), [testAtomName[1]])
-    self.assertEquals(list(self.ed['residueName']), [testResidueName[1]])
+    self.assertEquals(list(self.ed['atomName']), [self.testAtomName[1]])
+    self.assertEquals(list(self.ed['residueName']), [self.testResidueName[1]])
 
     self.ed = self.data.extract(ids=['A.1.ALA.CA', 'A.1.ALA.C'])
-    self.assertEquals(list(self.ed['atomName']), testAtomName[:2])
-    self.assertEquals(list(self.ed['residueName']), testResidueName[:2])
+    self.assertEquals(list(self.ed['atomName']), self.testAtomName[:2])
+    self.assertEquals(list(self.ed['residueName']), self.testResidueName[:2])
+
+    self.data['notFound'] = self.testAtomName   # thought this would give error
 
 #=========================================================================================
 # test_StructureData_properties
@@ -511,3 +573,205 @@ class TestStructureData_properties(WrapperTesting):
     """
     with self.assertRaisesRegexp(TypeError, 'does not correspond to type'):
       StructureData.valueToOptionalType(42, tuple, True)
+
+#=========================================================================================
+# TestContainer
+#=========================================================================================
+
+class TestContainer(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
+  #=========================================================================================
+  # setUp       initialise a newStructureEnsemble with ensemble.data
+  #=========================================================================================
+
+  def setUp(self):
+    """
+    Create a valid empty structureEnsemble
+    """
+    with self.initialSetup():
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+      self.newEnsemble = self.project.newStructureEnsemble()
+      self.newData = self.newEnsemble.data
+
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+                     ,'CB', 'HB1', ' HB2', 'HB3'
+                       ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+                       ,'CE', 'HE1', 'HE2', 'HE3'
+                       ,'CG', 'HG1', 'HG2', 'HG3'
+                       ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumbers = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumbers
+
+  #=========================================================================================
+  # TestContainerTypes
+  #=========================================================================================
+
+  def testContainerTypes_tooManyEnsemble(self):
+    """
+    Test that an error raised of too many ensambleDatas are passed as argument
+    :return:
+    """
+    self.newData = self.data.extract(index=range(4,5))   # get the 4th-5th elements in list
+    with self.assertRaisesRegexp(AssertionError, 'Only single row ensembles'):
+      self.data.setValues(self.data)
+
+  def testContainerTypes_SingleEnsemble_Proton(self):
+    """
+    Test that selecting a single item form the list with 'extract' can be
+    used to set new values
+    :return:
+    """
+    self.newData = self.data.extract(self.data.amideProtonSelector)   # get fifth element in list
+    temptuple = self.newData.as_namedtuples()
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[4], (AtomRecord(Index=5
+                                                  , atomName='H'
+                                                  , residueName='ALA'
+                                                  , chainCode='A'
+                                                  , sequenceId=1
+                                                  , modelNumber=1)))  # check initial values
+    self.data.setValues(self.newData
+                        , atomName='HG23'
+                        , residueName='VAL'
+                        , chainCode='F'
+                        , sequenceId=6
+                        , modelNumber=6)
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[4], (AtomRecord(Index=5
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
+
+  def testContainerTypes_SingleEnsemble_Index(self):
+    """
+    Test that selecting a single item form the list with 'extract' can be
+    used to set new values
+    :return:
+    """
+    self.newData = self.data.extract(index=10)   # get fifth element in list
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+                                                  , atomName='CD1'
+                                                  , residueName='LEU'
+                                                  , chainCode='C'
+                                                  , sequenceId=3
+                                                  , modelNumber=3)))  # check initial values
+    self.data.setValues(self.newData
+                        , atomName='HG23'
+                        , residueName='VAL'
+                        , chainCode='F'
+                        , sequenceId=6
+                        , modelNumber=6)
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
+    # self.undo.undo()      # ejb - doesn't work here
+    # namedTuples = self.data.as_namedtuples()
+    # AtomRecord = namedTuples[0].__class__
+    # self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+    #                                               , atomName='CD1'
+    #                                               , residueName='LEU'
+    #                                               , chainCode = 'C'
+    #                                               , sequenceId = 3
+    #                                               , modelNumber = 3)))  # check initial values
+
+  def testContainerTypes_pdSeries(self):
+    """
+    Test that setValues with a pd.Series as an argument:
+      raises error for nothing selected: AssertionError
+      returns correctly with 1 item in the list selected
+      raises an error for too may selected: AssertionError
+      raises an error for out of range: AssertionError
+      returns correctly for item in list even if selection is too long
+    :return:
+    """
+    with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select a single row'):
+      self.data.setValues(pd.Series((False,)*33, index=range(1,34)))
+
+    self.data.setValues(pd.Series((True,)+(False,)*32, index=range(1,34)))
+    with self.assertRaisesRegexp(ValueError, 'Attempt to set columns not present in DataFrame'):
+      self.data.setValues(pd.Series(self.data.amideProtonSelector), badName=['badName'])
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[4], (AtomRecord(Index=5
+                                                  , atomName='H'
+                                                  , residueName='ALA'
+                                                  , chainCode='A'
+                                                  , sequenceId=1
+                                                  , modelNumber=1)))  # check initial values
+    self.data.setValues(pd.Series(self.data.amideProtonSelector)
+                                  , atomName='HG23'
+                                  , residueName='VAL'
+                                  , chainCode='F'
+                                  , sequenceId=6
+                                  , modelNumber=6)
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[4], (AtomRecord(Index=5
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
+
+    with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select a single row'):
+      self.data.setValues(self.data.methylSelector)
+
+    with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select an existing row'):
+      self.data.setValues(pd.Series((False,)*45+(True,), index=range(1,47)))
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[1], (AtomRecord(Index=2
+                                                  , atomName='C'
+                                                  , residueName='ALA'
+                                                  , chainCode='A'
+                                                  , sequenceId=1
+                                                  , modelNumber=1)))  # check initial values
+    self.data.setValues(pd.Series((False,)+(True,)+(False,)*44, index=range(1,47))
+                        , atomName='HG23'
+                        , residueName='VAL'
+                        , chainCode='F'
+                        , sequenceId=6
+                        , modelNumber=6)
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[1], (AtomRecord(Index=2
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
+
+  def testContainerTypes_badType(self):
+    """
+    Test that setValues with a string raises TypeError
+    :return:
+    """
+    with self.assertRaisesRegexp(TypeError, 'accessor must be index, ensemble row, or selector'):
+      self.data.setValues('badSetValue')

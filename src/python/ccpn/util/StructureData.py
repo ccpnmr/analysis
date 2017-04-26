@@ -37,6 +37,26 @@ from ccpn.util.ListFromString import listFromString
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
+NaN = math.nan
+
+# def _setIndexLock(fn):
+#   global _indexLockVal
+#   _indexLockVal = 0
+#
+#   # if we want to do something AFTER the  call to 'fn' we have to define another inner function
+#   # so we have somewhere to place the post 'fn' code - MUST RETURN A FUNCTION
+#   def _indexLock(*args, **kwargs):      # the same arguments as fn
+#
+#     # _indexLockVal += 1
+#     fn_ret = fn(*args, **kwargs)         # call 'fn' here - don't forget the brackets
+#     # _indexLockVal -= 1
+#
+#     return fn_ret                     # if fn returned a value then we need to match it here
+#
+#   return _indexLock             # and return the outer function
+
+
+
 
 
 class EnsembleData(pd.DataFrame):
@@ -263,11 +283,60 @@ class EnsembleData(pd.DataFrame):
     self.__containingObject = None
 
     # Reset index to one-start - unless it was passed in explicitly.
-    if 'index' not in kwargs:
+    # if 'index' not in kwargs:
+    #   self.reset_index(drop=True, inplace=True)
+    #   pass
+    # else:
+    #   pass              # ejb - this never gets hit...
+    #
+    # pass
+
+
+    try:
+      if _indexOverride:      # ejb - cheating with _indexOverride
+        pass                  # skip the indexing
+    except:
       self.reset_index(drop=True, inplace=True)
 
 
+
+      # try:
+        # arglist = str(args).split(' \\').split()
+        # if "'index'" not in arglist:
+        # arglist = str(self.dtypes).split()    # ejb - needs 464 below
+        # if 'IndexTemp' not in arglist:
+        #   self.reset_index(drop=True, inplace=True)  # ejb need ignore sometimes
+        #   pass
+      # finally:
+      #   pass
+
+      #   for ii, argitem in enumerate(arglist):
+      #     if argitem is 'Axis':
+      #       thisindex = arglist(ii+2)
+      #   pass
+      # except:
+      #   pass
+      # try:
+      #   ax = self.axes[0]
+      #   pass
+      # except:
+      #   pass
+      # pass
+
   ### Making selections
+
+  # def drop(self, labels, axis = 0, level = None, inplace = False, errors = 'raise'):    # ejb
+  #   """
+  #   Overload the Pandas drop to reset the indexing after items have been removed
+  #   :param labels:
+  #   :param axis:
+  #   :param level:
+  #   :param inplace:
+  #   :param errors:
+  #   :return:
+  #   """
+  #   super().drop(labels, axis, level, inplace, errors)
+  #   # self.reset_index(drop=True, inplace=True)
 
   def selector(self, index=None, chainCodes=None, residueNames=None, sequenceIds=None,
                atomNames=None, modelNumbers=None, ids=None,
@@ -430,12 +499,32 @@ class EnsembleData(pd.DataFrame):
       columnNames = self.columns
 
     if selector is None:
-      return self.extract(self.selector(**kwargs), *columnNames)
+      return self.extract(self.selector(**kwargs), *columnNames)   # ejb
 
     else:
       try:
         if self.shape[0] == selector.shape[0]:
-          return self.ix[selector, columnNames]
+          # return self.ix[selector, columnNames]
+
+          global _indexOverride
+          _indexOverride = True                   # ejb - just need existence
+          newEx = self.ix[selector, columnNames]
+          del _indexOverride
+          return newEx
+          #
+          # return self.ix[selector, ('Index',)+columnNames]    # ejb
+          # newEx = self.ix[selector, ('IndexTemp',)+columnNames]   # Pandas should rename it as _1
+          # try:
+          #   self.__global__._indexOverride = True
+          #   newEx.drop('IndexTemp', axis=1, inplace=True)     # drop the rogue column
+          #   del self.__global__._indexOverride
+          # except:
+          #   pass
+          # return newEx
+          # need to remove the bad column from newEx
+          # return self.ix[selector, columnNames+('Index',)]
+
+
         else:
           raise ValueError('Selectors must be the same length as the number of atom records.')
       except AttributeError:
@@ -470,6 +559,116 @@ class EnsembleData(pd.DataFrame):
     See setValues for details"""
     nextIndex =  max(self.index) + 1 if self.shape[0] else 1
     self.setValues(nextIndex, **kwargs)
+
+  def _insertRow(self, *args, **kwargs):
+    """
+    Currently called by undo to re-insert a row.
+    Add the **kwargs to new element at the bottom of each column.
+    Modify the index and sort the new row into the correct position.
+    :param index in *args:
+    :param kwargs:
+    :return:
+    """
+    index = int(args[0])
+    len = self.shape[0]                         # current rows
+    for key in kwargs:
+      super().loc[len+1, key] = kwargs[key]     # force an extra row
+
+    neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
+    self.index = neworder                       # set the new index
+    self.sort_index(inplace=True)                     # and re-sort the table
+
+  def deleteRow(self, *args, **kwargs):
+    """
+    Delete a numbered row of the table.
+    index must exist and be a specified row.
+    An undo event is added corresponding to self._insertRow above.
+    :param index in *args:
+    :param kwargs:
+    :return:
+    """
+    index = int(args[0])
+    rowExists = False
+    if not index:
+      raise ValueError('Row not specified')
+    else:
+      if index in self.index:       # the index must exist
+        rowExists = True
+      else:
+        raise ValueError('deleteRow cannot delete the row.')
+
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteRow', values=kwargs)
+
+    try:
+      colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
+
+      super().drop(index, **kwargs)       # delete the row
+
+      if containingObject is not None:
+        undo = containingObject._project._undo
+        if undo is not None:                        # add the undo event
+            undo.newItem(self._insertRow, self.deleteRow,
+                         undoArgs=(index,), undoKwargs=colData,
+                         redoArgs=(index,), redoKwargs=kwargs)
+
+    finally:
+      if containingObject is not None:
+        containingObject._endCommandEchoBlock()
+
+  def _insertCol(self, *args, **kwargs):
+    """
+    Currently called by undo to re-insert a column.
+    Add the **kwargs to the column across the index.
+    Currently *args are not checked for multiple values
+    :param colIndex in *args:
+    :param kwargs:
+    :return:
+    """
+    colIndex = str(args[0])       # get the index from the first arg value
+    for sInd in kwargs:
+      super().loc[int(sInd), colIndex] = kwargs[sInd]
+
+  def deleteCol(self, *args, **kwargs):
+    """
+    Delete a named column from the table, colIndex must exist.
+    An undo event is added corresponding to self._insertCol above.
+    :param colIndex in *args:
+    :param kwargs:
+    :return:
+    """
+    colIndex = str(args[0])
+    colExists = False
+    if not colIndex:
+      raise ValueError('Row not specified')
+    else:
+      if colIndex in self.columns:       # the index must exist
+        colExists = True
+      else:
+        raise ValueError('deleteCol cannot delete the column.')
+
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
+
+    try:
+      colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
+
+      super().drop(colIndex, **kwargs)
+
+      if containingObject is not None:
+        undo = containingObject._project._undo
+        if undo is not None:                        # add the undo event
+            undo.newItem(self._insertCol, self.deleteCol,
+                         undoArgs=(colIndex,), undoKwargs=colData,
+                         redoArgs=(colIndex,), redoKwargs=kwargs)
+
+    finally:
+      if containingObject is not None:
+        containingObject._endCommandEchoBlock()
 
   def setValues(self, accessor:typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
     """
@@ -512,15 +711,30 @@ class EnsembleData(pd.DataFrame):
     elif isinstance(accessor, EnsembleData):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
       index = accessor.index
-      assert (index in self.index
-              and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
-        "Ensembles used for selection must be (or match) row in current ensemble"
-      )
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      #
+      global _indexOverride
+      _indexOverride = True  # ejb - just need existence
+      aant = accessor.as_namedtuples()      # testing for below
+      slan = self.loc[index].as_namedtuples()
+      del _indexOverride
+
+      # tsit = tuple(self.itertuples(name='AtomRecord'))[index[0]]
+      #tuple(self.itertuples(name='AtomRecord'))
+
+      assert (index[0] in self.index and aant == slan), (
+        "Ensembles used for selection must be (or match) row in current ensemble")
+
+      # assert (index[0] in self.index
+      #         and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
+      #   "Ensembles used for selection must be (or match) row in current ensemble"
+      # )
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     elif isinstance(accessor, pd.Series): # selector
       rows = accessor[accessor == True]
       assert rows.shape[0] == 1, "Boolean selector must select a single row."
       index = rows.index
-      assert index in self.index, "Boolean selector must select an existing row"
+      assert index[0] in self.index, "Boolean selector must select an existing row"   # ejb
     else:
       raise TypeError('accessor must be index, ensemble row, or selector.')
 
@@ -562,6 +776,8 @@ class EnsembleData(pd.DataFrame):
       # Internally this calls self.__setitem__.
       # Type handling is done there and can be skipped here.
       # NB, various obvious alternatives, like just setting the row, do NOT work.
+
+      tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
       for key,val in values.items():
         self.loc[index, key] = val
 
@@ -575,15 +791,18 @@ class EnsembleData(pd.DataFrame):
         # set up undo functions
         if rowExists:
           # Undo modification of existing row
+          # undo.newItem(self.setValues, self.setValues,
+          #              undoArgs=(index,), undoKwargs=dict((x, self.loc[index].get(x))
+          #                                                    for x in kwargs),
+          #              redoArgs=(index,), redoKwargs=kwargs)
           undo.newItem(self.setValues, self.setValues,
-                       undoArgs=(index,), undoKwargs=dict((x, self.loc[index].get(x))
-                                                             for x in kwargs),
+                       undoArgs=(index,), undoKwargs=tempkw,
                        redoArgs=(index,), redoKwargs=kwargs)
         else:
           # undo addition of new row
           undo.newItem(self.drop, self.setValues,
                        undoArgs=(index,), undoKwargs={'inplace':True},
-                       redoArgs=(index, ), redoKwargs=kwargs)
+                       redoArgs=(index,), redoKwargs=kwargs)
 
 
   ### PDB mapping

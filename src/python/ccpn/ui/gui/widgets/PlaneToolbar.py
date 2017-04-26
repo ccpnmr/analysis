@@ -50,7 +50,7 @@ class _StripLabel(Label):
   """
   Specific Label to be used in Strip displays
   """
-  def __init__(self, parent, text, appBase, **kwds):
+  def __init__(self, parent, text, **kwds):
 
     Label.__init__(self, parent, text, **kwds)
     self.parent = parent
@@ -106,24 +106,20 @@ class _StripLabel(Label):
 
 class PlaneToolbar(ToolBar):
   #TODO: undocumented and needs refactoring ;
-  def __init__(self, strip, callbacks, **kw):
+  def __init__(self, qtParent, strip, callbacks, **kw):
 
-    ToolBar.__init__(self, strip, **kw)
+    ToolBar.__init__(self, parent=qtParent, **kw)
 
     self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
                             hAlign='center', vAlign='top')
     self.stripIdLabel.setFixedHeight(15)
     self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-#    self.spinSystemLabel = Label(self, text='',
-#                                 hAlign='center', vAlign='top')
-    # Drop/draggable label
-    self.spinSystemLabel = _StripLabel(self, text='',
-                                      appBase=strip._parent._appBase,
-                                      hAlign='center', vAlign='top'
-    )
 
+    # Drop/draggable label
+    self.spinSystemLabel = _StripLabel(self, text='', hAlign='center', vAlign='top')
     self.spinSystemLabel.setFixedHeight(15)
     self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+
     self.addWidget(self.stripIdLabel)
     self.addWidget(self.spinSystemLabel)
 

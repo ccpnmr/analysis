@@ -93,6 +93,7 @@ class GuiStripNd(GuiStrip):
                             application=application, useOpenGL=True
                       )
 
+    self.qtParent = qtParent
     # For now, cannot set this attribute as it is owned by the wrapper class
     # self.spectrumDisplay = spectrumDisplay
     self.application = application
@@ -199,11 +200,7 @@ class GuiStripNd(GuiStrip):
 
     self.crossHairAction.setChecked(self.crossHairIsVisible)
     self.gridAction.setChecked(self.gridIsVisible)
-    # if self.gridShown:
-    #   self.gridAction.setChecked(True)
-    # else:
-    #   self.gridAction.setChecked(False)
-    # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+
     return self.contextMenu
 
   def resetZoom(self, axis=None):
@@ -412,7 +409,8 @@ class GuiStripNd(GuiStrip):
     """
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
-    self.planeToolbar = PlaneToolbar(strip=self,
+    self.planeToolbar = PlaneToolbar(qtParent=self.qtParent,
+                                     strip=self,
                                      grid=(1, self.spectrumDisplay.orderedStrips.index(self)),
                                      hPolicy='extending',
                                      hAlign='center', vAlign='center', callbacks=callbacks)

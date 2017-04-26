@@ -87,50 +87,18 @@ class GuiStrip(Widget):
                                  hPolicy='expanding', vPolicy='expanding'
                                  )
 
-    # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
-    qtParent.layout().addWidget(self.plotWidget, 0,
-                                       self.spectrumDisplay.orderedStrips.index(self))
+    qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))
 
-
-
-    # #TODO:GEERTEN: Fix with proper stylesheet
-    self.colourScheme = self.application.colourScheme
-    if self.colourScheme == 'light':
-      self.background = '#f7ffff'
-      self.foreground = '#080000'
-      self.gridColour = '#080000'
-    else:
-      self.background = '#080000'
-      self.foreground = '#f7ffff'
-      self.gridColour = '#f7ffff'
-#    self.plotWidget.setBackground(self.background)
-
+    # Strip needs access to plotWidget's items and info
     self.plotItem = self.plotWidget.plotItem
-    #self.plotItem.parent = self
-    #self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
+
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
 
-    #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
-    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
-    #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
-    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
-
-    # for orientation in ('left', 'top'):
-    #   axisItem = self.plotItem.axes[orientation]['item']
-    #   axisItem.hide()
-    # for orientation in ('right', 'bottom'):
-    #   axisItem = self.plotItem.axes[orientation]['item']
-    #   axisItem.setPen(color=self.foreground)
-    #self.gridShown = True
-
-    # self.viewBox.sigClicked.connect(self._mouseClicked)
-    # self.grid = CcpnGridItem(self.gridColour)
-    # self.plotWidget.addItem(self.grid)
-    #self._createCrossHair()
     self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
     self._showCrossHair()
+    # callbacks
     self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
     self.storedZooms = []
@@ -329,7 +297,8 @@ class GuiStrip(Widget):
       spectrumView._changedPhasingDirection()
       
   def _updatePhasing(self):
-    #colour = '#ffffff' if self.background == 'k' else '#000000'
+    #
+    # TODO:GEERTEN: Fix with proper stylesheet
     colour = '#e4e15b' if self.application.colourScheme == 'dark' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
@@ -380,54 +349,21 @@ class GuiStrip(Widget):
       item.setPos(x, y)
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
-  # def _createCrossHair(self):
-  #   """
-  #   Creates a single or double cross hair depending on specification in application preferences.
-  #   """
-  #   self.vLine = self.plotWidget.crossHair1.vLine
-  #   self.hLine = self.plotWidget.crossHair1.hLine
-  #   self.vLine2 = self.plotWidget.crossHair2.vLine
-  #   self.hLine2 = self.plotWidget.crossHair2.hLine
-    # self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    # self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    # self.plotWidget.addItem(self.vLine, ignoreBounds=True)
-    # self.plotWidget.addItem(self.hLine, ignoreBounds=True)
-    # self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    # self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    # if self.application.preferences.general.doubleCrossHair is True:
-    #   self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
-    #   self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
-
   def _toggleCrossHair(self):
     " Toggles whether crosshair is visible"
-    # self.vLine.setVisible(not self.vLine.isVisible())
-    # self.hLine.setVisible(not self.hLine.isVisible())
-    # self.vLine2.setVisible(not self.vLine2.isVisible())
-    # self.hLine2.setVisible(not self.hLine2.isVisible())
-    # return
     self.plotWidget.crossHair1.toggle()
     if self.showDoubleCrossHair:
       self.plotWidget.crossHair2.toggle()
 
   def _showCrossHair(self):
     "Displays crosshair in strip"
-    # self.vLine.show()
-    # self.hLine.show()
-    # self.vLine2.show()
-    # self.hLine2.show()
-    # return
     self.plotWidget.crossHair1.show()
     if self.showDoubleCrossHair:
       self.plotWidget.crossHair2.show()
 
   def _hideCrossHair(self):
     "Hides crosshair in strip."
-    # self.vLine.hide()
-    # self.hLine.hide()
-    # self.vLine2.hide()
-    # self.hLine2.hide()
-    # return
-    # self.plotWidget.crossHair1.hide()
+    self.plotWidget.crossHair1.hide()
     if self.showDoubleCrossHair:
       self.plotWidget.crossHair2.hide()
 
@@ -451,7 +387,7 @@ class GuiStrip(Widget):
     # print('>>', xPos, yPos)
     self.plotWidget.crossHair1.setPosition(xPos,yPos)
 
-    #TODO:SOLIDS This is clearly not correct; it should take the offset as defined
+    #TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum
     if self.showDoubleCrossHair:
       xPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
       yPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
@@ -504,12 +440,10 @@ class GuiStrip(Widget):
     """
     Updates the position of the crosshair when the mouse is moved.
     """
-
     if self.isDeleted:
       return
 
     # position is in pixels
-
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
       self.mousePixel = (positionPixel.x(), positionPixel.y())
       mousePoint = self.viewBox.mapSceneToView(positionPixel) # mouse point is in ppm

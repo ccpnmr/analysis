@@ -90,7 +90,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
 class CrossHair():
   "class to implement a cross-hair"
 
-  def __init__(self, parent, position=Point(0,0), show=True, rgb=None, colour=None, **kwds):
+  def __init__(self, parent, position=Point(0,0), show=True, rgb=None, colour=None, moveable=False, **kwds):
     """CrossHair init,
        stetting color, using rgb or colour, which-ever is
                        not None (default to grey) + optional **kwds
@@ -104,8 +104,8 @@ class CrossHair():
     else:
       pen = pg.functions.mkPen(color=(129,129,129), **kwds)
 
-    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=pen)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=pen)
+    self.vLine = pg.InfiniteLine(angle=90, movable=moveable, pen=pen)
+    self.hLine = pg.InfiniteLine(angle=0, movable=moveable, pen=pen)
     parent.addItem(self.vLine, ignoreBounds=True)
     parent.addItem(self.hLine, ignoreBounds=True)
     self._parent = parent

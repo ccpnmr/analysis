@@ -60,9 +60,6 @@ from functools import partial
 from ccpn.core.PeakList import PeakList
 # from ccpn.core.Peak import Peak
 
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-
 # from ccpn.ui.gui.widgets.Button import Button
 # from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -81,19 +78,25 @@ class GuiStripNd(GuiStrip):
 
   def __init__(self, qtParent, spectrumDisplay, application):
     """
-    Main spectrum display Module object
+    Main Strip for Nd spectra object
 
     :param qtParent: QT parent to place widgets
+    :param spectrumDisplay: spectrumDisplay instance
     :param application: application instance
 
     This module inherits the following attributes from the Strip wrapper class
     """
     # TODO:ED: complete the above; also port to GuiStrip1d
 
-    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay, application=application, useOpenGL=True)
-    self.application = application
+    print('GuiStripNd>>', qtParent, self.spectrumDisplay, application)
+    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay,
+                            application=application, useOpenGL=True
+                      )
+
     # For now, cannot set this attribute as it is owned by the wrapper class
     # self.spectrumDisplay = spectrumDisplay
+    self.application = application
+    self.mainWindow = self.spectrumDisplay.mainWindow
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
@@ -114,7 +117,7 @@ class GuiStripNd(GuiStrip):
 
   @property
   def pythonConsole(self):
-    return self.application.ui.mainWindow.pythonConsole
+    return self.mainWindow.pythonConsole
 
   def setStripLabelText(self, text: str):
     """set the text of the stripLabel"""
@@ -146,32 +149,32 @@ class GuiStripNd(GuiStrip):
     Creates and returns the Nd context menu
     """
     self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.guiSpectrumDisplay.toggleToolbar, checkable=True)
+    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.spectrumDisplay.toggleToolbar, checkable=True)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self._toggleCrossHair, checkable=True)
     self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
     self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)
     self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-    plusOneAction = self.contextMenu.addAction("Add Contour Level", self.guiSpectrumDisplay.addContourLevel)
+    plusOneAction = self.contextMenu.addAction("Add Contour Level", self.spectrumDisplay.addContourLevel)
     plusOneIcon = Icon('icons/contour-add')
     plusOneAction.setIcon(plusOneIcon)
     plusOneAction.setToolTip('Add One Level')
-    minusOneAction = self.contextMenu.addAction("Remove Contour Level", self.guiSpectrumDisplay.removeContourLevel)
+    minusOneAction = self.contextMenu.addAction("Remove Contour Level", self.spectrumDisplay.removeContourLevel)
     minusOneIcon = Icon('icons/contour-remove')
     minusOneAction.setIcon(minusOneIcon)
     minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = self.contextMenu.addAction("Raise Base Level", self.guiSpectrumDisplay.raiseContourBase)
+    upBy2Action = self.contextMenu.addAction("Raise Base Level", self.spectrumDisplay.raiseContourBase)
     upBy2Icon = Icon('icons/contour-base-up')
     upBy2Action.setIcon(upBy2Icon)
     upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = self.contextMenu.addAction("Lower Base Level", self.guiSpectrumDisplay.lowerContourBase)
+    downBy2Action = self.contextMenu.addAction("Lower Base Level", self.spectrumDisplay.lowerContourBase)
     downBy2Icon = Icon('icons/contour-base-down')
     downBy2Action.setIcon(downBy2Icon)
     downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = self.contextMenu.addAction("Store Zoom", self.guiSpectrumDisplay._storeZoom)
+    storeZoomAction = self.contextMenu.addAction("Store Zoom", self.spectrumDisplay._storeZoom)
     storeZoomIcon = Icon('icons/zoom-store')
     storeZoomAction.setIcon(storeZoomIcon)
     storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = self.contextMenu.addAction("Restore Zoom", self.guiSpectrumDisplay._restoreZoom)
+    restoreZoomAction = self.contextMenu.addAction("Restore Zoom", self.spectrumDisplay._restoreZoom)
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
@@ -404,14 +407,17 @@ class GuiStripNd(GuiStrip):
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
     self.logger.info("application.getByGid(%r).prevZPlane()" % self.pid)
 
+  # TODO: this should move to GuiStrip and StripNd should just hide this
   def _addPlaneToolbar(self):
     """
     Adds the plane toolbar to the strip.
     """
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
-    self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
-                                     hAlign='center', vAlign='c', callbacks=callbacks)
+    self.planeToolbar = PlaneToolbar(strip=self,
+                                     grid=(1, self.spectrumDisplay.orderedStrips.index(self)),
+                                     hPolicy='extending',
+                                     hAlign='center', vAlign='center', callbacks=callbacks)
     self.planeToolbar.setMinimumWidth(250)
 
   def _setZPlanePosition(self, n:int, value:float):

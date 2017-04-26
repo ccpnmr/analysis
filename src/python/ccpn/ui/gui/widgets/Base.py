@@ -33,6 +33,9 @@ from PyQt4 import QtGui, QtCore
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 
+from ccpn.util.Logging import getLogger
+logger = getLogger()
+
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
   'right': QtCore.Qt.AlignRight,
@@ -148,6 +151,16 @@ class Base(DropBase):
     #layout = self.getLayout()
     #if layout is not None:
     #  layout.setContentsMargins(0, 0, 0, 0)
+
+  def setGridLayout(self):
+    "Add a QGridlayout to self"
+    layout = self.getLayout()
+    if layout is None:
+      layout = QtGui.QGridLayout(self)
+      layout.setContentsMargins(0, 0, 0, 0)
+      self.setLayout(layout)
+    else:
+      logger.warning('Widget already has a layout!')
 
   def getLayout(self):
     "return the layout of self"

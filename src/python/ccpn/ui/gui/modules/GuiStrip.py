@@ -22,7 +22,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -59,8 +58,10 @@ class GuiStrip(Widget):
 
   def __init__(self, qtParent, spectrumDisplay, application, useOpenGL=False):
     """
+    Basic strip class; used in StripNd and Strip1d
 
     :param qtParent: QT parent to place widgets
+    :param spectrumDisplay: spectrumDisplay instance
     :param application: application instance
 
     This module inherits attributes from the Strip wrapper class
@@ -71,22 +72,22 @@ class GuiStrip(Widget):
     self.application = application
     self.current = application.current
 
+    print('GuiStrip>>>', self.spectrumDisplay, application)
+
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
-    Widget.__init__(self, acceptDrops=True, hPolicy='expanding', vPolicy='expanding')
-    #self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    Widget.__init__(self, acceptDrops=True, hPolicy='expanding', vPolicy='expanding',
+                          grid=(0, self.spectrumDisplay.orderedStrips.index(self))
+                    )
 
-    self.stripFrame = self._parent.stripFrame
-    self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
-
-    self.plotWidget = PlotWidget(qtParent, appBase=self.application,
+    self.plotWidget = PlotWidget(parent=self, appBase=self.application,
                                  useOpenGL=useOpenGL, strip=self,
                                  hPolicy='expanding', vPolicy='expanding'
                                  )
 
     # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
-    self.stripFrame.layout().addWidget(self.plotWidget, 0,
-                                       self.guiSpectrumDisplay.orderedStrips.index(self))
+    qtParent.layout().addWidget(self.plotWidget, 0,
+                                       self.spectrumDisplay.orderedStrips.index(self))
 
     #TODO:GEERTEN: Fix with proper stylesheet
     self.colourScheme = self.application.colourScheme
@@ -376,7 +377,7 @@ class GuiStrip(Widget):
       return (minDiff > tol) or (maxDiff > tol)
 
     yRange = list(self.viewBox.viewRange()[1])
-    for strip in self.guiSpectrumDisplay.strips:
+    for strip in self.spectrumDisplay.strips:
       stripYRange = list(self.viewBox.viewRange()[1])
       if _widthsChangedEnough(stripYRange, yRange):
         strip.viewBox.setYRange(*yRange, padding=0)
@@ -385,6 +386,7 @@ class GuiStrip(Widget):
     """
     Puts axis code labels in the correct place on the PlotWidget
     """
+    pass
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -403,7 +405,7 @@ class GuiStrip(Widget):
   #   """
   #   Hides all crosshairs in all strips in parent spectrum display.
   #   """
-  #   for strip in self.guiSpectrumDisplay.guiStrips:
+  #   for strip in self.spectrumDisplay.guiStrips:
   #     strip.hideCrossHair()
 
   def _createCrossHair(self):
@@ -485,6 +487,7 @@ class GuiStrip(Widget):
     mark = task.newMark('white', positions, axisCodes)
 
   #
+  #TODO:API: remove
   def _rulerCreated(self, apiRuler):
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position
@@ -549,9 +552,9 @@ class GuiStrip(Widget):
         window._setCrossHairPosition(axisPositionDict)
       ###self.vLine.setPos(mousePoint.x())
       ###self.hLine.setPos(mousePoint.y())
-      ###for vLine in self.guiSpectrumDisplay._appBase.vLines:
+      ###for vLine in self.spectrumDisplay._appBase.vLines:
       ###  vLine.setPos(self.mousePoint.x())
-      ###for hLine in self.guiSpectrumDisplay._appBase.hLines:
+      ###for hLine in self.spectrumDisplay._appBase.hLines:
       ###  hLine.setPos(self.mousePoint.y())
     ###return self.mousePoint
 
@@ -567,7 +570,7 @@ class GuiStrip(Widget):
       format = "%s: %.3f  %s: %.4g"
     else:
       format = "%s: %.2f  %s: %.2f"
-    self.guiSpectrumDisplay.positionBox.setText(format %
+    self.spectrumDisplay.positionBox.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
 
@@ -669,7 +672,7 @@ class GuiStrip(Widget):
       return
 
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
-    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+    self.spectrumDisplay.showPeaks(peakListView, peaks)
 
   def _resetRemoveStripAction(self):
     """Update interface when a strip is created or deleted.

@@ -121,9 +121,11 @@ class GuiSpectrumDisplay(CcpnModule):
     # scroll area
     self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7), showBorder=True,
                                       hPolicy='expanding', vPolicy='expanding')
-    #TODO:GEERTEN check for this naming
-    self.stripFrame.guiSpectrumDisplay = self
     self.setScrollbarPolicies(horizontal='always')
+    self.stripFrame.setGridLayout()
+
+    #TODO:GEERTEN check for this naming
+    #self.stripFrame.guiSpectrumDisplay = self
 
     #
     #self.setEnabled(True)
@@ -170,7 +172,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def _handlePeakList(self, peakList):
     "See if peaklist can be copied"
-        spectrum = peakList.spectrum
+    spectrum = peakList.spectrum
     #TODO:GEERTEN: Ask rasmus how to match axis codes
     if spectrum.dimensionCount != self.strips[0].spectra[0].dimensionCount or \
       not True: # peakList.spectrum.axisCodes match

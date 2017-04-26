@@ -90,6 +90,7 @@ class _StripLabel(Label):
     else:
       self.show()
 
+  #TODO:GEERTEN: move notifier to here
   @staticmethod
   def _updateLabelText(nmrResidue:NmrResidue, oldPid:str):
     """Effect rename for NmrResidueLabel
@@ -107,7 +108,7 @@ class PlaneToolbar(ToolBar):
   #TODO: undocumented and needs refactoring ;
   def __init__(self, strip, callbacks, **kw):
 
-    ToolBar.__init__(self, strip.stripFrame, **kw)
+    ToolBar.__init__(self, strip, **kw)
 
     self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
                             hAlign='center', vAlign='top')

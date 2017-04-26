@@ -365,7 +365,7 @@ class Strip1d(coreClass, _GuiStrip1d):
   """1D strip"""
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
-    print('Strip1d>> project:', project, 'project._appBase:', project._appBase)
+    print('Strip1d> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
     # hack for now;
@@ -379,7 +379,7 @@ class StripNd(coreClass, _GuiStripNd):
   """ND strip """
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
-    print('StripNd>> project:', project, 'project._appBase:', project._appBase)
+    print('StripNd> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
     # hack for now;

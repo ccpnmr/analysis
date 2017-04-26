@@ -27,31 +27,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import typing
+
 import pyqtgraph as pg
-from functools import partial
+from PyQt4 import QtGui, QtCore, QtOpenGL
 
-from PyQt4 import QtGui, QtCore
-
-from ccpn.core.Project import Project
-from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
-
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Project import Project
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
+from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
-
-from ccpn.util.Colour import Colour
 from ccpn.util import Ticks
-import typing
-
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
-from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
-from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.util.Colour import Colour
 from ccpn.util.Logging import getLogger
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 logger = getLogger()
 
 class GuiStrip(Widget):
@@ -83,8 +77,7 @@ class GuiStrip(Widget):
                           grid=(0, self.spectrumDisplay.orderedStrips.index(self))
                     )
 
-    self.plotWidget = PlotWidget(parent=self, appBase=self.application,
-                                 useOpenGL=useOpenGL, strip=self,
+    self.plotWidget = PlotWidget(strip=self, useOpenGL=useOpenGL,
                                  hPolicy='expanding', vPolicy='expanding'
                                  )
 
@@ -825,3 +818,68 @@ def _setupGuiStrip(project:Project, apiStrip):
                                     axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
+
+
+class PlotWidget(pg.PlotWidget):
+
+  def __init__(self, strip, useOpenGL=False, **kw):
+
+    current = strip.spectrumDisplay.mainWindow.application.current
+    pg.PlotWidget.__init__(self, parent=strip,
+                           viewBox=ViewBox(current=current, parent=strip),
+                           axes=None, enableMenu=True)
+    self.setInteractive(True)
+    self.strip = strip
+    self.plotItem.setAcceptHoverEvents(True)
+    self.plotItem.setAcceptDrops(True)
+    self.plotItem.axes['left']['item'].hide()
+    self.plotItem.axes['right']['item'].show()
+    self.hideButtons()
+
+    if useOpenGL:
+      self.setViewport(QtOpenGL.QGLWidget())
+      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+
+  def __getattr__(self, attr):
+    """
+    Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.
+    """
+    try:
+      return super().__getattr__(attr)
+    except NameError:
+      raise AttributeError(attr)
+
+  def addItem(self, item:QtGui.QGraphicsObject):
+    """
+    Adds specified graphics object to the Graphics Scene of the PlotWidget.
+    """
+    self.scene().addItem(item)
+
+
+class AxisTextItem(pg.TextItem):
+
+  def __init__(self, plotWidget, orientation, axisCode=None, units=None, mappedDim=None):
+
+    self.plotWidget = plotWidget
+    self.orientation = orientation
+    self.axisCode = axisCode
+    self.units = units
+    self.mappedDim = mappedDim
+    if plotWidget.strip.spectrumDisplay.mainWindow.application.colourScheme == 'dark':
+      colour = '#f7ffff'
+    else:
+      colour = '#080000'
+    pg.TextItem.__init__(self, text=axisCode, color=colour)
+    if orientation == 'top':
+      self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
+      self.anchor = pg.Point(0, 1)
+    else:
+      self.setPos(plotWidget.plotItem.vb.boundingRect().topRight())
+      self.anchor = pg.Point(1, 0)
+    plotWidget.scene().addItem(self)
+
+  def _setUnits(self, units):
+    self.units = units
+
+  def _setAxisCode(self, axisCode):
+    self.axisCode = str(axisCode)

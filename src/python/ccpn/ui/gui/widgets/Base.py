@@ -192,9 +192,9 @@ class Base(DropBase):
     return row, col
 
   # Temporary hacks for now
-  @property
-  def _appBase(self):
-    return QtCore.QCoreApplication.instance()._ccpnApplication
+  # @property
+  # def _appBase(self):
+  #   return QtCore.QCoreApplication.instance()._ccpnApplication
 
   # @property
   # def mainWindow(self):

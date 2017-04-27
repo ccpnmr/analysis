@@ -55,6 +55,7 @@ lucidaGrande12        = Font('Lucida Grande', 12)
 lucidaGrande14        = Font('Lucida Grande', 14)
 
 # widgets and modules
+textFontSmall   = helvetica10        # general text font
 textFont        = helvetica12        # general text font
 textFontBold    = helveticaBold12    # general text font bold
 textFontLarge   = helvetica14        # general text font large

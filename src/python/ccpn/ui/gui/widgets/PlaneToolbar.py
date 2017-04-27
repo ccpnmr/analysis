@@ -105,6 +105,7 @@ class _StripLabel(Label):
         strip.planeToolbar.spinSystemLabel.setText(nmrResidue.id)
 
 
+#TODO:GEERTEN: complete this and replace
 class PlaneSelectorWidget(Widget):
   """
   This widget contains the buttons and entry boxes for selection of the plane
@@ -149,27 +150,15 @@ class PlaneSelectorWidget(Widget):
     print('spinBox chnaged to:', value)
 
   def _planeCountChanged(self, value):
-    print('planeCOunt changed to:', value)
+    print('planeCount changed to:', value)
 
 
 class PlaneToolbar(ToolBar):
   #TODO: undocumented and needs refactoring ;
+  # GWV: Does not work as a Widget!?
   def __init__(self, qtParent, strip, callbacks, **kw):
 
     ToolBar.__init__(self, parent=qtParent, **kw)
-
-    # self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
-    #                         hAlign='center', vAlign='top')
-    # self.stripIdLabel.setFixedHeight(15)
-    # self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    # self.addWidget(self.stripIdLabel)
-
-    # # Drop/draggable label
-    # self.spinSystemLabel = _StripLabel(self, text='', hAlign='center', vAlign='top')
-    # self.spinSystemLabel.setFixedHeight(20)
-    # self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-    #
-    # self.addWidget(self.spinSystemLabel)
 
     self.planeLabels = []
     self.planeCounts = []

@@ -35,7 +35,8 @@ import pyqtgraph as pg
 from PyQt4 import QtGui, QtOpenGL
 
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
-from ccpn.ui.gui import ViewBox
+from ccpn.ui.gui.widgets.ViewBox import ViewBox
+from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 
@@ -48,7 +49,7 @@ class PlotWidget(pg.PlotWidget, Base):
 
   def __init__(self, parent, application, useOpenGL=False, strip=None, showDoubleCrosshair=False, **kw):
 
-    self.viewBox = ViewBox.ViewBox(current=application.current, parent=parent, strip=strip)
+    self.viewBox = ViewBox(current=application.current, parent=parent, strip=strip)
     pg.PlotWidget.__init__(self, parent=parent,
                                  viewBox=self.viewBox,
                                  axes=None, enableMenu=True)
@@ -70,6 +71,7 @@ class PlotWidget(pg.PlotWidget, Base):
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
     #TODO:GEERTEN: Fix with proper stylesheet
+    # Also used in AxisTextItem
     if self.application.colourScheme == 'light':
       self.background = '#f7ffff'
       self.foreground = '#080000'
@@ -98,8 +100,8 @@ class PlotWidget(pg.PlotWidget, Base):
     self.addItem(self.grid)
 
     # Add two crosshairs
-    self.crossHair1 = ViewBox.CrossHair(parent=self, show=True, colour=self.foreground)
-    self.crossHair2 = ViewBox.CrossHair(parent=self, show=showDoubleCrosshair, colour=self.foreground)
+    self.crossHair1 = CrossHair(parent=self, show=True, colour=self.foreground)
+    self.crossHair2 = CrossHair(parent=self, show=showDoubleCrosshair, colour=self.foreground)
 
   def highlightAxes(self, state=False):
     "Highlight the axes on/of"

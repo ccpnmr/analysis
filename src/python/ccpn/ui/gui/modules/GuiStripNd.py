@@ -112,7 +112,13 @@ class GuiStripNd(GuiStrip):
     self.axesSwapped = False
 
     self.planeToolbar = None
-    self._addPlaneToolbar()
+
+    # TODO: this should be refactored; oddly: left-alignment goes wrong when using Widget's
+    # Adds the plane toolbar to the strip.
+    callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
+    self.planeToolbar = PlaneToolbar(self.stripToolBarWidget, strip=self, callbacks=callbacks, )
+    #                                 grid=(0,1), hPolicy='minimum', hAlign='left', vAlign='center')
+    self.stripToolBarWidget.addWidget(self.planeToolbar)
     #self.planeToolBar.hide()
     # test
     #PlaneSelectorWidget(qtParent=self.stripToolBarWidget, strip=self, axis=2, grid=(0,1))
@@ -406,17 +412,6 @@ class GuiStripNd(GuiStrip):
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
     self.logger.info("application.getByGid(%r).prevZPlane()" % self.pid)
-
-  # TODO: this should move to GuiStrip and StripNd should just hide this
-  def _addPlaneToolbar(self):
-    """
-    Adds the plane toolbar to the strip.
-    """
-    callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
-
-    self.planeToolbar = PlaneToolbar(qtParent=self.stripToolBarWidget, strip=self, callbacks=callbacks,
-                                     grid=(0, 1), hPolicy='expanding', hAlign='center', vAlign='center')
-    #self.planeToolbar.setMinimumWidth(250)
 
   def _setZPlanePosition(self, n:int, value:float):
     """

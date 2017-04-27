@@ -36,16 +36,23 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
+
+from ccpn.ui.gui.guiSettings import textFontSmall
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
+from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
-from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+
+
+
 from ccpn.util import Ticks
 from ccpn.util.Colour import Colour
-from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+
+from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 # 27/04/17 Functional revision number: 937d42fee2e1e32fb7c875669d4959e9590ef9be
@@ -91,16 +98,25 @@ class GuiStrip(Widget):
     qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))
 
     # placeholder for toolbar and a stripIdLabel; more items will be added by GuiStripNd and GuiStrip1d
-    self.stripToolBarWidget = Widget(parent=qtParent,
+    # TODO: oddly: left-alignment goes wrong when using Widget's
+    self.stripToolBarWidget = ToolBar(parent=qtParent,
                                      hPolicy='expanding', vAlign='top',
                                      grid=(1, self.spectrumDisplay.orderedStrips.index(self)))
     self.stripToolBarWidget.setFixedHeight(20)
 
     #TODO: correct once pid has been reviewed
     self.stripIdLabel = Label(parent=self.stripToolBarWidget,
-                              text='.'.join(self.id.split('.')[2:]),
-                              grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
-    self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+                              text='.'.join(self.id.split('.')[2:]))
+#                              grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    self.stripIdLabel.setFont(textFontSmall)
+    #self.stripIdLabel.setMaximumWidth(100)
+    #self.stripIdLabel.setMinimumWidth(100)
+    self.stripToolBarWidget.addWidget(self.stripIdLabel)
+
+    self.stripLabel = _StripLabel(parent=self.stripToolBarWidget, text='test')
+    self.stripLabel.setFont(textFontSmall)
+    self.stripToolBarWidget.addWidget(self.stripLabel)
+    self.stripLabel.hide()
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -157,6 +173,18 @@ class GuiStrip(Widget):
   def crossHairIsVisible(self):
     "True if crosshair is visible"
     return self.plotWidget.crossHair1.isVisible()
+
+  def setStripLabelText(self, text):
+    "Set the text of the stripLabel"
+    self.stripLabel.setText(text)
+
+  def showStripLabelText(self):
+    "Show the stripLabel"
+    self.stripLabel.show()
+
+  def hideStripLabelText(self):
+    "Hide the stripLabel"
+    self.stripLabel.hide()
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
@@ -622,11 +650,11 @@ def _axisRegionChanged(axis:'Axis'):
     try:
       if index == 0:
         # X axis
-        padding = strip._appBase.preferences.general.stripRegionPadding
+        padding = strip.application.preferences.general.stripRegionPadding
         strip.viewBox.setXRange(*region, padding=padding)
       elif index == 1:
         # Y axis
-        padding = strip._appBase.preferences.general.stripRegionPadding
+        padding = strip.application.preferences.general.stripRegionPadding
         strip.viewBox.setYRange(*region, padding=padding)
       else:
         # One of the Z axes
@@ -741,48 +769,10 @@ def _setupGuiStrip(project:Project, apiStrip):
 
   strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
-  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
-                                    axisCode=axisOrder[0])
-  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
-                                    axisCode=axisOrder[1])
+  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top', axisCode=axisOrder[0])
+  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left', axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
-
-
-class PlotWidget(pg.PlotWidget):
-
-  def __init__(self, strip, useOpenGL=False, **kw):
-
-    current = strip.spectrumDisplay.mainWindow.application.current
-    pg.PlotWidget.__init__(self, parent=strip,
-                           viewBox=ViewBox(current=current, parent=strip),
-                           axes=None, enableMenu=True)
-    self.setInteractive(True)
-    self.strip = strip
-    self.plotItem.setAcceptHoverEvents(True)
-    self.plotItem.setAcceptDrops(True)
-    self.plotItem.axes['left']['item'].hide()
-    self.plotItem.axes['right']['item'].show()
-    self.hideButtons()
-
-    if useOpenGL:
-      self.setViewport(QtOpenGL.QGLWidget())
-      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-
-  def __getattr__(self, attr):
-    """
-    Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.
-    """
-    try:
-      return super().__getattr__(attr)
-    except NameError:
-      raise AttributeError(attr)
-
-  def addItem(self, item:QtGui.QGraphicsObject):
-    """
-    Adds specified graphics object to the Graphics Scene of the PlotWidget.
-    """
-    self.scene().addItem(item)
 
 
 class AxisTextItem(pg.TextItem):
@@ -794,11 +784,7 @@ class AxisTextItem(pg.TextItem):
     self.axisCode = axisCode
     self.units = units
     self.mappedDim = mappedDim
-    if plotWidget.strip.spectrumDisplay.mainWindow.application.colourScheme == 'dark':
-      colour = '#f7ffff'
-    else:
-      colour = '#080000'
-    pg.TextItem.__init__(self, text=axisCode, color=colour)
+    pg.TextItem.__init__(self, text=axisCode, color=plotWidget.gridColour)
     if orientation == 'top':
       self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
       self.anchor = pg.Point(0, 1)

@@ -55,19 +55,19 @@ class SequenceModule(CcpnModule):
   QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
   """
 
-  def __init__(self, project):
+  def __init__(self, mainWindow):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
-    CcpnModule.__init__(self, name='Sequence', closable=False)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name='Sequence', closable=False)
 
-    self.project = project
-    self.colourScheme = project._appBase.colourScheme
+    self.project = mainWindow.application.project
+    self.colourScheme = mainWindow.application.colourScheme
     #self.label.hide()
+
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scrollArea.scene = QtGui.QGraphicsScene(self)
-    self.project = project
     self.scrollContents = QtGui.QGraphicsView(self.scrollArea.scene, self)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
@@ -84,10 +84,10 @@ class SequenceModule(CcpnModule):
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
     self.widgetHeight = 0 # dynamically calculated from the number of chains
-    if not project.chains:
+    if not self.project.chains:
       self._addChainLabel(placeholder=True)
     else:
-      for chain in project.chains:
+      for chain in self.project.chains:
         self._addChainLabel(chain)
 
     #GWV: removed fixed height restrictions but maximum height instead

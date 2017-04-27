@@ -531,6 +531,7 @@ class Framework:
                 else:
                   keysSeen.add(key)
                   func = getattr(self, MODULE_DICT[key])
+                  print('FrameWork._initLayout>', func)
                   func()
             else:
               _analyseContents(content)
@@ -541,9 +542,11 @@ class Framework:
     # ===
     # start of the actual method code
     # ===
-    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+    yamlPath = os.path.join(self.project.path, 'layouts', 'layout.yaml')
+    if os.path.exists(yamlPath):
+      #print('FrameWork._initLayout>', yamlPath)
       try:
-        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+        with open(yamlPath) as f:
           names, layout = yaml.load(f)
 
         typ, contents, state = layout['main']  # main window
@@ -987,26 +990,27 @@ class Framework:
       yaml.dump([currentModulesDict, layout], stream)
       stream.close()
 
-
-  def _restoreLayout(self):
-    import yaml, os
-    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
-      try:
-        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-          modulesDict, layoutState =  yaml.load(f)
-
-        import ccpn.ui.gui.modules as gm
-        ccpnModules = gm.importCcpnModules(modulesDict)
-        for ccpnModule in ccpnModules:
-          #FIXME: is this correct?
-          newModule = ccpnModule(self.project)
-          self.ui.mainWindow.moduleArea.addModule(newModule)
-
-        self.ui.mainWindow.moduleArea.restoreState(layoutState)
-
-      except Exception as e:
-        # for now just ignore restore failures
-        self.project._logger.warning("Layout restore failed: %s" % e)
+  # GWV while refactoring: This routine seems not to be called
+  #TODO:TJ: Confirm and delete
+  # def _restoreLayout(self):
+  #   import yaml, os
+  #   if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+  #     try:
+  #       with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+  #         modulesDict, layoutState =  yaml.load(f)
+  #
+  #       import ccpn.ui.gui.modules as gm
+  #       ccpnModules = gm.importCcpnModules(modulesDict)
+  #       for ccpnModule in ccpnModules:
+  #         #FIXME: is this correct?
+  #         newModule = ccpnModule(self.ui.gui.mainWindow)
+  #         self.ui.mainWindow.moduleArea.addModule(newModule)
+  #
+  #       self.ui.mainWindow.moduleArea.restoreState(layoutState)
+  #
+  #     except Exception as e:
+  #       # for now just ignore restore failures
+  #       self.project._logger.warning("Layout restore failed: %s" % e)
 
   #
   # def _openCcpnModule(self, ccpnModules, **kwargs):
@@ -1048,7 +1052,8 @@ class Framework:
       return self._saveProject(newPath=newPath, createFallback=createFallback,
                                overwriteExisting=overwriteExisting)
 
-  # This routine should not be used as it calls the graphics mainWindow routine
+  # GWV: This routine should not be used as it calls the graphics mainWindow routine
+  # Instead: The graphics part now calls _getRecentFiles
   #
   # def _updateRecentFiles(self, oldPath=None):
   #   project = self.project
@@ -1072,11 +1077,14 @@ class Framework:
     """Get and return a list of recent files, setting reference to
        self as first element, unless it is a temp project
        update the preferences with the new list
+       
+       CCPN INTERNAL: called by MainWindow
     """
     project = self.project
     path = project.path
     recentFiles = self.preferences.recentFiles
 
+    #TODO:RASMUS: replace by new function on project: isTemporary()
     if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
       if path in recentFiles:
         recentFiles.remove(path)
@@ -1368,9 +1376,10 @@ class Framework:
     """
     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
-    self.sequenceModule = SequenceModule(self.project)
-    self.ui.mainWindow.moduleArea.addModule(self.sequenceModule,
-                                            position=position, relativeTo=relativeTo)
+    mainWindow = self.ui.mainWindow
+    self.sequenceModule = SequenceModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.sequenceModule,
+                                    position=position, relativeTo=relativeTo)
     return self.sequenceModule
 
 

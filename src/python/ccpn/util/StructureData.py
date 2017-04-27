@@ -6,15 +6,15 @@
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:07 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 16:40:29 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ import numpy
 import pandas as pd
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
+
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
@@ -348,7 +349,7 @@ class EnsembleData(pd.DataFrame):
 
     Returns Pandas Series of booleans
     """
-    s = pd.Series((True,) * self.shape[0])
+    s = pd.Series((True,) * self.shape[0], index=self.index) #range(1,self.shape[0]+1))      # ejb
     if index is not None:
       s = s & self._indexSelector(index)
     if chainCodes is not None:
@@ -374,7 +375,7 @@ class EnsembleData(pd.DataFrame):
   def _stringSelector(self, expression:typing.Union[str, typing.Iterable[str]],
                       columnName:str) -> pd.Series:
     """Select column 'columnName' based on 'expression',
-    which must wither be or convert to a sequence of strings
+    which must either be or convert to a sequence of strings
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
@@ -385,6 +386,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     expression = [int(x) for x in expression]
@@ -395,6 +397,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     return self['modelNumber'].isin(expression)
@@ -404,6 +407,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     return self.index.isin(expression)
@@ -412,7 +416,7 @@ class EnsembleData(pd.DataFrame):
     """Select records based on 'expression',
     which must either be or convert to a sequence of string atom IDs
     """
-    s = pd.Series((False,) * self.shape[0])
+    s = pd.Series((False,) * self.shape[0], index=self.index)    # ejb
     if isinstance(expression, str):
       expression = listFromString(expression)
     for i in expression:
@@ -491,7 +495,7 @@ class EnsembleData(pd.DataFrame):
       *columnNames: All positional arguments indicate the columns to extract.
                     If there are no columnNames, all columns are extracted.
 
-      **kwargs: ALl keyword-value arguments are passed to the selector function.
+      **kwargs: All keyword-value arguments are passed to the selector function.
 
     Returns a new EnsembleData
     """
@@ -642,7 +646,7 @@ class EnsembleData(pd.DataFrame):
     colIndex = str(args[0])
     colExists = False
     if not colIndex:
-      raise ValueError('Row not specified')
+      raise ValueError('Column not specified')
     else:
       if colIndex in self.columns:       # the index must exist
         colExists = True
@@ -1155,10 +1159,17 @@ def valueToOptionalType(x, dataType:type, force=False) -> typing.Optional['dataT
     return x
 
   elif force:
-    return dataType(x)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # return dataType(x)
+    try:
+      return dataType(x)
+    except:
+      raise TypeError("Value %s does not correspond to type %s" % (x, dataType))
+    #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   else:
-    raise ValueError("Value %s does not correspond to type %s" % (x, dataType))
+    raise TypeError("Value %s does not correspond to type %s" % (x, dataType))
 
 
 def valueToOptionalInt(x, force:bool=False) -> typing.Optional[int]:
@@ -1184,7 +1195,7 @@ def valueToOptionalInt(x, force:bool=False) -> typing.Optional[int]:
       return int(x)
 
   else:
-    raise ValueError("Value %s does not correspond to an integer" % x)
+    raise TypeError("Value %s does not correspond to an integer" % x)
 
 
 def pdb2df(filename:str) -> pd.DataFrame:

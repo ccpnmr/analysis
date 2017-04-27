@@ -36,8 +36,8 @@ from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 
-from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
 
 from ccpn.util.Colour import Colour
 from ccpn.util import Ticks
@@ -67,27 +67,33 @@ class GuiStrip(Widget):
     This module inherits attributes from the Strip wrapper class
     """
 
+    self.qtParent = qtParent
     # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
     # self.spectrumDisplay = spectrumDisplay
     self.application = application
     self.current = application.current
 
-    print('GuiStrip>>>', self.spectrumDisplay, application)
+    print('GuiStrip>>>', qtParent, self.spectrumDisplay, application)
 
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
-    Widget.__init__(self, acceptDrops=True, hPolicy='expanding', vPolicy='expanding',
+    Widget.__init__(self, parent=self.qtParent, setLayout=True,
+                          acceptDrops=True, hPolicy='expanding', vPolicy='minimal',
                           grid=(0, self.spectrumDisplay.orderedStrips.index(self))
                     )
     self.setMinimumWidth(200)
+    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     self.plotWidget = PlotWidget(parent=self, application=self.application,
                                  useOpenGL=useOpenGL, strip=self,
-                                 showDoubleCrosshair=application.preferences.general.doubleCrossHair,
-                                 hPolicy='expanding', vPolicy='expanding'
-                                 )
-
+                                 showDoubleCrosshair=application.preferences.general.doubleCrossHair)
+    # Have to add it to qtParent to make this work, while have self as parent
     qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))
+
+    # placeholder for toolbar
+    self.stripToolBarWidget = Widget(parent=qtParent,
+                                     hPolicy='expanding', vAlign='top',
+                                     grid=(1, self.spectrumDisplay.orderedStrips.index(self)))
 
     # Strip needs access to plotWidget's items and info
     self.plotItem = self.plotWidget.plotItem
@@ -330,11 +336,11 @@ class GuiStrip(Widget):
       if _widthsChangedEnough(stripYRange, yRange):
         strip.viewBox.setYRange(*yRange, padding=0)
 
+  #TODO:WAYNE: Make this part of PlotWidget, pass axes label strings on init (
   def _moveAxisCodeLabels(self):
     """
     Puts axis code labels in the correct place on the PlotWidget
     """
-    pass
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -436,12 +442,18 @@ class GuiStrip(Widget):
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
 
+  #TODO:WAYNE: this should move to PlotWidget
   def _mouseMoved(self, positionPixel):
     """
     Updates the position of the crosshair when the mouse is moved.
     """
     if self.isDeleted:
       return
+
+    #TODO:WAYNE: PlotObject has lastMousePos, but it has the same 'Scene' coordinates, i.e. not world (ppm) coordinates)
+    # We need a property lastMousePosition which gets the mouse position in world coordinates
+    # and calls self.plotWidget.something to get this
+    #print('>_mouseMoved>', self, self.plotWidget.lastMousePos, positionPixel)
 
     # position is in pixels
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
@@ -460,7 +472,7 @@ class GuiStrip(Widget):
         axisPositionDict[self._crosshairCode(axis.code)] = pos
         position.append(pos)
       self.mousePosition = tuple(position) # position is in ppm
-      #TODO:WAYNE: replace with appropriate mechanism base on QT notifier
+      #TODO:WAYNE: replace with appropriate object
       for window in self.application.project.windows:
         window._setCrossHairPosition(axisPositionDict)
 

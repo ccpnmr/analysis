@@ -94,7 +94,7 @@ class Frame(QtGui.QFrame, Base):
       'vLine':       QtGui.QFrame.VLine,
   }
 
-  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None, **kwds):
+  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None, setLayout=False, **kwds):
     """
     Initialise a Frame with optional border and layout
 
@@ -122,7 +122,7 @@ class Frame(QtGui.QFrame, Base):
       #print('>>', styleSheet)
       self.setStyleSheet('QFrame {' + styleSheet + '}')
 
-    Base.__init__(self, **kwds)
+    Base.__init__(self, setLayout=setLayout, **kwds)
 
     # define frame styles
     if fShape or fShadow:

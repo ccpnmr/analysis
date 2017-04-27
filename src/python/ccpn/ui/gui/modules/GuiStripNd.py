@@ -94,7 +94,7 @@ class GuiStripNd(GuiStrip):
                       )
 
     self.qtParent = qtParent
-    # For now, cannot set this attribute as it is owned by the wrapper class
+    # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
     # self.spectrumDisplay = spectrumDisplay
     self.application = application
     self.mainWindow = self.spectrumDisplay.mainWindow
@@ -409,12 +409,9 @@ class GuiStripNd(GuiStrip):
     """
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
-    self.planeToolbar = PlaneToolbar(qtParent=self.qtParent,
-                                     strip=self,
-                                     grid=(1, self.spectrumDisplay.orderedStrips.index(self)),
-                                     hPolicy='extending',
-                                     hAlign='center', vAlign='center', callbacks=callbacks)
-    self.planeToolbar.setMinimumWidth(250)
+    self.planeToolbar = PlaneToolbar(qtParent=self.stripToolBarWidget, strip=self, callbacks=callbacks,
+                                     grid=(0, 0), hAlign='left', vAlign='center')
+    #self.planeToolbar.setMinimumWidth(250)
 
   def _setZPlanePosition(self, n:int, value:float):
     """

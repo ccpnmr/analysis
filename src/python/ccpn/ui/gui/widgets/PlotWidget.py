@@ -40,20 +40,19 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 
 
-#TODO:WAYNE: this class could be moved into GuiStrip
+#TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
 # as it is only there and is just a small wrapper arount a pyqtgraph class
-# goes together with AxisTextItem
-#TODO:WAYNE: should this inherit from Base!! is layout in pyqtgraph is different to Base???
+# goes together with AxisTextItem (probably can be reduced to a function and included here.
+#TODO:WAYNE: should this inherit from Base??
 class PlotWidget(pg.PlotWidget, Base):
 
-  def __init__(self, parent, application, useOpenGL=False, strip=None, showDoubleCrosshair=True, **kw):
+  def __init__(self, parent, application, useOpenGL=False, strip=None, showDoubleCrosshair=False, **kw):
 
     self.viewBox = ViewBox.ViewBox(current=application.current, parent=parent, strip=strip)
     pg.PlotWidget.__init__(self, parent=parent,
                                  viewBox=self.viewBox,
                                  axes=None, enableMenu=True)
-
-    Base.__init__(self, acceptDrops=True, **kw)
+    Base.__init__(self, **kw)
 
     self.application = application
     self.strip = strip
@@ -95,7 +94,7 @@ class PlotWidget(pg.PlotWidget, Base):
       axisItem.setPen(color=self.foreground)
 
     # add grid
-    self.grid = CcpnGridItem(self.gridColour)
+    self.grid = CcpnGridItem(gridColour=self.gridColour)
     self.addItem(self.grid)
 
     # Add two crosshairs

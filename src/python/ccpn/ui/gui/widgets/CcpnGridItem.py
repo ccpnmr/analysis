@@ -34,7 +34,6 @@ __all__ = ['CcpnGridItem']
 
 class CcpnGridItem(UIGraphicsItem):
 
-
     def __init__(self, gridColour):
         UIGraphicsItem.__init__(self)
         self.picture = None
@@ -49,8 +48,6 @@ class CcpnGridItem(UIGraphicsItem):
         if self.picture is None:
             self.generatePicture()
         p.drawPicture(QtCore.QPointF(0, 0), self.picture)
-
-
 
     def generatePicture(self):
         self.picture = QtGui.QPicture()

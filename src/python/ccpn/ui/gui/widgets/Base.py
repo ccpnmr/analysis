@@ -70,8 +70,9 @@ POLICY_DICT = {
 class Base(DropBase):
 
   def __init__(self, tipText=None,
-                     grid=(None, None), gridSpan=(1,1), stretch=(0,0),
-                     hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
+                     grid=(None, None), gridSpan=(1,1), stretch=(0,0), setLayout=False,
+                     hAlign=None, vAlign=None,
+                     hPolicy=None, vPolicy=None,
                      bgColor=None, fgColor=None,
                      isFloatWidget=False,
                      acceptDrops=False
@@ -148,9 +149,8 @@ class Base(DropBase):
       #rgb = QtGui.QColor(fgColor).getRgb()[:3]
       self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  fgColor)
 
-    #layout = self.getLayout()
-    #if layout is not None:
-    #  layout.setContentsMargins(0, 0, 0, 0)
+    if setLayout:
+      self.setGridLayout()
 
   def setGridLayout(self):
     "Add a QGridlayout to self"

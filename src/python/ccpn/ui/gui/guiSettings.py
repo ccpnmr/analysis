@@ -73,6 +73,30 @@ LIGHT = 'light'
 DARK = 'dark'
 COLOUR_SCHEMES = (LIGHT, DARK)
 
+MARK_LINE_COLOUR_DICT = {
+  'CA': '#0000FF',
+  'CB': '#0024FF',
+  'CG': '#0048FF',
+  'CD': '#006DFF',
+  'CE': '#0091FF',
+  'CZ': '#00B6FF',
+  'CH': '#00DAFF',
+  'C': '#00FFFF',
+  'HA': '#FF0000',
+  'HB': '#FF0024',
+  'HG': '#FF0048',
+  'HD': '#FF006D',
+  'HE': '#FF0091',
+  'HZ': '#FF00B6',
+  'HH': '#FF00DA',
+  'H': '#FF00FF',
+  'N': '#00FF00',
+  'ND': '#3FFF00',
+  'NE': '#7FFF00',
+  'NZ': '#BFFF00',
+  'NH': '#FFFF00',
+}
+
 def getColourScheme():
   """
   :return: colourScheme

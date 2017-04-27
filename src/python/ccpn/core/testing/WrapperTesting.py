@@ -11,22 +11,21 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:35 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:47 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import os
 import unittest
 import contextlib
@@ -34,6 +33,33 @@ import contextlib
 from ccpn.framework import Framework
 
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
+
+
+#=========================================================================================
+# checkGetSetAttr
+#=========================================================================================
+
+def checkGetSetAttr(cls, func, funcAttribute, funcParam, *funcOut):
+  """
+  Test that the object has a populated attribute.
+  Read the attribute using getattr(), if it not populated then an error is raised.
+  If populated, then test the setter/getter are consistent.
+
+  :param func:
+  :param funcAttribute:
+  :param funcParam:
+  """
+  thisParam = getattr(func, funcAttribute)
+  setattr(func, funcAttribute, funcParam)
+  if not funcOut:
+    cls.assertEqual(getattr(func, funcAttribute), funcParam)
+  else:
+    cls.assertEqual(getattr(func, funcAttribute), funcOut[0])
+
+
+#=========================================================================================
+# WrapperTesting
+#=========================================================================================
 
 class WrapperTesting(unittest.TestCase):
   """Base class for all testing of wrapper code that requires projects."""

@@ -4,24 +4,22 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
                "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:59 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 16:40:29 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -222,7 +220,7 @@ del getter
 
 # Connections to parents:
 
-def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None,
+def _newSampleComponent(self:Sample, name:str=None, labelling:str=None, role:str=None,    # ejb
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
@@ -239,11 +237,30 @@ def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None
      )
   )
 
-  for ss in (name, labelling):
-    if ss and Pid.altCharacter in ss:
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+  # for ss in (name, labelling):
+  #   if ss and Pid.altCharacter in ss:
+  #     raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+  #                      (Pid.altCharacter, name, labelling))
+  #
+  if not isinstance(name, str):
+    raise TypeError("ccpn.SampleComponent name must be a string")     # ejb
+  elif not name:
+    raise ValueError("ccpn.SampleComponent name must be set")         # ejb
+  elif Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+           (Pid.altCharacter, name, labelling))
+
+  if labelling is not None:        # 'None' caught by below as default
+    if not isinstance(labelling, str):
+      raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")   # ejb
+    elif not labelling:
+      raise ValueError("ccpn.SampleComponent 'labelling' name must be set")       # ejb
+    elif Pid.altCharacter in labelling:
       raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
                        (Pid.altCharacter, name, labelling))
-
+  #
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   if concentrationUnit not in Constants.concentrationUnits:
     self._project._logger.warning(

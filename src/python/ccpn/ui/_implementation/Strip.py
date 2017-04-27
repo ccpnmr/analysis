@@ -277,7 +277,7 @@ class Strip(AbstractWrapperObject):
 
 
   def findAxis(self, axisCode):
-    """Reset display to original axis order"""
+    """Find axis"""
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
   def displaySpectrum(self, spectrum:Spectrum, axisOrder:Sequence=()):

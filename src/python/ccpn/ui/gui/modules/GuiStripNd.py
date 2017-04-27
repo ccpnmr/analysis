@@ -30,15 +30,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__author__ = "$Author: CCPN $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,19 +72,71 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class GuiStripNd(GuiStrip):
+  """
+  Main Strip for Nd spectra object
+
+  This module inherits the following attributes from the Strip wrapper class:
+
+  serial          serial number of Strip, used in Pid and to identify the Strip
+                    :return <str>
+  axisCodes         Fixed string Axis codes in original display order
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  axisOrder         String Axis codes in display order, determine axis display order
+                      axisOrder = <sequence>:(X, Y, Z1, Z2, ...)
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  positions         Axis centre positions, in display order
+                      positions = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  widths            Axis display widths, in display order
+                      widths = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  units             Axis units, in display order
+                      :return <Tuple>
+  spectra           List of the spectra attached to the strip
+                    (whether display is currently turned on or not)
+                      :return <Tuple>:(<Spectrum>, ...)
+
+  delete            Delete a strip
+  clone             Create new strip that duplicates this one, appending it at the end
+  moveTo            Move strip to index newIndex in orderedStrips
+                      moveTo(newIndex:int)
+                        :param newIndex:<int> new index position
+  resetAxisOrder    Reset display to original axis order
+  findAxis          Find axis
+                      findAxis(axisCode)
+                        :param axisCode:
+                        :return axis
+  displaySpectrum   Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+                      displaySpectrum(spectrum:Spectrum, axisOrder:Sequence=()
+                        :param spectrum:<Spectrum> additional spectrum to display
+                        :param axisOrder:<Sequence>=() new axis ordering
+  peakIsInPlane     Return whether the peak is in currently displayed planes for strip
+                      peakIsInPlane(peak:Peak)
+                        :param peak:<Peak> peak of interest
+                        :return <bool>
+  peakIsInFlankingPlane   Return whether the peak is in planes flanking currently displayed planes for strip
+                            peakIsInFlankingPlane(peak:Peak)
+                              :param peak:<Peak> peak of interest
+                              :return <bool>
+  peakPickPosition  Pick peak at position for all spectra currently displayed in strip
+                      peakPickPosition(position:List[float])
+                        :param position:<List> coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  peakPickRegion    Peak pick all spectra currently displayed in strip in selectedRegion
+                      selectedRegion:List[List[float])
+                        :param selectedRegion:<List>  of <List> of coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  """
+  # TODO:ED: complete the above; also port to GuiStrip1d
 
   def __init__(self, qtParent, spectrumDisplay, application):
     """
-    Main Strip for Nd spectra object
+    Initialise Nd spectra object
 
     :param qtParent: QT parent to place widgets
     :param spectrumDisplay: spectrumDisplay instance
     :param application: application instance
-
-    This module inherits the following attributes from the Strip wrapper class
     """
-    # TODO:ED: complete the above; also port to GuiStrip1d
-
     print('GuiStripNd>>', qtParent, self.spectrumDisplay, application)
     GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay,
                             application=application, useOpenGL=True

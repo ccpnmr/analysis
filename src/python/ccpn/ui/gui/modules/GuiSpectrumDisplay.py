@@ -60,15 +60,73 @@ QtCore.qInstallMsgHandler(lambda *args: None)
 
 
 class GuiSpectrumDisplay(CcpnModule):
+  """
+  Main spectrum display Module object.
+
+  This module inherits the following attributes from the SpectralDisplay wrapper class:
+
+  getName           Name of spectrumDisplay;
+                      :return <str>
+  stripDirection    Strip axis direction
+                      :return <str>:('X', 'Y', None) - None only for non-strip plots
+  stripCount        Number of strips
+                      :return <str>.
+  comment           Free-form text comment
+                      comment = <str>
+                      :return <str>
+  axisCodes         Fixed string Axis codes in original display order
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  axisOrder         String Axis codes in display order, determine axis display order
+                      axisOrder = <sequence>:(X, Y, Z1, Z2, ...)
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  is1D              True if this is a 1D display
+                      :return <bool>
+  window            Gui window showing SpectrumDisplay
+                      window = <Window>
+                      :return <Window>
+  nmrResidue        NmrResidue attached to SpectrumDisplay
+                      nmrResidue = <NmrResidue>
+                      :return <NmrResidue>
+  positions         Axis centre positions, in display order
+                      positions = <Tuple>
+                      :return <Tuple>
+  widths            Axis display widths, in display order
+                      widths = <Tuple>
+                      :return <Tuple>
+  units             Axis units, in display order
+                      :return <Tuple>
+
+  parameters        Keyword-value dictionary of parameters.
+                      NB the value is a copy - modifying it will not modify the actual data.
+                      Values can be anything that can be exported to JSON,
+                      including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
+                      or pandas DataFrame, Series, or Panel
+                      :return <dict>
+  setParameter      Add name:value to parameters, overwriting existing entries
+                      setParameter(name:str, value)
+                        :param name:<str> name of parameter
+                        :param value: value to set
+  deleteParameter   Delete parameter
+                      deleteParameter(name:str)
+                        :param name:<str> name of parameter to delete
+  clearParameters   Delete all parameters
+  updateParameters  Update list of parameters
+                      updateParameters(value:dict)
+                        :param value:<dict> parameter list
+
+  resetAxisOrder    Reset display to original axis order
+  findAxis          Find axis
+                      findAxis(axisCode)
+                        :param axisCode:
+                        :return axis
+  """
 
   def __init__(self, mainWindow, name):
     """
-    Main spectrum display Module object
+    Initialise the Gui spectrum display object
     
     :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
-    
-    This module inherits the following attributes from the SpectralDisplay wrapper class
     """
     #TODO:ED: complete the above
 

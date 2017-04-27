@@ -253,10 +253,11 @@ class Undo(deque):
     elif self.maxWaypoints:
       undoTo = -1
       for val in self.waypoints:
-        if val < self.nextIndex -1:
+        if val < self.nextIndex-1:
           undoTo = val
         else:
           break
+          # pass            # ejb
     else:
       undoTo = max(self.nextIndex - 2, -1)
 

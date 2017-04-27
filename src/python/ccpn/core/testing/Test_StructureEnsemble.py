@@ -11,55 +11,37 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:01 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:47 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Ed Brooksbank $"
+__date__ = "$Date: 2017-03-30 15:03:06 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import numpy
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+import numpy
+from unittest import expectedFailure
+from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
 from ccpn.framework import Framework
 
 
-class StructureEnsembleTesting(WrapperTesting):
+#=========================================================================================
+# StructureEnsembleTesting    No loaded project
+#=========================================================================================
 
-  # Path of project to load (None for new project)
-  projectPath = 'CcpnCourse3e'
-
-
-  def test_haveEnsemble(self):
-    assert len(self.project.structureEnsembles) > 0
-
-    self.project._wrappedData.root.checkAllValid(complete=True)
-
-  def test_getModels(self):
-    models = self.project.structureEnsembles[0].models
-    assert len(models) > 0
-    assert len(models) == 20
-
-  def test_coords(self):
-    data = self.project.structureEnsembles[0].data
-    self.assertEquals(data.shape, (29680, 17))
-
-
-class StructureEnsembleTesting2(WrapperTesting):
+class StructureEnsembleTesting_None(WrapperTesting):
 
   # Path of project to load (None for new project)
   projectPath = None
 
-  def test_load_structure(self):
+  def _test_load_structure(self):
     self.loadData('../structures/2CPP.pdb')
     ensemble = self.project.structureEnsembles[0]
     self.assertEqual( len(ensemble.models), 1)
@@ -86,3 +68,93 @@ class StructureEnsembleTesting2(WrapperTesting):
         print ('\n\n@~@~', tag, '\n', data[tag].value_counts())
     finally:
       loadedProject.delete()
+
+
+#=========================================================================================
+# StructureEnsembleTesting    Loaded project
+#=========================================================================================
+
+class StructureEnsembleTesting_Project(WrapperTesting):
+  """
+  Test StructureEnsemble with a pre-loaded valid project
+  """
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse3e'
+
+
+  def _test_haveEnsemble(self):
+    # assert len(self.project.structureEnsembles) > 0
+    #
+    self.assertGreater(len(self.project.structureEnsembles), 0)
+
+    self.project._wrappedData.root.checkAllValid(complete=True)
+
+    models = self.project.structureEnsembles[0].models
+    # assert len(models) > 0
+    # assert len(models) == 20
+    #
+    self.assertGreater(len(models), 0)
+    self.assertEquals(len(models), 20)
+
+    data = self.project.structureEnsembles[0].data
+    self.assertEquals(data.shape, (29680, 17))
+
+
+  def _test_getModels(self):
+    models = self.project.structureEnsembles[0].models
+    # assert len(models) > 0
+    # assert len(models) == 20
+    #
+    self.assertGreater(len(models), 0)
+    self.assertEquals(len(models), 20)
+
+  def _test_coords(self):
+    data = self.project.structureEnsembles[0].data
+    self.assertEquals(data.shape, (29680, 17))
+
+
+#=========================================================================================
+# StructureEnsembleTesting      Properties
+#=========================================================================================
+
+class StructureEnsembleTesting_Properties(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
+  #=========================================================================================
+  # setUp       initialise a newStructureEnsemble
+  #=========================================================================================
+
+  def setUp(self):
+    """
+    Create a valid empty structureEnsemble
+    """
+    with self.initialSetup():
+      self.ensemble = self.project.newStructureEnsemble()
+
+  #=========================================================================================
+  # test_properties_structuresEnsemble
+  #=========================================================================================
+
+  def test_properties_structuresEnsemble_Serial(self):
+    """
+    Test that structureEnsemble attribute .serial is populated.
+    Read the attribute, if it not populated then an error is raised.
+    """
+    self.assertEqual(self.project.structureEnsembles[0].serial, 1)
+
+  def test_properties_structuresEnsemble_Label(self):
+    """
+    Test that structureEnsemble attribute .label is populated.
+    Read the attribute, if it not populated then an error is raised.
+    If no error, then test the setter by setting and then getting to check consistent.
+    """
+    checkGetSetAttr(self, self.project.structureEnsembles[0], 'label', 'ValidName')
+
+  def test_properties_structuresEnsemble_Comment(self):
+    """
+    Test that structureEnsemble attribute .comment is populated.
+    """
+    checkGetSetAttr(self, self.project.structureEnsembles[0], 'comment', 'ValidComment')
+

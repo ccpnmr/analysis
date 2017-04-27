@@ -11,24 +11,24 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:01 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import collections
 from ccpn.core.lib.MoleculeLib import duplicateAtomBonds
+
 
 boundAtomsTestData = collections.OrderedDict((
   ('A.1.CYS.C',['CA', 'O', 'A.2.ASP.N']),
@@ -236,6 +236,12 @@ class ChainTest(WrapperTesting):
     self.assertEquals([x._id for x in atom2.boundAtoms], ['A.1.CYS.SG', 'B.3.CYS.CB'])
 
     chainc = chaina.clone()
+
+    # first error here
+    # constraint
+    # linking_and_descriptor_must_be_consistent_with_Atoms_and_LinkEnds
+    # violated: < ccp.molecule.MolSystem.Residue['default', 'C', 3] >
+
     chaind = chainb.clone()
     duplicateAtomBonds(({chaina:chainc, chainb:chaind}))
     project._wrappedData.checkAllValid(complete=True)

@@ -11,47 +11,263 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:35 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:46 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+from unittest import expectedFailure
 from ccpn.framework import Framework
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
-class NoteTest(WrapperTesting):
+#=========================================================================================
+# NoteTest_SetUp
+#=========================================================================================
+
+class NoteTest_setUp(WrapperTesting):
 
   # Path of project to load (None for new project)
   projectPath = None
 
-  def test_make_and_save_note(self):
-    self.project.newNote(text='Balaclava')
+  #=========================================================================================
+  # setUp       initialise a new project
+  #=========================================================================================
+
+  def setUp(self):
+    """
+    Create a valid Note of name 'Validname'
+    """
+    with self.initialSetup():
+      self.note = self.project.newNote(name='ValidNote')
+
+  #=========================================================================================
+  # test_rename_Note          functions to test bad renames
+  #=========================================================================================
+
+  def test_rename_Note_ES(self):
+    """
+    Test that renaming to '' raises an error and does not alter the original Note.
+    ^ is a bad character and not to be included in strings.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Note name must be set'):
+      self.note.rename('')
+    self.assertEqual(self.note.name, 'ValidNote')
+
+  def test_rename_Note_Badname(self):
+    """
+    Test that renaming to '^Badname' raises an error and does not alter the original Note.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.note.rename('^Badname')
+    self.assertEqual(self.note.name, 'ValidNote')
+
+  def test_rename_Note_None(self):
+    """
+    Test that renaming to None raises an error and does not alter the original Note.
+    """
+    with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+      self.note.rename(None)
+    self.assertEqual(self.note.name, 'ValidNote')
+
+  def test_rename_Note_Int(self):
+    """
+    Test that renaming to 42 (non-string) raises an error and does not alter the original Note.
+    """
+    # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+    #   self.note.rename(42)
+    #
+    with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+      self.note.rename(42)
+    self.assertEqual(self.note.name, 'ValidNote')
+
+  #=========================================================================================
+  # test_undo_Note
+  #=========================================================================================
+
+  def test_undo_Note(self):
+    """
+    Create an Undo point and check that the original/changed names are correct.
+    """
+    undo = self.project._undo
+    undo.newWaypoint()                                    # set a recovery point
+
+    self.note.rename('Changed')
+    self.assertEqual(self.note.name, 'Changed')
+
+    undo.undo()
+    self.assertEqual(self.note.name, 'ValidNote')         # revert to the original name
+
+    undo.redo()
+    self.assertEqual(self.note.name, 'Changed')           # redo
+
+  #=========================================================================================
+  # test_properties_Note      Properties
+  #=========================================================================================
+
+  def test_properties_Note_Serial(self):
+    """
+    Test that Note attribute .serial is populated.
+    """
+    self.assertEqual(self.note.serial, 1)
+
+  def test_properties_Note_Name(self):
+    """
+    Test that Note attribute .name is populated.
+    """
+    self.assertEqual(self.note.name, 'ValidNote')
+
+  def test_properties_Note_Text(self):
+    """
+    Test that Note attribute .text is populated.
+    """
+    self.assertEqual(self.note.text, None)
+
+  def test_properties_Note_Header(self):
+    """
+    Test that Note attribute .header is populated.
+    """
+    self.assertEqual(self.note.header, None)
+
+  #=========================================================================================
+  # test_properties_Note
+  #=========================================================================================
+
+  def test_properties_Note_None(self):
+    """
+    Test that text setter is setting the .header correctly.
+    Read the attribute, if it not populated then an error is raised.
+    If no error, then test the setter by setting and then getting to check consistent.
+    """
+    text = self.note.text
+    self.note.text = None
+    self.assertEqual(self.note.header, None)
+
+  def test_properties_Note_ES(self):
+    """
+    Test that text setter is setting the .header correctly.
+    """
+    self.note.text = ''
+    self.assertEqual(self.note.header, None)
+
+  def test_properties_Note_S(self):
+    """
+    Test that text setter is setting the .header correctly.
+    """
+    self.note.text = 'Changed Header'
+    self.assertEqual(self.note.header, 'Changed Header')
+
+  def test_properties_Note_Int(self):
+    """
+    Test that text setter does not accept a non-string.
+    """
+    # with self.assertRaisesRegexp(ApiError, 'String input is not of a valid type'):
+    #   self.note.text = 42
+    #
+    with self.assertRaisesRegexp(TypeError, 'Note name text must be a string'):
+      self.note.text = 42
+    self.assertEqual(self.note.header, None)
+
+  #=========================================================================================
+  # test_properties_Note      expectedFailure
+  #=========================================================================================
+
+  # @expectedFailure                          remove this as we want to see the failure
+  def test_properties_Note_created(self):
+    """
+    Test that Note attribute .created returns an strftime of Note creation time.
+
+    This is an expectedFailure as .created has not been populated.
+    """
+    created = self.note.created
+
+  # @expectedFailure                          remove this as we want to see the failure
+  def test_properties_Note_lastModified(self):
+    """
+    Test that Note attribute .lastModified returns an strftime of Note modification time.
+
+    This is an expectedFailure as .lastModified has not been populated.
+    """
+    lastModified = self.note.lastModified
+
+  #=========================================================================================
+  # test_make_and_save_Note
+  #=========================================================================================
+
+  def test_make_and_save_Note(self):
+    """
+    Test that the project can be saved and loaded.
+    """
+    self.project.newNote(text='test_make_and_save_Note')
     self.assertTrue(self.project.save())
+    #
     # loadedProject = core.loadProject(self.project.path)
     loadedProject = Framework.createFramework(projectPath=self.project.path).project
     loadedProject.delete()
 
-  def test_rename_note(self):
-    note = self.project.newNote(name='patty')
-    undo = self.project._undo
-    undo.newWaypoint()
-    note.rename('cake')
-    self.assertEqual(note.name, 'cake')
-    undo.undo()
-    self.assertEqual(note.name, 'patty')
-    undo.redo()
-    self.assertEqual(note.name, 'cake')
+#=========================================================================================
+# NoteTest_No_setUp
+#=========================================================================================
+
+class NoteTest_No_setUp(WrapperTesting):
+
+  #=========================================================================================
+  # test_newNote            functions to create new Notes
+  #=========================================================================================
+
+  def test_newNote(self):
+    """
+    Test that creating a new Note with no parameter creates a valid Note.
+    """
+    self.note = self.project.newNote()
+    self.assertEqual(self.note.name, 'Note')  # check that default name has been set 'Note'
+
+  def test_newNote_ES(self):
+    """
+    Test that creating a new Note with '' raises an error.
+    """
+    # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
+    #   self.project.newNote('')
+    #
+    with self.assertRaisesRegexp(ValueError, 'Note name must be set'):
+      self.project.newNote('')
+
+  def test_newNote_Badname(self):
+    """
+    Test that creating a new Note with '^Badname' raises an error.
+    ^ is a bad character and not to be included in strings.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.project.newNote('^Badname')
+
+  def test_newNote_None(self):
+    """
+    Test that creating a new Note with None raises an error.
+    """
+    # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
+    #   self.project.newNote(None)
+    #
+    with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+      self.project.newNote(None)
+
+  def test_newNote_Int(self):
+    """
+    Test that creating a new Note with 42 (non-string) raises an error.
+    """
+    # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+    #   self.project.newNote(42)
+    #
+    with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+      self.project.newNote(42)
 

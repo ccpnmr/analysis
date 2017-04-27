@@ -768,6 +768,7 @@ class EnsembleData(pd.DataFrame):
     if containingObject is not None:
       # undo and echoing
       containingObject._startCommandEchoBlock('data.setValues', values=kwargs)
+      undo = containingObject._project._undo      # ejb
 
     try:
       # We must do this one by one - passing in the dictionary
@@ -777,14 +778,18 @@ class EnsembleData(pd.DataFrame):
       # Type handling is done there and can be skipped here.
       # NB, various obvious alternatives, like just setting the row, do NOT work.
 
+      undo.increaseBlocking()       # ejb
       tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
       for key,val in values.items():
         self.loc[index, key] = val
+      undo.decreaseBlocking()       # ejb
 
     finally:
       if containingObject is not None:
         containingObject._endCommandEchoBlock()
 
+    # ejb/Rasmus removed here, should be covered by __setItem__
+    # must be this way around, otherwise setValues with new column gets transposed
     if containingObject is not None:
       undo = containingObject._project._undo
       if undo is not None:
@@ -917,7 +922,7 @@ class EnsembleData(pd.DataFrame):
         project = containingObject._project
         project.blankNotification()
         undo = project._undo
-        undo.increaseBlocking()
+        # undo.increaseBlocking()       # ejb
 
       # WE need a copy, not a view, as this is used for undoing etc.
       oldValue = self.get(key)
@@ -947,7 +952,6 @@ class EnsembleData(pd.DataFrame):
             super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
           else:
             super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
-
 
         if firstData:
           self.reset_index(drop=True, inplace=True)
@@ -980,8 +984,24 @@ class EnsembleData(pd.DataFrame):
         if containingObject is not None:
           project._endCommandEchoBlock()
           project.unblankNotification()
-          undo.decreaseBlocking()
+          # undo.decreaseBlocking()          # ejb
 
+      # if containingObject is not None:
+      #   # WARNING This code is also called when you do ModelData.__setitem__
+      #   # In those cases containingObject is temporarily rest to the Model object
+      #   # Any bugs/modifications that arise in this code must consider ModelData as well
+      #   undo = containingObject._project._undo
+      #   if undo is not None:
+      #     # set up undo functions
+      #     if oldValue is None:
+      #       # undo addition of new column
+      #       undo.newItem(self.drop, self.__setitem__,
+      #                    undoArgs=(key,), undoKwargs={'axis':1, 'inplace':True},
+      #                    redoArgs=(key, value))
+      #     else:
+      #       # Undo overwrite of existing column
+      #       undo.newItem(super().__setitem__, self.__setitem__,
+      #                    undoArgs=(key, oldValue), redoArgs=(key, value))
 
   def _modelNumberConversion(self, force:bool=False):
     """Convert modelNumber series to valid data, changing value *in place*

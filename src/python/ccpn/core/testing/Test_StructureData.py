@@ -105,8 +105,8 @@ class TestPandasData(WrapperTesting):
 
     self.undo.undo()      # ejb - undo addition of 'x'
 
-    # with self.assertRaisesRegexp(KeyError, 'x'):      # should raise KeyError as deleted
-    #   self.assertEqual(list(self.data['x']), None)
+    with self.assertRaisesRegexp(KeyError, 'x'):      # should raise KeyError as deleted
+      self.assertEqual(list(self.data['x']), None)
 
     self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
                         , self.undo.maxOperations# = maxOperations
@@ -118,7 +118,8 @@ class TestPandasData(WrapperTesting):
                         , self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
     print ("postUNDO STATE, deletion data['x']:     ", self.UndoState)
 
-    self.undo.redo()
+    self.undo.redo()        # ejb redo addition of 'x'
+    self.assertEqual(list(self.data['x']), [2,2,2,2,1,1,1,1] * 2)
 
     self.data['y'] = [2,1,2,1,2,1,2,1] * 2
     self.data['z'] = None
@@ -130,15 +131,21 @@ class TestPandasData(WrapperTesting):
     self.data['nmrChainCode'] = ['@12', '@12', '@2', '@2', '#12', '#12', '#2', '#2'] * 2
     self.data['nmrSequenceCode'] = ['12', '2b'] * 8
     self.data.setValues(17)
+    self.assertEqual(len(self.data), 17)
 
     self.undo.undo()      # ejb - undo new row 17
+    self.assertEqual(len(self.data), 16)
+
     self.undo.redo()
+    self.assertEqual(len(self.data), 17)
 
     self.assertEquals(list(self.data.loc[17])[3:],  [None] * 7)
     self.assertTrue(all(math.isnan(x) for x in self.data.loc[17][:3]))
     self.data.addRow()
+    self.assertEqual(len(self.data), 18)
 
     self.undo.undo()      # ejb - undo new row with 'addRow'
+    self.assertEqual(len(self.data), 17)
     self.undo.redo()      #       should be the same as above
 
     self.assertEquals(list(self.data.loc[18])[3:],  [None] * 7)
@@ -199,8 +206,16 @@ class TestPandasData(WrapperTesting):
                                        origIndex=5)))
 
     self.data.deleteRow(7, inplace=True)
-    self.undo.undo()      # ejb
+    self.assertEqual(list(self.data['chainCode'])
+                     , ['B','B','A','A','B','B','A','B','B','A','A','B','B','A','A',None,None])
+
+    self.undo.undo()
+    self.assertEqual(list(self.data['chainCode'])
+                     , ['B','B','A','A','B','B','A','A','B','B','A','A','B','B','A','A',None,None])
+
     self.undo.redo()
+    self.assertEqual(list(self.data['chainCode'])
+                     , ['B','B','A','A','B','B','A','B','B','A','A','B','B','A','A',None,None])
 
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
@@ -212,9 +227,19 @@ class TestPandasData(WrapperTesting):
     self.data.setValues(1, x=1.0, y=1.0)
     self.data.setValues(2, x=1.0, y=1.0)
 
+    # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
+    # new function deleteCol has been added to replace simple drop
     self.data.deleteCol('z', axis=1, inplace=True)
-    self.undo.undo()      # ejb - does not work on 'drop', added to deleteCol
+
+    with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as deleted
+      self.assertEqual(list(self.data['z']), None)
+    self.undo.undo()
+
+    self.assertEqual(str(list(self.data['z'])), str([nan]*17))    # back again as list of nan
     self.undo.redo()
+
+    with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as re-deleted
+      self.assertEqual(list(self.data['z']), None)
 
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__

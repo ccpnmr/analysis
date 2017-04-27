@@ -64,7 +64,7 @@ from ccpn.core.PeakList import PeakList
 # from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneSelectorWidget
 
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
@@ -110,7 +110,12 @@ class GuiStripNd(GuiStrip):
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
+
+    self.planeToolbar = None
     self._addPlaneToolbar()
+    #self.planeToolBar.hide()
+    # test
+    #PlaneSelectorWidget(qtParent=self.stripToolBarWidget, strip=self, axis=2, grid=(0,1))
 
     self.logger = self._project._logger
     self.mouseDragEvent = self._mouseDragEvent
@@ -410,7 +415,7 @@ class GuiStripNd(GuiStrip):
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
     self.planeToolbar = PlaneToolbar(qtParent=self.stripToolBarWidget, strip=self, callbacks=callbacks,
-                                     grid=(0, 0), hAlign='left', vAlign='center')
+                                     grid=(0, 1), hPolicy='expanding', hAlign='center', vAlign='center')
     #self.planeToolbar.setMinimumWidth(250)
 
   def _setZPlanePosition(self, n:int, value:float):

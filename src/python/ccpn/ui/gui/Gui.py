@@ -257,6 +257,7 @@ coreClass = _coreClassMap['Window']
 from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
+
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
     AbstractWrapperObject. __init__(self, project, wrappedData)
 

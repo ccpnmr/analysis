@@ -46,10 +46,14 @@ import typing
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
+
+# 27/04/17 Functional revision number: 937d42fee2e1e32fb7c875669d4959e9590ef9be
+# 27/04/17 ~11:00 merged revision number: 28abf9040ae461e639262cc6b2dca726e8cbf897
 
 class GuiStrip(Widget):
 
@@ -90,12 +94,19 @@ class GuiStrip(Widget):
     # Have to add it to qtParent to make this work, while have self as parent
     qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))
 
-    # placeholder for toolbar
+    # placeholder for toolbar and a stripIdLabel; more items will be added by GuiStripNd and GuiStrip1d
     self.stripToolBarWidget = Widget(parent=qtParent,
                                      hPolicy='expanding', vAlign='top',
                                      grid=(1, self.spectrumDisplay.orderedStrips.index(self)))
+    self.stripToolBarWidget.setFixedHeight(20)
 
-    # Strip needs access to plotWidget's items and info
+    #TODO: correct once pid has been reviewed
+    self.stripIdLabel = Label(parent=self.stripToolBarWidget,
+                              text='.'.join(self.id.split('.')[2:]),
+                              grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+
+    # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
     self.viewBox = self.plotItem.vb
 

@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.Widget import Widget
 
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -104,24 +105,71 @@ class _StripLabel(Label):
         strip.planeToolbar.spinSystemLabel.setText(nmrResidue.id)
 
 
+class PlaneSelectorWidget(Widget):
+  """
+  This widget contains the buttons and entry boxes for selection of the plane
+  """
+
+  def __init__(self, qtParent, strip, axis, **kwds):
+    "Setup the buttons and callbacks for axis"
+
+    Widget.__init__(self, parent=qtParent, **kwds)
+
+    self.strip = strip
+    self.axis = axis
+
+    width=20; height=20
+
+    self.previousPlaneButton = Button(parent=self, text='<', grid=(0,0),
+                                      callback=self._previousPlane)
+    self.previousPlaneButton.setFixedWidth(width)
+    self.previousPlaneButton.setFixedHeight(height)
+
+    self.spinBox = DoubleSpinbox(parent=self, showButtons=False, grid=(0,1),
+                                 callback=self._spinBoxChanged)
+    self.spinBox.setFixedHeight(height)
+
+    self.nextPlaneButton = Button(parent=self, text='<', grid=(0,2),
+                                  callback=self._nextPlane)
+    self.nextPlaneButton.setFixedWidth(width)
+    self.nextPlaneButton.setFixedHeight(height)
+
+    self.planeCountSpinBox = DoubleSpinbox(parent=self, showButtons=False, grid=(0,3),
+                                           callback=self._planeCountChanged
+                                           )
+    self.planeCountSpinBox.setFixedHeight(height)
+
+  def _previousPlane(self):
+    print('clicked previous')
+
+  def _nextPlane(self):
+    print('clicked previous')
+
+  def _spinBoxChanged(self, value):
+    print('spinBox chnaged to:', value)
+
+  def _planeCountChanged(self, value):
+    print('planeCOunt changed to:', value)
+
+
 class PlaneToolbar(ToolBar):
   #TODO: undocumented and needs refactoring ;
   def __init__(self, qtParent, strip, callbacks, **kw):
 
     ToolBar.__init__(self, parent=qtParent, **kw)
 
-    self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
-                            hAlign='center', vAlign='top')
-    self.stripIdLabel.setFixedHeight(15)
-    self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+    # self.stripIdLabel = Label(self, text='.'.join(strip.pid.id.split('.')[2:]),
+    #                         hAlign='center', vAlign='top')
+    # self.stripIdLabel.setFixedHeight(15)
+    # self.stripIdLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+    # self.addWidget(self.stripIdLabel)
 
-    # Drop/draggable label
-    self.spinSystemLabel = _StripLabel(self, text='', hAlign='center', vAlign='top')
-    self.spinSystemLabel.setFixedHeight(15)
-    self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
-
-    self.addWidget(self.stripIdLabel)
-    self.addWidget(self.spinSystemLabel)
+    # # Drop/draggable label
+    # self.spinSystemLabel = _StripLabel(self, text='', hAlign='center', vAlign='top')
+    # self.spinSystemLabel.setFixedHeight(20)
+    # self.spinSystemLabel.setFont(QtGui.QFont('Lucida Grande', 10))
+    #
+    # self.addWidget(self.spinSystemLabel)
 
     self.planeLabels = []
     self.planeCounts = []

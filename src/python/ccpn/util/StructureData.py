@@ -769,6 +769,7 @@ class EnsembleData(pd.DataFrame):
       # undo and echoing
       containingObject._startCommandEchoBlock('data.setValues', values=kwargs)
       undo = containingObject._project._undo      # ejb
+      undo.increaseBlocking()       # ejb
 
     try:
       # We must do this one by one - passing in the dictionary
@@ -778,14 +779,13 @@ class EnsembleData(pd.DataFrame):
       # Type handling is done there and can be skipped here.
       # NB, various obvious alternatives, like just setting the row, do NOT work.
 
-      undo.increaseBlocking()       # ejb
       tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
       for key,val in values.items():
         self.loc[index, key] = val
-      undo.decreaseBlocking()       # ejb
 
     finally:
       if containingObject is not None:
+        undo.decreaseBlocking()  # ejb
         containingObject._endCommandEchoBlock()
 
     # ejb/Rasmus removed here, should be covered by __setItem__

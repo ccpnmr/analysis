@@ -308,7 +308,8 @@ class SideBar(QtGui.QTreeWidget, Base):
         objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
         if objFromPid is not None:
           contextMenu.addAction('Delete', partial(self._deleteItemObject, objFromPid))
-          contextMenu.exec_(self.mapToGlobal(event.pos()))
+          contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+          contextMenu.exec()
 
 
   def _deleteItemObject(self,  obj):

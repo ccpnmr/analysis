@@ -1,11 +1,12 @@
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
-import  numpy as np
 from pyqtgraph.Point import Point
-import ccpn.ui.gui.ViewBox as spectrumViewbox
+
+import ccpn.ui.gui.widgets.ViewBox as spectrumViewbox
 from ccpn.core.NmrResidue import NmrResidue
-from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+from ccpn.ui.gui.widgets.Menu import Menu
+
 current = []
 
 labelsColor = 'b'

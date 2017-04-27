@@ -80,7 +80,7 @@ class GuiPipeline(CcpnModule):
     self.templates = self._getPipelineTemplates(templates)
     self.pipelineMethods = self._getPipelineMethods(pipelineMethods)
 
-    CcpnModule.__init__(self, name=name)
+    CcpnModule.__init__(self, mainWindow=self.mainWindow, name=name)
 
     self._setIcons()
     self._setMainLayout()

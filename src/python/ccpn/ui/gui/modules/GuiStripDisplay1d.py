@@ -29,24 +29,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from typing import Sequence
+
+from PyQt4 import QtCore
 
 from ccpn.core.Project import Project
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from typing import Sequence
-from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
-  def __init__(self):
+  def __init__(self, mainWindow, name):
     # if not apiSpectrumDisplay1d.strips:
     #   apiSpectrumDisplay1d.newStrip1d()
 
-    GuiSpectrumDisplay.__init__(self)
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name)
     self._fillToolBar()
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
@@ -64,7 +65,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     """
 
     # NB should not be imported at top of file to avoid potential cyclic imports
-    from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
+    from ccpn.ui.gui.modules import GuiPeakListView
 
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict

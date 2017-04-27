@@ -27,29 +27,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import pyqtgraph as pg
-from functools import partial
-
-from PyQt4 import QtGui, QtCore
-
-from ccpn.core.Project import Project
-from ccpn.core.PeakList import PeakList
-from ccpn.core.Peak import Peak
-
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
-
-from ccpn.util.Colour import Colour
-from ccpn.util import Ticks
 import typing
 
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
-from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.core.lib.Notifiers import Notifier
+import pyqtgraph as pg
+from PyQt4 import QtGui, QtCore, QtOpenGL
 
+from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Project import Project
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
+from ccpn.ui.gui.widgets.ViewBox import ViewBox
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.util import Ticks
+from ccpn.util.Colour import Colour
 from ccpn.util.Logging import getLogger
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 logger = getLogger()
 
 # 27/04/17 Functional revision number: 937d42fee2e1e32fb7c875669d4959e9590ef9be
@@ -532,40 +528,36 @@ class GuiStrip(Widget):
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.autoRange(padding=padding)
 
-  def _zoomTo(self, x1:float, x2:float, y1:float, y2:float):
-    self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
-    self.zoomPopup.close()
-
   def showZoomPopup(self):
     """
     Creates and displays a popup for zooming to a region in the strip.
     """
-    #TODO:WAYNE: rework using ui.gui.widget classes
-    self.zoomPopup = QtGui.QDialog()
-    layout = QtGui.QGridLayout()
-    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
-    x1 = QtGui.QLineEdit()
-    layout.addWidget(x1, 0, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
-    x2 = QtGui.QLineEdit()
-    layout.addWidget(x2, 0, 3, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
-    y1 = QtGui.QLineEdit()
-    layout.addWidget(y1, 1, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
-    y2 = QtGui.QLineEdit()
-    layout.addWidget(y2, 1, 3, 1, 1)
-    okButton = QtGui.QPushButton(text="OK")
-    okButton.clicked.connect(partial(self._zoomTo, float(x1.text()), float(x2.text()),
-                                                   float(y1.text()), float(y2.text())
-                                     )
-                             )
-    cancelButton = QtGui.QPushButton(text='Cancel')
-    layout.addWidget(okButton,2, 1)
-    layout.addWidget(cancelButton, 2, 3)
-    cancelButton.clicked.connect(self.zoomPopup.close)
-    self.zoomPopup.setLayout(layout)
-    self.zoomPopup.exec_()
+    zoomPopup = QtGui.QDialog()
+
+    Label(zoomPopup, text='x1', grid=(0, 0))
+    x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))
+    Label(zoomPopup, text='x2', grid=(0, 2))
+    x2LineEdit = FloatLineEdit(zoomPopup, grid=(0, 3))
+    Label(zoomPopup, text='y1', grid=(1, 0))
+    y1LineEdit = FloatLineEdit(zoomPopup, grid=(1, 1))
+    Label(zoomPopup, text='y2', grid=(1, 2))
+    y2LineEdit = FloatLineEdit(zoomPopup, grid=(1, 3))
+
+    def _zoomTo():
+      x1 = x1LineEdit.get()
+      y1 = y1LineEdit.get()
+      x2 = x2LineEdit.get()
+      y2 = y2LineEdit.get()
+      if None in (x1, y1, x2, y2):
+        logger.warning('Zoom: must specify region completely')
+        return
+      self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
+      zoomPopup.close()
+
+    Button(zoomPopup, text='OK', callback=_zoomTo, grid=(2, 0), gridSpan=(1, 2))
+    Button(zoomPopup, text='Cancel', callback=zoomPopup.close, grid=(2, 2), gridSpan=(1, 2))
+
+    zoomPopup.exec_()
 
   def _storeZoom(self):
     """
@@ -755,3 +747,68 @@ def _setupGuiStrip(project:Project, apiStrip):
                                     axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
+
+
+class PlotWidget(pg.PlotWidget):
+
+  def __init__(self, strip, useOpenGL=False, **kw):
+
+    current = strip.spectrumDisplay.mainWindow.application.current
+    pg.PlotWidget.__init__(self, parent=strip,
+                           viewBox=ViewBox(current=current, parent=strip),
+                           axes=None, enableMenu=True)
+    self.setInteractive(True)
+    self.strip = strip
+    self.plotItem.setAcceptHoverEvents(True)
+    self.plotItem.setAcceptDrops(True)
+    self.plotItem.axes['left']['item'].hide()
+    self.plotItem.axes['right']['item'].show()
+    self.hideButtons()
+
+    if useOpenGL:
+      self.setViewport(QtOpenGL.QGLWidget())
+      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+
+  def __getattr__(self, attr):
+    """
+    Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.
+    """
+    try:
+      return super().__getattr__(attr)
+    except NameError:
+      raise AttributeError(attr)
+
+  def addItem(self, item:QtGui.QGraphicsObject):
+    """
+    Adds specified graphics object to the Graphics Scene of the PlotWidget.
+    """
+    self.scene().addItem(item)
+
+
+class AxisTextItem(pg.TextItem):
+
+  def __init__(self, plotWidget, orientation, axisCode=None, units=None, mappedDim=None):
+
+    self.plotWidget = plotWidget
+    self.orientation = orientation
+    self.axisCode = axisCode
+    self.units = units
+    self.mappedDim = mappedDim
+    if plotWidget.strip.spectrumDisplay.mainWindow.application.colourScheme == 'dark':
+      colour = '#f7ffff'
+    else:
+      colour = '#080000'
+    pg.TextItem.__init__(self, text=axisCode, color=colour)
+    if orientation == 'top':
+      self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
+      self.anchor = pg.Point(0, 1)
+    else:
+      self.setPos(plotWidget.plotItem.vb.boundingRect().topRight())
+      self.anchor = pg.Point(1, 0)
+    plotWidget.scene().addItem(self)
+
+  def _setUnits(self, units):
+    self.units = units
+
+  def _setAxisCode(self, axisCode):
+    self.axisCode = str(axisCode)

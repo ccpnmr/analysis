@@ -66,7 +66,7 @@ class CcpnModule(Dock):
 
     #TODO:GEERTEN: make mainWindow actually do something
 
-    super(CcpnModule, self).__init__(name, self, closable=closable, **kwds)
+    super(CcpnModule, self).__init__(name, self, closable=closable)#, **kwds)   # ejb
     print('CcpnModule>>>', type(self))
     # GWV: logger seems not to work??
     logger.debug('module:"%s"' % (name,))

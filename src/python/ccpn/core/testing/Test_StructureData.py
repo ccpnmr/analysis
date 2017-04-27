@@ -82,9 +82,44 @@ class TestPandasData(WrapperTesting):
     self.assertRaises(ValueError, setattr, self.data, 'occupancy',  (0,0,0.1,0.99,1,1.1))
 
   def test_sorting(self):
+    self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
+                        , self.undo.maxOperations# = maxOperations
+                        , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
+                        , self.undo.waypoints# = []  # array of last item in each waypoint
+                        , self.undo._blocked# = False # Block/unblock switch - internal use only
+                        , self.undo._blockingLevel
+                        , len(self.undo)
+                        , self.undo[0])# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+    print ('preUNDO STATE:                          ', self.UndoState)
+
     self.data['x'] = [2,2,2,2,1,1,1,1] * 2
-    self.undo.undo()      # ejb - undo new row 17
+    self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
+                        , self.undo.maxOperations# = maxOperations
+                        , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
+                        , self.undo.waypoints# = []  # array of last item in each waypoint
+                        , self.undo._blocked# = False # Block/unblock switch - internal use only
+                        , self.undo._blockingLevel# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                        , len(self.undo)
+                        , self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+    print ("preUNDO STATE, addition data['x']:      ", self.UndoState)
+
+    self.undo.undo()      # ejb - undo addition of 'x'
+
+    # with self.assertRaisesRegexp(KeyError, 'x'):      # should raise KeyError as deleted
+    #   self.assertEqual(list(self.data['x']), None)
+
+    self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
+                        , self.undo.maxOperations# = maxOperations
+                        , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
+                        , self.undo.waypoints# = []  # array of last item in each waypoint
+                        , self.undo._blocked# = False # Block/unblock switch - internal use only
+                        , self.undo._blockingLevel# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                        , len(self.undo)
+                        , self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+    print ("postUNDO STATE, deletion data['x']:     ", self.UndoState)
+
     self.undo.redo()
+
     self.data['y'] = [2,1,2,1,2,1,2,1] * 2
     self.data['z'] = None
     self.data['modelNumber'] = [2,2,2,2,1,1,1,1] * 2
@@ -240,12 +275,6 @@ class TestPandasData(WrapperTesting):
     self.data.deleteCol('y', axis=1, inplace=True)
     self.undo.undo()      # ejb - does not work on 'drop'
     self.undo.undo()      # ejb - does not work on 'drop'
-    self.undo.undo()      # ejb - does not work on 'drop'
-    self.undo.undo()      # ejb - does not work on 'drop'
-    self.undo.undo()      # ejb - does not work on 'drop'
-    self.undo.redo()
-    self.undo.redo()
-    self.undo.redo()
     self.undo.redo()
     self.undo.redo()
 

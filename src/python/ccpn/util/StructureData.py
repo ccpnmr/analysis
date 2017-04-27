@@ -912,6 +912,7 @@ class EnsembleData(pd.DataFrame):
         # We can make a nice-looking synonym later, if we want.
         # NB with large objects the echo will be huge and ugly.
         # But it is almost impossible to compress the great variety of value types Pandas allow.
+
         containingObject._startCommandEchoBlock('data.__setitem__', key, value)
         project = containingObject._project
         project.blankNotification()

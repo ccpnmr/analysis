@@ -217,6 +217,11 @@ class TestPandasData(WrapperTesting):
     self.assertEqual(list(self.data['chainCode'])
                      , ['B','B','A','A','B','B','A','B','B','A','A','B','B','A','A',None,None])
 
+    with self.assertRaisesRegexp(ValueError, 'deleteRow: Row not specified'):  # should raise ValueError
+      self.data.deleteRow()
+    with self.assertRaisesRegexp(ValueError, 'deleteRow: Row does not exist'):  # should raise ValueError
+      self.data.deleteRow(42, inplace=True)
+
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
     ll = ['modelNumber', 'chainCode', 'sequenceId', 'atomName']
@@ -230,6 +235,11 @@ class TestPandasData(WrapperTesting):
     # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
     # new function deleteCol has been added to replace simple drop
     self.data.deleteCol('z', axis=1, inplace=True)
+
+    with self.assertRaisesRegexp(ValueError, 'deleteCol: Column not specified'):  # should raise ValueError
+      self.data.deleteCol()
+    with self.assertRaisesRegexp(ValueError, 'deleteCol: Column does not exist'):  # should raise ValueError
+      self.data.deleteCol('notFound', axis=1, inplace=True)
 
     with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as deleted
       self.assertEqual(list(self.data['z']), None)
@@ -315,7 +325,54 @@ class TestPandasData(WrapperTesting):
     #                    atomName='HG12', nmrAtomName='HG12', nmrChainCode='#2', nmrSequenceCode='2b',
     #                    origIndex=8))
 
-  # TODO: test the undo redo function on drop and setValues
+  #=========================================================================================
+  # test_structureData_modelNumber
+  #=========================================================================================
+
+  def test_structureData_modelNumber(self):
+    with self.assertRaisesRegexp(TypeError, 'does not correspond to an integer'):
+      self.data['modelNumber'] = ['12']
+    with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
+      self.assertEqual(list(self.data['modelNumber']), None)
+
+    with self.assertRaisesRegexp(ValueError, 'Length of values does not match length of index'):
+      self.data['modelNumber'] = [1,2,3,4,5]          # other attributes must be defined first
+    with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
+      self.assertEqual(list(self.data['modelNumber']), None)
+
+    self.data['modelNumber'] = [5]
+    with self.assertRaisesRegexp(ValueError, 'Model numbers must be integers >= 1'):
+      self.data['modelNumber'] = [-1]
+    self.assertEqual(list(self.data['modelNumber']), [5])
+
+  #=========================================================================================
+  # test_structureData_nmrSequenceCode
+  #=========================================================================================
+
+  def test_structureData_nmrSequenceCode(self):
+    self.data['nmrSequenceCode'] = ['12']
+    self.assertEqual(list(self.data['nmrSequenceCode']), ['12'])
+
+    self.data['nmrSequenceCode'] = [13]
+    self.assertEqual(list(self.data['nmrSequenceCode']), ['13'])
+
+    self.data['nmrSequenceCode'] = [14.0]
+    self.assertEqual(list(self.data['nmrSequenceCode']), ['14'])
+
+    self.data['nmrSequenceCode'] = [nan]
+    self.assertEqual(list(self.data['nmrSequenceCode']), [None])
+
+    with self.assertRaisesRegexp(ValueError, 'nmrSequenceCode must have integer values if entered as numbers'):      # should raise KeyError as re-deleted
+      self.data['nmrSequenceCode'] = [15.5]
+    self.assertEqual(list(self.data['nmrSequenceCode']), [None])    # still None from above
+
+    with self.assertRaisesRegexp(ValueError, 'nmrSequenceCode must be set as strings or integer values'):      # should raise KeyError as re-deleted
+      self.data['nmrSequenceCode'] = [(15,16)]
+    self.assertEqual(list(self.data['nmrSequenceCode']), [None])    # still None from above
+
+  #=========================================================================================
+  # test_structureData_ChainCode
+  #=========================================================================================
 
   def test_structureData_ChainCode(self):
     self.data['chainCode'] = ['B','B','A','A','B','B','A','A']
@@ -340,6 +397,10 @@ class TestPandasData(WrapperTesting):
     except Exception as e:
       print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
 
+  #=========================================================================================
+  # test_structureData_residueNames
+  #=========================================================================================
+
   def test_structureData_residueNames(self):
     self.data['residueName'] = ['ALA', 'LEU', 'MET', 'THR', 'VAL']
 
@@ -352,7 +413,7 @@ class TestPandasData(WrapperTesting):
 # TestSelectors
 #=========================================================================================
 
-class TestSelectors(WrapperTesting):
+class TestSelectors_Iterator(WrapperTesting):
 
   # Path of project to load (None for new project)
   projectPath = None
@@ -377,7 +438,7 @@ class TestSelectors(WrapperTesting):
       self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
       self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
       self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-      self.testModelNumbers = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumber = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
       self.testElement = ['H'] * 4 + ['O'] * 4 + ['C'] * 4 + ['N'] * 21
       self.testFuncName = ['H'
                        ,'HB1', ' HB2', 'HB3'
@@ -390,7 +451,7 @@ class TestSelectors(WrapperTesting):
       self.data['residueName'] = self.testResidueName
       self.data['chainCode'] = self.testChainCode
       self.data['sequenceId'] = self.testSequenceId
-      self.data['modelNumber'] = self.testModelNumbers
+      self.data['modelNumber'] = self.testModelNumber
       # self.testIds = [CH+'.'+str(SI)+'.'+RN+'.'+AT for AT, RN, CH, SI in zip(testAtomName
       #                                                              , testResidueName
       #                                                              , testChainCode
@@ -522,12 +583,33 @@ class TestSelectors(WrapperTesting):
                                               , sequenceId=6
                                               , modelNumber=6
                                               , element='N')))  # check initial values
+
     def funcSelect(*args, **kwargs) -> bool:
+      """
+      Test function to check that the funcSelector is working.
+      Return True if the atomName contains 'H' otherwise False
+      :param args:
+      :param kwargs:
+      :return:
+      """
       thisAtomName = args[0]['atomName']
       return 'H' in thisAtomName
 
     self.ed = self.data.extract(func=funcSelect)
     self.assertEquals(list(self.ed['atomName']), self.testFuncName)
+
+  #=========================================================================================
+  # test_structureData_Iterator
+  #=========================================================================================
+
+  def test_structureData_Iterator(self):
+    self.itRec = self.data.records()
+    for rNum, rec in enumerate(self.itRec):
+      self.assertEqual(list(rec['atomName']), [self.testAtomName[rNum]])
+      self.assertEqual(list(rec['residueName']), [self.testResidueName[rNum]])
+      self.assertEqual(list(rec['chainCode']), [self.testChainCode[rNum]])
+      self.assertEqual(list(rec['sequenceId']), [self.testSequenceId[rNum]])
+      self.assertEqual(list(rec['modelNumber']), [self.testModelNumber[rNum]])
 
 #=========================================================================================
 # test_StructureData_properties
@@ -711,13 +793,13 @@ class TestContainer(WrapperTesting):
       self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
       self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
       self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-      self.testModelNumbers = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumber = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
 
       self.data['atomName'] = self.testAtomName
       self.data['residueName'] = self.testResidueName
       self.data['chainCode'] = self.testChainCode
       self.data['sequenceId'] = self.testSequenceId
-      self.data['modelNumber'] = self.testModelNumbers
+      self.data['modelNumber'] = self.testModelNumber
 
   #=========================================================================================
   # TestContainerTypes
@@ -897,3 +979,11 @@ class TestContainer(WrapperTesting):
     """
     with self.assertRaisesRegexp(TypeError, 'accessor must be index, ensemble row, or selector'):
       self.data.setValues('badSetValue')
+
+  #=========================================================================================
+  # test_structureData_LastErrors
+  #=========================================================================================
+
+  def test_structureData_LastErrors(self):
+    with self.assertRaisesRegexp(ValueError, 'EnsembleData._containingObject'):
+      self.data._containingObject = 'badObject'

@@ -558,9 +558,10 @@ class EnsembleData(pd.DataFrame):
   ### Record-wise assignment of values
 
   def addRow(self, **kwargs):
-    """Add row with values matching kwargs, setting index to next available index
-
-    See setValues for details"""
+    """
+    Add row with values matching kwargs, setting index to next available index
+    See setValues for details
+    """
     nextIndex =  max(self.index) + 1 if self.shape[0] else 1
     self.setValues(nextIndex, **kwargs)
 
@@ -591,15 +592,16 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    index = int(args[0])
+    try:
+      index = int(args[0])
+    except:
+      raise ValueError('deleteRow: Row not specified')
+
     rowExists = False
-    if not index:
-      raise ValueError('Row not specified')
+    if index in self.index:       # the index must exist
+      rowExists = True
     else:
-      if index in self.index:       # the index must exist
-        rowExists = True
-      else:
-        raise ValueError('deleteRow cannot delete the row.')
+      raise ValueError('deleteRow: Row does not exist')
 
     containingObject = self._containingObject
     if containingObject is not None:
@@ -643,15 +645,16 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    colIndex = str(args[0])
+    try:
+      colIndex = str(args[0])
+    except:
+      raise ValueError('deleteCol: Column not specified')
+
     colExists = False
-    if not colIndex:
-      raise ValueError('Column not specified')
+    if colIndex in self.columns:       # the index must exist
+      colExists = True
     else:
-      if colIndex in self.columns:       # the index must exist
-        colExists = True
-      else:
-        raise ValueError('deleteCol cannot delete the column.')
+      raise ValueError('deleteCol: Column does not exist.')
 
     containingObject = self._containingObject
     if containingObject is not None:
@@ -1050,7 +1053,7 @@ class EnsembleData(pd.DataFrame):
     for val in self[key]:
       if val is None or isinstance(val,str):
         appnd(val)
-      elif isinstance(val, int):
+      elif isinstance(val, (int, numpy.integer)):
         appnd(str(val))
       elif isinstance(val, Real):
         if isnan(val):

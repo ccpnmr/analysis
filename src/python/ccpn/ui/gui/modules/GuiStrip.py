@@ -118,7 +118,7 @@ class GuiStrip(Widget):
     self.stripLabel = _StripLabel(parent=self.stripToolBarWidget, text='test')
     self.stripLabel.setFont(textFontSmall)
     self.stripToolBarWidget.addWidget(self.stripLabel)
-    self.stripLabel.hide()
+    self.showStripLabel(False)
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -176,17 +176,25 @@ class GuiStrip(Widget):
     "True if crosshair is visible"
     return self.plotWidget.crossHair1.isVisible()
 
-  def setStripLabelText(self, text):
-    "Set the text of the stripLabel"
-    self.stripLabel.setText(text)
+  def setStripLabelText(self, text: str):
+    """set the text of the stripLabel"""
+    if text is not None:
+      self.stripLabel.setText(text)
 
-  def showStripLabelText(self):
-    "Show the stripLabel"
-    self.stripLabel.show()
+  def getStripLabelText(self) -> str:
+    """return the text of the stripLabel"""
+    return self.stripLabel.text()
 
-  def hideStripLabelText(self):
-    "Hide the stripLabel"
-    self.stripLabel.hide()
+  def showStripLabel(self, doShow: bool):
+    """show / hide the stripLabel"""
+    if doShow:
+      self.stripLabel.show()
+    else:
+      self.stripLabel.hide()
+
+  # def hideStripLabelText(self):
+  #   "Hide the stripLabel"
+  #   self.stripLabel.hide()
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()

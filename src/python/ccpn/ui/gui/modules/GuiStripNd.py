@@ -180,22 +180,6 @@ class GuiStripNd(GuiStrip):
   def pythonConsole(self):
     return self.mainWindow.pythonConsole
 
-  def setStripLabelText(self, text: str):
-    """set the text of the stripLabel"""
-    if text is not None:
-      self.planeToolbar.spinSystemLabel.setText(text)
-
-  def getStripLabelText(self) -> str:
-    """return the text of the stripLabel"""
-    return self.planeToolbar.spinSystemLabel.text()
-
-  def showStripLabel(self, doShow: bool):
-    """show / hide the stripLabel"""
-    if doShow:
-      self.planeToolbar.spinSystemLabel.show()
-    else:
-      self.planeToolbar.spinSystemLabel.hide()
-
   def _mouseDragEvent(self, event):
     """
     Re-implemented mouse event to enable smooth panning.

@@ -389,7 +389,7 @@ class Substance(AbstractWrapperObject):
       | 'B.211.ALA.CB':{'12C':0.32, '13C':0.68},}"""
 
     result = {}
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
     if dd:
       for chain in self.chains:
         # NBNB this relies on residues being sorted by seqId, and so being
@@ -423,9 +423,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
-    if dd is None:
-      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
@@ -447,9 +445,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
-    if dd is None:
-      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
@@ -472,7 +468,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("Atom %s and its chain do not match the Substance" % atom)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
     if dd:
       residue = atom.residue
       residueIndex = residue.chain.residues.index(residue)
@@ -481,7 +477,7 @@ class Substance(AbstractWrapperObject):
 
   def clearSpecificAtomLabelling(self):
     """Clear specificAtomLabelling"""
-    self.ccpnInternalData['_specificAtomLabelling'] = {}
+    self._ccpnInternalData['_specificAtomLabelling'] = {}
 
 
   def updateSpecificAtomLabelling(self, dictionary:typing.Dict[str,typing.Dict[str,float]]):

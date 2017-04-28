@@ -27,11 +27,31 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import re
+
 from collections import namedtuple
 from collections import OrderedDict
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')
+
+# Timestamp formats
+stdTimeFormat = "%Y-%m-%d %%H:M:%S.%f"
+isoTimeFormat = "%Y-%m-%dT%%H:M:%S.%f"
+
+# CCPNMR data-transfer json mimetype
+ccpnmrJsonData = 'ccpnmr-json'
+
+# sequenceCode parsing expression
+# A sequenceCOde is combined (without whitespace) of:
+#   an optional integer
+#   an optional text field, as short as possible
+#   an optional field of the form +ii of -ii, where ii is an integer
+#
+# The expression below has one error:
+# a string of the form '+12' is parsed as (None, '', '+12'}
+# whereas it should be interpreted as (None, '+12', None), but that cannot be helped
+sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 
 # Units allowed for amounts (e.g. Sample)
 amountUnits = ('L', 'g', 'mole')
@@ -64,6 +84,14 @@ measurementType2ElementCode = {
   't2':'delay',
   't1rho':'delay',
   't1zz':'delay'
+}
+
+# Isotope-dependent assignment tolerances (in ppm)
+defaultAssignmentTolerance = 0.02
+isotope2Tolerance = {
+  '1H':0.02,
+  '13C':0.2,
+  '15N':0.2,
 }
 
 # Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant

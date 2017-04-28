@@ -33,15 +33,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtCore, QtGui
 
 import typing
-
-from ccpn.core.lib import PeakLib
+from ccpn.core.lib import AssignmentLib
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
-from ccpn.core.lib.AssignmentLib import propagateAssignments
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
-from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
@@ -68,7 +63,8 @@ class GuiWindow():
     # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self.application.current),
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
+                                                              current=self.application.current),
                     context=context)
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
@@ -150,7 +146,7 @@ class GuiWindow():
 
     currentParams = self._getPeaksParams(peaks)
     try:
-      PeakLib.refitPeaks(peaks)
+      AssignmentLib.refitPeaks(peaks)
     finally:
       undo.decreaseBlocking()
       undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],

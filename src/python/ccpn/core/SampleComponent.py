@@ -192,7 +192,7 @@ class SampleComponent(AbstractWrapperObject):
 
     NBNB the internal dictionary is returned directly without checks or encapsulation"""
 
-    result = self._wrappedData.ccpnInternalData['isotopeCode2Fraction']
+    result = self._wrappedData.ccpnInternalData.get('isotopeCode2Fraction')
     if result is None:
       result = self._wrappedData.ccpnInternalData['isotopeCode2Fraction'] = {}
     #

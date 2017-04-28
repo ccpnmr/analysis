@@ -138,11 +138,11 @@ class Sample(AbstractWrapperObject):
   @property
   def isHazardous(self) -> bool:
     """True if this Sample is a hazard?"""
-    return self._wrappedData.isHazard
+    return self._wrappedData.isHazardous
 
   @isHazardous.setter
   def isHazardous(self, value:bool):
-    self._wrappedData.isHazard = value
+    self._wrappedData.isHazardous = value
 
   @property
   def isVirtual(self) -> bool:
@@ -166,11 +166,11 @@ class Sample(AbstractWrapperObject):
   @property
   def batchIdentifier(self) -> str:
     """batch identifier for sample"""
-    return self._wrappedData.batchNumber
+    return self._wrappedData.batchIdentifier
 
   @batchIdentifier.setter
   def batchIdentifier(self, value:str):
-    self._wrappedData.batchNumber = value
+    self._wrappedData.batchIdentifier = value
 
   @property
   def plateIdentifier(self) -> str:

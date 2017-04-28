@@ -68,7 +68,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
         continue
 
 
-def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
+def matchAxesAndNmrAtoms(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom]):
 
   shiftDict = {}
   shiftList = strip.spectra[0].chemicalShiftList
@@ -83,7 +83,7 @@ def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
   return shiftDict
 
 
-def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
+def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   """
   Determines whether a given shift is within the bounds of the specified axis of the specified
   strip.

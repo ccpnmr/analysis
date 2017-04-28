@@ -521,7 +521,7 @@ class Framework:
       """function internal to _initLayout"""
       contentToRemove = []
       for content in contents:
-         if isinstance(content, (tuple, list)):
+        if isinstance(content, (tuple, list)):
           if content:
             if content[0] == 'dock':
               key = content[1]

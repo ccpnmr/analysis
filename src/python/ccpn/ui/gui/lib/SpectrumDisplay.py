@@ -9,7 +9,7 @@ from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
 
 def navigateToPeakPosition(project:Project, peak:Peak=None,
-   selectedDisplays:List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None):
+   selectedDisplays:List[GuiSpectrumDisplay]=None, strip:GuiStrip=None):
   """
   Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.

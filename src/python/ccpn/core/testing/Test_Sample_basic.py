@@ -283,7 +283,6 @@ class TestSample_setUp(WrapperTesting):
   # test_properties_Sample    expectedFailure
   #=========================================================================================
 
-  # @expectedFailure                          remove this as we want to see the failure
   def test_properties_Sample_iH(self):
     """
     Test that Sample attribute .isHazardous is populated..
@@ -292,16 +291,14 @@ class TestSample_setUp(WrapperTesting):
     """
     checkGetSetAttr(self, self.newSample, 'isHazardous', False)
 
-  # @expectedFailure                          remove this as we want to see the failure
   def test_properties_Sample_bI(self):
     """
     Test that Sample attribute .batchIdentifier is populated..
 
     This is an expectedFailure as .batchIdentifier has not been populated.
     """
-    checkGetSetAttr(self, self.newSample, 'batchIdentifier', False)
+    checkGetSetAttr(self, self.newSample, 'batchIdentifier', '#124345')
 
-  # @expectedFailure                          remove this as we want to see the failure
   def test_properties_Sample_creationDate(self):
     """
     Test that Sample attribute .creationDate can be set.

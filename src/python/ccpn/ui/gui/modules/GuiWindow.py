@@ -33,8 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtCore, QtGui
 
 import typing
-
-from ccpn.core.lib import PeakLib
+from ccpn.core.lib import AssignmentLib
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -150,7 +149,7 @@ class GuiWindow():
 
     currentParams = self._getPeaksParams(peaks)
     try:
-      PeakLib.refitPeaks(peaks)
+      AssignmentLib.refitPeaks(peaks)
     finally:
       undo.decreaseBlocking()
       undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],

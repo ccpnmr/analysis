@@ -252,7 +252,7 @@ class AbstractWrapperObject():
             or not hasattr(self._project, '_data2Obj'))
 
   @property
-  def ccpnInternalData(self) -> dict:
+  def _ccpnInternalData(self) -> dict:
     """Dictionary containing arbitrary type data for internal use.
 
     Data can be nested strings, numbers, lists, tuples, (ordered) dicts,
@@ -260,14 +260,19 @@ class AbstractWrapperObject():
     object that can be serialised to JSON. This does NOT include CCPN or
     CCPN API objects.
 
+    NB This returns the INTERNAL dictionary. There is NO encapsulation
+
     Data are kept on save and reload, but there is NO guarantee against
     trampling by other code"""
-    return self._wrappedData.ccpnInternalData
+    result = self._wrappedData.ccpnInternalData
+    if result is None:
+      result = self._wrappedData.ccpnInternalData = {}
+    return result
 
-  @ccpnInternalData.setter
-  def ccpnInternalData(self, value):
-    if not (value is None or isinstance(value, dict)):
-      raise ValueError("ccpnInternalData must be None or a dictionary, was %s" % value)
+  @_ccpnInternalData.setter
+  def _ccpnInternalData(self, value):
+    if not (isinstance(value, dict)):
+      raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
     self._wrappedData.ccpnInternalData = value
   
   # CCPN abstract properties

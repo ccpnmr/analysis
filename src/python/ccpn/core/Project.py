@@ -780,7 +780,9 @@ class Project(AbstractWrapperObject):
     # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    # TODO:RASMUS suspension temporarily disabled; decide on this
+    # Notification suspension postpones notifications (and removes duplicates)
+    # It is broken and has been disabled for a long time.
+    # There may be some accumulated bugs when (if)it is turned back on.
     if False and self._notificationSuspension:
       ll = self._pendingNotifications
       for dd in iterator:
@@ -908,7 +910,7 @@ class Project(AbstractWrapperObject):
       return []
     else:
       spectrum = self._data2Obj[apiDataSource]
-      spectrum.resetAssignmentTolerances()
+      spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
       return [spectrum]
 
   def _loadLookupFile(self, path:str, subType:str, ):

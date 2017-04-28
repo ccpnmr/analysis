@@ -35,7 +35,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 
 from ccpn.core.lib.Pid import Pid
-from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -54,7 +53,7 @@ class DropBase:
   IDS  = 'ids'
   _dropTargets = (URLS, TEXT, PIDS, IDS)
 
-  JSONDATA = ccpnmrJsonData #TODO:RASMUS: check why this comes from ccpncore
+  from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
 
   def __init__(self, acceptDrops, *args, **kw):
 

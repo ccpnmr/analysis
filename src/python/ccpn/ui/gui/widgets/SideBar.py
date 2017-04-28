@@ -63,7 +63,7 @@ from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-from ccpnmodel.ccpncore.lib.Constants import ccpnmrJsonData
+from ccpn.util.Constants import ccpnmrJsonData
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra

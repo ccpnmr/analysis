@@ -1823,8 +1823,9 @@ class CcpnNefWriter:
       for note in sorted(notes):
         row = loop.newRow(self._loopRowData(loopName, note))
         row['serial'] = note.serial
-        row['created'] = note._wrappedData.created.strftime(coreConstants.isoTimeFormat)
-        row['last_modified'] = note._wrappedData.lastModified.strftime(coreConstants.isoTimeFormat)
+        row['created'] = note._wrappedData.created.strftime(Constants.isoTimeFormat)
+        row['last_modified'] = note._wrappedData.lastModified.strftime(
+          Constants.isoTimeFormat)
     else:
       result = None
     #
@@ -1842,7 +1843,7 @@ class CcpnNefWriter:
       dd = pid2Obj.get(className)
       if dd:
         for obj in dd.values():
-          internalData = obj.ccpnInternalData
+          internalData = obj._ccpnInternalData
           if internalData:
             data[obj.longPid] = internalData
 
@@ -3306,11 +3307,11 @@ class CcpnNefReader:
       apiNote = result._wrappedData
       created = row.get('created')
       if created:
-        apiNote.__dict__['created'] = datetime.strptime(created, coreConstants.isoTimeFormat)
+        apiNote.__dict__['created'] = datetime.strptime(created, Constants.isoTimeFormat)
       lastModified = row.get('last_modified')
       if lastModified:
         apiNote.__dict__['lastModified'] = datetime.strptime(lastModified,
-                                                             coreConstants.isoTimeFormat)
+                                                             Constants.isoTimeFormat)
       serial = row.get('serial')
       if serial is not None:
         result.resetSerial(serial)
@@ -3331,7 +3332,7 @@ class CcpnNefReader:
     loop = saveFrame[loopName]
     for row in loop.data:
       pid, data = row.values()
-      project.getByPid(pid).ccpnInternalData = jsonIo.loads(data)
+      project.getByPid(pid)._ccpnInternalData = jsonIo.loads(data)
   #
   importers['ccpn_additional_data'] = load_ccpn_additional_data
 

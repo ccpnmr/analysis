@@ -38,10 +38,7 @@ from PyQt4 import QtGui
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib.AssignmentLib import ATOM_NAMES
-from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
-                                                      peaksAreOnLine,
-                                                      sameAxisCodes)
+from ccpn.core.lib.AssignmentLib import ATOM_NAMES, nmrAtomsForPeaks, peaksAreOnLine, sameAxisCodes
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox

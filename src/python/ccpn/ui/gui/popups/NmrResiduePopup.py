@@ -26,8 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtGui
 
 from ccpn.core.Chain import Chain
-from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
-from ccpn.core.lib.AssignmentLib import getNmrResiduePrediction, getNmrAtomPrediction
+from ccpn.core.lib.AssignmentLib import CCP_CODES,  getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label

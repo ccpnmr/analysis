@@ -28,12 +28,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import typing                   # ejb - added for 'header'
+from ccpn.util import Constants as utilConstants
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
-from ccpnmodel.ccpncore.lib import Constants as coreConstants
 
 
 class Note(AbstractWrapperObject):
@@ -102,12 +102,12 @@ class Note(AbstractWrapperObject):
   @property
   def created(self) -> typing.Optional[str]:
     """Note creation time"""
-    return self._wrappedData.created.strftime(coreConstants.stdTimeFormat)
+    return self._wrappedData.created.strftime(utilConstants.stdTimeFormat)
 
   @property
   def lastModified(self) -> str:
     """Note last modification time"""
-    return self._wrappedData.lastModified.strftime(coreConstants.stdTimeFormat)
+    return self._wrappedData.lastModified.strftime(utilConstants.stdTimeFormat)
 
   @property
   def header(self) -> typing.Optional[str]:       # ejb - changed from str

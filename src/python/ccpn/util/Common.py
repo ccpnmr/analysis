@@ -4,9 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import itertools
-from typing import Sequence
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -40,12 +37,14 @@ import os
 import random
 import sys
 import typing
-# import collections
 import string
-# from functools import total_ordering
+import itertools
+
+from ccpn.util import Constants as utilConstants
+
+
 
 from ccpn.util import Path, Constants
-from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -168,7 +167,7 @@ def parseSequenceCode(value):
 
   # sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
 
-  tt = coreLibConstants.sequenceCodePattern.match(value.strip()).groups()
+  tt = utilConstants.sequenceCodePattern.match(value.strip()).groups()
 
   if tt[0] is None and not tt[1]:
     # special case: entire string matches offset modifier and is misread
@@ -369,7 +368,7 @@ def checkIsotope(text:str) -> str:
   return result
 
 
-def axisCodeMatch(axisCode:str, refAxisCodes:Sequence[str])->str:
+def axisCodeMatch(axisCode:str, refAxisCodes:typing.Sequence[str])->str:
   """Get refAxisCode that best matches axisCode """
   for ii,indx in enumerate(_axisCodeMapIndices([axisCode], refAxisCodes)):
     if indx == 0:
@@ -379,7 +378,7 @@ def axisCodeMatch(axisCode:str, refAxisCodes:Sequence[str])->str:
     return None
 
 
-def axisCodeMapping(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->dict:
+def axisCodeMapping(axisCodes:typing.Sequence[str], refAxisCodes:typing.Sequence[str])->dict:
   """get {axisCode:refAxisCode} mapping dictionary
   all axisCodes must match, or dictionary will be empty
   NB a series of single-letter axisCodes (e.g. 'N', 'HCN') can be passed in as a string"""
@@ -409,7 +408,7 @@ def reorder(values:typing.Sequence, axisCodes:typing.Sequence[str],
   return result
 
 
-def _axisCodeMapIndices(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->list:
+def _axisCodeMapIndices(axisCodes:typing.Sequence[str], refAxisCodes:typing.Sequence[str])->list:
   """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
   all axisCodes must match, but result can contain None if refAxisCodes is longer
   if axisCodes contain duplicates, you will get one of possible matches"""

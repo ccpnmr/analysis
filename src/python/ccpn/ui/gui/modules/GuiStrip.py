@@ -91,7 +91,7 @@ class GuiStrip(Widget):
     self.setMinimumWidth(200)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-    self.plotWidget = PlotWidget(parent=self, application=self.application,
+    self.plotWidget = PlotWidget(parent=self.qtParent, application=self.application,
                                  useOpenGL=useOpenGL, strip=self,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
     # Have to add it to qtParent to make this work, while have self as parent

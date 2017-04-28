@@ -191,8 +191,22 @@ class Gui(Ui):
         else:
           self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
       else:
-        blankDisplay = self.mainWindow.addBlankDisplay()
-      return blankDisplay
+        # LM 28/04/17
+        # This is not called anymore when a spectrum display is opened.
+        # For some reason is impossible to open a new blank display. Must be some conflict with function name across
+        # Gui/Framework/GuiMainwindow/mainMindow for the addBlankDisplay() function.
+        # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
+
+
+        # blankDisplay = self.mainWindow.addBlankDisplay()
+        # return blankDisplay # Why a return blankDisplay?
+
+         # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
+        from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+        blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
+        self.mainWindow.moduleArea.addModule(blankDisplay, position=None)
+
+
     finally:
       self.application._endCommandBlock()
 

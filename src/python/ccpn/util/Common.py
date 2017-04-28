@@ -41,9 +41,6 @@ import string
 import itertools
 
 from ccpn.util import Constants as utilConstants
-
-
-
 from ccpn.util import Path, Constants
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -518,7 +515,7 @@ def axisCodesCompare(code:str, code2:str, mismatch:int=0) -> int:
   return score
 
 
-def doAxisCodesMatch(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->bool:
+def doAxisCodesMatch(axisCodes:typing.Sequence[str], refAxisCodes:typing.Sequence[str])->bool:
   """Return True if axisCodes match refAxisCodes else False"""
   if len(axisCodes) != len(refAxisCodes):
     return False

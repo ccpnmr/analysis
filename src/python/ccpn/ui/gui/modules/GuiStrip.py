@@ -84,15 +84,17 @@ class GuiStrip(Widget):
 
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
-    Widget.__init__(self, parent=self.qtParent, setLayout=True,
-                          acceptDrops=True, hPolicy='expanding', vPolicy='minimal',
-                          grid=(0, self.spectrumDisplay.orderedStrips.index(self))
-                    )
+    ##Widget.__init__(self, parent=self.qtParent, setLayout=True,
+    ##                      acceptDrops=True, hPolicy='expanding', vPolicy='minimal',
+    ##                      grid=(0, self.spectrumDisplay.orderedStrips.index(self))
+    ##                )
+    Widget.__init__(self)
     self.setMinimumWidth(200)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-    self.plotWidget = PlotWidget(parent=self, application=self.application,
-                                 useOpenGL=useOpenGL, strip=self,
+    ##self.plotWidget = PlotWidget(parent=self, application=self.application,
+    self.plotWidget = PlotWidget(parent=qtParent, application=self.application,
+                                                              useOpenGL=useOpenGL, strip=self,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
     # Have to add it to qtParent to make this work, while have self as parent
     qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))

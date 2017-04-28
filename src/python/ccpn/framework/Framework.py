@@ -547,7 +547,7 @@ class Framework:
       #print('FrameWork._initLayout>', yamlPath)
       try:
         with open(yamlPath) as f:
-          names, layout = yaml.load(f)
+          layout = yaml.load(f)
 
         typ, contents, state = layout['main']  # main window
         _analyseContents(contents)
@@ -987,7 +987,7 @@ class Framework:
       os.makedirs(layoutPath)
     import yaml
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
-      yaml.dump([currentModulesDict, layout], stream)
+      yaml.dump(layout, stream)
       stream.close()
 
   # GWV while refactoring: This routine seems not to be called

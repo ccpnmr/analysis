@@ -175,14 +175,14 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
-    # self.stripFrame = ScrollableWidget(self.module, grid=(1, 0), gridSpan=(1, 7),
-    #                                    hPolicy='expanding', vPolicy='expanding',
-    #                                    scrollBarPolicies = ('always', 'asNeeded')
-    #                                   )
-    self.stripFrame = Widget(self.module, grid=(1, 0), gridSpan=(1, 7),
-                                       setLayout=True,
+    self.stripFrame = ScrollableWidget(self.module, grid=(1, 0), gridSpan=(1, 7),
                                        hPolicy='expanding', vPolicy='expanding',
+                                       scrollBarPolicies = ('always', 'asNeeded')
                                       )
+    # self.stripFrame = Widget(self.module, grid=(1, 0), gridSpan=(1, 7),
+    #                                    setLayout=True,
+    #                                    hPolicy='expanding', vPolicy='expanding',
+    #                                   )
     self.stripFrame.setGridLayout()
     #self.module.mainWindow.show()
 

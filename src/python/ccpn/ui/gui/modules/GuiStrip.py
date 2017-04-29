@@ -88,6 +88,7 @@ class GuiStrip(Widget):
     ##                )
     Widget.__init__(self)
     self.setMinimumWidth(200)
+    self.setMinimumHeight(200)
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     ##self.plotWidget = PlotWidget(parent=self, application=self.application,
@@ -113,7 +114,7 @@ class GuiStrip(Widget):
     #self.stripIdLabel.setMinimumWidth(100)
     self.stripToolBarWidget.addWidget(self.stripIdLabel)
 
-    self.stripLabel = _StripLabel(parent=self.stripToolBarWidget, text='test')
+    self.stripLabel = _StripLabel(parent=self.stripToolBarWidget, text='')
     self.stripLabel.setFont(textFontSmall)
     self.stripToolBarWidget.addWidget(self.stripLabel)
     self.showStripLabel(False)
@@ -183,6 +184,7 @@ class GuiStrip(Widget):
     """return the text of the stripLabel"""
     return self.stripLabel.text()
 
+  #TODO:GEERTEN: the hide does not work!?
   def showStripLabel(self, doShow: bool):
     """show / hide the stripLabel"""
     if doShow:

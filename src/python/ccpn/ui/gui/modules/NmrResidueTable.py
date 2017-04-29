@@ -77,7 +77,7 @@ class NmrResidueTableModule(CcpnModule):
     # underpinning the addNotifier call do not allow for it either
     self.displaysWidget = ListCompoundWidget(self.settingsWidget, grid=(0,0), vAlign='top',
                                              minimumWidths=(100, 0, 0),
-                                             maximumWidths=(150, 150, 150),
+                                             maximumWidths=(100, 100, 100),
                                              orientation = 'left',
                                              labelText="Display module(s):",
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]

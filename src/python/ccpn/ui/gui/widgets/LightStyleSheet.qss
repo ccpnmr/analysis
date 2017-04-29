@@ -6,7 +6,7 @@ QWidget {
 
 
 Frame {
-    border: 1px solid #EDC151; /* #555D85; */
+    border: 0px solid #EDC151; /* #555D85; */
 }
 
 CallTipWidget {

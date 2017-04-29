@@ -80,31 +80,41 @@ class GuiStrip(Widget):
     self.application = application
     self.current = application.current
 
-    print('GuiStrip>>>', qtParent, self.spectrumDisplay, application)
+    #print('GuiStrip>>>', qtParent, self.spectrumDisplay, application)
 
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
-    ##Widget.__init__(self, parent=self.qtParent, setLayout=True,
-    ##                      acceptDrops=True, hPolicy='expanding', vPolicy='minimal',
-    ##                      grid=(0, self.spectrumDisplay.orderedStrips.index(self))
-    ##                )
-    Widget.__init__(self)
+
+    TESTING=True
+
+    stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+    if TESTING:
+      Widget.__init__(self, parent=self.qtParent, setLayout=True,
+                            acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
+                     )
+      # now put the PlotWidget and toolbarWidget in self
+      stripIndex = 0
+      qtParent = self
+    else:
+      Widget.__init__(self)
+      self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
     self.setMinimumWidth(200)
     self.setMinimumHeight(200)
-    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-    ##self.plotWidget = PlotWidget(parent=self, application=self.application,
     self.plotWidget = PlotWidget(parent=qtParent, application=self.application,
-                                                              useOpenGL=useOpenGL, strip=self,
+                                 useOpenGL=useOpenGL, strip=self,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
+    self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # Have to add it to qtParent to make this work, while have self as parent
-    qtParent.layout().addWidget(self.plotWidget, 0, self.spectrumDisplay.orderedStrips.index(self))
+    qtParent.layout().addWidget(self.plotWidget, 0, stripIndex)
 
     # placeholder for toolbar and a stripIdLabel; more items will be added by GuiStripNd and GuiStrip1d
     # TODO: oddly: left-alignment goes wrong when using Widget's
     self.stripToolBarWidget = ToolBar(parent=qtParent,
-                                     hPolicy='expanding', vAlign='top',
-                                     grid=(1, self.spectrumDisplay.orderedStrips.index(self)))
+                                      hPolicy='expanding', vAlign='top',
+                                      grid=(1, stripIndex)
+                                     )
     self.stripToolBarWidget.setFixedHeight(20)
 
     #TODO: correct once pid has been reviewed

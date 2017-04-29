@@ -146,10 +146,11 @@ class GuiSpectrumDisplay(CcpnModule):
     #                         name=self._wrappedData.name, closeFunc=self._closeModule,
     #                         size=(1100,1300), autoOrientation=False)
     #self.window.moduleArea.addModule(self.module, position='right')
+
+    #TODO:GEERTEN These need to go into self.mainWidget
     # Hack for now
     self.module = self
 
-    #TODO:GEERTEN These need to go into self.mainWidget
     self.spectrumToolBar = SpectrumToolBar(self.module, widget=self, grid=(0, 0), gridSpan=(1, 4))
     #self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
     self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -173,16 +174,11 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
-    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7), showBorder=True,
+    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7),
+                                      showBorder=True,
                                       hPolicy='expanding', vPolicy='expanding')
     self.setScrollbarPolicies(horizontal='always')
     self.stripFrame.setGridLayout()
-
-    #TODO:GEERTEN check for this naming
-    #self.stripFrame.guiSpectrumDisplay = self
-
-    #
-    #self.setEnabled(True)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection,

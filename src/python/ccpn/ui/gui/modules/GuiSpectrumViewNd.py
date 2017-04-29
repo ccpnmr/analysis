@@ -615,9 +615,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     except GLError:  # invalid framebuffer operation
       pass
 
-  def boundingRect(self):  # seems necessary to have
-      
-    return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TODO: remove hardwiring
+  # def boundingRect(self):  # seems necessary to have
+  #
+  #   return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TODO: remove hardwiring
   
   ##### functions not to be used externally #####
   # NBNB TBD internal functions should start with UNDERSCORE!

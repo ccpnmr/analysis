@@ -137,7 +137,7 @@ class GuiStripNd(GuiStrip):
     :param spectrumDisplay: spectrumDisplay instance
     :param application: application instance
     """
-    print('GuiStripNd>>', qtParent, self.spectrumDisplay, application)
+    #print('GuiStripNd>>', qtParent, self.spectrumDisplay, application)
     GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay,
                             application=application, useOpenGL=True
                       )

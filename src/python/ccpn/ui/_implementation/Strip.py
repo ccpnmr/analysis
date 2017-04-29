@@ -284,6 +284,7 @@ class Strip(AbstractWrapperObject):
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
+    print('Strip.displaySpectrum>>> _finaliseDone', self._finaliseDone, spectrum)
     if not self._finaliseDone: return
 
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum

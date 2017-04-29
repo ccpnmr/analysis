@@ -617,6 +617,9 @@ class TestSelectors_Iterator(WrapperTesting):
 
 class TestStructureData_properties(WrapperTesting):
 
+  # Path of project to load (None for new project)
+  projectPath = None
+
   #=========================================================================================
   # setUp       initialise a newStructureEnsemble
   #=========================================================================================

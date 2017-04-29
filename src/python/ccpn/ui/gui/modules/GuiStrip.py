@@ -55,6 +55,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.util.Logging import getLogger
 logger = getLogger()
 
+# 27/04/17 Functional revision number: 937d42fee2e1e32fb7c875669d4959e9590ef9be
+# 27/04/17 ~11:00 merged revision number: 28abf9040ae461e639262cc6b2dca726e8cbf897
 
 class GuiStrip(Widget):
 

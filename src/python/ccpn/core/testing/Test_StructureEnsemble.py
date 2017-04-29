@@ -249,8 +249,8 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     self.assertEquals(list(self.data['atomName']), self.testAtomName)
 
     self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[0:5])
-    self.assertEquals(list(self.project.models[1].data['atomName']), self.testAtomName[5:9])
-    self.assertEquals(list(self.project.models[2].data['atomName']), self.testAtomName[9:17])
-    self.assertEquals(list(self.project.models[3].data['atomName']), self.testAtomName[17:21])
-    self.assertEquals(list(self.project.models[4].data['atomName']), self.testAtomName[21:25])
-    self.assertEquals(list(self.project.models[5].data['atomName']), self.testAtomName[25:33])
+    self.assertEqual(list(self.project.models[1].data['atomName']), self.testAtomName[5:9])
+    self.assertEqual(list(self.project.models[2].data['atomName']), self.testAtomName[9:17])
+    self.assertEqual(list(self.project.models[3].data['atomName']), self.testAtomName[17:21])
+    self.assertEqual(list(self.project.models[4].data['atomName']), self.testAtomName[21:25])
+    self.assertEqual(list(self.project.models[5].data['atomName']), self.testAtomName[25:33])

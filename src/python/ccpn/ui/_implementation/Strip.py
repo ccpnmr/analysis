@@ -184,9 +184,6 @@ class Strip(AbstractWrapperObject):
     self._startCommandEchoBlock('clone')
     try:
       newStrip = self._project._data2Obj.get(self._wrappedData.clone())
-
-      # NBNB TODO Why is this necessary? Presumably it should be the same width as the source?
-      newStrip.setMinimumWidth(200)
     finally:
       self._endCommandEchoBlock()
     

@@ -88,7 +88,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     
   def boundingRect(self):  # seems necessary to have
 
-    return QtCore.QRectF(0, 0, 1000, 1000)  # TBD: remove hardwiring
+    return QtCore.QRectF(0, 0, 900, 700)  # TBD: remove hardwiring
 
   # override of Qt setVisible
   def setVisible(self, visible):

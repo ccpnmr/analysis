@@ -294,8 +294,6 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     for strip in self.strips:
       strip._unregisterStrip()
-    if len(self.mainWindow.spectrumDisplays) == 1:
-      self.mainWindow.addBlankDisplay()
     # self.module.close()
     #self.delete()
     CcpnModule._closeModule(self)

@@ -53,16 +53,18 @@ from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
 
 from ccpnmodel.ccpncore.memops import Notifiers
 
-def _getLevels(count, base, factor):
-  
+#TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
+# attributes
+def _getLevels(count:int, base:float, factor:float)->list:
+  "return a list with contour levels"
   levels = []
   if count > 0:
     levels = [base]
     for n in range(count-1):
       levels.append(numpy.float32(factor * levels[-1]))
-
   return levels
-       
+
+
 class GuiSpectrumViewNd(GuiSpectrumView):
   
   ###PeakListItemClass = PeakListNdItem

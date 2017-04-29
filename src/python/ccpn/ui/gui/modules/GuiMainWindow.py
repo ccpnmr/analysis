@@ -84,7 +84,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.moduleArea = CcpnModuleArea(mainWindow=self)
     # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
     #self.moduleArea.guiWindow = self
-    self.moduleArea.setGeometry(0, 0, 12000, 8000)
+    self.moduleArea.setGeometry(0, 0, 1000, 800)
 
     self.recordingMacro = False
     self._setupWindow()
@@ -163,7 +163,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
     self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-    #TODO:GEERTEN: deal with Stylesheet issue
+    #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
     self.setStyleSheet("""QSplitter{
                                     background-color: #bec4f3;
                                     }

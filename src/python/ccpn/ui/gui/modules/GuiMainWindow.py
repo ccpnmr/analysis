@@ -73,6 +73,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     QtGui.QMainWindow.__init__(self)
     self.setGeometry(200, 40, 1100, 900)
+    layout = self.layout()
+    if layout is not None:
+      layout.setContentsMargins(0, 0, 0, 0)
+      layout.setSpacing(0)
+
     # connect a close event, cleaning up things as needed
     self.closeEvent = self._closeEvent
     self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)

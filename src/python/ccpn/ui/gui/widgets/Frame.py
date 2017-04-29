@@ -152,7 +152,7 @@ class ScrollableFrame(Frame):
                                  scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
                                  **kwds
                                 )
-    self.scrollArea.setWidgetResizable(True)
+
     # initialise the frame
     super(ScrollableFrame, self).__init__(parent=self.scrollArea, showBorder=showBorder,
                                           fShape = fShape, fShadow = fShadow,
@@ -161,9 +161,15 @@ class ScrollableFrame(Frame):
     self.scrollArea.setWidget(self)
     self.scrollArea.getLayout().addWidget(self)
 
-  def setScrollBarPolicies(self, policies=('asNeeded','asNeeded')):
+    self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.scrollArea.setWidgetResizable(True)
+    self.setScrollBarPolicies(scrollBarPolicies)
+
+  def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
     "Set the scrolbar policy: always, never, asNeeded"
-    self.scrollArea.setScrollBarPolicies(policies)
+    self.scrollArea.setScrollBarPolicies(scrollBarPolicies)
+
+
 
 if __name__ == '__main__':
 

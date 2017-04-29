@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
+from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
@@ -174,11 +175,16 @@ class GuiSpectrumDisplay(CcpnModule):
     self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
-    self.stripFrame = ScrollableFrame(self.module, grid=(1, 0), gridSpan=(1, 7),
-                                      showBorder=True,
-                                      hPolicy='expanding', vPolicy='expanding')
-    self.setScrollbarPolicies(horizontal='always')
+    # self.stripFrame = ScrollableWidget(self.module, grid=(1, 0), gridSpan=(1, 7),
+    #                                    hPolicy='expanding', vPolicy='expanding',
+    #                                    scrollBarPolicies = ('always', 'asNeeded')
+    #                                   )
+    self.stripFrame = Widget(self.module, grid=(1, 0), gridSpan=(1, 7),
+                                       setLayout=True,
+                                       hPolicy='expanding', vPolicy='expanding',
+                                      )
     self.stripFrame.setGridLayout()
+    #self.module.mainWindow.show()
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection,
@@ -232,7 +238,7 @@ class GuiSpectrumDisplay(CcpnModule):
     showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
-    "Set the scrolbar policies"
+    "Set the scrolbar policies; convenience to expose to the user"
     from ccpn.ui.gui.widgets.Frame import SCROLLBAR_POLICY_DICT
 
     if horizontal not in SCROLLBAR_POLICY_DICT or \

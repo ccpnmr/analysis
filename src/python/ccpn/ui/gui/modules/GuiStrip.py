@@ -97,9 +97,17 @@ class GuiStrip(Widget):
       qtParent = self
     else:
       Widget.__init__(self)
-      self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-    self.setMinimumWidth(200)
+    # is appears to be required to explicitly set these
+    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    layout = self.layout()
+    if layout is not None:
+      layout = QtGui.QGridLayout(self)
+      layout.setContentsMargins(0, 0, 0, 0)
+      layout.setSpacing(0)
+      self.setLayout(layout)
+
+    self.setMinimumWidth(250)
     self.setMinimumHeight(200)
 
     self.plotWidget = PlotWidget(parent=qtParent, application=self.application,

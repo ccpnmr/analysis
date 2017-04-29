@@ -155,9 +155,10 @@ class Base(DropBase):
   def setGridLayout(self):
     "Add a QGridlayout to self"
     layout = self.getLayout()
-    if layout is None:
+    if layout is not None:
       layout = QtGui.QGridLayout(self)
       layout.setContentsMargins(0, 0, 0, 0)
+      layout.setSpacing(0)
       self.setLayout(layout)
     else:
       logger.warning('Widget already has a layout!')

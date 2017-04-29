@@ -375,6 +375,12 @@ class Strip1d(coreClass, _GuiStrip1d):
     self.application = project._appBase
     # Strip1d utimately is a widget which gets appBase from widgets.Base
     # self._appBase = project._appBase
+    # 28/04/17: No longer the case
+
+    # hack 2: PostPhone SpectrumLoading and PlotWidget stuff until later
+    self._finaliseDone = False
+
+    print('Strip1d>> spectrumDisplay:', self.spectrumDisplay)
     _GuiStrip1d.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
                                spectrumDisplay=self.spectrumDisplay,
                                application=self.application)
@@ -391,6 +397,11 @@ class StripNd(coreClass, _GuiStripNd):
     application = project._appBase
     # StripNd utimately is a widget which gets _appBase from widgets.Base (for now)
     # self._appBase = project._appBase
+    # 28/04/17: No longer the case
+
+    # hack 2: PostPhone SpectrumLoading and PlotWidget stuff until later
+    self._finaliseDone = False
+
     print('StripNd>> spectrumDisplay:', self.spectrumDisplay)
     _GuiStripNd.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
                                spectrumDisplay=self.spectrumDisplay,

@@ -363,6 +363,8 @@ class GuiStrip(Widget):
     # this code is complicated because need to keep viewBox region and axis region in sync
     # and there can be different viewBoxes with the same axis
 
+    if not self._finaliseDone: return
+
     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
 
     self._updateY()
@@ -377,6 +379,8 @@ class GuiStrip(Widget):
       maxDiff = abs(r1[1] - r2[1])
       return (minDiff > tol) or (maxDiff > tol)
 
+    if not self._finaliseDone: return
+
     yRange = list(self.viewBox.viewRange()[1])
     for strip in self.spectrumDisplay.strips:
       stripYRange = list(self.viewBox.viewRange()[1])
@@ -388,6 +392,7 @@ class GuiStrip(Widget):
     """
     Puts axis code labels in the correct place on the PlotWidget
     """
+    if not self._finaliseDone: return
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -434,6 +439,8 @@ class GuiStrip(Widget):
     # CCPN INTERNAL
     Called in _setCrossHairPosition method of GuiSpectrumDisplay
     """
+    if not self._finaliseDone: return
+
     axes = self.orderedAxes
     xPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
     yPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
@@ -448,6 +455,9 @@ class GuiStrip(Widget):
 
   def _createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
+
+    if not self._finaliseDone: return
+
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
@@ -456,6 +466,9 @@ class GuiStrip(Widget):
   #
   #TODO:API: remove
   def _rulerCreated(self, apiRuler):
+
+    if not self._finaliseDone: return
+
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position
     if apiRuler.mark.colour[0] == '#':
@@ -494,6 +507,8 @@ class GuiStrip(Widget):
     """
     Updates the position of the crosshair when the mouse is moved.
     """
+    if not self._finaliseDone: return
+
     if self.isDeleted:
       return
 
@@ -527,6 +542,8 @@ class GuiStrip(Widget):
     """
     Displays mouse position for both axes by axis code.
     """
+    if not self._finaliseDone: return
+
     if self.isDeleted:
       return
 
@@ -543,6 +560,7 @@ class GuiStrip(Widget):
     """
     Zooms strip to the specified region
     """
+    if not self._finaliseDone: return
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(*xRegion, padding=padding)
     self.viewBox.setYRange(*yRegion, padding=padding)
@@ -551,6 +569,8 @@ class GuiStrip(Widget):
     """
     Zooms x axis of strip to the specified region
     """
+    if not self._finaliseDone: return
+
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x1, x2, padding=padding)
 
@@ -558,6 +578,7 @@ class GuiStrip(Widget):
     """
     Zooms y axis of strip to the specified region
     """
+    if not self._finaliseDone: return
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setYRange(y1, y2, padding=padding)
 
@@ -565,6 +586,7 @@ class GuiStrip(Widget):
     """
     Zooms both axis of strip to the specified region
     """
+    if not self._finaliseDone: return
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.autoRange(padding=padding)
 
@@ -603,12 +625,14 @@ class GuiStrip(Widget):
     """
     Adds current region to the zoom stack for the strip.
     """
+    if not self._finaliseDone: return
     self.storedZooms.append(self.viewBox.viewRange())
 
   def _restoreZoom(self):
     """
     Restores last saved region to the zoom stack for the strip.
     """
+    if not self._finaliseDone: return
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
       padding = self.application.preferences.general.stripRegionPadding
@@ -625,6 +649,7 @@ class GuiStrip(Widget):
     # NBNB TBD 1) we should not always display all peak lists together
     # NBNB TBD 2) This should not be called for each strip
 
+    if not self._finaliseDone: return
     if not peaks:
       peaks = peakList.peaks
 
@@ -648,11 +673,12 @@ class GuiStrip(Widget):
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""
 
+  strip = axis.strip
+  if not strip._finaliseDone: return
+
   position = axis.position
   width = axis.width
   region = (position - width/2., position + width/2.)
-
-  strip = axis.strip
 
   index = strip.axisOrder.index(axis.code)
   if not strip.beingUpdated:
@@ -774,6 +800,8 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
 def _setupGuiStrip(project:Project, apiStrip):
   """Set up graphical parameters for completed strips - for notifiers"""
   strip = project._data2Obj[apiStrip]
+
+  if not strip._finaliseDone: return
 
   orderedAxes = strip.orderedAxes
   axisOrder = strip.axisOrder

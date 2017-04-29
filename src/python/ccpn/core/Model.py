@@ -207,7 +207,7 @@ class Model(AbstractWrapperObject):
 
   @property
   def data(self) -> ModelData:
-    """Model data pandas object - a view on the dat ain the StructureEnsemble."""
+    """Model data pandas object - a view on the data in the StructureEnsemble."""
     result = self._modelData
     if result is None:
       result = self._modelData = ModelData(model=self)

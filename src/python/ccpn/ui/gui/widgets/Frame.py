@@ -124,6 +124,7 @@ class Frame(QtGui.QFrame, Base):
       self.setStyleSheet('QFrame {' + styleSheet + '}')
 
     Base.__init__(self, setLayout=setLayout, **kwds)
+    self.setContentsMargins(0, 0, 0, 0)
 
     # define frame styles
     if fShape or fShadow:
@@ -162,6 +163,8 @@ class ScrollableFrame(Frame):
     self.scrollArea.setWidget(self)
     self.scrollArea.getLayout().addWidget(self)
 
+    # configure the scroll area to allow all available space without margins
+    self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)

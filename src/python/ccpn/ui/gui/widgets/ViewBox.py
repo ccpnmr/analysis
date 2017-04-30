@@ -230,8 +230,8 @@ class ViewBox(pg.ViewBox):
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
-    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
-    click events.
+    Re-implementation of PyQtGraph mouse click event to allow custom actions 
+    for different mouse click events.
     """
     self.current.strip = self.strip
     xPosition = self.mapSceneToView(event.pos()).x()

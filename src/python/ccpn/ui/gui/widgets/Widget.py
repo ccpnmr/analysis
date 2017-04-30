@@ -65,6 +65,8 @@ class ScrollableWidget(Widget):
     self.scrollArea.setWidget(self)
     self.scrollArea.layout().addWidget(self)
 
+    # configure the scroll area to allow all available space without margins
+    self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)

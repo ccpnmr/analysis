@@ -47,9 +47,11 @@ from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 #TODO:WAYNE: should this inherit from Base??
 class PlotWidget(pg.PlotWidget, Base):
 
-  def __init__(self, parent, application, useOpenGL=False, strip=None, showDoubleCrosshair=False, **kw):
+  def __init__(self, parent, application, useOpenGL=False, strip=None,
+                     showDoubleCrosshair=False, **kw):
 
-    self.viewBox = ViewBox(current=application.current, parent=parent, strip=strip)
+    # Be sure to use explicit arguments to ViewBox as the call order is different in the __init__
+    self.viewBox = ViewBox(parent=parent, current=application.current, strip=strip)
     pg.PlotWidget.__init__(self, parent=parent,
                                  viewBox=self.viewBox,
                                  axes=None, enableMenu=True)

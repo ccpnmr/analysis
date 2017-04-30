@@ -136,11 +136,11 @@ class GuiSpectrumDisplay(CcpnModule):
     :param name: Title-bar name for the Module
     """
 
-    print('GuiSpectrumDisplay>>>', mainWindow, name)
+    print('GuiSpectrumDisplay>> mainWindow, name:', mainWindow, name)
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
-    print('GuiSpectrumDisplay>>>', self.layout)
+    print('GuiSpectrumDisplay>> self.layout:', self.layout)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -151,11 +151,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
     #TODO:GEERTEN These need to go into self.mainWidget
     qtParent = self.mainWidget
-    print('GuiSpectrumDisplay>> self.parent():', self.parent(), 'qtParent:', qtParent)
+    print('GuiSpectrumDisplay>> self.parent(), self.parent().layout:', self.parent(), self.parent().layout)
+    print('GuiSpectrumDisplay>> qtParent, qtParent.getLayout():', qtParent, qtParent.getLayout())
     #layout=self.parent().layout()
 
     # GWV: Not sure what the widget argument is for
-    self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self, grid=(0, 0), gridSpan=(1, 4))
+    self.spectrumToolBar = SpectrumToolBar(widget=self) #, grid=(0, 0), gridSpan=(1, 4)
+    qtParent.getLayout().addWidget(self.spectrumToolBar, 0, 0, 1, 4)
     #layout.addWidget(self.spectrumToolBar, 0, 0)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)

@@ -39,7 +39,7 @@ from functools import partial
 
 class SpectrumToolBar(ToolBar):
 
-  def __init__(self, parent, widget=None, **kwds):
+  def __init__(self, parent=None, widget=None, **kwds):
 
     ToolBar.__init__(self, parent=parent, **kwds)
     self.widget = widget

@@ -112,6 +112,7 @@ class GuiWindow():
       if MessageDialog.showYesNo(title, msg, parent):
         current.project.deleteObjects(*peaks)
 
+  #FIXME:WAYNE: I don't think this can be correct
   def getCurrentPositionAndStrip(self):
     current = self.application.current
     current.strip = current.viewBox.parentObject().parent

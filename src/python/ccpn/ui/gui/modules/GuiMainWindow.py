@@ -107,12 +107,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.addBlankDisplay()
 
     self.statusBar().showMessage('Ready')
+    self.show()
 
   def _initProject(self):
     """
     Puts relevant information from the project into the appropriate places in the main window.
-
     """
+    #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
     isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
     project = self._project
@@ -165,9 +166,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Sets up SideBar, python console and splitters to divide up main window properly.
 
     """
-    self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
-    self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
-
     #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
     self.setStyleSheet("""QSplitter{
                                     background-color: #bec4f3;
@@ -211,11 +209,24 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 # """ + self.pythonConsole.ipythonWidget.__doc__
 
     self.sideBar = SideBar(parent=self)
-    self.splitter3.addWidget(self.sideBar)
-    self.splitter1.addWidget(self.splitter3)
     self.sideBar.itemDoubleClicked.connect(self._raiseObjectProperties)
-    self.splitter1.addWidget(self.moduleArea)
-    self.setCentralWidget(self.splitter1)
+
+    # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
+    self._horizontalSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+    # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
+    # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+
+    # GWV: do not understand this order
+    # self._verticalSplitter.addWidget(self.sideBar)
+    # self._horizontalSplitter.addWidget(self._verticalSplitter)
+    # self._horizontalSplitter.addWidget(self.moduleArea)
+    # self.setCentralWidget(self._horizontalSplitter)
+
+    # GWV: there is no need for the above as the moduleArea generates its splitter
+    # when required
+    self._horizontalSplitter.addWidget(self.sideBar)
+    self._horizontalSplitter.addWidget(self.moduleArea)
+    self.setCentralWidget(self._horizontalSplitter)
 
   def _setupMenus(self):
     """
@@ -224,7 +235,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     This currently pulls info on what menus to create from Framework.  Once GUI and Project are
     separated, Framework should be able to call a method to set the menus.
-
     """
 
     self._menuBar = MenuBar(self)
@@ -232,7 +242,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._createMenu(m)
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
-    self.show()
 
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
@@ -534,6 +543,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
+  #TODO:LUCA: this cannot be correct and ModuleArea is not updates; The proper way should be
+  # that moduleArea handles this: self.moduleArea.deleteModule(blankDisplay)
   def deleteBlankDisplay(self):
     """
     Removes blank display from main window modulearea if one is present.

@@ -34,7 +34,6 @@ from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
@@ -161,7 +160,7 @@ class Base(DropBase):
       layout.setSpacing(0)
       self.setLayout(layout)
     else:
-      logger.warning('Widget %s already has a layout!' % self)
+      getLogger().warning('Widget %s already has a layout!' % self)
 
   def getLayout(self):
     "return the layout of self"

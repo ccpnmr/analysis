@@ -148,19 +148,21 @@ class GuiSpectrumDisplay(CcpnModule):
     #                         size=(1100,1300), autoOrientation=False)
     #self.window.moduleArea.addModule(self.module, position='right')
 
-    #TODO:GEERTEN These need to go into self.mainWidget
     # Hack for now
     self.module = self
 
-    self.spectrumToolBar = SpectrumToolBar(self.module, widget=self, grid=(0, 0), gridSpan=(1, 4))
+    #TODO:GEERTEN These need to go into self.mainWidget
+    qtParent = self
+
+    # GWV: Not sure what the widget argument is for
+    self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self, grid=(0, 0), gridSpan=(1, 4))
     #self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
-    self.spectrumToolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     #self.resize(self.sizeHint())
 
     # Utilities Toolbar; filled later-on!?
-    self.spectrumUtilToolBar = ToolBar(self.module, grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
+    self.spectrumUtilToolBar = ToolBar(parent=qtParent, grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
@@ -171,11 +173,11 @@ class GuiSpectrumDisplay(CcpnModule):
       self.spectrumUtilToolBar.hide()
 
     # position box
-    self.positionBox = Label(self.module)
-    self.module.addWidget(self.positionBox, 0, 6)
+    self.positionBox = Label(parent=qtParent, grid=(0,6))
+    #self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
-    self.stripFrame = ScrollableWidget(self.module, grid=(1, 0), gridSpan=(1, 7),
+    self.stripFrame = ScrollableWidget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
                                        hPolicy='expanding', vPolicy='expanding',
                                        scrollBarPolicies = ('always', 'asNeeded')
                                       )
@@ -187,7 +189,7 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.module.mainWindow.show()
 
     includeDirection = not self.is1D
-    self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection,
+    self.phasingFrame = PhasingFrame(parent=qtParent, includeDirection=includeDirection,
                                      callback=self._updatePhasing,
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
@@ -199,12 +201,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                        self._processDroppedItems)
 
-    # GWV: this came from previous code, but I am not sure why it was there
-    # commented for now
-    # self.hoverEvent = self._hoverEvent
+    # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
+    # the module to another location
+    self.hoverEvent = self._hoverEvent
 
-  # def _hoverEvent(self, event):
-  #   event.accept()
+  def _hoverEvent(self, event):
+    event.accept()
 
   def _processDroppedItems(self, data):
     "Process the pids"

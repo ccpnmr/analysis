@@ -44,6 +44,7 @@ class SpectrumToolBar(ToolBar):
     ToolBar.__init__(self, parent=parent, **kwds)
     self.widget = widget
     self.parent = parent
+    self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
   def mousePressEvent(self, event:QtGui.QMouseEvent):
     """

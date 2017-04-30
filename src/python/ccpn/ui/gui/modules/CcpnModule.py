@@ -42,7 +42,6 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 
 class CcpnModule(Dock):
   """
@@ -66,10 +65,11 @@ class CcpnModule(Dock):
 
     #TODO:GEERTEN: make mainWindow actually do something
 
-    super(CcpnModule, self).__init__(name, self, closable=closable)#, **kwds)   # ejb
-    print('CcpnModule>>>', type(self))
-    # GWV: logger seems not to work??
-    logger.debug('module:"%s"' % (name,))
+    super(CcpnModule, self).__init__(name=name, area=mainWindow.moduleArea,
+                                     closable=closable)#, **kwds)   # ejb
+    print('CcpnModule>>>', type(self), mainWindow)
+
+    getLogger().debug('module:"%s"' % (name,))
 
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
@@ -85,13 +85,14 @@ class CcpnModule(Dock):
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=self.widgetArea, setLayout=False)  #QtGui.QWidget(self)
 
     # optional settings widget area
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      self.settingsWidget = ScrollableFrame(parent=self, scrollBarPolicies=('always','asNeeded'),
+      self.settingsWidget = ScrollableFrame(parent=self.widgetArea,
+                                            scrollBarPolicies=('always','asNeeded'),
                                             minimumSizes=self.settingsMinimumSizes
                                            )
       if self.settingsOnTop:
@@ -101,8 +102,17 @@ class CcpnModule(Dock):
         self.addWidget(self.mainWidget, 0, 0)
         self.addWidget(self.settingsWidget.scrollArea, 1, 0)
       self.settingsWidget.scrollArea.hide()
+
     else:
+      self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
+
+    # always explicitly show the mainWidget
+    self.mainWidget.show()
+
+    # set parenting relations
+    self.setParent(mainWindow)
+    self.widgetArea.setParent(self)
 
   def getName(self):
     "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a warpper object as well"
@@ -263,7 +273,7 @@ class CcpnModuleLabel(DockLabel):
 
   def paintEvent(self, ev):
     """
-    Copied from the parent VerticlLabel class to allow for modification in StyleSheet
+    Copied from the parent VerticalLabel class to allow for modification in StyleSheet
     """
     p = QtGui.QPainter(self)
 

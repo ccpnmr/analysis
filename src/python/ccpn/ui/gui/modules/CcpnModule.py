@@ -85,7 +85,7 @@ class CcpnModule(Dock):
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=self.widgetArea, setLayout=False)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=self.widgetArea, setLayout=True)  #QtGui.QWidget(self)
 
     # optional settings widget area
     self.settingsState = 0  # current state (not shown)

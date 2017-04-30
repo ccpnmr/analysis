@@ -22,6 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt4 import QtGui, QtCore
 
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
@@ -33,6 +34,13 @@ class CcpnModuleArea(ModuleArea):
 
   def __init__(self, mainWindow):
     super(CcpnModuleArea, self).__init__(mainWindow)
+    # #GWV test to trace gridding issues
+    # # remove the existing Vbox layout by transferring to a temp widget
+    # QtGui.QWidget().setLayout(self.layout)  ## pyqtgraph stored the layout as self.layout
+    # self.layout = QtGui.QGridLayout(self)
+    # self.layout.setContentsMargins(0, 0, 0, 0)
+    # self.layout.setSpacing(0)
+
     self.modules = self.docks
     self.moveModule = self.moveDock
     self.mainWindow = mainWindow  # a link back to the parent MainWindow

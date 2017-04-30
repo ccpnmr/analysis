@@ -140,6 +140,7 @@ class GuiSpectrumDisplay(CcpnModule):
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
+    print('GuiSpectrumDisplay>>>', self.layout)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -148,14 +149,9 @@ class GuiSpectrumDisplay(CcpnModule):
     # cannot set self.project because self is a wrapper object
     # self.project = mainWindow.application.project
 
-    #TODO:GEERTEN; remove this once it has been established that GuiSpectrumDisplay can safely be subclassed from CcpnModule
-    #self.module = CcpnModule(parent=self.window.moduleArea,
-    #                         name=self._wrappedData.name, closeFunc=self._closeModule,
-    #                         size=(1100,1300), autoOrientation=False)
-
     #TODO:GEERTEN These need to go into self.mainWidget
     qtParent = self.mainWidget
-    print('>>', self.parent())
+    print('GuiSpectrumDisplay>> self.parent():', self.parent(), 'qtParent:', qtParent)
     #layout=self.parent().layout()
 
     # GWV: Not sure what the widget argument is for

@@ -72,11 +72,23 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def __init__(self, application):
 
     QtGui.QMainWindow.__init__(self)
-    self.setGeometry(200, 40, 1100, 900)
+    # Layout
     layout = self.layout()
+    print('GuiMainWindow: layout:', layout)
+
+    # # GWV test to trace gridding issues
+    # if layout is not None:
+    #   # remove the existing  layout by transferring to a temp widget
+    #   QtGui.QWidget().setLayout(layout)
+    #   layout = QtGui.QGridLayout(self)
+    # layout = self.layout()
+    # print('GuiMainWindow: layout:', layout)
+
     if layout is not None:
       layout.setContentsMargins(0, 0, 0, 0)
       layout.setSpacing(0)
+
+    self.setGeometry(200, 40, 1100, 900)
 
     # connect a close event, cleaning up things as needed
     self.closeEvent = self._closeEvent
@@ -87,8 +99,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # Module area
     self.moduleArea = CcpnModuleArea(mainWindow=self)
-    # GWV: kept this for compatibility for now; CcpnModuleArea sets its mainWindow attribute
-    #self.moduleArea.guiWindow = self
+    print('GuiMainWindow.moduleArea: layout:', self.moduleArea.layout) ## pyqtgraph object
     self.moduleArea.setGeometry(0, 0, 1000, 800)
 
     self.recordingMacro = False

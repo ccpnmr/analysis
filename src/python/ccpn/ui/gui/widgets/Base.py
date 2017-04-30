@@ -165,12 +165,11 @@ class Base(DropBase):
 
   def getLayout(self):
     "return the layout of self"
-    #TODO:WAYNE: complete this routine to be failsave/robust
-    if isinstance(self, Dock):
-      print('Base.getLayout> Dock instance %s', self)
-      layout = self.widgetArea.layout()
-    else:
-      layout = self.layout()
+    layout = None
+    try:
+      layout = QtGui.QWidget.layout(self)
+    except:
+      raise RuntimeError('Unable to query layout of %s', self)
     return layout
 
   def _getRowCol(self, grid):

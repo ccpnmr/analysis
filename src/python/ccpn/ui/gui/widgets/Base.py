@@ -161,7 +161,7 @@ class Base(DropBase):
       layout.setSpacing(0)
       self.setLayout(layout)
     else:
-      logger.warning('Widget already has a layout!')
+      logger.warning('Widget %s already has a layout!' % self)
 
   def getLayout(self):
     "return the layout of self"

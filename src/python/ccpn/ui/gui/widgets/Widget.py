@@ -45,11 +45,8 @@ class Widget(QtGui.QWidget, Base):
   def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
     "General widget; default accepts drops (for now)"
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, acceptDrops=acceptDrops, **kwds)
-    if setLayout:
-      layout = QtGui.QGridLayout()
-      self.setLayout(layout)
-
+    Base.__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+    self.setContentsMargins(0, 0, 0, 0)
 
 class ScrollableWidget(Widget):
   "A scrollable Widget"

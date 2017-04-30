@@ -94,7 +94,8 @@ class Frame(QtGui.QFrame, Base):
       'vLine':       QtGui.QFrame.VLine,
   }
 
-  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None, setLayout=False, **kwds):
+  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+                     setLayout=False, **kwds):
     """
     Initialise a Frame with optional border and layout
 

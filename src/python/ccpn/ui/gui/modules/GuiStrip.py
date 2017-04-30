@@ -45,6 +45,7 @@ from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+from ccpn.ui.gui.widgets.Frame import Frame
 
 
 
@@ -55,10 +56,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.util.Logging import getLogger
 logger = getLogger()
 
-# 27/04/17 Functional revision number: 937d42fee2e1e32fb7c875669d4959e9590ef9be
-# 27/04/17 ~11:00 merged revision number: 28abf9040ae461e639262cc6b2dca726e8cbf897
 
-class GuiStrip(Widget):
+class GuiStrip(Frame):
 
   # GWV: used for!?
   sigClicked = QtCore.Signal(object, object)
@@ -89,8 +88,8 @@ class GuiStrip(Widget):
 
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)
     if TESTING:
-      Widget.__init__(self, parent=self.qtParent, setLayout=True,
-                            acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
+      Frame.__init__(self, parent=self.qtParent, setLayout=True, showBorder=True,
+                           acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
                      )
       # now put the PlotWidget and toolbarWidget in self
       stripIndex = 0
@@ -98,14 +97,10 @@ class GuiStrip(Widget):
     else:
       Widget.__init__(self)
 
-    # is appears to be required to explicitly set these
+    # is appears to be required to explicitly set these, otherwise
+    # the Widget will not fill all available space
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    layout = self.layout()
-    if layout is not None:
-      layout = QtGui.QGridLayout(self)
-      layout.setContentsMargins(0, 0, 0, 0)
-      layout.setSpacing(0)
-      self.setLayout(layout)
+    self.setContentsMargins(30, 5, 30, 5)
 
     self.setMinimumWidth(250)
     self.setMinimumHeight(200)
@@ -114,8 +109,10 @@ class GuiStrip(Widget):
                                  useOpenGL=useOpenGL, strip=self,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.plotWidget.setContentsMargins(0, 0, 0, 0)
     # Have to add it to qtParent to make this work, while have self as parent
     qtParent.layout().addWidget(self.plotWidget, 0, stripIndex)
+
 
     # placeholder for toolbar and a stripIdLabel; more items will be added by GuiStripNd and GuiStrip1d
     # TODO: oddly: left-alignment goes wrong when using Widget's

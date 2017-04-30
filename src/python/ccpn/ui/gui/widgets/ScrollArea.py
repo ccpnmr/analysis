@@ -45,7 +45,7 @@ class ScrollArea(QtGui.QScrollArea, Base):
                      minimumSizes=(50, 50), **kwds):
 
     QtGui.QScrollArea.__init__(self, parent)
-    Base.__init__(self, **kwds)
+    Base.__init__(self, setLayout=True, **kwds)
     self.setScrollBarPolicies(scrollBarPolicies)
     self.setMinimumSizes(minimumSizes)
 

@@ -36,6 +36,7 @@ class CcpnModuleArea(ModuleArea):
     self.modules = self.docks
     self.moveModule = self.moveDock
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
+    self.setContentsMargins(0, 0, 0, 0)
 
   @property
   def currentModules(self) -> list:

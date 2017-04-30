@@ -333,7 +333,7 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
 
     _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name)
-    self.application.ui.mainWindow.moduleArea.addModule(self.module, position='right')
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right')
 
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
@@ -357,7 +357,7 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name
                                 )
-    self.application.ui.mainWindow.moduleArea.addModule(self.module, position='right')
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right')
 #old name
 StripDisplayNd = SpectrumDisplayNd
 

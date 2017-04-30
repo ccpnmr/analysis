@@ -80,7 +80,7 @@ class GuiStrip(Frame):
     self.current = application.current
     self.stripIndex = self.spectrumDisplay.orderedStrips.index(self)
 
-    #print('GuiStrip>>>', qtParent, self.spectrumDisplay, application)
+    print('GuiStrip>>>', qtParent, self.spectrumDisplay)  #, application)
 
     # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this

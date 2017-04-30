@@ -119,6 +119,7 @@ class Base(DropBase):
         #layout.setContentsMargins(1,1,1,1)
         layout.setContentsMargins(0, 0, 0, 0)
         parent.setLayout( layout )
+
       if isinstance(layout, QtGui.QGridLayout):
         row, col = self._getRowCol(grid)
         rowStr, colStr = stretch
@@ -166,6 +167,7 @@ class Base(DropBase):
     "return the layout of self"
     #TODO:WAYNE: complete this routine to be failsave/robust
     if isinstance(self, Dock):
+      print('Base.getLayout> Dock instance %s', self)
       layout = self.widgetArea.layout()
     else:
       layout = self.layout()

@@ -59,7 +59,7 @@ class CcpnModule(Dock):
   includeSettingsWidget = False
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
-  settingsMinimumSizes = (0, 0)
+  settingsMinimumSizes = (100, 50)
 
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
@@ -111,7 +111,7 @@ class CcpnModule(Dock):
     self.mainWidget.show()
 
     # set parenting relations
-    self.setParent(mainWindow)
+    self.setParent(mainWindow.moduleArea)
     self.widgetArea.setParent(self)
 
   def getName(self):

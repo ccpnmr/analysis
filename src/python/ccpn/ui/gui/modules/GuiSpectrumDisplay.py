@@ -122,6 +122,12 @@ class GuiSpectrumDisplay(CcpnModule):
                         :return axis
   """
 
+  # overide in specific module implementations
+  includeSettingsWidget = True
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
+  settingsMinimumSizes = (250, 50)
+
   def __init__(self, mainWindow, name):
     """
     Initialise the Gui spectrum display object
@@ -129,8 +135,8 @@ class GuiSpectrumDisplay(CcpnModule):
     :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
     """
-    #TODO:ED: complete the above
 
+    print('GuiSpectrumDisplay>>>', mainWindow, name)
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
@@ -146,17 +152,15 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.module = CcpnModule(parent=self.window.moduleArea,
     #                         name=self._wrappedData.name, closeFunc=self._closeModule,
     #                         size=(1100,1300), autoOrientation=False)
-    #self.window.moduleArea.addModule(self.module, position='right')
-
-    # Hack for now
-    self.module = self
 
     #TODO:GEERTEN These need to go into self.mainWidget
-    qtParent = self
+    qtParent = self.mainWidget
+    print('>>', self.parent())
+    #layout=self.parent().layout()
 
     # GWV: Not sure what the widget argument is for
     self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self, grid=(0, 0), gridSpan=(1, 4))
-    #self.module.addWidget(self.spectrumToolBar, 0, 0, 1, 2)#, grid=(0, 0), gridSpan=(1, 2))
+    #layout.addWidget(self.spectrumToolBar, 0, 0)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     #self.resize(self.sizeHint())
@@ -166,7 +170,6 @@ class GuiSpectrumDisplay(CcpnModule):
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
-    #self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
     if self.application.preferences.general.showToolbar:
       self.spectrumUtilToolBar.show()
     else:
@@ -174,19 +177,17 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # position box
     self.positionBox = Label(parent=qtParent, grid=(0,6))
-    #self.module.addWidget(self.positionBox, 0, 6)
 
     # scroll area
     self.stripFrame = ScrollableWidget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
                                        hPolicy='expanding', vPolicy='expanding',
                                        scrollBarPolicies = ('always', 'asNeeded')
                                       )
-    # self.stripFrame = Widget(self.module, grid=(1, 0), gridSpan=(1, 7),
+    # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
     #                                    setLayout=True,
     #                                    hPolicy='expanding', vPolicy='expanding',
     #                                   )
     self.stripFrame.setGridLayout()
-    #self.module.mainWindow.show()
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(parent=qtParent, includeDirection=includeDirection,

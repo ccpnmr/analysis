@@ -5,6 +5,7 @@ QWidget {
 }
 
 
+
 Frame {
     border: 0px solid #EDC151; /* #555D85; */
 }

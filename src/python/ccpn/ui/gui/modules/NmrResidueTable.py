@@ -111,7 +111,8 @@ class NmrResidueTableModule(CcpnModule):
                                             )
 
     # main window
-    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,
+    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, setLayout=True,
+                                           application=self.application,
                                            actionCallback=self.navigateToNmrResidue,
                                            grid=(0,0)
                                           )
@@ -176,13 +177,14 @@ class NmrResidueTable(ObjectTable):
 
     self._project = application.project
     self._current = application.current
+    kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
-    ObjectTable.__init__(self, parent=self._widget,
+    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects = [],
                          autoResize=True,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
@@ -208,6 +210,12 @@ class NmrResidueTable(ObjectTable):
 
     if len(self._project.nmrChains) > 0:
       self.displayTableForNmrChain(self._project.nmrChains[0])
+
+  def addWidgetToTop(self, widget, col=2, colSpan=1):
+    "Convenience to add a widget to the top of the table; col >= 2"
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForNmrChain(self, nmrChain):
     "Display the table for all NmrResidue's of nmrChain"

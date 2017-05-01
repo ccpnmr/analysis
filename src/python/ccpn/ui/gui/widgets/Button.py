@@ -40,7 +40,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class Button(QtGui.QPushButton, Base):
 
-  def __init__(self, parent, text='', callback=None, icon=None, toggle=None, **kw):
+  def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, **kw):
 
     #text = translator.translate(text): not needed as it calls setText which does the work
 

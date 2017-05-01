@@ -183,24 +183,19 @@ class Gui(Ui):
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
-
-  #TODO:TJ There are also addBlankDisplay and deleteBlankDisplay in the GuiWMainindow class;
-  # This should be refactored properly with the graphics aspects delt with by GuiMainWindow (passing poition,relative)
-  # to it
+  #TODO: this should be made failsafe
   def addBlankDisplay(self, position='right', relativeTo=None):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
     try:
-      if 'Blank Display' in self.mainWindow.moduleArea.findAll()[1]:
-        blankDisplay = self.mainWindow.moduleArea.findAll()[1]['Blank Display']
-        if blankDisplay.isVisible():
-          return
-        else:
-          self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
+      mDict = self.mainWindow.moduleArea.currentModulesDict
+      if 'BlankDisplay' in mDict:
+        blankDisplay = mDict['BlankDisplay']
+        blankDisplay.show()
       else:
-        blankDisplay = self.mainWindow.addBlankDisplay()
+        blankDisplay = self.mainWindow.newBlankDisplay()
       return blankDisplay
     finally:
       self.application._endCommandBlock()

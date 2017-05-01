@@ -50,7 +50,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
-from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
+from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 from ccpn.util.Common import uniquify
 
@@ -75,14 +75,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # Layout
     layout = self.layout()
     print('GuiMainWindow: layout:', layout)
-
-    # # GWV test to trace gridding issues
-    # if layout is not None:
-    #   # remove the existing  layout by transferring to a temp widget
-    #   QtGui.QWidget().setLayout(layout)
-    #   layout = QtGui.QGridLayout(self)
-    # layout = self.layout()
-    # print('GuiMainWindow: layout:', layout)
 
     if layout is not None:
       layout.setContentsMargins(0, 0, 0, 0)
@@ -115,7 +107,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.updatePopup = None
 
     # open a blank display
-    self.addBlankDisplay()
+    self.newBlankDisplay()
 
     self.statusBar().showMessage('Ready')
     self.show()
@@ -564,11 +556,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
       blankDisplay.close()
 
-  def addBlankDisplay(self):
-    "Adds blank display; returns BlankDisplay instance"
-    if not self._wrappedData.modules:
-      blankDisplay = BlankDisplay(mainWindow=self)
-      self.moduleArea.addModule(blankDisplay, position=None)
+  def newBlankDisplay(self, position='right', relativeTo=None):
+    "Adds new blank display to module area; returns BlankDisplay instance"
+    blankDisplay = BlankDisplay(mainWindow=self)
+    self.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
+    return blankDisplay
 
   def newMacroFromLog(self):
     """

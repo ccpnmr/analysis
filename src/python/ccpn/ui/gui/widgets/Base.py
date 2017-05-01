@@ -171,7 +171,7 @@ class Base(DropBase):
     # have to use _getLayout() functionality as not all widget descend from Base;
     layout = self._getLayout(parent)
     if layout is None:
-      getLogger().warning('No layout for parent widget %s of %s', (parent,self))
+      getLogger().warning('No layout for parent widget %s of %s' % (parent,self))
       return
 
     if isinstance(layout, QtGui.QGridLayout):

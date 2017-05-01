@@ -49,7 +49,7 @@ class Label(QtGui.QLabel, Base):
   }
   """
 
-  def __init__(self, parent, text='', textColour=None, textSize=12, bold=False,
+  def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
                margins=[2, 1, 2, 1], **kwds):
 
     text = translator.translate(text)

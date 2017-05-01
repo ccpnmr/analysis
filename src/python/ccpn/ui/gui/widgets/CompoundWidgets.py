@@ -80,7 +80,7 @@ class ListCompoundWidget(CompoundBaseWidget):
     horizontal  = [(0, 0), (0, 1), (0, 2)],
   )
 
-  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
                labelText='', texts=None, callback=None, defaults=None, uniqueList=True, **kwds):
     """
     :param parent: parent widget
@@ -187,7 +187,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
                labelText='', texts=None, callback=None, default=None, **kwds):
     """
     :param parent: parent widget
@@ -291,7 +291,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
                labelText='', text='', callback=None, checked=False, **kwds):
     """
     :param parent: parent widget
@@ -353,7 +353,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
                labelText='', value=None, range=(None,None), step=None, showButtons=True,
                decimals=None, callback=None, **kwds):
     """
@@ -405,7 +405,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
 
 class SelectorWidget(QtGui.QWidget, Base):
 
-  def __init__(self, parent, label, data=None, callback=None, **kw):
+  def __init__(self, parent=None, label='', data=None, callback=None, **kw):
 
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)

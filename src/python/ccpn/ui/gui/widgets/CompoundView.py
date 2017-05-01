@@ -4,6 +4,7 @@ Credits to Tim Stevens, University of Cambridge December 2010-2012
 """
 
 
+#TODO:ED add header
 
 PI = 3.1415926535898
 from PyQt4 import QtCore, QtGui, QtSvg
@@ -16,7 +17,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 class CompoundView(QtGui.QGraphicsView, Base):
 
-  def __init__(self, parent, smiles=None, variant=None, preferences=None, **kw):
+  def __init__(self, parent=None, smiles=None, variant=None, preferences=None, **kw):
 
 
     QtGui.QGraphicsView.__init__(self, parent)

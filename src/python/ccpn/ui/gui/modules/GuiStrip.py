@@ -121,13 +121,14 @@ class GuiStrip(Frame):
     self._labelWidget.setFixedHeight(20)
 
     # display and pid
-    #TODO: correct once pid has been reviewed
+    #TODO:GEERTEN correct once pid has been reviewed
     self._stripIdLabel = Label(parent=self._labelWidget,
                                text='.'.join(self.id.split('.')[2:]),
                                grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
     self._stripIdLabel.setFont(textFontSmall)
 
     # Displays a draggable label for the strip
+    #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='test',
                                    grid=(0,1), hAlign='left', vAlign='center', hPolicy='minimum')

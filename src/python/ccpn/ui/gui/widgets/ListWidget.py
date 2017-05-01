@@ -40,7 +40,7 @@ class ListWidget(QtGui.QListWidget, Base):
                border: 1px solid #182548;
                }
   """
-  def __init__(self, parent, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
+  def __init__(self, parent=None, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)

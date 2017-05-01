@@ -86,7 +86,7 @@ class GuiStrip(Frame):
     #TODO:GEERTEN: find cause and fix this
 
     Frame.__init__(self, parent=self.qtParent, setLayout=True, showBorder=True,
-                           acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
+                         acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
                   )
 
     # it appears to be required to explicitly set these, otherwise

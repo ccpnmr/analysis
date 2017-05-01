@@ -43,10 +43,10 @@ from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
 
 
-class PreferencesPopup(QtGui.QDialog):
+class PreferencesPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, preferences=None, project=None, **kw):
     super(PreferencesPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, setLayout=True, **kw)
     self.project = project
     self.preferences = preferences
     self.oldPreferences = preferences

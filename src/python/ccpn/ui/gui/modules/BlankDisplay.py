@@ -55,8 +55,11 @@ class BlankDisplay(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    self.label2 = Label(self.mainWidget, acceptDrops=True, stretch=(1,1), text='Drag Spectrum Here',
-                        textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center'
+    self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColour='#bec4f3', textSize='32',
+                                         grid=(0,0), #stretch=(1,1),
+                                         hPolicy='minimal', vPolicy='minimal',
+                                         hAlign='center', vAlign='center',
+                                         acceptDrops=False
                        )
 
     self.mainWidget.setAcceptDrops(True)

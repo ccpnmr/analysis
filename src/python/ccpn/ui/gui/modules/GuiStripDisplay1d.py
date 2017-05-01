@@ -99,10 +99,10 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     Adds specific icons for 1d spectra to the spectrum utility toolbar.
     """
     spectrumUtilToolBar = self.spectrumUtilToolBar
-    spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64))
+    #spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor
 
-    GuiSpectrumDisplay._fillToolBar(self)
-
+    # GWV: removed: GuiSpectrumDisplay._fillToolBar(self)
+    #TODO: See Nd case on how to do this better
 
     # Disable add and remove strips, as they're broken
     spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])

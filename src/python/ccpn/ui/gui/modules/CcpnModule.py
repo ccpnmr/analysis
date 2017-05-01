@@ -96,11 +96,11 @@ class CcpnModule(Dock):
                                             minimumSizes=self.settingsMinimumSizes
                                            )
       if self.settingsOnTop:
-        self.addWidget(self.settingsWidget.scrollArea, 0, 0)
+        self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
-        self.addWidget(self.settingsWidget.scrollArea, 1, 0)
+        self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
       self.settingsWidget.scrollArea.hide()
 
     else:

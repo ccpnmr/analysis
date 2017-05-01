@@ -70,7 +70,8 @@ class GuiStrip(Frame):
     :param spectrumDisplay: spectrumDisplay instance
     :param application: application instance
 
-    This module inherits attributes from the Strip wrapper class
+    This module inherits attributes from the Strip wrapper class:
+    Use clone() to make a copy
     """
 
     self.qtParent = qtParent
@@ -93,12 +94,7 @@ class GuiStrip(Frame):
     # the Widget will not fill all available space
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
-    self.setContentsMargins(0, 0, 0, 5)
-
-    layout = self.getLayout()
-    if layout is not None:
-      layout.setContentsMargins(0, 0, 0, 0)
-
+    self.setContentsMargins(0, 0, 0, 0)
     self.setMinimumWidth(250)
     self.setMinimumHeight(200)
 
@@ -106,30 +102,37 @@ class GuiStrip(Frame):
                                  useOpenGL=useOpenGL, strip=self,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    self.plotWidget.setContentsMargins(0, 0, 0, 0)
-    self.layout().addWidget(self.plotWidget, 0, 0)
+    # GWV: appears not responsive to contentsMargins
+    self.plotWidget.setContentsMargins(10, 30, 10, 30)
+    self.getLayout().addWidget(self.plotWidget, 1, 0)
 
-    # placeholder for toolbar and a stripIdLabel; more items will be added by GuiStripNd and GuiStrip1d
-    # TODO: oddly: left-alignment goes wrong when using Widget's
-    self.stripToolBarWidget = ToolBar(parent=self,
-                                      hPolicy='expanding', vAlign='top',
-                                      grid=(1, 0)
-                                     )
-    self.stripToolBarWidget.setFixedHeight(20)
+    # Widgets for toolbar; items will be added by GuiStripNd and GuiStrip1d
+    self._stripToolBarWidget = Widget(parent=self, setLayout=True,
+                                      hPolicy='expanding',
+                                      grid=(2, 0)
+                                      )
+    self._stripToolBarWidget.setFixedHeight(20)
 
+    # Widgets for _stripIdLabel and _stripLabel
+    self._labelWidget = Widget(parent=self, setLayout=True,
+                                     hPolicy='expanding', vAlign='center',
+                                     grid=(0, 0)
+                                    )
+    self._labelWidget.setFixedHeight(20)
+
+    # display and pid
     #TODO: correct once pid has been reviewed
-    self.stripIdLabel = Label(parent=self.stripToolBarWidget,
-                              text='.'.join(self.id.split('.')[2:]))
-#                              grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
-    self.stripIdLabel.setFont(textFontSmall)
-    #self.stripIdLabel.setMaximumWidth(100)
-    #self.stripIdLabel.setMinimumWidth(100)
-    self.stripToolBarWidget.addWidget(self.stripIdLabel)
+    self._stripIdLabel = Label(parent=self._labelWidget,
+                               text='.'.join(self.id.split('.')[2:]),
+                               grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    self._stripIdLabel.setFont(textFontSmall)
 
-    self.stripLabel = _StripLabel(parent=self.stripToolBarWidget, text='')
-    self.stripLabel.setFont(textFontSmall)
-    self.stripToolBarWidget.addWidget(self.stripLabel)
-    self.showStripLabel(False)
+    # Displays a draggable label for the strip
+    self._stripLabel = _StripLabel(parent=self._labelWidget,
+                                   text='test',
+                                   grid=(0,1), hAlign='left', vAlign='center', hPolicy='minimum')
+    self._stripLabel.setFont(textFontSmall)
+    self.hideStripLabel()
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -187,26 +190,26 @@ class GuiStrip(Frame):
     "True if crosshair is visible"
     return self.plotWidget.crossHair1.isVisible()
 
+  @property
+  def pythonConsole(self):
+    return self.mainWindow.pythonConsole
+
   def setStripLabelText(self, text: str):
-    """set the text of the stripLabel"""
+    """set the text of the _stripLabel"""
     if text is not None:
-      self.stripLabel.setText(text)
+      self._stripLabel.setText(text)
 
   def getStripLabelText(self) -> str:
-    """return the text of the stripLabel"""
-    return self.stripLabel.text()
+    """return the text of the _stripLabel"""
+    return self._stripLabel.text()
 
-  #TODO:GEERTEN: the hide does not work!?
-  def showStripLabel(self, doShow: bool):
-    """show / hide the stripLabel"""
-    if doShow:
-      self.stripLabel.show()
-    else:
-      self.stripLabel.hide()
+  def showStripLabel(self, doShow: bool=True):
+    """show / hide the _stripLabel"""
+    self._stripLabel.setVisible(doShow)
 
-  # def hideStripLabelText(self):
-  #   "Hide the stripLabel"
-  #   self.stripLabel.hide()
+  def hideStripLabel(self):
+    "Hide the _stripLabel; convienience"
+    self._stripLabel.setVisible(False)
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
@@ -676,7 +679,7 @@ class GuiStrip(Frame):
       NB notifier is executed after deletion is final but before the wrapper is updated.
       len() > 1 check is correct also for delete
     """
-    self.spectrumDisplay._resetRemoveStripAction()
+    pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
 
 # Notifiers:

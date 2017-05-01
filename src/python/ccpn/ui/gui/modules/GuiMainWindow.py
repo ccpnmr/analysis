@@ -604,7 +604,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:
-      spectrumDisplay._resetRemoveStripAction()
+      pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
 
   def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
     #TODO:LUCA: Docstring needed

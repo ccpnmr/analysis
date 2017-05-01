@@ -2,7 +2,7 @@
 Base class for gridding, optionally setting up size policies and layout,
 optionally inserting itself into parent using keyword, grid, gridspan, hAlign, vAlign
 
-The proper way for addig widgets is:
+The proper way for adding widgets explicitly is:
 widget.getLayout().addWidget(row, col, [rowspan, [colspan])
 """
 #=========================================================================================

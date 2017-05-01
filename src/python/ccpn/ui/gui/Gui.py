@@ -30,6 +30,8 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
+from PyQt4 import QtGui, QtCore
+
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -37,9 +39,17 @@ from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
-
-
 # This import initializes relative paths for QT style-sheets.  Do not remove!
+
+from ccpn.util.Logging import getLogger
+
+def qtMessageHandler(*errors):
+  for err in errors:
+    getLogger().warning('QT error: %s' % err)
+
+# un/suppress messages
+QtCore.qInstallMsgHandler(qtMessageHandler)
+
 
 class Gui(Ui):
 
@@ -97,10 +107,6 @@ class Gui(Ui):
     project.registerNotifier('NmrAtom', 'rename', GuiPeakListView._updateAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
-
-    from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
-    project.registerNotifier('NmrResidue', 'rename', _StripLabel._updateLabelText)
-
 
     # API notifiers - see functions for comments on why this is done this way
     project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,

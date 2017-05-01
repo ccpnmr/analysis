@@ -152,28 +152,34 @@ class ScrollableFrame(Frame):
 
     # define a scroll area
     self.scrollArea = ScrollArea(parent=parent,
-                                 scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                 **kwds
+                                 scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes
                                 )
 
     # initialise the frame
-    Frame.__init__(self, parent=parent, setLayout=setLayout,
+    Frame.__init__(self, parent=self.scrollArea, setLayout=setLayout,
                          showBorder=showBorder, fShape = fShape, fShadow = fShadow,
+                         **kwds
                   )
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
-    self.scrollArea.getLayout().addWidget(self)
+    #self.scrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
+    # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
+    # self.scrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+    self.show()
 
   def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
     "Set the scrolbar policy: always, never, asNeeded"
     self.scrollArea.setScrollBarPolicies(scrollBarPolicies)
 
+  def getScrollArea(self):
+    "Return the scrollbar widget; for external usage"
+    return self.scrollArea
 
 
 if __name__ == '__main__':

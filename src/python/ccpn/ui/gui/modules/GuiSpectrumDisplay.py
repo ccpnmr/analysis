@@ -53,11 +53,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
-
-# suppress messages
-#TODO:WAYNE: fix the root cause of this HACK!!!
-#QtCore.qInstallMsgHandler(lambda *args: None)
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -140,7 +135,7 @@ class GuiSpectrumDisplay(CcpnModule):
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
-    print('GuiSpectrumDisplay>> self.layout:', self.layout)
+    # print('GuiSpectrumDisplay>> self.layout:', self.layout)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -149,16 +144,15 @@ class GuiSpectrumDisplay(CcpnModule):
     # cannot set self.project because self is a wrapper object
     # self.project = mainWindow.application.project
 
-    #TODO:GEERTEN These need to go into self.mainWidget
+    # self.mainWidget will be the parent of all the subsequent widgets
     qtParent = self.mainWidget
-    print('GuiSpectrumDisplay>> self.parent(), self.parent().layout:', self.parent(), self.parent().layout)
-    print('GuiSpectrumDisplay>> qtParent, qtParent.getLayout():', qtParent, qtParent.getLayout())
-    #layout=self.parent().layout()
+    # print('GuiSpectrumDisplay>> self.parent(), self.parent().layout:', self.parent(), self.parent().layout)
+    # print('GuiSpectrumDisplay>> qtParent, qtParent.getLayout():', qtParent, qtParent.getLayout())
 
     # GWV: Not sure what the widget argument is for
-    self.spectrumToolBar = SpectrumToolBar(widget=self) #, grid=(0, 0), gridSpan=(1, 4)
-    qtParent.getLayout().addWidget(self.spectrumToolBar, 0, 0, 1, 4)
-    self.spectrumToolBar.setMinimumWidth(200)
+    self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self,
+                                           grid=(0, 0), gridSpan=(1, 4))
+    #qtParent.getLayout().addWidget(self.spectrumToolBar, 0, 0, 1, 4)
     self.spectrumToolBar.setFixedHeight(30)
 
     #layout.addWidget(self.spectrumToolBar, 0, 0)
@@ -167,8 +161,9 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.resize(self.sizeHint())
 
     # Utilities Toolbar; filled later-on!?
-    self.spectrumUtilToolBar = ToolBar(parent=qtParent, grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
-    self.spectrumUtilToolBar.setFixedWidth(150)
+    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(25,25),
+                                       grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
+    #self.spectrumUtilToolBar.setFixedWidth(150)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
     if self.application.preferences.general.showToolbar:
@@ -180,22 +175,26 @@ class GuiSpectrumDisplay(CcpnModule):
     self.positionBox = Label(parent=qtParent, grid=(0,6))
 
     # scroll area
-    self.stripFrame = ScrollableWidget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
+    self.stripFrame = ScrollableWidget(parent=qtParent, setLayout=True,
                                        hPolicy='expanding', vPolicy='expanding',
                                        scrollBarPolicies = ('always', 'asNeeded')
                                       )
+    # We want to add the scroll area, not the stripFrame (which lives inside the scrollArea)
+    qtParent.getLayout().addWidget(self.stripFrame.getScrollArea(), 1, 0, 1, 7)
     # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
     #                                    setLayout=True,
     #                                    hPolicy='expanding', vPolicy='expanding',
     #                                   )
-    self.stripFrame.setGridLayout()
+    #self.stripFrame.setGridLayout()
 
     includeDirection = not self.is1D
-    self.phasingFrame = PhasingFrame(parent=qtParent, includeDirection=includeDirection,
+    self.phasingFrame = PhasingFrame(parent=qtParent,
+                                     showBorder=True,
+                                     includeDirection=includeDirection,
                                      callback=self._updatePhasing,
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
-                                     grid=(2, 0), gridSpan=(1, 3))
+                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top')
     self.phasingFrame.setVisible(False)
 
     self.stripFrame.setAcceptDrops(True)
@@ -247,7 +246,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     if horizontal not in SCROLLBAR_POLICY_DICT or \
        vertical not in SCROLLBAR_POLICY_DICT:
-      logger.warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
+      getLogger().warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
     self.stripFrame.setScrollBarPolicies((horizontal, vertical))
 
   def _updatePivot(self):
@@ -308,36 +307,48 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.delete()
     CcpnModule._closeModule(self)
 
-  def _fillToolBar(self):
-    """
-    # CCPN INTERNAL - called in _fillToolBar methods of GuiStripDisplay1d and GuiStripDisplayNd
-    Puts icons for addition and removal of strips into the spectrum utility toolbar.
-    """
-    addStripAction = self.spectrumUtilToolBar.addAction('Add Strip', self.duplicateStrip) #self.orderedStrips[0].clone()) # clone first strip
-    addStripIcon = Icon('icons/plus')
-    addStripAction.setIcon(addStripIcon)
-    removeStripAction = self.spectrumUtilToolBar.addAction('Remove Strip', self.removeStrip) # remove last strip
-    removeStripIcon = Icon('icons/minus')
-    removeStripAction.setIcon(removeStripIcon)
-    self.removeStripAction = removeStripAction
+  def removeStrip(self, strip):
+    "Remove strip if it belongs to self"
 
+    if strip is None:
+      showWarning('Remove strip', 'Invalid strip' )
+      return
 
-  def removeStrip(self, strip=None):
-    # changed 6 Jul 2016
-    #self.orderedStrips[-1]._unregisterStrip()
-    #self.orderedStrips[-1].delete()
-    if len(self.orderedStrips) > 1:
-      if not strip:
-        strip = self.current.strip
-      if strip:
-        strip._unregisterStrip()
-        strip.delete()
+    if strip not in self.strips:
+      showWarning('Remove strip', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                  % (strip.pid, self.pid))
+      return
 
-  def duplicateStrip(self):
+    if len(self.orderedStrips) == 1:
+      showWarning('Remove strip', 'Last strip of SpectrumDisplay "%s" cannot be removed' \
+                  % (self.pid,))
+      return
+    strip._unregisterStrip()
+    strip.delete()
+
+  def removeCurrentStrip(self):
+    "Remove current.strip if it belongs to self"
+    if self.current.strip is None:
+      showWarning('Remove current strip', 'Select first in SpectrumDisplay by clicking')
+      return
+    self.removeStrip(self.current.strip)
+
+  # def duplicateStrip(self):
+  #   """
+  #   Creates a new strip identical to the last one created and adds it to right of the display.
+  #   """
+  #   newStrip = self.strips[-1].clone()
+
+  def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
     """
-    Creates a new strip identical to the last one created and adds it to right of the display.
+    Creates a new strip by cloning strip with index (default the last) in the display.
     """
-    newStrip = self.strips[-1].clone()
+    newStrip = self.strips[stripIndex].clone()
+    mainWindow = self.mainWindow
+    mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
+    getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
+                     % (self.pid, stripIndex))
+    return newStrip
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""
@@ -400,37 +411,37 @@ class GuiSpectrumDisplay(CcpnModule):
         if inactivePeakItems:
           inactivePeakItems.add(peakItem)
 
-  def _resetRemoveStripAction(self):
-    """
-    # CCPNINTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
-    and from Framework to set up initial state
-    """
-    #TODO:WAYNE: FrameWork should not have anything to do with this
-    strip = self.current.strip
-    # # Rasmus HACK!
-    # # This code broke because it got triggered (via a current notifier) when strips
-    # # were deleted but self was not. A bigger fix is needed (TODO), but for now try this
-    myStrips = [self.project._data2Obj.get(x) for x in self._wrappedData.strips]
-    if len(myStrips) <= 1 or not strip in myStrips:
-      # current.strip not in display, or only 1 strip in display, so disable removeStrip button
-      enabled = False
-    else:
-      enabled = True
-    self.removeStripAction.setEnabled(enabled)
-
-    # strips = set(self._appBase.current.strips)
-    # # Rasmus HACK!
-    # # This code broke because it got triggered (via a current notifier) when strips
-    # # were deleted but self was not. A bigger fix is needed, but for now try this
-    # myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
-    # myStrips = [x for x in myStrips if x is not None]
-    # if len(myStrips) <= 1 or not strips.intersection(myStrips):
-    # # if not strips.intersection(self.strips) or len(self.strips) == 1:
-    #   # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button
-    #   enabled = False
-    # else:
-    #   enabled = True
-    # self.removeStripAction.setEnabled(enabled)
+  # def _resetRemoveStripAction(self):
+  #   """
+  #   # CCPNINTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
+  #   and from Framework to set up initial state
+  #   """
+  #   #TODO:WAYNE: FrameWork should not have anything to do with this
+  #   strip = self.current.strip
+  #   # # Rasmus HACK!
+  #   # # This code broke because it got triggered (via a current notifier) when strips
+  #   # # were deleted but self was not. A bigger fix is needed (TODO), but for now try this
+  #   myStrips = [self.project._data2Obj.get(x) for x in self._wrappedData.strips]
+  #   if len(myStrips) <= 1 or not strip in myStrips:
+  #     # current.strip not in display, or only 1 strip in display, so disable removeStrip button
+  #     enabled = False
+  #   else:
+  #     enabled = True
+  #   self.removeStripAction.setEnabled(enabled)
+  #
+  #   # strips = set(self._appBase.current.strips)
+  #   # # Rasmus HACK!
+  #   # # This code broke because it got triggered (via a current notifier) when strips
+  #   # # were deleted but self was not. A bigger fix is needed, but for now try this
+  #   # myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
+  #   # myStrips = [x for x in myStrips if x is not None]
+  #   # if len(myStrips) <= 1 or not strips.intersection(myStrips):
+  #   # # if not strips.intersection(self.strips) or len(self.strips) == 1:
+  #   #   # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button
+  #   #   enabled = False
+  #   # else:
+  #   #   enabled = True
+  #   # self.removeStripAction.setEnabled(enabled)
 
   def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
     """Display additional spectrum, with spectrum axes ordered according ton axisOrder

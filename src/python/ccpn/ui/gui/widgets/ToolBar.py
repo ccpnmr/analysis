@@ -37,6 +37,13 @@ from PyQt4 import QtGui, QtCore
 
 class ToolBar(QtGui.QToolBar, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, iconSizes=(None,None), **kw):
     QtGui.QToolBar.__init__(self, parent)
     Base.__init__(self, **kw)
+
+    # optionally set width and height, making it square if one is missing
+    width, height = iconSizes
+    if width is not None or height is not None:
+      width = width if width is not None else height
+      height = height if height is not None else width
+      self.setIconSize(QtCore.QSize(width, height))

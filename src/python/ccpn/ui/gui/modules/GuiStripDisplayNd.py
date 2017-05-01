@@ -23,7 +23,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: Geerten/CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -37,6 +37,8 @@ from ccpn.ui.gui.modules import GuiPeakListView
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+
+from ccpn.util.Logging import getLogger
 
 
 class GuiStripDisplayNd(GuiSpectrumDisplay):
@@ -64,54 +66,41 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     self.isGrouped = False
     
-    self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button)
+    #TODO: have SpectrumToolbar own and maintain this
+    self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
     self._fillToolBar()
-    self.setAcceptDrops(True)
-
-  def addStrip(self) -> 'GuiStripNd':
-    """
-    Creates a new strip by duplicating the first strip in the display.
-    """
-    newStrip = self.strips[0].clone()
-    mainWindow = self.mainWindow
-    mainWindow.pythonConsole.writeConsoleCommand(
-        "strip.clone()", strip=self.strips[0].clone())
-    self.project._logger.info("strip = ui.getByGid('%s'); strip.clone()" % self.strips[0].pid)
-    return newStrip
+    #self.setAcceptDrops(True)
 
   def _fillToolBar(self):
     """
     Adds specific icons for Nd spectra to the spectrum utility toolbar.
     """
-    GuiSpectrumDisplay._fillToolBar(self)
-    
-    spectrumUtilToolBar = self.spectrumUtilToolBar
-    
-    plusOneAction = spectrumUtilToolBar.addAction("+1", self.addContourLevel)
-    plusOneIcon = Icon('icons/contour-add')
-    plusOneAction.setIcon(plusOneIcon)
-    plusOneAction.setToolTip('Add One Level')
-    minusOneAction = spectrumUtilToolBar.addAction("+1", self.removeContourLevel)
-    minusOneIcon = Icon('icons/contour-remove')
-    minusOneAction.setIcon(minusOneIcon)
-    minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = spectrumUtilToolBar.addAction("*1.4", self.raiseContourBase)
-    upBy2Icon = Icon('icons/contour-base-up')
-    upBy2Action.setIcon(upBy2Icon)
-    upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = spectrumUtilToolBar.addAction("/1.4", self.lowerContourBase)
-    downBy2Icon = Icon('icons/contour-base-down')
-    downBy2Action.setIcon(downBy2Icon)
-    downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
-    storeZoomAction.setIcon(storeZoomIcon)
-    storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
-    restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')
+    tb = self.spectrumUtilToolBar
+    # bit of a hack: save all the action in a dict to ba able to access later
+    self._spectrumUtilActions = {}
+
+    toolBarItemsForBoth = [
+     #  action name     icon                    tooltip                     active     callback
+      ('Add Strip',    'icons/plus',           'Duplicate the rightmost strip', True, self.addStrip),
+      ('Remove Strip', 'icons/minus',          'Remove the current strip',  True,    self.removeCurrentStrip),
+    ]
+    toolBarItemsForNd = [
+     #  action name     icon                    tooltip                     active     callback
+      ('+1',           'icons/contour-add',    'Add one contour level',     True,     self.addContourLevel),
+      ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
+      ('*1.4',         'icons/contour-base-up','Raise Contour Base Level',  True,     self.raiseContourBase),
+      ('/1.4',         'icons/contour-base-up','Lower Contour Base Level',  True,     self.lowerContourBase),
+      ('Store Zoom',   'icons/zoom-store',     'Store Zoom',                True,     self._storeZoom),
+      ('Restore Zoom', 'icons/zoom-restore',   'Restore Zoom',              True,     self._restoreZoom)
+    ]
+
+    for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:
+      action = tb.addAction(aName, callback)
+      if icon is not None:
+        ic = Icon(icon)
+        action.setIcon(ic)
+        self._spectrumUtilActions[aName] = action
 
   def raiseContourBase(self):
     """
@@ -147,9 +136,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
-        self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-        self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+        getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+        getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
   def lowerContourBase(self):
     """
@@ -185,9 +174,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
-        self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-        self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+        getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+        getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
   def addContourLevel(self):
     """
@@ -219,9 +208,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
-        self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-        self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+        getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+        getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
   def removeContourLevel(self):
     """
@@ -257,9 +246,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-        self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
-        self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-        self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+        getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+        getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+        getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
     
   def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
     """

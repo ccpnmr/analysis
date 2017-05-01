@@ -473,7 +473,7 @@ class Framework:
 
     # Initialise displays
     for spectrumDisplay in project.windows[0].spectrumDisplays: # there is exactly one window
-      spectrumDisplay._resetRemoveStripAction()
+      pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
 
     # Initialise strips
     for strip in project.strips:

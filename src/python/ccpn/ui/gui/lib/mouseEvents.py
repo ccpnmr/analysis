@@ -31,8 +31,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 
 def doDebug(msg):
   if False: #cannot get the regular debugger to work and likely do not want this on during production anyway

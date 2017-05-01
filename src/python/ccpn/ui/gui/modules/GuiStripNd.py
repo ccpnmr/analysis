@@ -62,8 +62,9 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneSelectorWidget
-
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.util.Logging import getLogger
+
 
 import typing
 
@@ -161,33 +162,18 @@ class GuiStripNd(GuiStrip):
     self.axesSwapped = False
 
     self.planeToolbar = None
-
-    # TODO: this should be refactored; oddly: left-alignment goes wrong when using Widget's
+    # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
     # Adds the plane toolbar to the strip.
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
-    self.planeToolbar = PlaneToolbar(self.stripToolBarWidget, strip=self, callbacks=callbacks, )
-    #                                 grid=(0,1), hPolicy='minimum', hAlign='left', vAlign='center')
-    self.stripToolBarWidget.addWidget(self.planeToolbar)
+    self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
+                                     grid=(0,1), hPolicy='minimum', hAlign='center', vAlign='center')
+    #self._stripToolBarWidget.addWidget(self.planeToolbar)
     #self.planeToolBar.hide()
     # test
-    #PlaneSelectorWidget(qtParent=self.stripToolBarWidget, strip=self, axis=2, grid=(0,1))
+    #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
 
-    self.logger = self._project._logger
-    self.mouseDragEvent = self._mouseDragEvent
+    #self.mouseDragEvent = self._mouseDragEvent
     self.updateRegion = self._updateRegion
-
-  @property
-  def pythonConsole(self):
-    return self.mainWindow.pythonConsole
-
-  def _mouseDragEvent(self, event):
-    """
-    Re-implemented mouse event to enable smooth panning.
-    """
-    if event.button() == QtCore.Qt.RightButton:
-      pass
-    else:
-      self.viewBox.mouseDragEvent(self, event)
 
   def _get2dContextMenu(self) -> Menu:
     """
@@ -273,7 +259,7 @@ class GuiStripNd(GuiStrip):
     zoomYArray = ([min(yArray), max(yArray)])
     self.zoomToRegion(zoomXArray, zoomYArray)
     self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
+    getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
@@ -416,7 +402,7 @@ class GuiStripNd(GuiStrip):
       if planeLabel.minimum() <= position <= planeLabel.maximum():
         zAxis.position = position
         self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
-        self.logger.info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
+        getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
         #planeLabel.setValue(zAxis.position)
 
       # else:
@@ -436,7 +422,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-    self.logger.info("application.getByGid(%r).nextZPlane()" % self.pid)
+    getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
 
   def prevZPlane(self, n:int=0):
     """
@@ -444,7 +430,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-    self.logger.info("application.getByGid(%r).prevZPlane()" % self.pid)
+    getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
 
   def _setZPlanePosition(self, n:int, value:float):
     """

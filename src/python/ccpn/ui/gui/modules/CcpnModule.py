@@ -91,7 +91,7 @@ class CcpnModule(Dock):
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      self.settingsWidget = ScrollableFrame(parent=self.widgetArea,
+      self.settingsWidget = ScrollableFrame(parent=self.widgetArea, setLayout=True,
                                             scrollBarPolicies=('always','asNeeded'),
                                             minimumSizes=self.settingsMinimumSizes
                                            )

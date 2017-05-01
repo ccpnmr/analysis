@@ -60,16 +60,20 @@ class ScrollableWidget(Widget):
                                  **kwds
                                 )
     # initialise the frame
-    super(ScrollableWidget, self).__init__(parent=self.scrollArea, setLayout=setLayout)
+    Widget.__init__(self, parent=self.scrollArea, setLayout=setLayout)
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
-    self.scrollArea.layout().addWidget(self)
+    self.scrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
+
+  def getScrollArea(self):
+    "return scroll area (for external usage)"
+    return self.scrollArea
 
   def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
     "Set the scrolbar policy: always, never, asNeeded"

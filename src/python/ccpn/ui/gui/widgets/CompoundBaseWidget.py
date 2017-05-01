@@ -46,7 +46,7 @@ class CompoundBaseWidget(Frame):
     :param orientation: orientation keyword
     :param kwds: (optional) keyword, value pairs for the gridding of Frame
     """
-    Frame.__init__(self, parent=parent, showBorder=showBorder, **kwds)
+    Frame.__init__(self, parent=parent, showBorder=showBorder, setLayout=True, **kwds)
 
     if not orientation in layoutDict:
       raise RuntimeError('Invalid parameter "orientation" (%s)' % orientation)
@@ -55,6 +55,7 @@ class CompoundBaseWidget(Frame):
     self._widgets = []    # list of all the widgets; use addWidget to add using the layoutDict
 
     # notifiers
+    #TODO:GEERTEN: poor design?; rethink this over
     if not hasattr(self, NOTIFIERS):
       setattr(self, NOTIFIERS, []) # list of all notifiers for this widget
     nf = getattr(self, NOTIFIERS)

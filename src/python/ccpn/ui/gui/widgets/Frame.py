@@ -146,7 +146,8 @@ class Frame(QtGui.QFrame, Base):
 class ScrollableFrame(Frame):
   "A scrollable frame"
 
-  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+  def __init__(self, parent=None,
+                     setLayout=False, showBorder=False, fShape=None, fShadow=None,
                      minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
 
     # define a scroll area
@@ -156,9 +157,9 @@ class ScrollableFrame(Frame):
                                 )
 
     # initialise the frame
-    super(ScrollableFrame, self).__init__(parent=self.scrollArea, showBorder=showBorder,
-                                          fShape = fShape, fShadow = fShadow,
-                                         )
+    Frame.__init__(self, parent=parent, setLayout=setLayout,
+                         showBorder=showBorder, fShape = fShape, fShadow = fShadow,
+                  )
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
     self.scrollArea.getLayout().addWidget(self)

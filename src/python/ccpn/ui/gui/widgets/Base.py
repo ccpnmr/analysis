@@ -133,7 +133,8 @@ class Base(DropBase):
 
   def setGridLayout(self):
     "Add a QGridlayout to self"
-    layout = self.getLayout()
+    layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
+                                    # layout, we are going to add one
     if layout is None:
       layout = QtGui.QGridLayout(self)
       layout.setContentsMargins(0, 0, 0, 0)

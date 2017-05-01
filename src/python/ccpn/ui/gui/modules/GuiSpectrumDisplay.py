@@ -161,7 +161,7 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.resize(self.sizeHint())
 
     # Utilities Toolbar; filled later-on!?
-    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(25,25),
+    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(40,40),
                                        grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
     #self.spectrumUtilToolBar.setFixedWidth(150)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())

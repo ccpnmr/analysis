@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 
 from ccpn.util.Logging import getLogger
 
@@ -86,15 +87,17 @@ class CcpnModule(Dock):
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
     self.mainWidget = Widget(parent=self.widgetArea, setLayout=True)  #QtGui.QWidget(self)
+    #self.mainWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     # optional settings widget area
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      self.settingsWidget = ScrollableFrame(parent=self.widgetArea, setLayout=True,
+      self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
                                             scrollBarPolicies=('always','asNeeded'),
                                             minimumSizes=self.settingsMinimumSizes
                                            )
+      #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
       if self.settingsOnTop:
         self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
         self.addWidget(self.mainWidget, 1, 0)

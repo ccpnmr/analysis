@@ -150,9 +150,17 @@ class ScrollableFrame(Frame):
                      setLayout=False, showBorder=False, fShape=None, fShadow=None,
                      minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
 
-    # define a scroll area
+    # define a scroll area; check kwds if these apply to gridding
+    kw1 = {}
+    for key in 'grid gridSpan stretch hAlign vAlign'.split():
+      if key in kwds:
+        kw1[key] = kwds[key]
+        del(kwds[key])
+    kw1['setLayout'] = True ## always assure a layout for the scrollarea
+
     self.scrollArea = ScrollArea(parent=parent,
-                                 scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes
+                                 scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+                                 **kw1
                                 )
 
     # initialise the frame

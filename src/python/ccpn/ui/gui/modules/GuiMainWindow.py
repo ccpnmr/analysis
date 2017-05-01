@@ -106,8 +106,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.feedbackPopup = None
     self.updatePopup = None
 
-    # open a blank display
-    self.newBlankDisplay()
+    # blank display opened later by the _initLayout if there is nothing to show otherwise
+    # self.newBlankDisplay()
 
     self.statusBar().showMessage('Ready')
     self.show()

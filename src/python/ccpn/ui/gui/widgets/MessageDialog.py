@@ -66,7 +66,7 @@ class MessageDialog(QtGui.QMessageBox):
 
     if iconPath:
       image = QtGui.QPixmap(iconPath)
-      scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
+      scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
       self.setIconPixmap(scaledImage)
 
 

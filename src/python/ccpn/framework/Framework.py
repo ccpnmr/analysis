@@ -568,6 +568,9 @@ class Framework:
         # for now just ignore restore failures
         self.project._logger.warning("Layout restore failed: %s" % e)
 
+    if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
+      self.ui.mainWindow.newBlankDisplay()
+
   def getByPid(self, pid):
     return self.project.getByPid(pid)
 

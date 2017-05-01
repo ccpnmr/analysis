@@ -54,16 +54,23 @@ class ScrollableWidget(Widget):
   def __init__(self, parent=None, setLayout=False,
                      minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
 
-    # define a scroll area
+    # define a scroll area; check kwds if these apply to gridding
+    kw1 = {}
+    for key in 'grid gridSpan stretch hAlign vAlign'.split():
+      if key in kwds:
+        kw1[key] = kwds[key]
+        del(kwds[key])
+    kw1['setLayout'] = True ## always assure a layout for the scrollarea
+
     self.scrollArea = ScrollArea(parent=parent,
                                  scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                 **kwds
+                                 **kw1
                                 )
     # initialise the frame
-    Widget.__init__(self, parent=self.scrollArea, setLayout=setLayout)
+    Widget.__init__(self, parent=self.scrollArea, setLayout=setLayout, **kwds)
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
-    self.scrollArea.getLayout().addWidget(self)
+    #self.scrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)

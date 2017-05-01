@@ -192,8 +192,9 @@ class Gui(Ui):
     try:
       mDict = self.mainWindow.moduleArea.currentModulesDict
       if 'BlankDisplay' in mDict:
-        blankDisplay = mDict['BlankDisplay']
-        blankDisplay.show()
+        pass
+        # blankDisplay = mDict['BlankDisplay']
+        # blankDisplay.show()
       else:
         blankDisplay = self.mainWindow.newBlankDisplay()
       return blankDisplay

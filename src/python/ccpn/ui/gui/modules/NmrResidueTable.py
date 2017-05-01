@@ -75,19 +75,20 @@ class NmrResidueTableModule(CcpnModule):
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
+    colwidth = 80
     self.displaysWidget = ListCompoundWidget(self.settingsWidget, grid=(0,0), vAlign='top',
-                                             minimumWidths=(100, 0, 0),
-                                             maximumWidths=(100, 100, 100),
+                                             #minimumWidths=(colwidth, 0, 0),
+                                             maximumWidths=(colwidth, colwidth, colwidth),
                                              orientation = 'left',
                                              labelText="Display module(s):",
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-                                            )
+                                             )
     #self.displaysWidget.listWidget.setHeight(40)
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
                                              self.settingsWidget, grid=(1,0), vAlign='top',
-                                             minimumWidths=(100, 0),
-                                             maximumWidths=(100, 30),
+                                             #minimumWidths=(colwidth, 0),
+                                             maximumWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Show sequential strips:',
                                              checked = False
@@ -95,16 +96,16 @@ class NmrResidueTableModule(CcpnModule):
 
     self.markPositionsWidget = CheckBoxCompoundWidget(
                                              self.settingsWidget, grid=(2,0), vAlign='top',
-                                             minimumWidths=(100, 0),
-                                             maximumWidths=(100, 30),
+                                             #minimumWidths=(colwidth, 0),
+                                             maximumWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Mark positions:',
                                              checked = True
                                             )
     self.autoClearMarksWidget = CheckBoxCompoundWidget(
                                              self.settingsWidget, grid=(3,0), vAlign='top',
-                                             minimumWidths=(100, 0),
-                                             maximumWidths=(100, 30),
+                                             #minimumWidths=(colwidth, 0),
+                                             maximumWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Auto clear marks:',
                                              checked = True
@@ -204,7 +205,7 @@ class NmrResidueTable(ObjectTable):
     # This widget will display a pulldown list of NmrChain pids in the project
     self.ncWidget = NmrChainPulldown(parent=self._widget,
                                      project=self._project, default=0,  #first NmrChain in project (if present)
-                                     grid=(0,0), gridSpan=(1,2), minimumWidths=(0,100),
+                                     grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
                                      callback=self._selectionPulldownCallback
                                      )
 
@@ -278,5 +279,6 @@ class NmrResidueTable(ObjectTable):
     "Cleanup of self"
     if self._chainNotifier is not None:
       self._chainNotifier.unRegister()
-    self._peaksNotifier.unRegister()
+    if self._peaksNotifier is not None:
+      self._peaksNotifier.unRegister()
 

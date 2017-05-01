@@ -41,7 +41,7 @@ class PhasingFrame(Frame):
 
   def __init__(self, parent=None, includeDirection=True, callback=None, returnCallback=None, directionCallback=None, **kw):
 
-    Frame.__init__(self, parent, **kw)
+    Frame.__init__(self, parent, setLayout=True, **kw)
     
     self.callback = callback
     self.returnCallback = returnCallback if returnCallback else self.doCallback

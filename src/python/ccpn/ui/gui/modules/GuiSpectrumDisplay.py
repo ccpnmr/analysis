@@ -57,7 +57,7 @@ logger = getLogger()
 
 # suppress messages
 #TODO:WAYNE: fix the root cause of this HACK!!!
-QtCore.qInstallMsgHandler(lambda *args: None)
+#QtCore.qInstallMsgHandler(lambda *args: None)
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -158,6 +158,9 @@ class GuiSpectrumDisplay(CcpnModule):
     # GWV: Not sure what the widget argument is for
     self.spectrumToolBar = SpectrumToolBar(widget=self) #, grid=(0, 0), gridSpan=(1, 4)
     qtParent.getLayout().addWidget(self.spectrumToolBar, 0, 0, 1, 4)
+    self.spectrumToolBar.setMinimumWidth(200)
+    self.spectrumToolBar.setFixedHeight(30)
+
     #layout.addWidget(self.spectrumToolBar, 0, 0)
     # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
@@ -165,7 +168,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # Utilities Toolbar; filled later-on!?
     self.spectrumUtilToolBar = ToolBar(parent=qtParent, grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
-    # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
+    self.spectrumUtilToolBar.setFixedWidth(150)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
     if self.application.preferences.general.showToolbar:

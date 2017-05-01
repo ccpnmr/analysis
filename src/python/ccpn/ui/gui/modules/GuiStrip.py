@@ -93,7 +93,7 @@ class GuiStrip(Frame):
     # the Widget will not fill all available space
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
-    self.setContentsMargins(30, 5, 30, 5)
+    self.setContentsMargins(0, 0, 0, 5)
 
     layout = self.getLayout()
     if layout is not None:

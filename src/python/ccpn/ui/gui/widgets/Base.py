@@ -104,21 +104,29 @@ class Base(DropBase):
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
     # print('parent',parent)
     #TODO:GEERTEN: should not first check if there is already a gridding layout!?
-    if parent and not isFloatWidget:
+    if parent is not None and not isFloatWidget:
       # Setup gridding within parent
-      if isinstance(parent, Dock):
-        layout = parent.widgetArea.layout()
-      else:
-        layout = parent.layout()
-      if not layout:
-        layout = QtGui.QGridLayout(parent)
-        # layout.setSpacing(2)
+      # if isinstance(parent, Dock):
+      #   layout = parent.widgetArea.layout()
+      # else:
+      #   layout = parent.layout()
+      layout = None
+      try:
+        layout = QtGui.QWidget.layout(parent)
+      except:
+        getLogger().warning('Unable to query layout of %s', self)
 
-        # setContentsMargin(left, top, right, bottom)
-        #layout.setContentsMargins(2,2,2,2)
-        #layout.setContentsMargins(1,1,1,1)
-        layout.setContentsMargins(0, 0, 0, 0)
-        parent.setLayout( layout )
+      if layout is None:
+        getLogger().warning('No layout for parent widget %s', parent)
+      # if not layout:
+      #   layout = QtGui.QGridLayout(parent)
+      #   # layout.setSpacing(2)
+      #
+      #   # setContentsMargin(left, top, right, bottom)
+      #   #layout.setContentsMargins(2,2,2,2)
+      #   #layout.setContentsMargins(1,1,1,1)
+      #   layout.setContentsMargins(0, 0, 0, 0)
+      #   parent.setLayout( layout )
 
       if isinstance(layout, QtGui.QGridLayout):
         row, col = self._getRowCol(grid)
@@ -155,7 +163,7 @@ class Base(DropBase):
   def setGridLayout(self):
     "Add a QGridlayout to self"
     layout = self.getLayout()
-    if layout is not None:
+    if layout is None:
       layout = QtGui.QGridLayout(self)
       layout.setContentsMargins(0, 0, 0, 0)
       layout.setSpacing(0)
@@ -169,7 +177,7 @@ class Base(DropBase):
     try:
       layout = QtGui.QWidget.layout(self)
     except:
-      raise RuntimeError('Unable to query layout of %s', self)
+      getLogger().warning('Unable to query layout of %s', self)
     return layout
 
   def _getRowCol(self, grid):

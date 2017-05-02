@@ -100,6 +100,8 @@ class CcpnModule(Dock):
       #                                      )
       self._scrollArea = ScrollArea(parent=self.widgetArea, setLayout=True)
       self.settingsWidget = Frame(parent=self._scrollArea, setLayout=True, showBorder=True)
+      self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
+      self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
       self._scrollArea.setWidget(self.settingsWidget)
       self._scrollArea.setWidgetResizable(True)
       #self._scrollArea.getLayout().addWidget(self.settingsWidget)

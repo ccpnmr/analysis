@@ -801,6 +801,29 @@ class Project(AbstractWrapperObject):
     Return None for Un-recognised or un-parsable files; return empty list for ???
     """
 
+    # TODO: RASMUS:
+    # RASMUS EXPLANATION (to my successor)
+    # loadData does too many things: it is used for handling dropped files,
+    # which includes a system for deciding what actions are taken where for what file types,
+    # and it is called directly for loading e.g. a spectrum.
+    #
+    # Part of the idea was that a file of type 'Xyz' being dropped would trigger
+    # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
+    # in question. That allowed you to control which drops were allowed where, and what
+    # specific actions should be triggered.
+    #
+    # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
+    # My proposal (hopefully consistent with GV's (?)) would be to use this function
+    # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
+    # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
+    # spectrum or a project (currently loadData is (too) widely used.
+    # Some of these functions may or may not need to be written first.
+    # That still leaves the question of how to handle a case where e.g. a text
+    # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
+    # but that must be thought out and decided.
+    # Anyway, this function should have a proper and consistent return type (as GV says)
+    # Maybe we should consider returning a dictionary rather than a list of tuples??
+
     # urlInfo is list of triplets of (type, subType, modifiedUrl),
     # e.g. ('Spectrum', 'Bruker', newUrl)
     dataType, subType, usePath = ioFormats.analyseUrl(path)
@@ -836,7 +859,8 @@ class Project(AbstractWrapperObject):
     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
       projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
       project = self.loadProject(projectPath, ioFormats.CCPN)
-      #TODO:RASMSU: use python tmpdir or V3 calss
+      #TODO:RASMUS: use python tmpdir or V3 calss
+      # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
       project._wrappedData.root._temporaryDirectory = temporaryDirectory
       return [project]
 

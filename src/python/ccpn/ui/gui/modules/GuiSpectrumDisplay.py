@@ -161,7 +161,7 @@ class GuiSpectrumDisplay(CcpnModule):
     #self.resize(self.sizeHint())
 
     # Utilities Toolbar; filled later-on!?
-    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(40,40),
+    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(32,32),
                                        grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
     #self.spectrumUtilToolBar.setFixedWidth(150)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
@@ -179,7 +179,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                        hPolicy='expanding', vPolicy='expanding',
                                        scrollBarPolicies = ('always', 'asNeeded')
                                       )
-    # We want to add the scroll area, not the stripFrame (which lives inside the scrollArea)
+    # We want to add the scroll area, to the qtParent, not the stripFrame
+    # (which lives inside the scrollArea)
     qtParent.getLayout().addWidget(self.stripFrame.getScrollArea(), 1, 0, 1, 7)
     # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
     #                                    setLayout=True,

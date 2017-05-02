@@ -170,7 +170,7 @@ class ScrollableFrame(Frame):
                   )
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
-    #self.scrollArea.getLayout().addWidget(self)
+    self.scrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)

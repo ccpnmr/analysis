@@ -68,6 +68,7 @@ class ScrollableWidget(Widget):
                                 )
     # initialise the frame
     Widget.__init__(self, parent=self.scrollArea, setLayout=setLayout, **kwds)
+    # self.setMinimumSizes(minimumSizes) ## This make things go wrong!?
     # add it to the scrollArea
     self.scrollArea.setWidget(self)
     #self.scrollArea.getLayout().addWidget(self)
@@ -77,6 +78,11 @@ class ScrollableWidget(Widget):
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
+
+  def setMinimumSizes(self, minimumSizes):
+    "Set (minimumWidth, minimumHeight)"
+    self.setMinimumWidth(minimumSizes[0])
+    self.setMinimumHeight(minimumSizes[1])
 
   def getScrollArea(self):
     "return scroll area (for external usage)"

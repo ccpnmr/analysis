@@ -389,7 +389,7 @@ class Strip1d(coreClass, _GuiStrip1d):
     # 28/04/17: No longer the case
 
     # hack 2: PostPhone SpectrumLoading and PlotWidget stuff until later
-    self._finaliseDone = False
+    self._finaliseDone = True
 
     print('\nStrip1d>> spectrumDisplay:', self.spectrumDisplay)
     _GuiStrip1d.__init__(self, qtParent=self.spectrumDisplay.stripFrame,

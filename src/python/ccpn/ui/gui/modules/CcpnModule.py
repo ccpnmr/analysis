@@ -39,8 +39,9 @@ from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.util.Logging import getLogger
 
@@ -93,18 +94,26 @@ class CcpnModule(Dock):
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
-                                            scrollBarPolicies=('always','asNeeded'),
-                                            minimumSizes=self.settingsMinimumSizes
-                                           )
+      # self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
+      #                                       scrollBarPolicies=('always','asNeeded'),
+      #                                       minimumSizes=self.settingsMinimumSizes
+      #                                      )
+      self._scrollArea = ScrollArea(parent=self.widgetArea, setLayout=True)
+      self.settingsWidget = Frame(parent=self._scrollArea, setLayout=True, showBorder=True)
+      self._scrollArea.setWidget(self.settingsWidget)
+      self._scrollArea.setWidgetResizable(True)
+      #self._scrollArea.getLayout().addWidget(self.settingsWidget)
       #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
       if self.settingsOnTop:
-        self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
+        # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
+        self.addWidget(self._scrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
-        self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
-      self.settingsWidget.scrollArea.hide()
+        # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
+        self.addWidget(self.settingsWidget._scrollArea, 1, 0)
+      # self.settingsWidget.scrollArea.hide()
+      self._scrollArea.hide()
 
     else:
       self.settingsWidget = None
@@ -142,12 +151,15 @@ class CcpnModule(Dock):
       self.settingsState = (self.settingsState + 1) % self.maxSettingsState
       if self.settingsState == 0:
         self.mainWidget.show()
-        self.settingsWidget.scrollArea.hide()
+        # self.settingsWidget.scrollArea.hide()
+        self._scrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
-        self.settingsWidget.scrollArea.show()
+        # self.settingsWidget.scrollArea.hide()
+        self._scrollArea.show()
       elif self.settingsState == 2:
-        self.settingsWidget.scrollArea.show()
+        # self.settingsWidget.scrollArea.hide()
+        self._scrollArea.hide()
         self.mainWidget.hide()
     else:
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')

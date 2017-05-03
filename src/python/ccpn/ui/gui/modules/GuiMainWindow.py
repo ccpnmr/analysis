@@ -39,9 +39,10 @@ from PyQt4.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -664,3 +665,32 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           printer.startRegion(xOutputRegion, yOutputRegion)
           spectrumDisplayOrStrip._printToFile(printer)
 
+  _mouseMovedSignal = QtCore.pyqtSignal(dict)
+
+  def _mousePositionMoved(self, strip:GuiStrip, position:QtCore.QPointF):
+    """ CCPN INTERNAL: called from ViewBox
+    This is called when the mouse cursor position has changed in some strip
+    :param strip: The strip the mouse cursor is hovering over
+    :param position: The cursor position in "natural" (e.g. ppm) units
+    :return: None
+    """
+    axisCodes = strip.axisCodes
+    orderedAxes = strip.orderedAxes
+
+    # positionDict
+    #   strip --> strip
+    #   axisCode --> position (for each axisCode in strip)
+    # for the first two axes the position is provided by the cursor
+    # for the z axes the position is provided as the center of the axis region (i.e. the position)
+
+    mouseMovedDict = dict(strip=strip)
+    for n, axisCode in enumerate(axisCodes):
+      if n == 0:
+        pos = position.x()
+      elif n == 1:
+        pos = position.y()
+      else:
+        pos = orderedAxes[n].position
+      mouseMovedDict[axisCode] = pos
+
+    self._mouseMovedSignal.emit(mouseMovedDict)

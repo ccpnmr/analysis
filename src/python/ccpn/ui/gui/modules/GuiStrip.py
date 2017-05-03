@@ -62,6 +62,7 @@ class GuiStrip(Frame):
   # GWV: used for!?
   sigClicked = QtCore.Signal(object, object)
 
+  # TODO: get rid of application, it can be deduced from spectrumDisplay
   def __init__(self, qtParent, spectrumDisplay, application, useOpenGL=False):
     """
     Basic strip class; used in StripNd and Strip1d
@@ -98,8 +99,7 @@ class GuiStrip(Frame):
     self.setMinimumWidth(250)
     self.setMinimumHeight(200)
 
-    self.plotWidget = PlotWidget(parent=self, application=self.application,
-                                 useOpenGL=useOpenGL, strip=self,
+    self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
                                  showDoubleCrosshair=application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # GWV: appears not responsive to contentsMargins
@@ -145,7 +145,7 @@ class GuiStrip(Frame):
     self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
     self._showCrossHair()
     # callbacks
-    self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
+    ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
     self.storedZooms = []
     
@@ -447,25 +447,6 @@ class GuiStrip(Frame):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
     # TBD: the naive approach below should be improved
     return axisCode #if axisCode[0].isupper() else axisCode
-      
-  def _setCrossHairPosition(self, axisPositionDict):
-    """
-    # CCPN INTERNAL
-    Called in _setCrossHairPosition method of GuiSpectrumDisplay
-    """
-    if not self._finaliseDone: return
-
-    axes = self.orderedAxes
-    xPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
-    yPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
-    # print('>>', xPos, yPos)
-    self.plotWidget.crossHair1.setPosition(xPos,yPos)
-
-    #TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum
-    if self.showDoubleCrossHair:
-      xPos = axisPositionDict.get(self._crosshairCode(axes[1].code))
-      yPos = axisPositionDict.get(self._crosshairCode(axes[0].code))
-      self.plotWidget.crossHair2.setPosition(xPos, yPos)
 
   def _createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
@@ -515,42 +496,6 @@ class GuiStrip(Frame):
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
-
-  #TODO:WAYNE: this should move to PlotWidget
-  def _mouseMoved(self, positionPixel):
-    """
-    Updates the position of the crosshair when the mouse is moved.
-    """
-    if not self._finaliseDone: return
-
-    if self.isDeleted:
-      return
-
-    #TODO:WAYNE: PlotObject has lastMousePos, but it has the same 'Scene' coordinates, i.e. not world (ppm) coordinates)
-    # We need a property lastMousePosition which gets the mouse position in world coordinates
-    # and calls self.plotWidget.something to get this
-    #print('>_mouseMoved>', self, self.plotWidget.lastMousePos, positionPixel)
-
-    # position is in pixels
-    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
-      self.mousePixel = (positionPixel.x(), positionPixel.y())
-      mousePoint = self.viewBox.mapSceneToView(positionPixel) # mouse point is in ppm
-      axisPositionDict = self.axisPositionDict
-      position = []
-      for n, axis in enumerate(self.orderedAxes):
-        #TODO:WAYNE: what if x and y have the same (or related) axis codes?
-        if n == 0:
-          pos = mousePoint.x()
-        elif n == 1:
-          pos = mousePoint.y()
-        else:
-          pos = axis.position
-        axisPositionDict[self._crosshairCode(axis.code)] = pos
-        position.append(pos)
-      self.mousePosition = tuple(position) # position is in ppm
-      #TODO:WAYNE: replace with appropriate object
-      for window in self.application.project.windows:
-        window._setCrossHairPosition(axisPositionDict)
 
   def _showMousePosition(self, pos:QtCore.QPointF):
     """

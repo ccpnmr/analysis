@@ -214,7 +214,7 @@ if __name__ == '__main__':
     buttonPressed = pyqtSignal(str)
 
     def __init__(self, parent, name, **kwds):
-      super(MyWidget, self).__init__(parent=parent, **kwds)
+      super(MyWidget, self).__init__(parent=parent, setLayout=True, **kwds)
       self.name = name
       self.label = Label(parent=self, grid=(0,0), text=name, bold=True,textColour='black', textSize='18')
       self.button = Button(parent=self, grid=(1,0), text='Button-' + name, callback=self._pressed)
@@ -232,8 +232,8 @@ if __name__ == '__main__':
   class TestPopup(BasePopup):
     def body(self, parent):
       mainWidget = Widget(parent, grid=(0,0), setLayout=True)
-      widget1 = MyWidget(parent=mainWidget, name='Widget-1', grid=(0,0), bgColor=(255, 255, 0), setLayout=True)
-      widget2 = MyWidget(parent=mainWidget, name='Widget-2', grid=(1,0), bgColor=(255, 0, 0), setLayout=True)
+      widget1 = MyWidget(parent=mainWidget, name='Widget-1', grid=(0,0), bgColor=(255, 255, 0))
+      widget2 = MyWidget(parent=mainWidget, name='Widget-2', grid=(1,0), bgColor=(255, 0, 0))
       # connect the signals
       widget1.buttonPressed.connect(widget2._receivedSignal) # widget2 listens to widget1.buttonPressed signal
       widget2.buttonPressed.connect(widget1._receivedSignal) # widget1 listens to widget1.buttonPressed signal

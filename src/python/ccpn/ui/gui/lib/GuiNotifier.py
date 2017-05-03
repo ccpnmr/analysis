@@ -211,7 +211,8 @@ if __name__ == '__main__':
 
   class MyWidget(Widget):
 
-    buttonPressed = pyqtSignal(str)
+    buttonPressed1 = pyqtSignal(str)
+    buttonPressed2 = pyqtSignal(dict)
 
     def __init__(self, parent, name, **kwds):
       super(MyWidget, self).__init__(parent=parent, setLayout=True, **kwds)
@@ -222,21 +223,32 @@ if __name__ == '__main__':
     def _pressed(self):
       bText = self.button.getText()
       print(bText + ' was pressed')
-      self.buttonPressed.emit(bText)
+      # str signal
+      self.buttonPressed1.emit(bText)
+      # dict signal
+      bDict = {'text':bText}
+      self.buttonPressed2.emit(bDict)
 
     @pyqtSlot(str)
-    def _receivedSignal(self, text):
-      print(self.name + ' received signal from ' + text)
+    def _receivedSignal1(self, text):
+      print(self.name + ' received signal1:', text)
+
+    @pyqtSlot(dict)
+    def _receivedSignal2(self, aDict):
+      print(self.name + ' received signal2:', aDict)
 
 
   class TestPopup(BasePopup):
     def body(self, parent):
-      mainWidget = Widget(parent, grid=(0,0), setLayout=True)
+      mainWidget = Widget(parent, setLayout=True)
       widget1 = MyWidget(parent=mainWidget, name='Widget-1', grid=(0,0), bgColor=(255, 255, 0))
       widget2 = MyWidget(parent=mainWidget, name='Widget-2', grid=(1,0), bgColor=(255, 0, 0))
-      # connect the signals
-      widget1.buttonPressed.connect(widget2._receivedSignal) # widget2 listens to widget1.buttonPressed signal
-      widget2.buttonPressed.connect(widget1._receivedSignal) # widget1 listens to widget1.buttonPressed signal
+      # connect the signals to the str variant
+      widget1.buttonPressed1.connect(widget2._receivedSignal1) # widget2 listens to widget1.buttonPressed1 signal
+      widget2.buttonPressed1.connect(widget1._receivedSignal1) # widget1 listens to widget1.buttonPressed1 signal
+      # connect the signals to the dict variant
+      widget1.buttonPressed2.connect(widget2._receivedSignal2) # widget2 listens to widget1.buttonPressed2 signal
+      widget2.buttonPressed2.connect(widget1._receivedSignal2) # widget1 listens to widget1.buttonPressed2 signal
 
 
   app = TestApplication()

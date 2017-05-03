@@ -98,11 +98,12 @@ class CcpnModule(Dock):
       #                                       scrollBarPolicies=('always','asNeeded'),
       #                                       minimumSizes=self.settingsMinimumSizes
       #                                      )
-      self._scrollArea = ScrollArea(parent=self.widgetArea, setLayout=True)
-      self.settingsWidget = Frame(parent=self._scrollArea, setLayout=True, showBorder=True)
-      self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
-      self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
+      self._scrollArea = ScrollArea(parent=self.widgetArea)
+      self.settingsWidget = Frame(showBorder=True)
+      # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
+      # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
       self._scrollArea.setWidget(self.settingsWidget)
+      self.settingsWidget.setLayout(QtGui.QGridLayout())
       self._scrollArea.setWidgetResizable(True)
       #self._scrollArea.getLayout().addWidget(self.settingsWidget)
       #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)

@@ -130,24 +130,14 @@ class GuiStripNd(GuiStrip):
   """
   # TODO:ED: complete the above; also port to GuiStrip1d
 
-  def __init__(self, qtParent, spectrumDisplay, application):
+  def __init__(self, spectrumDisplay):
     """
     Initialise Nd spectra object
 
-    :param qtParent: QT parent to place widgets
     :param spectrumDisplay: spectrumDisplay instance
-    :param application: application instance
     """
-    #print('GuiStripNd>>', qtParent, self.spectrumDisplay, application)
-    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay,
-                            application=application, useOpenGL=True
-                      )
-
-    self.qtParent = qtParent
-    # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
-    # self.spectrumDisplay = spectrumDisplay
-    self.application = application
-    self.mainWindow = self.spectrumDisplay.mainWindow
+    #print('GuiStripNd>>', self.spectrumDisplay)
+    GuiStrip.__init__(self, spectrumDisplay, useOpenGL=True)
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer

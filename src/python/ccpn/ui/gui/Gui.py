@@ -382,19 +382,11 @@ class Strip1d(coreClass, _GuiStrip1d):
 
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
-    # hack for now;
-    self.application = project._appBase
-    # Strip1d utimately is a widget which gets appBase from widgets.Base
-    # self._appBase = project._appBase
-    # 28/04/17: No longer the case
-
-    # hack 2: PostPhone SpectrumLoading and PlotWidget stuff until later
+    # hack : Postpone SpectrumLoading and PlotWidget stuff until later
     self._finaliseDone = True
 
     print('\nStrip1d>> spectrumDisplay:', self.spectrumDisplay)
-    _GuiStrip1d.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
-                               spectrumDisplay=self.spectrumDisplay,
-                               application=self.application)
+    _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
 
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd
@@ -405,19 +397,11 @@ class StripNd(coreClass, _GuiStripNd):
 
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
-    # hack for now;
-    application = project._appBase
-    # StripNd utimately is a widget which gets _appBase from widgets.Base (for now)
-    # self._appBase = project._appBase
-    # 28/04/17: No longer the case
-
-    # hack 2: PostPhone SpectrumLoading and PlotWidget stuff until later
+    # hack : Postpone SpectrumLoading and PlotWidget stuff until later
     self._finaliseDone = True
 
     print('\nStripNd>> spectrumDisplay:', self.spectrumDisplay)
-    _GuiStripNd.__init__(self, qtParent=self.spectrumDisplay.stripFrame,
-                               spectrumDisplay=self.spectrumDisplay,
-                               application=application)
+    _GuiStripNd.__init__(self, self.spectrumDisplay)
 
     # cannot add the Frame until fully done
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)

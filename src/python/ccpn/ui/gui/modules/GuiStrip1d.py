@@ -92,18 +92,13 @@ class GuiStrip1d(GuiStrip):
                         :return <Tuple>:(<Peak>, ...)
   """
 
-  def __init__(self, qtParent, spectrumDisplay, application):
+  def __init__(self, spectrumDisplay):
     """
     Initialise Nd spectra object
 
-    :param qtParent: QT parent to place widgets
     :param spectrumDisplay Main spectrum display Module object
-    :param application: application instance
     """
-    GuiStrip.__init__(self, qtParent=qtParent, spectrumDisplay=spectrumDisplay, application=application)
-
-    # self.spectrumDisplay = spectrumDisplay
-    self.application = application
+    GuiStrip.__init__(self, spectrumDisplay)
 
     self.viewBox.invertX()
     self.plotWidget.showGrid(x=True, y=True)

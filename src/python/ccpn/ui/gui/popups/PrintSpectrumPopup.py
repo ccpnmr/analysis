@@ -1,5 +1,6 @@
-from PyQt4 import QtGui, QtCore
+__author__ = 'CCPN'
 
+from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
@@ -10,14 +11,19 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
 import os
 
-class SelectSpectrumDisplayPopup(QtGui.QDialog):
-  def __init__(self,project=None, **kw):
-    super(SelectSpectrumDisplayPopup, self).__init__()
-    self.setWindowTitle('Select Spectrum Display')
+class SelectSpectrumDisplayPopup(ccpnDialog):
+# class SelectSpectrumDisplayPopup(QtGui.QDialog):
+  def __init__(self,parent=None, project=None, **kw):
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Select Spectrum Display', **kw)
+    # super(SelectSpectrumDisplayPopup, self).__init__()
+    # self.setWindowTitle('Select Spectrum Display')
+
     self.project = project
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
@@ -25,12 +31,12 @@ class SelectSpectrumDisplayPopup(QtGui.QDialog):
     self.setFixedWidth(400)
     self.setFixedHeight(300)
 
-    self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2))
+    self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = QtGui.QFrame()
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtGui.QFrame()
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-    self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self.scrollArea, project)
+    self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self.scrollArea, project, setLayout=True)
     self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self._getSelection],
                                 texts=['Cancel', 'Select Display'])
 

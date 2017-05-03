@@ -32,6 +32,9 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
+from ccpn.ui.gui.widgets.Base import Base             # ejb
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+
 # This text is being copied on the clipboard only. Is not the source of the image in the popup.
 # The image is in ccpn.ui.gui.widgets
 
@@ -55,22 +58,28 @@ TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
             any other undesired consequences originating from the usage of this software.
         '''
 
-
-class AboutPopup(QtGui.QDialog):
+class AboutPopup(ccpnDialog):
+# class AboutPopup(QtGui.QDialog):
   def __init__(self, parent=None, **kw):
-    super(AboutPopup, self).__init__(parent)
-    self.setWindowTitle("About CcpNmr")
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='About CcpNmr', **kw)
+
+    # self.setWindowTitle("About CcpNmr")
     self.setContentsMargins(5, 5, 5, 5)
 
     pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr.png')
     self.label = Label(self, grid=(0, 0))
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
-    self.buttons = ButtonList(self, texts=['Close', 'Copy'],
-                              callbacks=[self.accept, self.copyToClipboard],
-                              tipTexts=['Close window', 'Copy text to clipboard'],
-                              grid=(1, 0), hAlign='r')
 
-    self.setMaximumWidth(self.size().width())
+    # self.label2 = Label(self, text='myLabel', grid=(1, 0))
+
+    self.buttons = ButtonList(self, texts=['Close', 'Copy'],
+                                      callbacks=[self.accept, self.copyToClipboard],
+                                      tipTexts=['Close window', 'Copy text to clipboard'],
+                                      grid=(1, 0), hAlign='r')
+
+    # self.setMaximumWidth(self.size().width())
+    # self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
+    ccpnDialog.fixedSize(self)
 
   def copyToClipboard(self):
     '''TEXT being copied on the clipboard '''
@@ -78,3 +87,14 @@ class AboutPopup(QtGui.QDialog):
     cb.clear(mode=cb.Clipboard)
     cb.setText(TEXT, mode=cb.Clipboard)
 
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+
+  app = TestApplication()
+  popup = AboutPopup()
+
+  popup.show()
+  popup.raise_()
+
+  app.start()

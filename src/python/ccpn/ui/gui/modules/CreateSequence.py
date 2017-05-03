@@ -1,3 +1,5 @@
+__author__ = 'CCPN'
+
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -6,11 +8,14 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
-class CreateSequence(QtGui.QDialog, Base):
+class CreateSequence(ccpnDialog):
+# class CreateSequence(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
-    super(CreateSequence, self).__init__(parent)
-    Base.__init__(self, **kw)
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Generate Chain', **kw)
+    # super(CreateSequence, self).__init__(parent)
+    # Base.__init__(self, **kw)
 
     self.project = project
 

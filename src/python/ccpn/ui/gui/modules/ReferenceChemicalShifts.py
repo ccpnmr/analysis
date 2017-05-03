@@ -34,13 +34,10 @@ from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 
 class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
-  def __init__(self, project, moduleArea):
-
-
-    CcpnModule.__init__(self, name='Reference Chemical Shifts')
+  def __init__(self, project, name, mainWindow):
+    CcpnModule.__init__(self, name=name, mainWindow=mainWindow)
 
     self.plotWidget = pg.PlotWidget()
-    moduleArea.addModule(self)
     self.project = project
     self.addWidget(self.plotWidget, 1, 0, 1, 4)
     self.plotWidget.plotItem.addLegend(offset=[1, 10])

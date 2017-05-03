@@ -43,7 +43,7 @@ class ButtonList(QtGui.QWidget, Base):
                tipTexts=None, direction='h', commands=None, images=None, **kw):
 
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, setLayout=True, **kw)     # ejb - added setLayout
 
 
 
@@ -96,6 +96,7 @@ class ButtonList(QtGui.QWidget, Base):
       icons.append(None)  
     
     j = len(self.buttons)
+
     for i, text in enumerate(texts):
       if 'h' in self.direction:
         grid = (0,i+j)
@@ -189,6 +190,7 @@ if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  from ccpn.ui.gui.popups.Dialog import ccpnDialog
 
   def callback(text):
     print('callback', text)
@@ -198,10 +200,16 @@ if __name__ == '__main__':
   icons = [None, None, 'icons/applications-system.png']
 
   app = TestApplication()
-  popup = BasePopup(title='Test ButtonList')
-  popup.setSize(200,60)
-  buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons)
-  utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
-  
+  popup = ccpnDialog(windowTitle='Test ButtonList')
+
+  # popup.setSize(200,200)
+  popup.setGeometry(200,200,200,200)
+
+  buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons, grid=(2,2))
+  # utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
+
+  popup.show()
+  popup.raise_()
+
   app.start()
 

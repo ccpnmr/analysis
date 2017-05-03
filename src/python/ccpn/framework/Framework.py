@@ -1308,35 +1308,48 @@ class Framework:
   ###################################################################################################################
 
   def showSpectrumGroupsPopup(self):
-    from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-    SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
+    if not self.project.spectra:
+      self.project._logger.warn('Project has no Specta. Spectrum groups cannot be displayed')
+      MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    else:
+      from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+      SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
 
 
   def showProjectionPopup(self):
     if not self.project.spectra:
+      self.project._logger.warn('Project has no Specta. Make Projection Popup cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
-      return
-    from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-    popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
-    popup.exec_()
+    else:
+      from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+      popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
+      popup.exec_()
 
 
   def showExperimentTypePopup(self):
     """
     Displays experiment type popup.
     """
-    from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
-    popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
-    popup.exec_()
+    if not self.project.spectra:
+      self.project._logger.warn('Experiment Type Selection: Project has no Specta.')
+      MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+    else:
+      from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+      popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
+      popup.exec_()
 
 
   def showPeakPickPopup(self):
     """
     Displays Peak Picking Popup.
     """
-    from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-    popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
-    popup.exec_()
+    if not self.project.peakLists:
+      self.project._logger.warn('Peak Picking: Project has no Specta.')
+      MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
+    else:
+      from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+      popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
+      popup.exec_()
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:
@@ -1399,8 +1412,9 @@ class Framework:
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""
     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-    self.refChemShifts = ReferenceChemicalShifts(self.project, self.ui.mainWindow.moduleArea)
-
+    self.refChemShifts = ReferenceChemicalShifts(self.project, name='Reference Chemical Shifts',
+                                                 mainWindow=self.ui.mainWindow)
+    self.ui.mainWindow.moduleArea.addModule(self.refChemShifts)
 
   ###################################################################################################################
   ## MENU callbacks:  VIEW
@@ -1637,7 +1651,7 @@ class Framework:
       self._systemOpen(path)
     else:
       from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-      newModule = CcpnModule(title)
+      newModule = CcpnModule(mainWindow=self.ui.mainWindow, name=title)
       view = CcpnWebView(path)
       newModule.addWidget(view)
       self.ui.mainWindow.moduleArea.addModule(newModule)

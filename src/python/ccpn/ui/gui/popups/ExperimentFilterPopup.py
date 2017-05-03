@@ -32,14 +32,17 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.popups.Dialog import ccpnDialog
 
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-class ExperimentFilterPopup(QtGui.QDialog, Base):
+class ExperimentFilterPopup(ccpnDialog):
+# class ExperimentFilterPopup(QtGui.QDialog, Base):
   def __init__(self, spectrum=None, parent=None, application=None,
                title:str='Experiment Type Filter', **kw):
-    super(ExperimentFilterPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # super(ExperimentFilterPopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
 
     detectionBox = GroupBox(self, grid=(0, 0), gridSpan=(1, 4))
     filterBox = GroupBox(self, grid=(1, 0), gridSpan=(2, 4))

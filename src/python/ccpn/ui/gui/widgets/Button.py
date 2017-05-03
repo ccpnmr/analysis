@@ -108,7 +108,7 @@ if __name__ == '__main__':
   b2.setEnabled(False)
 
   b3 = Button(window, text='I am green', callback=click,
-             tipText='Mmm, green', bgColor='#80FF80',
+             tipText='Mmm, green', #bgColor='#80FF80',
              grid=(0, 2))
 
   b4 = Button(window, icon='icons/system-help.png', callback=click,

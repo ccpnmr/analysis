@@ -34,11 +34,15 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
-class SetupNmrResiduesPopup(QtGui.QDialog, Base):
+class SetupNmrResiduesPopup(ccpnDialog):
+# class SetupNmrResiduesPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
-    super(SetupNmrResiduesPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Setup nmrResidues', **kw)
+    # super(SetupNmrResiduesPopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+
     self.parent = parent
     self.project = project
     label1a = Label(self, text="Source PeakList ", grid=(0, 0))

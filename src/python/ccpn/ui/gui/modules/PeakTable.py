@@ -49,8 +49,8 @@ class PeakTable(CcpnModule):
   maxSettingsState = 2
   settingsOnTop = True
 
-  def __init__(self, project, selectedList=None):
-    CcpnModule.__init__(self, name='Peak List')
+  def __init__(self, project, mainWindow, selectedList=None):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name='Peak List')
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.current = self.application.current

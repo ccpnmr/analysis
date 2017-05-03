@@ -32,12 +32,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence
 
 import pyqtgraph as pg
-from PyQt4 import QtGui, QtOpenGL
+from PyQt4 import QtCore, QtGui, QtOpenGL
 
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
@@ -48,21 +47,17 @@ from ccpn.util.Logging import getLogger
 # as it is only there and is just a small wrapper arount a pyqtgraph class
 # goes together with AxisTextItem (probably can be reduced to a function and included here.
 #TODO:WAYNE: should this inherit from Base??
-class PlotWidget(pg.PlotWidget, Base):
+class PlotWidget(pg.PlotWidget):
 
-  def __init__(self, parent, application, useOpenGL=False, strip=None,
-                     showDoubleCrosshair=False, **kw):
+  def __init__(self, strip, useOpenGL=False, showDoubleCrosshair=False):
 
     # Be sure to use explicit arguments to ViewBox as the call order is different in the __init__
-    self.viewBox = ViewBox(parent=parent, current=application.current, strip=strip)
-    pg.PlotWidget.__init__(self, parent=parent,
+    self.viewBox = ViewBox(strip)
+    pg.PlotWidget.__init__(self, parent=strip,
                                  viewBox=self.viewBox,
                                  axes=None, enableMenu=True)
-    Base.__init__(self, **kw)
 
-    self.application = application
     self.strip = strip
-    self.parent = parent
 
     self.plotItem.setAcceptHoverEvents(True)
     self.setInteractive(True)
@@ -75,9 +70,11 @@ class PlotWidget(pg.PlotWidget, Base):
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
+    strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
+
     #TODO:GEERTEN: Fix with proper stylesheet
     # Also used in AxisTextItem
-    if self.application.colourScheme == 'light':
+    if strip.spectrumDisplay.mainWindow.application.colourScheme == 'light':
       self.background = '#f7ffff'
       self.foreground = '#080000'
       self.gridColour = '#080000'
@@ -105,8 +102,8 @@ class PlotWidget(pg.PlotWidget, Base):
     self.addItem(self.grid)
 
     # Add two crosshairs
-    self.crossHair1 = CrossHair(parent=self, show=True, colour=self.foreground)
-    self.crossHair2 = CrossHair(parent=self, show=showDoubleCrosshair, colour=self.foreground)
+    self.crossHair1 = CrossHair(self, show=True, colour=self.foreground)
+    self.crossHair2 = CrossHair(self, show=showDoubleCrosshair, colour=self.foreground)
 
   def highlightAxes(self, state=False):
     "Highlight the axes on/of"
@@ -147,3 +144,30 @@ class PlotWidget(pg.PlotWidget, Base):
       pass
     else:
       self.viewBox.mouseDragEvent(self, event)
+
+  def _crosshairCode(self, axisCode):
+    # determines what axisCodes are compatible as far as drawing crosshair is concerned
+    # TBD: the naive approach below should be improved
+    return axisCode  # if axisCode[0].isupper() else axisCode
+
+  @QtCore.pyqtSlot(dict)
+  def _mousePositionChanged(self, mouseMovedDict):
+    """
+      This is called when the mouse position is changed in some strip
+      It means the crosshair(s) position should be updated
+    :param mouseMovedDict: 'strip'->strip and axisCode->position for each axisCode in strip
+    :return:  None
+    """
+    strip = self.strip
+    if not strip._finaliseDone: return
+
+    axes = strip.orderedAxes
+    xPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
+    yPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
+    #print('>>', strip, xPos, yPos)
+    self.crossHair1.setPosition(xPos, yPos)
+
+    #TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum
+    xPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
+    yPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
+    self.crossHair2.setPosition(xPos, yPos)

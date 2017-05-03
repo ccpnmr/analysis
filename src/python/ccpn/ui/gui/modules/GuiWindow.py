@@ -280,12 +280,4 @@ class GuiWindow():
     """
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
-    
-  def _setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
-    """
-    # CCPN INTERNAL - called in mouseMoved method of GuiStrip
-    Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.
-    """
-    for spectrumDisplay in self.spectrumDisplays:
-      spectrumDisplay._setCrossHairPosition(axisPositionDict)
 

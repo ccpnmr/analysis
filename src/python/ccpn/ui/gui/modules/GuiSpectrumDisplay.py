@@ -380,23 +380,6 @@ class GuiSpectrumDisplay(CcpnModule):
     # toggle grid for strips in this spectrumDisplay
     for strip in self.strips:
       strip.toggleGrid()
-    
-  def _setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
-    """
-    #CCPN INTERNAL
-    Sets the position of the cross in all strips of spectrum display."""
-    for strip in self.strips:
-      strip._setCrossHairPosition(axisPositionDict)
-  #
-  # def _setActionIconColour(self, apiDataSource):
-  #   action = self.spectrumActionDict.get(apiDataSource)
-  #   if action:
-  #     pix=QtGui.QPixmap(QtCore.QSize(60, 10))
-  #     if apiDataSource.numDim < 2:
-  #       pix.fill(QtGui.QColor(apiDataSource.sliceColour))
-  #     else:
-  #       pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))
-  #     action.setIcon(QtGui.QIcon(pix))
 
   def _deletedPeak(self, peak):
     apiPeak = peak._wrappedData

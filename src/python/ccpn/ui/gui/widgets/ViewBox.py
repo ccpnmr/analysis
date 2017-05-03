@@ -87,16 +87,18 @@ from ccpn.ui.gui.lib.mouseEvents import \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 
 
-class CrossHair():
+class CrossHair:
   "class to implement a cross-hair"
 
-  def __init__(self, parent, position=Point(0,0), show=True, rgb=None, colour=None, moveable=False, **kwds):
+  def __init__(self, plotWidget, position=Point(0,0), show=True, rgb=None, colour=None, moveable=False, **kwds):
     """CrossHair init,
        stetting color, using rgb or colour, which-ever is
                        not None (default to grey) + optional **kwds
        setting visibility
        it adds CrossHair hLine and vLine plot items to parent using addItem method
     """
+    self.plotWidget = plotWidget
+
     if rgb:
       pen = pg.functions.mkPen(color=rgb, **kwds)
     elif colour:
@@ -106,9 +108,8 @@ class CrossHair():
 
     self.vLine = pg.InfiniteLine(angle=90, movable=moveable, pen=pen)
     self.hLine = pg.InfiniteLine(angle=0, movable=moveable, pen=pen)
-    parent.addItem(self.vLine, ignoreBounds=True)
-    parent.addItem(self.hLine, ignoreBounds=True)
-    self._parent = parent
+    plotWidget.addItem(self.vLine, ignoreBounds=True)
+    plotWidget.addItem(self.hLine, ignoreBounds=True)
 
     self.setPointPosition(position)
     if show:
@@ -116,26 +117,24 @@ class CrossHair():
     else:
       self.hide()
 
-  def setPosition(self, xPos, yPos):
+  def setPosition(self, xPos:float, yPos:float):
     "Set position in world xPos, yPos coordinates"
     self.setVline(xPos)
     self.setHline(yPos)
 
-  def setVline(self, xPos):
+  def setVline(self, xPos:float):
     "Set vertical line in world xPos coordinates"
     if xPos is not None:
       self.vLine.setPos(xPos)
 
-  def setHline(self, yPos):
+  def setHline(self, yPos:float):
     "Set horizontal  in world xPos coordinates"
     if yPos is not None:
       self.hLine.setPos(yPos)
 
-  def setPointPosition(self, position):
+  def setPointPosition(self, position:QtCore.QPointF):
     "Set position in Point syntax"
-    self.vLine.setPos(position)
-    self.hLine.setPos(position)
-    self._position = position  # last set position
+    self.setPosition(position.x(), position.y())
 
   def show(self):
     #print(">> show")
@@ -164,14 +163,13 @@ class ViewBox(pg.ViewBox):
   """
   sigClicked = QtCore.Signal(object)
 
-  def __init__(self, current, parent, strip, *args, **kwds):
-    pg.ViewBox.__init__(self, *args, **kwds)
+  def __init__(self, strip):
+    pg.ViewBox.__init__(self)
 
     # Override pyqtgraph ViewBoxMenu
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
-    self.current = current
-    self.parent = parent
     self.strip = strip
+    self.current = strip.spectrumDisplay.mainWindow.application.current
 
     # self.rbScaleBox: Native pyQTgraph; used for Zoom
 
@@ -189,7 +187,6 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
 
-    self.project = current._project
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
@@ -380,9 +377,9 @@ class ViewBox(pg.ViewBox):
     self.crossHair.hide()
 
   def _hoverEvent(self, event):
-    self.current.viewBox = self
     if hasattr(event, '_scenePos'):
-      self.position = self.mapSceneToView(event.pos())
+      position = self.mapSceneToView(event.pos())
+      self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """

@@ -105,8 +105,8 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     #TODO: See Nd case on how to do this better
 
     # Disable add and remove strips, as they're broken
-    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
     # spectrumUtilToolBar.actions()[0].setDisabled(True)
 
     # Why does asking for the icon size fix it?  I don't know, but it does!

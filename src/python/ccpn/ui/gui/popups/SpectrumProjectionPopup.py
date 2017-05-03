@@ -1,3 +1,5 @@
+__author__ = 'CCPN'
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -7,15 +9,18 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
 import os
 
-class SpectrumProjectionPopup(QtGui.QDialog, Base):
+class SpectrumProjectionPopup(ccpnDialog):
+# class SpectrumProjectionPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
-    super(SpectrumProjectionPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Make Spectrum Projection', **kw)
+    # super(SpectrumProjectionPopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+    # self.setWindowTitle('Make Spectrum Projection')
 
-    self.setWindowTitle('Make Spectrum Projection')
     projectionMethods = ('max', 'sum', 'sum above noise')
     self.project = project
     spectrumLabel = Label(self, 'Spectrum to project', grid=(0, 0))

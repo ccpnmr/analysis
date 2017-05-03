@@ -45,6 +45,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
 from ccpn.util import Register
 from ccpn.util import Url
@@ -53,36 +54,39 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 
-class SubmitMacroPopup(QtGui.QDialog):
+class SubmitMacroPopup(ccpnDialog):
+# class SubmitMacroPopup(QtGui.QDialog):
 
   # parent mandatory and that needs to have attributes _appBase and colourScheme
-  def __init__(self, parent, title='Submit Macro Form'):
-    QtGui.QDialog.__init__(self, parent=parent)
-    self.setWindowTitle(title)
+  def __init__(self, parent=None, title='Submit Macro Form', **kw):
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # QtGui.QDialog.__init__(self, parent=parent)
+    # self.setWindowTitle(title)
 
+    self.setContentsMargins(5, 5, 5, 5)
     self._registrationDict = Register.loadDict()
 
-    frame = Frame(self)
+    # frame = Frame(self, setLayout=True)     # ejb
 
     row = 0
     for key in ('name', 'organisation', 'email'):
-      label = Label(frame, text='%s: ' % metaUtil.upperFirst(key), grid=(row,0))
-      label = Label(frame, text=self._registrationDict.get(key), grid=(row,1))
+      label = Label(self, text='%s: ' % metaUtil.upperFirst(key), grid=(row,0))
+      label = Label(self, text=self._registrationDict.get(key), grid=(row,1))
       row += 1
 
-    button = Button(frame, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
-    self.pathEntry = Entry(frame, maxLength=200, grid=(row,1))
+    button = Button(self, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
+    self.pathEntry = Entry(self, maxLength=200, grid=(row,1))
     row += 1
 
-    label = Label(frame, text='Keywords: ', grid=(row,0))
-    self.keywordsEntry = Entry(frame, grid=(row,1))
+    label = Label(self, text='Keywords: ', grid=(row,0))
+    self.keywordsEntry = Entry(self, grid=(row,1))
     row += 1
 
-    label = Label(frame, text='Description: ', grid=(row,0))
-    self.textEditor = TextEditor(frame, grid=(row,1))
+    label = Label(self, text='Description: ', grid=(row,0))
+    self.textEditor = TextEditor(self, grid=(row,1))
     row += 1
 
-    button = Button(frame, 'Submit', callback=self._submitMacro, grid=(row, 1))
+    button = Button(self, 'Submit', callback=self._submitMacro, grid=(row, 1))
 
   def _selectMacro(self):
     
@@ -141,3 +145,14 @@ class SubmitMacroPopup(QtGui.QDialog):
           msg, colourScheme=self.parent().colourScheme)
       
     self.hide()
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+
+  app = TestApplication()
+  popup = SubmitMacroPopup()
+
+  popup.show()
+  popup.raise_()
+
+  app.start()

@@ -31,16 +31,20 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+from ccpn.ui.gui.popups.Dialog import ccpnDialog
 
 from functools import partial
 
-class ExperimentTypePopup(QtGui.QDialog, Base):
+class ExperimentTypePopup(ccpnDialog):
+# class ExperimentTypePopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, title:str='Experiment Type Selection', **kw):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-    super(ExperimentTypePopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # super(ExperimentTypePopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+
     self.parent = parent
     spectra = project.spectra
     self.experimentTypes = project._experimentTypeMap

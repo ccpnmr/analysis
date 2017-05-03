@@ -2,11 +2,13 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.popups.Dialog import ccpnDialog
 
-
-class CopyPeakListPopup(QtGui.QDialog):
-  def __init__(self, parent, **kw):
-    super(CopyPeakListPopup, self).__init__(parent)
+# class CopyPeakListPopup(QtGui.QDialog):
+class CopyPeakListPopup(ccpnDialog):
+  def __init__(self, parent=None, **kw):
+    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle='Copy PeakList', **kw)
+    # super(CopyPeakListPopup, self).__init__(parent)
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.project = self.application.project
@@ -99,3 +101,26 @@ class CopyPeakListPopup(QtGui.QDialog):
       self.targetSpectraPullDown.select(defaultSpectrum.pid)
       # print('Selected defaultSpectrum: "self.project.spectra[-1]" ', defaultSpectrum) #Testing statement to be deleted
       return
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+  import ccpn.core.testing.WrapperTesting as WT
+
+  app = TestApplication()
+  app._ccpnApplication = app
+  app.colourScheme = 'dark'
+
+  thisWT = WT.WrapperTesting()
+  thisWT.setUp()
+
+  app.project = thisWT.project
+
+  popup = CopyPeakListPopup()       # too many errors for testing here...
+
+  popup.show()
+  popup.raise_()
+
+  app.start()
+
+  WT.WrapperTesting.tearDown(thisWT)

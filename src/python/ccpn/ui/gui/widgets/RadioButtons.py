@@ -106,11 +106,19 @@ class RadioButtons(QtGui.QWidget, Base):
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
+
+  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+
   app = TestApplication()
-  popup = BasePopup(title='Test radioButtons')
+  popup = ccpnDialog(windowTitle='Test radioButtons')
+
   popup.setSize(250, 50)
+
   radioButtons = RadioButtons(parent=popup, texts=['Test1','Test2','Test3'], selectedInd=1,
                callback=None, grid=(0, 0))
   radioButtons.radioButtons[0].setEnabled(False)
+
+  popup.raise_()
+  popup.exec()
 
   app.start()

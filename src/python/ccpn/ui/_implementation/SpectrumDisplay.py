@@ -112,6 +112,7 @@ class SpectrumDisplay(AbstractWrapperObject):
   @property
   def axisCodes(self) -> Tuple[str, ...]:
     """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+    # TODO axisCodes shold be unique, but I am not sure this is enforced
     return self._wrappedData.axisCodes
 
   @property

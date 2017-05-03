@@ -283,6 +283,17 @@ class EnsembleData(pd.DataFrame):
     # NB ModelData temporarily resets this to a Model object
     self.__containingObject = None
 
+    # TODO: ED
+    # reset_index should only happen when you create a new Ensemble
+    # (or put in data in ana empty one), not in general
+    # Otherwise it has too many unpredictable consequences when pandas
+    # creates sopies.
+    # So the reset)index calls should be *removed* from ModelData,
+    # and here should be triggered only in specific circumstances,
+    # when self._containingObject is set and probably not always even then.
+    # That would then replace the _indexOverride handling you have put in
+    # (since it would have a wider scope);.
+
     # Reset index to one-start - unless it was passed in explicitly.
     # if 'index' not in kwargs:
     #   self.reset_index(drop=True, inplace=True)

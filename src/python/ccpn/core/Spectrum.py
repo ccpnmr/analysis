@@ -727,6 +727,7 @@ class Spectrum(AbstractWrapperObject):
 
   @axisCodes.setter
   def axisCodes(self, value):
+    # TODO axisCodes shold be unique, but I am not sure this is enforced
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property

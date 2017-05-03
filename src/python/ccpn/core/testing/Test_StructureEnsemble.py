@@ -69,10 +69,6 @@ class skip1:  #StructureEnsembleTesting_None(WrapperTesting):
         'occupancy', 'bFactor',
         'nmrChainCode', 'nmrSequenceCode', 'nmrResidueName', 'nmrAtomName',
       ]
-      print ('@~@~ columns', data.columns)
-      print ('@~@~ dtypes', data.dtypes)
-      for tag in tags:
-        print ('\n\n@~@~', tag, '\n', data[tag].value_counts())
     finally:
       loadedProject.delete()
 
@@ -236,16 +232,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     self.data['residueName'] = self.testResidueName
     self.data['chainCode'] = self.testChainCode
     self.data['sequenceId'] = self.testSequenceId
-    print ('@~@~ data0')
-    print ('@~@~ models0', self.project.models)
-    for tt in self.data.as_namedtuples():
-      print (tt)
     self.data['modelNumber'] = self.testModelNumber
-
-    print ('@~@~ data1')
-    print ('@~@~ models1', self.project.models)
-    for tt in self.data.as_namedtuples():
-      print (tt)
 
   #=========================================================================================
   # test_properties_structuresEnsemble_resetModels

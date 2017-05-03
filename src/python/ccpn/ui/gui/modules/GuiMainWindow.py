@@ -602,6 +602,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
     #TODO:LUCA: Docstring needed
 
+    try:
+      saveName = spectrumDisplayOrStrip.title+'.svg'
+    except:
+      saveName=''
+
     current = self.application.current
     if not spectrumDisplayOrStrip:
       spectrumDisplayOrStrip = current.spectrumDisplay
@@ -616,7 +621,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
 
       if not path:
-        dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text='Print to File',
+        dialog = FileDialog(parent=self
+                            , directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
                             acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
                             filter='SVG (*.svg)')
         path = dialog.selectedFile()

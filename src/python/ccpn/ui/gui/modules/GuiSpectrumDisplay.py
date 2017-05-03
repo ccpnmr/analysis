@@ -59,9 +59,9 @@ class GuiSpectrumDisplay(CcpnModule):
   """
   Main spectrum display Module object.
 
-  This module inherits the following attributes from the SpectralDisplay wrapper class:
+  This module inherits the following attributes from the SpectrumDisplay wrapper class:
 
-  getName           Name of spectrumDisplay;
+  title             Name of spectrumDisplay;
                       :return <str>
   stripDirection    Strip axis direction
                       :return <str>:('X', 'Y', None) - None only for non-strip plots

@@ -129,9 +129,10 @@ class CcpnModule(Dock):
     self.setParent(mainWindow.moduleArea)
     self.widgetArea.setParent(self)
 
-  def getName(self):
-    "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a warpper object as well"
-    return self.name()
+  # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
+  # def getName(self):
+  #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
+  #   return self.name()
 
   def resizeEvent(self, event):
     self.setOrientation(self.labelOrientation, force=True)

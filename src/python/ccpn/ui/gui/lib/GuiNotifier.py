@@ -231,15 +231,15 @@ if __name__ == '__main__':
 
   class TestPopup(BasePopup):
     def body(self, parent):
-      mainWidget = Widget(parent, grid=(0,0))
-      widget1 = MyWidget(parent=mainWidget, name='Widget-1', grid=(0,0), bgColor=(255, 255, 0))
-      widget2 = MyWidget(parent=mainWidget, name='Widget-2', grid=(1,0), bgColor=(255, 0, 0))
+      mainWidget = Widget(parent, grid=(0,0), setLayout=True)
+      widget1 = MyWidget(parent=mainWidget, name='Widget-1', grid=(0,0), bgColor=(255, 255, 0), setLayout=True)
+      widget2 = MyWidget(parent=mainWidget, name='Widget-2', grid=(1,0), bgColor=(255, 0, 0), setLayout=True)
       # connect the signals
       widget1.buttonPressed.connect(widget2._receivedSignal) # widget2 listens to widget1.buttonPressed signal
       widget2.buttonPressed.connect(widget1._receivedSignal) # widget1 listens to widget1.buttonPressed signal
 
 
   app = TestApplication()
-  popup = TestPopup(title='Testing slots and signals')
+  popup = TestPopup(title='Testing slots and signals', setLayout=True)
   popup.resize(200, 400)
   app.start()

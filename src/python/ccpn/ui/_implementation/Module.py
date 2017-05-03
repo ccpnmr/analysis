@@ -68,8 +68,10 @@ class Module(AbstractWrapperObject):
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
-  def name(self) -> str:
-    """Module name"""
+  def title(self) -> str:
+    """Module title
+
+    (corresponds to its name, but the name 'name' is taken by PyQt"""
     return self._wrappedData.name
     
   @property
@@ -91,6 +93,9 @@ class Module(AbstractWrapperObject):
   @property
   def window(self) -> Window:
     """Gui window showing Module"""
+    # TODO: RASMUS window clashes with a Qt attribute.
+    # This should be renamed, but that also requires refactoring
+    # possibly with a model change that modifies the Task/Window/Module relationship
     return self._project._data2Obj.get(self._wrappedData.window)
 
   @window.setter
@@ -154,7 +159,7 @@ class Module(AbstractWrapperObject):
 
 
 # newModule functions
-def _newModule(self:Task, moduleType:str, name:str=None, window:Window=None, comment:str=None):
+def _newModule(self:Task, moduleType:str, title:str=None, window:Window=None, comment:str=None):
 
   window = self.getByPid(window) if isinstance(window, str) else window
 
@@ -166,16 +171,16 @@ def _newModule(self:Task, moduleType:str, name:str=None, window:Window=None, com
     window=apiWindow, details=comment, moduleType=moduleType
   )
   # Add name, setting and insuring uniqueness if necessary
-  if name is None:
-    name = moduleType
-  if Pid.altCharacter in name:
+  if title is None:
+    title = moduleType
+  if Pid.altCharacter in title:
     raise ValueError("Character %s not allowed in gui.core.Module.name" % Pid.altCharacter)
-  while apiTask.findFirstModule(name=name):
-    name = commonUtil.incrementName(name)
-  params['name'] = name
+  while apiTask.findFirstModule(name=title):
+    title = commonUtil.incrementName(title)
+  params['name'] = title
 
   # Create Module
-  defaults = collections.OrderedDict((('name', None), ('window', None),
+  defaults = collections.OrderedDict((('title', None), ('window', None),
                                      ('comment', None)))
   self._startCommandEchoBlock('newModule', moduleType, values=locals(), defaults=defaults,
                               parName='newModule')

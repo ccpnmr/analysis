@@ -49,7 +49,7 @@ class ModuleTest(WrapperTesting):
     window2.task = task2
     module1 = task.newModule('TestMod')
     module2 = task.newModule('TestMod')
-    module3 = task2.newModule('TestMod', window=window2, name='MyOwn', comment='really?')
+    module3 = task2.newModule('TestMod', window=window2, title='MyOwn', comment='really?')
     module4 = task.newModule('DifferentMod')
     undo.undo()
     undo.undo()

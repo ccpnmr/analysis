@@ -192,7 +192,7 @@ class SampleComponent(AbstractWrapperObject):
 
     NBNB the internal dictionary is returned directly without checks or encapsulation"""
 
-    result = self._wrappedData._ccpnInternalData.get('isotopeCode2Fraction')
+    result = self._ccpnInternalData.get('isotopeCode2Fraction')
     #
     return result
 
@@ -200,7 +200,7 @@ class SampleComponent(AbstractWrapperObject):
   def isotopeCode2Fraction(self, value):
     if not isinstance(value, dict):
       raise ValueError("SampleComponent.isotopeCode2Fraction must be a dictionary")
-    self._wrappedData._ccpnInternalData['isotopeCode2Fraction'] = value
+    self._ccpnInternalData['isotopeCode2Fraction'] = value
 
     
   # Implementation functions

@@ -59,35 +59,28 @@ logger = getLogger()
 
 class GuiStrip(Frame):
 
-  # GWV: used for!?
-  sigClicked = QtCore.Signal(object, object)
-
-  # TODO: get rid of application, it can be deduced from spectrumDisplay
-  def __init__(self, qtParent, spectrumDisplay, application, useOpenGL=False):
+  def __init__(self, spectrumDisplay, useOpenGL=False):
     """
     Basic strip class; used in StripNd and Strip1d
 
-    :param qtParent: QT parent to place widgets
     :param spectrumDisplay: spectrumDisplay instance
-    :param application: application instance
 
     This module inherits attributes from the Strip wrapper class:
     Use clone() to make a copy
     """
 
-    self.qtParent = qtParent
     # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
     # self.spectrumDisplay = spectrumDisplay
-    self.application = application
-    self.current = application.current
-    self.stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+    self.mainWindow = self.spectrumDisplay.mainWindow
+    self.application = self.mainWindow.application
+    self.current = self.application.current
 
-    print('GuiStrip>>> qtParent, spectrumDisplay:', qtParent, self.spectrumDisplay)  #, application)
+    print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)  #, application)
 
-    # GWV:passing qtParent to the widget stops the PlotWidget filling all available space
+    # GWV:passing spectrumDisplay.stripFrame to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
 
-    Frame.__init__(self, parent=self.qtParent, setLayout=True, showBorder=True,
+    Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=True,
                          acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
                   )
 
@@ -100,7 +93,7 @@ class GuiStrip(Frame):
     self.setMinimumHeight(200)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
-                                 showDoubleCrosshair=application.preferences.general.doubleCrossHair)
+                                 showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # GWV: appears not responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)

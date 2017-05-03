@@ -158,10 +158,9 @@ class CrossHair:
 
 class ViewBox(pg.ViewBox):
   """
-  Base-class to implement mouse and drag events in in PlotWidget.py; 
+  Base-class to implement mouse and drag events in PlotWidget.py;
   it will inherit the same parent as PlotWidget
   """
-  sigClicked = QtCore.Signal(object)
 
   def __init__(self, strip):
     pg.ViewBox.__init__(self)
@@ -171,7 +170,7 @@ class ViewBox(pg.ViewBox):
     self.strip = strip
     self.current = strip.spectrumDisplay.mainWindow.application.current
 
-    # self.rbScaleBox: Native pyQTgraph; used for Zoom
+    # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
     self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
     self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))

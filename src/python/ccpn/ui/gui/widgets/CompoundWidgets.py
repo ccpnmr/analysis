@@ -321,7 +321,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
       self.setMinimumWidths(minimumWidths)
 
     if maximumWidths is not None:
-      self.setMinimumWidths(maximumWidths)
+      self.setMaximumWidths(maximumWidths)
 
   def isChecked(self):
     "Convenience: Return whether checkBox is checked"

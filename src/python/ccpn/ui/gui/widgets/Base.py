@@ -165,7 +165,7 @@ class Base(DropBase):
 
     parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
     if parent is None:
-      getLogger().warning('Cannot add widget %s to parent (grid=%s)' % (self,grid))
+      getLogger().warning('No parent: Cannot add widget %s (grid=%s)' % (self,grid))
       return
 
     # have to use _getLayout() functionality as not all widget descend from Base;

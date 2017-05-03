@@ -76,6 +76,7 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ScrollArea import SCROLLBAR_POLICY_DICT
+from ccpn.ui.gui.widgets.Widget import Widget
 
 
 class Frame(QtGui.QFrame, Base):
@@ -175,7 +176,7 @@ class ScrollableFrame(Frame):
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    self.scrollArea.setWidgetResizable(True)
+    #self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
     # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
     # self.scrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
@@ -190,16 +191,67 @@ class ScrollableFrame(Frame):
     return self.scrollArea
 
 
+class ScrollableFrame2(Widget):
+  "A scrollable frame"
+
+  def __init__(self, parent=None,
+                     setLayout=False, showBorder=False, fShape=None, fShadow=None,
+                     minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
+
+    # check kwds if these apply to gridding
+    kw1 = {}
+    for key in 'grid gridSpan stretch hAlign vAlign'.split():
+      if key in kwds:
+        kw1[key] = kwds[key]
+        del(kwds[key])
+
+    Widget.__init__(self, parent=parent, **kw1)
+
+    # define a scroll area;
+    self._scrollArea = ScrollArea(parent=self, setLayout=True,
+                                  scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+                                 )
+
+    # initialise a frame
+    self._frame = Frame(parent=self._scrollArea, setLayout=setLayout, grid=(0,0),
+                                       showBorder=showBorder, fShape = fShape, fShadow = fShadow,
+                                       **kwds
+                       )
+
+    print('>>', self._frame)
+    # add it to the scrollArea
+    self._scrollArea.setWidget(self._frame)
+    # self._scrollArea.setWidgetResizable(True)
+
+    # configure the scroll area to allow all available space without margins
+    self._scrollArea.setContentsMargins(0, 0, 0, 0)
+    self._scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.setScrollBarPolicies(scrollBarPolicies)
+    # self.scrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+    #self.show()
+
+  def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
+    "Set the scrolbar policy: always, never, asNeeded"
+    self._scrollArea.setScrollBarPolicies(scrollBarPolicies)
+
+  def getScrollArea(self):
+    "Return the scrollbar widget; for external usage"
+    return self._scrollArea
+
+  def getFrame(self):
+    "Return the frame widget; for external usage"
+    return self._frame
+
+
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
   from ccpn.ui.gui.widgets.Label import Label
-  from ccpn.ui.gui.widgets.Widget import Widget
 
   class TestPopup(BasePopup):
     def body(self, parent):
-      widget = Widget(parent, grid=(0,0))
+      widget = Widget(parent, setLayout=True)
       policyDict = dict(
         hAlign='c',
         stretch=(1,0),
@@ -209,16 +261,22 @@ if __name__ == '__main__':
 
       #TODO: find the cause of the empty space between the widgets
       #frame3 = ScrollableFrame(parent=parent, showBorder=True, bgColor=(255, 0, 255), grid=(2,0))
-      frame1 = Frame(parent=widget, grid=(0,0), showBorder=False, bgColor=(255, 255, 0), **policyDict)
+      frame1 = Frame(parent=widget, setLayout=True, grid=(0,0), showBorder=False, bgColor=(255, 255, 0), **policyDict)
       label1 = Label(parent=frame1, grid=(0,0), text="FRAME-1", bold=True,textColour='black', textSize='32')
 
-      frame2 = Frame(parent=widget, grid=(1,0), showBorder=True, bgColor=(255, 0, 0),
+      frame2 = Frame(parent=widget, setLayout=True, grid=(1,0), showBorder=True, bgColor=(255, 0, 0),
                      fShape='styledPanel', fShadow='raised', **policyDict)
       label2 = Label(parent=frame2, grid=(0,0), text="FRAME-2", bold=True,textColour='black', textSize='32')
 
-      scroll4 = ScrollableFrame(parent=widget, grid=(4,0))
-      label4 = Label(parent=scroll4, text="ScrollableFrame", grid=(1,0), **policyDict,
-                    bold=True,textColour='black', textSize='32')
+ #     scroll4 = ScrollableFrame2(parent=widget, grid=(2,0), setLayout=True)
+      scroll4 = ScrollArea(scrollBarPolicies=('always','always'))
+      print(scroll4)
+      label4 = Label(
+                     text="ScrollableFrame",  bold=True,textColour='black', textSize='32',
+                     **policyDict,
+                   )
+      scroll4.setWidget(label4)
+      widget.getLayout().addWidget(scroll4, 2,0)
 
   app = TestApplication()
   popup = TestPopup(title='Test Frame')

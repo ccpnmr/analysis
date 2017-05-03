@@ -111,7 +111,7 @@ def _check(key=None, doDecode=True):
     valid = Time(ldict['valid'])
     if not now()< valid:
         sys.stderr.write(message3 % (applicationVersion, valid))
-        sys.exit(1)
+        #sys.exit(1)
     else:
         sys.stderr.write(message4 % (ldict['type'], valid))
 

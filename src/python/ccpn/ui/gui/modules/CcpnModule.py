@@ -103,7 +103,7 @@ class CcpnModule(Dock):
       self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
       self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
       self._scrollArea.setWidget(self.settingsWidget)
-      self._scrollArea.setWidgetResizable(True)
+      self._scrollArea.setWidgetResizable(False)
       #self._scrollArea.getLayout().addWidget(self.settingsWidget)
       #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
       if self.settingsOnTop:

@@ -41,7 +41,7 @@ SCROLLBAR_POLICY_DICT = dict(
 
 class ScrollArea(QtGui.QScrollArea, Base):
 
-  def __init__(self, parent, scrollBarPolicies=('asNeeded','asNeeded'),
+  def __init__(self, parent=None, scrollBarPolicies=('asNeeded','asNeeded'),
                      minimumSizes=(50, 50), **kwds):
 
     QtGui.QScrollArea.__init__(self, parent)

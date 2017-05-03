@@ -93,6 +93,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.moduleArea = CcpnModuleArea(mainWindow=self)
     print('GuiMainWindow.moduleArea: layout:', self.moduleArea.layout) ## pyqtgraph object
     self.moduleArea.setGeometry(0, 0, 1000, 800)
+    self.setCentralWidget(self.moduleArea)
+
 
     self.recordingMacro = False
     self._setupWindow()

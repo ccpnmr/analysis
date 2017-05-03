@@ -283,7 +283,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
   while apiTask.findFirstModule(name=title):
     title = commonUtil.incrementName(title)
-  displayPars['title'] = title
+  displayPars['name'] = title
 
   self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
                               parName='newSpectrumDisplay')

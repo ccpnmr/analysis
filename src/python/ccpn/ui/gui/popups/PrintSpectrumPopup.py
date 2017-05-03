@@ -10,6 +10,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
@@ -36,8 +37,14 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtGui.QFrame()
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-    self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self.scrollArea, project, setLayout=True)
-    self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self._getSelection],
+    self.spectrumDisplayIds = [sd.title for sd in project.spectrumDisplays]
+    self.spectrumDisplayPids = [sd.pid for sd in project.spectrumDisplays]
+    self.radioButtonBox = RadioButtons(self.scrollArea
+                                       , self.spectrumDisplayIds
+                                       , direction='v'
+                                       , setLayout=True)
+    # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self.scrollArea, project, setLayout=True)
+    self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
                                 texts=['Cancel', 'Select Display'])
 
   def _getViewBox(self, spectrumDisplay):
@@ -46,7 +53,7 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
 
   def _getSelection(self):
     self.reject() #close the popup, not needed anymore
-    pid = self.spectrumSelectionWidget.getDisplayToPrint()
+    pid = self.getDisplayToPrint()
     spectrumDisplay = self.project.getByPid(pid)
     if spectrumDisplay:
       if spectrumDisplay.is1D:
@@ -54,8 +61,17 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
       else:
         self.application.ui.mainWindow.printToFile(spectrumDisplay)
 
+  def getDisplayToPrint(self):
+    pIndex = self.radioButtonBox.getIndex()
+    thisPid = self.spectrumDisplayPids[pIndex]
+    spectrumDisplay = self.project.getByPid(thisPid)
 
-
+    self.reject() #close the popup, not needed anymore
+    if spectrumDisplay:
+      if spectrumDisplay.is1D:
+        self._open1DExporter(spectrumDisplay)
+      else:
+        self.application.ui.mainWindow.printToFile(spectrumDisplay)
 
   def _open1DExporter(self, spectrumDisplay):
     viewBox = self._getViewBox(spectrumDisplay)
@@ -113,39 +129,39 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
 #       self.filePathLineEdit.setText(path)
 
 
-class SpectrumDisplaySelectionWidget(QtGui.QWidget, Base):
-
-  def __init__(self, parent, project, **kw):
-    QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
-
-    current = project._appBase.current
-    # if current.spectrumDisplay:
-    #   self.currentSpectrumDisplay = current.spectrumDisplay
-    if current.strip:
-      self.currentSpectrumDisplay = current.strip.spectrumDisplay
-    else:
-      self.currentSpectrumDisplay = project.spectrumDisplays[0]
-    radioButton = RadioButton(self, text=self.currentSpectrumDisplay.pid, grid=(0, 0))
-    self.ii=1
-    self.radioButtons = [radioButton]
-    self.spectrumDisplayIds = [sd.pid for sd in project.spectrumDisplays if sd is not self.currentSpectrumDisplay]
-    radioButton.setChecked(True)
-
-    for spectrumDisplayId in self.spectrumDisplayIds:
-      self.addSpectrumDisplay(spectrumDisplayId)
-
-  def addSpectrumDisplay(self, spectrumDisplayId):
-    radioButton = RadioButton(self, text=spectrumDisplayId, grid=(self.ii, 0))
-    self.radioButtons.append(radioButton)
-    self.ii+=1
-
-  def getDisplayToPrint(self):
-    for radioButton in self.radioButtons:
-      if radioButton.isChecked():
-        index = self.radioButtons.index(radioButton)
-
-    if index == 0:
-      return self.currentSpectrumDisplay.pid
-    else:
-      return self.spectrumDisplayIds[index-1]
+# class SpectrumDisplaySelectionWidget(QtGui.QWidget, Base):
+#
+#   def __init__(self, parent, project, **kw):
+#     QtGui.QWidget.__init__(self, parent)
+#     Base.__init__(self, **kw)
+#
+#     current = project._appBase.current
+#     # if current.spectrumDisplay:
+#     #   self.currentSpectrumDisplay = current.spectrumDisplay
+#     if current.strip:
+#       self.currentSpectrumDisplay = current.strip.spectrumDisplay
+#     else:
+#       self.currentSpectrumDisplay = project.spectrumDisplays[0]
+#     radioButton = RadioButton(self, text=self.currentSpectrumDisplay.pid, grid=(0, 0))
+#     self.ii=1
+#     self.radioButtons = [radioButton]
+#     self.spectrumDisplayIds = [sd.pid for sd in project.spectrumDisplays if sd is not self.currentSpectrumDisplay]
+#     radioButton.setChecked(True)
+#
+#     for spectrumDisplayId in self.spectrumDisplayIds:
+#       self.addSpectrumDisplay(spectrumDisplayId)
+#
+#   def addSpectrumDisplay(self, spectrumDisplayId):
+#     radioButton = RadioButton(self, text=spectrumDisplayId, grid=(self.ii, 0))
+#     self.radioButtons.append(radioButton)
+#     self.ii+=1
+#
+#   def getDisplayToPrint(self):
+#     for radioButton in self.radioButtons:
+#       if radioButton.isChecked():
+#         index = self.radioButtons.index(radioButton)
+#
+#     if index == 0:
+#       return self.currentSpectrumDisplay.pid
+#     else:
+#       return self.spectrumDisplayIds[index-1]

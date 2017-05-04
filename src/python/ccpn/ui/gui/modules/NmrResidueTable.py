@@ -75,8 +75,8 @@ class NmrResidueTableModule(CcpnModule):
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
-    self._NTSwidget = Widget(self.settingsWidget, grid=(0,0), vAlign='top', hAlign='left')
-    #self._NTSwidget = self.settingsWidget
+    #self._NTSwidget = Widget(self.settingsWidget, grid=(0,0), vAlign='top', hAlign='left')
+    self._NTSwidget = self.settingsWidget
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either

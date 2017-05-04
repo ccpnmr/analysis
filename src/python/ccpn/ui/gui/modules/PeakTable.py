@@ -76,15 +76,15 @@ class PeakTable(CcpnModule):
 
 
   def _closeModule(self):
-    """
-    Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
-    """
+    """Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks"""
     #self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
     # self.peakList._deregisterNotifiers()
     self.close()
 
 
 class PeakListSettingsWidget(GroupBox):
+  ''' class conteining all settings widgets for the module peakTable '''
+
   def __init__(self, parent=None, **kw):
     GroupBox.__init__(self,parent, **kw)
     Base.__init__(self, **kw)
@@ -92,26 +92,19 @@ class PeakListSettingsWidget(GroupBox):
     self.checkBoxDict = {}
     columnsLabel = Label(self, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
     serialCheckLabel = Label(self, text='Serial', grid=(1, 0), hAlign='r')
-    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self, grid=(1, 1), hAlign='l',
-                                                            checked=True)
+    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self, grid=(1, 1), hAlign='l',checked=True)
     assignCheckLabel = Label(self, text='Assign', grid=(1, 2), hAlign='r')
-    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self, grid=(1, 3), hAlign='l',
-                                                            checked=True)
+    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self, grid=(1, 3), hAlign='l',checked=True)
     positionCheckLabel = Label(self, text='Position', grid=(1, 4), hAlign='r')
-    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self, grid=(1, 5), hAlign='l',
-                                                                checked=True)
+    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self, grid=(1, 5), hAlign='l',checked=True)
     heightCheckLabel = Label(self, text='Height', grid=(1, 6), hAlign='r')
-    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self, grid=(1, 7), hAlign='l',
-                                                            checked=True)
+    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self, grid=(1, 7), hAlign='l',checked=True)
     volumeCheckLabel = Label(self, text='Volume', grid=(1, 8), hAlign='r')
-    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self, grid=(1, 9), hAlign='l',
-                                                            checked=True)
+    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self, grid=(1, 9), hAlign='l',checked=True)
     linewidthCheckLabel = Label(self, text='Line Width', grid=(1, 10), hAlign='r')
-    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self, grid=(1, 11), hAlign='l',
-                                                                  checked=False)
+    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self, grid=(1, 11), hAlign='l',checked=False)
     detailsCheckLabel = Label(self, text='Details', grid=(1, 12), hAlign='r')
-    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self, grid=(1, 13), hAlign='l',
-                                                              checked=True)
+    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self, grid=(1, 13), hAlign='l', checked=True)
 
 
 class PeakListTableWidget(ObjectTable):

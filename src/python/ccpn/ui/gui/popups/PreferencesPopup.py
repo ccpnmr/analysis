@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
 # class PreferencesPopup(QtGui.QDialog, Base):
@@ -47,6 +48,11 @@ class PreferencesPopup(ccpnDialog):
     ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(PreferencesPopup, self).__init__(parent)
     # Base.__init__(self, setLayout=True, **kw)
+
+    if not project:                                         # ejb - should always be loaded
+      MessageDialog.showWarning(title, 'No project loaded')
+      self.close()
+      return
 
     self.project = project
     self.preferences = preferences

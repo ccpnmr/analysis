@@ -61,9 +61,8 @@ class PeakListPropertiesPopup(ccpnDialog):
     # super(PeakListPropertiesPopup, self).__init__(parent)
 
     self.peakList = peakList
-
     if not self.peakList:
-      MessageDialog.showWarning('No PeakList Found','')
+      MessageDialog.showWarning(title, 'No PeakList Found')
       self.close()
 
     else:

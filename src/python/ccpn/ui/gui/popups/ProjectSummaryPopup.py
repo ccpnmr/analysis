@@ -51,7 +51,8 @@ class ProjectSummaryPopup(ccpnDialog):
 
     self.project = project
 
-    QtGui.QDialog.__init__(self, parent=parent)
+    # self.setContentsMargins(15,15,15,15)
+    # QtGui.QDialog.__init__(self, parent=parent)
     if modal:  # Set before visible
       modality = QtCore.Qt.ApplicationModal
       self.setWindowModality(modality)
@@ -60,13 +61,13 @@ class ProjectSummaryPopup(ccpnDialog):
 
     self._setupData()
 
-    self.mainFrame = frame = Frame(self, grid=(0,0))
+    self.mainFrame = frame = Frame(self, grid=(0,0), setLayout=True)
 
     row = 0
 
     # SPECTRA
 
-    self.spectrumFrame = Frame(self.mainFrame, grid=(row,0))
+    self.spectrumFrame = Frame(self.mainFrame, grid=(row,0), setLayout=True)
     self.spectrumLabel = Label(self.spectrumFrame, text='Spectra', grid=(0, 0), hAlign='l')
     row += 1
 
@@ -83,7 +84,7 @@ class ProjectSummaryPopup(ccpnDialog):
 
     # PEAKLISTS
 
-    self.peakListFrame = Frame(self.mainFrame, grid=(row,0))
+    self.peakListFrame = Frame(self.mainFrame, grid=(row,0), setLayout=True)
     self.peakListLabel = Label(self.peakListFrame, text='PeakLists', grid=(0, 0), hAlign='l')
     row += 1
 
@@ -106,7 +107,7 @@ class ProjectSummaryPopup(ccpnDialog):
 
     # CHAINS
 
-    self.chainFrame = Frame(self.mainFrame, grid=(row,0))
+    self.chainFrame = Frame(self.mainFrame, grid=(row,0), setLayout=True)
     self.chainLabel = Label(self.chainFrame, text='Chains', grid=(0, 0), hAlign='l')
     row += 1
 
@@ -127,7 +128,7 @@ class ProjectSummaryPopup(ccpnDialog):
 
     # buttons
 
-    buttonFrame = Frame(self, grid=(1, 0))
+    buttonFrame = Frame(self, grid=(1, 0), setLayout=True)
     button = Button(buttonFrame, 'Save to Excel', callback=self._saveToExcel, grid=(0, 0))
     button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 1))
     button = Button(buttonFrame, 'Close', callback=self.accept, grid=(0, 2))

@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt4 import QtGui, QtCore
-
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
@@ -68,57 +67,54 @@ class PeakTable(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-
-    # if not project.peakLists:
-    #   project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
-    #   return
-
     # settingsWidget
-    self.checkBoxDict = {}
-    self._PLTSettingsWidget = GroupBox(self.settingsWidget, grid=(0, 0))
-    # columnsLabel = Label(self._PLTSettingsWidget, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
-    serialCheckLabel = Label(self._PLTSettingsWidget, text='Serial', grid=(1, 0), hAlign='r')
-    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self._PLTSettingsWidget, grid=(1, 1), hAlign='l', checked=True)
-    assignCheckLabel = Label(self._PLTSettingsWidget, text='Assign', grid=(1, 2), hAlign='r')
-    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self._PLTSettingsWidget, grid=(1, 3), hAlign='l', checked=True)
-    positionCheckLabel = Label(self._PLTSettingsWidget, text='Position', grid=(1, 4), hAlign='r')
-    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self._PLTSettingsWidget, grid=(1, 5), hAlign='l', checked=True)
-    heightCheckLabel = Label(self._PLTSettingsWidget, text='Height', grid=(1, 6), hAlign='r')
-    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self._PLTSettingsWidget, grid=(1, 7), hAlign='l', checked=True)
-    volumeCheckLabel = Label(self._PLTSettingsWidget, text='Volume', grid=(1, 8), hAlign='r')
-    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self._PLTSettingsWidget, grid=(1, 9), hAlign='l', checked=True)
-    linewidthCheckLabel = Label(self._PLTSettingsWidget, text='Line Width', grid=(1, 10), hAlign='r')
-    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self._PLTSettingsWidget, grid=(1, 11), hAlign='l', checked=False)
-    detailsCheckLabel = Label(self._PLTSettingsWidget, text='Details', grid=(1, 12), hAlign='r')
-    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self._PLTSettingsWidget, grid=(1, 13), hAlign='l', checked=True)
+    self._PLTSettingsWidget = PeakListSettingsWidget(self.settingsWidget, grid=(0,0))
 
     # mainWidget
-    # self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
+    self.peakListTable = PeakListTableWidget(parent=self.mainWidget, setLayout=True,
+                                       application=self.application, grid=(0, 0))
 
-    self.peakListTable = PeakListTable(parent=self.mainWidget, setLayout=True,
-                                       application=self.application,
-                                       actionCallback=None,
-                                       grid=(0, 0)
-                                       )
-
-
-    # if self.current.strip:
-    #   peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
-    #   self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
-
-    # for checkBox in self.checkBoxDict.values():
-    #   checkBox.toggled.connect(self.peakList.peakTable.updateTable)
 
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     #self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
-    self.peakList._deregisterNotifiers()
+    # self.peakList._deregisterNotifiers()
     self.close()
 
 
-class PeakListTable(ObjectTable):
+class PeakListSettingsWidget(GroupBox):
+  def __init__(self, parent=None, **kw):
+    GroupBox.__init__(self,parent, **kw)
+    Base.__init__(self, **kw)
+
+    self.checkBoxDict = {}
+    columnsLabel = Label(self, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
+    serialCheckLabel = Label(self, text='Serial', grid=(1, 0), hAlign='r')
+    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self, grid=(1, 1), hAlign='l',
+                                                            checked=True)
+    assignCheckLabel = Label(self, text='Assign', grid=(1, 2), hAlign='r')
+    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self, grid=(1, 3), hAlign='l',
+                                                            checked=True)
+    positionCheckLabel = Label(self, text='Position', grid=(1, 4), hAlign='r')
+    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self, grid=(1, 5), hAlign='l',
+                                                                checked=True)
+    heightCheckLabel = Label(self, text='Height', grid=(1, 6), hAlign='r')
+    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self, grid=(1, 7), hAlign='l',
+                                                            checked=True)
+    volumeCheckLabel = Label(self, text='Volume', grid=(1, 8), hAlign='r')
+    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self, grid=(1, 9), hAlign='l',
+                                                            checked=True)
+    linewidthCheckLabel = Label(self, text='Line Width', grid=(1, 10), hAlign='r')
+    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self, grid=(1, 11), hAlign='l',
+                                                                  checked=False)
+    detailsCheckLabel = Label(self, text='Details', grid=(1, 12), hAlign='r')
+    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self, grid=(1, 13), hAlign='l',
+                                                              checked=True)
+
+
+class PeakListTableWidget(ObjectTable):
 
   serialTipText   = 'Peak serial number'
   heightTipText   = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
@@ -145,7 +141,7 @@ class PeakListTable(ObjectTable):
     # create the column objects
     # self.getExtraColumns(self._project.peakLists[0])
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
-    selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
+    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects=[],

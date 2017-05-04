@@ -1,12 +1,11 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -58,13 +57,12 @@ TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
             any other undesired consequences originating from the usage of this software.
         '''
 
-class AboutPopup(ccpnDialog):
 # class AboutPopup(QtGui.QDialog):
-  def __init__(self, parent=None, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='About CcpNmr', **kw)
-
+class AboutPopup(ccpnDialog):
+  def __init__(self, parent=None, title='About CcpNmr', **kw):
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # self.setWindowTitle("About CcpNmr")
-    self.setContentsMargins(5, 5, 5, 5)
+    # self.setContentsMargins(5, 5, 5, 5)
 
     pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr.png')
     self.label = Label(self, grid=(0, 0))

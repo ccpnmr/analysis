@@ -1,30 +1,26 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-04-10 17:50:11 +0100 (Mon, April 10, 2017) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -49,18 +45,22 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Colour import spectrumColours
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
-class SpectrumPropertiesPopup(QtGui.QDialog, Base):
+# class SpectrumPropertiesPopup(QtGui.QDialog, Base):
+class SpectrumPropertiesPopup(ccpnDialog):
   # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
   # The apply button then steps through each tab, and calls each function in the _changes dictionary
   # in order to set the parameters.
 
+  def __init__(self, spectrum, parent=None
+               , title='Spectrum Properties', **kw):
+    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    # super(SpectrumPropertiesPopup, self).__init__(parent)
 
-  def __init__(self, spectrum, parent=None, **kw):
-
-    super(SpectrumPropertiesPopup, self).__init__(parent)
     layout = QtGui.QGridLayout()
     self.setLayout(layout)
     self.tabWidget = QtGui.QTabWidget()

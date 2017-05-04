@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -21,7 +20,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: skinnersp $"
-
 __date__ = "$Date: 2016-09-07 12:42:52 +0100 (Wed, 07 Sep 2016) $"
 #=========================================================================================
 # Start of code
@@ -43,11 +41,13 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 
 
-class ProjectSummaryPopup(QtGui.QDialog):
-
-  def __init__(self, project, parent=None, title='Project Summary', modal=False):
+# class ProjectSummaryPopup(QtGui.QDialog):
+class ProjectSummaryPopup(ccpnDialog):
+  def __init__(self, project, parent=None, title='Project Summary', modal=False, **kw):
+    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.project = project
 

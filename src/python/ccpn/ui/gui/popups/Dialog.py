@@ -33,6 +33,7 @@ class ccpnDialog(QtGui.QDialog, Base):
     Base.__init__(self, setLayout=setLayout, **kw)
 
     self.setWindowTitle(windowTitle)
+    self.setContentsMargins(5, 5, 5, 5)
 
     # self.mainLayout = QtGui.QGridLayout()
     # self.setLayout(self.mainLayout)

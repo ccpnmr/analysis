@@ -40,6 +40,8 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
+from ccpn.ui.gui import guiSettings
+
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
@@ -258,6 +260,8 @@ class GuiWindow():
     """
     Clears all marks in all windows for the current task.
     """
+    #TODO:WAYNE: make a method in strip: clearAtomLabels() which get called here so that is no hard encoding
+    # against non-modelled attributes.
     for mark in self.task.marks[:]:
       mark.delete()
     for spectrumDisplay in self.spectrumDisplays:
@@ -266,6 +270,32 @@ class GuiWindow():
           strip.plotWidget.removeItem(atomLabel)
         for atomLabel in strip.yAxisAtomLabels:
           strip.plotWidget.removeItem(atomLabel)
+
+  def markPositions(self, axisCodes, chemicalShifts):
+    """
+    Create marks based on the axisCodes and adds annotations where appropriate.
+    
+    :param axisCodes: The axisCodes making a mark for
+    :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
+    """
+    project = self.application.project
+    project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
+    try:
+      task = self.task
+
+      colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+      for ii, axisCode in enumerate(axisCodes):
+        for chemicalShift in chemicalShifts[ii]:
+          atomName = chemicalShift.nmrAtom.name
+          # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+          colour = colourDict.get(atomName[:min(2,len(atomName))])
+          if colour:
+            task.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
+          else:
+            task.newMark('white', [chemicalShift.value], [axisCode])
+
+    finally:
+      project._endCommandEchoBlock()
 
   def toggleGridAll(self):
     """

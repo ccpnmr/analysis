@@ -50,32 +50,33 @@ MODULE_DICT = {
                }
 
 #TODO:WAYNE: move to GuistripNd or GuiSpectrumDisplay or somewhere relevant
-def markPositions(project, axisCodes, chemicalShifts):
-  """
-  Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
-  :param project: Project instance
-  :param axisCodes: The axisCodes making a mark for
-  :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
-  """
-  project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
-  try:
-    if project._appBase.ui.mainWindow is not None:
-      mainWindow = project._appBase.ui.mainWindow
-    else:
-      mainWindow = project._appBase._mainWindow
-    task = mainWindow.task
-
-    colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
-    for ii, axisCode in enumerate(axisCodes):
-      for chemicalShift in chemicalShifts[ii]:
-        atomName = chemicalShift.nmrAtom.name
-        # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
-        colour = colourDict.get(atomName[:2])
-        if colour:
-          task.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
-        else:
-          task.newMark('white', [chemicalShift.value], [axisCode])
-
-  finally:
-    project._endCommandEchoBlock()
+# GWV moved to GuiWindow
+# def markPositions(project, axisCodes, chemicalShifts):
+#   """
+#   Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
+#   :param project: Project instance
+#   :param axisCodes: The axisCodes making a mark for
+#   :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
+#   """
+#   project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
+#   try:
+#     if project._appBase.ui.mainWindow is not None:
+#       mainWindow = project._appBase.ui.mainWindow
+#     else:
+#       mainWindow = project._appBase._mainWindow
+#     task = mainWindow.task
+#
+#     colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+#     for ii, axisCode in enumerate(axisCodes):
+#       for chemicalShift in chemicalShifts[ii]:
+#         atomName = chemicalShift.nmrAtom.name
+#         # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+#         colour = colourDict.get(atomName[:2])
+#         if colour:
+#           task.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
+#         else:
+#           task.newMark('white', [chemicalShift.value], [axisCode])
+#
+#   finally:
+#     project._endCommandEchoBlock()
 

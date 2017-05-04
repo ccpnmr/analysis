@@ -132,7 +132,8 @@ class GuiStrip(Frame):
     # A label to display the cursor positions (updated by _showMousePosition)
     self._cursorLabel = Label(parent=self._labelWidget,
                                text='',
-                               grid=(0,2), hAlign='right', vAlign='center', hPolicy='minimum')
+                               grid=(0,2), gridSpan=(1,2),
+                               hAlign='right', vAlign='center', hPolicy='minimum')
     self._stripIdLabel.setFont(textFontSmall)
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
@@ -176,8 +177,12 @@ class GuiStrip(Frame):
     self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
     self.haveSetVPhasingPivot = False
 
+    # notifier for highlighting the strip
     self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+    # Notifier for updating the peaks
     self._peakNotifier = Notifier(self.project, [Notifier.CREATE], 'Peak', self._updateDisplayedPeaks)
+    # Notifier for change of stripLabel
+    self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
@@ -194,6 +199,10 @@ class GuiStrip(Frame):
   @property
   def pythonConsole(self):
     return self.mainWindow.pythonConsole
+
+  def getStripLabel(self):
+    """Return the stripLabel widget"""
+    return self._stripLabel
 
   def setStripLabelText(self, text: str):
     """set the text of the _stripLabel"""
@@ -212,9 +221,16 @@ class GuiStrip(Frame):
     "Hide the _stripLabel; convienience"
     self._stripLabel.setVisible(False)
 
+  def _updateStripLabel(self, callbackDict):
+    "Update the striplabel if it represented a NmrResidue that has changed its id"
+    text = self.getStripLabelText()
+    if callbackDict['oldPid'] == text:
+      self.setStripLabelText(callbackDict['object'].pid)
+
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
+    self._stripLabelNotifier.unRegister()
 
   def _updateDisplayedPeaks(self, data):
     "Callback when peaks have changed"

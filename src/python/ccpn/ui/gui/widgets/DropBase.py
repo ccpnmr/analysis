@@ -73,7 +73,7 @@ class DropBase:
     'Native' treatment of CcpnModule instances
     """
 
-    # Needs to be here to prevent circular imports as CcpnModule imports sevral Widgets which import DropBase
+    # Needs to be here to prevent circular imports as CcpnModule imports several Widgets which import DropBase
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
     if isinstance(self, CcpnModule):
@@ -84,7 +84,7 @@ class DropBase:
 
       dataDict = self.parseEvent(event)
       logger.debug('Accepted drop with data:%s' % dataDict)
-      print('New-DropBase-event>', self, self.accessibleName(), dataDict)
+      print('DropBase-event>', self, 'callback:', self._dropEventCallback, 'data:', dataDict)
 
       if dataDict is not None and len(dataDict) > 1:
         event.accept()

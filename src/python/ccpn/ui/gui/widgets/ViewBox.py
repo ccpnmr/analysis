@@ -504,6 +504,7 @@ class ViewBox(pg.ViewBox):
                     #self.current.addPeak(peak)
                     peaks.append(peak)
         self.current.peaks = peaks
+
     elif controlMiddleMouse(event):
       # Control(Cmd)+middle drag: move a selected peak
 
@@ -590,7 +591,7 @@ class ViewBox(pg.ViewBox):
     ax = QtCore.QRectF(point1, point2)
     ax = self.childGroup.mapRectFromParent(ax)
     self.showAxRect(ax)
-    # This was copied from pyqtgraph viewbox, but appears a oddly
+    # GWV: This was copied from pyqtgraph viewbox, but appears a oddly
     # implemented zoom stack, which could amount to a memory leak
     #self.axHistoryPointer += 1
     #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]

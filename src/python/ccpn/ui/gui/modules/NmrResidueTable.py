@@ -27,7 +27,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -186,6 +185,7 @@ class NmrResidueTable(ObjectTable):
 
   def __init__(self, parent, application, actionCallback=None, selectionCallback=None, **kwds):
 
+    self._application = application
     self._project = application.project
     self._current = application.current
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
@@ -258,19 +258,19 @@ class NmrResidueTable(ObjectTable):
 
   def _selectionCallback(self, nmrResidue, row, col):
     "Callback for selecting a row in the table"
-    self._project._appBase.current.nmrResidue = nmrResidue
+    self._current.nmrResidue = nmrResidue
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting NmrChain"
     nmrChain = self._project.getByPid(item)
-    print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if nmrChain is not None:
       self.displayTableForNmrChain(nmrChain)
 
   def _updateCallback(self, data):
     "callback for updating the table"
     nmrChain = data['theObject']
-    print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
+    # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
     if nmrChain is not None:
       self._update(nmrChain)
 

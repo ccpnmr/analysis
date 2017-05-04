@@ -69,6 +69,10 @@ class skip1:  #StructureEnsembleTesting_None(WrapperTesting):
         'occupancy', 'bFactor',
         'nmrChainCode', 'nmrSequenceCode', 'nmrResidueName', 'nmrAtomName',
       ]
+      print ('@~@~ columns', data.columns)
+      print ('@~@~ dtypes', data.dtypes)
+      for tag in tags:
+        print ('\n\n@~@~', tag, '\n', data[tag].value_counts())
     finally:
       loadedProject.delete()
 
@@ -89,7 +93,10 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
     self.projectPath = 'CcpnCourse3e'
     super().setUp()                   # ejb - call WrapperTesting setup to load project
 
-  def test_haveEnsemble(self):
+
+  def _test_haveEnsemble(self):
+    # assert len(self.project.structureEnsembles) > 0
+    #
     self.assertGreater(len(self.project.structureEnsembles), 0)
 
     self.project._wrappedData.root.checkAllValid(complete=True)
@@ -104,9 +111,18 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
     data = self.project.structureEnsembles[0].data
     self.assertEquals(data.shape, (29680, 17))
 
+
+  def _test_getModels(self):
     models = self.project.structureEnsembles[0].models
+    # assert len(models) > 0
+    # assert len(models) == 20
+    #
     self.assertGreater(len(models), 0)
     self.assertEquals(len(models), 20)
+
+  def _test_coords(self):
+    data = self.project.structureEnsembles[0].data
+    self.assertEquals(data.shape, (29680, 17))
 
 
 #=========================================================================================
@@ -114,6 +130,9 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
 #=========================================================================================
 
 class StructureEnsembleTesting_Properties(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
 
   #=========================================================================================
   # setUp       initialise a newStructureEnsemble
@@ -218,6 +237,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
     self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
     self.testModelNumber = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+    self.testModelNumberNew = [6]*5 + [5]*4 + [4]*8 + [3]*4 + [2]*4 + [1]*8
     self.testElement = ['H'] * 4 + ['O'] * 4 + ['C'] * 4 + ['N'] * 21
     self.testFuncName = ['H'
                      ,'HB1', ' HB2', 'HB3'
@@ -240,7 +260,7 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
 
   def test_properties_structuresEnsemble_resetModels(self):
     """
-    Test structureEnsemble models attributes.
+    Test that structureEnsemble attribute .comment is populated.
     """
     self.assertEquals(list(self.data['atomName']), self.testAtomName)
 
@@ -250,3 +270,48 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     self.assertEqual(list(self.project.models[3].data['atomName']), self.testAtomName[17:21])
     self.assertEqual(list(self.project.models[4].data['atomName']), self.testAtomName[21:25])
     self.assertEqual(list(self.project.models[5].data['atomName']), self.testAtomName[25:33])
+
+  #=========================================================================================
+  # test_properties_structuresEnsemble_resetModels
+  #=========================================================================================
+
+  def test_properties_structuresEnsemble_clearData(self):
+    """
+    Test that structureEnsemble attribute .comment is populated.
+    """
+    self.assertEquals(list(self.data['atomName']), self.testAtomName)
+    self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[0:5])
+          # only the first one is okay
+
+    # self.data['modelNumber'] = self.testModelNumberNew
+    # self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[25:33])
+
+    # self.project.models[0].delete()
+    self.project.models[0].clearData()      # can use either of these delete methods
+
+  #=========================================================================================
+  # test_properties_Model
+  #=========================================================================================
+
+  def test_properties_Model_Serial(self):
+    """
+    Test that model attribute .serial is populated.
+    Requires valid modelNumber to be assigned to atoms.
+    Read the attribute, if it not populated then an error is raised.
+    """
+    self.assertEqual(self.project.models[0].serial, 1)
+
+  def test_properties_Model_Label(self):
+    """
+    Test that structureEnsemble attribute .label is populated.
+    Read the attribute, if it not populated then an error is raised.
+    If no error, then test the setter by setting and then getting to check consistent.
+    """
+    checkGetSetAttr(self, self.project.models[0], 'label', 'ValidName')
+
+  def test_properties_Model_Comment(self):
+    """
+    Test that structureEnsemble attribute .comment is populated.
+    """
+    checkGetSetAttr(self, self.project.models[0], 'comment', 'ValidComment')
+

@@ -42,7 +42,9 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 
+from ccpn.core.lib.Notifiers import Notifier
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnModule):
@@ -129,13 +131,8 @@ class PeakListTable(ObjectTable):
                ('#',         'serial',                 serialTipText  ),
                ('Height',     lambda pk: pk.height,    heightTipText  ),
                ('Volume',     lambda pk: pk.volume,    volumeTipText  ),
-               ('Comments',   lambda pk: pk.comments,  commentsTipText),
-               ('test',       lambda pk: PeakListTable.test,'' ),
+               ('Comment',   lambda pk: pk.comment,  commentsTipText),
                ]
-
-
-
-
 
 
 
@@ -146,36 +143,73 @@ class PeakListTable(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
 
     # create the column objects
+    # self.getExtraColumns(self._project.peakLists[0])
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
-    columns.append(self.getExtraColumns(self._project.peakLists[0]))
-    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
+    selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects=[],
                          autoResize=True,
-                         # actionCallback=actionCallback, selectionCallback=selectionCallback,
+                         actionCallback=actionCallback, selectionCallback=selectionCallback,
                          grid=(1, 0), gridSpan=(1, 6)
                          )
 
-    self.sampledDims = {}
+    self.ncWidget = PeakListPulldown(parent=self._widget,
+                                     project=self._project, default=0,  # first peakList in project (if present)
+                                     grid=(0, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                     callback=self._selectionPulldownCallback
+                                     )
 
-  def getExtraColumns(self, peakList):
-
-      columns = []
-      tipTexts=[]
-
-      k = 1
-      numDim = peakList.spectrum.dimensionCount
-
-      for i in range(numDim):
-          j = i + 1
-          c = ('Assign F%d' % j, lambda pk, dim=i:getPeakAnnotation(pk, dim))
-          columns.insert(k, c)
-          tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
-          k+=1
+    self._peakNotifier = None
+    self._updateSilence = False  # flag to silence updating of the table
 
 
-      return columns, tipTexts
+
+    if len(self._project.peakLists) > 0:
+      self.displayTableForPeakList(self._project.peakLists[0])
+
+
+  def _selectionPulldownCallback(self, item):
+    "Callback for selecting NmrChain"
+    pl = self._project.getByPid(item)
+    print('>selectionPulldownCallback>', item, type(item), pl)
+    if pl is not None:
+      self.displayTableForPeakList(pl)
+
+  def displayTableForPeakList(self, peakList):
+    "Display the table for all peakLists"
+
+    if self._peakNotifier is not None:
+      # we have a new peak and hence need to unregister the previous notifier
+      self._peakNotifier.unRegister()
+    # register a notifier for this peakList
+    self._peakNotifier = Notifier(peakList,
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
+                                    self._updateCallback
+                                  )
+
+    self.ncWidget.select(peakList.pid)
+    self._update(peakList)
+
+  def setUpdateSilence(self, silence):
+    "Silences/unsilences the update of the table until switched again"
+    self._updateSilence = silence
+
+  def _update(self, peakList):
+    "Update the table "
+    if not self._updateSilence:
+      self.clearTable()
+      self._silenceCallback = True
+      self.setObjects(peakList.peaks)
+      self._silenceCallback = False
+      self.show()
+
+  def _updateCallback(self, data):
+    "callback for updating the table"
+    peakList = data['theObject']
+    print('>updateCallback>', data['notifier'], peakList, data['trigger'], data['object'], self._updateSilence)
+    if peakList is not None:
+      self._update(peakList)
 
 
 class PeakListSimple(QtGui.QWidget, Base):
@@ -240,6 +274,7 @@ class PeakListSimple(QtGui.QWidget, Base):
     self.__registerNotifiers()
 
     self.peakListPulldown.activated[str].connect(self.updateSelectionOnTable)
+
 
 
 

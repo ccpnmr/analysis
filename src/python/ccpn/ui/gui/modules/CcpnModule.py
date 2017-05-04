@@ -98,27 +98,27 @@ class CcpnModule(Dock):
       #                                       scrollBarPolicies=('always','asNeeded'),
       #                                       minimumSizes=self.settingsMinimumSizes
       #                                      )
-      self._scrollArea = ScrollArea(parent=self.widgetArea)
+      self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
       self.settingsWidget = Frame(showBorder=True)
       # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
       # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
-      self._scrollArea.setWidget(self.settingsWidget)
+      self._settingsScrollArea.setWidget(self.settingsWidget)
       #self.settingsWidget.setLayout(QtGui.QGridLayout())
       self.settingsWidget.setGridLayout()
-      self._scrollArea.setWidgetResizable(True)
-      #self._scrollArea.getLayout().addWidget(self.settingsWidget)
+      self._settingsScrollArea.setWidgetResizable(True)
+      #self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)
       #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
       if self.settingsOnTop:
         # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
-        self.addWidget(self._scrollArea, 0, 0)
+        self.addWidget(self._settingsScrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
         # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
         self.addWidget(self.settingsWidget._scrollArea, 1, 0)
       # self.settingsWidget.scrollArea.hide()
-      self._scrollArea.hide()
+      self._settingsScrollArea.hide()
 
     else:
       self.settingsWidget = None
@@ -158,14 +158,14 @@ class CcpnModule(Dock):
       if self.settingsState == 0:
         self.mainWidget.show()
         # self.settingsWidget.scrollArea.hide()
-        self._scrollArea.hide()
+        self._settingsScrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
         # self.settingsWidget.scrollArea.hide()
-        self._scrollArea.show()
+        self._settingsScrollArea.show()
       elif self.settingsState == 2:
         # self.settingsWidget.scrollArea.hide()
-        self._scrollArea.hide()
+        self._settingsScrollArea.hide()
         self.mainWidget.hide()
     else:
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')

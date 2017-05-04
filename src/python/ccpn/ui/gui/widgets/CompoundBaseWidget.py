@@ -75,21 +75,32 @@ class CompoundBaseWidget(Frame):
     if len(minimumWidths) < len(self._widgets):
       raise RuntimeError('Not enough values to set minimum widths of all widgets')
     for i, width in enumerate(minimumWidths[0:len(self._widgets)]):
-      self._widgets[i].setMinimumWidth(width)
+      if width is not None:
+        self._widgets[i].setMinimumWidth(width)
 
   def setMaximumWidths(self, maximumWidths):
     "Set maximumWidths of widgets"
     if len(maximumWidths) < len(self._widgets):
       raise RuntimeError('Not enough values to set maximum widths of all widgets')
     for i, width in enumerate(maximumWidths[0:len(self._widgets)]):
-      self._widgets[i].setMaximumWidth(width)
+      if width is not None:
+        self._widgets[i].setMaximumWidth(width)
 
   def setFixedWidths(self, fixedWidths):
     "Set maximumWidths of widgets"
     if len(fixedWidths) < len(self._widgets):
-      raise RuntimeError('Not enough values to set maximum widths of all widgets')
+      raise RuntimeError('Not enough values to set fixed widths of all widgets')
     for i, width in enumerate(fixedWidths[0:len(self._widgets)]):
-      self._widgets[i].setFixedWidth(width)
+      if width is not None:
+        self._widgets[i].setFixedWidth(width)
+
+  def setFixedHeigths(self, fixedHeights):
+    "Set fixed heights of widgets"
+    if len(fixedHeights) < len(self._widgets):
+      raise RuntimeError('Not enough values to set fixed heights of all widgets')
+    for i, height in enumerate(fixedHeights[0:len(self._widgets)]):
+      if height is not None:
+        self._widgets[i].setFixedHeight(height)
 
   def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
     """

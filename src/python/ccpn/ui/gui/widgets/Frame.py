@@ -221,7 +221,7 @@ class ScrollableFrame2(Widget):
     print('>>', self._frame)
     # add it to the scrollArea
     self._scrollArea.setWidget(self._frame)
-    # self._scrollArea.setWidgetResizable(True)
+    # self._settingsScrollArea.setWidgetResizable(True)
 
     # configure the scroll area to allow all available space without margins
     self._scrollArea.setContentsMargins(0, 0, 0, 0)

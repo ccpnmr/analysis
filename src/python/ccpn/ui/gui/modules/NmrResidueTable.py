@@ -82,14 +82,15 @@ class NmrResidueTableModule(CcpnModule):
     colwidth = 140
     self.displaysWidget = ListCompoundWidget(self._NTSwidget,
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                             vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
-                                             fixedWidths=(colwidth, 140, 140),
+                                             fixedWidths=(colwidth, colwidth, colwidth),
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                              )
-    #self.displaysWidget.listWidget.setHeight(40)
+    self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
                                              self._NTSwidget,

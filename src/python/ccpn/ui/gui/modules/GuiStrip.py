@@ -133,7 +133,7 @@ class GuiStrip(Frame):
     self._cursorLabel = Label(parent=self._labelWidget,
                                text='',
                                grid=(0,2), gridSpan=(1,2),
-                               hAlign='right', vAlign='center', hPolicy='minimum')
+                               hAlign='right', vAlign='center', hPolicy='minimum', vPolicy='expanding')
     self._stripIdLabel.setFont(textFontSmall)
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this

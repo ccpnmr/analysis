@@ -183,14 +183,14 @@ class GuiSpectrumDisplay(CcpnModule):
     # #self.stripFrame.setGridLayout()
 
     # This took a lot of sorting-out; better leave as is or test thoroughly
-    self._scrollArea = ScrollArea(parent=qtParent, setLayout=False,
-                                  scrollBarPolicies = ('always', 'asNeeded')
-                                 )
+    self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
+                                            scrollBarPolicies = ('always', 'asNeeded')
+                                            )
     self.stripFrame = Frame(showBorder=True)
-    self._scrollArea.setWidget(self.stripFrame)
+    self._stripFrameScrollArea.setWidget(self.stripFrame)
     self.stripFrame.setGridLayout()
-    self._scrollArea.setWidgetResizable(True)
-    qtParent.getLayout().addWidget(self._scrollArea, 1, 0, 1, 7)
+    self._stripFrameScrollArea.setWidgetResizable(True)
+    qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(parent=qtParent,

@@ -51,14 +51,18 @@ class _StripLabel(Label):
   """
   Specific Label to be used in Strip displays
   """
-  def __init__(self, parent, text, **kwds):
+  def __init__(self, parent, text, dragKey=DropBase.TEXT, **kwds):
 
     Label.__init__(self, parent, text, **kwds)
+    """
+    The text of the label can be dragged; it will be passed on in the dict under key dragKey
+    """
     self.parent = parent
+    self._dragKey = dragKey
     self.mousePressEvent = self._mousePressEvent
     self.dragMoveEvent= self._dragMoveEvent
     self.setAcceptDrops(True)
-    #self.setDragEnabled(True) not possile for Label
+    #self.setDragEnabled(True) # not possile for Label
 
     # disable any drop event callback's until explicitly defined later
     self.setDropEventCallback(None)
@@ -77,7 +81,7 @@ class _StripLabel(Label):
     event.accept()
     mimeData = QtCore.QMimeData()
     # create the dataDict
-    dataDict = {'ids':[self.text()]}
+    dataDict = {self._dragKey:self.text()}
     # update the dataDict with all mouseEvents
     dataDict.update(getMouseEventDict(event))
     # convert into json
@@ -90,19 +94,6 @@ class _StripLabel(Label):
       pass
     else:
       self.show()
-
-  #TODO:GEERTEN: move notifier to here
-  @staticmethod
-  def _updateLabelText(nmrResidue:NmrResidue, oldPid:str):
-    """Effect rename for NmrResidueLabel
-       For notifiers
-       #CCPN INTERNAL: used in ui.gui.Gui.py to set a notifier on rename of NmrResidue  
-    """
-    #oldId = oldPid.split(Pid.PREFIXSEP, 1)[-1]
-    oldId = oldPid.id
-    for strip in nmrResidue.project.strips:
-      if strip.planeToolbar.spinSystemLabel.text() == oldId:
-        strip.planeToolbar.spinSystemLabel.setText(nmrResidue.id)
 
 
 #TODO:GEERTEN: complete this and replace

@@ -40,43 +40,57 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnModule):
+  '''
+  This class implements the module by wrapping a PeakListTable instance
+  '''
 
   includeSettingsWidget = True
   maxSettingsState = 2
   settingsOnTop = True
 
-  def __init__(self, project, mainWindow, selectedList=None):
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Peak List')
+  className = 'PeakListTableModule'
 
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.current = self.application.current
+  def __init__(self, project, mainWindow, name='PeakList Table', selectedList=None):
 
-    if not project.peakLists:
-      project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
-      return
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+    # Derive application, project, and current from mainWindow
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
+
+    # if not project.peakLists:
+    #   project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
+    #   return
 
     # settingsWidget
+    self._PLTSettingsWidget = Widget(self.settingsWidget, grid=(0, 0), vAlign='top', hAlign='left')
+
     self.checkBoxDict = {}
-    self.selectionBox = GroupBox(self.settingsWidget, grid=(0, 0))
-    columnsLabel = Label(self.selectionBox, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
-    serialCheckLabel = Label(self.selectionBox, text='Serial', grid=(1, 0), hAlign='r')
-    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self.selectionBox, grid=(1, 1), hAlign='l', checked=True)
-    assignCheckLabel = Label(self.selectionBox, text='Assign', grid=(1, 2), hAlign='r')
-    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self.selectionBox, grid=(1, 3), hAlign='l', checked=True)
-    positionCheckLabel = Label(self.selectionBox, text='Position', grid=(1, 4), hAlign='r')
-    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self.selectionBox, grid=(1, 5), hAlign='l', checked=True)
-    heightCheckLabel = Label(self.selectionBox, text='Height', grid=(1, 6), hAlign='r')
-    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self.selectionBox, grid=(1, 7), hAlign='l', checked=True)
-    volumeCheckLabel = Label(self.selectionBox, text='Volume', grid=(1, 8), hAlign='r')
-    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self.selectionBox, grid=(1, 9), hAlign='l', checked=True)
-    linewidthCheckLabel = Label(self.selectionBox, text='Line Width', grid=(1, 10), hAlign='r')
-    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self.selectionBox, grid=(1, 11), hAlign='l', checked=False)
-    detailsCheckLabel = Label(self.selectionBox, text='Details', grid=(1, 12), hAlign='r')
-    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self.selectionBox, grid=(1, 13), hAlign='l', checked=True)
+    # self._PLTSettingsWidget = GroupBox(self.settingsWidget, grid=(0, 0))
+    columnsLabel = Label(self._PLTSettingsWidget, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
+    serialCheckLabel = Label(self._PLTSettingsWidget, text='Serial', grid=(1, 0), hAlign='r')
+    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self._PLTSettingsWidget, grid=(1, 1), hAlign='l', checked=True)
+    assignCheckLabel = Label(self._PLTSettingsWidget, text='Assign', grid=(1, 2), hAlign='r')
+    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self._PLTSettingsWidget, grid=(1, 3), hAlign='l', checked=True)
+    positionCheckLabel = Label(self._PLTSettingsWidget, text='Position', grid=(1, 4), hAlign='r')
+    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self._PLTSettingsWidget, grid=(1, 5), hAlign='l', checked=True)
+    heightCheckLabel = Label(self._PLTSettingsWidget, text='Height', grid=(1, 6), hAlign='r')
+    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self._PLTSettingsWidget, grid=(1, 7), hAlign='l', checked=True)
+    volumeCheckLabel = Label(self._PLTSettingsWidget, text='Volume', grid=(1, 8), hAlign='r')
+    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self._PLTSettingsWidget, grid=(1, 9), hAlign='l', checked=True)
+    linewidthCheckLabel = Label(self._PLTSettingsWidget, text='Line Width', grid=(1, 10), hAlign='r')
+    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self._PLTSettingsWidget, grid=(1, 11), hAlign='l', checked=False)
+    detailsCheckLabel = Label(self._PLTSettingsWidget, text='Details', grid=(1, 12), hAlign='r')
+    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self._PLTSettingsWidget, grid=(1, 13), hAlign='l', checked=True)
 
     # mainWidget
     self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
@@ -85,8 +99,8 @@ class PeakTable(CcpnModule):
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 
-    for checkBox in self.checkBoxDict.values():
-      checkBox.toggled.connect(self.peakList.peakTable.updateTable)
+    # for checkBox in self.checkBoxDict.values():
+    #   checkBox.toggled.connect(self.peakList.peakTable.updateTable)
 
   def _closeModule(self):
     """
@@ -96,6 +110,24 @@ class PeakTable(CcpnModule):
     self.peakList._deregisterNotifiers()
     self.close()
 
+
+class PeakListTable(ObjectTable):
+
+  serialTipText   = 'Peak serial number'
+  heightTipText   = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
+  volumeTipText   = 'Integral of spectrum intensity around peak location, according to chosen volume method'
+  commentsTipText = 'Textual notes about the peak'
+
+
+  columnDefs = [
+               ('#',         'serial',                 serialTipText  ),
+               ('Height',     lambda pk: pk.height,    heightTipText  ),
+               ('Volume',     lambda pk: pk.volume,    volumeTipText  ),
+               ('Comments',   lambda pk: pk.comments,  commentsTipText),
+
+
+
+  ]
 
 
 class PeakListSimple(QtGui.QWidget, Base):

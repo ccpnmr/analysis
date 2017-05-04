@@ -67,45 +67,40 @@ class PeakTable(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    # settingsWidget
-    self._PLTSettingsWidget = PeakListSettingsWidget(self.settingsWidget, grid=(0,0))
 
     # mainWidget
     self.peakListTable = PeakListTableWidget(parent=self.mainWidget, setLayout=True,
-                                       application=self.application, grid=(0, 0))
+                                             application=self.application, grid=(0, 0))
+
+    # settingsWidget
+    self._PLTSettingsWidget = PeakListSettingsWidget(parent=self.settingsWidget,table=self.peakListTable, grid=(0,0))
 
 
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks"""
-    #self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
-    # self.peakList._deregisterNotifiers()
+    # TODO deregister notifiers
     self.close()
 
 
 class PeakListSettingsWidget(GroupBox):
   ''' class conteining all settings widgets for the module peakTable '''
 
-  def __init__(self, parent=None, **kw):
+  def __init__(self, table, parent=None, **kw):
     GroupBox.__init__(self,parent, **kw)
     Base.__init__(self, **kw)
 
-    self.checkBoxDict = {}
-    columnsLabel = Label(self, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
-    serialCheckLabel = Label(self, text='Serial', grid=(1, 0), hAlign='r')
-    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self, grid=(1, 1), hAlign='l',checked=True)
-    assignCheckLabel = Label(self, text='Assign', grid=(1, 2), hAlign='r')
-    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self, grid=(1, 3), hAlign='l',checked=True)
-    positionCheckLabel = Label(self, text='Position', grid=(1, 4), hAlign='r')
-    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self, grid=(1, 5), hAlign='l',checked=True)
-    heightCheckLabel = Label(self, text='Height', grid=(1, 6), hAlign='r')
-    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self, grid=(1, 7), hAlign='l',checked=True)
-    volumeCheckLabel = Label(self, text='Volume', grid=(1, 8), hAlign='r')
-    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self, grid=(1, 9), hAlign='l',checked=True)
-    linewidthCheckLabel = Label(self, text='Line Width', grid=(1, 10), hAlign='r')
-    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self, grid=(1, 11), hAlign='l',checked=False)
-    detailsCheckLabel = Label(self, text='Details', grid=(1, 12), hAlign='r')
-    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self, grid=(1, 13), hAlign='l', checked=True)
+    self.table = table
+    columns = self.table.columns
+    for i, colum in enumerate(columns):
+      CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack, hAlign='l',checked=True)
 
+  def checkBoxCallBack(self):
+    checkBox = self.sender()
+    name = checkBox.text()
+    if checkBox.isChecked():
+      self.table._showColumn(name)
+    else:
+      self.table._hideColumn(name)
 
 class PeakListTableWidget(ObjectTable):
 
@@ -125,7 +120,7 @@ class PeakListTableWidget(ObjectTable):
 
 
 
-  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, **kwds):
+  def __init__(self, parent, application, **kwds):
     self._project = application.project
     self._current = application.current
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
@@ -134,39 +129,58 @@ class PeakListTableWidget(ObjectTable):
     # create the column objects
     # self.getExtraColumns(self._project.peakLists[0])
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
-    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
-    # create the table; objects are added later via the displayTableForNmrChain method
+
+    # create the table; objects are added later via the displayTableForPeakList method
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects=[],
-                         autoResize=True,
-                         actionCallback=actionCallback, selectionCallback=selectionCallback,
-                         grid=(1, 0), gridSpan=(1, 6)
-                         )
-
+                         autoResize=True, multiSelect=True,
+                         actionCallback=self._actionCallback, selectionCallback=self._selectionCallback,
+                         grid=(1, 0), gridSpan=(1, 6))
+    gridHPos = 0
     self.ncWidget = PeakListPulldown(parent=self._widget,
                                      project=self._project, default=0,  # first peakList in project (if present)
-                                     grid=(0, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                     grid=(0, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      callback=self._selectionPulldownCallback
                                      )
+    gridHPos+=1
+    self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
+    gridHPos += 1
+    self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=None,
+                                        grid=(0, gridHPos))
+    self.posUnitPulldown.setDisabled(True) #TODO
 
     self._peakNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
 
-
-
     if len(self._project.peakLists) > 0:
       self.displayTableForPeakList(self._project.peakLists[0])
+
+    # register current notifier to select on the table the current peaks
+    self._current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
+
+  def _updateColumns(self, peakList):
+    # self._hideColumn('Volume')
+    pass
+
+  def _hideColumn(self, name):
+    self.hideColumn(self.getColumnInt(columnName=name))
+
+  def _showColumn(self, name):
+    self.showColumn(self.getColumnInt(columnName=name))
 
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting NmrChain"
-    pl = self._project.getByPid(item)
-    print('>selectionPulldownCallback>', item, type(item), pl)
-    if pl is not None:
-      self.displayTableForPeakList(pl)
+    peakList = self._project.getByPid(item)
+    if peakList is not None:
+      self.displayTableForPeakList(peakList)
+      self._selectOnTableCurrentPeaks(currentPeaks=self._current.peaks)
 
   def displayTableForPeakList(self, peakList):
     "Display the table for all peakLists"
+
+    # update the columns table based on the spectrum dim
+    self._updateColumns(peakList)
 
     if self._peakNotifier is not None:
       # we have a new peak and hence need to unregister the previous notifier
@@ -196,9 +210,39 @@ class PeakListTableWidget(ObjectTable):
   def _updateCallback(self, data):
     "callback for updating the table"
     peakList = data['theObject']
-    print('>updateCallback>', data['notifier'], peakList, data['trigger'], data['object'], self._updateSilence)
     if peakList is not None:
       self._update(peakList)
+
+  def _actionCallback(self, peak, *args):
+    ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+
+    if self._current.strip is not None:
+        navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
+    else:
+      self._project._logger.warn('Impossible to navigate to peak position. Set a current strip first')
+
+
+  def _selectionCallback(self, peaks, *args):
+    """
+    set as current the selected peaks on the table
+    """
+    if peaks is None:
+      self._current.clearPeaks()
+    else:
+      self._current.peaks = peaks
+
+  def _selectOnTableCurrentPeaks(self, currentPeaks):
+    ''' highlight current peaks on the opened peak table '''
+
+    if len(currentPeaks)>0:
+      self._highLightObjs(currentPeaks)
+    else:
+      self.clearSelection()
+
+
+
+
 
 
 class PeakListSimple(QtGui.QWidget, Base):

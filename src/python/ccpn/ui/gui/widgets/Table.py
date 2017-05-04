@@ -549,7 +549,10 @@ class ObjectTable(QtGui.QTableView, Base):
 
       self.setFocus(QtCore.Qt.OtherFocusReason)
 
-
+  def getColumnInt(self, columnName):
+    for i, column in enumerate(self.columns):
+      if column.heading == columnName:
+        return i
 
   def setupHeaderStretch(self):
 

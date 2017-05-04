@@ -72,11 +72,9 @@ class PeakTable(CcpnModule):
     #   return
 
     # settingsWidget
-    self._PLTSettingsWidget = Widget(self.settingsWidget, grid=(0, 0), vAlign='top', hAlign='left')
-
     self.checkBoxDict = {}
-    # self._PLTSettingsWidget = GroupBox(self.settingsWidget, grid=(0, 0))
-    columnsLabel = Label(self._PLTSettingsWidget, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
+    self._PLTSettingsWidget = GroupBox(self.settingsWidget, grid=(0, 0))
+    # columnsLabel = Label(self._PLTSettingsWidget, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
     serialCheckLabel = Label(self._PLTSettingsWidget, text='Serial', grid=(1, 0), hAlign='r')
     serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self._PLTSettingsWidget, grid=(1, 1), hAlign='l', checked=True)
     assignCheckLabel = Label(self._PLTSettingsWidget, text='Assign', grid=(1, 2), hAlign='r')
@@ -93,11 +91,18 @@ class PeakTable(CcpnModule):
     detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self._PLTSettingsWidget, grid=(1, 13), hAlign='l', checked=True)
 
     # mainWidget
-    self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
+    # self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
 
-    if self.current.strip:
-      peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
-      self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
+    self.peakListTable = PeakListTable(parent=self.mainWidget, setLayout=True,
+                                       application=self.application,
+                                       actionCallback=None,
+                                       grid=(0, 0)
+                                       )
+
+
+    # if self.current.strip:
+    #   peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
+    #   self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 
     # for checkBox in self.checkBoxDict.values():
     #   checkBox.toggled.connect(self.peakList.peakTable.updateTable)
@@ -120,14 +125,57 @@ class PeakListTable(ObjectTable):
 
 
   columnDefs = [
+
                ('#',         'serial',                 serialTipText  ),
                ('Height',     lambda pk: pk.height,    heightTipText  ),
                ('Volume',     lambda pk: pk.volume,    volumeTipText  ),
                ('Comments',   lambda pk: pk.comments,  commentsTipText),
+               ('test',       lambda pk: PeakListTable.test,'' ),
+               ]
 
 
 
-  ]
+
+
+
+
+  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, **kwds):
+    self._project = application.project
+    self._current = application.current
+    kwds['setLayout'] = True  ## Assure we have a layout with the widget
+    self._widget = Widget(parent=parent, **kwds)
+
+    # create the column objects
+    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns.append(self.getExtraColumns(self._project.peakLists[0]))
+    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
+    # create the table; objects are added later via the displayTableForNmrChain method
+    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
+                         columns=columns, objects=[],
+                         autoResize=True,
+                         # actionCallback=actionCallback, selectionCallback=selectionCallback,
+                         grid=(1, 0), gridSpan=(1, 6)
+                         )
+
+    self.sampledDims = {}
+
+  def getExtraColumns(self, peakList):
+
+      columns = []
+      tipTexts=[]
+
+      k = 1
+      numDim = peakList.spectrum.dimensionCount
+
+      for i in range(numDim):
+          j = i + 1
+          c = ('Assign F%d' % j, lambda pk, dim=i:getPeakAnnotation(pk, dim))
+          columns.insert(k, c)
+          tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
+          k+=1
+
+
+      return columns, tipTexts
 
 
 class PeakListSimple(QtGui.QWidget, Base):

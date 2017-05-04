@@ -368,14 +368,30 @@ class GuiSpectrumDisplay(CcpnModule):
   def _restoreZoom(self):
     """Restores last saved zoom of current strip."""
     try:
-      self.current.strip._restoreZoom()         # ejb - could be empty strip
+      if not self.current.strip:
+        showWarning('Restore Zoom', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Restore Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+      else:
+        self.current.strip._restoreZoom()         # ejb - could be empty strip
     except:
       pass
 
   def _storeZoom(self):
     """Saves zoomed region of current strip."""
     try:
-      self.current.strip._storeZoom()         # ejb - could be empty strip
+      if not self.current.strip:
+        showWarning('Store Zoom', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Store Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+      else:
+        self.current.strip._storeZoom()         # ejb - could be empty strip
     except:
       pass
 

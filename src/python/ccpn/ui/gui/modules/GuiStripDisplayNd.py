@@ -33,6 +33,7 @@ from ccpn.ui.gui.modules import GuiPeakListView
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 
 from ccpn.util.Logging import getLogger
 
@@ -102,6 +103,17 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Increases contour base level for all spectra visible in the display.
     """
+    try:
+      if not self.current.strip:
+        showWarning('Raise Contour Base', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Raise Contour Base', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+    except:
+      return
+
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         spectrum = spectrumView.spectrum
@@ -140,6 +152,17 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Decreases contour base level for all spectra visible in the display.
     """
+    try:
+      if not self.current.strip:
+        showWarning('Lower Contour Base', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Lower Contour Base', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+    except:
+      return
+
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         spectrum = spectrumView.spectrum
@@ -178,6 +201,17 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Increases number of contours by 1 for all spectra visible in the display.
     """
+    try:
+      if not self.current.strip:
+        showWarning('Add Contour Level', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Add Contour Level', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+    except:
+      return
+
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         spectrum = spectrumView.spectrum
@@ -212,6 +246,17 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Decreases number of contours by 1 for all spectra visible in the display.
     """
+    try:
+      if not self.current.strip:
+        showWarning('Remove Contour Level', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Remove Contour Level', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+    except:
+      return
+
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         spectrum = spectrumView.spectrum

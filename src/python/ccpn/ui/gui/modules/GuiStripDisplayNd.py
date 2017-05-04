@@ -87,7 +87,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       ('+1',           'icons/contour-add',    'Add one contour level',     True,     self.addContourLevel),
       ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
       ('*1.4',         'icons/contour-base-up','Raise Contour Base Level',  True,     self.raiseContourBase),
-      ('/1.4',         'icons/contour-base-up','Lower Contour Base Level',  True,     self.lowerContourBase),
+      ('/1.4',         'icons/contour-base-down','Lower Contour Base Level',  True,     self.lowerContourBase),
       ('Store Zoom',   'icons/zoom-store',     'Store Zoom',                True,     self._storeZoom),
       ('Restore Zoom', 'icons/zoom-restore',   'Restore Zoom',              True,     self._restoreZoom)
     ]

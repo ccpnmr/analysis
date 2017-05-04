@@ -39,7 +39,7 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -156,7 +156,7 @@ class GuiStripNd(GuiStrip):
     # Adds the plane toolbar to the strip.
     callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
     self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
-                                     grid=(0,1), hPolicy='minimum', hAlign='center', vAlign='center')
+                                     grid=(0,0), hPolicy='minimum', hAlign='center', vAlign='center')
     #self._stripToolBarWidget.addWidget(self.planeToolbar)
     #self.planeToolBar.hide()
     # test

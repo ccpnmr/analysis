@@ -71,21 +71,27 @@ POLICY_DICT = {
 
 class Base(DropBase):
 
-  def __init__(self, tipText=None,
-                     setLayout=False,
-                     hPolicy=None, vPolicy=None,
+  def __init__(self, isFloatWidget=False,
+                     tipText=None,
                      bgColor=None, fgColor=None,
-                     isFloatWidget=False,
-                     acceptDrops=False,
+
+                     # keywords related to optional layout
+                     setLayout=False,
+                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(0,0),
+
+                     # keywords for adding to parent
                      grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                      hAlign=None, vAlign=None,
+
+                     # keywords related to dropable properties
+                     acceptDrops=False,
                ):
     """
     
     :param tipText:  add tiptext to widget
     :param grid:     insert widget at (row,col) of parent layout (if available)
     :param gridSpan: extend widget over (rows,cols); default (1,1)
-    :param stretch:  stretch (row,col) of widget (True/False); default (False,False)
+    :param stretch:  stretch factor (row,col) of widget; default (0, 0)
     :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)
     :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)
     :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
@@ -123,7 +129,7 @@ class Base(DropBase):
       self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  fgColor)
 
     if setLayout:
-      self.setGridLayout()
+      self.setGridLayout(margins=margins, spacing=spacing)
 
     # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
     # or grid[1] (vertical) are defined
@@ -131,14 +137,15 @@ class Base(DropBase):
       self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                         hAlign=hAlign, vAlign=vAlign)
 
-  def setGridLayout(self):
+  def setGridLayout(self, margins=(0,0,0,0), spacing=(0,0)):
     "Add a QGridlayout to self"
     layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
                                     # layout, we are going to add one
     if layout is None:
       layout = QtGui.QGridLayout(self)
-      layout.setContentsMargins(0, 0, 0, 0)
-      layout.setSpacing(0)
+      layout.setContentsMargins(*margins)
+      layout.setHorizontalSpacing(spacing[0])
+      layout.setVerticalSpacing(spacing[1])
       self.setLayout(layout)
     else:
       getLogger().warning('Widget %s already has a layout!' % self)
@@ -147,7 +154,7 @@ class Base(DropBase):
     "return the layout of self"
     layout = self._getLayout(self)
     if layout is None:
-      getLogger().warning('Unable to query layout of %s', self)
+      getLogger().warning('Unable to query layout of %s' % self)
     return layout
 
   @staticmethod
@@ -191,7 +198,7 @@ class Base(DropBase):
   def _getRowCol(layout, grid):
     "Returns (row, col) tuple from layout, using grid or using current rowCount"
     if layout is None:
-      getLogger().warning('Layout of widget %s is None, cannot get (row, col) tuple', self)
+      getLogger().warning('Layout is None, cannot get (row, col) tuple')
       return (0, 0)
     if grid:
       row, col = grid

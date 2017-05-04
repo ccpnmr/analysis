@@ -73,39 +73,49 @@ class NmrResidueTableModule(CcpnModule):
 
     # settings
 
+    # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
+    # backBoneAssignment modules
+    self._NTSwidget = Widget(self.settingsWidget, grid=(0,0), vAlign='top', hAlign='left')
+    #self._NTSwidget = self.settingsWidget
+
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
-    colwidth = 80
-    self.displaysWidget = ListCompoundWidget(self.settingsWidget, grid=(0,0), vAlign='top',
+    colwidth = 140
+    self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+                                             grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0, 0),
-                                             maximumWidths=(colwidth, colwidth, colwidth),
+                                             fixedWidths=(colwidth, 140, 140),
                                              orientation = 'left',
-                                             labelText="Display module(s):",
+                                             labelText='Display(s):',
+                                             tipText = 'SpectrumDisplay modules to respond to double-click',
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                              )
     #self.displaysWidget.listWidget.setHeight(40)
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                                             self.settingsWidget, grid=(1,0), vAlign='top',
+                                             self._NTSwidget,
+                                             grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
-                                             maximumWidths=(colwidth, 30),
+                                             fixedWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Show sequential strips:',
                                              checked = False
                                             )
 
     self.markPositionsWidget = CheckBoxCompoundWidget(
-                                             self.settingsWidget, grid=(2,0), vAlign='top',
+                                             self._NTSwidget,
+                                             grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
-                                             maximumWidths=(colwidth, 30),
+                                             fixedWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Mark positions:',
                                              checked = True
                                             )
     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                                             self.settingsWidget, grid=(3,0), vAlign='top',
+                                             self._NTSwidget,
+                                             grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
-                                             maximumWidths=(colwidth, 30),
+                                             fixedWidths=(colwidth, 30),
                                              orientation = 'left',
                                              labelText = 'Auto clear marks:',
                                              checked = True

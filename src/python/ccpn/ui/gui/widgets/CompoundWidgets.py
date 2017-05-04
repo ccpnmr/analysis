@@ -40,7 +40,9 @@ logger = getLogger()
 
 class ListCompoundWidget(CompoundBaseWidget):
   """
-  Compound class comprising a Label and a PulldownList, and a ListWidget, combined in a CompoundBaseWidget (i.e.a Frame)
+  Compound class comprising a Label, a PulldownList, and a ListWidget, combined in a 
+  CompoundBaseWidget (i.e.a Frame)
+  
   NB: can also be used as only a Label and a ListWidget by hiding the Pulldown:
         myWidget.showPulldownList(False)
 
@@ -80,8 +82,10 @@ class ListCompoundWidget(CompoundBaseWidget):
     horizontal  = [(0, 0), (0, 1), (0, 2)],
   )
 
-  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
-               labelText='', texts=None, callback=None, defaults=None, uniqueList=True, **kwds):
+  def __init__(self, parent=None, showBorder=False, orientation='left',
+                     minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                     labelText='', texts=None, callback=None,
+                     defaults=None, uniqueList=True, **kwds):
     """
     :param parent: parent widget
     :param showBorder: flag to display the border of Frame (True, False)
@@ -89,8 +93,10 @@ class ListCompoundWidget(CompoundBaseWidget):
                         Allowed values: 'left', 'right', 'top', 'bottom', 'centreLeft, centreRight, horizontal
     :param minimumWidths: tuple of three values specifying the minimum width of the Label, Pulldown and ListWidget, 
                           respectively
-    :param maximumWidths: tuple of two values specifying the maximum width of the Label and Pulldown and ListWidget, 
+    :param maximumWidths: tuple of three values specifying the maximum width of the Label and Pulldown and ListWidget, 
                           respectively
+    :param fixedWidths: tuple of three values specifying the maximum width of the Label and Pulldown and ListWidget, 
+                        respectively
     :param labelText: Text for the Label
     :param texts: (optional) iterable generating text values for the Pulldown
     :param callback: (optional) callback for the Pulldown
@@ -123,6 +129,9 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     if maximumWidths is not None:
       self.setMinimumWidths(maximumWidths)
+
+    if fixedWidths is not None:
+      self.setFixedWidths(fixedWidths)
 
   def showPulldownList(self, show):
     if show:
@@ -187,7 +196,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left',
+               minimumWidths=None, maximumWidths=None, fixedWidths=None,
                labelText='', texts=None, callback=None, default=None, **kwds):
     """
     :param parent: parent widget
@@ -230,6 +240,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
     if maximumWidths is not None:
       self.setMinimumWidths(maximumWidths)
+
+    if fixedWidths is not None:
+      self.setFixedWidths(fixedWidths)
 
   def getText(self):
     "Convenience: Return selected text in Pulldown"
@@ -291,7 +304,8 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left',
+               minimumWidths=None, maximumWidths=None, fixedWidths=None,
                labelText='', text='', callback=None, checked=False, **kwds):
     """
     :param parent: parent widget
@@ -323,6 +337,9 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     if maximumWidths is not None:
       self.setMaximumWidths(maximumWidths)
 
+    if fixedWidths is not None:
+      self.setFixedWidths(fixedWidths)
+
   def isChecked(self):
     "Convenience: Return whether checkBox is checked"
     return self.checkBox.isChecked()
@@ -353,7 +370,8 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     bottom = [(1, 0), (0, 0)],
   )
 
-  def __init__(self, parent=None, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+  def __init__(self, parent=None, showBorder=False, orientation='left',
+               minimumWidths=None, maximumWidths=None, fixedWidths=None,
                labelText='', value=None, range=(None,None), step=None, showButtons=True,
                decimals=None, callback=None, **kwds):
     """
@@ -392,6 +410,9 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
 
     if maximumWidths is not None:
       self.setMinimumWidths(maximumWidths)
+
+    if fixedWidths is not None:
+      self.setFixedWidths(fixedWidths)
 
   def getValue(self)-> float:
     "get the value from the DoubleSpinBox"

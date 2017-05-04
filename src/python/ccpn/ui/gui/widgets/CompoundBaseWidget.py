@@ -84,6 +84,13 @@ class CompoundBaseWidget(Frame):
     for i, width in enumerate(maximumWidths[0:len(self._widgets)]):
       self._widgets[i].setMaximumWidth(width)
 
+  def setFixedWidths(self, fixedWidths):
+    "Set maximumWidths of widgets"
+    if len(fixedWidths) < len(self._widgets):
+      raise RuntimeError('Not enough values to set maximum widths of all widgets')
+    for i, width in enumerate(fixedWidths[0:len(self._widgets)]):
+      self._widgets[i].setFixedWidth(width)
+
   def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
     """
     Add and store a notifier with widget; 

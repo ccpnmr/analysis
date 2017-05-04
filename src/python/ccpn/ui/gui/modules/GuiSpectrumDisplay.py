@@ -45,6 +45,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
@@ -146,47 +147,50 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # self.mainWidget will be the parent of all the subsequent widgets
     qtParent = self.mainWidget
-    # print('GuiSpectrumDisplay>> self.parent(), self.parent().layout:', self.parent(), self.parent().layout)
-    # print('GuiSpectrumDisplay>> qtParent, qtParent.getLayout():', qtParent, qtParent.getLayout())
 
     # GWV: Not sure what the widget argument is for
     self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self,
-                                           grid=(0, 0), gridSpan=(1, 4))
-    #qtParent.getLayout().addWidget(self.spectrumToolBar, 0, 0, 1, 4)
+                                           grid=(0, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
 
-    #layout.addWidget(self.spectrumToolBar, 0, 0)
-    # screenWidth = QtGui.QApplication.desktop().screenGeometry().width()
-    # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
-    #self.resize(self.sizeHint())
-
-    # Utilities Toolbar; filled later-on!?
+    # Utilities Toolbar; filled in Nd/1d classes
     self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(32,32),
-                                       grid=(0, 4), gridSpan=(1, 2), hPolicy='minimal', hAlign='right')
+                                       grid=(0, 6), gridSpan=(1, 1),
+                                       hPolicy='minimal', hAlign='right')
     #self.spectrumUtilToolBar.setFixedWidth(150)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
-    # grid=(0, 2), gridSpan=(1, 1))
     if self.application.preferences.general.showToolbar:
       self.spectrumUtilToolBar.show()
     else:
       self.spectrumUtilToolBar.hide()
 
     # position box
-    self.positionBox = Label(parent=qtParent, grid=(0,6))
+    # self.positionBox = Label(parent=qtParent, grid=(0,6))
 
-    # scroll area
-    self.stripFrame = ScrollableWidget(parent=qtParent, setLayout=True,
-                                       hPolicy='expanding', vPolicy='expanding',
-                                       scrollBarPolicies = ('always', 'asNeeded')
-                                      )
-    # We want to add the scroll area, to the qtParent, not the stripFrame
-    # (which lives inside the scrollArea)
-    qtParent.getLayout().addWidget(self.stripFrame.getScrollArea(), 1, 0, 1, 7)
-    # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
-    #                                    setLayout=True,
+    # scroll area for strips
+
+    # self.stripFrame = ScrollableWidget(parent=qtParent, setLayout=True,
     #                                    hPolicy='expanding', vPolicy='expanding',
+    #                                    scrollBarPolicies = ('always', 'asNeeded')
     #                                   )
-    #self.stripFrame.setGridLayout()
+    # # We want to add the scroll area, to the qtParent, not the stripFrame
+    # # (which lives inside the scrollArea)
+    # qtParent.getLayout().addWidget(self.stripFrame.getScrollArea(), 1, 0, 1, 7)
+    # # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
+    # #                                    setLayout=True,
+    # #                                    hPolicy='expanding', vPolicy='expanding',
+    # #                                   )
+    # #self.stripFrame.setGridLayout()
+
+    # This took a lot of sorting-out; better leave as is or test thoroughly
+    self._scrollArea = ScrollArea(parent=qtParent, setLayout=False,
+                                  scrollBarPolicies = ('always', 'asNeeded')
+                                 )
+    self.stripFrame = Frame(showBorder=True)
+    self._scrollArea.setWidget(self.stripFrame)
+    self.stripFrame.setGridLayout()
+    self._scrollArea.setWidgetResizable(True)
+    qtParent.getLayout().addWidget(self._scrollArea, 1, 0, 1, 7)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(parent=qtParent,

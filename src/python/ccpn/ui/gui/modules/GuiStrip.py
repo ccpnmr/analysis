@@ -80,7 +80,7 @@ class GuiStrip(Frame):
     # GWV:passing spectrumDisplay.stripFrame to the widget stops the PlotWidget filling all available space
     #TODO:GEERTEN: find cause and fix this
 
-    Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=True,
+    Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
                          acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
                   )
 
@@ -88,7 +88,7 @@ class GuiStrip(Frame):
     # the Widget will not fill all available space
     self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
-    self.setContentsMargins(0, 0, 0, 0)
+    self.setContentsMargins(5, 0, 5, 0)
     self.setMinimumWidth(250)
     self.setMinimumHeight(200)
 
@@ -99,19 +99,20 @@ class GuiStrip(Frame):
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
     self.getLayout().addWidget(self.plotWidget, 1, 0)
 
-    # Widgets for toolbar; items will be added by GuiStripNd and GuiStrip1d
+    # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
+    # and GuiStrip1d
     self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                       hPolicy='expanding',
                                       grid=(2, 0)
                                       )
-    self._stripToolBarWidget.setFixedHeight(20)
+    self._stripToolBarWidget.setFixedHeight(30)
 
     # Widgets for _stripIdLabel and _stripLabel
     self._labelWidget = Widget(parent=self, setLayout=True,
                                      hPolicy='expanding', vAlign='center',
                                      grid=(0, 0)
                                     )
-    self._labelWidget.setFixedHeight(20)
+    self._labelWidget.setFixedHeight(34)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
@@ -124,9 +125,15 @@ class GuiStrip(Frame):
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='test',
-                                   grid=(0,1), hAlign='left', vAlign='center', hPolicy='minimum')
+                                   grid=(2,0), hAlign='left', vAlign='center', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
     self.hideStripLabel()
+
+    # A label to display the cursor positions (updated by _showMousePosition)
+    self._cursorLabel = Label(parent=self._labelWidget,
+                               text='',
+                               grid=(0,2), hAlign='right', vAlign='center', hPolicy='minimum')
+    self._stripIdLabel.setFont(textFontSmall)
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -504,7 +511,8 @@ class GuiStrip(Frame):
       format = "%s: %.3f  %s: %.4g"
     else:
       format = "%s: %.2f  %s: %.2f"
-    self.spectrumDisplay.positionBox.setText(format %
+
+    self._cursorLabel.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
 

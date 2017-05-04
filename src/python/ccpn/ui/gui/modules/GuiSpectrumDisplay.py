@@ -367,12 +367,18 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def _restoreZoom(self):
     """Restores last saved zoom of current strip."""
-    self.current.strip._restoreZoom()
+    try:
+      self.current.strip._restoreZoom()         # ejb - could be empty strip
+    except:
+      pass
 
   def _storeZoom(self):
     """Saves zoomed region of current strip."""
-    self.current.strip._storeZoom()
-    
+    try:
+      self.current.strip._storeZoom()         # ejb - could be empty strip
+    except:
+      pass
+
   def toggleCrossHair(self):
     """Toggles whether cross hair is displayed in all strips of spectrum display."""
     # toggle crosshairs for strips in this spectrumDisplay

@@ -68,7 +68,7 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
                                        , self.spectrumDisplayIds
                                        , direction='v'
                                        , setLayout=True)
-    # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self.scrollArea, project, setLayout=True)
+    # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
     self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
                                 texts=['Cancel', 'Select Display'])
 
@@ -117,12 +117,12 @@ class SelectSpectrumDisplayPopup(ccpnDialog):
 #     filePathLabel = Label(self, 'Image Path', grid=(1, 0))
 #     self.filePathLineEdit = LineEdit(self, grid=(1, 1))
 #     self.pathButton = Button(self, grid=(1, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
-#     scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2))
+#     _sequenceGraphScrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2))
 #
 #     self.project = project
-#     self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(scrollArea, project)
-#     scrollArea.setWidgetResizable(True)
-#     scrollArea.setWidget(self.spectrumSelectionWidget)
+#     self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(_sequenceGraphScrollArea, project)
+#     _sequenceGraphScrollArea.setWidgetResizable(True)
+#     _sequenceGraphScrollArea.setWidget(self.spectrumSelectionWidget)
 #
 #     self.buttonBox = ButtonList(self, grid=(5, 1), callbacks=[self.reject, self.printSpectrum],
 #                                 texts=['Cancel', 'Print Display'], gridSpan=(1, 2))

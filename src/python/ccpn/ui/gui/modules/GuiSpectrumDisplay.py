@@ -154,7 +154,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.spectrumToolBar.setFixedHeight(30)
 
     # Utilities Toolbar; filled in Nd/1d classes
-    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(32,32),
+    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(24,24),
                                        grid=(0, 6), gridSpan=(1, 1),
                                        hPolicy='minimal', hAlign='right')
     #self.spectrumUtilToolBar.setFixedWidth(150)
@@ -164,24 +164,7 @@ class GuiSpectrumDisplay(CcpnModule):
     else:
       self.spectrumUtilToolBar.hide()
 
-    # position box
-    # self.positionBox = Label(parent=qtParent, grid=(0,6))
-
     # scroll area for strips
-
-    # self.stripFrame = ScrollableWidget(parent=qtParent, setLayout=True,
-    #                                    hPolicy='expanding', vPolicy='expanding',
-    #                                    scrollBarPolicies = ('always', 'asNeeded')
-    #                                   )
-    # # We want to add the scroll area, to the qtParent, not the stripFrame
-    # # (which lives inside the scrollArea)
-    # qtParent.getLayout().addWidget(self.stripFrame.getScrollArea(), 1, 0, 1, 7)
-    # # self.stripFrame = Widget(parent=qtParent, grid=(1, 0), gridSpan=(1, 7),
-    # #                                    setLayout=True,
-    # #                                    hPolicy='expanding', vPolicy='expanding',
-    # #                                   )
-    # #self.stripFrame.setGridLayout()
-
     # This took a lot of sorting-out; better leave as is or test thoroughly
     self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
                                             scrollBarPolicies = ('always', 'asNeeded')

@@ -117,7 +117,7 @@ class CcpnModule(Dock):
         self.addWidget(self.mainWidget, 0, 0)
         # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
         self.addWidget(self.settingsWidget._scrollArea, 1, 0)
-      # self.settingsWidget.scrollArea.hide()
+      # self.settingsWidget._sequenceGraphScrollArea.hide()
       self._settingsScrollArea.hide()
 
     else:
@@ -157,14 +157,14 @@ class CcpnModule(Dock):
       self.settingsState = (self.settingsState + 1) % self.maxSettingsState
       if self.settingsState == 0:
         self.mainWidget.show()
-        # self.settingsWidget.scrollArea.hide()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
         self._settingsScrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
-        # self.settingsWidget.scrollArea.hide()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
         self._settingsScrollArea.show()
       elif self.settingsState == 2:
-        # self.settingsWidget.scrollArea.hide()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
         self._settingsScrollArea.hide()
         self.mainWidget.hide()
     else:

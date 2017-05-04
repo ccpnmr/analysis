@@ -69,9 +69,9 @@ class ScrollableWidget(Widget):
     # initialise the frame
     Widget.__init__(self, parent=self.scrollArea, setLayout=setLayout, **kwds)
     # self.setMinimumSizes(minimumSizes) ## This make things go wrong!?
-    # add it to the scrollArea
+    # add it to the _sequenceGraphScrollArea
     self.scrollArea.setWidget(self)
-    #self.scrollArea.getLayout().addWidget(self)
+    #self._sequenceGraphScrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)

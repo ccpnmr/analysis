@@ -64,7 +64,7 @@ class ShortcutModule(CcpnModule):
     self.setStyleSheet('ScrollArea > QWidget {background-color: #00092d}')
 
 
-    # self.scrollArea.layout().addWidget(self.shortcutWidget)
+    # self._sequenceGraphScrollArea.layout().addWidget(self.shortcutWidget)
 
   def save(self):
     newShortcuts = self.shortcutWidget.getShortcuts()

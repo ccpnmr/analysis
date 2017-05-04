@@ -169,17 +169,17 @@ class ScrollableFrame(Frame):
                          showBorder=showBorder, fShape = fShape, fShadow = fShadow,
                          **kwds
                   )
-    # add it to the scrollArea
+    # add it to the _sequenceGraphScrollArea
     self.scrollArea.setWidget(self)
     self.scrollArea.getLayout().addWidget(self)
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
     self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    #self.scrollArea.setWidgetResizable(True)
+    #self._sequenceGraphScrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
     # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
-    # self.scrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+    # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
     self.show()
 
   def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
@@ -219,7 +219,7 @@ class ScrollableFrame2(Widget):
                        )
 
     print('>>', self._frame)
-    # add it to the scrollArea
+    # add it to the _sequenceGraphScrollArea
     self._scrollArea.setWidget(self._frame)
     # self._settingsScrollArea.setWidgetResizable(True)
 
@@ -227,7 +227,7 @@ class ScrollableFrame2(Widget):
     self._scrollArea.setContentsMargins(0, 0, 0, 0)
     self._scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     self.setScrollBarPolicies(scrollBarPolicies)
-    # self.scrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+    # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
     #self.show()
 
   def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):

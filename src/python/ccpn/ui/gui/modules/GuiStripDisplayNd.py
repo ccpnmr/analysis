@@ -100,7 +100,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       if icon is not None:
         ic = Icon(icon)
         action.setIcon(ic)
-        self._spectrumUtilActions[aName] = action
+      self._spectrumUtilActions[aName] = action
 
   def raiseContourBase(self):
     """

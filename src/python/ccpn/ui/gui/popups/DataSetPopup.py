@@ -31,12 +31,12 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import ccpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 # class DataSetPopup(QtGui.QDialog, Base):
-class DataSetPopup(ccpnDialog):
+class DataSetPopup(CcpnDialog):
   def __init__(self, parent=None, dataSet=None, title='DataSet', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(DataSetPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 

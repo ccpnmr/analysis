@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -46,11 +46,11 @@ SEP = ', '
 
 
 # class SubstancePropertiesPopup(QtGui.QDialog):
-class SubstancePropertiesPopup(ccpnDialog):
+class SubstancePropertiesPopup(CcpnDialog):
   def __init__(self, substance=None, project=None, parent=None
                , sampleComponent=None, newSubstance=False
                , title='Substance Properties', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(SubstancePropertiesPopup, self).__init__(parent)
 
     self.project = project

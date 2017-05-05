@@ -38,14 +38,14 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
 # class PreferencesPopup(QtGui.QDialog, Base):
-class PreferencesPopup(ccpnDialog):
+class PreferencesPopup(CcpnDialog):
   def __init__(self, parent=None, preferences=None, project=None, title='Preferences', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(PreferencesPopup, self).__init__(parent)
     # Base.__init__(self, setLayout=True, **kw)
 

@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
@@ -47,9 +47,9 @@ SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
 AMOUNT_UNIT = ['L', 'g', 'mole']
 
 # class SamplePropertiesPopup(QtGui.QDialog):
-class SamplePropertiesPopup(ccpnDialog):
+class SamplePropertiesPopup(CcpnDialog):
   def __init__(self, sample, parent=None, project=None, title='Sample Properties', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(SamplePropertiesPopup, self).__init__(parent)
 
     self.project = project

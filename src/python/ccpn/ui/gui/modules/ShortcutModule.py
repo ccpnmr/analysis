@@ -37,26 +37,31 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Base import Base             # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
-#TODO:LUCA: turn into popup widget
-class ShortcutModule(CcpnModule):
 
-  def __init__(self, mainWindow):
-    CcpnModule.__init__(self,mainWindow=mainWindow, name='Define User Shortcuts')
-
+# class ShortcutModule(CcpnModule):
+class ShortcutModule(CcpnDialog):
+  # def __init__(self, mainWindow, parent=None, title='Define User Shortcuts'):
+    # CcpnModule.__init__(self, mainWindow=mainWindow, name='Define User Shortcuts', **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.mainWindow = mainWindow
     self.application = self.mainWindow.application
     self.preferences = self.application.preferences
 
-    self.mainWindow.moduleArea.addModule(self)
+    # self.mainWindow.moduleArea.addModule(self)
     self.rowCount = 0
-    self.scrollArea = ScrollArea(self.mainWidget, grid=(0, 0), gridSpan=(1, 2))
+    # self.scrollArea = ScrollArea(self.mainWidget, grid=(0, 0), gridSpan=(1, 2))
+    self.scrollArea = ScrollArea(self, grid=(0, 0), gridSpan=(1, 2), setLayout=True)   # ejb
 
-    self.shortcutWidget = ShortcutWidget(self, mainWindow)
+    # self.shortcutWidget = ShortcutWidget(self, mainWindow)
+    self.shortcutWidget = ShortcutWidget(self, mainWindow, setLayout=True)      # ejb
     self.scrollArea.setWidgetResizable(True)
     self.scrollArea.setWidget(self.shortcutWidget)
-    self.buttonList = ButtonList(self.mainWidget, grid=(1, 1),
+    self.buttonList = ButtonList(self, grid=(1, 1),
                                  texts=['Cancel', 'Save', 'Save and Close'],
                                  callbacks=[self.close, self.save, self.saveAndQuit])
 
@@ -75,11 +80,12 @@ class ShortcutModule(CcpnModule):
     self.save()
     self.close()
 
-#TODO:LUCA: Use ScrollableWidget class
+
 class ShortcutWidget(ScrollableFrame):
 
-  def __init__(self, parent, mainWindow, **kw):
-    ScrollableFrame.__init__(self)
+  # def __init__(self, parent, mainWindow, **kw):
+  def __init__(self, mainWindow, parent=None, **kw):           # ejb
+    ScrollableFrame.__init__(self, setLayout=True)
     from functools import partial
     self.mainWindow = mainWindow
     self.application = self.mainWindow.application

@@ -27,7 +27,7 @@ __date__ = "$Date$"
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
 
-class ccpnDialog(QtGui.QDialog, Base):
+class CcpnDialog(QtGui.QDialog, Base):
   def __init__(self, parent=None, windowTitle='', setLayout=False, **kw):
     QtGui.QDialog.__init__(self, parent)
     Base.__init__(self, setLayout=setLayout, **kw)
@@ -35,11 +35,9 @@ class ccpnDialog(QtGui.QDialog, Base):
     self.setWindowTitle(windowTitle)
     self.setContentsMargins(15, 15, 15, 15)
 
-    # self.mainLayout = QtGui.QGridLayout()
+    # self.mainLayout = QtGui.QGridLayout()   # ejb - handled inside Base
     # self.setLayout(self.mainLayout)
 
-  # def setSize(self, x:int, y:int):
-  #   pass
   def fixedSize(self):
     self.sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
     self.sizePolicy.setHorizontalStretch(0)
@@ -47,13 +45,3 @@ class ccpnDialog(QtGui.QDialog, Base):
     self.setSizePolicy(self.sizePolicy)
     self.setFixedSize(self.maximumWidth(), self.maximumHeight())
     self.setSizeGripEnabled(False)
-
-    # Dialog->resize(581, 292);
-    # QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    # sizePolicy.setHorizontalStretch(0);
-    # sizePolicy.setVerticalStretch(0);
-    # sizePolicy.setHeightForWidth(WaterLevelEditorDialog->sizePolicy().hasHeightForWidth());
-    # Dialog->setSizePolicy(sizePolicy);
-    # Dialog->setMinimumSize(QSize(581, 292));
-    # Dialog->setMaximumSize(QSize(581, 292));
-    # Dialog->setSizeGripEnabled(false);

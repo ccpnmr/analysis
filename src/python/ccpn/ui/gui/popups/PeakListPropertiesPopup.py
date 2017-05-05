@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpn.util.Colour import spectrumColours
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # def _getColour(peakList, peakListViews, attr):
@@ -55,9 +55,9 @@ from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
 # 1D.
 
 # class PeakListPropertiesPopup(QtGui.QDialog):
-class PeakListPropertiesPopup(ccpnDialog):
+class PeakListPropertiesPopup(CcpnDialog):
   def __init__(self, parent=None, peakList=None, title='Peak List Properties', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(PeakListPropertiesPopup, self).__init__(parent)
 
     self.peakList = peakList

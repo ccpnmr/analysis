@@ -45,20 +45,20 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Colour import spectrumColours
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
 # class SpectrumPropertiesPopup(QtGui.QDialog, Base):
-class SpectrumPropertiesPopup(ccpnDialog):
+class SpectrumPropertiesPopup(CcpnDialog):
   # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
   # The apply button then steps through each tab, and calls each function in the _changes dictionary
   # in order to set the parameters.
 
   def __init__(self, spectrum, parent=None
                , title='Spectrum Properties', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(SpectrumPropertiesPopup, self).__init__(parent)
 
     # layout = QtGui.QGridLayout()

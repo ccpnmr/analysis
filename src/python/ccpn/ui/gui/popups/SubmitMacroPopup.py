@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 from ccpn.util import Register
 from ccpn.util import Url
@@ -53,10 +53,10 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 # code below has to be synchronised with code in SCRIPT_URL
 
 # class SubmitMacroPopup(QtGui.QDialog):
-class SubmitMacroPopup(ccpnDialog):
+class SubmitMacroPopup(CcpnDialog):
   # parent mandatory and that needs to have attributes _appBase and colourScheme
   def __init__(self, parent=None, title='Submit Macro Form', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # QtGui.QDialog.__init__(self, parent=parent)
     # self.setWindowTitle(title)
 

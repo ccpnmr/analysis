@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
@@ -41,11 +41,11 @@ Labelling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','IL
 
 
 # class EditSampleComponentPopup(QtGui.QDialog):
-class EditSampleComponentPopup(ccpnDialog):
+class EditSampleComponentPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , sample=None, sampleComponent=None, newSampleComponent=False
                , title='Edit Sample Component', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(EditSampleComponentPopup, self).__init__(parent)
 
     self.project = project

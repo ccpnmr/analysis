@@ -31,14 +31,14 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # class NmrChainPopup(QtGui.QDialog, Base):
-class NmrChainPopup(ccpnDialog):
+class NmrChainPopup(CcpnDialog):
   def __init__(self, parent=None, nmrChain=None
                , title='Nmr Chain', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(NmrChainPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 

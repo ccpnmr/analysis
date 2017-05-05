@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
@@ -169,10 +169,10 @@ class ExcludeRegions(QtGui.QWidget):
 
 
 # class PickPeak1DPopup(QtGui.QDialog):
-class PickPeak1DPopup(ccpnDialog):
+class PickPeak1DPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , title='Pick 1D Peak List', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(PickPeak1DPopup, self).__init__(parent)
 
     self.project = project

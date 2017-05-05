@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 restraintTypes = [
@@ -44,9 +44,9 @@ restraintTypes = [
 ]
 
 # class RestraintTypePopup(QtGui.QDialog, Base):
-class RestraintTypePopup(ccpnDialog):
+class RestraintTypePopup(CcpnDialog):
   def __init__(self, parent=None, peakList=None, title='Restraints', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(RestraintTypePopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 

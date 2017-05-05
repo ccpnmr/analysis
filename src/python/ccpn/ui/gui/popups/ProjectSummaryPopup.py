@@ -41,13 +41,13 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # class ProjectSummaryPopup(QtGui.QDialog):
-class ProjectSummaryPopup(ccpnDialog):
+class ProjectSummaryPopup(CcpnDialog):
   def __init__(self, project, parent=None, title='Project Summary', modal=False, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.project = project
 

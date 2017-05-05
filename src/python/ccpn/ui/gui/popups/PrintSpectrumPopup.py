@@ -39,14 +39,14 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 import os
 
 # class SelectSpectrumDisplayPopup(QtGui.QDialog):
-class SelectSpectrumDisplayPopup(ccpnDialog):
+class SelectSpectrumDisplayPopup(CcpnDialog):
   def __init__(self,parent=None, project=None, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Select Spectrum Display', **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Select Spectrum Display', **kw)
     # super(SelectSpectrumDisplayPopup, self).__init__()
     # self.setWindowTitle('Select Spectrum Display')
 

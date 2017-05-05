@@ -29,12 +29,12 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.popups.Dialog import ccpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 # class CopyPeakListPopup(QtGui.QDialog):
-class CopyPeakListPopup(ccpnDialog):
+class CopyPeakListPopup(CcpnDialog):
   def __init__(self, parent=None, title='Copy PeakList', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(CopyPeakListPopup, self).__init__(parent)
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
@@ -131,7 +131,7 @@ class CopyPeakListPopup(ccpnDialog):
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
   import ccpn.core.testing.WrapperTesting as WT
 
   app = TestApplication()

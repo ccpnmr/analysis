@@ -3,16 +3,16 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import ccpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 #from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 
 from ccpn.framework.update.UpdateAgent import UpdateAgent
 
 
 # class UpdatePopup(QtGui.QDialog, UpdateAgent):
-class UpdatePopup(ccpnDialog, UpdateAgent):
+class UpdatePopup(CcpnDialog, UpdateAgent):
   def __init__(self, parent=None, title='Update CCPN code', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     version = QtCore.QCoreApplication.applicationVersion()
     # QtGui.QDialog.__init__(self, parent=parent)

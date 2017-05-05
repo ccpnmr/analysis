@@ -52,14 +52,14 @@ widgetGetters = {'CheckBox': 'get',  #returns Bool
 
 class PluginModule(CcpnModule):
 
-  def __init__(self, interactor, *args, **kwargs):
+  def __init__(self, interactor, mainWindow, *args, **kwargs):
     self.interactor = interactor
     self._kwargs = {}
 
     if interactor.settings is not None:
       self.includeSettingsWidget = True
 
-    super().__init__(name=interactor.PLUGINNAME)
+    super().__init__(mainWindow=mainWindow, name=interactor.PLUGINNAME)
 
     self._populateMainWidget()
     if interactor.settings is not None:
@@ -120,6 +120,10 @@ class TestQt:
     pgDockArea = DockArea()
     self.qtMainWindow.setCentralWidget(pgDockArea)
 
+    # layout = QtGui.QGridLayout()      # ejb
+    # layout.setContentsMargins(15,15,15,15)
+    # self.qtMainWindow.setLayout(layout)
+
     self.pgDock = Dock("Dock", size=(w, h))
     pgDockArea.addDock(self.pgDock)
 
@@ -133,10 +137,13 @@ class TestQt:
 
 if __name__ == '__main__':
   from unittest.mock import Mock
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
   qtTestHarness = TestQt()
 
   application = Mock()
+  # application = TestApplication()
   application.colourScheme = 'light'  # HACK!!!
   qtTestHarness.qtApp._ccpnApplication = application
 
@@ -275,5 +282,23 @@ if __name__ == '__main__':
     print('Run clicked, ', kwargs)
   interactor.run = run
 
-  pluginModule = PluginModule(interactor)
+  qtTestHarness.qtMainWindow.moduleArea = CcpnModuleArea(mainWindow=qtTestHarness.qtMainWindow)
+  # print('GuiMainWindow.moduleArea: layout:', qtTestHarness.qtMainWindow.moduleArea.layout)  ## pyqtgraph object
+  # qtTestHarness.qtMainWindow.moduleArea.setGeometry(0, 0, 1000, 800)
+  # qtTestHarness.qtMainWindow.setCentralWidget(qtTestHarness.qtMainWindow.moduleArea)
+
+  # pluginModule = PluginModule(interactor)       # ejb - original line
+
+  # pluginModule = PluginModule(interactor=interactor
+  #                             , application=application
+  #                             , mainWindow=application.mainWindow)
+
+  pluginModule = PluginModule(interactor=interactor
+                              , application=application
+                              , mainWindow=qtTestHarness.qtMainWindow)
   qtTestHarness.showWidget(pluginModule)
+
+  # pluginModule.show()
+  # pluginModule.raise_()
+
+  # application.start()

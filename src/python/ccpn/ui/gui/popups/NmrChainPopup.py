@@ -36,8 +36,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 # class NmrChainPopup(QtGui.QDialog, Base):
 class NmrChainPopup(CcpnDialog):
-  def __init__(self, parent=None, nmrChain=None
-               , title='Nmr Chain', **kw):
+  def __init__(self, parent=None, nmrChain=None, title='Nmr Chains', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(NmrChainPopup, self).__init__(parent)
     # Base.__init__(self, **kw)

@@ -31,13 +31,15 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
+class NmrResiduePopup(CcpnDialog):
+  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, title='Nmr Residues', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # super(NmrResiduePopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
 
-class NmrResiduePopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, **kw):
-    super(NmrResiduePopup, self).__init__(parent)
-    Base.__init__(self, **kw)
     self.setStyleSheet("border: 0px solid")
     self.parent = parent
     self.project = nmrResidue.project

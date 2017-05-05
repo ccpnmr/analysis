@@ -6,17 +6,21 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 
 ###from ccpn.framework.Framework import createFramework  # see note below
 
-class NmrAtomPopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, nmrAtom=None, **kw):
+class NmrAtomPopup(CcpnDialog):
+  def __init__(self, parent=None, nmrAtom=None, title='Nmr Atom', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
     # WARNING: above says nmrAtom can be None but code below assumes it is not None
-    super(NmrAtomPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    # super(NmrAtomPopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+
     self.nmrAtom = nmrAtom
     self.project = nmrAtom.project
     ###application = createFramework() # this does not work, it creates a new Framework

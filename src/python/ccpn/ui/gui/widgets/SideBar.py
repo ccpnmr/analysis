@@ -494,17 +494,14 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup = PeakListPropertiesPopup(peakList=obj)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SG':
       popup = SpectrumGroupEditor(project=self.project, spectrumGroup=obj)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SA':
       popup = SamplePropertiesPopup(obj, project=self.project)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SC':
       popup = EditSampleComponentPopup(sampleComponent=obj)
       popup.exec_()
@@ -558,6 +555,11 @@ class SideBar(QtGui.QTreeWidget, Base):
       showInfo('Not implemented yet!',
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
+    elif obj.shortClassName == 'IL':
+      # to be decided when we design structure
+      showInfo('Not implemented yet!',
+               'This function has not been implemented in the current version',
+               colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
       if self._appBase.ui.mainWindow is not None:
         mainWindow = self._appBase.ui.mainWindow
@@ -570,11 +572,11 @@ class SideBar(QtGui.QTreeWidget, Base):
     """Create new object starting from the <New> item
     """
 
-    if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
+    if item.text(0) == "<New IntegralList>" or item.text(0) == "<New PeakList>":
 
-      if item.text(0) == "<New Peak List>":
+      if item.text(0) == "<New PeakList>":
         self.project.getByPid(item.parent().text(0)).newPeakList()
-      if item.text(0) == "<New Integral List>":
+      if item.text(0) == "<New IntegralList>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
 
       # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)

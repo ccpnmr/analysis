@@ -86,6 +86,11 @@ class NmrChainPulldown(_Pulldown):
     attributeName = 'nmrChains'
 
 
+class StructurePulldown(_Pulldown):
+  className = 'StructureEnsemble'
+  attributeName = 'structureEnsembles'
+
+
 class ChemicalShiftListPulldown(_Pulldown):
     className = 'ChemicalShiftList'
     attributeName = 'chemicalShiftLists'

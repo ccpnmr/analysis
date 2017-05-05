@@ -210,3 +210,4 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
       strips.append(display.strips[stripIndex])
 
   return strips
+

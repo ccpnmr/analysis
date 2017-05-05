@@ -799,6 +799,7 @@ class Framework:
       (),
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
+      ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
@@ -1458,6 +1459,17 @@ class Framework:
     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
+
+
+  def showStructureTable(self, position='bottom', relativeTo=None):
+    """Displays Structure Table"""
+    from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+
+    mainWindow = self.ui.mainWindow
+    structureTableModule = StructureTableModule(mainWindow)
+    mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
+    self.project._logger.info("application.showStructureTable()")
 
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):

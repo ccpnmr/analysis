@@ -142,7 +142,8 @@ class GuiStripNd(GuiStrip):
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
     ###self.peakListViewDict = {}  # peakList --> peakListView
-    
+    self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
+
     self.haveSetupZWidgets = False
     self.viewBox.menu = self._get2dContextMenu()
     self.viewBox.invertX()
@@ -169,46 +170,56 @@ class GuiStripNd(GuiStrip):
     """
     Creates and returns the Nd context menu
     """
-    self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.spectrumDisplay.toggleToolbar, checkable=True)
-    self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self._toggleCrossHair, checkable=True)
-    self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
-    self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)
-    self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-    plusOneAction = self.contextMenu.addAction("Add Contour Level", self.spectrumDisplay.addContourLevel)
-    plusOneIcon = Icon('icons/contour-add')
-    plusOneAction.setIcon(plusOneIcon)
-    plusOneAction.setToolTip('Add One Level')
-    minusOneAction = self.contextMenu.addAction("Remove Contour Level", self.spectrumDisplay.removeContourLevel)
-    minusOneIcon = Icon('icons/contour-remove')
-    minusOneAction.setIcon(minusOneIcon)
-    minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = self.contextMenu.addAction("Raise Base Level", self.spectrumDisplay.raiseContourBase)
-    upBy2Icon = Icon('icons/contour-base-up')
-    upBy2Action.setIcon(upBy2Icon)
-    upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = self.contextMenu.addAction("Lower Base Level", self.spectrumDisplay.lowerContourBase)
-    downBy2Icon = Icon('icons/contour-base-down')
-    downBy2Action.setIcon(downBy2Icon)
-    downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = self.contextMenu.addAction("Store Zoom", self.spectrumDisplay._storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
-    storeZoomAction.setIcon(storeZoomIcon)
-    storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = self.contextMenu.addAction("Restore Zoom", self.spectrumDisplay._restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
-    restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')
-    resetZoomAction = self.contextMenu.addAction("Reset Zoom", self.resetZoom)
-    resetZoomIcon = Icon('icons/zoom-full')
-    resetZoomAction.setIcon(resetZoomIcon)
-    resetZoomAction.setToolTip('Reset Zoom')
-    printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-    printIcon = Icon('icons/print')
-    printAction.setIcon(printIcon)
-    printAction.setToolTip('Print Spectrum Display to File')
+    class tType:
+      menu, item, actn = range(1,4)
 
-    self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+    self._spectrumUtilActions = {}
+    self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
+
+    toolBarItems = [
+       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
+      (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
+      (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      None,                                 ''),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      None,                                 ''),
+      (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
+
+      (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
+      (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
+      (tType.actn, 'Raise Base Level',      'icons/contour-base-up',  'Raise Contour Base Level', True,   True,       self.spectrumDisplay.raiseContourBase,''),
+      (tType.actn, 'Lower Base Level',      'icons/contour-base-down','Lower Contour Base Level', True,   True,       self.spectrumDisplay.lowerContourBase,''),
+      (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
+      (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
+      (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
+      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True, lambda:self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
+
+      (tType.menu, 'Navigate To',           '',                       '',                         True,   True,       None,                                 'navigateToMenu')
+    ]
+
+    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+      # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+      def tempMethod():           # ejb - how does this work?????
+        return
+      if aType == tType.menu:
+        action = self.contextMenu.addMenu(aName)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
+
+      elif aType == tType.item:
+        # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
+        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self, tempMethod.__name__, action)                # add to self
+
+      elif aType == tType.actn:
+        # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
+        action = self.contextMenu.addAction(aName, callback)
+        if icon is not None:
+          ic = Icon(icon)
+          action.setIcon(ic)
+        self._spectrumUtilActions[aName] = action
 
     # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     # self.spectrumDisplays = self.getSpectrumDisplays()

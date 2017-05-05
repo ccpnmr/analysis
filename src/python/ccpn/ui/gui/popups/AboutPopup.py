@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
 from ccpn.ui.gui.widgets.Base import Base             # ejb
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 # This text is being copied on the clipboard only. Is not the source of the image in the popup.
 # The image is in ccpn.ui.gui.widgets
@@ -58,9 +58,9 @@ TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
         '''
 
 # class AboutPopup(QtGui.QDialog):
-class AboutPopup(ccpnDialog):
+class AboutPopup(CcpnDialog):
   def __init__(self, parent=None, title='About CcpNmr', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # self.setWindowTitle("About CcpNmr")
     # self.setContentsMargins(5, 5, 5, 5)
 
@@ -77,7 +77,7 @@ class AboutPopup(ccpnDialog):
 
     # self.setMaximumWidth(self.size().width())
     # self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
-    ccpnDialog.fixedSize(self)
+    CcpnDialog.fixedSize(self)
 
   def copyToClipboard(self):
     '''TEXT being copied on the clipboard '''
@@ -87,7 +87,7 @@ class AboutPopup(ccpnDialog):
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
   app = TestApplication()
   popup = AboutPopup()

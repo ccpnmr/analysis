@@ -45,24 +45,24 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Colour import spectrumColours
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
 # class SpectrumPropertiesPopup(QtGui.QDialog, Base):
-class SpectrumPropertiesPopup(ccpnDialog):
+class SpectrumPropertiesPopup(CcpnDialog):
   # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
   # The apply button then steps through each tab, and calls each function in the _changes dictionary
   # in order to set the parameters.
 
   def __init__(self, spectrum, parent=None
                , title='Spectrum Properties', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(SpectrumPropertiesPopup, self).__init__(parent)
 
-    layout = QtGui.QGridLayout()
-    self.setLayout(layout)
+    # layout = QtGui.QGridLayout()
+    # self.setLayout(layout)
     self.tabWidget = QtGui.QTabWidget()
     # tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
@@ -142,8 +142,9 @@ class GeneralTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None, item=None):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
-
     super(GeneralTab, self).__init__(parent)
+    Base.__init__(self, setLayout=True)      # ejb
+
     self.item = item
     self.spectrum = spectrum
     self._changes = dict()
@@ -446,6 +447,8 @@ class GeneralTab(QtGui.QWidget, Base):
 class DimensionsTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
+    Base.__init__(self, setLayout=True)      # ejb
+
     self.spectrum = spectrum
     self._changes = dict()
 
@@ -548,6 +551,7 @@ class DimensionsTab(QtGui.QWidget, Base):
 class ContoursTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None):
     super(ContoursTab, self).__init__(parent)
+    Base.__init__(self, setLayout=True)      # ejb
 
     self.spectrum = spectrum
     if self.spectrum.project._appBase.ui.mainWindow is not None:

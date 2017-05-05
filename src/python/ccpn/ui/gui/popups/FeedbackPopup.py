@@ -49,7 +49,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util import Url
-from ccpn.ui.gui.popups.Dialog import ccpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 LOG_FILE_TEXT = 'Log file'
 PROJECT_DIR_TEXT = 'Project directory'
@@ -58,11 +58,11 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/feedback/submitFeedback.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 
-class FeedbackPopup(ccpnDialog):
+class FeedbackPopup(CcpnDialog):
 # class FeedbackPopup(QtGui.QDialog):
   # parent mandatory and that needs to have attributes _appBase and colourScheme
   def __init__(self, parent=None, title='Feedback Form', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # QtGui.QDialog.__init__(self, parent=parent)
     # self.setWindowTitle(title)
 

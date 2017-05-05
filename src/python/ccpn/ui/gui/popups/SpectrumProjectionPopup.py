@@ -34,16 +34,16 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 import os
 
 
 # class SpectrumProjectionPopup(QtGui.QDialog, Base):
-class SpectrumProjectionPopup(ccpnDialog):
+class SpectrumProjectionPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , title='Make Spectrum Projection', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(SpectrumProjectionPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
     # self.setWindowTitle('Make Spectrum Projection')

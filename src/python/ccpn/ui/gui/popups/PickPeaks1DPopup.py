@@ -41,12 +41,12 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
 class ExcludeRegions(QtGui.QWidget):
-
   '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
-
   def __init__(self, parent=None,**kw):
     super(ExcludeRegions, self).__init__(parent)
 
@@ -167,11 +167,25 @@ class ExcludeRegions(QtGui.QWidget):
       else:
         widget1.deleteLater()
 
-class PickPeak1DPopup(QtGui.QDialog):
 
-  def __init__(self, parent=None, project=None,  **kw):
-    super(PickPeak1DPopup, self).__init__(parent)
+# class PickPeak1DPopup(QtGui.QDialog):
+class PickPeak1DPopup(CcpnDialog):
+  def __init__(self, parent=None, project=None
+               , title='Pick 1D Peak List', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    # super(PickPeak1DPopup, self).__init__(parent)
+
     self.project = project
+    if not project:                                             # ejb
+      MessageDialog.showWarning(title, 'No project loaded')
+      self.close()
+      return
+    else:
+      if not self.project.peakLists:
+        MessageDialog.showWarning(title, 'No PeakList Found')
+        self.close()
+        return
+
     self.mainWindow = parent
     self.application = self.mainWindow.application
     self._setMainLayout()

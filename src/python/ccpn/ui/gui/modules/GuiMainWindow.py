@@ -472,10 +472,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return
       else:
         from ccpn.ui.gui.modules.PluginModule import PluginModule
-        pluginModule = PluginModule(interactor=plugin, application=self.application)
+        pluginModule = PluginModule(interactor=plugin, application=self.application
+                                    , mainWindow=self)   # ejb
     else:
       pluginModule = plugin.guiModule(name=plugin.PLUGINNAME, parent=self,
-                                      interactor=plugin, application=self.application)
+                                      interactor=plugin, application=self.application
+                                      , mainWindow=self)
     plugin.ui = pluginModule
     self.application.ui.pluginModules.append(pluginModule)
     self.moduleArea.addModule(pluginModule)

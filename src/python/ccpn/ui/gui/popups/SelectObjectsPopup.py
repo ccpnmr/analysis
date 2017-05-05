@@ -32,15 +32,15 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # class SelectObjectsPopup(QtGui.QDialog, Base):
-class SelectObjectsPopup(ccpnDialog):
+class SelectObjectsPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , dim=None, objects=None
                , title='Select Objects', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(SelectObjectsPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 

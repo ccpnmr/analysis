@@ -39,13 +39,13 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Widget import Widget
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-class PeakFindPopup(ccpnDialog):
+class PeakFindPopup(CcpnDialog):
 # class PeakFindPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, current=None, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
     # super(PeakFindPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 

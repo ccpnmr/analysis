@@ -26,13 +26,13 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # class TabDialog(QtGui.QDialog):
-class TabDialog(ccpnDialog):
+class TabDialog(CcpnDialog):
     def __init__(self, fileName, parent=None, title='Tab Dialog', **kw):
-        ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
         # super(TabDialog, self).__init__(parent)
 
         fileInfo = QtCore.QFileInfo(fileName)

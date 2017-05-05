@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showError
 from ccpn.framework.PathsAndUrls import ccpnUrl
 ###from ccpn.ui.gui.widgets.WebView import WebViewPanel
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 from ccpn.util import Register
 
@@ -46,9 +46,9 @@ from ccpn.util import Register
 licenseUrl = ccpnUrl + '/license'
 
 # class RegisterPopup(QtGui.QDialog):
-class RegisterPopup(ccpnDialog):
+class RegisterPopup(CcpnDialog):
   def __init__(self, parent=None, version='3', title='Register with CCPN', modal=False, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.version = version
     

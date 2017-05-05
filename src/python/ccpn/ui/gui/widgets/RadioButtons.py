@@ -107,10 +107,10 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
 
-  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
   app = TestApplication()
-  popup = ccpnDialog(windowTitle='Test radioButtons')
+  popup = CcpnDialog(windowTitle='Test radioButtons')
 
   popup.setSize(250, 50)
 

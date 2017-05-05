@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
-  from ccpn.ui.gui.popups.Dialog import ccpnDialog
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
   def callback(text):
     print('callback', text)
@@ -200,7 +200,7 @@ if __name__ == '__main__':
   icons = [None, None, 'icons/applications-system.png']
 
   app = TestApplication()
-  popup = ccpnDialog(windowTitle='Test ButtonList')
+  popup = CcpnDialog(windowTitle='Test ButtonList')
 
   # popup.setSize(200,200)
   popup.setGeometry(200,200,200,200)

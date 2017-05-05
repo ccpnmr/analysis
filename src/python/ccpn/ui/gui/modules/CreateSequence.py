@@ -8,12 +8,12 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
-class CreateSequence(ccpnDialog):
+class CreateSequence(CcpnDialog):
 # class CreateSequence(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
-    ccpnDialog.__init__(self, parent, setLayout=True, windowTitle='Generate Chain', **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Generate Chain', **kw)
     # super(CreateSequence, self).__init__(parent)
     # Base.__init__(self, **kw)
 

@@ -33,15 +33,15 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import ccpnDialog      # ejb
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 # class SpectrumGroupEditor(QtGui.QDialog):
-class SpectrumGroupEditor(ccpnDialog):
+class SpectrumGroupEditor(CcpnDialog):
   def __init__(self, parent=None, project=None
                , spectrumGroup=None, addNew=False, editorMode=False
                , title='Spectrum Group Setup', **kw):
-    ccpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
     # super(SpectrumGroupEditor, self).__init__(parent)
 

@@ -147,10 +147,13 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+
 from collections import OrderedDict
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -617,21 +620,6 @@ class ObjectTable(QtGui.QTableView, Base):
     action = menu.exec_(self.mapToGlobal(pos))
     if action == exportMenu:
       self.exportDialog()
-
-    # if action == searchMenu:
-    #   if not hasattr(self, 'searchPopup'):
-    #     self.openSearchPopup()
-    #   else:
-    #     if not self.searchPopup.isOpened:
-    #       self.openSearchPopup()
-    # if action == copyMenu:
-    #   self.copyRow()
-
-  def openSearchPopup(self):
-    self.searchPopup = ObjectTableFilter(self)
-    self.searchPopup.show()
-    self.searchPopup.raise_()
-
 
 
   def exportDialog(self):
@@ -1166,78 +1154,62 @@ class ObjectTableExport(QtGui.QDialog, Base):
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 
+class ColumnViewSettings(Widget):
+  ''' hide show check boxes corresponding to the table columns '''
 
-class ObjectTableFilter(QtGui.QDialog):
+  def __init__(self, table, parent=None, **kw):
+    Widget.__init__(self, parent, setLayout=True, **kw)
+    # Base.__init__(self, **kw)
+    self.table = table
+    columns = self.table.columns
+    if columns:
+      for i, colum in enumerate(columns):
+        CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack, hAlign='l', checked=True)
 
-  def __init__(self, parent=None, **kw):
-    super(ObjectTableFilter, self).__init__(parent)
-    self.setMinimumHeight(110)
+  def checkBoxCallBack(self):
+    checkBox = self.sender()
+    name = checkBox.text()
+    if checkBox.isChecked():
+      self.table._showColumn(name)
+    else:
+      self.table._hideColumn(name)
 
-    self.setMaximumWidth(700)
-    self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-    self.isOpened = True
 
-    self.table = parent
-    tablePos = self.table.pos()
-    tablePos.setY(tablePos.y() + 30)
-    self.move(tablePos)
+class ObjectTableFilter(Widget):
+
+  def __init__(self, table, parent=None, **kw):
+    Widget.__init__(self, parent, setLayout=True, **kw)
+    self.table = table
     self.status = None
     self.origObjects = self.table.objects
+
     columns = self.table.columns
     texts = [c.heading for c in columns]
-    objects = range(len(columns))
+    objectsRange = range(len(columns))
     tIndex = self.table.getCurrentIndex()
     if tIndex is None:
       index = 0
     else:
       index = tIndex.column()
-    gridRow = 0
-    gridColumn = 0
-    labelColumn = Label(self, 'Filter Column', grid=(gridRow,gridColumn))
-    gridColumn += 1
-    self.colPulldown = PulldownList(self, texts, objects, index=index, grid=(gridRow,gridColumn))
-    gridColumn += 1
-    labelObjects = Label(self, 'Objects to filter', grid=(gridRow,gridColumn))
-    gridColumn += 1
-    self.edit = LineEdit(self,grid=(gridRow,gridColumn))
-    gridColumn += 1
 
 
-    self.mode = RadioButtons(self, texts= ['Select Only', 'Filter'],
-                                   selectedInd=0,
-                                   callback=None,
-                                   direction='h',
-                                   tipTexts=None,
-                                   grid=(gridRow, gridColumn))
+    labelColumn = Label(self, 'Search in', grid=(0,0))
+    self.colPulldown = PulldownList(self, texts, objectsRange, index=0, grid=(0,1))
 
-    gridRow = 1
-    gridColumn = 4
+    labelObjects = Label(self, 'Search for', grid=(0,2))
 
-    self.button = Button(self, text='Search',callback =self.findOnTable,  grid=(gridRow,gridColumn))
-    self.button.setStyleSheet("margin:4px;")
+    self.edit = LineEdit(self,grid=(0,3))
 
-    gridRow = 3
-    gridColumn = 4
-    apply = ButtonList(self, texts=['Close','Cancel','Apply'],
-                       tipTexts=['Restore Table and Close','Restore Table',
-                                 'Keep Filtered Table and Close. '
-                                 'NB: To show again all the table contents you will need to close and reopen it'],
-                       callbacks=[self.closePopup,self.restoreTable,self.applyFilter],
-                       grid=(gridRow, gridColumn))
 
-    gridRow = 2
-    gridColumn = 0
-    self.msg = Label(self, text='Not Found', grid=(gridRow, gridColumn))
+    self.searchButtons = ButtonList(self, texts=['Reset','Search'],
+                       tipTexts=['Restore Table','Search'],
+                       callbacks=[self.restoreTable,self.findOnTable ],
+                       grid=(0, 4))
+
+    self.msg = Label(self, text='Not Found', grid=(1, 0))
     self.msg.hide()
 
-  def closePopup(self):
-    self.table.setObjects(self.origObjects)
-    self.close()
-    self.isOpened = False
 
-  def applyFilter(self):
-    self.close()
-    self.isOpened = False
 
   def restoreTable(self):
     self.table.setObjects(self.origObjects)
@@ -1245,9 +1217,15 @@ class ObjectTableFilter(QtGui.QDialog):
     self.edit.clear()
 
   def findOnTable(self):
+    if self.edit.text() == '' or None:
+      self.msg.show()
+      return
+    self.table.setObjects(self.origObjects)
     self.hideNotFoundMsg()
+
     text = self.edit.text()
     columns = self.table.columns
+
     objCol = columns[self.colPulldown.currentObject()]
 
     matched = []
@@ -1256,13 +1234,11 @@ class ObjectTableFilter(QtGui.QDialog):
       value = u'%s' % (objCol.getValue(obj))
       if str(text) in str(value):
         matched.append(obj)
+      elif str(text) == str(value):
+        matched.append(obj)
 
-    if len(matched)>1:
-      if self.mode.get() == 'Select Only':
-        self.table.setCurrentObjects(matched)
-        return
-      else:
-        self.setFilteredObjects()
+    if matched:
+      self.table.setObjects(matched)
     else:
       self.showNotFoundMsg()
 
@@ -1275,82 +1251,6 @@ class ObjectTableFilter(QtGui.QDialog):
 
   def showNotFoundMsg(self):
     self.msg.show()
-
-  # def handleButton(self):
-  #   items = self.table.model.findItems(
-  #     self.edit.text(), QtCore.Qt.MatchExactly)
-  #   if items:
-  #     results = '\n'.join(
-  #       'row %d column %d' % (item.row() + 1, item.column() + 1)
-  #       for item in items)
-  #   else:
-  #     results = 'Found Nothing'
-
-  # def close(self):
-  #
-  #   BasePopup.close(self)
-
-  # def unfilterTable(self):
-  #
-  #   self.table.setObjects(self.origObjects)
-  #   self.status = None
-  #
-  # def filterInclude(self, *event):
-  #
-  #   self.filterTable(True)
-  #
-  # def filterExclude(self, *event):
-  #
-  #   self.filterTable(False)
-
-  # def filterTable(self, includeMatches=True):
-  #
-  #   if not self.origObjects:
-  #     self.status = None
-  #     return
-  #
-  #   string = self.entry.get()
-  #   if not string:
-  #     self.status = None
-  #     return
-  #
-  #   self.status = includeMatches
-  #   columns = self.table.columns
-  #   objCol = columns[self.colPulldown.currentObject()]
-  #   mode = self.filterModeRadio.get()
-  #   flag = re.S
-  #
-  #   def exclude(a,b,c):
-  #     return not re.search(a,b,c)
-  #
-  #   if includeMatches:
-  #     find = re.search
-  #   else:
-  #     find = exclude
-  #
-  #   if mode != SEARCH_MODES[2]:
-  #     string = re.escape(string)
-  #
-  #   if mode == SEARCH_MODES[0]:
-  #     flag = re.I
-  #
-  #   objects = []
-  #   objectsAppend = objects.append
-  #
-  #   if self.filterObjRadio.getIndex() == 0:
-  #     filterObjs = self.origObjects
-  #   else:
-  #     filterObjs = self.table.getSelectedObjects()
-  #
-  #   for  obj in filterObjs:
-  #     value = u'%s' % (objCol.getValue(obj))
-  #     match = find(string, value, flag)
-  #
-  #     if match:
-  #       objectsAppend(obj)
-  #
-  #   self.table.clearSelection()
-  #   self.table.setObjects(objects, None)
 
 class Column:
 

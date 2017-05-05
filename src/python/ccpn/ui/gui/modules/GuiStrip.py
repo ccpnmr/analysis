@@ -46,7 +46,8 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Frame import Frame
-
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
 
 from ccpn.util import Ticks
@@ -54,7 +55,6 @@ from ccpn.util.Colour import Colour
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 
 
 class GuiStrip(Frame):
@@ -66,7 +66,7 @@ class GuiStrip(Frame):
     :param spectrumDisplay: spectrumDisplay instance
 
     This module inherits attributes from the Strip wrapper class:
-    Use clone() to make a copy
+    Use clone() method to make a copy
     """
 
     # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
@@ -75,11 +75,7 @@ class GuiStrip(Frame):
     self.application = self.mainWindow.application
     self.current = self.application.current
 
-    print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)  #, application)
-
-    # GWV:passing spectrumDisplay.stripFrame to the widget stops the PlotWidget filling all available space
-    #TODO:GEERTEN: find cause and fix this
-
+    print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
                          acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
                   )
@@ -95,12 +91,12 @@ class GuiStrip(Frame):
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
                                  showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    # GWV: appears not responsive to contentsMargins
+    # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
     self.getLayout().addWidget(self.plotWidget, 1, 0)
 
     # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
-    # and GuiStrip1d
+    # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
     self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                       hPolicy='expanding',
                                       grid=(2, 0)
@@ -186,6 +182,14 @@ class GuiStrip(Frame):
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
+    # For now, all dropevents are not strip specific, use spectrumDisplay's
+    # handling
+    self._droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self.spectrumDisplay._processDroppedItems)
+
+    self.show()
+
   @property
   def gridIsVisible(self):
     "True if grid is visible"
@@ -231,6 +235,7 @@ class GuiStrip(Frame):
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
     self._stripLabelNotifier.unRegister()
+    self._droppedNotifier.unRegister()
 
   def _updateDisplayedPeaks(self, data):
     "Callback when peaks have changed"
@@ -587,7 +592,7 @@ class GuiStrip(Frame):
       x2 = x2LineEdit.get()
       y2 = y2LineEdit.get()
       if None in (x1, y1, x2, y2):
-        logger.warning('Zoom: must specify region completely')
+        getLogger().warning('Zoom: must specify region completely')
         return
       self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
       zoomPopup.close()

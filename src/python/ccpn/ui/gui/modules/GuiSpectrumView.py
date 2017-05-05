@@ -82,13 +82,22 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     ##for strip in self.strips:
     ##  strip.addSpectrum(self)
 
+  # To write your own graphics item, you first create a subclass of QGraphicsItem, and
+  # then start by implementing its two pure virtual public functions:
+  # boundingRect(), which returns an estimate of the area painted by the item,
+  # and paint(), which implements the actual painting. For example:
+
+  # mandatory function to override for QGraphicsItem
+  # Implemented in GuiSpectrumViewNd or GuiSpectrumView1d
   def paint(self, painter, option, widget=None):
-
     pass
-    
-  def boundingRect(self):  # seems necessary to have
 
-    return QtCore.QRectF(0, 0, 900, 700)  # TBD: remove hardwiring
+  # mandatory function to override for QGraphicsItem
+  def boundingRect(self):  # seems necessary to have
+    return QtCore.QRectF(0, 0, 100, 150)  # TBD: remove hardwiring
+                                          # Earlier versions too large value (~1400,1000);
+    # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
+    # to give less flicker in Scrolled Strips.
 
   # override of Qt setVisible
   def setVisible(self, visible):

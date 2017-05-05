@@ -90,10 +90,11 @@ class _StripLabel(Label):
     mimeData.setText(itemData)
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
-    if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
-      pass
-    else:
-      self.show()
+    drag.start(QtCore.Qt.MoveAction)
+    # if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
+    #     pass
+    # else:
+    #   self.show()
 
 
 #TODO:GEERTEN: complete this and replace

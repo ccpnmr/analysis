@@ -167,7 +167,8 @@ class GuiSpectrumDisplay(CcpnModule):
     # scroll area for strips
     # This took a lot of sorting-out; better leave as is or test thoroughly
     self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
-                                            scrollBarPolicies = ('always', 'asNeeded')
+                                            scrollBarPolicies = ('always', 'asNeeded'),
+                                            acceptDrops=True
                                             )
     self.stripFrame = Frame(showBorder=True)
     self._stripFrameScrollArea.setWidget(self.stripFrame)
@@ -198,7 +199,11 @@ class GuiSpectrumDisplay(CcpnModule):
     event.accept()
 
   def _processDroppedItems(self, data):
-    "Process the pids"
+    """
+    CallBack for Drop events
+    
+    CCPN INTERNAL: Also called from GuiStrip
+    """
     for ii, pid in enumerate(data.get('pids',[])):
       print('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
       self._handlePid(pid)

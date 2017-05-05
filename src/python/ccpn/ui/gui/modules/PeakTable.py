@@ -36,7 +36,7 @@ from ccpn.ui.gui.popups.SelectObjectsPopup import SelectObjectsPopup
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.GroupBox import GroupBox
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -82,12 +82,12 @@ class PeakTable(CcpnModule):
     self.close()
 
 
-class PeakListSettingsWidget(GroupBox):
+class PeakListSettingsWidget(ScrollableFrame):
   ''' class conteining all settings widgets for the module peakTable '''
 
   def __init__(self, table, parent=None, **kw):
-    GroupBox.__init__(self,parent, **kw)
-    Base.__init__(self, **kw)
+    ScrollableFrame.__init__(self,parent, setLayout=True, **kw)
+    # Base.__init__(self, **kw)
 
     self.table = table
     columns = self.table.columns
@@ -106,8 +106,6 @@ class PeakListTableWidget(ObjectTable):
 
 
 
-  volumeTipText   = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-  commentsTipText = 'Textual notes about the peak'
 
 
   columnDefs = []
@@ -119,7 +117,7 @@ class PeakListTableWidget(ObjectTable):
     if peakList is not None:
 
       serialTipText = 'Peak serial number'
-      serial = ('#', 'serial', serialTipText)
+      serial = ('#', 'serial', serialTipText, None)
       self.columnDefs.append(serial)
 
       numDim = peakList.spectrum.dimensionCount
@@ -128,7 +126,7 @@ class PeakListTableWidget(ObjectTable):
       for i in range(numDim):
         j = i + 1
         assignTipTexts = 'NmrAtom assignments of peak in dimension %d' % j
-        assign =  ('Assign F%d' % j, lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipTexts)
+        assign =  ('Assign F%d' % j, lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipTexts, None)
         self.columnDefs.append(assign)
 
       # Peak positions
@@ -136,7 +134,7 @@ class PeakListTableWidget(ObjectTable):
         j = i + 1
         positionTipText = 'Peak position in dimension %d' % j
         unit = UNITS[0] #self.posUnitPulldown.currentText()
-        position = ('Pos F%d' % j, lambda pk, dim=i, unit=unit: getPeakPosition(pk, dim, unit), positionTipText)
+        position = ('Pos F%d' % j, lambda pk, dim=i, unit=unit: getPeakPosition(pk, dim, unit), positionTipText, None)
         self.columnDefs.append(position)
 
       # linewidth TODO remove hardcoded Hz unit
@@ -144,26 +142,35 @@ class PeakListTableWidget(ObjectTable):
         j = i + 1
         linewidthTipTexts = 'Peak line width %d' % j
 
-        linewidth = ('LW F%d (Hz)' % j, lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts)
+        linewidth = ('LW F%d (Hz)' % j, lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None)
         self.columnDefs.append(linewidth)
 
-
+      # height
       heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-      height = ('Height', lambda pk: pk.height, heightTipText)
+      height = ('Height', lambda pk: pk.height, heightTipText, None)
       self.columnDefs.append(height)
 
-      volume = ('Volume', lambda pk: pk.volume, self.volumeTipText)
+      # volume
+      volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
+      volume = ('Volume', lambda pk: pk.volume, volumeTipText, None)
       self.columnDefs.append(volume)
 
-      comment = ('Comment', lambda pk: pk.comment, self.commentsTipText)
+      # comment
+      commentsTipText = 'Textual notes about the peak'
+      comment = ('Comment', lambda pk: pk.comment, commentsTipText, lambda pk, value: self._setObjectDetails(pk, value))
+      # setEditValue
       self.columnDefs.append(comment)
 
       self._setColumns()
 
   def _setColumns(self):
     '''set the columns on the table from the list of tuples "columnDefs"  '''
-    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
     self.setColumns(columns)
+
+  def _setComment(self, peak, value):
+    peak.comment = value
+
 
 
   def __init__(self, parent, application, **kwds):
@@ -174,7 +181,7 @@ class PeakListTableWidget(ObjectTable):
 
     # create the column objects
 
-    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForPeakList method
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,

@@ -1200,17 +1200,8 @@ class ObjectTableFilter(Widget):
     self.status = None
     self.origObjects = self.table.objects
 
-    # columns = self.table.columns
-    # texts = [c.heading for c in columns]
-    # objectsRange = range(len(columns))
-    # tIndex = self.table.getCurrentIndex()
-    # if tIndex is None:
-    #   index = 0
-    # else:
-    #   index = tIndex.column()
-
-
     labelColumn = Label(self, 'Search in', grid=(0,0))
+
     self.colPulldown = PulldownList(self, grid=(0,1))
 
     labelObjects = Label(self, 'Search for', grid=(0,2))
@@ -1225,12 +1216,17 @@ class ObjectTableFilter(Widget):
 
     self.msg = Label(self, text='Not Found', grid=(1, 0))
     self.msg.hide()
+    self.setColumnPullDown()
 
   def setColumnPullDown(self):
     columns = self.table.columns
     texts = [c.heading for c in columns]
     objectsRange = range(len(columns))
-    self.colPulldown.setData(texts=texts, objects=objectsRange, index=0)
+
+    self.colPulldown.addItem('Whole Table', object=None)
+    for i, text in enumerate(texts):
+      self.colPulldown.addItem(text, objectsRange[i])
+    self.colPulldown.setIndex(0)
 
   def updateColumnPullDown(self, table):
     self.table = table
@@ -1251,8 +1247,29 @@ class ObjectTableFilter(Widget):
     text = self.edit.text()
     columns = self.table.columns
 
-    objCol = columns[self.colPulldown.currentObject()]
+    if self.colPulldown.currentObject() is None:
+      # serch in the whole table
+      objs = [o for o in self.colPulldown.objects if o is not None]
+      allMatched = []
+      for obj in objs:
+        objCol = columns[obj]
+        matched = self.searchMatches(objCol, text)
+        allMatched.append(matched)
 
+      matched = [i for m in allMatched for i in m]   #making a single list of matching objs
+
+    else:
+      objCol = columns[self.colPulldown.currentObject()]
+
+      matched = self.searchMatches(objCol, text)
+
+    if matched:
+      self.table.setObjects(matched)
+    else:
+      self.showNotFoundMsg()
+
+
+  def searchMatches(self, objCol, text):
     matched = []
     objs = self.table.objects
     for obj in objs:
@@ -1261,11 +1278,10 @@ class ObjectTableFilter(Widget):
         matched.append(obj)
       elif str(text) == str(value):
         matched.append(obj)
+    return  matched
 
-    if matched:
-      self.table.setObjects(matched)
-    else:
-      self.showNotFoundMsg()
+
+
 
   def setFilteredObjects(self):
     selected = self.table.getSelectedObjects()

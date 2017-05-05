@@ -63,18 +63,18 @@ class PeakTable(CcpnModule):
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
-    self.project = mainWindow.application.project
+    self.project = project
     self.current = mainWindow.application.current
 
 
     # mainWidget
-    self.peakListTable = PeakListTableWidget(parent=self.mainWidget, setLayout=True,
+    self.peakListTable = PeakListTableWidget(parent=self.mainWidget, moduleParent=self, setLayout=True,
                                              application=self.application, grid=(0, 0))
 
     # settingsWidget
     self.displayColumnFilterWidget = ColumnViewSettings(parent=self.settingsWidget,table=self.peakListTable, grid=(0,0))
     self.strFilterWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
-  #
+
 
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks"""
@@ -156,9 +156,10 @@ class PeakListTableWidget(ObjectTable):
     peak.comment = value
 
 
-  def __init__(self, parent, application, **kwds):
+  def __init__(self, parent, moduleParent, application, **kwds):
     self._project = application.project
     self._current = application.current
+    self.peakTableModule = moduleParent
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
@@ -210,6 +211,11 @@ class PeakListTableWidget(ObjectTable):
 
     # update the columns table based on the spectrum dim
     self.initColumns(peakList)
+    # FIXME do the proper way to update setting widget when refreshing the table contents
+    if hasattr(self.peakTableModule, 'displayColumnFilterWidget'):
+      self.peakTableModule.displayColumnFilterWidget.updateWidgets(self)
+    if hasattr(self.peakTableModule, 'strFilterWidget'):
+      self.peakTableModule.strFilterWidget.updateColumnPullDown(self)
 
     if self._peakNotifier is not None:
       # we have a new peak and hence need to unregister the previous notifier

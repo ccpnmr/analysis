@@ -1161,10 +1161,16 @@ class ColumnViewSettings(Widget):
     Widget.__init__(self, parent, setLayout=True, **kw)
     # Base.__init__(self, **kw)
     self.table = table
+    self.checkBoxes = []
+    self.initCheckBoxes()
+
+  def initCheckBoxes(self):
     columns = self.table.columns
     if columns:
       for i, colum in enumerate(columns):
-        CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack, hAlign='l', checked=True)
+        cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack, hAlign='l', checked=True)
+        self.checkBoxes.append(cb)
+
 
   def checkBoxCallBack(self):
     checkBox = self.sender()
@@ -1173,6 +1179,17 @@ class ColumnViewSettings(Widget):
       self.table._showColumn(name)
     else:
       self.table._hideColumn(name)
+
+  def updateWidgets(self, table):
+    self.table = table
+    if self.checkBoxes:
+      print(self.checkBoxes)
+      for cb in self.checkBoxes:
+        cb.deleteLater()
+    self.checkBoxes = []
+    self.initCheckBoxes()
+
+
 
 
 class ObjectTableFilter(Widget):
@@ -1183,18 +1200,18 @@ class ObjectTableFilter(Widget):
     self.status = None
     self.origObjects = self.table.objects
 
-    columns = self.table.columns
-    texts = [c.heading for c in columns]
-    objectsRange = range(len(columns))
-    tIndex = self.table.getCurrentIndex()
-    if tIndex is None:
-      index = 0
-    else:
-      index = tIndex.column()
+    # columns = self.table.columns
+    # texts = [c.heading for c in columns]
+    # objectsRange = range(len(columns))
+    # tIndex = self.table.getCurrentIndex()
+    # if tIndex is None:
+    #   index = 0
+    # else:
+    #   index = tIndex.column()
 
 
     labelColumn = Label(self, 'Search in', grid=(0,0))
-    self.colPulldown = PulldownList(self, texts, objectsRange, index=0, grid=(0,1))
+    self.colPulldown = PulldownList(self, grid=(0,1))
 
     labelObjects = Label(self, 'Search for', grid=(0,2))
 
@@ -1209,7 +1226,15 @@ class ObjectTableFilter(Widget):
     self.msg = Label(self, text='Not Found', grid=(1, 0))
     self.msg.hide()
 
+  def setColumnPullDown(self):
+    columns = self.table.columns
+    texts = [c.heading for c in columns]
+    objectsRange = range(len(columns))
+    self.colPulldown.setData(texts=texts, objects=objectsRange, index=0)
 
+  def updateColumnPullDown(self, table):
+    self.table = table
+    self.setColumnPullDown()
 
   def restoreTable(self):
     self.table.setObjects(self.origObjects)

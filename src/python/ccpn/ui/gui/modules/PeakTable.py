@@ -91,49 +91,45 @@ class PeakListTableWidget(ObjectTable):
 
     self.columnDefs = []
 
-    if peakList is not None:
-      serialTipText = 'Peak serial number'
-      serial = ('#', 'serial', serialTipText, None)
-      self.columnDefs.append(serial)
+    if not peakList:
+      self.setObjects([])
 
-      numDim = peakList.spectrum.dimensionCount
-      # Assign
-      for i in range(numDim):
-        j = i + 1
-        assignTipText = 'NmrAtom assignments of peak in dimension %d' % j
-        assign =  ('Assign F%d' % j, lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None)
-        self.columnDefs.append(assign)
+    self.columnDefs.append(('#', 'serial', 'Peak serial number', None))
 
-      # Peak positions
-      for i in range(numDim):
-        j = i + 1
-        positionTipText = 'Peak position in dimension %d' % j
-        position = ('Pos F%d' % j, lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit), positionTipText, None)
-        self.columnDefs.append(position)
+    # Assignment column
+    for i in range(peakList.spectrum.dimensionCount):
+      assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
+      self.columnDefs.append(
+        ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
 
-      # linewidth TODO remove hardcoded Hz unit
-      for i in range(numDim):
-        j = i + 1
-        linewidthTipTexts = 'Peak line width %d' % j
-        linewidth = ('LW F%d (Hz)' % j, lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None)
-        self.columnDefs.append(linewidth)
+    # Peak positions column
+    for i in range(peakList.spectrum.dimensionCount):
+      positionTipText = 'Peak position in dimension %s' % str(i + 1)
+      self.columnDefs.append(('Pos F%s' % str(i + 1),
+                              lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
+                              positionTipText, None))
 
-      # height
-      heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-      height = ('Height', lambda pk: pk.height, heightTipText, None)
-      self.columnDefs.append(height)
+    # linewidth column TODO remove hardcoded Hz unit
+    for i in range(peakList.spectrum.dimensionCount):
+      linewidthTipTexts = 'Peak line width %s' % str(i + 1)
+      self.columnDefs.append(
+        ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None))
 
-      # volume
-      volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-      volume = ('Volume', lambda pk: pk.volume, volumeTipText, None)
-      self.columnDefs.append(volume)
+    # height column
+    heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
+    self.columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
 
-      # comment
-      commentsTipText = 'Textual notes about the peak'
-      comment = ('Comment', lambda pk: self._getCommentText(pk), commentsTipText, lambda pk, value: self._setComment(pk, value))
-      self.columnDefs.append(comment)
+    # volume column
+    volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
+    self.columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
 
-      self._setColumns()
+    # comment column
+    commentsTipText = 'Textual notes about the peak'
+    self.columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
+                            lambda pk, value: PeakListTableWidget._setComment(pk, value)))
+
+
+    self._setColumns()
 
   def _setColumns(self):
     '''set the columns on the table from the list of tuples "columnDefs"  '''
@@ -278,4 +274,18 @@ class PeakListTableWidget(ObjectTable):
       self._peakNotifier.unRegister()
     self._current.unRegisterNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
+  @staticmethod
+  def _getCommentText(peak):
+    if peak.comment == '' or not peak.comment:
+      return ' '
+    else:
+      return peak.comment
+
+  @staticmethod
+  def _setComment(peak, value):
+    peak.comment = value
+#
+  def _updatePeakLists(self, value):
+    self.peakTable.objectLists = self.project.peakLists
+    self.peakTable._updateSelectorContents()
 #

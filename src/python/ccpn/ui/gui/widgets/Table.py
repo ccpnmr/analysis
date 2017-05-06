@@ -151,7 +151,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 from collections import OrderedDict
@@ -1205,52 +1205,60 @@ class ObjectTableFilter(Widget):
 
     self.origObjects = self.table.objects
 
-    labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='c')
+    labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='l')
 
-    self.colPulldown = PulldownList(self, grid=(0,1), hAlign='c')
+    self.columnOptions = PulldownList(self, grid=(0, 1), hAlign='l')
 
-    labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='c')
+    labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='l')
 
-    self.edit = LineEdit(self,grid=(0,3), hAlign='c')
+    self.edit = LineEdit(self,grid=(0,3), hAlign='l')
 
 
-    self.searchButtons = ButtonList(self, texts=['Reset','Search'],
-                       tipTexts=['Restore Table','Search'],
-                       callbacks=[self.restoreTable,self.findOnTable ],
-                       grid=(0, 4), hAlign='c')
+    # self.searchButtons = ButtonList(self, texts=['Reset','Search'],
+    #                    tipTexts=['Restore Table','Search'],
+    #                    callbacks=[self.restoreTable,self.findOnTable ],
+    #                    grid=(0, 4), hAlign='l')
+
+    self.clearButton = Button(self, text='Reset',
+                                    tipText='Restore Table',
+                                    callback=self.restoreTable,
+                                    grid=(0, 4), hAlign='c')
+    self.searchButton = Button(self, text='Search',
+                                tipText='Search in Table',
+                                callback=self.findOnTable,
+                                grid=(0, 5), hAlign='c')
 
     self.msg = Label(self, text='Not Found', grid=(1, 0))
     self.msg.hide()
-    self.setColumnPullDown()
+    self.setColumnOptions()
 
-  def setColumnPullDown(self):
+  def setColumnOptions(self):
     columns = self.table.columns
     texts = [c.heading for c in columns]
     objectsRange = range(len(columns))
 
-    self.colPulldown.addItem('Whole Table', object=None)
+    self.columnOptions.addItem('Whole Table', object=None)
     for i, text in enumerate(texts):
-      self.colPulldown.addItem(text, objectsRange[i])
-    self.colPulldown.setIndex(0)
+      self.columnOptions.addItem(text, objectsRange[i])
+    self.columnOptions.setIndex(0)
 
-  def updateColumnPullDown(self, table):
+  def updateColumnOption(self, table):
     self.table = table
     self.origObjects = self.table.objects
-    self.setColumnPullDown()
+    self.setColumnOptions()
 
 
 
 
   def restoreTable(self):
     # origObjects =  [obj for obj in self.origObjects if obj is not None]
-    print(self.origObjects)
     self.table.setObjects(self.origObjects)
     self.msg.hide()
     self.edit.clear()
 
   def findOnTable(self):
     if self.edit.text() == '' or None:
-      self.msg.show()
+      self.restoreTable()
       return
     self.table.setObjects(self.origObjects)
     self.hideNotFoundMsg()
@@ -1258,27 +1266,24 @@ class ObjectTableFilter(Widget):
     text = self.edit.text()
     columns = self.table.columns
 
-    if self.colPulldown.currentObject() is None:
+    if self.columnOptions.currentObject() is None:
       # serch in the whole table
-      objs = [o for o in self.colPulldown.objects if o is not None]
+      objs = [o for o in self.columnOptions.objects if o is not None]
       allMatched = []
       for obj in objs:
         objCol = columns[obj]
         matched = self.searchMatches(objCol, text)
         allMatched.append(matched)
-      # matched = [i for m in allMatched for i in m]   #making a single list of matching objs
       matched = set([i for m in allMatched for i in m])   #making a single list of matching objs
-      print(len(matched))
-    else:
-      objCol = columns[self.colPulldown.currentObject()]
 
+    else:
+      objCol = columns[self.columnOptions.currentObject()]
       matched = self.searchMatches(objCol, text)
 
     if matched:
       self.table.setObjects(matched)
     else:
       self.showNotFoundMsg()
-
 
   def searchMatches(self, objCol, text):
     matched = []
@@ -1290,8 +1295,6 @@ class ObjectTableFilter(Widget):
       elif str(text) == str(value):
         matched.append(obj)
     return  matched
-
-
 
 
   def setFilteredObjects(self):

@@ -28,7 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
@@ -228,11 +227,11 @@ class PeakListTableWidget(ObjectTable):
     self._updateSilence = silence
 
   def _updateSettingsWidgets(self):
-    # FIXME do the proper way to update setting widget when refreshing the table contents. LM
+    # FIXME do the proper way for updating setting widget when refreshing the table contents. LM
     if hasattr(self.peakTableModule, 'displayColumnFilterWidget'):
       self.peakTableModule.displayColumnFilterWidget.updateWidgets(self)
     if hasattr(self.peakTableModule, 'strFilterWidget'):
-      self.peakTableModule.strFilterWidget.updateColumnPullDown(self)
+      self.peakTableModule.strFilterWidget.updateColumnOption(self)
 
   def _update(self, peakList):
     "Update the table "

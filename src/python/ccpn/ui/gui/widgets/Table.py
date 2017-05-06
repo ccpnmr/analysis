@@ -1163,12 +1163,17 @@ class ColumnViewSettings(Widget):
     self.table = table
     self.checkBoxes = []
     self.initCheckBoxes()
-
+    self.filterLabel =  Label(self, 'Display Columns', grid=(0,0), vAlign='b')
   def initCheckBoxes(self):
     columns = self.table.columns
     if columns:
       for i, colum in enumerate(columns):
-        cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack, hAlign='l', checked=True)
+        tipTex = 'Hide/Show %s column' % colum.heading
+        cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack,  checked=True,
+                      hAlign='c',tipText= tipTex,)
+
+        cb.setMinimumSize(cb.sizeHint()*1.3)
+
         self.checkBoxes.append(cb)
 
 
@@ -1197,22 +1202,22 @@ class ObjectTableFilter(Widget):
   def __init__(self, table, parent=None, **kw):
     Widget.__init__(self, parent, setLayout=True, **kw)
     self.table = table
-    self.status = None
+
     self.origObjects = self.table.objects
 
-    labelColumn = Label(self, 'Search in', grid=(0,0))
+    labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='c')
 
-    self.colPulldown = PulldownList(self, grid=(0,1))
+    self.colPulldown = PulldownList(self, grid=(0,1), hAlign='c')
 
-    labelObjects = Label(self, 'Search for', grid=(0,2))
+    labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='c')
 
-    self.edit = LineEdit(self,grid=(0,3))
+    self.edit = LineEdit(self,grid=(0,3), hAlign='c')
 
 
     self.searchButtons = ButtonList(self, texts=['Reset','Search'],
                        tipTexts=['Restore Table','Search'],
                        callbacks=[self.restoreTable,self.findOnTable ],
-                       grid=(0, 4))
+                       grid=(0, 4), hAlign='c')
 
     self.msg = Label(self, text='Not Found', grid=(1, 0))
     self.msg.hide()
@@ -1230,9 +1235,15 @@ class ObjectTableFilter(Widget):
 
   def updateColumnPullDown(self, table):
     self.table = table
+    self.origObjects = self.table.objects
     self.setColumnPullDown()
 
+
+
+
   def restoreTable(self):
+    # origObjects =  [obj for obj in self.origObjects if obj is not None]
+    print(self.origObjects)
     self.table.setObjects(self.origObjects)
     self.msg.hide()
     self.edit.clear()
@@ -1255,9 +1266,9 @@ class ObjectTableFilter(Widget):
         objCol = columns[obj]
         matched = self.searchMatches(objCol, text)
         allMatched.append(matched)
-
-      matched = [i for m in allMatched for i in m]   #making a single list of matching objs
-
+      # matched = [i for m in allMatched for i in m]   #making a single list of matching objs
+      matched = set([i for m in allMatched for i in m])   #making a single list of matching objs
+      print(len(matched))
     else:
       objCol = columns[self.colPulldown.currentObject()]
 

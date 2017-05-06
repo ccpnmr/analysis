@@ -211,17 +211,14 @@ class PeakListTableWidget(ObjectTable):
 
     # update the columns table based on the spectrum dim
     self.initColumns(peakList)
-    # FIXME do the proper way to update setting widget when refreshing the table contents
-    if hasattr(self.peakTableModule, 'displayColumnFilterWidget'):
-      self.peakTableModule.displayColumnFilterWidget.updateWidgets(self)
-    if hasattr(self.peakTableModule, 'strFilterWidget'):
-      self.peakTableModule.strFilterWidget.updateColumnPullDown(self)
+
 
     if self._peakNotifier is not None:
       # we have a new peak and hence need to unregister the previous notifier
       self._peakNotifier.unRegister()
     # register a notifier for this peakList
     self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak', self._updateCallback)
+    self._updateSettingsWidgets()
 
     self.ncWidget.select(peakList.pid)
     self._update(peakList)
@@ -229,6 +226,13 @@ class PeakListTableWidget(ObjectTable):
   def setUpdateSilence(self, silence):
     "Silences/unsilences the update of the table until switched again"
     self._updateSilence = silence
+
+  def _updateSettingsWidgets(self):
+    # FIXME do the proper way to update setting widget when refreshing the table contents. LM
+    if hasattr(self.peakTableModule, 'displayColumnFilterWidget'):
+      self.peakTableModule.displayColumnFilterWidget.updateWidgets(self)
+    if hasattr(self.peakTableModule, 'strFilterWidget'):
+      self.peakTableModule.strFilterWidget.updateColumnPullDown(self)
 
   def _update(self, peakList):
     "Update the table "
@@ -238,6 +242,7 @@ class PeakListTableWidget(ObjectTable):
       self.setObjects(peakList.peaks)
       self._silenceCallback = False
       self.show()
+      self._updateSettingsWidgets()
 
   def _updateCallback(self, data):
     "callback for updating the table"

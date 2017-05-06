@@ -230,7 +230,7 @@ class Model(AbstractWrapperObject):
     """Remove all data for model
     """
     data = self.structureEnsemble.data
-    data.drop(data._modelsSelector(self.serial))
+    # data.drop(data._modelsSelector(self.serial))      # ejb - already seems to be empty
 
   @classmethod
   def _getAllWrappedData(cls, parent: StructureEnsemble)-> list:

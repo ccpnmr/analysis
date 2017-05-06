@@ -283,32 +283,40 @@ class StructureTable(ObjectTable):
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
 
-  def testy(self, row, name):
+  def testy(self, row, name, valType):
     try:
-      return getattr(row, name)
+      thisVal = getattr(row, name)
+      if valType is str:
+        return str(thisVal)
+      elif valType is float:
+        return float(thisVal)
+      elif valType is int:
+        return int(thisVal)
+      else:
+        return None
     except:
-      return 0
+      return None
 
   #row.modelNumber, etc., may not exist..
 
   columnDefs = [
-                ('modelNumber', lambda row: int(StructureTable.testy(StructureTable, row, 'modelNumber')), 'modelNumber'),
-                ('chainCode', lambda row: str(StructureTable.testy(StructureTable, row, 'chainCode')), 'chainCode'),
-                ('sequenceId', lambda row: int(StructureTable.testy(StructureTable, row, 'sequenceId')), 'sequenceId'),
-                ('insertionCode', lambda row: str(StructureTable.testy(StructureTable, row, 'insertionCode')), 'insertionCode'),
-                ('residueName', lambda row: str(StructureTable.testy(StructureTable, row, 'residueName')), 'residueName'),
-                ('atomName', lambda row: str(StructureTable.testy(StructureTable, row, 'atomName')), 'atomName'),
-                ('altLocationCode', lambda row: str(StructureTable.testy(StructureTable, row, 'altLocationCode')), 'altLocationCode'),
-                ('element', lambda row: str(StructureTable.testy(StructureTable, row, 'element')), 'element'),
-                ('x', lambda row: float(StructureTable.testy(StructureTable, row, 'x')), 'x'),
-                ('y', lambda row: float(StructureTable.testy(StructureTable, row, 'y')), 'y'),
-                ('z', lambda row: float(StructureTable.testy(StructureTable, row, 'z')), 'z'),
-                ('occupancy', lambda row: float(StructureTable.testy(StructureTable, row, 'occupancy')), 'occupancy'),
-                ('bFactor', lambda row: float(StructureTable.testy(StructureTable, row, 'bFactor')), 'bFactor'),
-                ('nmrChainCode', lambda row: str(StructureTable.testy(StructureTable, row, 'nmrChainCode')), 'nmrChainCode'),
-                ('nmrSequenceCode', lambda row: str(StructureTable.testy(StructureTable, row, 'nmrSequenceCode')), 'nmrSequenceCode'),
-                ('nmrResidueName', lambda row: str(StructureTable.testy(StructureTable, row, 'nmrResidueName')), 'nmrResidueName'),
-                ('nmrAtomName', lambda row: str(StructureTable.testy(StructureTable, row, 'nmrAtomName')), 'nmrAtomName')
+                ('modelNumber', lambda row: StructureTable.testy(StructureTable, row, 'modelNumber', int), 'modelNumber'),
+                ('chainCode', lambda row: StructureTable.testy(StructureTable, row, 'chainCode', str), 'chainCode'),
+                ('sequenceId', lambda row: StructureTable.testy(StructureTable, row, 'sequenceId', int), 'sequenceId'),
+                ('insertionCode', lambda row: StructureTable.testy(StructureTable, row, 'insertionCode', str), 'insertionCode'),
+                ('residueName', lambda row: StructureTable.testy(StructureTable, row, 'residueName', str), 'residueName'),
+                ('atomName', lambda row: StructureTable.testy(StructureTable, row, 'atomName', str), 'atomName'),
+                ('altLocationCode', lambda row: StructureTable.testy(StructureTable, row, 'altLocationCode', str), 'altLocationCode'),
+                ('element', lambda row: StructureTable.testy(StructureTable, row, 'element', str), 'element'),
+                ('x', lambda row: StructureTable.testy(StructureTable, row, 'x', float), 'x'),
+                ('y', lambda row: StructureTable.testy(StructureTable, row, 'y', float), 'y'),
+                ('z', lambda row: StructureTable.testy(StructureTable, row, 'z', float), 'z'),
+                ('occupancy', lambda row: StructureTable.testy(StructureTable, row, 'occupancy', float), 'occupancy'),
+                ('bFactor', lambda row: StructureTable.testy(StructureTable, row, 'bFactor', float), 'bFactor'),
+                ('nmrChainCode', lambda row: StructureTable.testy(StructureTable, row, 'nmrChainCode', str), 'nmrChainCode'),
+                ('nmrSequenceCode', lambda row: StructureTable.testy(StructureTable, row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
+                ('nmrResidueName', lambda row: StructureTable.testy(StructureTable, row, 'nmrResidueName', str), 'nmrResidueName'),
+                ('nmrAtomName', lambda row: StructureTable.testy(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
   ]
 
   def __init__(self, parent, application, **kwds):

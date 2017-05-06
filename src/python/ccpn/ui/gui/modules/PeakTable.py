@@ -157,7 +157,7 @@ class PeakListTableWidget(ObjectTable):
     ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[], autoResize=True, multiSelect=True,
                          actionCallback=self._actionCallback, selectionCallback=self._selectionCallback, grid=(1, 0), gridSpan=(1, 6))
     gridHPos = 0
-    self.ncWidget = PeakListPulldown(parent=self._widget,
+    self.pLwidget = PeakListPulldown(parent=self._widget,
                                      project=self._project, default=0,  # first peakList in project (if present)
                                      grid=(0, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      callback=self._selectionPulldownCallback
@@ -210,7 +210,7 @@ class PeakListTableWidget(ObjectTable):
     self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak', self._updateCallback)
     self._updateSettingsWidgets()
 
-    self.ncWidget.select(peakList.pid)
+    self.pLwidget.select(peakList.pid)
     self._update(peakList)
 
   def setUpdateSilence(self, silence):

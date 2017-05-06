@@ -1187,7 +1187,6 @@ class ColumnViewSettings(Widget):
   def updateWidgets(self, table):
     self.table = table
     if self.checkBoxes:
-      print(self.checkBoxes)
       for cb in self.checkBoxes:
         cb.deleteLater()
     self.checkBoxes = []

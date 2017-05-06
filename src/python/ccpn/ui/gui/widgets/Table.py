@@ -1180,9 +1180,9 @@ class ColumnViewSettings(Widget):
     checkBox = self.sender()
     name = checkBox.text()
     if checkBox.isChecked():
-      self.table._showColumn(name)
+      self._showColumn(name)
     else:
-      self.table._hideColumn(name)
+      self._hideColumn(name)
 
   def updateWidgets(self, table):
     self.table = table
@@ -1192,7 +1192,11 @@ class ColumnViewSettings(Widget):
     self.checkBoxes = []
     self.initCheckBoxes()
 
+  def _hideColumn(self, name):
+    self.table.hideColumn(self.table.getColumnInt(columnName=name))
 
+  def _showColumn(self, name):
+    self.table.showColumn(self.table.getColumnInt(columnName=name))
 
 
 class ObjectTableFilter(Widget):

@@ -183,14 +183,10 @@ class PeakListTableWidget(ObjectTable):
       peakList = self.objects[0].peakList
       self.displayTableForPeakList(peakList) #update the table with new units
 
-  def _hideColumn(self, name):
-    self.hideColumn(self.getColumnInt(columnName=name))
 
-  def _showColumn(self, name):
-    self.showColumn(self.getColumnInt(columnName=name))
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting NmrChain"
+    "Callback for selecting pl"
     peakList = self._project.getByPid(item)
     if peakList is not None:
       self.displayTableForPeakList(peakList)

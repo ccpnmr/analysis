@@ -141,13 +141,12 @@ import pandas as pd
 import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.BasePopup import BasePopup
+from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -1228,8 +1227,6 @@ class ObjectTableFilter(Widget):
                                 callback=self.findOnTable,
                                 grid=(0, 5), hAlign='c')
 
-    self.msg = Label(self, text='Not Found', grid=(1, 0))
-    self.msg.hide()
     self.setColumnOptions()
 
   def setColumnOptions(self):
@@ -1253,7 +1250,6 @@ class ObjectTableFilter(Widget):
   def restoreTable(self):
     # origObjects =  [obj for obj in self.origObjects if obj is not None]
     self.table.setObjects(self.origObjects)
-    self.msg.hide()
     self.edit.clear()
 
   def findOnTable(self):
@@ -1261,7 +1257,6 @@ class ObjectTableFilter(Widget):
       self.restoreTable()
       return
     self.table.setObjects(self.origObjects)
-    self.hideNotFoundMsg()
 
     text = self.edit.text()
     columns = self.table.columns
@@ -1283,7 +1278,9 @@ class ObjectTableFilter(Widget):
     if matched:
       self.table.setObjects(matched)
     else:
-      self.showNotFoundMsg()
+
+      MessageDialog.showWarning('Not found', '')
+
 
   def searchMatches(self, objCol, text):
     matched = []
@@ -1301,11 +1298,6 @@ class ObjectTableFilter(Widget):
     selected = self.table.getSelectedObjects()
     self.table.setObjects(selected)
 
-  def hideNotFoundMsg(self):
-    self.msg.hide()
-
-  def showNotFoundMsg(self):
-    self.msg.show()
 
 class Column:
 

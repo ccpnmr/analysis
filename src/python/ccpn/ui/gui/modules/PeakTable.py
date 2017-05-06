@@ -28,20 +28,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
+
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
-from ccpn.ui.gui.popups.SelectObjectsPopup import SelectObjectsPopup
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
-
 from ccpn.core.lib.Notifiers import Notifier
+
+
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnModule):
@@ -55,7 +52,7 @@ class PeakTable(CcpnModule):
 
   className = 'PeakListTableModule'
 
-  def __init__(self, project, mainWindow, name='PeakList Table', selectedList=None):
+  def __init__(self, project, mainWindow, name='PeakList Table'):
 
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -71,37 +68,35 @@ class PeakTable(CcpnModule):
                                              application=self.application, grid=(0, 0))
 
     # settingsWidget
-    self.displayColumnFilterWidget = ColumnViewSettings(parent=self.settingsWidget,table=self.peakListTable, grid=(0,0))
-    self.strFilterWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
+    self.displayColumnWidget = ColumnViewSettings(parent=self.settingsWidget, table=self.peakListTable, grid=(0, 0))
+    self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
 
 
   def _closeModule(self):
-    """Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks"""
+    """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    # FIXME is this needed?
     self.peakListTable.destroy()
     self.close()
 
 
 class PeakListTableWidget(ObjectTable):
 
-  columnDefs = []
   positionsUnit = UNITS[0] #default
 
   def initColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
-     column = ( Header Name, value, tipText, editOption) 
+     format of column = ( Header Name, value, tipText, editOption) 
      editOption allows the user to modify the value content by doubleclick
      '''
 
     self.columnDefs = []
 
     if peakList is not None:
-
       serialTipText = 'Peak serial number'
       serial = ('#', 'serial', serialTipText, None)
       self.columnDefs.append(serial)
 
       numDim = peakList.spectrum.dimensionCount
-
       # Assign
       for i in range(numDim):
         j = i + 1
@@ -228,10 +223,10 @@ class PeakListTableWidget(ObjectTable):
 
   def _updateSettingsWidgets(self):
     # FIXME do the proper way for updating setting widget when refreshing the table contents. LM
-    if hasattr(self.peakTableModule, 'displayColumnFilterWidget'):
-      self.peakTableModule.displayColumnFilterWidget.updateWidgets(self)
-    if hasattr(self.peakTableModule, 'strFilterWidget'):
-      self.peakTableModule.strFilterWidget.updateColumnOption(self)
+    if hasattr(self.peakTableModule, 'displayColumnWidget'):
+      self.peakTableModule.displayColumnWidget.updateWidgets(self)
+    if hasattr(self.peakTableModule, 'searchWidget'):
+      self.peakTableModule.searchWidget.updateColumnOption(self)
 
   def _update(self, peakList):
     "Update the table "

@@ -151,7 +151,7 @@ class PeakListTableWidget(ObjectTable):
     self.pLwidget = PeakListPulldown(parent=self._widget,
                                      project=self._project, default=0,  # first peakList in project (if present)
                                      grid=(0, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                     callback=self._selectionPulldownCallback
+                                     callback=self._updateAllModule
                                      )
     gridHPos+=1
     self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
@@ -159,60 +159,44 @@ class PeakListTableWidget(ObjectTable):
     self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self.updateUnits,
                                         grid=(0, gridHPos))
 
-    self._peakNotifier = None
-    self._updateSilence = False  # flag to silence updating of the table
+    # self._peakNotifier = None
+    # self._peakListNotifier = None
+    # self._updateSilence = False  # flag to silence updating of the table
 
-    if len(self._project.peakLists) > 0:
-      self.displayTableForPeakList(self._project.peakLists[0])
+    # if len(self._project.peakLists) > 0:
+    #   self.displayTableForPeakList(self._project.peakLists[0])
 
     # register current notifier to select on the table the current peaks
-    self._current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
+    # self._current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
-    # self._project.registerNotifier('PeakList', 'create', self.test, onceOnly=True)
-    # self._project.registerNotifier('PeakList', 'modify', self.test, onceOnly=True)
-    # self._project.registerNotifier('PeakList', 'rename', self.test, onceOnly=True)
-    # self._project.registerNotifier('PeakList', 'delete', self.test, onceOnly=True)
+    self._project.registerNotifier('PeakList', 'create', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('PeakList', 'modify', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('PeakList', 'rename', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('PeakList', 'delete', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('Peak', 'create', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('Peak', 'modify', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('Peak', 'rename', self._updateAllModule, onceOnly=True)
+    self._project.registerNotifier('Peak', 'delete', self._updateAllModule, onceOnly=True)
 
   def updateUnits(self, unit):
+    #update the table with new units
     self._setPositionUnit(unit)
-    if self.objects:
-      peakList = self.objects[0].peakList
-      self.displayTableForPeakList(peakList)
-      #update the table with new units
-    print(self.positionsUnit)
+    self._updateAllModule()
 
-  def test(self, v):
-    self.setObjects(v['theObject'].peaks)
 
-  def _selectionPulldownCallback(self, item):
-    "Callback for selecting pl"
-    peakList = self._project.getByPid(item)
+  def _updateAllModule(self, *kw):
+    self._silenceCallback = True
+    self.clearTable()
+    peakList = self._project.getByPid(self.pLwidget.getText())
     if peakList is not None:
-      self.displayTableForPeakList(peakList)
-      self._selectOnTableCurrentPeaks(currentPeaks=self._current.peaks)
-
-  def displayTableForPeakList(self, peakList):
-    "Display the table for all peakLists"
-
-    # update the columns table based on the spectrum dim
-    self.initColumns(peakList)
-
-
-    if self._peakNotifier is not None:
-      # we have a new peak and hence need to unregister the previous notifier
-      self._peakNotifier.unRegister()
-    # register a notifier for this peakList
-    self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'PeakList',
-                                  self.test)
-    self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak', self._updateCallback)
+      self.initColumns(peakList)
+      self.setObjects(peakList.peaks)
+      # self._silenceCallback = False
+    else:
+      self.setObjects([])
     self._updateSettingsWidgets()
 
-    self.pLwidget.select(peakList.pid)
-    self._update(peakList)
 
-  def setUpdateSilence(self, silence):
-    "Silences/unsilences the update of the table until switched again"
-    self._updateSilence = silence
 
   def _updateSettingsWidgets(self):
     # FIXME do the proper way for updating setting widget when refreshing the table contents. LM
@@ -221,21 +205,6 @@ class PeakListTableWidget(ObjectTable):
     if hasattr(self.peakTableModule, 'searchWidget'):
       self.peakTableModule.searchWidget.updateColumnOption(self)
 
-  def _update(self, peakList):
-    "Update the table "
-    if not self._updateSilence:
-      self.clearTable()
-      self._silenceCallback = True
-      self.setObjects(peakList.peaks)
-      self._silenceCallback = False
-      self.show()
-      self._updateSettingsWidgets()
-
-  def _updateCallback(self, data):
-    "callback for updating the table"
-    peakList = data['theObject']
-    if peakList is not None:
-      self._update(peakList)
 
   def _actionCallback(self, peak, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
@@ -264,12 +233,6 @@ class PeakListTableWidget(ObjectTable):
     else:
       self.clearSelection()
 
-  def destroy(self):
-    "Cleanup of self"
-
-    if self._peakNotifier is not None:
-      self._peakNotifier.unRegister()
-    self._current.unRegisterNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
   @staticmethod
   def _getCommentText(peak):
@@ -287,7 +250,7 @@ class PeakListTableWidget(ObjectTable):
     if value in UNITS:
       PeakListTableWidget.positionsUnit = value
 
-  def _updatePeakLists(self, value):
-    self.peakTable.objectLists = self.project.peakLists
-    self.peakTable._updateSelectorContents()
-#
+
+  def destroy(self):
+    "Cleanup of self"
+    self._current.unRegisterNotify(self._selectOnTableCurrentPeaks, 'peaks')

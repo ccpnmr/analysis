@@ -5,6 +5,13 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
+# NB must be Python 2.7 and 3.x compatible
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -30,8 +37,17 @@ __date__ = ": 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# NB must be Python 2.7 and 3.x compatible
+import time
+import sys
+from collections import OrderedDict as OD
 
+from ..nef import StarIo
+from . import Constants
+from .. import Common as commonUtil
+
+from ccp.general import Io as generalIo
+from memops.general import Io as memopsIo
+from ccp.lib import MoleculeModify
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -40,43 +56,44 @@ maxRandomInt =  2000000000
 # The order is significant, because setting of crosslinks relies on the order frames are read
 # Frames are read in correct order regardless of how they are in the file
 saveFrameReadingOrder = [
-  'nef_nmr_meta_data',
+  # 'nef_nmr_meta_data',
   'nef_molecular_system',
-  'ccpn_sample',
-  'ccpn_substance',
+  # 'ccpn_sample',
+  # 'ccpn_substance',
   'ccpn_assignment',
   'nef_chemical_shift_list',
-  'ccpn_dataset',
+  # 'ccpn_dataset',
   'nef_distance_restraint_list',
   'nef_dihedral_restraint_list',
   'nef_rdc_restraint_list',
   'nef_nmr_spectrum',
   'nef_peak_restraint_links',
-  'ccpn_complex',
-  'ccpn_spectrum_group',
-  'ccpn_restraint_list',
-  'ccpn_notes',
-  'ccpn_additional_data'
+  # 'ccpn_complex',
+  # 'ccpn_spectrum_group',
+  # 'ccpn_restraint_list',
+  # 'ccpn_notes',
+  # 'ccpn_additional_data'
 ]
 
 
-def loadNefFile(memopsRoot, path):
-  """Load NEF file at path into memopsRoot"""
+def loadNefFile(path, memopsRoot=None):
+  """Load NEF file at path into memopsRoot, creting memopsRoot it not passed in"""
 
   nefReader = CcpnNefReader()
   dataBlock = nefReader.getNefData(path)
+  if memopsRoot is None:
+    memopsRoot = memopsIo.newProject(dataBlock.name, path)
   nefReader.importNewProject(memopsRoot, dataBlock)
+  #
+  return memopsRoot
 
 
 class CcpnNefReader:
   # Importer functions - used for converting saveframes and loops
   importers = {}
 
-  def __init__(self, application:str, specificationFile:str=None, mode:str='standard',
-               testing:bool=False):
+  def __init__(self, testing=False):
 
-    self.application = application
-    self.mode=mode
     self.saveFrameName = None
     self.warnings = []
     self.errors = []
@@ -95,7 +112,7 @@ class CcpnNefReader:
     self.defaultChemicalShiftList = None
 
 
-  def getNefData(self, path:str):
+  def getNefData(self, path):
     """Get NEF data structure from file"""
     nmrDataExtent = StarIo.parseNefFile(path)
     dataBlocks = list(nmrDataExtent.values())
@@ -107,7 +124,7 @@ class CcpnNefReader:
     #
     return dataBlock
 
-  def _getSaveFramesInOrder(self, dataBlock:StarIo.NmrDataBlock) -> OD:
+  def _getSaveFramesInOrder(self, dataBlock):
     """Get saveframes in fixed reading order as Ordereddict(category:[saveframe,])"""
     result = OD(((x, []) for x in saveFrameReadingOrder))
     result['other'] = otherFrames = []
@@ -120,17 +137,19 @@ class CcpnNefReader:
     #
     return result
 
-  def importNewProject(self, project:Project, dataBlock:StarIo.NmrDataBlock,
-                       projectIsEmpty:bool=True):
+  def importNewProject(self, project, dataBlock):
     """Import entire project from dataBlock into empty Project"""
 
     t0 = time.time()
 
-
-    # TODO Add error handling
-
     self.warnings = []
+
     self.project = project
+    name = dataBlock.name
+    self.nmrProject = project.newNmrProject(name=name)
+    self.molSystem = project.newMolSystem(code=name, name=name)
+
+
     self.defaultChainCode = None
 
     saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
@@ -168,29 +187,24 @@ class CcpnNefReader:
         if importer is None:
           print ("WARNING, unknown saveframe category", sf_category, saveFrameName)
         else:
-          # NB - newObject may be project, for some saveframes.
-          result = importer(self, project, saveFrame)
-          if isinstance(result, AbstractWrapperObject):
-            self.frameCode2Object[saveFrameName] = result
-          # elif not isinstance(result, list):
-          #   self.warning("Unexpected return %s while reading %s" %
-          #                (result, saveFrameName))
+          pass
 
-          # Handle unmapped elements
-          extraTags = [x for x in saveFrame
-                       if x not in nef2CcpnMap[sf_category]
-                       and x not in ('sf_category', 'sf_framecode')]
-          if extraTags:
-            print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
-            # TODO put here function that stashes data in object, or something
-            # ues newObject here
-          # t2 = time.time()
-          # print('@~@~ loaded', saveFrameName, t2-t1)
-          # t1 = t2
+          # # NBNB check
+          # # NB - newObject may be project, for some saveframes.
+          # result = importer(self, project, saveFrame)
+          # if isinstance(result, AbstractWrapperObject):
+          #   self.frameCode2Object[saveFrameName] = result
+          # # elif not isinstance(result, list):
+          # #   self.warning("Unexpected return %s while reading %s" %
+          # #                (result, saveFrameName))
 
-    # Put metadata in main dataset
-    self.updateMetaData(metaDataFrame)
-
+          # # NBNB check
+          # # Handle unmapped elements
+          # extraTags = [x for x in saveFrame
+          #              if x not in nef2CcpnMap[sf_category]
+          #              and x not in ('sf_category', 'sf_framecode')]
+          # if extraTags:
+          #   print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
 
     t2 = time.time()
     print('Loaded NEF file, time = ', t2-t0)
@@ -200,38 +214,28 @@ class CcpnNefReader:
     self.project = None
 
 
-  def load_nef_nmr_meta_data(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_nmr_meta_data(self, project, saveFrame):
     """load nef_nmr_meta_data saveFrame"""
+    # Nothing we need here - this is a no-op
 
-    # Other data are read in here at the end of the load
-    self.mainDataSetSerial = saveFrame.get('ccpn_dataset_serial')
-
-    return None
-
-    # TODO - store data in this saveframe
-    # for now we store none of this, as the storage slots are in DataSet, not Project
-    # Maybe for another load function?
-  #
-  importers['nef_nmr_meta_data'] = load_nef_nmr_meta_data
+    # Not updated. Invalid
+    raise NotImplementedError()
+  # #
+  # importers['nef_nmr_meta_data'] = load_nef_nmr_meta_data
 
 
-  def load_nef_molecular_system(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_molecular_system(self, project, saveFrame):
     """load nef_molecular_system saveFrame"""
 
-    mapping = nef2CcpnMap['nef_molecular_system']
-    for tag, ccpnTag in mapping.items():
-      if ccpnTag == _isALoop:
-        loop = saveFrame.get(tag)
-        if loop:
-          importer = self.importers[tag]
-          importer(self, project, loop)
+    self.load_nef_sequence(project, saveFrame.get('nef_sequence'))
+    self.load_nef_covalent_links(project, saveFrame.get('nef_covalent_links'))
     #
     return None
-  #
-  importers['nef_molecular_system'] = load_nef_molecular_system
+  # #
+  # importers['nef_molecular_system'] = load_nef_molecular_system
 
 
-  def load_nef_sequence(self, project:Project, loop:StarIo.NmrLoop):
+  def load_nef_sequence(self, molSystem, loop):
     """Load nef_sequence loop"""
 
     result = []
@@ -245,16 +249,16 @@ class CcpnNefReader:
       else:
         ll.append(row)
 
+    # Get default chain code - NB this can break with more than 26 chains, but so what?
     defaultChainCode = None
     if None in chainData:
       defaultChainCode = 'A'
       # Replace chainCode None with default chainCode
       # Selecting the first value that is not already taken.
       while defaultChainCode in chainData:
-        defaultChainCode = commonUtil.incrementName(defaultChainCode)
+        defaultChainCode = chr(ord(defaultChainCode)+1)
       chainData[defaultChainCode] = chainData.pop(None)
     self.defaultChainCode = defaultChainCode
-
 
     sequence2Chain = {}
     tags =('residue_name', 'linking', 'residue_variant')
@@ -262,6 +266,8 @@ class CcpnNefReader:
       compoundName = rows[0].get('ccpn_compound_name')
       role = rows[0].get('ccpn_chain_role')
       comment = rows[0].get('ccpn_chain_comment')
+
+      # NBNB FIXME
       for row in rows:
         if row.get('linking') == 'dummy':
           row['residue_name'] = 'dummy.' + row['residue_name']
@@ -269,65 +275,68 @@ class CcpnNefReader:
 
       lastChain = sequence2Chain.get(sequence)
       if lastChain is None:
-        newSubstance = project.fetchNefSubstance(sequence=rows, name=compoundName)
-        newChain = newSubstance.createChain(shortName=chainCode, role=role,
-                                            comment=comment)
+        molecule = createMoleculeFromNef(name=compoundName, sequence=rows)
+        newChain = molSystem.newChain(code=chainCode, molecule=molecule)
         sequence2Chain[sequence] = newChain
 
-        # Set variant codes:
-        for ii, residue in enumerate(newChain.residues):
-          variantCode = sequence[ii][2]
-
-          if variantCode:
-
-            atomNamesRemoved, atomNamesAdded = residue._wrappedData.getAtomNameDifferences()
-
-
-            for code in variantCode.split(','):
-              code = code.strip()  # Should not be necessary but costs nothing to catch those errors
-              atom = residue.getAtom(code[1:])
-              if code[0] == '-':
-                if atom is None:
-                  residue._project._logger.error(
-                    "Incorrect variantCode %s: No atom named %s found in %s. Skipping ..."
-                    % (variantCode, code, residue)
-                  )
-                else:
-                  atom.delete()
-
-              elif code[0] == '+':
-                if atom is None:
-                  residue.newAtom(name=code[1:])
-                else:
-                  residue._project._logger.error(
-                    "Incorrect variantCode %s: Atom named %s already present in %s. Skipping ..."
-                    % (variantCode, code, residue)
-                  )
-
-              else:
-                residue._project._logger.error(
-                  "Incorrect variantCode %s: must start with '+' or '-'. Skipping ..."
-                  % variantCode
-                )
+        # TODO implement alternative to this
+        # # Set variant codes:
+        # for ii, residue in enumerate(newChain.residues):
+        #   variantCode = sequence[ii][2]
+        #
+        #   if variantCode:
+        #
+        #     atomNamesRemoved, atomNamesAdded = residue._wrappedData.getAtomNameDifferences()
+        #
+        #
+        #     for code in variantCode.split(','):
+        #       code = code.strip()  # Should not be necessary but costs nothing to catch those errors
+        #       atom = residue.getAtom(code[1:])
+        #       if code[0] == '-':
+        #         if atom is None:
+        #           residue._project._logger.error(
+        #             "Incorrect variantCode %s: No atom named %s found in %s. Skipping ..."
+        #             % (variantCode, code, residue)
+        #           )
+        #         else:
+        #           atom.delete()
+        #
+        #       elif code[0] == '+':
+        #         if atom is None:
+        #           residue.newAtom(name=code[1:])
+        #         else:
+        #           residue._project._logger.error(
+        #             "Incorrect variantCode %s: Atom named %s already present in %s. Skipping ..."
+        #             % (variantCode, code, residue)
+        #           )
+        #
+        #       else:
+        #         residue._project._logger.error(
+        #           "Incorrect variantCode %s: must start with '+' or '-'. Skipping ..."
+        #           % variantCode
+        #         )
 
       else:
-        newChain = lastChain.clone(shortName=chainCode)
-        newChain.role = role
-        newChain.comment = comment
+        from memops.general.Util import copySubTree
+        newChain = copySubTree(lastChain, self.molSystem,
+                               topObjectParameters={'code':chainCode})
 
-      for apiResidue in newChain._wrappedData.sortedResidues():
-        # Necessary to guarantee against name clashes
-        # Direct access to avoid unnecessary notifiers
-        apiResidue.__dict__['seqInsertCode'] = '__@~@~__'
-      for ii,apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
-        # NB we have to loop over API residues to be sure we get the residues
-        # in creation order rather than sorted order
-        residue = project._data2Obj[apiResidue]
-        residue.rename(rows[ii].get('sequence_code'))
-        residue._resetIds()
+      newChain.role = role
+      newChain.details = comment
 
-      # Necessary as notification is blanked here:
-      newChain._resetIds()
+      # for apiResidue in newChain._wrappedData.sortedResidues():
+      #   # Necessary to guarantee against name clashes
+      #   # Direct access to avoid unnecessary notifiers
+      #   apiResidue.__dict__['seqInsertCode'] = '__@~@~__'
+      # for ii,apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
+      #   # NB we have to loop over API residues to be sure we get the residues
+      #   # in creation order rather than sorted order
+      #   residue = project._data2Obj[apiResidue]
+      #   residue.rename(rows[ii].get('sequence_code'))
+      #   residue._resetIds()
+      #
+      # # Necessary as notification is blanked here:
+      # newChain._resetIds()
 
       #
       result.append(newChain)
@@ -343,33 +352,36 @@ class CcpnNefReader:
   importers['nef_sequence'] = load_nef_sequence
 
 
-  def load_nef_covalent_links(self, project:Project, loop:StarIo.NmrLoop):
+  def load_nef_covalent_links(self, project, loop):
     """Load nef_sequence loop"""
 
-    result = []
+    # TODO Add reading and setting of disulfides (nothing else here is supported)
+    return None
 
-    for row in loop.data:
-      id1 = Pid.createId(*(row[x] for x in ('chain_code_1', 'sequence_code_1',
-                                           'residue_name_1', 'atom_name_1', )))
-      id2 = Pid.createId(*(row[x] for x in ('chain_code_2', 'sequence_code_2',
-                                           'residue_name_2', 'atom_name_2', )))
-      atom1 = project.getAtom(id1)
-      atom2 = project.getAtom(id2)
-      if atom1 is None:
-        self.warning("Unknown atom %s for bond to %s. Skipping..." % (id1, id2))
-      elif atom2 is None:
-        self.warning("Unknown atom %s for bond to %s. Skipping..." % (id2, id1))
-      else:
-        result.append((atom1, atom2))
-        atom1.addInterAtomBond(atom2)
+    # result = []
     #
-    return result
-  #
-  importers['nef_covalent_links'] = load_nef_covalent_links
+    # for row in loop.data:
+    #   id1 = Pid.createId(*(row[x] for x in ('chain_code_1', 'sequence_code_1',
+    #                                        'residue_name_1', 'atom_name_1', )))
+    #   id2 = Pid.createId(*(row[x] for x in ('chain_code_2', 'sequence_code_2',
+    #                                        'residue_name_2', 'atom_name_2', )))
+    #   atom1 = project.getAtom(id1)
+    #   atom2 = project.getAtom(id2)
+    #   if atom1 is None:
+    #     self.warning("Unknown atom %s for bond to %s. Skipping..." % (id1, id2))
+    #   elif atom2 is None:
+    #     self.warning("Unknown atom %s for bond to %s. Skipping..." % (id2, id1))
+    #   else:
+    #     result.append((atom1, atom2))
+    #     atom1.addInterAtomBond(atom2)
+    # #
+    # return result
+  # #
+  # importers['nef_covalent_links'] = load_nef_covalent_links
 
 
 
-  def preloadAssignmentData(self, dataBlock:StarIo.NmrDataBlock):
+  def preloadAssignmentData(self, dataBlock):
     """Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
     and create NmrResidues in connencted nmrChains in order
 
@@ -434,7 +446,7 @@ class CcpnNefReader:
             nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
 
-  def load_nef_chemical_shift_list(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_chemical_shift_list(self, project, saveFrame):
     """load nef_chemical_shift_list saveFrame"""
 
     # Get ccpn-to-nef mappping for saveframe
@@ -474,7 +486,7 @@ class CcpnNefReader:
 
   importers['nef_chemical_shift_list'] = load_nef_chemical_shift_list
 
-  def load_nef_chemical_shift(self, parent:ChemicalShiftList, loop:StarIo.NmrLoop):
+  def load_nef_chemical_shift(self, parent, loop):
     """load nef_chemical_shift loop"""
 
     result = []
@@ -493,7 +505,7 @@ class CcpnNefReader:
         if isotope:
           isotopeCode = '%s%s' % (isotope, element.title())
         else:
-          isotopeCode = Constants.DEFAULT_ISOTOPE_DICT.get(element.upper())
+          isotopeCode = xConstants.DEFAULT_ISOTOPE_DICT.get(element.upper())
       elif isotope:
         element = commonUtil.name2ElementSymbol(tt[3])
         isotopeCode = '%s%s' % (isotope, element.title())
@@ -514,7 +526,7 @@ class CcpnNefReader:
   #
   importers['nef_chemical_shift'] = load_nef_chemical_shift
 
-  def load_nef_restraint_list(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_restraint_list(self, project, saveFrame):
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
      nef_rdc_restraint_list and ccpn_restraint_list"""
 
@@ -587,8 +599,7 @@ class CcpnNefReader:
   importers['nef_rdc_restraint_list'] = load_nef_restraint_list
   importers['ccpn_restraint_list'] = load_nef_restraint_list
 
-  def load_nef_restraint(self, restraintList:RestraintList, loop:StarIo.NmrLoop,
-                         itemLength:int=None):
+  def load_nef_restraint(self, restraintList, loop, itemLength=None):
     """Serves to load nef_distance_restraint, nef_dihedral_restraint,
      nef_rdc_restraint and ccpn_restraint loops"""
 
@@ -678,7 +689,7 @@ class CcpnNefReader:
   importers['nef_rdc_restraint'] = load_nef_restraint
   importers['ccpn_restraint'] = load_nef_restraint
 
-  def load_nef_nmr_spectrum(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_nmr_spectrum(self, project, saveFrame):
 
     dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
@@ -781,7 +792,7 @@ class CcpnNefReader:
   importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
 
-  def read_nef_spectrum_dimension_transfer(self, loop:StarIo.NmrLoop):
+  def read_nef_spectrum_dimension_transfer(self, loop):
 
     transferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space',
                      'relayed-alternate')
@@ -798,7 +809,7 @@ class CcpnNefReader:
     return result
 
 
-  def load_nef_spectrum_dimension_transfer(self, spectrum:Spectrum, loop:StarIo.NmrLoop):
+  def load_nef_spectrum_dimension_transfer(self, spectrum, loop):
 
     transferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space',
                      'relayed-alternate')
@@ -823,8 +834,7 @@ class CcpnNefReader:
     #
     return result
 
-  def process_nef_spectrum_dimension_transfer(self, spectrum:Spectrum,
-                                              dataLists:Sequence[Sequence]):
+  def process_nef_spectrum_dimension_transfer(self, spectrum, dataLists):
       # Store expTransfers in API as we can not be sure we will get a refExperiment
 
       apiExperiment = spectrum._wrappedData.experiment
@@ -842,7 +852,7 @@ class CcpnNefReader:
           self.warning("Duplicate nef_spectrum_dimension_transfer: %s" % (ll,))
 
 
-  def load_ccpn_spectrum_dimension(self, spectrum:Spectrum, loop:StarIo.NmrLoop) -> dict:
+  def load_ccpn_spectrum_dimension(self, spectrum, loop):
     """Read ccpn_spectrum_dimension loop, set the relevant values,
     and return the spectrum and other parameters for further processing"""
 
@@ -929,7 +939,7 @@ class CcpnNefReader:
   #           if otherCode == atomTypes[otherDim - 1]:
 
 
-  def read_nef_spectrum_dimension(self, project:Project, loop:StarIo.NmrLoop):
+  def read_nef_spectrum_dimension(self, project, loop):
     """Read nef_spectrum_dimension loop and convert data to a dictionary
     of ccpnTag:[per-dimension-value]"""
 
@@ -957,8 +967,10 @@ class CcpnNefReader:
     return result
 
 
-  def load_ccpn_integral_list(self, spectrum:Spectrum,
-                              loop:StarIo.NmrLoop) -> List[IntegralList]:
+  def load_ccpn_integral_list(self, spectrum, loop):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     result = []
 
@@ -976,8 +988,10 @@ class CcpnNefReader:
     return result
 
 
-  def load_ccpn_integral(self, spectrum:Spectrum,
-                              loop:StarIo.NmrLoop) -> List[Integral]:
+  def load_ccpn_integral(self, spectrum, loop):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     result = []
 
@@ -1011,7 +1025,7 @@ class CcpnNefReader:
     #
     return result
 
-  def load_nef_peak(self, peakList:PeakList, loop:StarIo.NmrLoop) -> List[Peak]:
+  def load_nef_peak(self, peakList, loop):
     """Serves to load nef_peak loop"""
 
     result = []
@@ -1103,7 +1117,7 @@ class CcpnNefReader:
   importers['nef_peak'] = load_nef_peak
 
 
-  def load_nef_peak_restraint_links(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_nef_peak_restraint_links(self, project, saveFrame):
     """load nef_peak_restraint_links saveFrame"""
     mapping = nef2CcpnMap['nef_peak_restraint_links']
     for tag, ccpnTag in mapping.items():
@@ -1118,7 +1132,7 @@ class CcpnNefReader:
   importers['nef_peak_restraint_links'] = load_nef_peak_restraint_links
 
 
-  def load_nef_peak_restraint_link(self, project:Project, loop:StarIo.NmrLoop):
+  def load_nef_peak_restraint_link(self, project, loop):
     """Load nef_peak_restraint_link loop"""
 
     links = {}
@@ -1175,7 +1189,10 @@ class CcpnNefReader:
   importers['nef_peak_restraint_link'] = load_nef_peak_restraint_link
 
 
-  def load_ccpn_spectrum_group(self ,project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_spectrum_group(self ,project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1198,8 +1215,11 @@ class CcpnNefReader:
   #
   importers['ccpn_spectrum_group'] = load_ccpn_spectrum_group
 
-  def load_ccpn_group_spectrum(self, parent:SpectrumGroup, loop:StarIo.NmrLoop):
+  def load_ccpn_group_spectrum(self, parent, loop):
     """load ccpn_group_spectrum loop"""
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     spectra = []
     for row in loop.data:
@@ -1217,7 +1237,10 @@ class CcpnNefReader:
   importers['ccpn_group_spectrum'] = load_ccpn_group_spectrum
 
 
-  def load_ccpn_complex(self ,project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_complex(self ,project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1240,8 +1263,11 @@ class CcpnNefReader:
   #
   importers['ccpn_complex'] = load_ccpn_complex
 
-  def load_ccpn_complex_chain(self, parent:Complex, loop:StarIo.NmrLoop):
+  def load_ccpn_complex_chain(self, parent, loop):
     """load ccpn_complex_chain loop"""
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     chains = []
     for row in loop.data:
@@ -1259,7 +1285,10 @@ class CcpnNefReader:
   importers['ccpn_complex_chain'] = load_ccpn_complex_chain
 
 
-  def load_ccpn_sample(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_sample(self, project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     # NBNB TODO add crosslinks to spectrum (also for components)
 
@@ -1285,8 +1314,11 @@ class CcpnNefReader:
   importers['ccpn_sample'] = load_ccpn_sample
 
 
-  def load_ccpn_sample_component(self, parent:Sample, loop:StarIo.NmrLoop):
+  def load_ccpn_sample_component(self, parent, loop):
     """load ccpn_sample_component loop"""
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     result = []
 
@@ -1303,7 +1335,10 @@ class CcpnNefReader:
   importers['ccpn_sample_component'] = load_ccpn_sample_component
 
 
-  def load_ccpn_substance(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_substance(self, project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1359,8 +1394,11 @@ class CcpnNefReader:
   #
   importers['ccpn_substance'] = load_ccpn_substance
 
-  def load_ccpn_substance_synonym(self, parent:Substance, loop:StarIo.NmrLoop):
+  def load_ccpn_substance_synonym(self, parent, loop):
     """load ccpn_substance_synonym loop"""
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     result = [row['synonym'] for row in loop.data]
     parent.synonyms = result
@@ -1369,7 +1407,7 @@ class CcpnNefReader:
   #
   importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
 
-  def load_ccpn_assignment(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_assignment(self, project, saveFrame):
 
     # the saveframe contains nothing but three loops:
     nmrChainLoopName = 'nmr_chain'
@@ -1420,7 +1458,10 @@ class CcpnNefReader:
   importers['ccpn_assignment'] = load_ccpn_assignment
 
 
-  def load_ccpn_notes(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_notes(self, project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     # ccpn_notes contains nothing except for the ccpn_note loop
     loopName = 'ccpn_notes'
@@ -1456,7 +1497,11 @@ class CcpnNefReader:
   importers['ccpn_notes'] = load_ccpn_notes
 
 
-  def load_ccpn_additional_data(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_additional_data(self, project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
+
 
     # ccpn_additional_data contains nothing except for the ccpn_internal_data loop
     loopName = 'ccpn_internal_data'
@@ -1468,7 +1513,10 @@ class CcpnNefReader:
   importers['ccpn_additional_data'] = load_ccpn_additional_data
 
 
-  def load_ccpn_dataset(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+  def load_ccpn_dataset(self, project, saveFrame):
+
+    # Not updated. Invalid
+    raise NotImplementedError()
 
     print ("ccpn_dataset reading is not implemented yet")
 
@@ -1480,8 +1528,7 @@ class CcpnNefReader:
   importers['ccpn_dataset'] = load_ccpn_dataset
 
 
-  def _parametersFromSaveFrame(self, saveFrame:StarIo.NmrSaveFrame, mapping:OD,
-                               ccpnPrefix:str=None):
+  def _parametersFromSaveFrame(self, saveFrame, mapping, ccpnPrefix=None):
     """Extract {parameter:value} dictionary and list of loop names from saveFrame
 
     The mapping gives the map from NEF tags to ccpn tags.
@@ -1518,7 +1565,7 @@ class CcpnNefReader:
     #
     return parameters, loopNames
 
-  def warning(self, message:str):
+  def warning(self, message):
     template = "WARNING in saveFrame%s\n%s"
     self.warnings.append(template % (self.saveFrameName, message))
 
@@ -1531,7 +1578,7 @@ class CcpnNefReader:
     #
     return parameters
 
-  def produceNmrChain(self, chainCode:str=None):
+  def produceNmrChain(self, chainCode=None):
     """Get NmrChain, correcting for possible errors"""
 
     if chainCode is None:
@@ -1546,7 +1593,7 @@ class CcpnNefReader:
         self.warning("New NmrChain:%s name caused an error.  Renamed %s"
                      % (chainCode, newChainCode))
 
-  def produceNmrResidue(self, chainCode:str=None, sequenceCode:str=None, residueType:str=None):
+  def produceNmrResidue(self, chainCode=None, sequenceCode=None, residueType=None):
     """Get NmrResidue, correcting for possible errors"""
 
     inputTuple = (chainCode, sequenceCode, residueType)
@@ -1630,7 +1677,7 @@ class CcpnNefReader:
     self._nmrResidueMap[inputTuple] = result
     return result
 
-  def produceNmrAtom(self, nmrResidue:NmrResidue, name:str, isotopeCode=None):
+  def produceNmrAtom(self, nmrResidue, name, isotopeCode=None):
     """Get NmrAtom from NmrResidue and name, correcting for possible errors"""
 
     if not name:
@@ -1680,15 +1727,8 @@ class CcpnNefReader:
       self.warning("New NmrAtom:%s.%s name caused an error.  Renamed %s.%s"
                    % (nmrResidue._id, name, nmrResidue._id, newName))
 
-  def updateMetaData(self, metaDataFrame:StarIo.NmrSaveFrame):
-    """Add meta information to main data set. Must be done at end of read"""
 
-    # NBNB NOT WORKING YET!
-
-    # dataSet = self.fetchDataSet(self.mainDataSetSerial)
-    self.mainDataSetSerial = None
-
-  def fetchDataSet(self, serial:int=None):
+  def fetchDataSet(self, serial=None):
     """Fetch DataSet with given serial.
     If input is None, use self.defaultDataSetSerial
     If that too is None, create a new DataSet and use its serial as the default
@@ -1723,8 +1763,7 @@ class CcpnNefReader:
     return dataSet
 
 
-def createSpectrum(project:Project, spectrumName:str, spectrumParameters:dict,
-                   dimensionData:dict, transferData:Sequence[Tuple]=None):
+def createSpectrum(project, spectrumName, spectrumParameters, dimensionData, transferData=None):
   """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
 
   :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
@@ -1893,8 +1932,7 @@ def createSpectrum(project:Project, spectrumName:str, spectrumParameters:dict,
   else:
     raise ValueError("Spectrum named %s already exists" % spectrumName)
 
-def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
-                     acquisitionAxisIndex:int, transferData:Sequence[Tuple]):
+def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferData):
 
   nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
   dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
@@ -1915,13 +1953,7 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
           dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
 
   resultMap = {}
-  acquisitionAtEnd = False
   if acquisitionAxisIndex is not None:
-    acquisitionAtEnd = acquisitionAxisIndex >= 0.5*len(isotopeCodes)
-    # if acquisitionAtEnd:
-    #   # reverse, because acquisition end of dimensions should
-    #   # be the one WITHOUT number suffixes
-    #   dimensionIds.reverse()
 
     # Put acquisition axis first, to make sure it gets the lowest number
     # even if it is not teh first to start with.
@@ -1948,10 +1980,175 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
 
     resultMap[dim] = axisCode
   dimensionIds.sort()
-  # NBNB new attempt - may not work
-  # if acquisitionAtEnd:
-  #   # put result back in dimension order
-  #   dimensionIds.reverse()
   result = list(resultMap[ii] for ii in dimensionIds)
   #
   return result
+
+
+def createMoleculeFromNef(project, name, sequence, defaultType='UNK'):
+  """Create a Molecule from a sequence of NEF row dictionaries (or equivalent)"""
+
+  stretches = StarIo.splitNefSequence(sequence)
+  molecule =  project.newMolecule(name=name)
+
+  for stretch in stretches:
+
+    # Try setting start number
+    sequenceCode = stretch[0]['sequence_code']
+    seqCode, seqInsertCode,offset = commonUtil.parseSequenceCode(sequenceCode)
+    if seqCode is None:
+      startNumber = 1
+    else:
+      startNumber = seqCode
+
+    # Create new MolResidues
+    residueTypes = [row.get('residue_name', defaultType) for row in stretch]
+    firstLinking = stretch[0].get('linking')
+    if len(residueTypes) > 1:
+      lastLinking = stretch[-1].get('linking')
+      if (firstLinking in ('start', 'single', 'nonlinear', 'dummy') or
+          lastLinking == 'end'):
+        isCyclic = False
+      else:
+        # We use isCyclic to set the ends to 'middle'. It gets sorted out below
+        isCyclic = True
+
+      molResidues = molecule.extendMolResidues(sequence=residueTypes, startNumber=startNumber,
+                                               isCyclic=isCyclic)
+
+      # Adjust linking and descriptor
+      if isCyclic:
+        if firstLinking != 'cyclic' or lastLinking != 'cyclic':
+          # not cyclic after all - remove cyclising link
+          cyclicLink = molResidues[-1].findFirstMolResLinkEnd(linkCode='next').molResLink
+          cyclicLink.delete()
+      else:
+        if firstLinking != 'start':
+          ff = molResidues[0].chemComp.findFirstChemCompVar
+          chemCompVar = (ff(linking='middle', isDefaultVar=True) or ff(linking='middle'))
+          molResidues[0].__dict__['linking'] = 'middle'
+          molResidues[0].__dict__['descriptor'] = chemCompVar.descriptor
+        if lastLinking != 'end':
+          ff = molResidues[-1].chemComp.findFirstChemCompVar
+          chemCompVar = (ff(linking='middle', isDefaultVar=True) or ff(linking='middle'))
+          molResidues[-1].__dict__['linking'] = 'middle'
+          molResidues[-1].__dict__['descriptor'] = chemCompVar.descriptor
+    else:
+      # Only one residue
+      # residueType = residueTypes[0]
+      # if residueType.startswith('dummy.'):
+      #   tt = ('dummy',residueType[6:])
+      # else:
+      tt = Constants.residueName2chemCompId.get(residueTypes[0])
+      if not tt:
+        project._logger.warning("""Could not access ChemComp for %s - replacing with %s
+NB - could be a failure in fetching remote information.
+Are you off line?""" % (residueTypes[0], defaultType))
+        tt = Constants.residueName2chemCompId.get(defaultType)
+      if tt:
+        chemComp = generalIo.getChemComp(project, tt[0], tt[1])
+        if chemComp:
+          chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
+                          chemComp.findFirstChemCompVar()) # just a default
+          molecule.newMolResidue(seqCode=startNumber, chemCompVar=chemCompVar)
+
+        else:
+          raise ValueError("Residue type %s %s: Error in getting template information"
+                           % (residueTypes[0], tt))
+
+      else:
+        raise ValueError("Residue type %s not recognised" % residueTypes[0])
+
+    startNumber += len(residueTypes)
+  #
+  return molecule
+
+
+
+def extendMolResidues(molecule, sequence, startNumber=1, isCyclic=False):
+  """Descrn: Adds MolResidues for a sequence of residueNames to Molecule.
+             Consecutive protein or DNA/RNA residues are connected, other residues remain unlinked
+
+     Inputs: Ccp.Molecule.Molecule,
+             List of Words (residueName),
+             Int (first MolResidue.seqCode)
+             bool (is molecule cyclic?)
+
+     Output: List of new Ccp.Molecule.MolResidues
+  """
+
+  root = molecule.root
+
+  if not sequence:
+    return []
+
+  # Reset startNumber to match pre-existing MolResidues
+  oldMolResidues = molecule.molResidues
+  if oldMolResidues:
+    nn = max([x.seqCode for x in oldMolResidues]) + 1
+    startNumber = max(startNumber, nn)
+
+  # Convert to sequence of (molType, ccpCode) and check for known residueNames
+  residueName2chemCompId = Constants.residueName2chemCompId
+  seqInput = [residueName2chemCompId.get(x) for x in sequence]
+  # seqInput = []
+  # for x in sequence:
+  #   if x.startswith('dummy.'):
+  #     # Dummy residue, special handling
+  #     seqInput.append(('dummy',x[6:]))
+  #   else:
+  #     seqInput.append(residueName2chemCompId.get(x))
+
+  if None in seqInput:
+    ii = seqInput.index(None)
+    raise ValueError("Unknown residueName %s at position %s in sequence"
+                     % (sequence[ii], ii))
+
+  # Divide molecule in stretches by type, and add the residues one stretch at a time
+  result = []
+
+  offset1 = 0
+  while offset1 < len(seqInput):
+    molType1, ccpCode = seqInput[offset1]
+
+    if molType1 in Constants.LINEAR_POLYMER_TYPES:
+      # Linear polymer stretch - add to stretch
+      offset2 = offset1 + 1
+      while offset2 < len(seqInput):
+        molType2 = seqInput[offset2][0]
+        if (molType2 in Constants.LINEAR_POLYMER_TYPES
+            and (molType1 == 'protein') == (molType2 == 'protein')):
+          # Either both protein or both RNA/DNA
+          offset2 += 1
+        else:
+          break
+
+      if offset2 - offset1 > 1:
+        result.extend(MoleculeModify.makeLinearSequence(molecule, seqInput[offset1:offset2],
+                                                        seqCodeStart=startNumber+offset1,
+                                                        isCyclic=isCyclic))
+        offset1 = offset2
+        # End of stretch. Skip rest of loop and go on to next residue
+        continue
+
+    # No linear polymer stretch was found. Deal with residue by itself
+    # assert  molType1 not in LINEAR_POLYMER_TYPES or offset2 - offset1 == 1
+    chemComp = generalIo.getChemComp(root, molType1, ccpCode)
+    if chemComp:
+      chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
+                      chemComp.findFirstChemCompVar()) # just a default
+
+      result.append(molecule.newMolResidue(seqCode=startNumber+offset1, chemCompVar=chemCompVar))
+      offset1 += 1
+
+    else:
+      raise ValueError('ChemComp %s,%s cannot be found.' % (molType1, ccpCode))
+
+  #
+  return result
+
+if __name__ == '__main__':
+  path = sys.argv[1]
+  memopsRoot = loadNefFile(path)
+  loadNefFile(memopsRoot, path)
+  memopsRoot.saveModified()

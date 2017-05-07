@@ -81,7 +81,7 @@ class PeakTable(CcpnModule):
 
 class PeakListTableWidget(ObjectTable):
 
-  positionsUnit = UNITS[0] #default
+  positionsUnit = UNITS[0] #default, updated by a pulldownList
 
   def initColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
@@ -106,7 +106,7 @@ class PeakListTableWidget(ObjectTable):
     for i in range(peakList.spectrum.dimensionCount):
       positionTipText = 'Peak position in dimension %s' % str(i + 1)
       self.columnDefs.append(('Pos F%s' % str(i + 1),
-                              lambda pk, dim=i, unit=self.positionsUnit: getPeakPosition(pk, dim, unit),
+                              lambda pk, dim=i, unit=PeakListTableWidget.positionsUnit: getPeakPosition(pk, dim, unit),
                               positionTipText, None))
 
     # linewidth column TODO remove hardcoded Hz unit
@@ -135,15 +135,6 @@ class PeakListTableWidget(ObjectTable):
     '''set the columns on the table from the list of tuples "columnDefs"  '''
     columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
     self.setColumns(columns)
-
-  def _getCommentText(self, peak):
-    if peak.comment == '' or not peak.comment:
-      return ' '
-    else:
-      return peak.comment
-
-  def _setComment(self, peak, value):
-    peak.comment = value
 
 
   def __init__(self, parent, moduleParent, application, **kwds):
@@ -177,13 +168,21 @@ class PeakListTableWidget(ObjectTable):
     # register current notifier to select on the table the current peaks
     self._current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
+    # self._project.registerNotifier('PeakList', 'create', self.test, onceOnly=True)
+    # self._project.registerNotifier('PeakList', 'modify', self.test, onceOnly=True)
+    # self._project.registerNotifier('PeakList', 'rename', self.test, onceOnly=True)
+    # self._project.registerNotifier('PeakList', 'delete', self.test, onceOnly=True)
+
   def updateUnits(self, unit):
-    self.positionsUnit = unit
+    self._setPositionUnit(unit)
     if self.objects:
       peakList = self.objects[0].peakList
-      self.displayTableForPeakList(peakList) #update the table with new units
+      self.displayTableForPeakList(peakList)
+      #update the table with new units
+    print(self.positionsUnit)
 
-
+  def test(self, v):
+    self.setObjects(v['theObject'].peaks)
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting pl"
@@ -203,6 +202,8 @@ class PeakListTableWidget(ObjectTable):
       # we have a new peak and hence need to unregister the previous notifier
       self._peakNotifier.unRegister()
     # register a notifier for this peakList
+    self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'PeakList',
+                                  self.test)
     self._peakNotifier = Notifier(peakList, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak', self._updateCallback)
     self._updateSettingsWidgets()
 
@@ -280,7 +281,12 @@ class PeakListTableWidget(ObjectTable):
   @staticmethod
   def _setComment(peak, value):
     peak.comment = value
-#
+
+  @staticmethod
+  def _setPositionUnit(value):
+    if value in UNITS:
+      PeakListTableWidget.positionsUnit = value
+
   def _updatePeakLists(self, value):
     self.peakTable.objectLists = self.project.peakLists
     self.peakTable._updateSelectorContents()

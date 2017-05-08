@@ -72,9 +72,21 @@ class PeakTable(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
 
 
+  def _getPeakTable(self):
+    " CCPN-INTERNAL: used to get peakListTable"
+    return self.peakListTable
+
+
+  def _getDisplayColumnWidget(self):
+    " CCPN-INTERNAL: used to get displayColumnWidget"
+    return self.displayColumnWidget
+
+  def _getSearchWidget(self):
+    " CCPN-INTERNAL: used to get searchWidget"
+    return self.searchWidget
+
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification """
-    # FIXME is this needed?
     self.peakListTable.destroy()
     self.close()
 
@@ -82,65 +94,60 @@ class PeakTable(CcpnModule):
 class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default, updated by a pulldownList
+  dimension = 1 #default
 
-  def initColumns(self, peakList):
+  def _getTableColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
      format of column = ( Header Name, value, tipText, editOption) 
      editOption allows the user to modify the value content by doubleclick
      '''
 
-    self.columnDefs = []
+    columnDefs = []
 
-    if not peakList:
-      self.setObjects([])
-
-    self.columnDefs.append(('#', 'serial', 'Peak serial number', None))
+    columnDefs.append(('#', 'serial', 'Peak serial number', None))
 
     # Assignment column
     for i in range(peakList.spectrum.dimensionCount):
       assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-      self.columnDefs.append(
+      columnDefs.append(
         ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
 
     # Peak positions column
     for i in range(peakList.spectrum.dimensionCount):
       positionTipText = 'Peak position in dimension %s' % str(i + 1)
-      self.columnDefs.append(('Pos F%s' % str(i + 1),
+      columnDefs.append(('Pos F%s' % str(i + 1),
                               lambda pk, dim=i, unit=PeakListTableWidget.positionsUnit: getPeakPosition(pk, dim, unit),
                               positionTipText, None))
 
     # linewidth column TODO remove hardcoded Hz unit
     for i in range(peakList.spectrum.dimensionCount):
       linewidthTipTexts = 'Peak line width %s' % str(i + 1)
-      self.columnDefs.append(
+      columnDefs.append(
         ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None))
 
     # height column
     heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-    self.columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
+    columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
 
     # volume column
     volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-    self.columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
+    columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
 
     # comment column
     commentsTipText = 'Textual notes about the peak'
-    self.columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
+    columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
                             lambda pk, value: PeakListTableWidget._setComment(pk, value)))
 
-
-    self._setColumns()
-
-  def _setColumns(self):
-    '''set the columns on the table from the list of tuples "columnDefs"  '''
-    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
-    self.setColumns(columns)
+    return [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in
+               columnDefs]
 
 
   def __init__(self, parent, moduleParent, application, **kwds):
     self._project = application.project
     self._current = application.current
-    self.peakTableModule = moduleParent
+    self.moduleParent = moduleParent
+    self.settingWidgets = None
+
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
@@ -159,24 +166,25 @@ class PeakListTableWidget(ObjectTable):
     self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self.updateUnits,
                                         grid=(0, gridHPos))
 
-    # self._peakNotifier = None
-    # self._peakListNotifier = None
-    # self._updateSilence = False  # flag to silence updating of the table
 
-    # if len(self._project.peakLists) > 0:
-    #   self.displayTableForPeakList(self._project.peakLists[0])
+    #
+    self._peakListNotifier = None
+    # self._spectrumDeleteNotifier = Notifier(self._project,
+    #                                         [Notifier.DELETE], 'Spectrum',
+    #                                         self._updateAllModule
+    #                                         )
+    self._peakListDeleteNotifier =  Notifier(self._project,
+                                             [Notifier.DELETE], 'PeakList',
+                                             self._updateAllModule
+                                             )
 
-    # register current notifier to select on the table the current peaks
-    # self._current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
+    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT],
+                                             targetName='peaks',
+                                             callback=self._selectOnTableCurrentPeaksNotifierCallback)
 
-    self._project.registerNotifier('PeakList', 'create', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('PeakList', 'modify', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('PeakList', 'rename', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('PeakList', 'delete', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('Peak', 'create', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('Peak', 'modify', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('Peak', 'rename', self._updateAllModule, onceOnly=True)
-    self._project.registerNotifier('Peak', 'delete', self._updateAllModule, onceOnly=True)
+    self._displayTable()
+
+
 
   def updateUnits(self, unit):
     #update the table with new units
@@ -185,33 +193,44 @@ class PeakListTableWidget(ObjectTable):
 
 
   def _updateAllModule(self, *kw):
+    self._displayTable()
+    self._updateSettingsWidgets()
+
+  def _deleteCallback(self, *kw):
+    self._updateAllModule()
+
+  def _displayTable(self):
     self._silenceCallback = True
     self.clearTable()
     peakList = self._project.getByPid(self.pLwidget.getText())
     if peakList is not None:
-      self.initColumns(peakList)
-      self.setObjects(peakList.peaks)
-      # self._silenceCallback = False
+      self.setObjectsAndColumns(objects=peakList.peaks, columns=self._getTableColumns(peakList))
+      self._selectOnTableCurrentPeaks(self._current.peaks)
+
+      ## Set a notifier for this PeakList
+      if self._peakListNotifier is not None:
+        self._peakListNotifier.unRegister()
+      self._peakListNotifier = Notifier(peakList,
+                                        [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
+                                        self._updateAllModule
+                                        )
     else:
       self.setObjects([])
-    self._updateSettingsWidgets()
-
 
 
   def _updateSettingsWidgets(self):
-    # FIXME do the proper way for updating setting widget when refreshing the table contents. LM
-    if hasattr(self.peakTableModule, 'displayColumnWidget'):
-      self.peakTableModule.displayColumnWidget.updateWidgets(self)
-    if hasattr(self.peakTableModule, 'searchWidget'):
-      self.peakTableModule.searchWidget.updateColumnOption(self)
-
+    ''' update settings Widgets according with the new displayed table '''
+    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+    displayColumnWidget.updateWidgets(self)
+    searchWidget = self.moduleParent._getSearchWidget()
+    searchWidget.updateWidgets(self)
 
   def _actionCallback(self, peak, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
     if self._current.strip is not None:
-        navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
+      navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
     else:
       self._project._logger.warn('Impossible to navigate to peak position. Set a current strip first')
 
@@ -224,6 +243,10 @@ class PeakListTableWidget(ObjectTable):
       self._current.clearPeaks()
     else:
       self._current.peaks = peaks
+
+  def _selectOnTableCurrentPeaksNotifierCallback(self, data):
+    currentPeaks = data['value']
+    self._selectOnTableCurrentPeaks(currentPeaks)
 
   def _selectOnTableCurrentPeaks(self, currentPeaks):
     ''' highlight current peaks on the opened peak table '''
@@ -253,4 +276,4 @@ class PeakListTableWidget(ObjectTable):
 
   def destroy(self):
     "Cleanup of self"
-    self._current.unRegisterNotify(self._selectOnTableCurrentPeaks, 'peaks')
+    self._selectOnTableCurrentPeaksNotifier.unRegister()

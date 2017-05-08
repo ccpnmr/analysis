@@ -1158,7 +1158,6 @@ class ColumnViewSettings(Widget):
 
   def __init__(self, table, parent=None, **kw):
     Widget.__init__(self, parent, setLayout=True, **kw)
-    # Base.__init__(self, **kw)
     self.table = table
     self.checkBoxes = []
     self.initCheckBoxes()
@@ -1242,7 +1241,7 @@ class ObjectTableFilter(Widget):
       self.columnOptions.addItem(text, objectsRange[i])
     self.columnOptions.setIndex(0)
 
-  def updateColumnOption(self, table):
+  def updateWidgets(self, table):
     self.table = table
     self.origObjects = self.table.objects
     self.setColumnOptions()

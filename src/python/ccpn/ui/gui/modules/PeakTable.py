@@ -95,11 +95,13 @@ class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default, updated by a pulldownList
 
+
   def __init__(self, parent, moduleParent, application, **kwds):
     self._project = application.project
     self._current = application.current
     self.moduleParent = moduleParent
     self.settingWidgets = None
+    self._selectedPeakList = None
 
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
@@ -111,7 +113,7 @@ class PeakListTableWidget(ObjectTable):
     self.pLwidget = PeakListPulldown(parent=self._widget,
                                      project=self._project, default=0,  # first peakList in project (if present)
                                      grid=(0, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                     callback=self._updateAllModule
+                                     callback=self._pulldownPLcallback
                                      )
     gridHPos+=1
     self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
@@ -129,8 +131,8 @@ class PeakListTableWidget(ObjectTable):
 
 
     self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT],
-                                             targetName='peaks',
-                                             callback=self._selectOnTableCurrentPeaksNotifierCallback)
+                                                       targetName='peaks',
+                                                       callback=self._selectOnTableCurrentPeaksNotifierCallback)
 
     self._spectrumDeleteNotifier = Notifier(self._project,
                                             [Notifier.DELETE], 'Spectrum',
@@ -141,7 +143,6 @@ class PeakListTableWidget(ObjectTable):
                                              self._deleteCallback
                                              )
     self._displayTable()
-    self._registerPeakNotifier()
 
   def _getTableColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
@@ -149,6 +150,7 @@ class PeakListTableWidget(ObjectTable):
      editOption allows the user to modify the value content by doubleclick
      '''
 
+    print('Getting columns ')
     columnDefs = []
 
     # Serial column
@@ -195,41 +197,63 @@ class PeakListTableWidget(ObjectTable):
     self._updateAllModule()
 
 
+  def _pulldownPLcallback(self, data):
+
+    print('_pulldownPLcallback')
+    self._updateAllModule()
+
+
+
   def _updateAllModule(self, *kw):
     self._displayTable()
     self._updateSettingsWidgets()
 
+  def _peakNotifierCallback(self, *kw):
+    print('!!!!' * 1000)
+    print('_peakNotifierCallback')
+    self._unregisterObjNotifier()
+
+    self._displayTable()
+    self._updateSettingsWidgets()
+
+
   def _deleteCallback(self, *kw):
-    print('@@@'*1000)
-    self._selectOnTableCurrentPeaksNotifier.unRegister()
+    print('$$$$' * 1000)
+    print('_deleteCallback ', kw)
+
     if self._peakListNotifier is not None:
       self._peakListNotifier.unRegister()
+
+    if self._selectedPeakList is not None:
+      self.pLwidget.select(self._selectedPeakList.pid)
+
     self._updateAllModule()
 
 
   def _displayTable(self):
+    print('@@@@'*1000)
+    print('_displayTable')
+
     self._silenceCallback = True
-    self.setObjects([])
-    peakList = self._project.getByPid(self.pLwidget.getText())
-    if peakList is not None:
-      self.setObjectsAndColumns(objects=peakList.peaks, columns=self._getTableColumns(peakList))
+    self.setObjectsAndColumns(objects=[],columns=[])
+    self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
+    if self._selectedPeakList is not None:
+      self.setObjectsAndColumns(objects=self._selectedPeakList.peaks, columns=self._getTableColumns(self._selectedPeakList))
       self._selectOnTableCurrentPeaks(self._current.peaks)
-
-      ## Set a notifier for this PeakList
-      if self._peakListNotifier is not None:
-        self._peakListNotifier.unRegister()
-
     else:
       self.setObjects([])
+    print('columns> ',len(self.columns))
 
   def _registerPeakNotifier(self):
+    print('>>>>' * 1000)
+    print('_registerPeakNotifier')
     peakList = self._project.getByPid(self.pLwidget.getText())
     if peakList is not None:
+
       self._peakListNotifier = Notifier(peakList,
                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-                                        self._updateAllModule
+                                        self._peakNotifierCallback
                                         )
-
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''
@@ -281,12 +305,30 @@ class PeakListTableWidget(ObjectTable):
   def _setComment(peak, value):
     peak.comment = value
 
+  @property
+  def _selectedPeakList(self):
+    return self.__selectedPeakList
+
+  @_selectedPeakList.setter
+  def _selectedPeakList(self, value):
+    self.__selectedPeakList = value
+
+
 
   def _setPositionUnit(self, value):
     if value in UNITS:
       PeakListTableWidget.positionsUnit = value
 
+  def _unregisterObjNotifier(self):
+
+    if self._peakListDeleteNotifier:
+      self._peakListDeleteNotifier.unRegister()
+    if self._spectrumDeleteNotifier:
+      self._spectrumDeleteNotifier.unRegister()
+    if self._peakListNotifier is not None:
+      self._peakListNotifier.unRegister()
 
   def destroy(self):
     "Cleanup of self"
+    self._unregisterObjNotifier()
     self._selectOnTableCurrentPeaksNotifier.unRegister()

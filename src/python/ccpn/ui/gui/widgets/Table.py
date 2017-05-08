@@ -1236,6 +1236,7 @@ class ObjectTableFilter(Widget):
     texts = [c.heading for c in columns]
     objectsRange = range(len(columns))
 
+    self.columnOptions.clear()
     self.columnOptions.addItem('Whole Table', object=None)
     for i, text in enumerate(texts):
       self.columnOptions.addItem(text, objectsRange[i])
@@ -1264,11 +1265,9 @@ class ObjectTableFilter(Widget):
     columns = self.table.columns
 
     if self.columnOptions.currentObject() is None:
-      # serch in the whole table
-      objs = [o for o in self.columnOptions.objects if o is not None]
       allMatched = []
-      for obj in objs:
-        objCol = columns[obj]
+      for i in range(len(columns)):
+        objCol = columns[i]
         matched = self.searchMatches(objCol, text)
         allMatched.append(matched)
       matched = set([i for m in allMatched for i in m])   #making a single list of matching objs

@@ -94,53 +94,6 @@ class PeakTable(CcpnModule):
 class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default, updated by a pulldownList
-  dimension = 1 #default
-
-  def _getTableColumns(self, peakList):
-    '''Add default columns  plus the ones according with peakList.spectrum dimension
-     format of column = ( Header Name, value, tipText, editOption) 
-     editOption allows the user to modify the value content by doubleclick
-     '''
-
-    columnDefs = []
-
-    columnDefs.append(('#', 'serial', 'Peak serial number', None))
-
-    # Assignment column
-    for i in range(peakList.spectrum.dimensionCount):
-      assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
-      columnDefs.append(
-        ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
-
-    # Peak positions column
-    for i in range(peakList.spectrum.dimensionCount):
-      positionTipText = 'Peak position in dimension %s' % str(i + 1)
-      columnDefs.append(('Pos F%s' % str(i + 1),
-                              lambda pk, dim=i, unit=PeakListTableWidget.positionsUnit: getPeakPosition(pk, dim, unit),
-                              positionTipText, None))
-
-    # linewidth column TODO remove hardcoded Hz unit
-    for i in range(peakList.spectrum.dimensionCount):
-      linewidthTipTexts = 'Peak line width %s' % str(i + 1)
-      columnDefs.append(
-        ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None))
-
-    # height column
-    heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
-    columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
-
-    # volume column
-    volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
-    columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
-
-    # comment column
-    commentsTipText = 'Textual notes about the peak'
-    columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
-                            lambda pk, value: PeakListTableWidget._setComment(pk, value)))
-
-    return [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in
-               columnDefs]
-
 
   def __init__(self, parent, moduleParent, application, **kwds):
     self._project = application.project
@@ -173,18 +126,68 @@ class PeakListTableWidget(ObjectTable):
     #                                         [Notifier.DELETE], 'Spectrum',
     #                                         self._updateAllModule
     #                                         )
-    self._peakListDeleteNotifier =  Notifier(self._project,
-                                             [Notifier.DELETE], 'PeakList',
-                                             self._updateAllModule
-                                             )
+
 
     self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT],
                                              targetName='peaks',
                                              callback=self._selectOnTableCurrentPeaksNotifierCallback)
 
+    self._spectrumDeleteNotifier = Notifier(self._project,
+                                            [Notifier.DELETE], 'Spectrum',
+                                            self._deleteCallback
+                                            )
+    self._peakListDeleteNotifier =  Notifier(self._project,
+                                             [Notifier.DELETE], 'PeakList',
+                                             self._deleteCallback
+                                             )
     self._displayTable()
+    self._registerPeakNotifier()
 
+  def _getTableColumns(self, peakList):
+    '''Add default columns  plus the ones according with peakList.spectrum dimension
+     format of column = ( Header Name, value, tipText, editOption) 
+     editOption allows the user to modify the value content by doubleclick
+     '''
 
+    columnDefs = []
+
+    # Serial column
+    columnDefs.append(('#', 'serial', 'Peak serial number', None))
+
+    # Assignment column
+    for i in range(peakList.spectrum.dimensionCount):
+      assignTipText = 'NmrAtom assignments of peak in dimension %s' % str(i + 1)
+      columnDefs.append(
+        ('Assign F%s' % str(i + 1), lambda pk, dim=i: getPeakAnnotation(pk, dim), assignTipText, None))
+
+    # Peak positions column
+    for i in range(peakList.spectrum.dimensionCount):
+      positionTipText = 'Peak position in dimension %s' % str(i + 1)
+      columnDefs.append(('Pos F%s' % str(i + 1),
+                         lambda pk, dim=i, unit=PeakListTableWidget.positionsUnit: getPeakPosition(pk, dim, unit),
+                         positionTipText, None))
+
+    # linewidth column TODO remove hardcoded Hz unit
+    for i in range(peakList.spectrum.dimensionCount):
+      linewidthTipTexts = 'Peak line width %s' % str(i + 1)
+      columnDefs.append(
+        ('LW F%s (Hz)' % str(i + 1), lambda pk, dim=i: getPeakLinewidth(pk, dim), linewidthTipTexts, None))
+
+    # height column
+    heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
+    columnDefs.append(('Height', lambda pk: pk.height, heightTipText, None))
+
+    # volume column
+    volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
+    columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
+
+    # comment column
+    commentsTipText = 'Textual notes about the peak'
+    columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
+                       lambda pk, value: PeakListTableWidget._setComment(pk, value)))
+
+    return [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in
+            columnDefs]
 
   def updateUnits(self, unit):
     #update the table with new units
@@ -197,11 +200,16 @@ class PeakListTableWidget(ObjectTable):
     self._updateSettingsWidgets()
 
   def _deleteCallback(self, *kw):
+    print('@@@'*1000)
+    self._selectOnTableCurrentPeaksNotifier.unRegister()
+    if self._peakListNotifier is not None:
+      self._peakListNotifier.unRegister()
     self._updateAllModule()
+
 
   def _displayTable(self):
     self._silenceCallback = True
-    self.clearTable()
+    self.setObjects([])
     peakList = self._project.getByPid(self.pLwidget.getText())
     if peakList is not None:
       self.setObjectsAndColumns(objects=peakList.peaks, columns=self._getTableColumns(peakList))
@@ -210,12 +218,17 @@ class PeakListTableWidget(ObjectTable):
       ## Set a notifier for this PeakList
       if self._peakListNotifier is not None:
         self._peakListNotifier.unRegister()
+
+    else:
+      self.setObjects([])
+
+  def _registerPeakNotifier(self):
+    peakList = self._project.getByPid(self.pLwidget.getText())
+    if peakList is not None:
       self._peakListNotifier = Notifier(peakList,
                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
                                         self._updateAllModule
                                         )
-    else:
-      self.setObjects([])
 
 
   def _updateSettingsWidgets(self):
@@ -268,8 +281,8 @@ class PeakListTableWidget(ObjectTable):
   def _setComment(peak, value):
     peak.comment = value
 
-  @staticmethod
-  def _setPositionUnit(value):
+
+  def _setPositionUnit(self, value):
     if value in UNITS:
       PeakListTableWidget.positionsUnit = value
 

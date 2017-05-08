@@ -43,8 +43,11 @@ class CcpnGridItem(UIGraphicsItem):
         UIGraphicsItem.viewRangeChanged(self)
         self.picture = None
 
-    def paint(self, p, opt, widget):
+    def viewTransformChanged(self):                 # ejb - causes a redraw when new strip added
+        UIGraphicsItem.viewTransformChanged(self)
+        self.picture = None
 
+    def paint(self, p, opt, widget):
         if self.picture is None:
             self.generatePicture()
         p.drawPicture(QtCore.QPointF(0, 0), self.picture)
@@ -78,7 +81,7 @@ class CcpnGridItem(UIGraphicsItem):
             nl = (dist / d) + 0.5
 
             for ax in range(0,2):  ## Draw grid for both axes
-                ppl = dim[ax] / nl[ax]
+                ppl = np.array( dim[ax] / nl[ax] )                      # ejb
                 c = np.clip(3.*(ppl-3), 0., 30.)
                 if self.gridColour == '#f7ffff':
                   linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))

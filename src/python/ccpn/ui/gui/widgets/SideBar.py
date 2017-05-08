@@ -116,10 +116,12 @@ NEW_ITEM_DICT = {
 ### Flag example code removed in revision 7686
 
 class SideBar(QtGui.QTreeWidget, Base):
-  def __init__(self, parent=None ):
+  def __init__(self, parent=None, mainWindow=None):
 
     QtGui.QTreeWidget.__init__(self, parent)
     Base.__init__(self, acceptDrops=True)
+
+    self.mainWindow = parent                      # ejb - needed for moduleArea
 
     self._typeToItem = dd = {}
 
@@ -587,12 +589,24 @@ class SideBar(QtGui.QTreeWidget, Base):
                'This function has not been implemented in the current version',
                colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
-      if self._appBase.ui.mainWindow is not None:
-        mainWindow = self._appBase.ui.mainWindow
+      # if self._application.ui.mainWindow is not None:
+      #   mainWindow = self._application.ui.mainWindow
+      # else:
+      #   mainWindow = self._application._mainWindow
+      # self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
+      #                                name='Notes Editor', note=obj)
+
+      if self.mainWindow:
+        self.notesEditor = NotesEditor(self.mainWindow, self.project
+                                       , mainWindow=self.mainWindow
+                                       , name='Notes Editor', note=obj)
+        self.mainWindow.moduleArea.addModule(self.notesEditor, position='top',
+                                        relativeTo=None)
+        self.mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditor()")
+        self.project._logger.info("application.showNotesEditor()")
       else:
-        mainWindow = self._appBase._mainWindow
-      self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
-                                     name='Notes Editor', note=obj)
+        showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
+
 
   def _createNewObject(self, item):
     """Create new object starting from the <New> item

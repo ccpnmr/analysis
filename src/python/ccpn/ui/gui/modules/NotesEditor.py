@@ -33,31 +33,55 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 
 class NotesEditor(CcpnModule):
+  """
+  This class implements the module by wrapping a StructureTable instance
+  """
+  includeSettingsWidget = True
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
 
-  def __init__(self, parent, project, name='Notes Editor', note=None):
-    CcpnModule.__init__(self, name=name)
-    widget = QtGui.QWidget()
+  className = 'NotesEditorModule'
+
+  def __init__(self, parent, project=None, mainWindow=None, name='Notes Editor', note=None):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+    # Derive application, project, and current from mainWindow
+    if not mainWindow:
+      self.mainWindow = mainWindow
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+
+    # widget = QtGui.QWidget()
     self._appBase = project._appBase
     self.project = project
-    self.parent = parent
-    self.parent.addModule(self)
-    self.textBox = TextEditor()
+    # self.parent = parent
+    # self.parent.addModule(self)
     self.note = note
-    widgetLayout = QtGui.QGridLayout()
-    widget.setLayout(widgetLayout)
-    self.label1 = Label(self, text='Note name')
-    self.lineEdit1 = LineEdit(self)
-    widget.layout().addWidget(self.label1, 1, 0)
-    widget.layout().addWidget(self.lineEdit1, 1, 1, 1, 4)
-    widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
+    # widgetLayout = QtGui.QGridLayout()
+    # widget.setLayout(widgetLayout)
+
+    self.label1 = Label(self.mainWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
+    self.lineEdit1 = LineEdit(self.mainWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
+    self.mainWidget.layout().addItem(QtGui.QSpacerItem(5, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed), 2, 0, 1, 1)
+    # self.mainWidget.layout().addItem(QtGui.QSpacerItem(5, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed), grid=(2,0), gridSpan=(1,1))
+    self.textBox = TextEditor(self.mainWidget, grid=(3,0), gridSpan=(1,7))
+
+    # self.addWidget(self.label1, 1, 0)
+    # self.addWidget(self.lineEdit1, 1, 1, 1, 4)
+    # self.addWidget(self.textBox, 2, 0, 1, 5)
+
     if note:
       self.textBox.setText(note.text)
       self.lineEdit1.setText(self.note.name)
-    self.buttonBox = ButtonList(self, texts=['Save', 'Cancel'],
-                                callbacks=[self._saveNote, self._reject])
-    widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
+
+    self.buttonBox = ButtonList(self.mainWidget, texts=['Save', 'Cancel']
+                                , callbacks=[self._saveNote, self._reject]
+                                , grid=(4,5), gridSpan=(1,2))
+
+    self.mainWidget.setContentsMargins(5, 5, 5, 5)
     self.processText = self._processText
-    self.layout.addWidget(widget)
+    # self.layout.addWidget(widget)
 
   def _setNoteName(self):
     """

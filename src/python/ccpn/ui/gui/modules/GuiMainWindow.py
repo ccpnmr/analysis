@@ -561,9 +561,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
       blankDisplay.close()
 
-  def newBlankDisplay(self, position='right', relativeTo=None):
+  def newBlankDisplay(self, position='bottom', relativeTo=None):
     "Adds new blank display to module area; returns BlankDisplay instance"
     blankDisplay = BlankDisplay(mainWindow=self)
+    #FIXME:ED - still crashes when loading some projects
+    if not relativeTo:
+      relativeTo = self.moduleArea     # ejb
     self.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
     return blankDisplay
 

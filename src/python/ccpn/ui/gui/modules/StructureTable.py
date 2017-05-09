@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
@@ -35,6 +36,8 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from PyQt4 import QtGui, QtCore
+from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 
@@ -42,75 +45,6 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 ALL = '<all>'
-
-
-class PandasModel(QtCore.QAbstractTableModel):
-  """
-  Class to populate a table view with a pandas dataframe
-  """
-  # 'modelNumber'
-  # 'chainCode'
-  # 'sequenceId'
-  # 'insertionCode'
-  # 'residueName'
-  # 'atomName'
-  # 'altLocationCode'
-  # 'element'
-  # 'x'
-  # 'y'
-  # 'z'
-  # 'occupancy'
-  # 'bFactor'
-  # 'nmrChainCode'
-  # 'nmrSequenceCode'
-  # 'nmrResidueName'
-  # 'nmrAtomName'
-
-  def __init__(self, data, parent=None):
-    QtCore.QAbstractTableModel.__init__(self, parent)
-    self._data = data
-
-  def rowCount(self, parent=None):
-    return len(self._data.values)
-
-  def columnCount(self, parent=None):
-    return self._data.columns.size
-
-  def data(self, index, role=QtCore.Qt.DisplayRole):
-    if index.isValid():
-      if role == QtCore.Qt.DisplayRole:
-        return str(self._data.values[index.row()][index.column()])
-    return None
-
-  def headerData(self, col, orientation, role):
-    if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-      return self._data.columns[col]
-    return None
-
-  def setData(self, index, value, role):
-    if not index.isValid():
-      return False
-    if role != QtCore.Qt.EditRole:
-      return False
-    row = index.row()
-    if row < 0 or row >= len(self._data.values):
-      return False
-    column = index.column()
-    if column < 0 or column >= self._data.columns.size:
-      return False
-    self._data.values[row][column] = value
-    self.dataChanged.emit(index, index)
-    return True
-
-  def flags(self, index):
-    flags = super(self.__class__, self).flags(index)
-    flags |= QtCore.Qt.ItemIsEditable
-    flags |= QtCore.Qt.ItemIsSelectable
-    flags |= QtCore.Qt.ItemIsEnabled
-    flags |= QtCore.Qt.ItemIsDragEnabled
-    flags |= QtCore.Qt.ItemIsDropEnabled
-    return flags
-
 
 class StructureTableModule(CcpnModule):
   """
@@ -123,7 +57,7 @@ class StructureTableModule(CcpnModule):
   className = 'StructureTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, name='Structure Table'):
+  def __init__(self, mainWindow, name='Structure Table', itemPid=None):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
@@ -133,50 +67,73 @@ class StructureTableModule(CcpnModule):
     self.current = mainWindow.application.current
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    self.ensemble = self.project.newStructureEnsemble()
-    self.data = self.ensemble.data
+    # add test structure Ensembles
+    try:
+      StructureTableModule.defined
+    except:
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
 
-    self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-      , 'CB', 'HB1', 'HB2', 'HB3'
-      , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-      , 'CE', 'HE1', 'HE2', 'HE3'
-      , 'CG', 'HG1', 'HG2', 'HG3'
-      , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-                                                                                                   'VAL'] * 8
-    self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
 
-    self.data['atomName'] = self.testAtomName
-    self.data['residueName'] = self.testResidueName
-    self.data['chainCode'] = self.testChainCode
-    self.data['sequenceId'] = self.testSequenceId
-    self.data['modelNumber'] = self.testModelNumber
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    self.ensemble = self.project.newStructureEnsemble()
-    self.data = self.ensemble.data
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
 
-    self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-      , 'CB', 'HB1', 'HB2', 'HB3'
-      , 'CE', 'HE1', 'HE2', 'HE3'
-      , 'CG', 'HG1', 'HG2', 'HG3'
-      , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-      , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-                                                                                                   'VAL'] * 8
-    self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
 
-    self.data['atomName'] = self.testAtomName
-    self.data['residueName'] = self.testResidueName
-    self.data['chainCode'] = self.testChainCode
-    self.data['sequenceId'] = self.testSequenceId
-    self.data['modelNumber'] = self.testModelNumber
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+
+      self.ensemble = self.project.newStructureEnsemble()
+      self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+
+      # make a test dataset in here
+
+      self.dataSet = self.project.newDataSet('ensembleCCPN')
+
+      self.dataItem = self.dataSet.newData('derivedConformers')
+      self.dataSet.attachedObject = self.ensemble       # the newest object
+      self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+
+      StructureTableModule.defined=True
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    finally:
+      pass
 
     # settings
+
+    self.itemPid = itemPid      # read the passed in object
+                                # this could come from DataSet or Structures
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -229,10 +186,11 @@ class StructureTableModule(CcpnModule):
                                             )
 
     # main window
-    self.structureTable = StructureTable(parent=self.mainWidget, setLayout=True,
-                                           application=self.application,
-                                           grid=(0,0)
+    self.structureTable = StructureTable(parent=self.mainWidget, setLayout=True
+                                          , application=self.application
+                                          , grid=(0,0), itemPid=itemPid
                                           )
+    self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -318,13 +276,14 @@ class StructureTable(ObjectTable):
                 ('nmrAtomName', lambda row: StructureTable.testy(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
   ]
 
-  def __init__(self, parent, application, **kwds):
+  def __init__(self, parent, application, itemPid=None, **kwds):
 
     self._application = application
     self._project = application.project
     self._current = application.current
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
+    self.itemPid=itemPid
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
@@ -336,8 +295,11 @@ class StructureTable(ObjectTable):
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
-                         grid = (1, 0), gridSpan = (1, 6)
+                         grid = (2, 0), gridSpan = (1, 6)
                          )
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(1,0), gridSpan=(1,1))
 
     # Notifier object to update the table if the nmrChain changes
     self._structureNotifier = None
@@ -350,15 +312,37 @@ class StructureTable(ObjectTable):
     #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-    # This widget will display a pulldown list of NmrChain pids in the project
+    # This widget will display a pulldown list of Structure pids in the project
     self.ncWidget = StructurePulldown(parent=self._widget,
-                                     project=self._project, default=0,  #first NmrChain in project (if present)
+                                     project=self._project, default=0,  # first Structure in project (if present)
                                      grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
-                                     callback=self._selectionPulldownCallback
-                                     )
+                                     callback=self._selectionPulldownCallback)
 
-    if len(self._project.structureEnsembles) > 0:
-      self.displayTableForStructure(self._project.structureEnsembles[0])
+    if self.itemPid:
+      thisObj = self._project.getByPid(self.itemPid)
+      if thisObj.shortClassName == 'SE':
+        self.displayTableForStructure(thisObj)
+      elif thisObj.shortClassName == 'DS':
+
+        thisAttached = thisObj.attachedObject
+        for dt in thisObj.data:
+
+          if dt.name is 'derivedConformers':
+            try:
+              params = dt.parameters
+              thisFunc = params['backboneSelector']
+              thisSubset = thisAttached.data.extract(thisFunc)
+              # self.displayTableForStructure(thisSubset)
+              self.displayTableForDataSetStructure(thisSubset)
+            except:
+              showInfo('DataSet:',
+                       'Parameter not found.')
+
+        pass
+
+    else:
+      if len(self._project.structureEnsembles) > 0:
+        self.displayTableForStructure(self._project.structureEnsembles[0])
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"
@@ -372,7 +356,7 @@ class StructureTable(ObjectTable):
     if self._structureNotifier is not None:
       # we have a new nmrChain and hence need to unregister the previous notifier
       self._structureNotifier.unRegister()
-    # register a notifier for this nmrChain
+    # register a notifier for this structureEnsemble
     self._structureNotifier = Notifier(structureEnsemble,
                                    [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureEnsemble',
                                     self._updateCallback
@@ -380,6 +364,24 @@ class StructureTable(ObjectTable):
 
     self.ncWidget.select(structureEnsemble.pid)
     self._update(structureEnsemble)
+
+  def displayTableForDataSetStructure(self, structureData):
+    "Display the table for all StructureDataSet"
+
+    #FIXME:ED doesn't work for StructureData, but only a test
+    # if self._structureNotifier is not None:
+    #   # we have a new nmrChain and hence need to unregister the previous notifier
+    #   self._structureNotifier.unRegister()
+    # register a notifier for this structureEnsemble
+    # self._structureNotifier = Notifier(structureData,
+    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureData',
+    #                                 self._updateCallback
+    #                               )
+
+    # self.ncWidget.select(structureData.pid)
+
+    self._updateDataSet(structureData)
+
 
   def _update(self, structureEnsemble):
     "Update the table"
@@ -391,6 +393,20 @@ class StructureTable(ObjectTable):
       # self.setModel(model)
       # self.setSortingEnabled(True)
       tuples = structureEnsemble.data.as_namedtuples()
+      self.setObjects(tuples)
+      self._silenceCallback = False
+      self.show()
+
+  def _updateDataSet(self, structureData):
+    "Update the table"
+    if not self._updateSilence:
+      self.clearTable()
+      self._silenceCallback = True
+
+      # model = PandasModel(structureEnsemble.data)   # ejb - interesting, set QTableView form Pandas
+      # self.setModel(model)
+      # self.setSortingEnabled(True)
+      tuples = structureData.as_namedtuples()
       self.setObjects(tuples)
       self._silenceCallback = False
       self.show()

@@ -68,16 +68,20 @@ class AboutPopup(CcpnDialog):
     self.label = Label(self, grid=(0, 0))
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
 
-    # self.label2 = Label(self, text='myLabel', grid=(1, 0))
+    # self.label.setScaledContents(True)
+    # # self.label2 = Label(self, text='myLabel', grid=(1, 0))
+    # self.label.setMinimumSize(1, 1)
+    # # get resize events for the label
+    # self.label.setAlignment(QtCore.Qt.AlignCenter)
 
     self.buttons = ButtonList(self, texts=['Close', 'Copy'],
                                       callbacks=[self.accept, self.copyToClipboard],
                                       tipTexts=['Close window', 'Copy text to clipboard'],
                                       grid=(1, 0), hAlign='r')
 
-    # self.setMaximumWidth(self.size().width())
-    # self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
-    CcpnDialog.fixedSize(self)
+    self.setMaximumWidth(self.size().width())
+    self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
+    # CcpnDialog.fixedSize(self)
 
   def copyToClipboard(self):
     '''TEXT being copied on the clipboard '''
@@ -96,3 +100,4 @@ if __name__ == '__main__':
   popup.raise_()
 
   app.start()
+

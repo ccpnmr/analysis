@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 class NotesEditor(CcpnModule):
   """
@@ -42,34 +42,22 @@ class NotesEditor(CcpnModule):
 
   className = 'NotesEditorModule'
 
-  def __init__(self, parent, project=None, mainWindow=None, name='Notes Editor', note=None):
+  def __init__(self, mainWindow=None, name='Notes Editor', note=None):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
-    if not mainWindow:
-      self.mainWindow = mainWindow
-      self.application = mainWindow.application
-      self.project = mainWindow.application.project
-      self.current = mainWindow.application.current
-
-    # widget = QtGui.QWidget()
-    self._appBase = project._appBase
-    self.project = project
-    # self.parent = parent
-    # self.parent.addModule(self)
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
     self.note = note
-    # widgetLayout = QtGui.QGridLayout()
-    # widget.setLayout(widgetLayout)
 
     self.label1 = Label(self.mainWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
     self.lineEdit1 = LineEdit(self.mainWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
-    self.mainWidget.layout().addItem(QtGui.QSpacerItem(5, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed), 2, 0, 1, 1)
-    # self.mainWidget.layout().addItem(QtGui.QSpacerItem(5, 5, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed), grid=(2,0), gridSpan=(1,1))
+    self.spacer = Spacer(self.mainWidget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,0), gridSpan=(1,1))
     self.textBox = TextEditor(self.mainWidget, grid=(3,0), gridSpan=(1,7))
-
-    # self.addWidget(self.label1, 1, 0)
-    # self.addWidget(self.lineEdit1, 1, 1, 1, 4)
-    # self.addWidget(self.textBox, 2, 0, 1, 5)
 
     if note:
       self.textBox.setText(note.text)

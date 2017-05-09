@@ -24,7 +24,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -85,9 +84,13 @@ class ChemicalShiftTable(CcpnModule):
   """Alternative proposal to the ChemicalShiftTable
   """
 
-  def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):
+  def __init__(self, mainWindow=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    CcpnModule.__init__(self, name=name)
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     if not chemicalShiftLists:
       chemicalShiftLists = []

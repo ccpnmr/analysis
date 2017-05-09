@@ -1439,14 +1439,18 @@ class Framework:
     """
     Displays Chemical Shift table.
     """
+    mainWindow = self.ui.mainWindow
     if not self.project.chemicalShiftLists:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
       MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed')
       return
     from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
-    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self.project.chemicalShiftLists)
-    self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.chemicalShiftTable = ChemicalShiftTable(mainWindow, chemicalShiftLists=self.project.chemicalShiftLists)
+    mainWindow.moduleArea.addModule(self.chemicalShiftTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
 
@@ -1455,7 +1459,10 @@ class Framework:
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
 
     mainWindow = self.ui.mainWindow
-    nmrResidueTableModule = NmrResidueTableModule(mainWindow)
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
@@ -1466,7 +1473,10 @@ class Framework:
     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
 
     mainWindow = self.ui.mainWindow
-    structureTableModule = StructureTableModule(mainWindow)
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    structureTableModule = StructureTableModule(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
     self.project._logger.info("application.showStructureTable()")
@@ -1477,13 +1487,18 @@ class Framework:
     Displays Peak table on left of main window with specified list selected.
     """
     from ccpn.ui.gui.modules.PeakTable import PeakTable
+
+    mainWindow = self.ui.mainWindow
     if not self.project.peakLists:
       self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed')
       return
-    self.peakTable = PeakTable(self.project, self.ui.mainWindow, selectedList=selectedList)
-    self.ui.mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.peakTable = PeakTable(mainWindow, selectedList=selectedList)
+    mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
 
@@ -1492,13 +1507,17 @@ class Framework:
     Displays Peak table on left of main window with specified list selected.
     """
     from ccpn.ui.gui.modules.RestraintTable import RestraintTable
+    mainWindow = self.ui.mainWindow
     if not self.project.restraintLists:
       self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
       MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
       return
-    restraintTable = RestraintTable(self.project, selectedList=selectedList, project=self.project)
-    self.ui.mainWindow.moduleArea.addModule(restraintTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.restraintTable = RestraintTable(mainWindow=mainWindow, restraintLists=selectedList)
+    mainWindow.moduleArea.addModule(self.restraintTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")
 
 
@@ -1517,6 +1536,9 @@ class Framework:
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
 
     mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
     self.sequenceGraph = SequenceGraph(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(self.sequenceGraph, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
@@ -1528,6 +1550,9 @@ class Framework:
     from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
 
     mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
     self.atomSelector = AtomSelector(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
@@ -1592,29 +1617,44 @@ class Framework:
     """
     Displays macro editor.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+    # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
+    # self.project._logger.info("application.showMacroEditor()")
 
   def newMacroFromConsole(self):
     """
     Displays macro editor with contents of python console inside.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-    editor.textBox.setText(self.ui.mainWindow.pythonConsole.textEditor.toPlainText())
+    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    #FIXME:ED - haven't checked this properly
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    self.editor.textBox.setText(mainWindow.pythonConsole.textEditor.toPlainText())
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   def newMacroFromLog(self):
     """
     Displays macro editor with contents of the log.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    #FIXME:ED - haven't checked this properly
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+
     l = open(self.project._logger.logPath, 'r').readlines()
     text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
-    editor.textBox.setText(text)
+    self.editor.textBox.setText(text)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   def startMacroRecord(self):
     """
     Displays macro editor with additional buttons for recording a macro.
     """
-    self.macroEditor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor", showRecordButtons=True)
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 

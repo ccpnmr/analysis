@@ -32,9 +32,13 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
 class RestraintTable(CcpnModule):
-  def __init__(self, parent=None, restraintLists=None, name='Restraint Table', **kw):
+  def __init__(self, mainWindow=None, restraintLists=None, name='Restraint Table', **kw):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    CcpnModule.__init__(self, name=name)
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     project = kw.get('project')
 

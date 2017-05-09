@@ -29,34 +29,42 @@ from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
-class ResidueInformation(CcpnModule, Base):
+class ResidueInformation(CcpnModule):
 
-  def __init__(self, parent=None, project=None, **kw):
-    CcpnModule.__init__(self, name='Residue Information')
-    Base.__init__(self, **kw)
+  def __init__(self, mainWindow, name='Residue Information', **kw):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    chainLabel = Label(self, text='Chain')
-    self.layout.addWidget(chainLabel, 0, 0)
-    chainPulldown = PulldownList(self, callback=self._setChain, grid=(0, 1))
-    chainPulldownData = [chain.pid for chain in project.chains]
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
+    self.chainLabel = Label(self.mainWidget, text='Chain', grid=(0,0))
+    # self.layout.addWidget(chainLabel, 0, 0)
+    chainPulldown = PulldownList(self.mainWidget, callback=self._setChain, grid=(0, 1))
+    chainPulldownData = [chain.pid for chain in self.project.chains]
     chainPulldownData.append('<All>')
     chainPulldown.setData(chainPulldownData)
-    self.selectedChain = project.getByPid(chainPulldown.currentText())
-    residueLabel = Label(self, text='Residue ', grid=(0, 3))
-    self.colourScheme = project._appBase.colourScheme
-    residuePulldown = PulldownList(self, callback=self._setCurrentResidue, grid=(0, 4))
-    residuePulldown.setData(CCP_CODES)
-    self.selectedResidueType = residuePulldown.currentText()
-    self.residueWidget = QtGui.QWidget(self)
-    self.residueWidget.setLayout(QtGui.QGridLayout())
-    self.project = project
-    self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
+    self.selectedChain = self.project.getByPid(chainPulldown.currentText())
+    self.residueLabel = Label(self.mainWidget, text='Residue ', grid=(0, 3))
+    # self.colourScheme = project._appBase.colourScheme
+    self.colourScheme = self.application.colourScheme
+    self.residuePulldown = PulldownList(self.mainWidget, callback=self._setCurrentResidue
+                                   , grid=(0, 4))
+    self.residuePulldown.setData(CCP_CODES)
+    self.selectedResidueType = self.residuePulldown.currentText()
+    self.residueWidget = Widget(self.mainWidget, setLayout=True
+                                , grid=(1,0), gridSpan=(1,5))
+    # self.residueWidget = QtGui.QWidget(self)
+    # self.residueWidget.setLayout(QtGui.QGridLayout())
+    # self.project = project
+    # self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
     self._getResidues()
-
-
 
   def _setChain(self, value:str):
     """

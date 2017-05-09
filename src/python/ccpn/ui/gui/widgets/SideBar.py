@@ -555,9 +555,17 @@ class SideBar(QtGui.QTreeWidget, Base):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      if self.mainWindow:
+        from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+
+        self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+        self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+                                        relativeTo=self.mainWindow.moduleArea)
+        self.mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
+        self.project._logger.info("application.showStructureTable()")
+
+      else:
+        showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
     elif obj.shortClassName == 'MC':
       #to be decided when we design structure
       info = showInfo('Not implemented yet!',
@@ -570,9 +578,34 @@ class SideBar(QtGui.QTreeWidget, Base):
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'DS':
       #to be decided when we design structure
-      popup = DataSetPopup(dataSet=obj)
-      popup.exec_()
-      popup.raise_()
+
+      # popup = DataSetPopup(dataSet=obj)
+      # popup.exec_()
+      # popup.raise_()
+
+      # test DataSet
+
+      if self.mainWindow:
+
+        # Use StructureTable for the moment
+
+        if obj.title is 'ensembleCCPN':
+          from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+
+          self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+          self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+                                          relativeTo=self.mainWindow.moduleArea)
+          self.mainWindow.pythonConsole.writeConsoleCommand("application.showDataSetStructureTable()")
+          self.project._logger.info("application.showDataSetStructureTable()")
+        else:
+          showInfo('Not implemented yet!',
+                   'This function has not been implemented in the current version',
+                   colourScheme=self.colourScheme)
+
+
+
+
+
     elif obj.shortClassName == 'RL':
       #to be decided when we design structure
       showInfo('Not implemented yet!',
@@ -597,11 +630,9 @@ class SideBar(QtGui.QTreeWidget, Base):
       #                                name='Notes Editor', note=obj)
 
       if self.mainWindow:
-        self.notesEditor = NotesEditor(self.mainWindow, self.project
-                                       , mainWindow=self.mainWindow
-                                       , name='Notes Editor', note=obj)
-        self.mainWindow.moduleArea.addModule(self.notesEditor, position='top',
-                                        relativeTo=None)
+        self.notesEditor = NotesEditor(mainWindow=self.mainWindow, name='Notes Editor', note=obj)
+        self.mainWindow.moduleArea.addModule(self.notesEditor, position='bottom',
+                                        relativeTo=self.mainWindow.moduleArea)
         self.mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditor()")
         self.project._logger.info("application.showNotesEditor()")
       else:

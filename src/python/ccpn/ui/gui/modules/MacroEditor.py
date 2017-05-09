@@ -36,13 +36,18 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 class MacroEditor(CcpnModule):
 
-  def __init__(self, parent, mainWindow, name, showRecordButtons=False):
-    CcpnModule.__init__(self, name=name)
+  def __init__(self, mainWindow=None, name='Macro Editor', showRecordButtons=False):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    self.parent = parent
+    # self.parent = parent
+    # self.mainWindow = mainWindow
+    # self.parent.addModule(self)
     self.mainWindow = mainWindow
-    self.parent.addModule(self)
-    self.preferences = self.mainWindow.preferences
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+    self.preferences = self.application.preferences
+
     # macro selection
     self.label1 = Label(self, 'Macro Name')
     self.lineEdit1 = LineEdit(self)

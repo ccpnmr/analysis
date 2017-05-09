@@ -35,7 +35,7 @@ from ccpn.framework import Framework
 # StructureEnsembleTesting    No loaded project
 #=========================================================================================
 
-class skip1:  #StructureEnsembleTesting_None(WrapperTesting):
+class StructureEnsembleTesting_None(WrapperTesting):
 
   #=========================================================================================
   # setUp       initialise a newStructureEnsemble

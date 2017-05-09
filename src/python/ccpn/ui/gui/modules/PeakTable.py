@@ -50,7 +50,7 @@ class PeakTable(CcpnModule):
   maxSettingsState = 2
   settingsOnTop = True
 
-  className = 'PeakListTableModule'
+  className = 'PeakTable'
 
   def __init__(self, mainWindow, name='PeakList Table'):
 
@@ -121,19 +121,11 @@ class PeakListTableWidget(ObjectTable):
     self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self.updateUnits,
                                         grid=(0, gridHPos))
 
-
-    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT],
-                                                       targetName='peaks',
+    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT], targetName='peaks',
                                                        callback=self._selectOnTableCurrentPeaksNotifierCallback)
 
-    self._spectrumDeleteNotifier = Notifier(self._project,
-                                            [Notifier.DELETE], 'Spectrum',
-                                            self._deleteCallback
-                                            )
-    self._peakListDeleteNotifier =  Notifier(self._project,
-                                             [Notifier.DELETE], 'PeakList',
-                                             self._deleteCallback
-                                             )
+    self._spectrumDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'Spectrum', self._deleteCallback)
+    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'PeakList', self._deleteCallback)
 
     self._displayTable()
 
@@ -146,7 +138,6 @@ class PeakListTableWidget(ObjectTable):
      editOption allows the user to modify the value content by doubleclick
      '''
 
-    print('Getting columns ')
     columnDefs = []
 
     # Serial column
@@ -194,8 +185,6 @@ class PeakListTableWidget(ObjectTable):
 
 
   def _pulldownPLcallback(self, data):
-
-    print('_pulldownPLcallback')
     self._updateAllModule()
 
 
@@ -205,49 +194,46 @@ class PeakListTableWidget(ObjectTable):
     self._updateSettingsWidgets()
 
     if self._selectedPeakList is not None:
-      self._peakNotifier = Notifier(self._selectedPeakList,
-                                              [Notifier.DELETE], 'Peak',
-                                              self._peakNotifierCallback
-                                              )
+
+      self._peakNotifier = Notifier(self._selectedPeakList,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
+                                    'Peak', self._peakNotifierCallback)
 
 
   def _peakNotifierCallback(self, data):
     if data['trigger'] == 'delete':
-      print('deleting Peak ')
+      self._peakNotifier.unRegister()
       self._updateAllModule()
 
 
   def _deleteCallback(self, *kw):
-    print('$$$$' * 1000)
-    print('Deleting Spectrum')
-
 
     if self._selectedPeakList is not None:
       self.pLwidget.select(self._selectedPeakList.pid)
 
+    self._peakNotifier.unRegister()
     self._updateAllModule()
 
 
   def _displayTable(self):
-    print('@@@@'*1000)
-    print('_displayTable')
-
     self._silenceCallback = True
     self.setObjectsAndColumns(objects=[], columns=[])
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
+    # doReturn = False
     if self._selectedPeakList is not None:
-      peaks = [peak for peak in self._selectedPeakList.peaks if not peak._wrappedData.isDeleted]
-      deletedPeaks = [peak for peak in self._selectedPeakList.peaks if  peak._wrappedData.isDeleted]
-      print('deletedPeaks', deletedPeaks)
-
-      self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+      for peak in self._selectedPeakList.peaks:
+        if peak.isDeleted:
+          if self._peakNotifier is not None:
+            self._peakNotifier.unRegister()
+            return
+      #       doReturn = True
+      # if doReturn:
+      #   return
+      self.setObjectsAndColumns(objects=self._selectedPeakList.peaks, columns=self._getTableColumns(self._selectedPeakList))
       self._selectOnTableCurrentPeaks(self._current.peaks)
 
     else:
       self.setObjects([])
 
-
-    print('_displayTable done')
 
 
   def _updateSettingsWidgets(self):

@@ -195,6 +195,7 @@ class StructureTableModule(CcpnModule):
                                         , application=self.application
                                         , grid=(0,0), itemPid=itemPid)
     self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
+    self.structureTable.initialiseButtons(0)
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -310,7 +311,6 @@ class StructureTable(ObjectTable):
                                   , tipTexts=None
                                   , setLayout=True
                                   , grid=(0,2), gridSpan=(1,3))
-
     self.displayTableForStructure(self.thisObj)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
@@ -348,30 +348,31 @@ class StructureTable(ObjectTable):
     #                               )
 
     # self.stWidget.select(structureData.pid)
-    for dt in self.thisDataSet.data:
-      if dt.name is 'derivedConformers':
-        try:
-          self.params = dt.parameters
-          thisFunc = self.params['backboneSelector']
-          thisSubset = self.thisObj.data.extract(thisFunc)
-          self._updateDataSet(thisSubset)
-        except:
-          pass
+    if self.thisDataSet:
+      for dt in self.thisDataSet.data:
+        if dt.name is 'derivedConformers':
+          try:
+            self.params = dt.parameters
+            thisFunc = self.params['backboneSelector']
+            thisSubset = self.thisObj.data.extract(thisFunc)
+            self._updateDataSet(thisSubset)
+          except:
+            pass
 
   def _getAttachedDataSet(self, item):
     if item:
-      thisObj = self._project.getByPid(self.itemPid)
+      thisObj = self._project.getByPid(item)
       if self._project.dataSets:
         for dd in self._project.dataSets:
-          if dd.title is thisObj.longPid:
+          if dd.title == thisObj.longPid:
 
-            thisDataSet = dd
+            self.thisDataSet = dd
             for dt in self.thisDataSet.data:
               if dt.name is 'derivedConformers':
                 try:
                   self.params = dt.parameters
                   thisFunc = self.params['backboneSelector']
-                  return thisDataSet
+                  return self.thisDataSet
                   # thisSubset = thisAttached.data.extract(thisFunc)
                   # self.displayTableForStructure(thisSubset)
                   # self.displayTableForDataSetStructure(thisSubset)
@@ -421,11 +422,12 @@ class StructureTable(ObjectTable):
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting Structure"
-    structureEnsemble = self._project.getByPid(item)
+    self.stButtons.setIndex(0)
+    self.thisObj = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
-    if structureEnsemble is not None:
+    if self.thisObj is not None:
       self.thisDataSet = self._getAttachedDataSet(item)
-      self.displayTableForStructure(structureEnsemble)
+      self.displayTableForStructure(self.thisObj)
 
   def _selectionButtonCallback(self):
     "Callback for selecting Structure Ensemble or Average"
@@ -461,3 +463,5 @@ class StructureTable(ObjectTable):
 
     return None
 
+  def initialiseButtons(self, index):
+    self.stButtons.setIndex(index)

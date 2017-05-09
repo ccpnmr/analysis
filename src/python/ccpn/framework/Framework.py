@@ -1506,16 +1506,16 @@ class Framework:
     """
     Displays Peak table on left of main window with specified list selected.
     """
-    from ccpn.ui.gui.modules.RestraintTable import RestraintTable
+    from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
     mainWindow = self.ui.mainWindow
-    if not self.project.restraintLists:
-      self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
-      MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
-      return
+    # if not self.project.restraintLists:
+    #   self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
+    #   MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
+    #   return
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.restraintTable = RestraintTable(mainWindow=mainWindow, restraintLists=selectedList)
+    self.restraintTable = RestraintTableModule(mainWindow=mainWindow, restraintLists=selectedList)
     mainWindow.moduleArea.addModule(self.restraintTable, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")

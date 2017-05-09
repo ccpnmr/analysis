@@ -91,6 +91,11 @@ class StructurePulldown(_Pulldown):
   attributeName = 'structureEnsembles'
 
 
+class RestraintsPulldown(_Pulldown):
+  className = 'Restraint'
+  attributeName = 'restraints'
+
+
 class ChemicalShiftListPulldown(_Pulldown):
     className = 'ChemicalShiftList'
     attributeName = 'chemicalShiftLists'

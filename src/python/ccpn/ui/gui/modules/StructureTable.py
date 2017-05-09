@@ -334,20 +334,20 @@ class StructureTable(ObjectTable):
     self.stWidget.select(structureEnsemble.pid)
     self._update(structureEnsemble)
 
-  def displayTableForDataSetStructure(self, structureData):
+  def displayTableForDataSetStructure(self, structureEnsemble):
     "Display the table for all StructureDataSet"
 
-    #FIXME:ED doesn't work for StructureData, but only a test
-    # if self._ensembleNotifier is not None:
-    #   # we have a new nmrChain and hence need to unregister the previous notifier
-    #   self._ensembleNotifier.unRegister()
+    if self._ensembleNotifier is not None:
+      # we have a new nmrChain and hence need to unregister the previous notifier
+      self._ensembleNotifier.unRegister()
     # register a notifier for this structureEnsemble
-    # self._ensembleNotifier = Notifier(structureData,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureData',
-    #                                 self._updateCallback
-    #                               )
+    self._ensembleNotifier = Notifier(structureEnsemble,
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureEnsemble',
+                                    self._updateCallback
+                                  )
 
-    # self.stWidget.select(structureData.pid)
+    self.stWidget.select(structureEnsemble.pid)
+
     if self.thisDataSet:
       for dt in self.thisDataSet.data:
         if dt.name is 'derivedConformers':

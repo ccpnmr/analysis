@@ -231,6 +231,7 @@ class StructureTable(ObjectTable):
   #row.modelNumber, etc., may not exist..
 
   columnDefs = [
+                ('#', lambda row: StructureTable.stLam(StructureTable, row, 'Index', int), 'Index'),
                 ('modelNumber', lambda row: StructureTable.stLam(StructureTable, row, 'modelNumber', int), 'modelNumber'),
                 ('chainCode', lambda row: StructureTable.stLam(StructureTable, row, 'chainCode', str), 'chainCode'),
                 ('sequenceId', lambda row: StructureTable.stLam(StructureTable, row, 'sequenceId', int), 'sequenceId'),

@@ -122,14 +122,6 @@ class PeakListTableWidget(ObjectTable):
                                         grid=(0, gridHPos))
 
 
-    #
-    # self._peakNotifier = None
-    # self._spectrumDeleteNotifier = Notifier(self._project,
-    #                                         [Notifier.DELETE], 'Spectrum',
-    #                                         self._updateAllModule
-    #                                         )
-
-
     self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT],
                                                        targetName='peaks',
                                                        callback=self._selectOnTableCurrentPeaksNotifierCallback)
@@ -219,19 +211,6 @@ class PeakListTableWidget(ObjectTable):
                                               )
 
 
-  # def _peakNotifierCallback(self, *kw):
-  #   print('!!!!' * 1000)
-  #   print('_peakNotifierCallback')
-  #
-  #
-  #   if self._peakListNotifier is not None:
-  #     self._peakListNotifier.unRegister()
-  #
-  #   if self._selectedPeakList is not None:
-  #     self.pLwidget.select(self._selectedPeakList.pid)
-  #
-  #   self._updateAllModule()
-
   def _peakNotifierCallback(self, data):
     if data['trigger'] == 'delete':
       print('deleting Peak ')
@@ -270,21 +249,6 @@ class PeakListTableWidget(ObjectTable):
 
     print('_displayTable done')
 
-  # def _registerPeakNotifier(self):
-  #   print('>>>>' * 1000)
-  #   print('_registerPeakNotifier')
-  #
-  #   if self._selectedPeakList is not None:
-  #     print('_peakListNotifier = ', self._peakListNotifier)
-  #
-  #     if self._peakListNotifier is None:
-  #       print('if _peakListNotifier', self._peakListNotifier)
-  #       self._peakListNotifier = Notifier(self._selectedPeakList,
-  #                                         [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-  #                                         self._peakNotifierCallback
-  #                                         )
-  #     else:
-  #       print('else _peakListNotifier = ', self._peakListNotifier)
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''
@@ -349,8 +313,6 @@ class PeakListTableWidget(ObjectTable):
   def _setPositionUnit(self, value):
     if value in UNITS:
       PeakListTableWidget.positionsUnit = value
-
-
 
 
   def destroy(self):

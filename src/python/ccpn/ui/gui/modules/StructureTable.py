@@ -29,6 +29,7 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
@@ -119,13 +120,14 @@ class StructureTableModule(CcpnModule):
 
       # make a test dataset in here
 
-      self.dataSet = self.project.newDataSet('ensembleCCPN')
+      self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
 
       self.dataItem = self.dataSet.newData('derivedConformers')
       self.dataSet.attachedObject = self.ensemble       # the newest object
       self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
 
       StructureTableModule.defined=True
+      # should be a DataSet with the corresponding stuff in it
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     finally:
       pass
@@ -143,6 +145,8 @@ class StructureTableModule(CcpnModule):
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
+
+    #FIXME:ED - need to check label text and function of these
     colwidth = 140
     self.displaysWidget = ListCompoundWidget(self._NTSwidget,
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
@@ -186,10 +190,10 @@ class StructureTableModule(CcpnModule):
                                             )
 
     # main window
-    self.structureTable = StructureTable(parent=self.mainWidget, setLayout=True
-                                          , application=self.application
-                                          , grid=(0,0), itemPid=itemPid
-                                          )
+    self.structureTable = StructureTable(parent=self.mainWidget
+                                        , setLayout=True
+                                        , application=self.application
+                                        , grid=(0,0), itemPid=itemPid)
     self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
 
   def _getDisplays(self):
@@ -204,43 +208,12 @@ class StructureTableModule(CcpnModule):
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
-  # def navigateToStructure(self, structureEnsemble, row=None, col=None):
-  #   "Navigate in selected displays to nmrResidue; skip if none defined"
-  #   logger.debug('StructureEnsemble=%s' % (structureEnsemble.id))
-  #
-  #   displays = self._getDisplays()
-  #   if len(displays) == 0:
-  #     logger.warn('Undefined display module(s); select in settings first')
-  #     showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
-  #     return
-  #
-  #   self.application._startCommandBlock('%s.navigateToStructure(project.getByPid(%r))' %
-  #       (self.className, structureEnsemble.pid))
-  #   try:
-  #       # optionally clear the marks
-  #       if self.autoClearMarksWidget.checkBox.isChecked():
-  #           self.application.ui.mainWindow.clearMarks()
-  #
-  #       # navigate the displays
-  #       for display in displays:
-  #           if len(display.strips) > 0:
-  #             pass
-  #               # self.navigateToStructureInDisplay(structureEnsemble, display, stripIndex=0,
-  #               #                               widths=['full'] * len(display.strips[0].axisCodes),
-  #               #                               showSequentialStructures = (len(display.axisCodes) > 2) and
-  #               #                               self.sequentialStripsWidget.checkBox.isChecked(),
-  #               #                               markPositions = self.markPositionsWidget.checkBox.isChecked()
-  #               # )
-  #   finally:
-  #       self.application._endCommandBlock()
-
 
 class StructureTable(ObjectTable):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
-
-  def testy(self, row, name, valType):
+  def stLam(self, row, name, valType):
     try:
       thisVal = getattr(row, name)
       if valType is str:
@@ -257,27 +230,26 @@ class StructureTable(ObjectTable):
   #row.modelNumber, etc., may not exist..
 
   columnDefs = [
-                ('modelNumber', lambda row: StructureTable.testy(StructureTable, row, 'modelNumber', int), 'modelNumber'),
-                ('chainCode', lambda row: StructureTable.testy(StructureTable, row, 'chainCode', str), 'chainCode'),
-                ('sequenceId', lambda row: StructureTable.testy(StructureTable, row, 'sequenceId', int), 'sequenceId'),
-                ('insertionCode', lambda row: StructureTable.testy(StructureTable, row, 'insertionCode', str), 'insertionCode'),
-                ('residueName', lambda row: StructureTable.testy(StructureTable, row, 'residueName', str), 'residueName'),
-                ('atomName', lambda row: StructureTable.testy(StructureTable, row, 'atomName', str), 'atomName'),
-                ('altLocationCode', lambda row: StructureTable.testy(StructureTable, row, 'altLocationCode', str), 'altLocationCode'),
-                ('element', lambda row: StructureTable.testy(StructureTable, row, 'element', str), 'element'),
-                ('x', lambda row: StructureTable.testy(StructureTable, row, 'x', float), 'x'),
-                ('y', lambda row: StructureTable.testy(StructureTable, row, 'y', float), 'y'),
-                ('z', lambda row: StructureTable.testy(StructureTable, row, 'z', float), 'z'),
-                ('occupancy', lambda row: StructureTable.testy(StructureTable, row, 'occupancy', float), 'occupancy'),
-                ('bFactor', lambda row: StructureTable.testy(StructureTable, row, 'bFactor', float), 'bFactor'),
-                ('nmrChainCode', lambda row: StructureTable.testy(StructureTable, row, 'nmrChainCode', str), 'nmrChainCode'),
-                ('nmrSequenceCode', lambda row: StructureTable.testy(StructureTable, row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
-                ('nmrResidueName', lambda row: StructureTable.testy(StructureTable, row, 'nmrResidueName', str), 'nmrResidueName'),
-                ('nmrAtomName', lambda row: StructureTable.testy(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
+                ('modelNumber', lambda row: StructureTable.stLam(StructureTable, row, 'modelNumber', int), 'modelNumber'),
+                ('chainCode', lambda row: StructureTable.stLam(StructureTable, row, 'chainCode', str), 'chainCode'),
+                ('sequenceId', lambda row: StructureTable.stLam(StructureTable, row, 'sequenceId', int), 'sequenceId'),
+                ('insertionCode', lambda row: StructureTable.stLam(StructureTable, row, 'insertionCode', str), 'insertionCode'),
+                ('residueName', lambda row: StructureTable.stLam(StructureTable, row, 'residueName', str), 'residueName'),
+                ('atomName', lambda row: StructureTable.stLam(StructureTable, row, 'atomName', str), 'atomName'),
+                ('altLocationCode', lambda row: StructureTable.stLam(StructureTable, row, 'altLocationCode', str), 'altLocationCode'),
+                ('element', lambda row: StructureTable.stLam(StructureTable, row, 'element', str), 'element'),
+                ('x', lambda row: StructureTable.stLam(StructureTable, row, 'x', float), 'x'),
+                ('y', lambda row: StructureTable.stLam(StructureTable, row, 'y', float), 'y'),
+                ('z', lambda row: StructureTable.stLam(StructureTable, row, 'z', float), 'z'),
+                ('occupancy', lambda row: StructureTable.stLam(StructureTable, row, 'occupancy', float), 'occupancy'),
+                ('bFactor', lambda row: StructureTable.stLam(StructureTable, row, 'bFactor', float), 'bFactor'),
+                ('nmrChainCode', lambda row: StructureTable.stLam(StructureTable, row, 'nmrChainCode', str), 'nmrChainCode'),
+                ('nmrSequenceCode', lambda row: StructureTable.stLam(StructureTable, row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
+                ('nmrResidueName', lambda row: StructureTable.stLam(StructureTable, row, 'nmrResidueName', str), 'nmrResidueName'),
+                ('nmrAtomName', lambda row: StructureTable.stLam(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
   ]
 
   def __init__(self, parent, application, itemPid=None, **kwds):
-
     self._application = application
     self._project = application.project
     self._current = application.current
@@ -302,7 +274,7 @@ class StructureTable(ObjectTable):
                          , grid=(1,0), gridSpan=(1,1))
 
     # Notifier object to update the table if the nmrChain changes
-    self._structureNotifier = None
+    self._ensembleNotifier = None
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
@@ -313,36 +285,33 @@ class StructureTable(ObjectTable):
     self._updateSilence = False  # flag to silence updating of the table
 
     # This widget will display a pulldown list of Structure pids in the project
-    self.ncWidget = StructurePulldown(parent=self._widget,
-                                     project=self._project, default=0,  # first Structure in project (if present)
-                                     grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
-                                     callback=self._selectionPulldownCallback)
+    self.stWidget = StructurePulldown(parent=self._widget
+                                     , project=self._project, default=0  # first Structure in project (if present)
+                                     , grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100)
+                                     , callback=self._selectionPulldownCallback)
 
-    if self.itemPid:
-      thisObj = self._project.getByPid(self.itemPid)
-      if thisObj.shortClassName == 'SE':
-        self.displayTableForStructure(thisObj)
-      elif thisObj.shortClassName == 'DS':
+    # if self.itemPid:
+    #   thisObj = self._project.getByPid(self.itemPid)
+    #   if thisObj.shortClassName == 'SE':
+    #     self.displayTableForStructure(thisObj)
+    #   elif thisObj.shortClassName == 'DS':
 
-        thisAttached = thisObj.attachedObject
-        for dt in thisObj.data:
-
-          if dt.name is 'derivedConformers':
-            try:
-              params = dt.parameters
-              thisFunc = params['backboneSelector']
-              thisSubset = thisAttached.data.extract(thisFunc)
-              # self.displayTableForStructure(thisSubset)
-              self.displayTableForDataSetStructure(thisSubset)
-            except:
-              showInfo('DataSet:',
-                       'Parameter not found.')
-
-        pass
-
-    else:
+    if not itemPid:
       if len(self._project.structureEnsembles) > 0:
-        self.displayTableForStructure(self._project.structureEnsembles[0])
+        self.itemPid = self._project.structureEnsembles[0].pid
+
+    self.thisObj = self._project.getByPid(self.itemPid)
+    self.thisDataSet = self._getAttachedDataSet(self.itemPid)
+
+    self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
+                                  , selectedInd=1
+                                  , callback=self._selectionButtonCallback
+                                  , direction='h'
+                                  , tipTexts=None
+                                  , setLayout=True
+                                  , grid=(0,2), gridSpan=(1,3))
+
+    self.displayTableForStructure(self.thisObj)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"
@@ -353,35 +322,63 @@ class StructureTable(ObjectTable):
   def displayTableForStructure(self, structureEnsemble):
     "Display the table for all StructureEnsembles"
 
-    if self._structureNotifier is not None:
+    if self._ensembleNotifier is not None:
       # we have a new nmrChain and hence need to unregister the previous notifier
-      self._structureNotifier.unRegister()
+      self._ensembleNotifier.unRegister()
     # register a notifier for this structureEnsemble
-    self._structureNotifier = Notifier(structureEnsemble,
+    self._ensembleNotifier = Notifier(structureEnsemble,
                                    [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureEnsemble',
                                     self._updateCallback
                                   )
 
-    self.ncWidget.select(structureEnsemble.pid)
+    self.stWidget.select(structureEnsemble.pid)
     self._update(structureEnsemble)
 
   def displayTableForDataSetStructure(self, structureData):
     "Display the table for all StructureDataSet"
 
     #FIXME:ED doesn't work for StructureData, but only a test
-    # if self._structureNotifier is not None:
+    # if self._ensembleNotifier is not None:
     #   # we have a new nmrChain and hence need to unregister the previous notifier
-    #   self._structureNotifier.unRegister()
+    #   self._ensembleNotifier.unRegister()
     # register a notifier for this structureEnsemble
-    # self._structureNotifier = Notifier(structureData,
+    # self._ensembleNotifier = Notifier(structureData,
     #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureData',
     #                                 self._updateCallback
     #                               )
 
-    # self.ncWidget.select(structureData.pid)
+    # self.stWidget.select(structureData.pid)
+    for dt in self.thisDataSet.data:
+      if dt.name is 'derivedConformers':
+        try:
+          self.params = dt.parameters
+          thisFunc = self.params['backboneSelector']
+          thisSubset = self.thisObj.data.extract(thisFunc)
+          self._updateDataSet(thisSubset)
+        except:
+          pass
 
-    self._updateDataSet(structureData)
+  def _getAttachedDataSet(self, item):
+    if item:
+      thisObj = self._project.getByPid(self.itemPid)
+      if self._project.dataSets:
+        for dd in self._project.dataSets:
+          if dd.title is thisObj.longPid:
 
+            thisDataSet = dd
+            for dt in self.thisDataSet.data:
+              if dt.name is 'derivedConformers':
+                try:
+                  self.params = dt.parameters
+                  thisFunc = self.params['backboneSelector']
+                  return thisDataSet
+                  # thisSubset = thisAttached.data.extract(thisFunc)
+                  # self.displayTableForStructure(thisSubset)
+                  # self.displayTableForDataSetStructure(thisSubset)
+                except:
+                  return None
+    else:
+      return None
 
   def _update(self, structureEnsemble):
     "Update the table"
@@ -423,11 +420,22 @@ class StructureTable(ObjectTable):
     print(atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting NmrChain"
+    "Callback for selecting Structure"
     structureEnsemble = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if structureEnsemble is not None:
+      self.thisDataSet = self._getAttachedDataSet(item)
       self.displayTableForStructure(structureEnsemble)
+
+  def _selectionButtonCallback(self):
+    "Callback for selecting Structure Ensemble or Average"
+    item = self.stButtons.get()
+    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    if self.thisObj is not None:
+      if item is 'Ensemble':
+        self.displayTableForStructure(self.thisObj)
+      elif item is 'Average':
+        self.displayTableForDataSetStructure(self.thisObj)
 
   def _updateCallback(self, data):
     "callback for updating the table"
@@ -438,8 +446,8 @@ class StructureTable(ObjectTable):
 
   def destroy(self):
     "Cleanup of self"
-    if self._structureNotifier is not None:
-      self._structureNotifier.unRegister()
+    if self._ensembleNotifier is not None:
+      self._ensembleNotifier.unRegister()
     if self._peaksNotifier is not None:
       self._peaksNotifier.unRegister()
 

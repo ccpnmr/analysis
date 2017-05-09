@@ -577,30 +577,27 @@ class SideBar(QtGui.QTreeWidget, Base):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'DS':
-      #to be decided when we design structure
+      popup = DataSetPopup(dataSet=obj)
+      popup.exec_()
+      popup.raise_()
 
-      # popup = DataSetPopup(dataSet=obj)
-      # popup.exec_()
-      # popup.raise_()
-
-      # test DataSet
-
-      if self.mainWindow:
-
-        # Use StructureTable for the moment
-
-        if obj.title is 'ensembleCCPN':
-          from ccpn.ui.gui.modules.StructureTable import StructureTableModule
-
-          self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
-          self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
-                                          relativeTo=self.mainWindow.moduleArea)
-          self.mainWindow.pythonConsole.writeConsoleCommand("application.showDataSetStructureTable()")
-          self.project._logger.info("application.showDataSetStructureTable()")
-        else:
-          showInfo('Not implemented yet!',
-                   'This function has not been implemented in the current version',
-                   colourScheme=self.colourScheme)
+      # ejb - test DataSet
+      # if self.mainWindow:
+      #
+      #   # Use StructureTable for the moment
+      #
+      #   if obj.title is 'ensembleCCPN':
+      #     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+      #
+      #     self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+      #     self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+      #                                     relativeTo=self.mainWindow.moduleArea)
+      #     self.mainWindow.pythonConsole.writeConsoleCommand("application.showDataSetStructureTable()")
+      #     self.project._logger.info("application.showDataSetStructureTable()")
+      #   else:
+      #     showInfo('Not implemented yet!',
+      #              'This function has not been implemented in the current version',
+      #              colourScheme=self.colourScheme)
 
 
 

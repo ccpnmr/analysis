@@ -28,11 +28,21 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
+
+from ccpn.util.Logging import getLogger
+logger = getLogger()
+ALL = '<all>'
 
 
 class RestraintTable(CcpnModule):
-  def __init__(self, mainWindow=None, restraintLists=None, name='Restraint Table', **kw):
+  def __init__(self, mainWindow=None, name='Restraint Table', restraintLists=None, **kw):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.mainWindow = mainWindow
@@ -49,6 +59,58 @@ class RestraintTable(CcpnModule):
         restraintLists = project.restraintLists
 
     self.restraintLists = restraintLists
+
+    self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+                             grid=(0,0), vAlign='top', hAlign='left')
+
+    # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
+    # underpinning the addNotifier call do not allow for it either
+
+    #FIXME:ED - need to check label text and function of these
+    colwidth = 140
+    self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+                                             grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                             vPolicy='minimal',
+                                             #minimumWidths=(colwidth, 0, 0),
+                                             fixedWidths=(colwidth, colwidth, colwidth),
+                                             orientation = 'left',
+                                             labelText='Display(s):',
+                                             tipText = 'ResidueList modules to respond to double-click',
+                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+                                             )
+    self.displaysWidget.setFixedHeigths((None, None, 40))
+
+    self.sequentialStripsWidget = CheckBoxCompoundWidget(
+                                             self._NTSwidget,
+                                             grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                             #minimumWidths=(colwidth, 0),
+                                             fixedWidths=(colwidth, 30),
+                                             orientation = 'left',
+                                             labelText = 'Show sequential strips:',
+                                             checked = False
+                                            )
+
+    self.markPositionsWidget = CheckBoxCompoundWidget(
+                                             self._NTSwidget,
+                                             grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                             #minimumWidths=(colwidth, 0),
+                                             fixedWidths=(colwidth, 30),
+                                             orientation = 'left',
+                                             labelText = 'Mark positions:',
+                                             checked = True
+                                            )
+    self.autoClearMarksWidget = CheckBoxCompoundWidget(
+                                             self._NTSwidget,
+                                             grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                             #minimumWidths=(colwidth, 0),
+                                             fixedWidths=(colwidth, 30),
+                                             orientation = 'left',
+                                             labelText = 'Auto clear marks:',
+                                             checked = True
+                                            )
+
+
+
 
     label = Label(self, "Restraint List:")
     widget1 = QtGui.QWidget(self)
@@ -68,7 +130,7 @@ class RestraintTable(CcpnModule):
                # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
                ]
 
-    tipTexts = ['Restraimt Id',
+    tipTexts = ['Restraint Id',
                 'Atoms involved in the restraint',
                 'Target value for the restraint',
                 'Upper limit for the restraint',
@@ -77,14 +139,16 @@ class RestraintTable(CcpnModule):
                 'Number of peaks used to derive this restraint '
                 ]
 
-    self.restraintTable = GuiTableGenerator(self, restraintLists,
+    self.restraintTable = GuiTableGenerator(self.mainWidget, restraintLists,
                                                 actionCallback=self._callback, columns=columns,
                                                 selector=self.restraintListPulldown,
                                                 tipTexts=tipTexts, objectType='restraints')
 
     newLabel = Label(self, '', grid=(2, 0))
-
     self.layout.addWidget(self.restraintTable, 3, 0, 1, 4)
+
+    self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
+
 
   def _getContributions(self, restraint):
     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
@@ -104,3 +168,4 @@ class RestraintTable(CcpnModule):
 
   def _callback(self):
     pass
+

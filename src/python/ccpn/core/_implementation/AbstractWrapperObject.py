@@ -248,8 +248,10 @@ class AbstractWrapperObject():
   @property
   def isDeleted(self) -> bool:
     """True if this object is deleted."""
+    # The many variants are to make sure this catches deleted objects
+    # also during the deletion process, for filtering
     return (not hasattr(self, '_wrappedData') or self._wrappedData is None
-            or not hasattr(self._project, '_data2Obj'))
+            or not hasattr(self._project, '_data2Obj') or self._wrappedData.isDeleted)
 
   @property
   def _ccpnInternalData(self) -> dict:

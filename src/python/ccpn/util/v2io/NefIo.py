@@ -12,6 +12,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from nefimport.v2io.Constants import residueName2chemCompId
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -39,6 +41,7 @@ __date__ = ": 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import time
 import sys
+import os
 from collections import OrderedDict as OD
 
 from ..nef import StarIo
@@ -48,6 +51,8 @@ from .. import Common as commonUtil
 from ccp.general import Io as generalIo
 from memops.general import Io as memopsIo
 from ccp.lib import MoleculeModify
+from ccpnmr.analysis.core import MoleculeBasic
+from ccpnmr.analysis.core import AssignmentBasic
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -76,13 +81,672 @@ saveFrameReadingOrder = [
 ]
 
 
-def loadNefFile(path, memopsRoot=None):
+nef2CcpnMap = {
+  'nef_nmr_meta_data':OD((
+    ('format_name',None),
+    ('format_version',None),
+    ('program_name',None),
+    ('program_version',None),
+    ('creation_date',None),
+    ('uuid',None),
+    ('coordinate_file_name',None),
+    ('ccpn_dataset_serial', None),
+    ('ccpn_dataset_comment',None),
+    ('nef_related_entries',_isALoop),
+    ('nef_program_script',_isALoop),
+    ('nef_run_history',_isALoop),
+  )),
+  'nef_related_entries':OD((
+    ('database_name',None),
+    ('database_accession_code',None),
+  )),
+  'nef_program_script':OD((
+    ('program_name',None),
+    ('script_name',None),
+    ('script',None),
+  )),
+  'nef_run_history':OD((
+    ('run_number','serial'),
+    ('program_name','programName'),
+    ('program_version','programVersion'),
+    ('script_name','scriptName'),
+    ('script','script'),
+    ('ccpn_input_uuid','inputDataUuid'),
+    ('ccpn_output_uuid','outputDataUuid'),
+  )),
+
+  'nef_molecular_system':OD((
+    ('nef_sequence',_isALoop),
+    ('nef_covalent_links',_isALoop),
+  )),
+  'nef_sequence':OD((
+    ('index', None),
+    ('chain_code','chain.shortName'),
+    ('sequence_code','sequenceCode'),
+    ('residue_name','residueType'),
+    ('linking','linking'),
+    ('residue_variant','residueVariant'),
+    ('cis_peptide',None),
+    ('ccpn_comment','comment'),
+    ('ccpn_chain_role','chain.role'),
+    ('ccpn_compound_name','chain.compoundName'),
+    ('ccpn_chain_comment','chain.comment'),
+  )),
+  'nef_covalent_links':OD((
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+  )),
+
+  'nef_chemical_shift_list':OD((
+    ('ccpn_serial','serial'),
+    ('ccpn_auto_update','autoUpdate'),
+    ('ccpn_is_simulated','isSimulated'),
+    ('ccpn_comment','comment'),
+    ('nef_chemical_shift',_isALoop),
+  )),
+  'nef_chemical_shift':OD((
+    ('chain_code',None),
+    ('sequence_code',None),
+    ('residue_name',None),
+    ('atom_name',None),
+    ('value','value'),
+    ('value_uncertainty','valueError'),
+    ('element',None),
+    ('isotope_number',None),
+    ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_comment','comment'),
+  )),
+
+  'nef_distance_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('restraint_origin','origin'),
+    ('ccpn_tensor_chain_code','tensorChainCode'),
+    ('ccpn_tensor_sequence_code','tensorSequenceCode'),
+    ('ccpn_tensor_residue_name','tensorResidueType'),
+    ('ccpn_tensor_magnitude', 'tensorMagnitude'),
+    ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
+    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
+    ('ccpn_serial','serial'),
+    ('ccpn_dataset_serial','dataSet.serial'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('nef_distance_restraint',_isALoop),
+  )),
+  'nef_distance_restraint':OD((
+    ('index',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+    ('ccpn_comment','restraint.comment'),
+  )),
+
+  'nef_dihedral_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('restraint_origin','origin'),
+    ('ccpn_tensor_chain_code','tensorChainCode'),
+    ('ccpn_tensor_sequence_code','tensorSequenceCode'),
+    ('ccpn_tensor_residue_name','tensorResidueType'),
+    ('ccpn_tensor_magnitude', 'tensorMagnitude'),
+    ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
+    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
+    ('ccpn_serial','serial'),
+    ('ccpn_dataset_serial','dataSet.serial'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('nef_dihedral_restraint',_isALoop),
+  )),
+  'nef_dihedral_restraint':OD((
+    ('index',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_name_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_name_4',None),
+    ('atom_name_4',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('name',None),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+    ('ccpn_comment','restraint.comment'),
+  )),
+
+  'nef_rdc_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('restraint_origin','origin'),
+    ('tensor_magnitude', 'tensorMagnitude'),
+    ('tensor_rhombicity', 'tensorRhombicity'),
+    ('tensor_chain_code','tensorChainCode'),
+    ('tensor_sequence_code','tensorSequenceCode'),
+    ('tensor_residue_name','tensorResidueType'),
+    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
+    ('ccpn_serial','serial'),
+    ('ccpn_dataset_serial','dataSet.serial'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('nef_rdc_restraint',_isALoop),
+  )),
+  'nef_rdc_restraint':OD((
+    ('index',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('ccpn_vector_length','restraint.vectorLength'),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+    ('ccpn_comment','restraint.comment'),
+  )),
+
+  'nef_nmr_spectrum':OD((
+    ('num_dimensions','spectrum.dimensionCount'),
+    ('chemical_shift_list',None),
+    ('experiment_classification','spectrum.experimentType'),
+    ('experiment_type','spectrum.experimentName'),
+    ('ccpn_positive_contour_count','spectrum.positiveContourCount'),
+    ('ccpn_positive_contour_base','spectrum.positiveContourBase'),
+    ('ccpn_positive_contour_factor','spectrum.positiveContourFactor'),
+    ('ccpn_positive_contour_colour','spectrum.positiveContourColour'),
+    ('ccpn_negative_contour_count','spectrum.negativeContourCount'),
+    ('ccpn_negative_contour_base','spectrum.negativeContourBase'),
+    ('ccpn_negative_contour_factor','spectrum.negativeContourFactor'),
+    ('ccpn_negative_contour_colour','spectrum.negativeContourColour'),
+    ('ccpn_slice_colour','spectrum.sliceColour'),
+    ('ccpn_spectrum_scale','spectrum.scale'),
+    ('ccpn_spinning_rate','spectrum.spinningRate'),
+    ('ccpn_spectrum_comment','spectrum.comment'),
+    ('ccpn_spectrum_file_path', None),
+    ('ccpn_sample', None),
+    ('ccpn_file_header_size', 'spectrum._wrappedData.dataStore.headerSize'),
+    ('ccpn_file_number_type', 'spectrum._wrappedData.dataStore.numberType'),
+    ('ccpn_file_complex_stored_by', 'spectrum._wrappedData.dataStore.complexStoredBy'),
+    ('ccpn_file_scale_factor', 'spectrum._wrappedData.dataStore.scaleFactor'),
+    ('ccpn_file_is_big_endian', 'spectrum._wrappedData.dataStore.isBigEndian'),
+    ('ccpn_file_byte_number', 'spectrum._wrappedData.dataStore.nByte'),
+    ('ccpn_file_has_block_padding', 'spectrum._wrappedData.dataStore.hasBlockPadding'),
+    ('ccpn_file_block_header_size', 'spectrum._wrappedData.dataStore.blockHeaderSize'),
+    ('ccpn_file_type', 'spectrum._wrappedData.dataStore.fileType'),
+    ('ccpn_peaklist_serial','serial'),
+    ('ccpn_peaklist_comment','comment'),
+    ('ccpn_peaklist_name','title'),
+    ('ccpn_peaklist_is_simulated','isSimulated'),
+    ('ccpn_peaklist_symbol_colour','symbolColour'),
+    ('ccpn_peaklist_symbol_style','symbolStyle'),
+    ('ccpn_peaklist_text_colour','textColour'),
+    ('nef_spectrum_dimension',_isALoop),
+    ('ccpn_spectrum_dimension',_isALoop),
+    ('nef_spectrum_dimension_transfer',_isALoop),
+    ('nef_peak',_isALoop),
+    ('ccpn_integral_list',_isALoop),
+    ('ccpn_integral',_isALoop),
+    ('ccpn_spectrum_hit',_isALoop),
+  )),
+  'nef_spectrum_dimension':OD((
+    ('dimension_id',None),
+    ('axis_unit','axisUnits'),
+    ('axis_code','isotopeCodes'),
+    ('spectrometer_frequency','spectrometerFrequencies'),
+    ('spectral_width','spectralWidths'),
+    ('value_first_point',None),
+    ('folding',None),
+    ('absolute_peak_positions',None),
+    ('is_acquisition',None),
+    ('ccpn_axis_code','axisCodes'),
+  )),
+  # NB PseudoDimensions are not yet supported
+  'ccpn_spectrum_dimension':OD((
+    ('dimension_id',None),
+    ('point_count','pointCounts'),
+    ('reference_point','referencePoints'),
+    ('total_point_count','totalPointCounts'),
+    ('point_offset','pointOffsets'),
+    ('assignment_tolerance','assignmentTolerances'),
+    ('lower_aliasing_limit',None),
+    ('higher_aliasing_limit',None),
+    ('measurement_type','measurementTypes'),
+    ('phase_0','phases0'),
+    ('phase_1','phases1'),
+    ('window_function','windowFunctions'),
+    ('lorentzian_broadening','lorentzianBroadenings'),
+    ('gaussian_broadening','gaussianBroadenings'),
+    ('sine_window_shift','sineWindowShifts'),
+    ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
+    ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
+  )),
+  'nef_spectrum_dimension_transfer':OD((
+    ('dimension_1',None),
+    ('dimension_2',None),
+    ('transfer_type',None),
+    ('is_indirect',None),
+  )),
+  # NB TODO boxWidths and lineWidths are NOT included.
+  'nef_peak':OD((
+    ('index',None),
+    ('peak_id','serial'),
+    ('volume','volume'),
+    ('volume_uncertainty','volumeError'),
+    ('height','height'),
+    ('height_uncertainty','heightError'),
+    ('position_1',None),
+    ('position_uncertainty_1',None),
+    ('position_2',None),
+    ('position_uncertainty_2',None),
+    ('position_3',None),
+    ('position_uncertainty_3',None),
+    ('position_4',None),
+    ('position_uncertainty_4',None),
+    ('position_5',None),
+    ('position_uncertainty_5',None),
+    ('position_6',None),
+    ('position_uncertainty_6',None),
+    ('position_7',None),
+    ('position_uncertainty_7',None),
+    ('position_8',None),
+    ('position_uncertainty_8',None),
+    ('position_9',None),
+    ('position_uncertainty_9',None),
+    ('position_10',None),
+    ('position_uncertainty_10',None),
+    ('position_11',None),
+    ('position_uncertainty_11',None),
+    ('position_12',None),
+    ('position_uncertainty_12',None),
+    ('position_13',None),
+    ('position_uncertainty_13',None),
+    ('position_14',None),
+    ('position_uncertainty_14',None),
+    ('position_15',None),
+    ('position_uncertainty_15',None),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_name_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_name_4',None),
+    ('atom_name_4',None),
+    ('chain_code_5',None),
+    ('sequence_code_5',None),
+    ('residue_name_5',None),
+    ('atom_name_5',None),
+    ('chain_code_6',None),
+    ('sequence_code_6',None),
+    ('residue_name_6',None),
+    ('atom_name_6',None),
+    ('chain_code_7',None),
+    ('sequence_code_7',None),
+    ('residue_name_7',None),
+    ('atom_name_7',None),
+    ('chain_code_8',None),
+    ('sequence_code_8',None),
+    ('residue_name_8',None),
+    ('atom_name_8',None),
+    ('chain_code_9',None),
+    ('sequence_code_9',None),
+    ('residue_name_9',None),
+    ('atom_name_9',None),
+    ('chain_code_10',None),
+    ('sequence_code_10',None),
+    ('residue_name_10',None),
+    ('atom_name_10',None),
+    ('chain_code_11',None),
+    ('sequence_code_11',None),
+    ('residue_name_11',None),
+    ('atom_name_11',None),
+    ('chain_code_12',None),
+    ('sequence_code_12',None),
+    ('residue_name_12',None),
+    ('atom_name_12',None),
+    ('chain_code_13',None),
+    ('sequence_code_13',None),
+    ('residue_name_13',None),
+    ('atom_name_13',None),
+    ('chain_code_14',None),
+    ('sequence_code_14',None),
+    ('residue_name_14',None),
+    ('atom_name_14',None),
+    ('chain_code_15',None),
+    ('sequence_code_15',None),
+    ('residue_name_15',None),
+    ('atom_name_15',None),
+    ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_annotation','annotation'),
+    ('ccpn_comment','comment'),
+  )),
+  # NB SpectrumHit crosslink to sample and sampleComponent are derived
+  # And need not be stored here.
+  'ccpn_spectrum_hit':OD((
+    ('ccpn_substance_name','substanceName'),
+    ('ccpn_pseudo_dimension_number','pseudoDimensionNumber'),
+    ('ccpn_point_number','pointNumber'),
+    ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_merit_code','meritCode'),
+    ('ccpn_normalised_change','normalisedChange'),
+    ('ccpn_is_confirmed_','isConfirmed'),
+    ('ccpn_concentration','concentration'),
+    ('ccpn_','concentrationError'),
+    ('ccpn_concentration_uncertainty','concentrationUnit'),
+    ('ccpn_comment','comment'),
+  )),
+
+  'nef_peak_restraint_links':OD((
+    ('nef_peak_restraint_link',_isALoop),
+  )),
+  'nef_peak_restraint_link':OD((
+    ('nmr_spectrum_id',None),
+    ('peak_id',None),
+    ('restraint_list_id',None),
+    ('restraint_id',None),
+  )),
+
+  'ccpn_complex':OD((
+    ('name','name'),
+    ('ccpn_complex_chain',_isALoop),
+  )),
+  'ccpn_complex_chain':OD((
+    ('complex_chain_code',None),
+  )),
+
+  'ccpn_spectrum_group':OD((
+    ('name','name'),
+    ('ccpn_group_spectrum',_isALoop),
+  )),
+  'ccpn_group_spectrum':OD((
+    ('nmr_spectrum_id',None),
+  )),
+
+  'ccpn_integral_list':OD((
+    ('serial',None),
+    ('name','title'),
+    ('symbol_colour','symbolColour'),
+    ('text_colour','textColour'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_integral':OD((
+    ('integral_list_serial','integralList.serial'),
+    ('integral_serial',None),
+    ('value','value'),
+    ('value_uncertainty','valueError'),
+    ('bias','bias'),
+    ('figure_of_merit','figureOfMerit'),
+    ('slopes_1',None),
+    ('slopes_2',None),
+    ('slopes_3',None),
+    ('slopes_4',None),
+    ('lower_limits_1',None),
+    ('upper_limits_1',None),
+    ('lower_limits_2',None),
+    ('upper_limits_2',None),
+    ('lower_limits_3',None),
+    ('upper_limits_3',None),
+    ('lower_limits_4',None),
+    ('upper_limits_4',None),
+    ('annotation','annotation'),
+    ('comment','comment'),
+  )),
+
+  # NB Sample crosslink to spectrum is handled on the spectrum side
+  'ccpn_sample':OD((
+    ('name','name'),
+    ('pH','ph'),
+    ('ionic_strength','ionicStrength'),
+    ('amount','amount'),
+    ('amount_unit','amountUnit'),
+    ('is_hazardous','isHazardous'),
+    ('is_virtual','isVirtual'),
+    ('creation_date','creationDate'),
+    ('batch_identifier','batchIdentifier'),
+    ('plate_identifier','plateIdentifier'),
+    ('row_number','rowNumber'),
+    ('column_number','columnNumber'),
+    ('comment','comment'),
+    ('ccpn_sample_component',_isALoop),
+  )),
+  'ccpn_sample_component':OD((
+    ('name','name'),
+    ('labelling','labelling'),
+    ('role','role'),
+    ('concentration','concentration'),
+    ('concentration_error','concentrationError'),
+    ('concentration_unit','concentrationUnit'),
+    ('purity','purity'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_substance':OD((
+    ('name','name'),
+    ('labelling','labelling'),
+    ('substance_type', None),
+    ('user_code','userCode'),
+    ('smiles','smiles'),
+    ('inchi','inChi'),
+    ('cas_number','casNumber'),
+    ('empirical_formula','empiricalFormula'),
+    ('sequence_string',None),
+    ('mol_type',None),
+    ('start_number',None),
+    ('is_cyclic',None),
+    ('molecular_mass','molecularMass'),
+    ('atom_count','atomCount'),
+    ('bond_count','bondCount'),
+    ('ring_count','ringCount'),
+    ('h_bond_donor_count','hBondDonorCount'),
+    ('h_bond_acceptor_count','hBondAcceptorCount'),
+    ('polar_surface_area','polarSurfaceArea'),
+    ('log_partition_coefficient','logPartitionCoefficient'),
+    ('comment','comment'),
+    ('ccpn_substance_synonym',_isALoop),
+  )),
+  'ccpn_substance_synonym':OD((
+    ('synonym',None),
+  )),
+
+  'ccpn_assignment':OD((
+    ('nmr_chain',_isALoop),
+    ('nmr_residue',_isALoop),
+    ('nmr_atom',_isALoop),
+  )),
+
+  'nmr_chain':OD((
+    ('short_name','shortName'),
+    ('serial',None),
+    ('label','label'),
+    ('is_connected','isConnected'),
+    ('comment','comment'),
+  )),
+
+  'nmr_residue':OD((
+    ('chain_code', 'nmrChain.shortName'),
+    ('sequence_code','sequenceCode'),
+    ('residue_name','residueType'),
+    ('serial',None),
+    ('comment','comment'),
+  )),
+
+  'nmr_atom':OD((
+    ('chain_code','nmrResidue.nmrChain.shortName'),
+    ('sequence_code','nmrResidue.sequenceCode'),
+    ('serial',None),
+    ('name','name'),
+    ('isotopeCode','isotopeCode'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_dataset':OD((
+    ('serial','serial'),
+    ('title','title'),
+    ('program_name','programName'),
+    ('program_version','programVersion'),
+    ('data_path','dataPath'),
+    ('creation_date',None),
+    ('uuid','uuid'),
+    ('comment','comment'),
+    ('ccpn_calculation_step',_isALoop),
+    ('ccpn_calculation_data',_isALoop),
+  )),
+
+  'ccpn_calculation_step':OD((
+    ('serial', None),
+    ('program_name','programName'),
+    ('program_version','programVersion'),
+    ('script_name','scriptName'),
+    ('script','script'),
+    ('input_data_uuid','inputDataUuid'),
+    ('output_data_uuid','outputDataUuid'),
+  )),
+
+  'ccpn_calculation_data':OD((
+    ('data_name','name'),
+    ('attached_object_pid','attachedObjectPid'),
+    ('parameter_name', None),
+    ('parameter_value', None),
+  )),
+
+  'ccpn_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('restraint_origin','origin'),
+    ('tensor_chain_code','tensorChainCode'),
+    ('tensor_sequence_code','tensorSequenceCode'),
+    ('tensor_residue_name','tensorResidueType'),
+    ('tensor_magnitude', 'tensorMagnitude'),
+    ('tensor_rhombicity', 'tensorRhombicity'),
+    ('tensor_isotropic_value', 'tensorIsotropicValue'),
+    ('ccpn_serial','serial'),
+    ('dataset_serial','dataSet.serial'),
+    ('name','name'),
+    ('restraint_type','restraintType'),
+    ('restraint_item_length','restraintItemLength'),
+    ('unit','unit'),
+    ('measurement_type','measurementType'),
+    ('comment','comment'),
+    ('ccpn_restraint',_isALoop),
+  )),
+  'ccpn_restraint':OD((
+    ('index',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_name_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_name_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_name_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_name_4',None),
+    ('atom_name_4',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('name',None),
+    ('vector_length','restraint.vectorLength'),
+    ('figure_of_merit','restraint.figureOfMerit'),
+    ('ccpn_comment','restraint.comment'),
+  )),
+
+  'ccpn_notes':OD((
+    ('ccpn_note',_isALoop),
+  )),
+  'ccpn_note':OD((
+    ('serial',None),
+    ('name','name'),
+    ('created', None),
+    ('last_modified', None),
+    ('text','text'),
+  )),
+
+  'ccpn_additional_data':OD((
+    ('ccpn_internal_data',_isALoop),
+  )),
+  'ccpn_internal_data':OD((
+    ('ccpn_object_pid',None),
+    ('internal_data_string',None)
+  )),
+
+}
+
+
+
+def loadNefFile(path, memopsRoot=None, removeExisting=False):
   """Load NEF file at path into memopsRoot, creting memopsRoot it not passed in"""
 
   nefReader = CcpnNefReader()
   dataBlock = nefReader.getNefData(path)
   if memopsRoot is None:
-    memopsRoot = memopsIo.newProject(dataBlock.name, path)
+    name = os.path.splitext(dataBlock.name)[0]
+    memopsRoot = memopsIo.newProject(name, removeExisting=removeExisting)
   nefReader.importNewProject(memopsRoot, dataBlock)
   #
   return memopsRoot
@@ -106,6 +770,8 @@ class CcpnNefReader:
     self._dataSet2ItemMap = None
     self._nmrResidueMap = None
 
+    self._chainMapping = None
+
     self.defaultDataSetSerial = None
     self.defaultNmrChain = None
     self.mainDataSetSerial = None
@@ -121,6 +787,8 @@ class CcpnNefReader:
     # Initialise afresh for every file read
     self._dataSet2ItemMap = {}
     self._nmrResidueMap = {}
+
+    self._chainMapping = {}
     #
     return dataBlock
 
@@ -137,6 +805,16 @@ class CcpnNefReader:
     #
     return result
 
+  def initialiseProject(self, project, name):
+    """Initialise Project for reading, making new top level objects to
+    hold loaded data"""
+    # NB These are automatically set as current on the memopsRoot
+    nmrProject = project.newNmrProject(name=name)
+    project.newMolSystem(code=name, name=name)
+    project.newNmrConstraintStore(nmrProject=nmrProject)
+    project.newAnalysisProject(name=name, nmrProject=nmrProject)
+
+
   def importNewProject(self, project, dataBlock):
     """Import entire project from dataBlock into empty Project"""
 
@@ -146,25 +824,33 @@ class CcpnNefReader:
 
     self.project = project
     name = dataBlock.name
-    self.nmrProject = project.newNmrProject(name=name)
-    self.molSystem = project.newMolSystem(code=name, name=name)
-
+    self.initialiseProject(project, name=name)
 
     self.defaultChainCode = None
 
     saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
 
-    # Load metadata and molecular system first
-    metaDataFrame = dataBlock['nef_nmr_meta_data']
-    self.saveFrameName = 'nef_nmr_meta_data'
-    self.load_nef_nmr_meta_data(project, metaDataFrame)
-    del saveframeOrderedDict['nef_nmr_meta_data']
+    # # Load metadata and molecular system first
+    # metaDataFrame = dataBlock['nef_nmr_meta_data']
+    # self.saveFrameName = 'nef_nmr_meta_data'
+    # self.load_nef_nmr_meta_data(project, metaDataFrame)
+    # del saveframeOrderedDict['nef_nmr_meta_data']
 
     saveFrame = dataBlock.get('nef_molecular_system')
     if saveFrame:
       self.saveFrameName = 'nef_molecular_system'
       self.load_nef_molecular_system(project, saveFrame)
     del saveframeOrderedDict['nef_molecular_system']
+
+    for chainCode, chainDict in sorted(self._chainMapping.items()):
+      print('@~@~  chain', chainCode)
+      for sequenceCode, resDict in chainDict.items():
+        residue = resDict.get('residue')
+        print('    residue', sequenceCode, residue and residue.ccpCode, resDict['resonanceGroup'],
+              residue)
+        for name, atDict in sorted(resDict['atomSetMappings'].items()):
+          print('    --> ', name, atDict['name'], atDict['elementSymbol'], atDict['mappingType'],
+                [x.name for x in atDict['atomSets']])
 
     # Load assignments, or preload from shiftlists
     # to make sure '@' and '#' identifiers match the right serials
@@ -173,8 +859,6 @@ class CcpnNefReader:
       self.saveFrameName = 'ccpn_assignment'
       self.load_ccpn_assignment(project, saveFrame)
       del saveframeOrderedDict['ccpn_assignment']
-    else:
-      self.preloadAssignmentData(dataBlock)
 
     # t1 = time.time()
     # print ('@~@~ NEF load starting frames', t1-t0)
@@ -187,26 +871,11 @@ class CcpnNefReader:
         if importer is None:
           print ("WARNING, unknown saveframe category", sf_category, saveFrameName)
         else:
-          pass
 
-          # # NBNB check
-          # # NB - newObject may be project, for some saveframes.
-          # result = importer(self, project, saveFrame)
-          # if isinstance(result, AbstractWrapperObject):
-          #   self.frameCode2Object[saveFrameName] = result
-          # # elif not isinstance(result, list):
-          # #   self.warning("Unexpected return %s while reading %s" %
-          # #                (result, saveFrameName))
-
-          # # NBNB check
-          # # Handle unmapped elements
-          # extraTags = [x for x in saveFrame
-          #              if x not in nef2CcpnMap[sf_category]
-          #              and x not in ('sf_category', 'sf_framecode')]
-          # if extraTags:
-          #   print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
-
-    t2 = time.time()
+          # NBNB check
+          result = importer(self, project, saveFrame)
+          self.frameCode2Object[saveFrameName] = result
+          t2 = time.time()
     print('Loaded NEF file, time = ', t2-t0)
 
     for msg in self.warnings:
@@ -235,7 +904,7 @@ class CcpnNefReader:
   # importers['nef_molecular_system'] = load_nef_molecular_system
 
 
-  def load_nef_sequence(self, molSystem, loop):
+  def load_nef_sequence(self, memopsRoot, loop):
     """Load nef_sequence loop"""
 
     result = []
@@ -263,20 +932,20 @@ class CcpnNefReader:
     sequence2Chain = {}
     tags =('residue_name', 'linking', 'residue_variant')
     for chainCode, rows in sorted(chainData.items()):
-      compoundName = rows[0].get('ccpn_compound_name')
+      compoundName = rows[0].get('ccpn_compound_name') or 'Molecule_%s' % chainCode
       role = rows[0].get('ccpn_chain_role')
       comment = rows[0].get('ccpn_chain_comment')
 
-      # NBNB FIXME
       for row in rows:
+        # NB these will be dealt with as unknown resodies later, which is what we want
         if row.get('linking') == 'dummy':
           row['residue_name'] = 'dummy.' + row['residue_name']
       sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
 
       lastChain = sequence2Chain.get(sequence)
       if lastChain is None:
-        molecule = createMoleculeFromNef(name=compoundName, sequence=rows)
-        newChain = molSystem.newChain(code=chainCode, molecule=molecule)
+        molecule = createMoleculeFromNef(memopsRoot, name=compoundName, sequence=rows)
+        newChain = memopsRoot.currentMolSystem.newChain(code=chainCode, molecule=molecule)
         sequence2Chain[sequence] = newChain
 
         # TODO implement alternative to this
@@ -318,26 +987,44 @@ class CcpnNefReader:
 
       else:
         from memops.general.Util import copySubTree
-        newChain = copySubTree(lastChain, self.molSystem,
+        newChain = copySubTree(lastChain, memopsRoot.currentMolSystem,
                                topObjectParameters={'code':chainCode})
 
       newChain.role = role
       newChain.details = comment
 
-      # for apiResidue in newChain._wrappedData.sortedResidues():
-      #   # Necessary to guarantee against name clashes
-      #   # Direct access to avoid unnecessary notifiers
-      #   apiResidue.__dict__['seqInsertCode'] = '__@~@~__'
-      # for ii,apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
-      #   # NB we have to loop over API residues to be sure we get the residues
-      #   # in creation order rather than sorted order
-      #   residue = project._data2Obj[apiResidue]
-      #   residue.rename(rows[ii].get('sequence_code'))
-      #   residue._resetIds()
-      #
-      # # Necessary as notification is blanked here:
-      # newChain._resetIds()
+      # set seqCode, seqInsertCode and make mapping dictionary
+      self._chainMapping[chainCode] = chainDict = OD()
+      for ii, residue in enumerate(newChain.sortedResidues()):
 
+        sequenceCode = rows[ii]['sequence_code']
+
+        # set seqCode, seqInsertCode
+        seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+        residue.seqCode = seqCode
+        if seqInsertCode:
+          residue.seqInsertCode = seqInsertCode
+
+        # Make chainMapping
+        chainDict[sequenceCode] = resDict = {'residue':residue, 'resonanceGroup':None}
+        atomMappings = resDict['atomMappings'] = {}
+        residueMapping = MoleculeBasic.getResidueMapping(residue, aromaticsEquivalent=False)
+        for asm in residueMapping.atomSetMappings:
+          atDict = {'atomSetMapping':asm}
+          for tag in ('name', 'mappingType', 'elementSymbol', 'atomSets'):
+            atDict[tag] = getattr(asm, tag)
+          atDict['resonance'] = None
+          atName = atDict['name'].replace('*', '%').upper()
+          if atDict['mappingType'] == 'nonstereo':
+            if atName.endswith('A'):
+              atName = atName[:-1] + 'x'
+            elif atName.endswith('B'):
+              atName = atName[:-1] + 'y'
+            elif atName.endswith('A%'):
+              atName = atName[:-2] + 'x%'
+            elif atName.endswith('B%'):
+              atName = atName[:-2] + 'y%'
+          atomMappings[atName] = atDict
       #
       result.append(newChain)
 
@@ -379,71 +1066,6 @@ class CcpnNefReader:
   # #
   # importers['nef_covalent_links'] = load_nef_covalent_links
 
-
-
-  def preloadAssignmentData(self, dataBlock):
-    """Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
-    and create NmrResidues in connencted nmrChains in order
-
-    NB later we can store serials in CCPN projects, but something is needed that works anyway
-
-    NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable,
-    and that serials are put back where they came from.
-    This heuristic creates NmrResidues in connected stretches in the order they are found,
-    but this will break if connected tretches appear in multiple shiftlists and some are partial."""
-
-
-    project = self.project
-
-    for saveFrameName, saveFrame in dataBlock.items():
-
-      # get all NmrResidue data in chemicalshift lists
-      assignmentData = {}
-      assignmentData2 = {}
-      if saveFrameName.startswith('nef_chemical_shift_list'):
-        loop = saveFrame.get('nef_chemical_shift')
-        if loop:
-          for row in loop.data:
-            chainCode = row['chain_code']
-            nmrResidues = assignmentData.get(chainCode, OD())
-            assignmentData[chainCode] = nmrResidues
-            nmrResidues[(row['sequence_code'], row['residue_name'])] = None
-
-      # Create objects with reserved names
-      for chainCode in sorted(assignmentData):
-        if chainCode[0] in '@#' and chainCode[1:].isdigit():
-          # reserved name - make chain
-          try:
-            project.fetchNmrChain(chainCode)
-          except ValueError:
-            # Could not be done, probably because we have NmrChain '@1'. Leave for later
-            pass
-
-      for chainCode, nmrResidues in sorted(assignmentData.items()):
-
-        # Create NmrChain
-        try:
-          nmrChain = project.fetchNmrChain(chainCode)
-        except ValueError:
-          nmrChain = project.fetchNmrChain('`%s`' % chainCode)
-
-        if nmrChain.isConnected:
-          # Save data for later processing
-          assignmentData2[nmrChain] = nmrResidues
-        else:
-          # Create non-assigned NmrResidues to reserve the serials. The rest can wait
-          for sequenceCode, residueType in list(nmrResidues.keys()):
-            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-              nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
-
-      for nmrChain, nmrResidues in sorted(assignmentData2.items()):
-        # Create NmrResidues in order, to preserve connection order
-        for sequenceCode, residueType in list(nmrResidues.keys()):
-          # This time we want all non-offset, regardless of type - as we must get them in order
-          if (len(sequenceCode) < 2 or sequenceCode[-2] not in '+-'
-              or not sequenceCode[-1].isdigit()):
-            # I.e. for sequenceCodes that do not include an offset
-            nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
 
   def load_nef_chemical_shift_list(self, project, saveFrame):
@@ -1407,55 +2029,140 @@ class CcpnNefReader:
   #
   importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
 
+  def fetchAtomMap(self, chainCode, sequenceCode, name, isotopeCode=None, comment=None):
+    # First do non-offset residues, to make sure main residue maps are ready
+    residueMap = self.fetchResidueMap(chainCode, sequenceCode)
+    atomMappings = residueMap['atomMappings']
+    atomMap = atomMappings.get(name)
+    if isotopeCode is None:
+      isotopeCode = commonUtil.name2IsotopeCode(name) or 'unknown'
+    if atomMap is None:
+      # we have no preceding map. Make one, but we clearly can have only simple atoms,
+      # with no atomSets or provision for prochirals etc.
+      atomMap = atomMappings[name] = {'name':name.replace('%','*'), 'mappingType':'simple',
+                                      'atomSets':[],}
+      atomMap['elementSymbol'] = commonUtil.isotopeCode2Nucleus(isotopeCode)
+
+    if atomMap.get('resonance') is None:
+      # Make resonance
+      resonanceGroup = residueMap['resonanceGroup']
+      resonance = self.project.currentNmrProject.newResonance(name=atomMap['name'],
+                                                         isotopeCode=isotopeCode,
+                                                         resonanceGroup=resonanceGroup,
+                                                         details=comment)
+      atomMap['resonances'] = resonance
+
+      atomSets = atomMap.get('atomSets')
+      if atomSets:
+        AssignmentBasic.assignAtomsToRes(atomSets, resonance)
+      else:
+        resonance.assignNames = [atomMap['name']]
+    #
+    return atomMap
+
+  def fetchResidueMap(self, chainCode, sequenceCode, residueType=None, linkToMap=None):
+    """Return _chainMapping entry (if necessary)"""
+    nmrProject = self.project.currentNmrProject
+
+    chainMapping = self._chainMapping.get(chainCode)
+    if chainMapping is None:
+      chainMapping = self._chainMapping[chainCode] = OD()
+    result = chainMapping.get(sequenceCode)
+    if result is None:
+      result = chainMapping[sequenceCode] = {'atomMappings':{}}
+
+    if result.get('resonanceGroup') is None:
+      if chainCode == '@-':
+        # default chain
+        name = sequenceCode
+      else:
+        name = '%s.%s' % (chainCode, sequenceCode)
+      resonanceGroup = result['resonanceGroup'] = nmrProject.newResonanceGroup(name=name)
+      residue = result.get('residue')
+      if residue is None:
+        # ResonanceGroup is unassigned
+        tt = Constants.residueName2chemCompId.get(residueType, (None, None))
+        resonanceGroup.molType, resonanceGroup.ccpCode = tt
+      else:
+        # ResonanceGroup is assigned
+        resonanceGroup.molType = residue.molType
+        resonanceGroup.ccpCode = residue.ccpCode
+        resonanceGroup.linking = residue.linking
+        resonanceGroup.descriptor = residue.descriptor
+
+      seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+      if offset is not None:
+        # Offset residue - add to main residue
+        mainResidueMap = self.fetchResidueMap(chainCode, '%s.%s' % (seqCode, seqInsertCode))
+        mainResonanceGroup = mainResidueMap['resonanceGroup']
+        if offset == 0:
+          linkType = 'identity'
+        else:
+          linkType = 'sequential'
+        mainResonanceGroup.newResonanceGroupProb(linkType=linkType, offset=offset,
+                                                 possibility=resonanceGroup)
+      elif linkToMap is not None:
+        # This is a residue in a continuous stretch - and linkToMap is the map for the i-1 residue
+        previousResonanceGroup = linkToMap['resonanceGroup']
+        previousResonanceGroup.newResonanceGroupProb(linkType='sequential', offset=1,
+                                                     possibility=resonanceGroup)
+
+    #
+    return result
+
   def load_ccpn_assignment(self, project, saveFrame):
+    nmrChainTypes = {}
+    for row in saveFrame['nmr_chain']:
+      chainCode = row['chain_code']
+      isConnected = row['is_connected']
+      if chainCode in self._chainMapping:
+        # NB This assumes that the chainMapping is set for MolSYstem chains,
+        # and not for any other chains
+        nmrChainTypes[chainCode] = 'assigned'
+      else:
+        self._chainMapping[chainCode] = OD()
+        if isConnected:
+          nmrChainTypes[chainCode] = 'connected'
+        elif chainCode == '@-':
+          nmrChainTypes[chainCode] = 'default'
+        else:
+          nmrChainTypes[chainCode] = 'unassigned'
 
-    # the saveframe contains nothing but three loops:
-    nmrChainLoopName = 'nmr_chain'
-    nmrResidueLoopName = 'nmr_residue'
-    nmrAtomLoopName = 'nmr_atom'
+    offsetRows = []
+    previousConnectedMaps = {}
+    for row in saveFrame['nmr_residue']:
+      # First do non-offset residues, to make sure main residue maps are ready
+      chainCode = row['chain_code']
+      sequenceCode = row['sequenceCode']
+      seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+      if offset is None:
+        chainType = nmrChainTypes[chainCode]
+        if sequenceCode in nmrChainTypes[chainCode] and chainType != 'assigned':
+          raise ValueError("Invalid data, chain_code %s, sequence_code %s appear twice"
+                           % (chainCode, sequenceCode))
+        if chainType == 'connected':
+          linkToMap = previousConnectedMaps.get(chainCode)
+        else:
+          linkToMap = None
+        newMap = self.fetchResidueMap(chainCode, sequenceCode, residueType=row['residue_name'],
+                                      linkToMap=linkToMap)
+        newMap['resonanceGroup'].details = row.get('comment')
+        if chainType == 'connected':
+          previousConnectedMaps[chainCode] = newMap
+      else:
+        offsetRows.append(row)
 
-    nmrChains = {}
-    nmrResidues = {}
+    for row in offsetRows:
+      chainCode = row['chain_code']
+      sequenceCode = row['sequenceCode']
+      newMap = self.fetchResidueMap(chainCode, sequenceCode, row['residue_name'])
+      newMap['resonanceGroup'].details = row.get('comment')
 
-    # read nmr_chain loop
-    mapping = nef2CcpnMap[nmrChainLoopName]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    creatorFunc = project.newNmrChain
-    for row in saveFrame[nmrChainLoopName].data:
-      parameters = self._parametersFromLoopRow(row, map2)
-      nmrChain = creatorFunc(**parameters)
-      nmrChain.resetSerial(row['serial'])
-      # NB former call was BROKEN!
-      # modelUtil.resetSerial(nmrChain, row['serial'], 'nmrChains')
-      nmrChains[parameters['shortName']] = nmrChain
-
-    # read nmr_residue loop
-    mapping = nef2CcpnMap[nmrResidueLoopName]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    for row in saveFrame[nmrResidueLoopName].data:
-      parameters = self._parametersFromLoopRow(row, map2)
-      chainCode =  row['chain_code']
-      nmrChain = nmrChains[chainCode]
-      nmrResidue = nmrChain.newNmrResidue(**parameters)
-      nmrResidue.resetSerial(row['serial'])
-      # NB former call was BROKEN!
-      # modelUtil.resetSerial(nmrResidue, row['serial'], 'nmrResidues')
-      nmrResidues[(chainCode,parameters['sequenceCode'])] = nmrChain
-
-    # read nmr_atom loop
-    mapping = nef2CcpnMap[nmrAtomLoopName]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    for row in saveFrame[nmrAtomLoopName].data:
-      parameters = self._parametersFromLoopRow(row, map2)
-      chainCode =  row['chain_code']
-      sequenceCode =  row['sequence_code']
-      nmrResidue = nmrResidue[(chainCode, sequenceCode)]
-      nmrAtom = nmrResidue.newNmrAtom(**parameters)
-      nmrAtom.resetSerial(row['serial'])
-      # NB former call was BROKEN!
-      # modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
-  #
-  importers['ccpn_assignment'] = load_ccpn_assignment
+    for row in saveFrame['nmr_atom']:
+      self.fetchAtomMap(row['chain_code'], row['sequenceCode'], row['name'],
+                        isotopeCode=row['isotope_code'], comment=row.get('comment'))
+  # #
+  # importers['ccpn_assignment'] = load_ccpn_assignment
 
 
   def load_ccpn_notes(self, project, saveFrame):
@@ -1795,7 +2502,7 @@ def createSpectrum(project, spectrumName, spectrumParameters, dimensionData, tra
         # Deliberate - any error should be skipped
         pass
       if spectrum is None:
-        project._logger.warning("Failed to load spectrum from spectrum path %s" % filePath)
+       print("Failed to load spectrum from spectrum path %s" % filePath)
       elif 'axisCodes' in dimensionData:
           # set axisCodes
           spectrum.axisCodes = dimensionData['axisCodes']
@@ -2013,8 +2720,8 @@ def createMoleculeFromNef(project, name, sequence, defaultType='UNK'):
         # We use isCyclic to set the ends to 'middle'. It gets sorted out below
         isCyclic = True
 
-      molResidues = molecule.extendMolResidues(sequence=residueTypes, startNumber=startNumber,
-                                               isCyclic=isCyclic)
+      molResidues = extendMolResidues(molecule, sequence=residueTypes, startNumber=startNumber,
+                                                isCyclic=isCyclic)
 
       # Adjust linking and descriptor
       if isCyclic:
@@ -2041,7 +2748,7 @@ def createMoleculeFromNef(project, name, sequence, defaultType='UNK'):
       # else:
       tt = Constants.residueName2chemCompId.get(residueTypes[0])
       if not tt:
-        project._logger.warning("""Could not access ChemComp for %s - replacing with %s
+        print("""Could not access ChemComp for %s - replacing with %s
 NB - could be a failure in fetching remote information.
 Are you off line?""" % (residueTypes[0], defaultType))
         tt = Constants.residueName2chemCompId.get(defaultType)
@@ -2050,7 +2757,12 @@ Are you off line?""" % (residueTypes[0], defaultType))
         if chemComp:
           chemCompVar  = (chemComp.findFirstChemCompVar(linking='none') or
                           chemComp.findFirstChemCompVar()) # just a default
-          molecule.newMolResidue(seqCode=startNumber, chemCompVar=chemCompVar)
+          if chemCompVar:
+            molecule.newMolResidue(seqCode=startNumber, chemComp=chemCompVar.chemComp,
+                                   chemCompVar=chemCompVar)
+          else:
+            raise ValueError("No chemCompVar found for %s. Vars should be in  %s"
+                             % (chemComp, chemComp.chemCOmpVars))
 
         else:
           raise ValueError("Residue type %s %s: Error in getting template information"
@@ -2147,8 +2859,8 @@ def extendMolResidues(molecule, sequence, startNumber=1, isCyclic=False):
   #
   return result
 
+
 if __name__ == '__main__':
   path = sys.argv[1]
-  memopsRoot = loadNefFile(path)
-  loadNefFile(memopsRoot, path)
+  memopsRoot = loadNefFile(path, removeExisting=True)
   memopsRoot.saveModified()

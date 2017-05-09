@@ -52,14 +52,14 @@ class PeakTable(CcpnModule):
 
   className = 'PeakListTableModule'
 
-  def __init__(self, project, mainWindow, name='PeakList Table'):
+  def __init__(self, mainWindow, name='PeakList Table'):
 
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
-    self.project = project
+    self.project = self.mainWindow.project
     self.current = mainWindow.application.current
 
 
@@ -144,12 +144,7 @@ class PeakListTableWidget(ObjectTable):
                                              )
 
     self._displayTable()
-    print(self._selectedPeakList)
-    if self._selectedPeakList is not None:
-      self._peakNotifier = Notifier(self._selectedPeakList,
-                                              [Notifier.DELETE], 'Peak',
-                                              self._deleteCallback
-                                              )
+
 
 
 
@@ -217,6 +212,11 @@ class PeakListTableWidget(ObjectTable):
     self._displayTable()
     self._updateSettingsWidgets()
 
+    if self._selectedPeakList is not None:
+      self._peakNotifier = Notifier(self._selectedPeakList,
+                                              [Notifier.DELETE], 'Peak',
+                                              self._peakNotifierCallback
+                                              )
 
 
   # def _peakNotifierCallback(self, *kw):
@@ -232,13 +232,16 @@ class PeakListTableWidget(ObjectTable):
   #
   #   self._updateAllModule()
 
+  def _peakNotifierCallback(self, data):
+    if data['trigger'] == 'delete':
+      print('deleting Peak ')
+      self._updateAllModule()
+
 
   def _deleteCallback(self, *kw):
     print('$$$$' * 1000)
-    print('_deleteCallback ', kw)
+    print('Deleting Spectrum')
 
-    if self._peakNotifier is not None:
-      self._peakNotifier.unRegister()
 
     if self._selectedPeakList is not None:
       self.pLwidget.select(self._selectedPeakList.pid)
@@ -254,9 +257,12 @@ class PeakListTableWidget(ObjectTable):
     self.setObjectsAndColumns(objects=[], columns=[])
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
     if self._selectedPeakList is not None:
-      self.setObjectsAndColumns(objects=self._selectedPeakList.peaks, columns=self._getTableColumns(self._selectedPeakList))
-      self._selectOnTableCurrentPeaks(self._current.peaks)
+      peaks = [peak for peak in self._selectedPeakList.peaks if not peak._wrappedData.isDeleted]
+      deletedPeaks = [peak for peak in self._selectedPeakList.peaks if  peak._wrappedData.isDeleted]
+      print('deletedPeaks', deletedPeaks)
 
+      self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+      self._selectOnTableCurrentPeaks(self._current.peaks)
 
     else:
       self.setObjects([])

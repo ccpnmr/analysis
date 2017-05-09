@@ -209,7 +209,8 @@ class Gui(Ui):
          # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
         from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
         blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
-        self.mainWindow.moduleArea.addModule(blankDisplay, position=None)
+        self.mainWindow.moduleArea.addModule(blankDisplay, position='top'
+                                             , relativeTo=self.mainWindow.moduleArea)   # ejb
 
     finally:
       self.application._endCommandBlock()
@@ -348,7 +349,8 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
 
     _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name)
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right')
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
@@ -372,7 +374,8 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name
                                 )
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right')
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
 #old name
 StripDisplayNd = SpectrumDisplayNd
 

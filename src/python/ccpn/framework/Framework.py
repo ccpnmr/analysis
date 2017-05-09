@@ -1496,7 +1496,7 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.peakTable = PeakTable(mainWindow, selectedList=selectedList)
+    self.peakTable = PeakTable(mainWindow)
     mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")

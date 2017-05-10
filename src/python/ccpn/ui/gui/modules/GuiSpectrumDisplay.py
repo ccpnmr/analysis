@@ -27,6 +27,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
+# Having a scrolled widget containing OpenGL and PyQtGraph widgets does not seem to work.
+# The leftmost strip is full of random garbage if it's not completely visible.
+# So for now add option below to have it turned off (set to False) or on (True).
+USE_SCROLLAREA = True
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
@@ -164,17 +169,22 @@ class GuiSpectrumDisplay(CcpnModule):
     else:
       self.spectrumUtilToolBar.hide()
 
-    # scroll area for strips
-    # This took a lot of sorting-out; better leave as is or test thoroughly
-    self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
-                                            scrollBarPolicies = ('always', 'asNeeded'),
-                                            acceptDrops=True
-                                            )
-    self.stripFrame = Frame(showBorder=True)
-    self._stripFrameScrollArea.setWidget(self.stripFrame)
-    self.stripFrame.setGridLayout()
-    self._stripFrameScrollArea.setWidgetResizable(True)
-    qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
+    if USE_SCROLLAREA:
+      # scroll area for strips
+      # This took a lot of sorting-out; better leave as is or test thoroughly
+      self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
+                                              scrollBarPolicies = ('always', 'asNeeded'),
+                                              acceptDrops=True
+                                              )
+      self.stripFrame = Frame(showBorder=True)
+      self._stripFrameScrollArea.setWidget(self.stripFrame)
+      self.stripFrame.setGridLayout()
+      self._stripFrameScrollArea.setWidgetResizable(True)
+      qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
+    else:
+      self.stripFrame = Frame(qtParent, showBorder=True)
+      self.stripFrame.setGridLayout()
+      qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(parent=qtParent,

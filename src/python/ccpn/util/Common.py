@@ -563,8 +563,6 @@ class LocalFormatter(string.Formatter):
     # do any conversion on the resulting object
     # NB, conversion parameter is not used
 
-    from future_builtins import ascii
-
     if hasattr(value, 'pid'):
       return str(value)
     elif isinstance(value, float):
@@ -583,7 +581,12 @@ class LocalFormatter(string.Formatter):
     elif conversion == 'r':
         return repr(value)
     elif conversion == 'a':
-        return ascii(value)
+        try:
+          return ascii(value)
+        except NameError:
+          # Likely we are in Python 2.
+          # As ascii behaves like Python 2 repr, this should be the correct workaround
+          return repr(value)
     raise ValueError("Unknown conversion specifier {0!s}".format(conversion))
 
 stdLocalFormatter = LocalFormatter()

@@ -68,7 +68,8 @@ class GuiWindow():
     # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self.application.current),
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
+                                                              current=self.application.current),
                     context=context)
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
@@ -274,7 +275,7 @@ class GuiWindow():
   def markPositions(self, axisCodes, chemicalShifts):
     """
     Create marks based on the axisCodes and adds annotations where appropriate.
-    
+
     :param axisCodes: The axisCodes making a mark for
     :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
     """

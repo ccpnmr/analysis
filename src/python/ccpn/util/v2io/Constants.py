@@ -38,9 +38,9 @@ __date__ = ": 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 LINEAR_POLYMER_TYPES = ('protein', 'DNA', 'RNA')
 
-# Dictionary of resiude name to chemCompId
+# Dictionary of residue name to chemCompId
 # NB residue names are given both in UPPER and Title case
-# The latter should not be releant, but this is ahrmless.
+# The latter should not be relevant, but this is harmless.
 residueName2chemCompId = {
   '000':('other','000'),
   '001':('other','001'),

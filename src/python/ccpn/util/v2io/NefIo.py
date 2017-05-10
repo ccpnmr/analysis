@@ -1133,12 +1133,6 @@ class CcpnNefReader:
         restraintType = 'HBond'
       else:
         restraintType = 'Distance'
-    elif category == 'nef_dihedral_restraint_list':
-      itemLength = 4
-      data = saveFrame.get('nef_dihedral_restraint').data
-      restraintType = 'Dihedral'
-      # TODO do this differently
-      return None
     elif category == 'nef_rdc_restraint_list':
       itemLength = 2
       data = saveFrame.get('nef_rdc_restraint').data
@@ -1221,95 +1215,89 @@ class CcpnNefReader:
   importers['nef_distance_restraint_list'] = load_nef_restraint_list
   importers['nef_rdc_restraint_list'] = load_nef_restraint_list
 
-  def load_nef_restraint(self, restraintList, loop, itemLength=None):
-    """Serves to load nef_distance_restraint, nef_dihedral_restraint,
-     nef_rdc_restraint and ccpn_restraint loops"""
 
-    # NB Restraint.name - written out for dihedral restraints - is not read.
-    # Which is probably OK, it is derived from the atoms.
 
-    result = []
+  def load_nef_dihedral_restraint_list(self, project, saveFrame):
+    """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
+     nef_rdc_restraint_list and ccpn_restraint_list"""
 
-    string2ItemMap = self._dataSet2ItemMap[restraintList.dataSet]
+    nmrConstraintStore = self.project.currentNmrConstraintStore
 
-    # set itemLength if not passed in:
-    if not itemLength:
-      itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
+    category = saveFrame['sf_category']
+    framecode = saveFrame['sf_framecode']
 
-    mapping = nef2CcpnMap[loop.name]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    contributionTags = sorted(map2.values())
+    # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
+    name = framecode[len(category) + 1:]
+    comment = saveFrame.get('comment')
+    restraintList = nmrConstraintStore.newDihedralConstraintList(name=name, details=comment)
+    newRestraintFunc = restraintList.newDihedralConstraint
+    newItemFuncName =  "newDihedralConstraintItem"
+    itemLength = 4
+    data = saveFrame.get('nef_dihedral_restraint').data
+
     restraints = {}
-    # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
 
     max = itemLength + 1
     multipleAttributes = OD((
-      ('chainCodes',tuple('chain_code_%s' % ii for ii in range(1, max))),
-      ('sequenceCodes',tuple('sequence_code_%s' % ii for ii in range(1, max))),
-      ('residueTypes',tuple('residue_name_%s' % ii for ii in range(1, max))),
-      ('atomNames',tuple('atom_name_%s' % ii for ii in range(1, max))),
+      ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),
+      ('sequenceCodes', tuple('sequence_code_%s' % ii for ii in range(1, max))),
+      ('residueTypes', tuple('residue_name_%s' % ii for ii in range(1, max))),
+      ('atomNames', tuple('atom_name_%s' % ii for ii in range(1, max))),
     ))
 
-    parametersFromLoopRow = self._parametersFromLoopRow
     defaultChainCode = self.defaultChainCode
-    for row in loop.data:
+    for row in data:
 
       # get or make restraint
       serial = row.get('restraint_id')
       restraint = restraints.get(serial)
       if restraint is None:
-        valuesToContribution = {}
-        dd = {'serial':serial}
-        val = row.get('ccpn_vector_length')
+        # First line in restraint
+        dd = {}
+        val = row.get('weight')
         if val is not None:
-          dd['vectorLength'] = val
-        val = row.get('ccpn_figure_of_Merit')
-        if val is not None:
-          dd['figureOfMerit'] = val
+          dd['weight'] = val
         val = row.get('ccpn_comment')
         if val is not None:
-          dd['comment'] = val
-        restraint = restraintList.newRestraint(**dd)
-        restraints[serial] = restraint
-        result.append(restraint)
+          dd['details'] = val
 
-      # Get or make restraintContribution
-      parameters = parametersFromLoopRow(row, map2)
-      combinationId = parameters.get('combinationId')
-      nonAssignmentValues = tuple(parameters.get(tag) for tag in contributionTags)
-      if combinationId:
-        # Items in a combination are ANDed, so each line has one contribution
-        contribution = restraint.newRestraintContribution(**parameters)
-      else:
-        contribution = valuesToContribution.get(nonAssignmentValues)
-        if contribution is None:
-          contribution = restraint.newRestraintContribution(**parameters)
-          valuesToContribution[nonAssignmentValues] = contribution
+        # For dihedral restraints the resonance are on the restraint, not the item
+        ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
+        fixedResonances = []
+        for chainCode, sequenceCode, residueName, atomName in zip(*ll):
+          chainCode = chainCode or defaultChainCode
+          resonances = self.fetchAtomMap(chainCode, sequenceCode, atomName)['resonances']
+          fixedResonances.append(
+            tuple(ConstraintBasic.getFixedResonance(nmrConstraintStore,x) for x in resonances)
+          )
+        # NB We maek only one restraint, as we otehrwise mess up the restraint serials.
+        # Anyway the risk of a diedral restraint involving an ambiguous atom set is minuscule.
+        tt = list(itertools.product(*fixedResonances))[0]
+        restraint = newRestraintFunc(resonances=tt, **dd)
+        # Must be reset after the fact, as serials cannot be passed in normally
+        resetSerial(restraint, serial)
+        restraints[serial] = restraint
 
       # Add item
-      # ll = [row._get(tag)[:itemLength] for tag in assignTags]
-      ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
-      # Reset missing chain codes to default
-      # ll[0] = [x or defaultChainCode for x in ll[0]]
-
-      idStrings = []
-      for item in zip(*ll):
-        if defaultChainCode is not None and item[0] is None:
-          # ChainCode missing - replace with default chain code
-          item = (defaultChainCode,) + item[1:]
-        idStrings.append(Pid.IDSEP.join(('' if x is None else str(x)) for x in item))
-      try:
-        contribution.addRestraintItem(idStrings, string2ItemMap)
-      except ValueError:
-        self.warning("Cannot Add restraintItem %s. Identical to previous. Skipping" % idStrings)
-
+      dd2 = {}
+      val = row.get('target_value')
+      if val is not None:
+        dd2['targetValue'] = val
+      val = row.get('target_value_uncertainty')
+      if val is not None:
+        dd2['error'] = val
+      val = row.get('lower_limit')
+      if val is not None:
+        dd2['lowerLimit'] = val
+      val = row.get('upper_limit')
+      if val is not None:
+        dd2['upperLimit'] = val
+      restraint.newDihedralConstraintItem(**dd2)
     #
-    return result
-  #
-  importers['nef_distance_restraint'] = load_nef_restraint
-  importers['nef_dihedral_restraint'] = load_nef_restraint
-  importers['nef_rdc_restraint'] = load_nef_restraint
-  importers['ccpn_restraint'] = load_nef_restraint
+    return restraintList
+
+  importers['nef_dihedral_restraint_list'] = load_nef_dihedral_restraint_list
+
 
   def load_nef_nmr_spectrum(self, project, saveFrame):
 

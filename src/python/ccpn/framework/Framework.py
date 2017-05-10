@@ -495,8 +495,12 @@ class Framework:
           spectrumView._createdSpectrumView()
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
-    self._initLayout()
-    # self._restoreLayout()
+    # add blank Display
+    if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
+      self.ui.mainWindow.newBlankDisplay()
+    # FIXME: LM. Restore Layout
+    # Restore Layout currently unstable. Unexpected bugs from pyqtgraph conteiners. Needs a better refactoring
+    # self._initLayout()
 
   def _initLayout(self):
     """
@@ -1605,10 +1609,10 @@ class Framework:
     else:
       #TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);
       # initialise in GuiMainWindow on __init__; set appropriate Menu callbacks
+      from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
-      mainWindow.pythonConsoleModule = CcpnModule(mainWindow, name='Python Console', closeFunc=closeFunc)
-      mainWindow.pythonConsoleModule.layout.addWidget(mainWindow.pythonConsole)
+      mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
       mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
 

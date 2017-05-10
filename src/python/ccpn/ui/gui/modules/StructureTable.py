@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -193,7 +193,12 @@ class StructureTableModule(CcpnModule):
     self.structureTable = StructureTable(parent=self.mainWidget
                                         , setLayout=True
                                         , application=self.application
+                                        , moduleParent=self
                                         , grid=(0,0), itemPid=itemPid)
+    # settingsWidget
+    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.structureTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.structureTable, grid=(5, 0))
+
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -206,6 +211,14 @@ class StructureTableModule(CcpnModule):
     else:
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
+
+  def _getDisplayColumnWidget(self):
+    " CCPN-INTERNAL: used to get displayColumnWidget"
+    return self.displayColumnWidget
+
+  def _getSearchWidget(self):
+    " CCPN-INTERNAL: used to get searchWidget"
+    return self.searchWidget
 
 
 class StructureTable(ObjectTable):
@@ -249,7 +262,8 @@ class StructureTable(ObjectTable):
                 ('nmrAtomName', lambda row: StructureTable.stLam(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
   ]
 
-  def __init__(self, parent, application, itemPid=None, **kwds):
+  def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
+    self.moduleParent=moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
@@ -382,6 +396,7 @@ class StructureTable(ObjectTable):
       # self.setSortingEnabled(True)
       tuples = structureEnsemble.data.as_namedtuples()
       self.setObjects(tuples)
+      self._updateSettingsWidgets()
       self._silenceCallback = False
       self.show()
 
@@ -396,6 +411,7 @@ class StructureTable(ObjectTable):
       # self.setSortingEnabled(True)
       tuples = structureData.as_namedtuples()
       self.setObjects(tuples)
+      self._updateSettingsWidgets()
       self._silenceCallback = False
       self.show()
 
@@ -452,6 +468,13 @@ class StructureTable(ObjectTable):
                       )
 
     return None
+
+  def _updateSettingsWidgets(self):
+    ''' update settings Widgets according with the new displayed table '''
+    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+    displayColumnWidget.updateWidgets(self)
+    searchWidget = self.moduleParent._getSearchWidget()
+    searchWidget.updateWidgets(self)
 
   def initialiseButtons(self, index):
     self.stButtons.setIndex(index)

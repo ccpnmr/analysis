@@ -27,11 +27,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
-# Having a scrolled widget containing OpenGL and PyQtGraph widgets does not seem to work.
-# The leftmost strip is full of random garbage if it's not completely visible.
-# So for now add option below to have it turned off (set to False) or on (True).
-USE_SCROLLAREA = True
-
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
@@ -129,12 +124,15 @@ class GuiSpectrumDisplay(CcpnModule):
   settingsOnTop = True
   settingsMinimumSizes = (250, 50)
 
-  def __init__(self, mainWindow, name):
+  def __init__(self, mainWindow, name, useScrollArea=False):
     """
     Initialise the Gui spectrum display object
     
     :param mainWindow: MainWindow instance
     :param name: Title-bar name for the Module
+    :param useScrollArea: Having a scrolled widget containing OpenGL and PyQtGraph widgets does not seem to work.
+                          The leftmost strip is full of random garbage if it's not completely visible.
+                          So for now add option below to have it turned off (False) or on (True).
     """
 
     print('GuiSpectrumDisplay>> mainWindow, name:', mainWindow, name)
@@ -169,7 +167,7 @@ class GuiSpectrumDisplay(CcpnModule):
     else:
       self.spectrumUtilToolBar.hide()
 
-    if USE_SCROLLAREA:
+    if useScrollArea:
       # scroll area for strips
       # This took a lot of sorting-out; better leave as is or test thoroughly
       self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,

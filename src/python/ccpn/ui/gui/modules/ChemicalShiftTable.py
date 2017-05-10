@@ -201,16 +201,18 @@ class ChemicalShiftTable(ObjectTable):
     except:
       return None
 
-  columnDefs = [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number'),
-             ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id'),
-             ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name'),
-             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'value', float), 'Value of chemical shift, in selected ChemicalShiftList'),
-             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'valueError', float), 'Standard deviation of chemical shift, in selected ChemicalShiftList'),
+  columnDefs = [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
+             ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
+             ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
+             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'value', float), 'Value of chemical shift, in selected ChemicalShiftList', None),
+             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'valueError', float), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
              ('Shift list peaks',
               lambda cs:'%3d ' % ChemicalShiftTable._getShiftPeakCount(ChemicalShiftTable, cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
-                                                                                    'ChemicalShiftList'),
+                                                                                    'ChemicalShiftList', None),
              ('All peaks',
-              lambda cs:'%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists')
+              lambda cs:'%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
+              ('Comment', lambda cs:ChemicalShiftTable._getCommentText(cs), 'Notes',
+                 lambda cs, value:ChemicalShiftTable._setComment(cs, value))
              ]
 
   def __init__(self, parent, application, moduleParent, **kwds):
@@ -222,7 +224,7 @@ class ChemicalShiftTable(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForNmrChain method
     self.spacer = Spacer(self._widget, 5, 5
@@ -294,7 +296,7 @@ class ChemicalShiftTable(ObjectTable):
   def _actionCallback(self, chemicalShift, row, column):
     print(chemicalShift, row, column)
 
-  def _selectionCallback(self, obj, **kw):
+  def _selectionCallback(self, obj, row, col):
     "Callback for selecting a row in the table"
     self._current.chemicalShift = obj
 
@@ -339,6 +341,17 @@ class ChemicalShiftTable(ObjectTable):
     peaks = chemicalShift.nmrAtom.assignedPeaks
     return (len(set(x for x in peaks
                     if x.peakList.chemicalShiftList is chemicalShiftList)))
+
+  @staticmethod
+  def _getCommentText(chemicalShift):
+    if chemicalShift.comment == '' or not chemicalShift.comment:
+      return ' '
+    else:
+      return chemicalShift.comment
+
+  @staticmethod
+  def _setComment(chemicalShift, value):
+    chemicalShift.comment = value
 
 # class ChemicalShiftTable(CcpnModule):
 #   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):

@@ -123,11 +123,26 @@ class PeakListTableWidget(ObjectTable):
 
     # TODO
     # set notifier to trigger only if changes involve the selected peakList, its children or parent.
-    self._spectrumDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'Spectrum', self._updateAllModule)
-    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'PeakList', self._updateAllModule)
+    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'PeakList', self._peakListDeleteNotifierCallback)
     self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak',
-                                                                                    self._updateAllModule)
+                                                                                    self._peakNotifierNotifierCallback)
     self._displayTable()
+
+
+  def _peakListDeleteNotifierCallback(self,data):
+    peakList = data['object']
+    if self._selectedPeakList != peakList:
+      return
+    else:
+      self._updateAllModule()
+
+  def _peakNotifierNotifierCallback(self, data):
+    peak = data['object']
+    if peak is not None:
+      if self._selectedPeakList != peak.peakList:
+        return
+      else:
+        self._updateAllModule()
 
 
   def _getTableColumns(self, peakList):
@@ -267,8 +282,6 @@ class PeakListTableWidget(ObjectTable):
     "Cleanup of self"
     if self._peakListDeleteNotifier:
       self._peakListDeleteNotifier.unRegister()
-    if self._spectrumDeleteNotifier:
-      self._spectrumDeleteNotifier.unRegister()
     if self._peakNotifier:
       self._peakNotifier.unRegister()
     self._selectOnTableCurrentPeaksNotifier.unRegister()

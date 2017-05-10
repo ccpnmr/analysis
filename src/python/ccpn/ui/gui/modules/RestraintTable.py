@@ -297,7 +297,7 @@ class RestraintTable(ObjectTable):
       self._restraintNotifier.unRegister()
     # register a notifier for this structureEnsemble
     self._restraintNotifier = Notifier(restraint,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'restraint',
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Restraint',
                                     self._updateCallback
                                   )
 

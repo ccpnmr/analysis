@@ -41,7 +41,7 @@ class _Pulldown(PulldownListCompoundWidget):
 
     def __init__( self, parent, project,
                   showBorder=False, orientation='left', minimumWidths=None, labelText=None,
-                  callback=None, default=None, **kwds):
+                  showSelectName=False, callback=None, default=None, **kwds):
         """
         Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects
         in project; not to be used directly, used as a base class for the specific classes for 
@@ -67,10 +67,15 @@ class _Pulldown(PulldownListCompoundWidget):
         if minimumWidths is None:
             minimumWidths = (100,150)
 
+        if showSelectName:
+          self.textList = ['<Select '+labelText+'>']+getPids(project, self.attributeName) # ejb
+        else:
+          self.textList = getPids(project, self.attributeName)  # ejb
+
         PulldownListCompoundWidget.__init__(self, parent=parent, showBorder=showBorder,
                                             orientation=orientation, minimumWidths=minimumWidths,
                                             labelText=labelText,
-                                            texts=getPids(project, self.attributeName),
+                                            texts=self.textList,
                                             callback=callback, default=default, **kwds)
         # add a notifier to update the pulldown list
         self.updatePulldownList(project,

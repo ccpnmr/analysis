@@ -194,7 +194,7 @@ class StructureTableModule(CcpnModule):
                                         , setLayout=True
                                         , application=self.application
                                         , grid=(0,0), itemPid=itemPid)
-    self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
+    # self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
     self.structureTable.initialiseButtons(0)
 
   def _getDisplays(self):
@@ -264,16 +264,31 @@ class StructureTable(ObjectTable):
 
     # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForStructure method
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(0,0), gridSpan=(1,1))
+    self.stWidget = StructurePulldown(parent=self._widget
+                                     , project=self._project, default=0  # first Structure in project (if present)
+                                     , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
+                                     , showSelectName=True
+                                     , callback=self._selectionPulldownCallback)
+    self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
+                                  , selectedInd=1
+                                  , callback=self._selectionButtonCallback
+                                  , direction='h'
+                                  , tipTexts=None
+                                  , setLayout=True
+                                  , grid=(1,2), gridSpan=(1,3))
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects = [],
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
-                         grid = (2, 0), gridSpan = (1, 6)
+                         grid = (3, 0), gridSpan = (1, 6)
                          )
-    self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
-                         , grid=(1,0), gridSpan=(1,1))
 
     # Notifier object to update the table if the nmrChain changes
     self._ensembleNotifier = None
@@ -287,10 +302,11 @@ class StructureTable(ObjectTable):
     self._updateSilence = False  # flag to silence updating of the table
 
     # This widget will display a pulldown list of Structure pids in the project
-    self.stWidget = StructurePulldown(parent=self._widget
-                                     , project=self._project, default=0  # first Structure in project (if present)
-                                     , grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100)
-                                     , callback=self._selectionPulldownCallback)
+    # self.stWidget = StructurePulldown(parent=self._widget
+    #                                  , project=self._project, default=0  # first Structure in project (if present)
+    #                                  , grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100)
+    #                                  , showSelectName=True
+    #                                  , callback=self._selectionPulldownCallback)
 
     # if self.itemPid:
     #   thisObj = self._project.getByPid(self.itemPid)
@@ -298,21 +314,18 @@ class StructureTable(ObjectTable):
     #     self.displayTableForStructure(thisObj)
     #   elif thisObj.shortClassName == 'DS':
 
-    if not itemPid:
-      if len(self._project.structureEnsembles) > 0:
-        self.itemPid = self._project.structureEnsembles[0].pid
+    # self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
+    #                               , selectedInd=1
+    #                               , callback=self._selectionButtonCallback
+    #                               , direction='h'
+    #                               , tipTexts=None
+    #                               , setLayout=True
+    #                               , grid=(0,2), gridSpan=(1,3))
 
-    self.thisObj = self._project.getByPid(self.itemPid)
-    self.thisDataSet = self._getAttachedDataSet(self.itemPid)
-
-    self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
-                                  , selectedInd=1
-                                  , callback=self._selectionButtonCallback
-                                  , direction='h'
-                                  , tipTexts=None
-                                  , setLayout=True
-                                  , grid=(0,2), gridSpan=(1,3))
-    self.displayTableForStructure(self.thisObj)
+    if self.itemPid:
+      self.thisObj = self._project.getByPid(self.itemPid)
+      self.thisDataSet = self._getAttachedDataSet(self.itemPid)
+      self.displayTableForStructure(self.thisObj)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"

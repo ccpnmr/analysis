@@ -7,11 +7,13 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 
 class CopyPeaksModule(CcpnModule):
-  def __init__(self, project,  **kw):
+
+  className = 'CopyPeaksModule'
+  def __init__(self, mainWindow, name,  **kw):
     super(CopyPeaksModule, self)
-    CcpnModule.__init__(self, name='Copy Peaks to PeakLists')
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.project = project
+    CcpnModule.__init__(self, mainWindow=mainWindow, name='Copy Peaks to PeakLists')
+    self.application = mainWindow.application
+    self.project = mainWindow.project
 
     self._setMainLayout()
     self._createWidgets()

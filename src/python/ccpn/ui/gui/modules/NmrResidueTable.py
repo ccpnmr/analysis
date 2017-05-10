@@ -287,7 +287,7 @@ class NmrResidueTable(ObjectTable):
     "Silences/unsilences the update of the table until switched again"
     self._updateSilence = silence
 
-  def _selectionCallback(self, nmrResidue, **kw):
+  def _selectionCallback(self, nmrResidue, row, col):
     "Callback for selecting a row in the table"
     self._current.nmrResidue = nmrResidue
 

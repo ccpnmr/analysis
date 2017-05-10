@@ -555,17 +555,22 @@ class SideBar(QtGui.QTreeWidget, Base):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
-      if self.mainWindow:
-        from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+      info = showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.colourScheme)
 
-        self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
-        self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
-                                        relativeTo=self.mainWindow.moduleArea)
-        self.mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
-        self.project._logger.info("application.showStructureTable()")
+      # if self.mainWindow:
+      #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+      #
+      #   self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+      #   self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+      #                                   relativeTo=self.mainWindow.moduleArea)
+      #   self.mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
+      #   self.project._logger.info("application.showStructureTable()")
+      #
+      # else:
+      #   showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
 
-      else:
-        showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
     elif obj.shortClassName == 'MC':
       #to be decided when we design structure
       info = showInfo('Not implemented yet!',
@@ -626,6 +631,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       # self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
       #                                name='Notes Editor', note=obj)
 
+      #FIXME:ED should be a popup or consistency
       if self.mainWindow:
         self.notesEditor = NotesEditor(mainWindow=self.mainWindow, name='Notes Editor', note=obj)
         self.mainWindow.moduleArea.addModule(self.notesEditor, position='bottom',

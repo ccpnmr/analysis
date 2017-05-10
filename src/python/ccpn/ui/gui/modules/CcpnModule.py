@@ -128,7 +128,7 @@ class CcpnModule(Dock):
     self.mainWidget.show()
 
     # set parenting relations
-    self.setParent(mainWindow.moduleArea)
+    self.setParent(mainWindow.moduleArea)   # ejb
     self.widgetArea.setParent(self)
 
   # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'

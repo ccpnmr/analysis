@@ -80,7 +80,7 @@ class ButtonList(QtGui.QWidget, Base):
 
     self.buttons = []
     self.addButtons(texts, callbacks, icons, tipTexts)
-  
+
   def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
   
     if tipTexts is None:
@@ -105,10 +105,13 @@ class ButtonList(QtGui.QWidget, Base):
         
       button = Button(self, text, callbacks[i], icons[i],
                       tipText=tipTexts[i], grid=grid)
-      button.setMinimumWidth(20)
+      # button.setMinimumWidth(20)
+
+      width = button.fontMetrics().boundingRect(text).width() + 7
+      button.setMinimumWidth(width*1.5)
+
       self.buttons.append(button)
-    
-      
+
 class UtilityButtonList(ButtonList):
 
   def __init__(self, parent,

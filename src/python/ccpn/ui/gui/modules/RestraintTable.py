@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintsPulldown
 
@@ -62,24 +62,14 @@ class RestraintTableModule(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    dataSet = self.project.newDataSet()
-    newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
-                                            potentialType='logNormal', tensorMagnitude=1.0,
-                                            tensorRhombicity=1.0, tensorIsotropicValue=0.0,
-                                            tensorChainCode='A', tensorSequenceCode='11',
-                                            tensorResidueType='TENSOR', origin='NOE')
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-
-
-    if not restraintLists:
-      if self.project is None:
-        restraintLists = []
-      else:
-        restraintLists = self.project.restraintLists
-
-    self.restraintLists = restraintLists
-    self.itemPid = itemPid = self.restraintLists[0].pid
+    # if not restraintLists:
+    #   if self.project is None:
+    #     restraintLists = []
+    #   else:
+    #     restraintLists = self.project.restraintLists
+    #
+    # self.restraintLists = restraintLists
+    self.itemPid = itemPid = restraintLists
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -136,7 +126,11 @@ class RestraintTableModule(CcpnModule):
     self.restraintTable = RestraintTable(parent=self.mainWidget
                                         , setLayout=True
                                         , application=self.application
+                                         , moduleParent=self
                                         , grid=(0,0), itemPid=itemPid)
+    # settingsWidget
+    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.restraintTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.restraintTable, grid=(5, 0))
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -149,6 +143,14 @@ class RestraintTableModule(CcpnModule):
     else:
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
+
+  def _getDisplayColumnWidget(self):
+    " CCPN-INTERNAL: used to get displayColumnWidget"
+    return self.displayColumnWidget
+
+  def _getSearchWidget(self):
+    " CCPN-INTERNAL: used to get searchWidget"
+    return self.searchWidget
 
 
 class RestraintTable(ObjectTable):
@@ -164,7 +166,8 @@ class RestraintTable(ObjectTable):
                  # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
                  ]
 
-  def __init__(self, parent, application, itemPid=None, **kwds):
+  def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
+    self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
@@ -236,17 +239,7 @@ class RestraintTable(ObjectTable):
       self.clearTable()
       self._silenceCallback = True
       self.setObjects(RestraintList.restraints)
-      self._silenceCallback = False
-      self.show()
-
-  def _updateDataSet(self, restraint):
-    "Update the table"
-    if not self._updateSilence:
-      self.clearTable()
-      self._silenceCallback = True
-
-      tuples = restraint.as_namedtuples()
-      self.setObjects(tuples)
+      self._updateSettingsWidgets()
       self._silenceCallback = False
       self.show()
 
@@ -309,6 +302,14 @@ class RestraintTable(ObjectTable):
 
   def _callback(self):
     pass
+
+  def _updateSettingsWidgets(self):
+    ''' update settings Widgets according with the new displayed table '''
+    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+    displayColumnWidget.updateWidgets(self)
+    searchWidget = self.moduleParent._getSearchWidget()
+    searchWidget.updateWidgets(self)
+
 
 #
 #     tipTexts = ['Restraint Id',

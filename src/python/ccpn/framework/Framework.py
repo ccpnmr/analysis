@@ -498,8 +498,9 @@ class Framework:
     # add blank Display
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
       self.ui.mainWindow.newBlankDisplay()
+    # FIXME: LM. Restore Layout
+    # Restore Layout currently unstable. Unexpected bugs from pyqtgraph conteiners. Needs a better refactoring
     # self._initLayout()
-    # self._restoreLayout()
 
   def _initLayout(self):
     """

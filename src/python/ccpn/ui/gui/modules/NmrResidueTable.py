@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from PyQt4 import QtGui, QtCore
@@ -125,9 +125,12 @@ class NmrResidueTableModule(CcpnModule):
     # main window
     self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, setLayout=True,
                                            application=self.application,
+                                           moduleParent=self,
                                            actionCallback=self.navigateToNmrResidue,
-                                           grid=(0,0)
-                                          )
+                                           grid=(0,0))
+    # settingsWidget
+    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(5, 0))
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -170,6 +173,14 @@ class NmrResidueTableModule(CcpnModule):
     finally:
         self.application._endCommandBlock()
 
+  def _getDisplayColumnWidget(self):
+    " CCPN-INTERNAL: used to get displayColumnWidget"
+    return self.displayColumnWidget
+
+  def _getSearchWidget(self):
+    " CCPN-INTERNAL: used to get searchWidget"
+    return self.searchWidget
+
 
 class NmrResidueTable(ObjectTable):
   """
@@ -185,8 +196,8 @@ class NmrResidueTable(ObjectTable):
     ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue), 'Number of peaks assigned to NmrResidue')
   ]
 
-  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, **kwds):
-
+  def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, **kwds):
+    self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
@@ -268,6 +279,7 @@ class NmrResidueTable(ObjectTable):
       self.clearTable()
       self._silenceCallback = True
       self.setObjects(nmrChain.nmrResidues)
+      self._updateSettingsWidgets()
       self._silenceCallback = False
       self.show()
 
@@ -275,7 +287,7 @@ class NmrResidueTable(ObjectTable):
     "Silences/unsilences the update of the table until switched again"
     self._updateSilence = silence
 
-  def _selectionCallback(self, nmrResidue, row, col):
+  def _selectionCallback(self, nmrResidue, **kw):
     "Callback for selecting a row in the table"
     self._current.nmrResidue = nmrResidue
 
@@ -310,4 +322,11 @@ class NmrResidueTable(ObjectTable):
       self._chainNotifier.unRegister()
     if self._peaksNotifier is not None:
       self._peaksNotifier.unRegister()
+
+  def _updateSettingsWidgets(self):
+    ''' update settings Widgets according with the new displayed table '''
+    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+    displayColumnWidget.updateWidgets(self)
+    searchWidget = self.moduleParent._getSearchWidget()
+    searchWidget.updateWidgets(self)
 

@@ -97,8 +97,8 @@ class StructurePulldown(_Pulldown):
 
 
 class RestraintsPulldown(_Pulldown):
-  className = 'Restraint'
-  attributeName = 'restraints'
+  className = 'RestraintList'
+  attributeName = 'restraintLists'
 
 
 class ChemicalShiftListPulldown(_Pulldown):

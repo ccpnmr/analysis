@@ -1439,6 +1439,8 @@ class Framework:
     """
     Displays Chemical Shift table.
     """
+    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+
     mainWindow = self.ui.mainWindow
     if not self.project.chemicalShiftLists:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
@@ -1448,7 +1450,7 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.chemicalShiftTable = ChemicalShiftTable(mainWindow, chemicalShiftLists=self.project.chemicalShiftLists)
+    self.chemicalShiftTable = ChemicalShiftTableModule(mainWindow=mainWindow)   # ejb, chemicalShiftLists=self.project.chemicalShiftLists)
     mainWindow.moduleArea.addModule(self.chemicalShiftTable, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
@@ -1476,6 +1478,7 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
+
     structureTableModule = StructureTableModule(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")

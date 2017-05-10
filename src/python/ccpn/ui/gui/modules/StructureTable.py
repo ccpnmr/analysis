@@ -67,70 +67,70 @@ class StructureTableModule(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # add test structure Ensembles
-    try:
-      StructureTableModule.defined
-    except:
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-      self.ensemble = self.project.newStructureEnsemble()
-      self.data = self.ensemble.data
-
-      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-        , 'CB', 'HB1', 'HB2', 'HB3'
-        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-        , 'CE', 'HE1', 'HE2', 'HE3'
-        , 'CG', 'HG1', 'HG2', 'HG3'
-        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-                                                                                                     'VAL'] * 8
-      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-
-      self.data['atomName'] = self.testAtomName
-      self.data['residueName'] = self.testResidueName
-      self.data['chainCode'] = self.testChainCode
-      self.data['sequenceId'] = self.testSequenceId
-      self.data['modelNumber'] = self.testModelNumber
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-      self.ensemble = self.project.newStructureEnsemble()
-      self.data = self.ensemble.data
-
-      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-        , 'CB', 'HB1', 'HB2', 'HB3'
-        , 'CE', 'HE1', 'HE2', 'HE3'
-        , 'CG', 'HG1', 'HG2', 'HG3'
-        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-                                                                                                     'VAL'] * 8
-      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-
-      self.data['atomName'] = self.testAtomName
-      self.data['residueName'] = self.testResidueName
-      self.data['chainCode'] = self.testChainCode
-      self.data['sequenceId'] = self.testSequenceId
-      self.data['modelNumber'] = self.testModelNumber
-
-      self.ensemble = self.project.newStructureEnsemble()
-      self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
-
-      # make a test dataset in here
-
-      self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
-
-      self.dataItem = self.dataSet.newData('derivedConformers')
-      self.dataSet.attachedObject = self.ensemble       # the newest object
-      self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
-
-      StructureTableModule.defined=True
-      # should be a DataSet with the corresponding stuff in it
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    finally:
-      pass
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # # add test structure Ensembles
+    # try:
+    #   StructureTableModule.defined
+    # except:
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+    #     , 'CB', 'HB1', 'HB2', 'HB3'
+    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+    #     , 'CE', 'HE1', 'HE2', 'HE3'
+    #     , 'CG', 'HG1', 'HG2', 'HG3'
+    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+    #     , 'CB', 'HB1', 'HB2', 'HB3'
+    #     , 'CE', 'HE1', 'HE2', 'HE3'
+    #     , 'CG', 'HG1', 'HG2', 'HG3'
+    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+    #
+    #   # make a test dataset in here
+    #
+    #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+    #
+    #   self.dataItem = self.dataSet.newData('derivedConformers')
+    #   self.dataSet.attachedObject = self.ensemble       # the newest object
+    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+    #
+    #   StructureTableModule.defined=True
+    #   # should be a DataSet with the corresponding stuff in it
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # finally:
+    #   pass
 
     # settings
 
@@ -316,6 +316,8 @@ class StructureTable(ObjectTable):
       self.thisObj = self._project.getByPid(self.itemPid)
       self.thisDataSet = self._getAttachedDataSet(self.itemPid)
       self.displayTableForStructure(self.thisObj)
+    else:
+      self.thisObj=None
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"
@@ -419,12 +421,12 @@ class StructureTable(ObjectTable):
     "Silences/unsilences the update of the table until switched again"
     self._updateSilence = silence
 
-  def _selectionCallback(self, structureEnsemble, row, col):
+  def _selectionCallback(self, structureData, row, col):
     "Callback for selecting a row in the table"
-    self._current.structureEnsemble = structureEnsemble
+    self._current.structureData = structureData
 
   def _actionCallback(self, atomRecordTuple, row, column):
-    print(atomRecordTuple, row, column)
+      print(atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting Structure"

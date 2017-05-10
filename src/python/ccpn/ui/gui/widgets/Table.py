@@ -1213,27 +1213,27 @@ class ObjectTableFilter(Widget):
     self.origObjects = self.table.objects
 
     labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='l')
-
     self.columnOptions = PulldownList(self, grid=(0, 1), hAlign='l')
-
     labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='l')
-
     self.edit = LineEdit(self,grid=(0,3), hAlign='l')
+    self.edit.setMinimumSize(self.edit.sizeHint())
 
+    self.searchButtons = ButtonList(self, texts=['Reset','Search'],
+                                   tipTexts=['Restore Table','Search'],
+                                   callbacks=[self.restoreTable,self.findOnTable ],
+                                   grid=(0, 4), hAlign='c')
 
-    # self.searchButtons = ButtonList(self, texts=['Reset','Search'],
-    #                    tipTexts=['Restore Table','Search'],
-    #                    callbacks=[self.restoreTable,self.findOnTable ],
-    #                    grid=(0, 4), hAlign='l')
+    # self.clearButton = Button(self, text='Reset',
+    #                                 tipText='Restore Table',
+    #                                 callback=self.restoreTable,
+    #                                 grid=(0, 4), hAlign='c')
+    # self.searchButton = Button(self, text='Search',
+    #                             tipText='Search in Table',
+    #                             callback=self.findOnTable,
+    #                             grid=(0, 5), hAlign='c')
 
-    self.clearButton = Button(self, text='Reset',
-                                    tipText='Restore Table',
-                                    callback=self.restoreTable,
-                                    grid=(0, 4), hAlign='c')
-    self.searchButton = Button(self, text='Search',
-                                tipText='Search in Table',
-                                callback=self.findOnTable,
-                                grid=(0, 5), hAlign='c')
+    # self.clearButton.setMinimumSize(self.clearButton.sizeHint()*1.5)
+    # self.searchButton.setMinimumSize(self.searchButton.sizeHint()*1.5)
 
     self.setColumnOptions()
 

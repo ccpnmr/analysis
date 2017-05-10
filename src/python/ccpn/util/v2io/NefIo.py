@@ -12,8 +12,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from nefimport.v2io.Constants import residueName2chemCompId
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -47,6 +45,7 @@ from collections import OrderedDict as OD
 from ..nef import StarIo
 from . import Constants
 from .. import Common as commonUtil
+from .. import Constants as genConstants
 
 from ccp.general import Io as generalIo
 from memops.general import Io as memopsIo
@@ -80,6 +79,9 @@ saveFrameReadingOrder = [
   # 'ccpn_additional_data'
 ]
 
+class _isALoop:
+  # Dummy value - to be removed
+  pass
 
 nef2CcpnMap = {
   'nef_nmr_meta_data':OD((
@@ -842,18 +844,17 @@ class CcpnNefReader:
       self.load_nef_molecular_system(project, saveFrame)
     del saveframeOrderedDict['nef_molecular_system']
 
-    for chainCode, chainDict in sorted(self._chainMapping.items()):
-      print('@~@~  chain', chainCode)
-      for sequenceCode, resDict in chainDict.items():
-        residue = resDict.get('residue')
-        print('    residue', sequenceCode, residue and residue.ccpCode, resDict['resonanceGroup'],
-              residue)
-        for name, atDict in sorted(resDict['atomSetMappings'].items()):
-          print('    --> ', name, atDict['name'], atDict['elementSymbol'], atDict['mappingType'],
-                [x.name for x in atDict['atomSets']])
+    # for chainCode, chainDict in sorted(self._chainMapping.items()):
+    #   print('@~@~  chain', chainCode)
+    #   for sequenceCode, resDict in chainDict.items():
+    #     residue = resDict.get('residue')
+    #     print('    residue', sequenceCode, residue and residue.ccpCode, resDict['resonanceGroup'],
+    #           residue)
+    #     for name, atDict in sorted(resDict['atomSetMappings'].items()):
+    #       print('    --> ', name, atDict['name'], atDict['elementSymbol'], atDict['mappingType'],
+    #             [x.name for x in atDict['atomSets']])
 
-    # Load assignments, or preload from shiftlists
-    # to make sure '@' and '#' identifiers match the right serials
+    # Load CCPN assignments, if present, to preserve connected stretches
     saveFrame = dataBlock.get('ccpn_assignment')
     if saveFrame:
       self.saveFrameName = 'ccpn_assignment'
@@ -1013,7 +1014,7 @@ class CcpnNefReader:
           atDict = {'atomSetMapping':asm}
           for tag in ('name', 'mappingType', 'elementSymbol', 'atomSets'):
             atDict[tag] = getattr(asm, tag)
-          atDict['resonance'] = None
+          atDict['resonances'] = None
           atName = atDict['name'].replace('*', '%').upper()
           if atDict['mappingType'] == 'nonstereo':
             if atName.endswith('A'):
@@ -1067,90 +1068,58 @@ class CcpnNefReader:
   # importers['nef_covalent_links'] = load_nef_covalent_links
 
 
-
   def load_nef_chemical_shift_list(self, project, saveFrame):
     """load nef_chemical_shift_list saveFrame"""
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
-    mapping = nef2CcpnMap[category]
+    name = framecode[len(category) + 1:]
+    comment = saveFrame.get('ccpn_comment')
 
-    parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
-
-    parameters['name'] = framecode[len(category) + 1:]
-
-    # Make main object
-    result = project.newChemicalShiftList(**parameters)
-
+    shiftList = project.currentNmrProject.newShiftList(name=name, details=comment)
     if self.defaultChemicalShiftList is None:
       # ChemicalShiftList should default to the unique ChemicalShIftList in the file
       # A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists
       # given for all spectra- but this is nto hte place for validity checking
-      self.defaultChemicalShiftList = result
+      self.defaultChemicalShiftList = shiftList
 
-    if self.testing:
-      # When testing you want the values to remain as read
-      result.autoUpdate = False
-      # NB The above is how it ought to work.
-      # The below is how it is working as of July 2016
-      result._wrappedData.topObject.shiftAveraging = False
-
-    # Load loops, with object as parent
-    for loopName in loopNames:
-      loop = saveFrame.get(loopName)
-      if loop:
-        importer = self.importers[loopName]
-        importer(self, result, loop)
-    #
-    return result
-  #
-
-  importers['nef_chemical_shift_list'] = load_nef_chemical_shift_list
-
-  def load_nef_chemical_shift(self, parent, loop):
-    """load nef_chemical_shift loop"""
-
-    result = []
-
-    creatorFunc = parent.newChemicalShift
-
-    mapping = nef2CcpnMap[loop.name]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    # Read shifts loop
+    loop = saveFrame.get('nef_chemical_shift') or []
     for row in loop.data:
-      parameters = self._parametersFromLoopRow(row, map2)
-      tt = tuple(row.get(tag) for tag in ('chain_code', 'sequence_code', 'residue_name',
-                                          'atom_name'))
+      name = row['atom_name']
       element = row.get('element')
-      isotope = row.get('isotope_number')
+      isotopeNumber = row.get('isotope_number')
+
+      if not element:
+        element = commonUtil.name2ElementSymbol(name)
       if element:
-        if isotope:
-          isotopeCode = '%s%s' % (isotope, element.title())
+        if isotopeNumber:
+          isotopeCode = '%s%s%s' % (isotopeNumber, element[0].upper(), element[1:].lower())
         else:
-          isotopeCode = xConstants.DEFAULT_ISOTOPE_DICT.get(element.upper())
-      elif isotope:
-        element = commonUtil.name2ElementSymbol(tt[3])
-        isotopeCode = '%s%s' % (isotope, element.title())
+          isotopeCode = genConstants.DEFAULT_ISOTOPE_DICT.get(element.upper())
       else:
         isotopeCode = None
-      try:
-        nmrResidue = self.produceNmrResidue(*tt[:3])
-        nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
-        parameters['nmrAtom'] = nmrAtom
-        result.append(creatorFunc(**parameters))
 
-      except ValueError:
-        self.warning("Cannot produce NmrAtom for assignment %s. Skipping ChemicalShift" % (tt,))
-        # Should eventually be removed - raise while still testing
-        raise
+      atomMap = self.fetchAtomMap(row['chain_code'], row['sequence_code'], name,
+                                  isotopeCode=isotopeCode)
+      for resonance in atomMap['resonances']:
+        # There will be more than one resonance for e.g. Ser HB% or Leu HD%
+        shiftList.newShift(resonance=resonance, value=row['value'],
+                           error=row.get('value_uncertainty', 0),
+                           figOfMerit=row.get('ccpn_figure_of_merit', 1),
+                           details=row.get('ccpn_comment'))
     #
-    return result
-  #
-  importers['nef_chemical_shift'] = load_nef_chemical_shift
+    return shiftList
+
+  importers['nef_chemical_shift_list'] = load_nef_chemical_shift_list
 
   def load_nef_restraint_list(self, project, saveFrame):
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
      nef_rdc_restraint_list and ccpn_restraint_list"""
+
+    # No-Op  for now
+    return project
 
     # Get ccpn-to-nef mapping for saveframe
     category = saveFrame['sf_category']
@@ -1312,6 +1281,9 @@ class CcpnNefReader:
   importers['ccpn_restraint'] = load_nef_restraint
 
   def load_nef_nmr_spectrum(self, project, saveFrame):
+
+    # No-Op  for now
+    return project
 
     dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
@@ -1741,6 +1713,10 @@ class CcpnNefReader:
 
   def load_nef_peak_restraint_links(self, project, saveFrame):
     """load nef_peak_restraint_links saveFrame"""
+
+    # No-Op  for now
+    return project
+
     mapping = nef2CcpnMap['nef_peak_restraint_links']
     for tag, ccpnTag in mapping.items():
       if ccpnTag == _isALoop:
@@ -2039,22 +2015,36 @@ class CcpnNefReader:
     if atomMap is None:
       # we have no preceding map. Make one, but we clearly can have only simple atoms,
       # with no atomSets or provision for prochirals etc.
-      atomMap = atomMappings[name] = {'name':name.replace('%','*'), 'mappingType':'simple',
+      fixedName = name.replace('%','*')  # convert pseudoatom marker
+      fixedName = fixedName.replace('@', '__') # necessary as names like H@123 are reserved
+      atomMap = atomMappings[name] = {'name':fixedName, 'mappingType':'simple',
                                       'atomSets':[],}
       atomMap['elementSymbol'] = commonUtil.isotopeCode2Nucleus(isotopeCode)
 
-    if atomMap.get('resonance') is None:
+    if atomMap.get('resonances') is None:
       # Make resonance
       resonanceGroup = residueMap['resonanceGroup']
       resonance = self.project.currentNmrProject.newResonance(name=atomMap['name'],
-                                                         isotopeCode=isotopeCode,
-                                                         resonanceGroup=resonanceGroup,
-                                                         details=comment)
-      atomMap['resonances'] = resonance
+                                                              isotopeCode=isotopeCode,
+                                                              resonanceGroup=resonanceGroup,
+                                                              details=comment)
+      atomMap['resonances'] = [resonance]
 
       atomSets = atomMap.get('atomSets')
       if atomSets:
-        AssignmentBasic.assignAtomsToRes(atomSets, resonance)
+        resonanceSet = AssignmentBasic.assignAtomsToRes(atomSets, resonance)
+        asm = atomMap['atomSetMapping']
+        # assert asm is not None  # This is set together with the atomSets
+        if name[-1] == '%':
+          if asm.mappingType == 'ambiguous':
+            # This is e.g. Lys HG%, Val CG% or Ley HG% - we need two resonances here
+            resonance2 = self.project.currentNmrProject.newResonance(name=atomMap['name'],
+                                                                    isotopeCode=isotopeCode,
+                                                                    resonanceGroup=resonanceGroup,
+                                                                    details=comment)
+            atomMap['resonances'].append(resonance2)
+            AssignmentBasic.assignAtomsToRes(atomSets, resonance2, resonanceSet)
+            # AssignmentBasic.assignAtomsToRes(atomSets, resonance2)
       else:
         resonance.assignNames = [atomMap['name']]
     #
@@ -2081,7 +2071,10 @@ class CcpnNefReader:
       residue = result.get('residue')
       if residue is None:
         # ResonanceGroup is unassigned
-        tt = Constants.residueName2chemCompId.get(residueType, (None, None))
+        tt = Constants.residueName2chemCompId.get(residueType)
+        if tt is None:
+          #residueType not recognised - put in as ccpCode without molType
+          tt = (None, residueType)
         resonanceGroup.molType, resonanceGroup.ccpCode = tt
       else:
         # ResonanceGroup is assigned
@@ -2863,4 +2856,6 @@ def extendMolResidues(molecule, sequence, startNumber=1, isCyclic=False):
 if __name__ == '__main__':
   path = sys.argv[1]
   memopsRoot = loadNefFile(path, removeExisting=True)
+  print ('@~@~1', memopsRoot.activeRepositories)
+  print ('@~@~2', memopsRoot.packageLocator.findFirstRepository().url.path)
   memopsRoot.saveModified()

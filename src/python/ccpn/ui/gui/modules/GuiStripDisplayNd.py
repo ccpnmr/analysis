@@ -37,7 +37,6 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 
 from ccpn.util.Logging import getLogger
 
-
 class GuiStripDisplayNd(GuiSpectrumDisplay):
 
   def __init__(self, mainWindow, name):
@@ -56,8 +55,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
-    
-    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name)
+
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=False)
     # .mainWindow, .current and .application are set by GuiSpectrumDisplay
     # .project is set by the wrapper
 

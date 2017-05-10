@@ -40,14 +40,13 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 
 
-
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
   def __init__(self, mainWindow, name):
     # if not apiSpectrumDisplay1d.strips:
     #   apiSpectrumDisplay1d.newStrip1d()
 
-    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name)
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
     self._fillToolBar()
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)

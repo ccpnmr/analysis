@@ -272,12 +272,34 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     "Here the action is done to update the pulldown list"
     listFunc = callbackDict['notifier']._listFunc
     theObject = callbackDict['theObject']
+    trigger = callbackDict['trigger']       # ejb
+    object = callbackDict['object']         # ejb
+
     texts = listFunc(theObject, *args, **kwds)
     if texts is None:
       raise RuntimeError('Unable to update pulldownList')
-    self.pulldownList.clear()
-    self.pulldownList.setData(texts=texts)
 
+    #FIXME:ED - fix to stop the removal of <Select Name> from head of list
+    try:
+      if trigger=='delete':          # ejb - fix pullDownList delete
+        item = getattr(object, 'pid')
+        tempPulldown = self.pulldownList.texts
+        if item in tempPulldown:
+          tempPulldown.remove(item)
+          self.pulldownList.clear()
+          self.pulldownList.setData(texts=tempPulldown)
+      elif trigger=='create':
+        item = getattr(object, 'pid')
+        tempPulldown = self.pulldownList.texts
+        if item not in tempPulldown:
+          tempPulldown.append(item)
+          self.pulldownList.clear()
+          self.pulldownList.setData(texts=tempPulldown)
+      else:
+        self.pulldownList.clear()
+        self.pulldownList.setData(texts=texts)
+    except:
+      pass
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):
   """

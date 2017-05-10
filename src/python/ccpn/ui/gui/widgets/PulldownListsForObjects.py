@@ -96,6 +96,11 @@ class StructurePulldown(_Pulldown):
   attributeName = 'structureEnsembles'
 
 
+class NotesPulldown(_Pulldown):
+  className = 'Note'
+  attributeName = 'notes'
+
+
 class RestraintsPulldown(_Pulldown):
   className = 'RestraintList'
   attributeName = 'restraintLists'

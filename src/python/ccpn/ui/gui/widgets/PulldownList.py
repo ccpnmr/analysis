@@ -100,7 +100,7 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def setSelected(self, item, doCallback=False):
 
-    print("ccpn.ui.gui.widgets.PulldownList.setSelected is depecated use; .select()")
+    print("ccpn.ui.gui.widgets.PulldownList.setSelected is deprecated use; .select()")
     
     self.select(item)
 
@@ -114,31 +114,31 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def getSelected(self):
   
-    # print("ccpn.ui.gui.widgets.PulldownList.getSelected is depecated use; .currentData()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelected is deprecated use; .currentData()")
 
     return self.currentData()
 
   def getObject(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getObject is depecated use; .currentObject()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getObject is deprecated use; .currentObject()")
     
     return self.currentObject()
 
   def getText(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getText is depecated use; .currentText()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getText is deprecated use; .currentText()")
    
     return self.currentText()
 
   def getSelectedIndex(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is depecated use; .currentIndex()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is deprecated use; .currentIndex()")
 
     return self.currentIndex()
 
   def setup(self):
     
-    print("ccpn.ui.gui.widgets.PulldownList.setup is depecated use; .setData")
+    print("ccpn.ui.gui.widgets.PulldownList.setup is deprecated use; .setData")
 
     return self.currentIndex()
  

@@ -30,9 +30,13 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NotesPulldown
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.core.lib.Notifiers import Notifier
 
-class NotesEditor(CcpnModule):
+class NotesEditorModule(CcpnModule):
   """
   This class implements the module by wrapping a StructureTable instance
   """
@@ -52,41 +56,59 @@ class NotesEditor(CcpnModule):
     self.current = mainWindow.application.current
     self.note = note
 
-    self.label1 = Label(self.mainWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
-    self.lineEdit1 = LineEdit(self.mainWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
+    self.spacer = Spacer(self.mainWidget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(0,0), gridSpan=(1,1))
+    self.noWidget = NotesPulldown(parent=self.mainWidget
+                                   , project=self.project, default=0  # first Structure in project (if present)
+                                   , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
+                                   , showSelectName=True
+                                   , callback=self._selectionPulldownCallback)
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
-    self.textBox = TextEditor(self.mainWidget, grid=(3,0), gridSpan=(1,7))
+
+    self._noteNotifier = None
+    self._updateSilence = False  # flag to silence updating of the table
+
+    self.noteWidget = Widget(self.mainWidget, grid=(3,0), gridSpan=(1,5), setLayout=True)
+    self.noteWidget.hide()
+
+    self.label1 = Label(self.noteWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
+    self.lineEdit1 = LineEdit(self.noteWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
+    self.spacer = Spacer(self.noteWidget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,0), gridSpan=(1,1))
+    self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,7))
 
     if note:
       self.textBox.setText(note.text)
       self.lineEdit1.setText(self.note.name)
 
-    self.buttonBox = ButtonList(self.mainWidget, texts=['Save', 'Cancel']
-                                , callbacks=[self._saveNote, self._reject]
-                                , grid=(4,5), gridSpan=(1,2))
+    self.buttonBox = ButtonList(self.noteWidget, texts=['Apply']
+                                , callbacks=[self._applyNote]
+                                , grid=(6,5), gridSpan=(1,2))
+    self.spacer = Spacer(self.mainWidget, 5, 5
+                         , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+                         , grid=(5,4), gridSpan=(1,1))
 
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
     self.processText = self._processText
-    # self.layout.addWidget(widget)
 
   def _setNoteName(self):
     """
     Sets the name of the note based on the text in the Note name text box.
     """
-    if not self.note:
-      self.note = self.project.newNote(name=self.lineEdit1.text())
+    #FIXME:ED check that the new name is valid
     self.note.rename(self.lineEdit1.text())
 
-  def _saveNote(self):
+  def _applyNote(self):
     """
     Saves the text in the textbox to the note object.
     """
     newText = self.textBox.toPlainText()
     self._setNoteName()
     self.note.text = newText
-    self.close()
 
   def _reject(self):
     """
@@ -99,4 +121,60 @@ class NotesEditor(CcpnModule):
       self.note = self.project.newNote()
     self.textBox.setText(text)
     self.overlay.hide()
+
+  def _selectionPulldownCallback(self, item):
+    "Callback for selecting Structure"
+    self.thisObj = self.project.getByPid(item)
+    if self.thisObj is not None:
+      self.displayTableForNote(self.thisObj)
+    else:
+      self.noteWidget.hide()
+
+  def displayTableForNote(self, note):
+    "Display the table for all Notes"
+
+    if self._noteNotifier is not None:
+      # we have a new note and hence need to unregister the previous notifier
+      self._noteNotifier.unRegister()
+    # register a notifier for this note
+    self._noteNotifier = Notifier(note,
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Note',
+                                    self._updateCallback
+                                  )
+
+    self.noWidget.select(note.pid)
+    self._update(note)
+
+  def _updateCallback(self, data) -> str:
+    "callback for updating the note"
+    note = data['theObject']
+    if note is not None:
+      self._update(note)
+    return "MOO"
+
+  def destroy(self):
+    "Cleanup of self"
+    if self._noteNotifier is not None:
+      self._noteNotifier.unRegister()
+
+  def _update(self, note):
+    "Update the note"
+    if not self._updateSilence:
+      # self.clearTable()
+      self._silenceCallback = True
+
+      self.note = note
+      self.textBox.setText(note.text)
+      self.lineEdit1.setText(note.name)
+
+      self.noteWidget.show()
+      self._silenceCallback = False
+      self.show()
+
+  def updatePulldownList(self, callbackDict, *args, **kwds):
+    self.noWidget._updatePulldownList(self.noWidget, callbackDict, *args, **kwds)
+
+    texts = self.noWidget.pulldownList.textList
+    texts = ['<Select Note>']+texts
+    self.noWidget.pulldownList.setData(texts=texts)
 

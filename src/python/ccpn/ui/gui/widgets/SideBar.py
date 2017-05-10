@@ -41,7 +41,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui.gui.widgets.Base import Base
 
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-from ccpn.ui.gui.modules.NotesEditor import NotesEditor
+from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
@@ -54,6 +54,7 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -624,6 +625,10 @@ class SideBar(QtGui.QTreeWidget, Base):
                'This function has not been implemented in the current version',
                colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
+      popup = NotesPopup(note=obj)
+      popup.exec_()
+      popup.raise_()
+
       # if self._application.ui.mainWindow is not None:
       #   mainWindow = self._application.ui.mainWindow
       # else:
@@ -631,15 +636,15 @@ class SideBar(QtGui.QTreeWidget, Base):
       # self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
       #                                name='Notes Editor', note=obj)
 
-      #FIXME:ED should be a popup or consistency
-      if self.mainWindow:
-        self.notesEditor = NotesEditor(mainWindow=self.mainWindow, name='Notes Editor', note=obj)
-        self.mainWindow.moduleArea.addModule(self.notesEditor, position='bottom',
-                                        relativeTo=self.mainWindow.moduleArea)
-        self.mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditor()")
-        self.project._logger.info("application.showNotesEditor()")
-      else:
-        showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
+      # #FIXME:ED should be a popup or consistency
+      # if self.mainWindow:
+      #   self.notesEditor = NotesEditor(mainWindow=self.mainWindow, name='Notes Editor', note=obj)
+      #   self.mainWindow.moduleArea.addModule(self.notesEditor, position='bottom',
+      #                                   relativeTo=self.mainWindow.moduleArea)
+      #   self.mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditor()")
+      #   self.project._logger.info("application.showNotesEditor()")
+      # else:
+      #   showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
 
 
   def _createNewObject(self, item):

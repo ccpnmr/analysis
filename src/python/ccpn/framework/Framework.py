@@ -820,6 +820,8 @@ class Framework:
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')])
                   )),
       (),
+      ("Notes Table", self.showNotesEditorTable, [('shortcut', 'no')]),
+      (),
       ("Python Console", self.toggleConsole, [('shortcut', 'py'),
                                               ('checkable', True),
                                               ('checked', False)])
@@ -1527,6 +1529,20 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")
 
+  def showNotesEditorTable(self, position:str='bottom', relativeTo:CcpnModule=None):
+    """
+    Displays Notes Editing Table
+    """
+    from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+    mainWindow = self.ui.mainWindow
+
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.notesTable = NotesEditorModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.notesTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
+    self.project._logger.info("application.showNotesEditorTable()")
 
   def showPrintSpectrumDisplayPopup(self):
     from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup

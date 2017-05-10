@@ -194,8 +194,6 @@ class StructureTableModule(CcpnModule):
                                         , setLayout=True
                                         , application=self.application
                                         , grid=(0,0), itemPid=itemPid)
-    # self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
-    self.structureTable.initialiseButtons(0)
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -262,7 +260,6 @@ class StructureTable(ObjectTable):
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
 
-    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
@@ -300,27 +297,6 @@ class StructureTable(ObjectTable):
     #                                 self._updateCallback
     #                                )
     self._updateSilence = False  # flag to silence updating of the table
-
-    # This widget will display a pulldown list of Structure pids in the project
-    # self.stWidget = StructurePulldown(parent=self._widget
-    #                                  , project=self._project, default=0  # first Structure in project (if present)
-    #                                  , grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100)
-    #                                  , showSelectName=True
-    #                                  , callback=self._selectionPulldownCallback)
-
-    # if self.itemPid:
-    #   thisObj = self._project.getByPid(self.itemPid)
-    #   if thisObj.shortClassName == 'SE':
-    #     self.displayTableForStructure(thisObj)
-    #   elif thisObj.shortClassName == 'DS':
-
-    # self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
-    #                               , selectedInd=1
-    #                               , callback=self._selectionButtonCallback
-    #                               , direction='h'
-    #                               , tipTexts=None
-    #                               , setLayout=True
-    #                               , grid=(0,2), gridSpan=(1,3))
 
     if self.itemPid:
       self.thisObj = self._project.getByPid(self.itemPid)

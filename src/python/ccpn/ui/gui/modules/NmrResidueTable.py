@@ -40,8 +40,9 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from PyQt4 import QtGui, QtCore
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -196,11 +197,24 @@ class NmrResidueTable(ObjectTable):
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
+
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(0,0), gridSpan=(1,1))
+    self.ncWidget = NmrChainPulldown(parent=self._widget,
+                                     project=self._project, default=0,  #first NmrChain in project (if present)
+                                     grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100),
+                                     showSelectName=True,
+                                     callback=self._selectionPulldownCallback
+                                     )
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects = [],
                          autoResize=True,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
-                         grid = (1, 0), gridSpan = (1, 6)
+                         grid = (3, 0), gridSpan = (1, 6)
                          )
     # Notifier object to update the table if the nmrChain changes
     self._chainNotifier = None
@@ -214,14 +228,18 @@ class NmrResidueTable(ObjectTable):
     self._updateSilence = False  # flag to silence updating of the table
 
     # This widget will display a pulldown list of NmrChain pids in the project
-    self.ncWidget = NmrChainPulldown(parent=self._widget,
-                                     project=self._project, default=0,  #first NmrChain in project (if present)
-                                     grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
-                                     callback=self._selectionPulldownCallback
-                                     )
+    # self.ncWidget = NmrChainPulldown(parent=self._widget,
+    #                                  project=self._project, default=0,  #first NmrChain in project (if present)
+    #                                  grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
+    #                                  callback=self._selectionPulldownCallback
+    #                                  )
 
-    if len(self._project.nmrChains) > 0:
-      self.displayTableForNmrChain(self._project.nmrChains[0])
+    # if len(self._project.nmrChains) > 0:
+    #   self.displayTableForNmrChain(self._project.nmrChains[0])
+
+    # if self.itemPid:
+    #   self.thisObj = self._project.getByPid(self.itemPid)
+    #   self.displayTableForNmrChain(self.thisObj)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"

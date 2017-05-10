@@ -133,12 +133,10 @@ class RestraintTableModule(CcpnModule):
                                              checked = True
                                             )
 
-    # main window
     self.restraintTable = RestraintTable(parent=self.mainWidget
                                         , setLayout=True
                                         , application=self.application
                                         , grid=(0,0), itemPid=itemPid)
-    self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
 
   def _getDisplays(self):
     "return list of displays to navigate; done so BackboneAssignment module can subclass"
@@ -154,16 +152,6 @@ class RestraintTableModule(CcpnModule):
 
 
 class RestraintTable(ObjectTable):
-
-  # columnDefs = [('#'),
-  #                     ('Atoms'),
-  #                     ('Target Value.'),
-  #                     ('Upper Limit'),
-  #                     ('Lower Limit'),
-  #                     ('Error'),
-  #                     ('Peaks')
-  #                     ]
-
   columnDefs = [('#', '_key', 'Restraint Id'),
                  ('Atoms', lambda restraint:RestraintTable._getContributions(RestraintTable, restraint),
                   'Atoms involved in the restraint'),
@@ -177,67 +165,35 @@ class RestraintTable(ObjectTable):
                  ]
 
   def __init__(self, parent, application, itemPid=None, **kwds):
-
-    # self.columnsDefs = [('#', '_key', 'Restraint Id'),
-    #                ('Atoms', lambda restraint:self._getContributions(restraint),
-    #                 'Atoms involved in the restraint'),
-    #                ('Target Value.', 'targetValue', 'Target value for the restraint'),
-    #                ('Upper Limit', 'upperLimit', 'Upper limit for the restraint'),
-    #                ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint'),
-    #                ('Error', 'error', 'Error on the restraint'),
-    #                ('Peaks', lambda restraint:'%3d ' % self._getRestraintPeakCount(restraint),
-    #                 'Number of peaks used to derive this restraint')
-    #                # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
-    #                ]
-
     self._application = application
     self._project = application.project
     self._current = application.current
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
-    # self.restaintLists = restraintLists
     self.itemPid = itemPid
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
 
-    # selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForRestraints method
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(0, 0), gridSpan=(1, 1))
+    self.stWidget = RestraintsPulldown(parent=self._widget
+                                     , project=self._project, default=0
+                                     , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
+                                     , showSelectName=True
+                                     , callback=self._selectionPulldownCallback)
+    self.spacer = Spacer(self._widget, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2, 0), gridSpan=(1, 1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=columns, objects=[],
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
-                         grid=(2, 0), gridSpan=(1, 6)
+                         grid=(3, 0), gridSpan=(1, 6)
                          )
-    # columns = [('#', '_key'),
-    #            ('Atoms', lambda restraint: self._getContributions(restraint)),
-    #            ('Target Value.', 'targetValue'),
-    #            ('Upper Limit', 'upperLimit'),
-    #            ('Lower Limit', 'lowerLimit'),
-    #            ('Error', 'error'),
-    #            ('Peaks', lambda restraint: '%3d ' % self._getRestraintPeakCount(restraint))
-    #            # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
-    #            ]
-    #
-    # tipTexts = ['Restraint Id',
-    #             'Atoms involved in the restraint',
-    #             'Target value for the restraint',
-    #             'Upper limit for the restraint',
-    #             'Lower limitf or the restraint',
-    #             'Error on the restraint',
-    #             'Number of peaks used to derive this restraint '
-    #             ]
-    #
-    # self.restraintTable = GuiTableGenerator(self.mainWidget, restraintLists,
-    #                                             actionCallback=self._callback, columns=columns,
-    #                                             selector=self.restraintListPulldown,
-    #                                             tipTexts=tipTexts, objectType='restraints')
-
-    self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
-                         , grid=(1, 0), gridSpan=(1, 1))
-
 
     self._restraintNotifier = None
     #TODO: see how to handle peaks as this is too costly at present
@@ -249,24 +205,9 @@ class RestraintTable(ObjectTable):
     #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-    # This widget will display a pulldown list of Restraints pids in the project
-    self.stWidget = RestraintsPulldown(parent=self._widget
-                                     , project=self._project, default=0
-                                     , grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100)
-                                     , callback=self._selectionPulldownCallback)
-
-    # if self.itemPid:
-    #   thisObj = self._project.getByPid(self.itemPid)
-    #   if thisObj.shortClassName == 'SE':
-    #     self.displayTableForStructure(thisObj)
-    #   elif thisObj.shortClassName == 'DS':
-
-    if not itemPid:
-      if len(self._project.restraintLists) > 0:
-        self.itemPid = self._project.restraintLists[0].pid
-
-    self.thisObj = self._project.getByPid(self.itemPid)
-    self.displayTableForRestraint(self.thisObj)
+    if self.itemPid:
+      self.thisObj = self._project.getByPid(self.itemPid)
+      self.displayTableForRestraint(self.thisObj)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     "Convenience to add a widget to the top of the table; col >= 2"
@@ -288,53 +229,6 @@ class RestraintTable(ObjectTable):
 
     self.stWidget.select(restraint.pid)
     self._update(restraint)
-
-  def displayTableForDataSetRestraint(self, restraint):
-    "Display the table for all restraintDataSet"
-
-    if self._restraintNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._restraintNotifier.unRegister()
-    # register a notifier for this structureEnsemble
-    self._restraintNotifier = Notifier(restraint,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Restraint',
-                                    self._updateCallback
-                                  )
-
-    self.stWidget.select(restraint.pid)
-
-    # if self.thisDataSet:
-    #   for dt in self.thisDataSet.data:
-    #     if dt.name is 'derivedConformers':
-    #       try:
-    #         self.params = dt.parameters
-    #         thisFunc = self.params['backboneSelector']
-    #         thisSubset = self.thisObj.data.extract(thisFunc)
-    #         self._updateDataSet(thisSubset)
-    #       except:
-    #         pass
-
-  # def _getAttachedDataSet(self, item):
-  #   if item:
-  #     thisObj = self._project.getByPid(item)
-  #     if self._project.dataSets:
-  #       for dd in self._project.dataSets:
-  #         if dd.title == thisObj.longPid:
-  #
-  #           self.thisDataSet = dd
-  #           for dt in self.thisDataSet.data:
-  #             if dt.name is 'derivedConformers':
-  #               try:
-  #                 self.params = dt.parameters
-  #                 thisFunc = self.params['backboneSelector']
-  #                 return self.thisDataSet
-  #                 # thisSubset = thisAttached.data.extract(thisFunc)
-  #                 # self.displayTableForStructure(thisSubset)
-  #                 # self.displayTableForDataSetStructure(thisSubset)
-  #               except:
-  #                 return None
-  #   else:
-  #     return None
 
   def _update(self, RestraintList):
     "Update the table"

@@ -71,10 +71,6 @@ class PeakTable(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
 
 
-  def _getPeakTable(self):
-    " CCPN-INTERNAL: used to get peakListTable"
-    return self.peakListTable
-
   def _getDisplayColumnWidget(self):
     " CCPN-INTERNAL: used to get displayColumnWidget"
     return self.displayColumnWidget
@@ -91,7 +87,7 @@ class PeakTable(CcpnModule):
 
 class PeakListTableWidget(ObjectTable):
 
-  positionsUnit = UNITS[0] #default, updated by a pulldownList
+  positionsUnit = UNITS[0] #default
 
   def __init__(self, parent, moduleParent, application, **kwds):
     self._project = application.project
@@ -103,46 +99,29 @@ class PeakListTableWidget(ObjectTable):
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
-    # create the table; objects are added later via the displayTableForPeakList method
+    ## create peakList table widget
     ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[], autoResize=True, multiSelect=True,
                          actionCallback=self._actionCallback, selectionCallback=self._selectionCallback, grid=(1, 0), gridSpan=(1, 6))
+
+    ## create Pulldown for selection of peakList
     gridHPos = 0
-    self.pLwidget = PeakListPulldown(parent=self._widget,
-                                     project=self._project, default=0,  # first peakList in project (if present)
-                                     grid=(0, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                     callback=self._pulldownPLcallback
-                                     )
+    self.pLwidget = PeakListPulldown(parent=self._widget, project=self._project,grid=(0, gridHPos), gridSpan=(1, 1),
+                                     minimumWidths=(0, 100),callback=self._pulldownPLcallback)
+
+    ## create widgets for selection of position units
     gridHPos+=1
     self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
     gridHPos += 1
-    self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._updateUnits,
-                                        grid=(0, gridHPos))
+    self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
 
-    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT], targetName='peaks',
-                                                       callback=self._selectOnTableCurrentPeaksNotifierCallback)
+    ## set notifiers
+    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT], targetName='peaks',callback=self._selectOnTableCurrentPeaksNotifierCallback)
+    # TODO set notifier to trigger only for the selected peakList.
+    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.CREATE, Notifier.DELETE], 'PeakList', self._peakListNotifierCallback)
+    self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak', self._peakNotifierNotifierCallback)
 
-    # TODO
-    # set notifier to trigger only if changes involve the selected peakList, its children or parent.
-    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.DELETE], 'PeakList', self._peakListDeleteNotifierCallback)
-    self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak',
-                                                                                    self._peakNotifierNotifierCallback)
-    self._displayTable()
-
-
-  def _peakListDeleteNotifierCallback(self,data):
-    peakList = data['object']
-    if self._selectedPeakList != peakList:
-      return
-    else:
-      self._updateAllModule()
-
-  def _peakNotifierNotifierCallback(self, data):
-    peak = data['object']
-    if peak is not None:
-      if self._selectedPeakList != peak.peakList:
-        return
-      else:
-        self._updateAllModule()
+    ## populate the table if there are peaklists in the project
+    self._updateTable()
 
 
   def _getTableColumns(self, peakList):
@@ -191,32 +170,22 @@ class PeakListTableWidget(ObjectTable):
     return [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in
             columnDefs]
 
-  def _updateUnits(self, unit):
-    #update the table with new units
-    self._setPositionUnit(unit)
-    self._updateAllModule()
 
-  def _pulldownPLcallback(self, data):
-    self._updateAllModule()
+  ##################   Updates   ##################
 
-  def _updateAllModule(self, *kw):
-    if kw: #means that this function has been triggered by a notifier, Hence don't change the pulldown selection
-      # make sure any notifier from outside change the selection on the pulldown.
-      if self._selectedPeakList is not None:
-        self.pLwidget.select(self._selectedPeakList.pid)
-
-    self._displayTable()
+  def _updateAllModule(self):
+    '''Updates the table and the settings widgets'''
+    self._updateTable()
     self._updateSettingsWidgets()
 
-  def _displayTable(self):
-    '''Display the peaks on the table if the peak has not been  previously deleted and flagged isDeleted'''
+  def _updateTable(self):
+    '''Display the peaks on the table for the selected PeakList.
+    Obviously, If the peak has not been previously deleted and flagged isDeleted'''
+
     self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
-    peaks = []
     if self._selectedPeakList is not None:
-      for peak in self._selectedPeakList.peaks:
-        if not peak.isDeleted:
-          peaks.append(peak)
+      peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
       self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
       self._selectOnTableCurrentPeaks(self._current.peaks)
     else:
@@ -229,6 +198,8 @@ class PeakListTableWidget(ObjectTable):
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 
+  ##################   Widgets callbacks  ##################
+
   def _actionCallback(self, peak, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
@@ -238,7 +209,6 @@ class PeakListTableWidget(ObjectTable):
     else:
       self._project._logger.warn('Impossible to navigate to peak position. Set a current strip first')
 
-
   def _selectionCallback(self, peaks, *args):
     """
     set as current the selected peaks on the table
@@ -247,6 +217,40 @@ class PeakListTableWidget(ObjectTable):
       self._current.clearPeaks()
     else:
       self._current.peaks = peaks
+
+  def _pulldownUnitsCallback(self, unit):
+    # update the table with new units
+    self._setPositionUnit(unit)
+    self._updateAllModule()
+
+  def _pulldownPLcallback(self, data):
+    self._updateAllModule()
+
+  ##################   Notifiers callbacks  ##################
+
+  def _peakListNotifierCallback(self, data):
+    '''Refreshs the table only if the peakList involved in the notification is the one displayed '''
+    if self._selectedPeakList is not None:
+      self.pLwidget.select(self._selectedPeakList.pid) #otherwise automatically reset from the compoundWidget pulldown notifiers
+
+    peakList = data['object']
+    if self._selectedPeakList != peakList:
+      return
+    else:
+      self._updateAllModule()
+
+  def _peakNotifierNotifierCallback(self, data):
+    '''Callback for peak notifier. Refresh the table only if the peak belongs to the peakList displayed
+    NB. Currently impossible to register and trigger the notifier dynamically for only the peaks in the peakList displayed.
+    This because when deleting a peakList or spectrum from the project, the process starts by deleting one by one the peak and triggering the peak notifier automatically and therefore refreshing the table,
+    TODO: better notifier that if a parent object is deleted it suspends all the children notifiers.
+   '''
+    peak = data['object']
+    if peak is not None:
+      if self._selectedPeakList != peak.peakList:
+        return
+      else:
+        self._updateAllModule()
 
   def _selectOnTableCurrentPeaksNotifierCallback(self, data):
     '''callback from a notifier to select the current peaks  '''

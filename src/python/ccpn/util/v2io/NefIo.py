@@ -40,6 +40,7 @@ __date__ = ": 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import time
 import sys
 import os
+import itertools
 from collections import OrderedDict as OD
 
 from ..nef import StarIo
@@ -52,6 +53,7 @@ from memops.general import Io as memopsIo
 from ccp.lib import MoleculeModify
 from ccpnmr.analysis.core import MoleculeBasic
 from ccpnmr.analysis.core import AssignmentBasic
+from ccpnmr.analysis.core import ConstraintBasic
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -1114,81 +1116,110 @@ class CcpnNefReader:
 
   importers['nef_chemical_shift_list'] = load_nef_chemical_shift_list
 
+
   def load_nef_restraint_list(self, project, saveFrame):
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
      nef_rdc_restraint_list and ccpn_restraint_list"""
 
-    # No-Op  for now
-    return project
+    nmrConstraintStore = self.project.currentNmrConstraintStore
 
-    # Get ccpn-to-nef mapping for saveframe
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
-    mapping = nef2CcpnMap[category]
-
-    parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
     if category == 'nef_distance_restraint_list':
-      restraintType = 'Distance'
+      itemLength = 2
+      data = saveFrame.get('nef_distance_restraint').data
+      if saveFrame.get('restraint_origin') == 'hbond':
+        restraintType = 'HBond'
+      else:
+        restraintType = 'Distance'
     elif category == 'nef_dihedral_restraint_list':
+      itemLength = 4
+      data = saveFrame.get('nef_dihedral_restraint').data
       restraintType = 'Dihedral'
+      # TODO do this differently
+      return None
     elif category == 'nef_rdc_restraint_list':
+      itemLength = 2
+      data = saveFrame.get('nef_rdc_restraint').data
       restraintType = 'Rdc'
     else:
-      restraintType = saveFrame.get('restraint_type')
-      if not restraintType:
-        self.warning("Missing restraint_type for saveFrame %s - value was %s" %
-                     (framecode, restraintType))
-        return
-    parameters['restraintType'] = restraintType
-    namePrefix = restraintType[:3].capitalize() + '-'
+      # For now we do not support any non-standard restraint lists.
+      return None
 
     # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
-    dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-    if dataSetSerial is not None:
-      ss = '`%s`' % dataSetSerial
-      if name.startswith(ss):
-        name = name[len(ss):]
+    comment = saveFrame.get('comment')
+    newListFunc = getattr(nmrConstraintStore,"new%sConstraintList" % restraintType)
+    restraintList = newListFunc(name=name, details=comment)
+    newRestraintFunc = getattr(restraintList, "new%sConstraint" % restraintType)
+    newItemFuncName =  "new%sConstraintItem" % restraintType
 
-    # Make main object
-    dataSet = self.fetchDataSet(dataSetSerial)
-    previous = dataSet.getRestraintList(name)
-    if previous is not None:
-      # NEF but NOT CCPN has separate namespaces for different restraint types
-      # so we may get name clashes
-      # We should preserve NEF names, but it cannot be helped.
-      if not name.startswith(namePrefix):
-        # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
-        # for different constraint types
-        name = namePrefix + name
-        while dataSet.getRestraintList(name) is not None:
-          # This way we get a unique name even in the most bizarre cases
-          name = '`%s`' % name
+    restraints = {}
+    # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
 
-    parameters['name'] = name
+    max = itemLength + 1
+    multipleAttributes = OD((
+      ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),
+      ('sequenceCodes', tuple('sequence_code_%s' % ii for ii in range(1, max))),
+      ('residueTypes', tuple('residue_name_%s' % ii for ii in range(1, max))),
+      ('atomNames', tuple('atom_name_%s' % ii for ii in range(1, max))),
+    ))
 
-    result = dataSet.newRestraintList(**parameters)
+    defaultChainCode = self.defaultChainCode
+    for row in data:
 
-    # Load loops, with object as parent
-    for loopName in loopNames:
-      loop = saveFrame.get(loopName)
-      if loop:
-        importer = self.importers[loopName]
-        if loopName.endswith('_restraint'):
-          # NBNB HACK: the restrain loop reader needs an itemLength.
-          # There are no other loops currently, but if there ever is they will not need this
-          itemLength = saveFrame.get('restraint_item_length')
-          importer(self, result, loop, itemLength)
-        else:
-          importer(self, result, loop)
+      # get or make restraint
+      serial = row.get('restraint_id')
+      restraint = restraints.get(serial)
+      if restraint is None:
+        # First line in restraint
+        dd = {}
+        val = row.get('weight')
+        if val is not None:
+          dd['weight'] = val
+        val = row.get('ccpn_comment')
+        if val is not None:
+          dd['details'] = val
+        val = row.get('target_value')
+        if val is not None:
+          dd['targetValue'] = val
+        val = row.get('target_value_uncertainty')
+        if val is not None:
+          dd['error'] = val
+        val = row.get('lower_limit')
+        if val is not None:
+          dd['lowerLimit'] = val
+        val = row.get('upper_limit')
+        if val is not None:
+          dd['upperLimit'] = val
+        if restraintType == 'Rdc':
+          val = row.get('ccpn_vector_length')
+          if val is not None:
+            dd['vectorLength'] = val
+        restraint = newRestraintFunc(**dd)
+        # Must be reset after the fact, as serials cannot be passed in normally
+        resetSerial(restraint, serial)
+        restraints[serial] = restraint
+
+      # Add item
+      ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
+      fixedResonances = []
+      for chainCode, sequenceCode, residueName, atomName in zip(*ll):
+        chainCode = chainCode or defaultChainCode
+        resonances = self.fetchAtomMap(chainCode, sequenceCode, atomName)['resonances']
+        fixedResonances.append(
+          tuple(ConstraintBasic.getFixedResonance(nmrConstraintStore,x) for x in resonances)
+        )
+      # NB the appended resonances may be of length 2 in case of ambiguous
+      # resonances like Val HG%. Therefor we need to do the product.
+      for tt in itertools.product(*fixedResonances):
+        getattr(restraint, newItemFuncName)(resonances=tt)
     #
-    return result
-  #
+    return restraintList
+
   importers['nef_distance_restraint_list'] = load_nef_restraint_list
-  importers['nef_dihedral_restraint_list'] = load_nef_restraint_list
   importers['nef_rdc_restraint_list'] = load_nef_restraint_list
-  importers['ccpn_restraint_list'] = load_nef_restraint_list
 
   def load_nef_restraint(self, restraintList, loop, itemLength=None):
     """Serves to load nef_distance_restraint, nef_dihedral_restraint,
@@ -2851,6 +2882,39 @@ def extendMolResidues(molecule, sequence, startNumber=1, isCyclic=False):
 
   #
   return result
+
+def resetSerial(apiObject, newSerial):
+  """ADVANCED Reset serial of object to newSerial, resetting parent link
+  and the nextSerial of the parent.
+
+  Raises ValueError for objects that do not have a serial
+  (or, more precisely, where the _wrappedData does not have a serial)."""
+
+  if not hasattr(apiObject, 'serial'):
+    raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
+                     % apiObject)
+  downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
+
+  parentDict = apiObject.parent.__dict__
+  downdict = parentDict[downlink]
+  oldSerial = apiObject.serial
+  serialDict = parentDict['_serialDict']
+
+  if newSerial == oldSerial:
+    return
+
+  elif newSerial in downdict:
+    raise ValueError("Cannot reset serial to %s - value already in use" % newSerial)
+
+  else:
+    maxSerial = serialDict[downlink]
+    apiObject.__dict__['serial'] = newSerial
+    downdict[newSerial] = apiObject
+    del downdict[oldSerial]
+    if newSerial > maxSerial:
+      serialDict[downlink] = newSerial
+    elif oldSerial == maxSerial:
+      serialDict[downlink] = max(downdict)
 
 
 if __name__ == '__main__':

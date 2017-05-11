@@ -261,15 +261,15 @@ class NmrResidueTable(ObjectTable):
   def displayTableForNmrChain(self, nmrChain):
     "Display the table for all NmrResidue's of nmrChain"
 
-    if self._chainNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._chainNotifier.unRegister()
+    # if self._chainNotifier is not None:
+    #   we have a new nmrChain and hence need to unregister the previous notifier
+      # self._chainNotifier.unRegister()
     # register a notifier for this nmrChain
     self._chainNotifier = Notifier(nmrChain,
                                    [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrResidue',
                                     self._updateCallback
                                   )
-
+    self._chainNotifier.setDebug(True)
     self.ncWidget.select(nmrChain.pid)
     self._update(nmrChain)
 

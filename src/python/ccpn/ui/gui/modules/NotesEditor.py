@@ -45,6 +45,7 @@ class NotesEditorModule(CcpnModule):
   settingsOnTop = True
 
   className = 'NotesEditorModule'
+  attributeName = 'notes'
 
   def __init__(self, mainWindow=None, name='Notes Editor', note=None):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -68,7 +69,12 @@ class NotesEditorModule(CcpnModule):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
-    self._noteNotifier = None
+    self._noteNotifier = Notifier(self.project                                          # need an object not a list
+                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                  , 'Note'
+                                  , self._updateCallback)
+    self._noteNotifier.setDebug(True)
+
     self._updateSilence = False  # flag to silence updating of the table
 
     self.noteWidget = Widget(self.mainWidget, grid=(3,0), gridSpan=(1,5), setLayout=True)
@@ -85,8 +91,8 @@ class NotesEditorModule(CcpnModule):
       self.textBox.setText(note.text)
       self.lineEdit1.setText(self.note.name)
 
-    self.buttonBox = ButtonList(self.noteWidget, texts=['Apply']
-                                , callbacks=[self._applyNote]
+    self.buttonBox = ButtonList(self.noteWidget, texts=['Apply', 'Delete']
+                                , callbacks=[self._applyNote, self._deleteNote]
                                 , grid=(6,5), gridSpan=(1,2))
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
@@ -107,8 +113,8 @@ class NotesEditorModule(CcpnModule):
     Saves the text in the textbox to the note object.
     """
     newText = self.textBox.toPlainText()
-    self._setNoteName()
     self.note.text = newText
+    self._setNoteName()
 
   def _reject(self):
     """
@@ -133,29 +139,25 @@ class NotesEditorModule(CcpnModule):
   def displayTableForNote(self, note):
     "Display the table for all Notes"
 
-    if self._noteNotifier is not None:
-      # we have a new note and hence need to unregister the previous notifier
-      self._noteNotifier.unRegister()
-    # register a notifier for this note
-    self._noteNotifier = Notifier(note,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Note',
-                                    self._updateCallback
-                                  )
+    # if self._noteNotifier is not None:
+    #   # we have a new note and hence need to unregister the previous notifier
+    #   self._noteNotifier.unRegister()
+    # # register a notifier for this note
+    # self._noteNotifier = Notifier(note,
+    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Note',
+    #                                 self._updateCallback
+    #                               )
 
     self.noWidget.select(note.pid)
     self._update(note)
 
-  def _updateCallback(self, data) -> str:
+  def _updateCallback(self, data):
     "callback for updating the note"
-    note = data['theObject']
-    if note is not None:
-      self._update(note)
-    return "MOO"
-
-  def destroy(self):
-    "Cleanup of self"
-    if self._noteNotifier is not None:
-      self._noteNotifier.unRegister()
+    thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the notesList
+    if self.note in thisNoteList:
+      self.displayTableForNote(self.note)
+    else:
+      self.noteWidget.hide()
 
   def _update(self, note):
     "Update the note"
@@ -171,10 +173,12 @@ class NotesEditorModule(CcpnModule):
       self._silenceCallback = False
       self.show()
 
-  def updatePulldownList(self, callbackDict, *args, **kwds):
-    self.noWidget._updatePulldownList(self.noWidget, callbackDict, *args, **kwds)
+  def _deleteNote(self):
+    if self.note:
+      self.note.delete()
 
-    texts = self.noWidget.pulldownList.textList
-    texts = ['<Select Note>']+texts
-    self.noWidget.pulldownList.setData(texts=texts)
+  def destroy(self):
+    "Cleanup of self"
+    if self._noteNotifier is not None:
+      self._noteNotifier.unRegister()
 

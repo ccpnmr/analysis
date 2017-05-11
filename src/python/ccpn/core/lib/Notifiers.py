@@ -107,6 +107,13 @@ class Notifier(object):
   MONITOR = 'monitor'
   CURRENT = 'current'
 
+  NOTIFIER = 'notifier'
+  THEOBJECT = 'theObject'
+  TRIGGER = 'trigger'
+  OBJECT = 'object'
+  GETPID = 'pid'
+  OLDPID = 'oldPid'
+
   _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
 
   def __init__(self, theObject:Any, triggers:list, targetName:str, callback:Callable[..., str], *args, **kwargs):

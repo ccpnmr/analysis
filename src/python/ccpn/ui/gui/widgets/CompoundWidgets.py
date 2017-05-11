@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.util.Colour import spectrumColours
+from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -270,10 +271,10 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
   def _updatePulldownList(self, callbackDict, *args, **kwds):
     "Here the action is done to update the pulldown list"
-    listFunc = callbackDict['notifier']._listFunc
-    theObject = callbackDict['theObject']
-    trigger = callbackDict['trigger']       # ejb
-    object = callbackDict['object']         # ejb
+    listFunc = callbackDict[Notifier.NOTIFIER]._listFunc
+    theObject = callbackDict[Notifier.THEOBJECT]
+    trigger = callbackDict[Notifier.TRIGGER]       # ejb
+    object = callbackDict[Notifier.OBJECT]         # ejb
 
     texts = listFunc(theObject, *args, **kwds)
     if texts is None:
@@ -281,17 +282,25 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
     #FIXME:ED - fix to stop the removal of <Select Name> from head of list
     try:
-      if trigger=='delete':          # ejb - fix pullDownList delete
-        item = getattr(object, 'pid')
+      if trigger==Notifier.DELETE:                                # ejb - fix pulldownList delete
+        item = getattr(object, Notifier.GETPID)
         tempPulldown = self.pulldownList.texts
         if item in tempPulldown:
           tempPulldown.remove(item)
           self.pulldownList.clear()
           self.pulldownList.setData(texts=tempPulldown)
-      elif trigger=='create':
-        item = getattr(object, 'pid')
+      elif trigger==Notifier.CREATE:                               # ejb - fix pulldownList create
+        item = getattr(object, Notifier.GETPID)
         tempPulldown = self.pulldownList.texts
         if item not in tempPulldown:
+          tempPulldown.append(item)
+          self.pulldownList.clear()
+          self.pulldownList.setData(texts=tempPulldown)
+      elif trigger == Notifier.RENAME:                            # ejb - fix pulldownList create
+        item = getattr(object, Notifier.GETPID)
+        tempPulldown = self.pulldownList.texts
+        if item not in tempPulldown:
+          tempPulldown.remove(callbackDict[Notifier.OLDPID])
           tempPulldown.append(item)
           self.pulldownList.clear()
           self.pulldownList.setData(texts=tempPulldown)

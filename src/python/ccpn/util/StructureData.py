@@ -833,11 +833,10 @@ class EnsembleData(pd.DataFrame):
   @classmethod
   def from_pdb(cls, filename: str) -> pd.DataFrame:
     """
-    Create an EnsembleData from a Pandas DataFrame representing a pdb file
+    Create an EnsembleData from a pdb file.
     """
     dfs = pdb2df(filename)
-    # pdbName = '.'.join(filename.split('.')[:-1])
-    # ensemble = cls(name=pdbName)
+
     ensemble = cls()
     ensemble['modelNumber'] = dfs['model']
     ensemble['chainCode'] = dfs['chainID']
@@ -1216,27 +1215,42 @@ def pdb2df(filename:str) -> pd.DataFrame:
   """
   Create a Pandas dataframe from a pdb file.
   """
-  from io import StringIO
-  colspecs = [(0, 6), (6, 11), (12, 16), (16, 17), (17, 20), (21, 22), (22, 26), (26, 27),
-              (30, 38), (38, 46), (46, 54), (54, 60), (60, 66), (76, 78), (78, 80)]
-  colnames = ['ATOM', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq', 'iCode',
-              'x', 'y', 'z', 'occupancy', 'tempFactor', 'element', 'charge']
   with open(filename) as f:
+    pdbString = []
+    modelNumber = 1
     dfs = None
-    i = None
-    pdb = []
     for l in f:
-      if l.startswith('ATOM'):
-        pdb.append(l)
-      elif l.startswith('MODEL'):
-        if i is not None:
-          df = pd.read_fwf(StringIO(''.join(pdb)), header=None, colspecs=colspecs, names=colnames)
-          df['model'] = i
-          df = df[df['ATOM'] == 'ATOM']
+      if l.startswith('MODEL'):
+        if len(pdbString) > 0:
+          df = _pdbStringToDf(pdbString, modelNumber)
           if dfs is None:
             dfs = df
           else:
             dfs = dfs.append(df)
-        i = l.split()[1]
-        pdb = []
+          pdbString = []
+        modelNumber = l.split()[1]
+      elif l.startswith('ATOM'):
+        pdbString.append(l)
+    df = _pdbStringToDf(pdbString, modelNumber)
+    if dfs is None:
+      print('new dfs')
+      dfs = df
+    else:
+      dfs = dfs.append(df)
   return dfs
+
+
+def _pdbStringToDf(modelLines:list, modelNumber=1):
+  from io import StringIO
+
+  colspecs = [(0, 6), (6, 11), (12, 16), (16, 17), (17, 20), (21, 22), (22, 26), (26, 27),
+              (30, 38), (38, 46), (46, 54), (54, 60), (60, 66), (76, 78), (78, 80)]
+  colnames = ['ATOM', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq', 'iCode',
+              'x', 'y', 'z', 'occupancy', 'tempFactor', 'element', 'charge']
+
+  pdbString = ''.join(modelLines)
+
+  df = pd.read_fwf(StringIO(pdbString), header=None, colspecs=colspecs, names=colnames)
+  df['model'] = modelNumber
+  df = df[df['ATOM'] == 'ATOM']
+  return df

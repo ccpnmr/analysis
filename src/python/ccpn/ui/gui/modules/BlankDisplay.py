@@ -132,8 +132,8 @@ class BlankDisplay(CcpnModule):
       spectrumDisplay.spectrumToolBar.hide()
 
       spectrumGroupsToolBar = SpectrumGroupsToolBar(spectrumDisplayMainWidget, spectrumDisplay=spectrumDisplay, spectrumGroup=sg,)
-
       if len(spectrumDisplay.strips)>0:
+        spectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar = spectrumGroupsToolBar
         strip =  spectrumDisplay.strips[0]
         padding = self.application.preferences.general.stripRegionPadding
         strip.viewBox.autoRange(padding=padding)

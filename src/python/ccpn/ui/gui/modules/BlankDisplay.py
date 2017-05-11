@@ -32,6 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -105,6 +106,9 @@ class BlankDisplay(CcpnModule):
     if obj is not None and isinstance(obj, Spectrum):
       self._createSpectrumDisplay(obj)
       success = True
+    elif obj is not None and isinstance(obj, SpectrumGroup):
+      self._handleSpectrumGroups(obj)
+      success = True
     return success
 
   def _createSpectrumDisplay(self, spectrum):
@@ -116,6 +120,25 @@ class BlankDisplay(CcpnModule):
     self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
     logger.info('spectrum = project.getByPid(%r)' % spectrum.id)
     logger.info('application.createSpectrumDisplay(spectrum)')
+
+  def _handleSpectrumGroups(self, sg):
+
+    from ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsToolBar
+    if len(sg.spectra) > 0:
+      spectrumDisplay = self.mainWindow.createSpectrumDisplay(sg.spectra[0])
+
+      spectrumDisplay.isGrouped = True
+      spectrumDisplayMainWidget = spectrumDisplay.mainWidget
+      spectrumDisplay.spectrumToolBar.hide()
+
+      spectrumGroupsToolBar = SpectrumGroupsToolBar(spectrumDisplayMainWidget, spectrumDisplay=spectrumDisplay, spectrumGroup=sg,)
+
+      if len(spectrumDisplay.strips)>0:
+        strip =  spectrumDisplay.strips[0]
+        padding = self.application.preferences.general.stripRegionPadding
+        strip.viewBox.autoRange(padding=padding)
+      self.mainWindow.deleteBlankDisplay()
+
 
   def _closeModule(self):
     """

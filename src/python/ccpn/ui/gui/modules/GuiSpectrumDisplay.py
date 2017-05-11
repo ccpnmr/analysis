@@ -167,6 +167,8 @@ class GuiSpectrumDisplay(CcpnModule):
     else:
       self.spectrumUtilToolBar.hide()
 
+    self.stripFrame = Frame(setLayout=True, showBorder=True)
+
     if useScrollArea:
       # scroll area for strips
       # This took a lot of sorting-out; better leave as is or test thoroughly
@@ -174,14 +176,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                               scrollBarPolicies = ('always', 'asNeeded'),
                                               acceptDrops=True
                                               )
-      self.stripFrame = Frame(showBorder=True)
       self._stripFrameScrollArea.setWidget(self.stripFrame)
-      self.stripFrame.setGridLayout()
       self._stripFrameScrollArea.setWidgetResizable(True)
       qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
     else:
-      self.stripFrame = Frame(qtParent, showBorder=True)
-      self.stripFrame.setGridLayout()
       qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
 
     includeDirection = not self.is1D

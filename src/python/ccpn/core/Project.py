@@ -900,23 +900,31 @@ class Project(AbstractWrapperObject):
     #
     return chains
 
-    def _loadStructure(self, path:str, subType:str):
+
+  def _loadStructure(self, path:str, subType:str):
     '''
     Load Structure ensemble(s) from file into Wrapper project
     '''
     if subType == 'PDB':
-      name, ensemble = self._loadPdbStructure(path)
+      label, ensemble = self._loadPdbStructure(path)
     else:
       raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
-    se = self.newStructureEnsemble(label=name)
+    se = self.newStructureEnsemble()
     se.data = ensemble
+    se.label = label
+
     return [se]
 
   def _loadPdbStructure(self, path):
+    import os
     from ccpn.util.StructureData import EnsembleData
-    name = 'test'
+
+    label = os.path.split(path)[1]
+    label = label.split('.')[:-1]
+    label = '_'.join(label)
+
     ensemble = EnsembleData.from_pdb(path)
-    return name, ensemble
+    return label, ensemble
 
   def loadProject(self, path:str, subType:str) -> "Project":
     """Load project from file into application and return the new project"""

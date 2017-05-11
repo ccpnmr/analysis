@@ -904,10 +904,17 @@ class EnsembleData(pd.DataFrame):
     # reset index to one-origin successive integers
     self.index = range(1, len(reordered) + 1)
 
-  def reset_index(self, *args, **kwargs):
+  def reset_index(self, *args, inplace=False, **kwargs):
     """reset_index - overridden to generate index starting at one."""
-    super().reset_index(*args, **kwargs)
-    self.index = range(1, self.shape[0] + 1)
+    if inplace:
+      new_obj = self
+    else:
+      new_obj = self.copy()
+    new_obj.__class__.__bases__[0].reset_index(new_obj, *args, inplace=inplace, **kwargs)
+    new_obj.index = range(1, self.shape[0] + 1)
+
+    if not inplace:
+      return new_obj
 
 
   def __setitem__(self, key:str, value:typing.Any) -> None:

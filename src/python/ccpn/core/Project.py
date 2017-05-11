@@ -900,20 +900,23 @@ class Project(AbstractWrapperObject):
     #
     return chains
 
-  def _loadStructure(self, path:str, subType:str) -> list:
-    """Load Structure ensemble(s) from file into Wrapper project"""
-
-    # NBNB TODO FIXME The loader should be replaced with one that uses the current model
-    # Meanwhile this should make the old loader work
-    from ccpnmodel.v_3_0_2.upgrade import upgradeToPandasData
-
-    if subType == ioFormats.PDB:
-      apiEnsemble = pdbIo.loadStructureEnsemble(self._apiNmrProject.molSystem, path)
-      upgradeToPandasData(apiEnsemble)
+    def _loadStructure(self, path:str, subType:str):
+    '''
+    Load Structure ensemble(s) from file into Wrapper project
+    '''
+    if subType == 'PDB':
+      name, ensemble = self._loadPdbStructure(path)
     else:
-      raise ValueError("Structure file type %s is not recognised" % subType)
-    #
-    return [self._data2Obj[apiEnsemble]]
+      raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
+    se = self.newStructureEnsemble(label=name)
+    se.data = ensemble
+    return [se]
+
+  def _loadPdbStructure(self, path):
+    from ccpn.util.StructureData import EnsembleData
+    name = 'test'
+    ensemble = EnsembleData.from_pdb(path)
+    return name, ensemble
 
   def loadProject(self, path:str, subType:str) -> "Project":
     """Load project from file into application and return the new project"""

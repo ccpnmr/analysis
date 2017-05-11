@@ -905,6 +905,8 @@ class Project(AbstractWrapperObject):
     '''
     Load Structure ensemble(s) from file into Wrapper project
     '''
+
+    from ccpn.util.StructureData import averageStructure
     if subType == 'PDB':
       label, ensemble = self._loadPdbStructure(path)
     else:
@@ -912,6 +914,11 @@ class Project(AbstractWrapperObject):
     se = self.newStructureEnsemble()
     se.data = ensemble
     se.label = label
+
+    ds = self.newDataSet(title=label)
+    d = ds.newData(name='Derived')
+    # TODO: Rasmus fix me!
+    # d.setParameter('average', averageStructure(ensemble))
 
     return [se]
 

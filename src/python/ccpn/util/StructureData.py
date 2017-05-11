@@ -1272,11 +1272,12 @@ def _pdbStringToDf(modelLines:list, modelNumber=1):
 def averageStructure(ensemble:EnsembleData):
   identifierColumns = ['chainCode', 'sequenceId', 'atomName']
   dataColumns = ['x', 'y', 'z', 'occupancy', 'tempFactor']
+  dataColumns = [c for c in dataColumns if c in ensemble.columns]
   allColumns = identifierColumns + dataColumns
   allColumns.append('element')
 
   df = ensemble.groupby(identifierColumns)
-  df = gb[dataColumns].mean()
+  df = df[dataColumns].mean()
   df = df.reset_index()
   df = df.merge(ensemble.drop_duplicates(identifierColumns),
                 on=identifierColumns, how='left', suffixes=['', '_ensemble'])

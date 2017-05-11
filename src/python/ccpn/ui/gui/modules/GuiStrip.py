@@ -77,12 +77,12 @@ class GuiStrip(Frame):
 
     print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
-                         acceptDrops=True, hPolicy='expanding', vPolicy='minimal'
+                         acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                   )
 
     # it appears to be required to explicitly set these, otherwise
     # the Widget will not fill all available space
-    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    ###self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
     self.setContentsMargins(5, 0, 5, 0)
     self.setMinimumWidth(250)

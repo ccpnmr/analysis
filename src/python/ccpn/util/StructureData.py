@@ -1207,6 +1207,12 @@ def valueToOptionalInt(x, force:bool=False) -> typing.Optional[int]:
       # value equal to integer
       return int(x)
 
+  elif isinstance(x, str):
+    try:
+      return int(x)
+    except ValueError:
+      raise TypeError("Value %s does not correspond to an integer" % x)
+
   else:
     raise TypeError("Value %s does not correspond to an integer" % x)
 

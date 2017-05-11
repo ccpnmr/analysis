@@ -403,6 +403,8 @@ class Strip1d(coreClass, _GuiStrip1d):
 
     print('\nStrip1d>> spectrumDisplay:', self.spectrumDisplay)
     _GuiStrip1d.__init__(self, self.spectrumDisplay)
+    stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+    self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
 
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd

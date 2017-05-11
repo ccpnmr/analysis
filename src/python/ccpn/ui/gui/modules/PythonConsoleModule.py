@@ -37,7 +37,7 @@ class PythonConsoleModule(CcpnModule):
   This class implements the module by wrapping a PeakListTable instance
   '''
 
-  includeSettingsWidget = True
+  includeSettingsWidget = False
   maxSettingsState = 2
   settingsOnTop = True
 
@@ -48,7 +48,8 @@ class PythonConsoleModule(CcpnModule):
 
     self.mainWindow = mainWindow
     self.pythonConsoleWidget = self.mainWindow.pythonConsole
-    self.layout.addWidget(self.pythonConsoleWidget)
+
+    self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
 
 

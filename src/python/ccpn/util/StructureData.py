@@ -1269,13 +1269,18 @@ def _pdbStringToDf(modelLines:list, modelNumber=1):
   return df
 
 
-def averageStructure(ensemble:EnsembleData):
-  identifierColumns = ['chainCode', 'sequenceId', 'atomName']
-  dataColumns = ['x', 'y', 'z', 'occupancy', 'tempFactor']
-  dataColumns = [c for c in dataColumns if c in ensemble.columns]
-  allColumns = identifierColumns + dataColumns
-  allColumns.append('element')
+def averageStructure(ensemble:EnsembleData) -> EnsembleData:
+  '''
+  Calculate the average structure from all the models in an EnsembleData object.
 
+  '''
+
+  identifierColumns = ['chainCode', 'sequenceId', 'atomName']  # Still need to include altLocationCode
+  dataColumns = ['x', 'y', 'z', 'occupancy', 'bFactor']
+  dataColumns = [c for c in dataColumns if c in ensemble.columns]
+  allColumns = identifierColumns + ['residueName', 'element'] + dataColumns
+
+  # Have pandas do the calculation for us:
   df = ensemble.groupby(identifierColumns)
   df = df[dataColumns].mean()
   df = df.reset_index()

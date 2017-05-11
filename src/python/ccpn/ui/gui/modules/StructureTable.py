@@ -328,18 +328,20 @@ class StructureTable(ObjectTable):
 
   def displayTableForDataSetStructure(self, structureEnsemble):
     "Display the table for all StructureDataSet"
-    self.stWidget.select(structureEnsemble.pid)
-
-    if self.thisDataSet:
-      for dt in self.thisDataSet.data:
-        if dt.name is 'derivedConformers':
-          try:
-            self.params = dt.parameters
-            thisFunc = self.params['backboneSelector']
-            thisSubset = self.thisObj.data.extract(thisFunc)
-            self._updateDataSet(thisSubset)
-          except:
-            pass
+    # self.stWidget.select(structureEnsemble.pid)
+    #
+    # if self.thisDataSet:
+    #   for dt in self.thisDataSet.data:
+    #     if dt.name is 'derivedConformers':
+    #       try:
+    #         self.params = dt.parameters
+    #         thisFunc = self.params['backboneSelector']
+    #         thisSubset = self.thisObj.data.extract(thisFunc)
+    #         self._updateDataSet(thisSubset)
+    #       except:
+    #         pass
+    from ccpn.util.StructureData import averageStructure
+    self._updateDataSet(averageStructure(structureEnsemble.data))
 
   def _getAttachedDataSet(self, item):
     if item:

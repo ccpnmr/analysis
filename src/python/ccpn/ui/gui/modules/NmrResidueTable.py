@@ -42,6 +42,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from ccpn.core.NmrChain import NmrChain
 from PyQt4 import QtGui, QtCore
 
 from ccpn.util.Logging import getLogger
@@ -196,19 +197,23 @@ class NmrResidueTable(ObjectTable):
     ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue), 'Number of peaks assigned to NmrResidue')
   ]
 
+  className = 'NmrResidueTable'
+  attributeName = 'nmrChains'
+
   def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, **kwds):
     self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
-    kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
+    self.nmrChain = None
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
 
+    # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
@@ -227,8 +232,13 @@ class NmrResidueTable(ObjectTable):
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
                          grid = (3, 0), gridSpan = (1, 6)
                          )
+
     # Notifier object to update the table if the nmrChain changes
-    self._chainNotifier = None
+    self._chainNotifier = Notifier(self._project
+                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                   , NmrChain.__name__
+                                   , self._updateCallback)
+
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
@@ -252,11 +262,11 @@ class NmrResidueTable(ObjectTable):
     #   self.thisObj = self._project.getByPid(self.itemPid)
     #   self.displayTableForNmrChain(self.thisObj)
 
-  def addWidgetToTop(self, widget, col=2, colSpan=1):
-    "Convenience to add a widget to the top of the table; col >= 2"
-    if col < 2:
-      raise RuntimeError('Col has to be >= 2')
-    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  # def _addWidgetToTop(self, widget, col=2, colSpan=1):
+  #   "Convenience to add a widget to the top of the table; col >= 2"
+  #   if col < 2:
+  #     raise RuntimeError('Col has to be >= 2')
+  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForNmrChain(self, nmrChain):
     "Display the table for all NmrResidue's of nmrChain"
@@ -265,13 +275,27 @@ class NmrResidueTable(ObjectTable):
     #   we have a new nmrChain and hence need to unregister the previous notifier
       # self._chainNotifier.unRegister()
     # register a notifier for this nmrChain
-    self._chainNotifier = Notifier(nmrChain,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrResidue',
-                                    self._updateCallback
-                                  )
-    self._chainNotifier.setDebug(True)
+    # self._chainNotifier = Notifier(nmrChain,
+    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrResidue',
+    #                                 self._updateCallback
+    #                               )
+    # self._chainNotifier.setDebug(True)
+
     self.ncWidget.select(nmrChain.pid)
     self._update(nmrChain)
+
+  def _updateCallback(self, data):
+    "callback for updating the table"
+    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+    if self.nmrChain in thisChainList:
+      self.displayTableForNmrChain(self.nmrChain)
+    else:
+      self.clearTable()
+
+      # nmrChain = data['theObject']
+      # # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
+      # if nmrChain is not None:
+      #   self._update(nmrChain)
 
   def _update(self, nmrChain):
     "Update the table with NmrResidues of nmrChain"
@@ -293,17 +317,12 @@ class NmrResidueTable(ObjectTable):
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting NmrChain"
-    nmrChain = self._project.getByPid(item)
+    self.nmrChain = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
-    if nmrChain is not None:
-      self.displayTableForNmrChain(nmrChain)
-
-  def _updateCallback(self, data):
-    "callback for updating the table"
-    nmrChain = data['theObject']
-    # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
-    if nmrChain is not None:
-      self._update(nmrChain)
+    if self.nmrChain is not None:
+      self.displayTableForNmrChain(self.nmrChain)
+    else:
+      self.clearTable()
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):

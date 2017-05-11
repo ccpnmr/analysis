@@ -55,7 +55,8 @@ from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponen
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
-
+from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.guiSettings import sidebarFont
@@ -552,13 +553,21 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'CL':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = ChemicalShiftListPopup(chemicalShiftList=obj)
+      popup.exec_()
+      popup.raise_()
+
+      # info = showInfo('Not implemented yet!',
+      #     'This function has not been implemented in the current version',
+      #     colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = StructurePopup(structure=obj)
+      popup.exec_()
+      popup.raise_()
+
+      # info = showInfo('Not implemented yet!',
+      #     'This function has not been implemented in the current version',
+      #     colourScheme=self.colourScheme)
 
       # if self.mainWindow:
       #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule

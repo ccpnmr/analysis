@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NotesPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.Note import Note
 
 class NotesEditorModule(CcpnModule):
   """
@@ -71,11 +72,8 @@ class NotesEditorModule(CcpnModule):
 
     self._noteNotifier = Notifier(self.project                                          # need an object not a list
                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                  , 'Note'
+                                  , Note.__name__
                                   , self._updateCallback)
-    self._noteNotifier.setDebug(True)
-
-    self._updateSilence = False  # flag to silence updating of the table
 
     self.noteWidget = Widget(self.mainWidget, grid=(3,0), gridSpan=(1,5), setLayout=True)
     self.noteWidget.hide()
@@ -161,17 +159,11 @@ class NotesEditorModule(CcpnModule):
 
   def _update(self, note):
     "Update the note"
-    if not self._updateSilence:
-      # self.clearTable()
-      self._silenceCallback = True
-
-      self.note = note
-      self.textBox.setText(note.text)
-      self.lineEdit1.setText(note.name)
-
-      self.noteWidget.show()
-      self._silenceCallback = False
-      self.show()
+    self.note = note
+    self.textBox.setText(note.text)
+    self.lineEdit1.setText(note.name)
+    self.noteWidget.show()
+    self.show()
 
   def _deleteNote(self):
     if self.note:

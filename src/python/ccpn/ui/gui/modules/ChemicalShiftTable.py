@@ -44,7 +44,8 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldow
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.util.Logging import getLogger
@@ -187,27 +188,13 @@ class ChemicalShiftTable(ObjectTable):
   """
   Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
   """
-  def stLam(self, row, name, valType):
-    try:
-      thisVal = getattr(row, name)
-      if valType is str:
-        return str(thisVal)
-      elif valType is float:
-        return float(thisVal)
-      elif valType is int:
-        return int(thisVal)
-      else:
-        return None
-    except:
-      return None
-
   columnDefs = [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
              ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
              ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
-             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'value', float), 'Value of chemical shift, in selected ChemicalShiftList', None),
-             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable.stLam(ChemicalShiftTable, cs, 'valueError', float), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
+             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLam(cs, 'value', float), 'Value of chemical shift, in selected ChemicalShiftList', None),
+             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable._stLam(cs, 'valueError', float), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
              ('Shift list peaks',
-              lambda cs:'%3d ' % ChemicalShiftTable._getShiftPeakCount(ChemicalShiftTable, cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
+              lambda cs:'%3d ' % ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
                                                                                     'ChemicalShiftList', None),
              ('All peaks',
               lambda cs:'%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
@@ -215,13 +202,16 @@ class ChemicalShiftTable(ObjectTable):
                  lambda cs, value:ChemicalShiftTable._setComment(cs, value))
              ]
 
+  className = 'ChemicalShiftListTable'
+  attributeName = 'chemicalShiftLists'
+
   def __init__(self, parent, application, moduleParent, **kwds):
     self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
-    kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
+    self.chemicalShiftList = None
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
@@ -248,7 +238,10 @@ class ChemicalShiftTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
     # Notifier object to update the table if the nmrChain changes
-    self._chemicalShiftNotifier = None
+    self._chemicalShiftNotifier = Notifier(self._project
+                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                   , ChemicalShiftList.__name__
+                                   , self._updateCallback)
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
@@ -258,26 +251,34 @@ class ChemicalShiftTable(ObjectTable):
     #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-  def addWidgetToTop(self, widget, col=2, colSpan=1):
-    "Convenience to add a widget to the top of the table; col >= 2"
-    if col < 2:
-      raise RuntimeError('Col has to be >= 2')
-    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  # def addWidgetToTop(self, widget, col=2, colSpan=1):
+  #   "Convenience to add a widget to the top of the table; col >= 2"
+  #   if col < 2:
+  #     raise RuntimeError('Col has to be >= 2')
+  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForChemicalShift(self, chemicalShiftList):
     "Display the table for all chemicalShift"
 
-    if self._chemicalShiftNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._chemicalShiftNotifier.unRegister()
-    # register a notifier for this nmrChain
-    self._chemicalShiftNotifier = Notifier(chemicalShiftList,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'ChemicalShift',
-                                    self._updateCallback
-                                  )
+    # if self._chemicalShiftNotifier is not None:
+    #   # we have a new nmrChain and hence need to unregister the previous notifier
+    #   self._chemicalShiftNotifier.unRegister()
+    # # register a notifier for this nmrChain
+    # self._chemicalShiftNotifier = Notifier(chemicalShiftList,
+    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'ChemicalShift',
+    #                                 self._updateCallback
+    #                               )
 
     self.ncWidget.select(chemicalShiftList.pid)
     self._update(chemicalShiftList)
+
+  def _updateCallback(self, data):
+    "callback for updating the table"
+    thisChemicalShiftList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
+    if self.chemicalShiftList in thisChemicalShiftList:
+      self.displayTableForChemicalShift(self.chemicalShiftList)
+    else:
+      self.clearTable()
 
   def _update(self, chemicalShiftList):
     "Update the table with chemicalShift"
@@ -308,17 +309,12 @@ class ChemicalShiftTable(ObjectTable):
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting NmrChain"
-    chemicalShiftList = self._project.getByPid(item)
+    self.chemicalShiftList = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
-    if chemicalShiftList is not None:
-      self.displayTableForChemicalShift(chemicalShiftList)
-
-  def _updateCallback(self, data):
-    "callback for updating the table"
-    chemicalShiftList = data['theObject']
-    # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
-    if chemicalShiftList is not None:
-      self._update(chemicalShiftList)
+    if self.chemicalShiftList is not None:
+      self.displayTableForChemicalShift(self.chemicalShiftList)
+    else:
+      self.clearTable()
 
   def destroy(self):
     "Cleanup of self"
@@ -352,6 +348,22 @@ class ChemicalShiftTable(ObjectTable):
   @staticmethod
   def _setComment(chemicalShift, value):
     chemicalShift.comment = value
+
+  @staticmethod
+  def _stLam(self, row, name, valType):
+    " CCPN-INTERNAL: used to display Table"
+    try:
+      thisVal = getattr(row, name)
+      if valType is str:
+        return str(thisVal)
+      elif valType is float:
+        return float(thisVal)
+      elif valType is int:
+        return int(thisVal)
+      else:
+        return None
+    except:
+      return None
 
 # class ChemicalShiftTable(CcpnModule):
 #   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):

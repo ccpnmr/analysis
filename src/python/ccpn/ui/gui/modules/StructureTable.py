@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.core.StructureEnsemble import StructureEnsemble
 
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 
@@ -225,49 +226,39 @@ class StructureTable(ObjectTable):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
-  def stLam(self, row, name, valType):
-    try:
-      thisVal = getattr(row, name)
-      if valType is str:
-        return str(thisVal)
-      elif valType is float:
-        return float(thisVal)
-      elif valType is int:
-        return int(thisVal)
-      else:
-        return None
-    except:
-      return None
 
   #row.modelNumber, etc., may not exist..
 
   columnDefs = [
-                ('#', lambda row: StructureTable.stLam(StructureTable, row, 'Index', int), 'Index'),
-                ('modelNumber', lambda row: StructureTable.stLam(StructureTable, row, 'modelNumber', int), 'modelNumber'),
-                ('chainCode', lambda row: StructureTable.stLam(StructureTable, row, 'chainCode', str), 'chainCode'),
-                ('sequenceId', lambda row: StructureTable.stLam(StructureTable, row, 'sequenceId', int), 'sequenceId'),
-                ('insertionCode', lambda row: StructureTable.stLam(StructureTable, row, 'insertionCode', str), 'insertionCode'),
-                ('residueName', lambda row: StructureTable.stLam(StructureTable, row, 'residueName', str), 'residueName'),
-                ('atomName', lambda row: StructureTable.stLam(StructureTable, row, 'atomName', str), 'atomName'),
-                ('altLocationCode', lambda row: StructureTable.stLam(StructureTable, row, 'altLocationCode', str), 'altLocationCode'),
-                ('element', lambda row: StructureTable.stLam(StructureTable, row, 'element', str), 'element'),
-                ('x', lambda row: StructureTable.stLam(StructureTable, row, 'x', float), 'x'),
-                ('y', lambda row: StructureTable.stLam(StructureTable, row, 'y', float), 'y'),
-                ('z', lambda row: StructureTable.stLam(StructureTable, row, 'z', float), 'z'),
-                ('occupancy', lambda row: StructureTable.stLam(StructureTable, row, 'occupancy', float), 'occupancy'),
-                ('bFactor', lambda row: StructureTable.stLam(StructureTable, row, 'bFactor', float), 'bFactor'),
-                ('nmrChainCode', lambda row: StructureTable.stLam(StructureTable, row, 'nmrChainCode', str), 'nmrChainCode'),
-                ('nmrSequenceCode', lambda row: StructureTable.stLam(StructureTable, row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
-                ('nmrResidueName', lambda row: StructureTable.stLam(StructureTable, row, 'nmrResidueName', str), 'nmrResidueName'),
-                ('nmrAtomName', lambda row: StructureTable.stLam(StructureTable, row, 'nmrAtomName', str), 'nmrAtomName')
+                ('#', lambda row: StructureTable._stLam(row, 'Index', int), 'Index'),
+                ('modelNumber', lambda row: StructureTable._stLam(row, 'modelNumber', int), 'modelNumber'),
+                ('chainCode', lambda row: StructureTable._stLam(row, 'chainCode', str), 'chainCode'),
+                ('sequenceId', lambda row: StructureTable._stLam(row, 'sequenceId', int), 'sequenceId'),
+                ('insertionCode', lambda row: StructureTable._stLam(row, 'insertionCode', str), 'insertionCode'),
+                ('residueName', lambda row: StructureTable._stLam(row, 'residueName', str), 'residueName'),
+                ('atomName', lambda row: StructureTable._stLam(row, 'atomName', str), 'atomName'),
+                ('altLocationCode', lambda row: StructureTable._stLam(row, 'altLocationCode', str), 'altLocationCode'),
+                ('element', lambda row: StructureTable._stLam(row, 'element', str), 'element'),
+                ('x', lambda row: StructureTable._stLam(row, 'x', float), 'x'),
+                ('y', lambda row: StructureTable._stLam(row, 'y', float), 'y'),
+                ('z', lambda row: StructureTable._stLam(row, 'z', float), 'z'),
+                ('occupancy', lambda row: StructureTable._stLam(row, 'occupancy', float), 'occupancy'),
+                ('bFactor', lambda row: StructureTable._stLam(row, 'bFactor', float), 'bFactor'),
+                ('nmrChainCode', lambda row: StructureTable._stLam(row, 'nmrChainCode', str), 'nmrChainCode'),
+                ('nmrSequenceCode', lambda row: StructureTable._stLam(row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
+                ('nmrResidueName', lambda row: StructureTable._stLam(row, 'nmrResidueName', str), 'nmrResidueName'),
+                ('nmrAtomName', lambda row: StructureTable._stLam(row, 'nmrAtomName', str), 'nmrAtomName')
   ]
+
+  className = 'StructureTable'
+  objectClass = 'StructureEnsemble'
+  attributeName = 'structureEnsembles'
 
   def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
     self.moduleParent=moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
-    kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
     self.itemPid=itemPid
 
@@ -302,7 +293,11 @@ class StructureTable(ObjectTable):
                          )
 
     # Notifier object to update the table if the nmrChain changes
-    self._ensembleNotifier = None
+    self._ensembleNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , StructureEnsemble.__name__
+                                      , self._updateCallback)
+
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
@@ -319,39 +314,20 @@ class StructureTable(ObjectTable):
     else:
       self.thisObj=None
 
-  def addWidgetToTop(self, widget, col=2, colSpan=1):
-    "Convenience to add a widget to the top of the table; col >= 2"
-    if col < 2:
-      raise RuntimeError('Col has to be >= 2')
-    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  # def addWidgetToTop(self, widget, col=2, colSpan=1):
+  #   "Convenience to add a widget to the top of the table; col >= 2"
+  #   if col < 2:
+  #     raise RuntimeError('Col has to be >= 2')
+  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForStructure(self, structureEnsemble):
     "Display the table for all StructureEnsembles"
-
-    if self._ensembleNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._ensembleNotifier.unRegister()
-    # register a notifier for this structureEnsemble
-    self._ensembleNotifier = Notifier(structureEnsemble,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureEnsemble',
-                                    self._updateCallback
-                                  )
 
     self.stWidget.select(structureEnsemble.pid)
     self._update(structureEnsemble)
 
   def displayTableForDataSetStructure(self, structureEnsemble):
     "Display the table for all StructureDataSet"
-
-    if self._ensembleNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._ensembleNotifier.unRegister()
-    # register a notifier for this structureEnsemble
-    self._ensembleNotifier = Notifier(structureEnsemble,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'StructureEnsemble',
-                                    self._updateCallback
-                                  )
-
     self.stWidget.select(structureEnsemble.pid)
 
     if self.thisDataSet:
@@ -436,6 +412,8 @@ class StructureTable(ObjectTable):
     if self.thisObj is not None:
       self.thisDataSet = self._getAttachedDataSet(item)
       self.displayTableForStructure(self.thisObj)
+    else:
+      self.clearTable()
 
   def _selectionButtonCallback(self):
     "Callback for selecting Structure Ensemble or Average"
@@ -446,13 +424,22 @@ class StructureTable(ObjectTable):
         self.displayTableForStructure(self.thisObj)
       elif item is 'Average':
         self.displayTableForDataSetStructure(self.thisObj)
+    else:
+      self.clearTable()
 
   def _updateCallback(self, data):
     "callback for updating the table"
-    structureEnsemble = data['theObject']
+    thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
     # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
-    if structureEnsemble is not None:
-      self._update(structureEnsemble)
+    if self.thisObj in thisEnsembleList:
+      item = self.stButtons.get()
+      # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+      if item is 'Ensemble':
+        self.displayTableForStructure(self.thisObj)
+      elif item is 'Average':
+        self.displayTableForDataSetStructure(self.thisObj)
+    else:
+      self.clearTable()
 
   def destroy(self):
     "Cleanup of self"
@@ -470,6 +457,21 @@ class StructureTable(ObjectTable):
                       )
 
     return None
+
+  @staticmethod
+  def _stLam(row, name, valType):
+    try:
+      thisVal = getattr(row, name)
+      if valType is str:
+        return str(thisVal)
+      elif valType is float:
+        return float(thisVal)
+      elif valType is int:
+        return int(thisVal)
+      else:
+        return None
+    except:
+      return None
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''

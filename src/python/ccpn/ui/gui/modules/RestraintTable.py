@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintsPulldown
+from ccpn.core.RestraintList import RestraintList
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -126,8 +127,8 @@ class RestraintTableModule(CcpnModule):
     self.restraintTable = RestraintTable(parent=self.mainWidget
                                         , setLayout=True
                                         , application=self.application
-                                         , moduleParent=self
-                                        , grid=(0,0), itemPid=itemPid)
+                                        , moduleParent=self
+                                        , grid=(0,0))
     # settingsWidget
     self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.restraintTable, grid=(4, 0))
     self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.restraintTable, grid=(5, 0))
@@ -154,17 +155,22 @@ class RestraintTableModule(CcpnModule):
 
 
 class RestraintTable(ObjectTable):
-  columnDefs = [('#', '_key', 'Restraint Id'),
+  columnDefs = [('#', '_key', 'Restraint Id', None),
                  ('Atoms', lambda restraint:RestraintTable._getContributions(RestraintTable, restraint),
-                  'Atoms involved in the restraint'),
-                 ('Target Value.', 'targetValue', 'Target value for the restraint'),
-                 ('Upper Limit', 'upperLimit', 'Upper limit for the restraint'),
-                 ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint'),
-                 ('Error', 'error', 'Error on the restraint'),
+                  'Atoms involved in the restraint', None),
+                 ('Target Value.', 'targetValue', 'Target value for the restraint', None),
+                 ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None),
+                 ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None),
+                 ('Error', 'error', 'Error on the restraint', None),
                  ('Peaks', lambda restraint:'%3d ' % RestraintTable._getRestraintPeakCount(RestraintTable, restraint),
-                  'Number of peaks used to derive this restraint')
+                  'Number of peaks used to derive this restraint', None),
                  # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
-                 ]
+                ('Comment', lambda restraint:RestraintTable._getCommentText(restraint), 'Notes',
+                 lambda restraint, value:RestraintTable._setComment(restraint, value))
+                ]
+
+  className = 'RestraintTable'
+  attributeName = 'restraintLists'
 
   def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
     self.moduleParent = moduleParent
@@ -173,10 +179,10 @@ class RestraintTable(ObjectTable):
     self._current = application.current
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
-    self.itemPid = itemPid
+    self.restraintList = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForRestraints method
     self.spacer = Spacer(self._widget, 5, 5
@@ -198,7 +204,10 @@ class RestraintTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
 
-    self._restraintNotifier = None
+    self._restraintNotifier = Notifier(self._project
+                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                   , RestraintList.__name__
+                                   , self._updateCallback)
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
@@ -208,30 +217,38 @@ class RestraintTable(ObjectTable):
     #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-    if self.itemPid:
-      self.thisObj = self._project.getByPid(self.itemPid)
-      self.displayTableForRestraint(self.thisObj)
+    # if self.itemPid:
+    #   self.thisObj = self._project.getByPid(self.itemPid)
+    #   self.displayTableForRestraint(self.thisObj)
 
-  def addWidgetToTop(self, widget, col=2, colSpan=1):
-    "Convenience to add a widget to the top of the table; col >= 2"
-    if col < 2:
-      raise RuntimeError('Col has to be >= 2')
-    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  # def addWidgetToTop(self, widget, col=2, colSpan=1):
+  #   "Convenience to add a widget to the top of the table; col >= 2"
+  #   if col < 2:
+  #     raise RuntimeError('Col has to be >= 2')
+  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-  def displayTableForRestraint(self, restraint):
+  def displayTableForRestraint(self, restraintList):
     "Display the table for all Restraints"
 
-    if self._restraintNotifier is not None:
-      # we have a new nmrChain and hence need to unregister the previous notifier
-      self._restraintNotifier.unRegister()
-    # register a notifier for this structureEnsemble
-    self._restraintNotifier = Notifier(restraint,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Restraint',
-                                    self._updateCallback
-                                  )
+    # if self._restraintNotifier is not None:
+    #   # we have a new nmrChain and hence need to unregister the previous notifier
+    #   self._restraintNotifier.unRegister()
+    # # register a notifier for this structureEnsemble
+    # self._restraintNotifier = Notifier(restraint,
+    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Restraint',
+    #                                 self._updateCallback
+    #                               )
 
-    self.stWidget.select(restraint.pid)
-    self._update(restraint)
+    self.stWidget.select(restraintList.pid)
+    self._update(restraintList)
+
+  def _updateCallback(self, data):
+    "callback for updating the table"
+    thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
+    if self.restraintList in thisRestraintList:
+      self.displayTableForRestraint(self.restraintList)
+    else:
+      self.clearTable()
 
   def _update(self, RestraintList):
     "Update the table"
@@ -256,18 +273,13 @@ class RestraintTable(ObjectTable):
 
   def _selectionPulldownCallback(self, item):
     "Callback for selecting Restraint"
-    self.thisObj = self._project.getByPid(item)
+    self.restraintList = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
-    if self.thisObj is not None:
+    if self.restraintList is not None:
       # self.thisDataSet = self._getAttachedDataSet(item)
-      self.displayTableForRestraint(self.thisObj)
-
-  def _updateCallback(self, data):
-    "callback for updating the table"
-    restraint = data['theObject']
-    # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
-    if restraint is not None:
-      self._update(restraint)
+      self.displayTableForRestraint(self.restraintList)
+    else:
+      self.clearTable()
 
   def destroy(self):
     "Cleanup of self"
@@ -290,7 +302,6 @@ class RestraintTable(ObjectTable):
     if restraint.restraintContributions[0].restraintItems:
       return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
 
-
   def _getRestraintPeakCount(self, restraint):
     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
     using ChemicalShiftList"""
@@ -310,6 +321,16 @@ class RestraintTable(ObjectTable):
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 
+  @staticmethod
+  def _getCommentText(chemicalShift):
+    if chemicalShift.comment == '' or not chemicalShift.comment:
+      return ' '
+    else:
+      return chemicalShift.comment
+
+  @staticmethod
+  def _setComment(chemicalShift, value):
+    chemicalShift.comment = value
 
 #
 #     tipTexts = ['Restraint Id',

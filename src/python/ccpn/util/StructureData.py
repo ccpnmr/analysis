@@ -927,7 +927,7 @@ class EnsembleData(pd.DataFrame):
     firstData = not(self.shape[0])
 
     columnTypeData = self._reservedColumns.get(key)
-    if columnTypeData is None:
+    if True:#if columnTypeData is None:
       # Not a reserved column name - set the value. No echoing or undo.
       super().__setitem__(key, value)
 

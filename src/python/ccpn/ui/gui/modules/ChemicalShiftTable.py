@@ -49,8 +49,6 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from PyQt4 import QtGui, QtCore
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 ALL = '<all>'
 
 class ChemicalShiftTableModule(CcpnModule):

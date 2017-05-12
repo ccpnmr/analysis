@@ -35,7 +35,7 @@ class NotesPopup(CcpnDialog):
 
     self.note = note
     self.noteLabel = Label(self, "Note Name ", grid=(0, 0))
-    self.noteText = LineEdit(self, note.name, grid=(0, 1))
+    self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _okButton(self):

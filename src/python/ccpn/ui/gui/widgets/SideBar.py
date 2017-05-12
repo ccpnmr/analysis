@@ -30,7 +30,7 @@ from collections import OrderedDict
 
 import json
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, Qt
 
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -277,22 +277,31 @@ class SideBar(QtGui.QTreeWidget, Base):
       for obj in spectrum.peakLists + spectrum.integralLists:
         self._createItem(obj)
 
-  def _refreshParentNmrChain(self, nmrResidue:NmrResidue):
+  def _refreshParentNmrChain(self, nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
     Replaces normal _createItem notifier for NmrResidues"""
 
     nmrChain = nmrResidue._parent
 
-    # Remove NmrChain item and contents
-    self._removeItem(nmrChain)
+    # # Remove NmrChain item and contents
+    # self._removeItem(nmrChain)
+    #
+    # # Create NmrResidue items again - this gives them in correctly sorted order
+    # item = self._createItem(nmrChain)
 
-    # Create NmrResidue items again - this gives them in correctly sorted order
-    self._createItem(nmrChain)
-    for nr in nmrChain.nmrResidues:
-      self._createItem(nr)
-      for nmrAtom in nr.nmrAtoms:
-        self._createItem(nmrAtom)
+    for nr in nmrChain.nmrResidues:  # ejb - sort the list
+      if (nr.pid == nmrResidue.pid):
+        self._createItem(nr)
+        for nmrAtom in nr.nmrAtoms:
+          self._createItem(nmrAtom)
+
+    newPid = nmrChain.pid                   # ejb - expand the tree again from nmrChain
+    for item in self._findItems(newPid):
+      item.setExpanded(True)
+
+    # either remove the chain which gets inserted at the end - rename works
+    # OR find item in list, rename fails
 
   def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
@@ -436,13 +445,16 @@ class SideBar(QtGui.QTreeWidget, Base):
         # parent has changed - we must move and rename the entire item tree.
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
         objects = self._itemObjects(item, recursive=True)
-        sip.delete(item) # this also removes child items
+        # sip.delete(item) # this also removes child items
 
         # NB the first object cannot be found from its pid (as it has already been renamed)
         # So we do it this way
-        self._createItem(obj)
-        for xx in objects[1:]:
-          self._createItem(xx)
+
+        # self._createItem(obj)         # ejb - original bit
+        # for xx in objects[1:]:
+        #   self._createItem(xx)
+
+        item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
@@ -451,10 +463,10 @@ class SideBar(QtGui.QTreeWidget, Base):
       # Parent has changed - remove items from old location
       import sip
       for item in self._findItems(oldPid):
-        sip.delete(item) # this also removes child items
+        # sip.delete(item) # this also removes child items
+        item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
-    #
-    self._refreshParentNmrChain(obj)
+    self._refreshParentNmrChain(obj, oldPid)
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
@@ -463,7 +475,7 @@ class SideBar(QtGui.QTreeWidget, Base):
     for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
 
-  def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:
+  def _findItems(self, objPid:str) -> list:     #QtGui.QTreeWidgetItem
     """Find items that match objPid - returns empty list if no matches"""
 
     if objPid[:2] in classesInSideBar:

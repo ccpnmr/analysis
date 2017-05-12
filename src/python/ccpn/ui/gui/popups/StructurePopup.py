@@ -32,9 +32,10 @@ class StructurePopup(CcpnDialog):
   def __init__(self, parent=None, structure=None, title='Structures', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
+    #FIXME:ED structure has no name
     self.structure = structure
     self.structureLabel = Label(self, "Structure Name ", grid=(0, 0))
-    self.structureText = LineEdit(self, structure.name, grid=(0, 1))
+    self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _okButton(self):

@@ -76,7 +76,6 @@ class SpectrumGroupToolBar(ToolBar):
     peakListAction = popMenu.addAction('PeakLists')
     peakListAction.setCheckable(True)
     peakListAction.toggled.connect(partial(self._showHidePeakListView, spectrumGroup))
-
     return popMenu
 
   def _getStrip(self):
@@ -119,12 +118,31 @@ class SpectrumGroupToolBar(ToolBar):
     if len(strip.spectra)==0:
       self.spectrumDisplay._closeModule()
 
+  # LM: Fixme the code for peakList views below needs refactoring
+
   def _showHidePeakListView(self, spectrumGroup):
-    spectrumGroupPeakLists = [peakList for spectrum in spectrumGroup.spectra for peakList in spectrum.peakLists ]
-    peakListViews = [plv for peakList in spectrumGroupPeakLists for plv in peakList.peakListViews]
-    for plv in peakListViews:
+    for plv in self._getPeakListViews(spectrumGroup):
       if plv is not None:
         if plv.isVisible():
           plv.setVisible(False)
         else:
           plv.setVisible(True)
+
+  def _hidePeakLists(self, spectrumGroupPeakLists, peakListViews):
+    for peakList in spectrumGroupPeakLists:
+      if self.spectrumDisplay is not None:
+        for peakListView in peakListViews:
+          if peakList == peakListView.peakList:
+            peakListView.setVisible(False)
+
+  def _showPeakList(self, spectrumGroupPeakLists, peakListViews):
+    for peakList in spectrumGroupPeakLists:
+      if self.spectrumDisplay is not None:
+        for peakListView in peakListViews:
+          if peakList == peakListView.peakList:
+            peakListView.setVisible(True)
+
+
+  def _getPeakListViews(self, spectrumGroup):
+    spectrumGroupPeakLists = [peakList for spectrum in spectrumGroup.spectra for peakList in spectrum.peakLists]
+    return [plv for peakList in spectrumGroupPeakLists for plv in peakList.peakListViews]

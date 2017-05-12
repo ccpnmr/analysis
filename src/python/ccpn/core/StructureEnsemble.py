@@ -169,6 +169,8 @@ def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:En
     else:
       self._logger.warning(
         "EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
+      #FIXME:ED - crashes without the following line, is the wrapper not instantiated?
+      result.data = EnsembleData()    # ejb
       result.data = data
       data._containingObject = result
       for modelNumber in sorted(data['modelNumber'].unique()):

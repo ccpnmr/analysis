@@ -230,7 +230,6 @@ class Model(AbstractWrapperObject):
     """Remove all data for model
     """
     data = self.structureEnsemble.data
-    #FIXME: crashes when deleting Structure from SideBar
     data.drop(data._modelsSelector(self.serial))      # ejb - already seems to be empty
 
   @classmethod

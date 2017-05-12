@@ -343,7 +343,11 @@ class StructureTable(ObjectTable):
     #         pass
 
     from ccpn.util.StructureData import averageStructure        # ejb - from TJ
-    self._updateDataSet(averageStructure(structureEnsemble.data))
+    try:
+      self._updateDataSet(averageStructure(structureEnsemble.data))
+    except:
+      info = showWarning(self.thisObj.pid+' contains no Average', '')
+      self.stButtons.setIndex(0)
 
     # self.stWidget.select(structureEnsemble.pid)
 

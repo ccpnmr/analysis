@@ -263,6 +263,14 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     Test that new structureEnsemble can be instantiated
     """
     self.newEnsemble = self.project.newStructureEnsemble(data=self.data)
+    namedTuples = self.newEnsemble.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+                                                  , atomName='CD1'
+                                                  , residueName='LEU'
+                                                  , chainCode='C'
+                                                  , sequenceId=3
+                                                  , modelNumber=3)))  # check initial values
 
   #=========================================================================================
   # test_properties_structuresEnsemble_resetModels
@@ -289,13 +297,6 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     """
     Test that structureEnsemble attribute .comment is populated.
     """
-    self.assertEquals(list(self.data['atomName']), self.testAtomName)
-    self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[0:5])
-          # only the first one is okay
-
-    # self.data['modelNumber'] = self.testModelNumberNew
-    # self.assertEqual(list(self.project.models[0].data['atomName']), self.testAtomName[25:33])
-
     # self.project.models[0].delete()
     self.project.models[0].clearData()      # can use either of these delete methods
 

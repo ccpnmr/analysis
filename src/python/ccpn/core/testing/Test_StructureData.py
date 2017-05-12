@@ -330,15 +330,15 @@ class TestPandasData(WrapperTesting):
   #=========================================================================================
 
   def test_structureData_modelNumber(self):
-    with self.assertRaisesRegexp(TypeError, 'does not correspond to an integer'):
-      self.data['modelNumber'] = ['12']
-    with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
-      self.assertEqual(list(self.data['modelNumber']), None)
+    # with self.assertRaisesRegexp(TypeError, 'does not correspond to an integer'):
+    self.data['modelNumber'] = ['12']
+    # with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
+    #   self.assertEqual(list(self.data['modelNumber']), None)
 
     with self.assertRaisesRegexp(ValueError, 'Length of values does not match length of index'):
       self.data['modelNumber'] = [1,2,3,4,5]          # other attributes must be defined first
-    with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
-      self.assertEqual(list(self.data['modelNumber']), None)
+    # with self.assertRaisesRegexp(KeyError, 'modelNumber'):      # should raise KeyError
+    self.assertEqual(list(self.data['modelNumber']), [12])
 
     self.data['modelNumber'] = [5]
     with self.assertRaisesRegexp(ValueError, 'Model numbers must be integers >= 1'):
@@ -784,8 +784,8 @@ class TestContainer(WrapperTesting):
     with self.initialSetup():
       self.ensemble = self.project.newStructureEnsemble()
       self.data = self.ensemble.data
-      self.newEnsemble = self.project.newStructureEnsemble()
-      self.newData = self.newEnsemble.data
+      # self.newEnsemble = self.project.newStructureEnsemble()
+      # self.newData = self.newEnsemble.data
 
       self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
                      ,'CB', 'HB1', ' HB2', 'HB3'

@@ -304,11 +304,11 @@ class EnsembleData(pd.DataFrame):
     # pass
 
 
-    try:
-      if _indexOverride:      # ejb - cheating with _indexOverride
-        pass                  # skip the indexing
-    except:
-      self.reset_index(drop=True, inplace=True)
+    # try:
+    #   if _indexOverride:      # ejb - cheating with _indexOverride
+    #     pass                  # skip the indexing
+    # except:
+    #   self.reset_index(drop=True, inplace=True)
 
 
 
@@ -361,6 +361,7 @@ class EnsembleData(pd.DataFrame):
     Returns Pandas Series of booleans
     """
     s = pd.Series((True,) * self.shape[0], index=self.index) #range(1,self.shape[0]+1))      # ejb
+    # s = pd.Series((True,) * self.shape[0], index=range(1,self.shape[0]+1))      # ejb
     if index is not None:
       s = s & self._indexSelector(index)
     if chainCodes is not None:
@@ -521,12 +522,12 @@ class EnsembleData(pd.DataFrame):
         if self.shape[0] == selector.shape[0]:
           # return self.ix[selector, columnNames]
 
-          global _indexOverride
-          _indexOverride = True                   # ejb - just need existence
+          # global _indexOverride
+          # _indexOverride = True                   # ejb - just need existence
           newEx = self.ix[selector, columnNames]
-          del _indexOverride
+          # del _indexOverride
           return newEx
-          #
+
           # return self.ix[selector, ('Index',)+columnNames]    # ejb
           # newEx = self.ix[selector, ('IndexTemp',)+columnNames]   # Pandas should rename it as _1
           # try:
@@ -623,6 +624,7 @@ class EnsembleData(pd.DataFrame):
       colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
 
       super().drop(index, **kwargs)       # delete the row
+      self.reset_index(drop=True, inplace=True)     # ejb
 
       if containingObject is not None:
         undo = containingObject._project._undo
@@ -731,11 +733,11 @@ class EnsembleData(pd.DataFrame):
       index = accessor.index
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
       #
-      global _indexOverride
-      _indexOverride = True  # ejb - just need existence
+      # global _indexOverride
+      # _indexOverride = True  # ejb - just need existence
       aant = accessor.as_namedtuples()      # testing for below
       slan = self.loc[index].as_namedtuples()
-      del _indexOverride
+      # del _indexOverride
 
       # tsit = tuple(self.itertuples(name='AtomRecord'))[index[0]]
       #tuple(self.itertuples(name='AtomRecord'))
@@ -927,7 +929,7 @@ class EnsembleData(pd.DataFrame):
     firstData = not(self.shape[0])
 
     columnTypeData = self._reservedColumns.get(key)
-    if True:#if columnTypeData is None:
+    if columnTypeData is None:
       # Not a reserved column name - set the value. No echoing or undo.
       super().__setitem__(key, value)
 

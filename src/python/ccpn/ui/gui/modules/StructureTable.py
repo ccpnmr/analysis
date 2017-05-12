@@ -261,6 +261,7 @@ class StructureTable(ObjectTable):
     self._current = application.current
     self._widget = Widget(parent=parent, **kwds)
     self.itemPid=itemPid
+    self.thisObj=None
 
     # create the column objects
     columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
@@ -340,30 +341,79 @@ class StructureTable(ObjectTable):
     #         self._updateDataSet(thisSubset)
     #       except:
     #         pass
-    from ccpn.util.StructureData import averageStructure
+
+    from ccpn.util.StructureData import averageStructure        # ejb - from TJ
     self._updateDataSet(averageStructure(structureEnsemble.data))
 
-  def _getAttachedDataSet(self, item):
-    if item:
-      thisObj = self._project.getByPid(item)
-      if self._project.dataSets:
-        for dd in self._project.dataSets:
-          if dd.title == thisObj.longPid:
+    # self.stWidget.select(structureEnsemble.pid)
 
-            self.thisDataSet = dd
-            for dt in self.thisDataSet.data:
-              if dt.name is 'derivedConformers':
-                try:
-                  self.params = dt.parameters
-                  thisFunc = self.params['backboneSelector']
-                  return self.thisDataSet
-                  # thisSubset = thisAttached.data.extract(thisFunc)
-                  # self.displayTableForStructure(thisSubset)
-                  # self.displayTableForDataSetStructure(thisSubset)
-                except:
-                  return None
-    else:
-      return None
+    # # ejb - doesn't work, can't store in a DataSet
+    # if self.thisDataSet:
+    #   for dt in self.thisDataSet.data:
+    #     if dt.name is 'derivedConformers':
+    #       # self.params = dt.parameters
+    #       # self._updateDataSet(dt.parameters['Average'])
+    #       self._updateDataSet(dt.attachedObject)
+
+  def _getAttachedDataSet(self, item):
+    thisObj = item
+    Found=False
+    dd = dt = None
+    self.thisDataSet = None
+    if self._project.dataSets:
+      for dd in self._project.dataSets:
+        if dd.title == thisObj.longPid:
+          for dt in self.thisDataSet.data:
+            if dt.name is 'derivedConformers':
+              Found=True
+
+    if not Found:
+      dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid
+      dt = dd.newData('derivedConformers')
+    self.thisDataSet = dd
+
+    if 'Average' not in dt.parameters:
+      from ccpn.util.StructureData import averageStructure
+      # dt.parameters['Average'] = averageStructure(item.data)
+      # dt.setParameter(name='Average', value=averageStructure(item.data))
+      # dt.attachedObject = averageStructure(item.data)
+      # ejb - does't work, can't store in a DataSet
+
+      # for dd in self._project.dataSets:
+      #
+      #   if dd.title == thisObj.longPid:
+      #
+      #     self.thisDataSet = dd
+      #     for dt in self.thisDataSet.data:
+      #       if dt.name is 'derivedConformers':
+      #         self.params = dt.parameters
+      #         # thisFunc = self.params['backboneSelector']
+      #
+      #         if 'Average' not in self.params:
+      #           from ccpn.util.StructureData import averageStructure
+      #           self.params['Average'] = averageStructure(item.data)
+      #
+      #         return self.params['Average']
+
+    # if item:
+    #   thisObj = self._project.getByPid(item)
+    #   if self._project.dataSets:
+    #     for dd in self._project.dataSets:
+    #       if dd.title == thisObj.longPid:
+    #
+    #         self.thisDataSet = dd
+    #         for dt in self.thisDataSet.data:
+    #           if dt.name is 'derivedConformers':
+    #             self.params = dt.parameters
+    #             # thisFunc = self.params['backboneSelector']
+    #
+    #             if 'Average' not in self.params():
+    #               from ccpn.util.StructureData import averageStructure
+    #               self.params['Average'] = averageStructure(item.data)
+    #
+    #             return self.params['Average']
+    # else:
+    #   return None
 
   def _update(self, structureEnsemble):
     "Update the table"
@@ -412,7 +462,8 @@ class StructureTable(ObjectTable):
     self.thisObj = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.thisObj is not None:
-      self.thisDataSet = self._getAttachedDataSet(item)
+      # self.thisDataSet = self._getAttachedDataSet(item)
+      self._getAttachedDataSet(self.thisObj)
       self.displayTableForStructure(self.thisObj)
     else:
       self.clearTable()

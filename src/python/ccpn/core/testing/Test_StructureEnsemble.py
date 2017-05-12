@@ -255,6 +255,16 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     self.data['modelNumber'] = self.testModelNumber
 
   #=========================================================================================
+  # test_properties_structuresEnsemble_newSE
+  #=========================================================================================
+
+  def test_properties_structuresEnsemble_newSE(self):
+    """
+    Test that new structureEnsemble can be instantiated
+    """
+    self.newEnsemble = self.project.newStructureEnsemble(data=self.data)
+
+  #=========================================================================================
   # test_properties_structuresEnsemble_resetModels
   #=========================================================================================
 

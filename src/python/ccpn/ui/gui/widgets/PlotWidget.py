@@ -34,7 +34,6 @@ from typing import Sequence
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui, QtOpenGL
 
-from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem

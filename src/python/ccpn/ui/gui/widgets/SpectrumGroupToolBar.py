@@ -30,11 +30,13 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
+from ccpn.ui.gui.widgets.Menu import Menu
 
 class SpectrumGroupToolBar(ToolBar):
   def __init__(self, parent=None, spectrumDisplay=None, **kwds):
     ToolBar.__init__(self, parent=parent, **kwds)
     self.spectrumDisplay = spectrumDisplay
+    self._project = self.spectrumDisplay.project
     self._spectrumGroups = []
 
 
@@ -42,38 +44,47 @@ class SpectrumGroupToolBar(ToolBar):
     if spectrumGroup not in self._spectrumGroups:
       self._spectrumGroups.append(spectrumGroup)
 
-      name = 'SG:\n'+ spectrumGroup.name
-      action = self.addAction(name, partial(self._toggleSpectrumGroup, spectrumGroup))
+      action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
       action.setCheckable(True)
       action.setChecked(True)
       action.setToolTip(spectrumGroup.name)
       self._setupButton(action, spectrumGroup)
-      self._setupContextMenu(action, spectrumGroup)
+      # self._setupContextMenu(action, spectrumGroup)
 
   def _setupButton(self, action, spectrumGroup):
       widget = self.widgetForAction(action)
       widget.setIconSize(QtCore.QSize(120, 10))
       widget.setFixedSize(75, 30)
+      # widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+      # widget.customContextMenuRequested.connect(self._onContextMenu)
 
-      widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-      widget.customContextMenuRequested.connect(self._onContextMenu)
-
-
+  def mousePressEvent(self, event:QtGui.QMouseEvent):
+    """
+    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.
+    """
+    if event.button() == QtCore.Qt.RightButton:
+      button = self.childAt(event.pos())
+      sg = self._project.getByPid(button.text())
+      if sg is not None:
+        if len(button.actions())>0:
+          menu = self._setupContextMenu(button.actions()[0], sg)
+          if menu:
+            menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            menu.exec()
 
 
   def _setupContextMenu(self, action, spectrumGroup):
-    from ccpn.ui.gui.widgets.Menu import Menu
-    self.popMenu = Menu('',self)
-    self.popMenu.addAction('Remove', partial(self._deleteSpectrumGroup, action, spectrumGroup))
+    print('action -> %s , spectrumGroup-> %s ' %(action, spectrumGroup))
 
-    # self.popMenu.addAction(QtGui.QAction('Delete', self, triggered=partial(self._deleteSpectrumGroup, spectrumGroup)))
-    # self._peakListCheckBox = QtGui.QAction('PeakLists', self, checkable=True, triggered=self._showHidePeakListView)
-    # self._peakListCheckBox.setChecked(True)
-    # self.popMenu.addAction(self._peakListCheckBox)
-    #
-    # self._spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in spectrumGroup.spectra]
-    # self.peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews]
-    # self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.spectrumDisplay.peakListViews]
+    popMenu = Menu('',self)
+    removeAction = popMenu.addAction('Remove', partial(self._deleteSpectrumGroup, action, spectrumGroup))
+    peakListAction = popMenu.addAction('PeakLists')
+    peakListAction.setCheckable(True)
+    peakListAction.toggled.connect(partial(self._showHidePeakListView, spectrumGroup))
+
+
+    return popMenu
+
 
   def _onContextMenu(self, points):
     positions = self.sender().mapToGlobal(points)
@@ -86,6 +97,8 @@ class SpectrumGroupToolBar(ToolBar):
       return strips[0]
 
   def _toggleSpectrumGroup(self, spectrumGroup):
+    spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in spectrumGroup.spectra]
+    peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews]
 
     strip = self._getStrip()
     if strip is not None:
@@ -98,122 +111,136 @@ class SpectrumGroupToolBar(ToolBar):
           spectrumView.setVisible(True)
           if hasattr(spectrumView, 'plot'):
             spectrumView.plot.show()
-          self._showPeakList()
+          self._showPeakList(spectrumGroupPeakLists, peakListViews)
       else:
         for spectrumView in spectrumViews:
           spectrumView.setVisible(False)
           if hasattr(spectrumView, 'plot'):
             spectrumView.plot.hide()
-        self._hidePeakLists()
+        self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
 
   def _deleteSpectrumGroup(self, action, spectrumGroup):
     strip = self._getStrip()
     if strip is not None:
-      print(self, self.actions())
-
       self.removeAction(action)
       for spectrumView in strip.spectrumViews:
         if spectrumView.spectrum in spectrumGroup.spectra:
           spectrumView.delete()
+    if spectrumGroup in self._spectrumGroups:
+      self._spectrumGroups.remove(spectrumGroup)
+    if len(strip.spectra)==0:
+      self.spectrumDisplay._closeModule()
 
-  def _showHidePeakListView(self):
-    if self._peakListCheckBox.isChecked():
-      self._showPeakList()
-    else:
-      self._hidePeakLists()
+  def _showHidePeakListView(self, spectrumGroup):
+    print('_showHidePeakListView, action -> %s , spectrumGroup-> %s ' % (self.sender(), spectrumGroup))
 
-  def _hidePeakLists(self):
-    for peakList in self._spectrumGroupPeakLists:
-      if self.spectrumDisplay is not None:
-        for peakListView in self.spectrumDisplay.peakListViews:
-          if peakList == peakListView.peakList:
-            peakListView.setVisible(False)
-
-  def _showPeakList(self):
-    for peakList in self._spectrumGroupPeakLists:
-      if self.spectrumDisplay is not None:
-        for peakListView in self.spectrumDisplay.peakListViews:
-          if peakList == peakListView.peakList:
-            peakListView.setVisible(True)
-
-
-
-
-class SpectrumGroupsWidget(QtGui.QWidget):
-  def __init__(self, parent=None, spectrumDisplay=None, spectrumGroup=None, **kw):
-    QtGui.QWidget.__init__(self, parent)
-
-    self.spectrumDisplay = spectrumDisplay
-    if len(spectrumDisplay.strips) > 0:
-      self.strip = spectrumDisplay.strips[0]
-
-    self.spectrumGroup = spectrumGroup
-    self.spectrumGroupButton = Button(self, text=self.spectrumGroup.id,toggle=True)
-
-    self.spectrumGroupButton.setChecked(True)
-    self.spectrumGroupButton.setMinimumSize(40,33)
-    self.spectrumGroupButton.toggled.connect(self.toggleSpectrumGroups)
-
-    self.spectrumGroupButton.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    self.spectrumGroupButton.customContextMenuRequested.connect(self.onContextMenu)
-
-    self.popMenu = QtGui.QMenu(self)
-    self.popMenu.addAction(QtGui.QAction('Delete',self, triggered=self.deleteSpectrumGroup))
-    self.peakListCheckBox = QtGui.QAction('PeakLists',self, checkable = True, triggered=self.showHidePeakListView)
-    self.peakListCheckBox.setChecked(True)
-    self.popMenu.addAction(self.peakListCheckBox)
-
-    self.spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in self.spectrumGroup.spectra]
-    self.peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews ]
-    self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.spectrumDisplay.peakListViews ]
-
-  def onContextMenu(self, points):
-    positions = self.spectrumGroupButton.mapToGlobal(points)
-    self.popMenu.move(positions.x(), positions.y() + 10)
-    self.popMenu.exec()
-
-  def toggleSpectrumGroups(self):
-    if self.strip is not None:
-      spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews
-                       if spectrumView.spectrum in self.spectrumGroup.spectra]
-
-      if self.spectrumGroupButton.isChecked():
-        for spectrumView in spectrumViews:
-          spectrumView.setVisible(True)
-          if hasattr(spectrumView, 'plot'):
-            spectrumView.plot.show()
-        self.showPeakList()
-
+    spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in spectrumGroup.spectra]
+    peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews]
+    for plV in peakListViews:
+      if plV.isVisible():
+        plV.setVisible(False)
       else:
-        for spectrumView in spectrumViews:
-          spectrumView.setVisible(False)
-          if hasattr(spectrumView, 'plot'):
-            spectrumView.plot.hide()
-        self.hidePeakLists()
+        plV.setVisible(True)
+    # peakListAction= self.sender()
+    # print(peakListAction.text())
+    # print('BOOL ', self.sender().isChecked(), peakListViews)
+    # if peakListAction.isChecked():
+    # self._showPeakList(spectrumGroupPeakLists, peakListViews)
+    # else:
+    #   self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
 
-  def deleteSpectrumGroup(self):
-    if self.strip is not None:
-      self.spectrumGroupButton.deleteLater()
-      for spectrumView in self.strip.spectrumViews:
-        if spectrumView.spectrum in self.spectrumGroup.spectra:
-          spectrumView.delete()
-
-  def showHidePeakListView(self):
-    if self.peakListCheckBox.isChecked():
-      self.showPeakList()
-    else:
-      self.hidePeakLists()
-
-  def hidePeakLists(self):
-    for peakList in self.spectrumGroupPeakLists:
+  def _hidePeakLists(self, spectrumGroupPeakLists, peakListViews):
+    for peakList in spectrumGroupPeakLists:
       if self.spectrumDisplay is not None:
-        for peakListView in self.spectrumDisplay.peakListViews:
+        for peakListView in peakListViews:
           if peakList == peakListView.peakList:
             peakListView.setVisible(False)
 
-  def showPeakList(self):
-    for peakList in self.spectrumGroupPeakLists:
+  def _showPeakList(self, spectrumGroupPeakLists, peakListViews):
+    for peakList in spectrumGroupPeakLists:
       if self.spectrumDisplay is not None:
-        for peakListView in self.spectrumDisplay.peakListViews:
+        for peakListView in peakListViews:
           if peakList == peakListView.peakList:
             peakListView.setVisible(True)
+
+
+
+#
+# class SpectrumGroupsWidget(QtGui.QWidget):
+#   def __init__(self, parent=None, spectrumDisplay=None, spectrumGroup=None, **kw):
+#     QtGui.QWidget.__init__(self, parent)
+#
+#     self.spectrumDisplay = spectrumDisplay
+#     if len(spectrumDisplay.strips) > 0:
+#       self.strip = spectrumDisplay.strips[0]
+#
+#     self.spectrumGroup = spectrumGroup
+#     self.spectrumGroupButton = Button(self, text=self.spectrumGroup.id,toggle=True)
+#
+#     self.spectrumGroupButton.setChecked(True)
+#     self.spectrumGroupButton.setMinimumSize(40,33)
+#     self.spectrumGroupButton.toggled.connect(self.toggleSpectrumGroups)
+#
+#     self.spectrumGroupButton.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+#     self.spectrumGroupButton.customContextMenuRequested.connect(self.onContextMenu)
+#
+#     self.popMenu = QtGui.QMenu(self)
+#     self.popMenu.addAction(QtGui.QAction('Delete',self, triggered=self.deleteSpectrumGroup))
+#     self.peakListCheckBox = QtGui.QAction('PeakLists',self, checkable = True, triggered=self.showHidePeakListView)
+#     self.peakListCheckBox.setChecked(True)
+#     self.popMenu.addAction(self.peakListCheckBox)
+#
+#     self.spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in self.spectrumGroup.spectra]
+#     self.peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews ]
+#     self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.spectrumDisplay.peakListViews ]
+#
+#   def onContextMenu(self, points):
+#     positions = self.spectrumGroupButton.mapToGlobal(points)
+#     self.popMenu.move(positions.x(), positions.y() + 10)
+#     self.popMenu.exec()
+#
+#   def toggleSpectrumGroups(self):
+#     if self.strip is not None:
+#       spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews
+#                        if spectrumView.spectrum in self.spectrumGroup.spectra]
+#
+#       if self.spectrumGroupButton.isChecked():
+#         for spectrumView in spectrumViews:
+#           spectrumView.setVisible(True)
+#           if hasattr(spectrumView, 'plot'):
+#             spectrumView.plot.show()
+#         self.showPeakList()
+#
+#       else:
+#         for spectrumView in spectrumViews:
+#           spectrumView.setVisible(False)
+#           if hasattr(spectrumView, 'plot'):
+#             spectrumView.plot.hide()
+#         self.hidePeakLists()
+#
+#   def deleteSpectrumGroup(self):
+#     if self.strip is not None:
+#       self.spectrumGroupButton.deleteLater()
+#       for spectrumView in self.strip.spectrumViews:
+#         if spectrumView.spectrum in self.spectrumGroup.spectra:
+#           spectrumView.delete()
+#
+#   def showHidePeakListView(self):
+#     if self.peakListCheckBox.isChecked():
+#       self.showPeakList()
+#     else:
+#       self.hidePeakLists()
+#
+#   def hidePeakLists(self):
+#     for peakList in self.spectrumGroupPeakLists:
+#       if self.spectrumDisplay is not None:
+#         for peakListView in self.spectrumDisplay.peakListViews:
+#           if peakList == peakListView.peakList:
+#             peakListView.setVisible(False)
+#
+#   def showPeakList(self):
+#     for peakList in self.spectrumGroupPeakLists:
+#       if self.spectrumDisplay is not None:
+#         for peakListView in self.spectrumDisplay.peakListViews:
+#           if peakList == peakListView.peakList:
+#             peakListView.setVisible(True)

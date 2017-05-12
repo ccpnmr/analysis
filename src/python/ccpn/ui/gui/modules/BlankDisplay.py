@@ -98,7 +98,6 @@ class BlankDisplay(CcpnModule):
       self.mainWindow.deleteBlankDisplay()
       logger.info('application.deleteBlankDisplay()')
 
-  #TODO:LUCA: add handling for SpectrumGroup Pids; also do in GuiSpectrumDisplay
   def _handlePid(self, pid):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
     success = False
@@ -134,8 +133,6 @@ class BlankDisplay(CcpnModule):
       spectrumDisplay.spectrumToolBar.hide()
       spectrumDisplay.spectrumGroupToolBar.show()
       spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-
-
 
 
   def _closeModule(self):

@@ -293,12 +293,12 @@ class SideBar(QtGui.QTreeWidget, Base):
     for nr in nmrChain.nmrResidues:  # ejb - sort the list
       if (nr.pid == nmrResidue.pid):
         self._createItem(nr)
-        for nmrAtom in nr.nmrAtoms:
-          self._createItem(nmrAtom)
+        # for nmrAtom in nr.nmrAtoms:
+        #   self._createItem(nmrAtom)
 
-    newPid = nmrChain.pid                   # ejb - expand the tree again from nmrChain
-    for item in self._findItems(newPid):
-      item.setExpanded(True)
+    # newPid = nmrChain.pid                   # ejb - expand the tree again from nmrChain
+    # for item in self._findItems(newPid):
+    #   item.setExpanded(True)
 
     # either remove the chain which gets inserted at the end - rename works
     # OR find item in list, rename fails
@@ -444,7 +444,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       else:
         # parent has changed - we must move and rename the entire item tree.
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
-        objects = self._itemObjects(item, recursive=True)
+        # objects = self._itemObjects(item, recursive=True)
         # sip.delete(item) # this also removes child items
 
         # NB the first object cannot be found from its pid (as it has already been renamed)
@@ -462,11 +462,14 @@ class SideBar(QtGui.QTreeWidget, Base):
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location
       import sip
-      for item in self._findItems(oldPid):
+      # for item in self._findItems(oldPid):
         # sip.delete(item) # this also removes child items
-        item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+        # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
-    self._refreshParentNmrChain(obj, oldPid)
+    # self._refreshParentNmrChain(obj, oldPid)
+
+    for item in self._findItems(oldPid):
+      item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.

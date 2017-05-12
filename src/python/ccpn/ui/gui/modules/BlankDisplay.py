@@ -107,7 +107,7 @@ class BlankDisplay(CcpnModule):
       self._createSpectrumDisplay(obj)
       success = True
     elif obj is not None and isinstance(obj, SpectrumGroup):
-      self._handleSpectrumGroups(obj)
+      self._handleSpectrumGroup(obj)
       success = True
     return success
 
@@ -121,23 +121,21 @@ class BlankDisplay(CcpnModule):
     logger.info('spectrum = project.getByPid(%r)' % spectrum.id)
     logger.info('application.createSpectrumDisplay(spectrum)')
 
-  def _handleSpectrumGroups(self, sg):
+  def _handleSpectrumGroup(self, spectrumGroup):
+    '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+    Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
 
-    from ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsToolBar
-    if len(sg.spectra) > 0:
-      spectrumDisplay = self.mainWindow.createSpectrumDisplay(sg.spectra[0])
+    if len(spectrumGroup.spectra) > 0:
+      spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+      for spectrum in spectrumGroup.spectra: # Add the other spectra
+        spectrumDisplay.displaySpectrum(spectrum)
 
       spectrumDisplay.isGrouped = True
-      spectrumDisplayMainWidget = spectrumDisplay.mainWidget
       spectrumDisplay.spectrumToolBar.hide()
+      spectrumDisplay.spectrumGroupToolBar.show()
+      spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
 
-      spectrumGroupsToolBar = SpectrumGroupsToolBar(spectrumDisplayMainWidget, spectrumDisplay=spectrumDisplay, spectrumGroup=sg,)
-      if len(spectrumDisplay.strips)>0:
-        spectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar = spectrumGroupsToolBar
-        strip =  spectrumDisplay.strips[0]
-        padding = self.application.preferences.general.stripRegionPadding
-        strip.viewBox.autoRange(padding=padding)
-      self.mainWindow.deleteBlankDisplay()
+
 
 
   def _closeModule(self):

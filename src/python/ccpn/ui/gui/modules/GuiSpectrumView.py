@@ -228,7 +228,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
       widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
       widget.setIconSize(QtCore.QSize(120, 10))
       if spectrumDisplay.is1D:
-        widget.setFixedSize(100, 30)
+        widget.setFixedSize(75, 30)
       else:
         widget.setFixedSize(75, 30)
       widget.spectrumView = self._wrappedData

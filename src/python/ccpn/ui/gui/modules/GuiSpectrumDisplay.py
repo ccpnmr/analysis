@@ -35,7 +35,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsWidget
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 import typing
@@ -44,6 +43,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
+from ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
@@ -152,9 +152,16 @@ class GuiSpectrumDisplay(CcpnModule):
     qtParent = self.mainWidget
 
     # GWV: Not sure what the widget argument is for
+    # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
     self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self,
                                            grid=(0, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
+
+    # spectrumGroupsToolBar
+    self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=qtParent, spectrumDisplay=self,
+                                                  grid=(0, 0), gridSpan=(1, 6))
+    self.spectrumGroupToolBar.setFixedHeight(30)
+    self.spectrumGroupToolBar.hide()
 
     # Utilities Toolbar; filled in Nd/1d classes
     self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(24,24),
@@ -247,31 +254,37 @@ class GuiSpectrumDisplay(CcpnModule):
     If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
     one already in.
     '''
-    if len(spectrumGroup.spectra)>0:
-      for spectrumView in self.spectrumViews:
-        if len(spectrumView.spectrum.spectrumGroups)>0:
-          displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
-                                     for spectrumView in self.spectrumViews]
 
-          spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
-                       if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
 
-        else:
-          for spectrum in spectrumGroup.spectra:
-            self.displaySpectrum(spectrum)
+    self.spectrumGroupToolBar._addAction(spectrumGroup)
+    for spectrum in spectrumGroup.spectra:
+      self.displaySpectrum(spectrum)
 
-        if hasattr(self, 'isGrouped'):
-          if self.isGrouped:
-            if len(spectrumGroups)>0:
+    # if len(spectrumGroup.spectra)>0:
+    #   for spectrumView in self.spectrumViews:
+    #     if len(spectrumView.spectrum.spectrumGroups)>0:
+    #       displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
+    #                                  for spectrumView in self.spectrumViews]
+    #
+    #       spectrumGroups = [spectrumGroup for spectrumGroup in self.project.spectrumGroups
+    #                    if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == spectrumGroup.pid]
 
-              spectrumGroupsToolBar = self.strips[0].spectrumViews[0].spectrumGroupsToolBar
-              spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, self.strips[0], pids[0])
-              spectrumGroupsToolBar.addWidget(spectrumGroupButton)
-              for spectrum in spectrumGroups[0].spectra:
-                self.displaySpectrum(spectrum)
-          else:
-            print("SpectrumGroups cannot be displayed in a display with already spectra in it."
-                  "\nSpectrumGroup's spectra are added as single item in the display  ")
+    #     else:
+    #       for spectrum in spectrumGroup.spectra:
+    #         self.displaySpectrum(spectrum)
+    #
+    #     if hasattr(self, 'isGrouped'):
+    #       if self.isGrouped:
+    #         if len(spectrumGroups)>0:
+    #
+    #           spectrumGroupsToolBar = self.strips[0].spectrumViews[0].spectrumGroupsToolBar
+    #           spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, self.strips[0], pids[0])
+    #           spectrumGroupsToolBar.addWidget(spectrumGroupButton)
+    #           for spectrum in spectrumGroups[0].spectra:
+    #             self.displaySpectrum(spectrum)
+    #       else:
+    #         print("SpectrumGroups cannot be displayed in a display with already spectra in it."
+    #               "\nSpectrumGroup's spectra are added as single item in the display  ")
 
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):

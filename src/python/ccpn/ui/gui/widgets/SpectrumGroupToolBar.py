@@ -49,14 +49,11 @@ class SpectrumGroupToolBar(ToolBar):
       action.setChecked(True)
       action.setToolTip(spectrumGroup.name)
       self._setupButton(action, spectrumGroup)
-      # self._setupContextMenu(action, spectrumGroup)
 
   def _setupButton(self, action, spectrumGroup):
       widget = self.widgetForAction(action)
       widget.setIconSize(QtCore.QSize(120, 10))
       widget.setFixedSize(75, 30)
-      # widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-      # widget.customContextMenuRequested.connect(self._onContextMenu)
 
   def mousePressEvent(self, event:QtGui.QMouseEvent):
     """
@@ -72,9 +69,7 @@ class SpectrumGroupToolBar(ToolBar):
             menu.move(event.globalPos().x(), event.globalPos().y() + 10)
             menu.exec()
 
-
   def _setupContextMenu(self, action, spectrumGroup):
-    print('action -> %s , spectrumGroup-> %s ' %(action, spectrumGroup))
 
     popMenu = Menu('',self)
     removeAction = popMenu.addAction('Remove', partial(self._deleteSpectrumGroup, action, spectrumGroup))
@@ -82,14 +77,7 @@ class SpectrumGroupToolBar(ToolBar):
     peakListAction.setCheckable(True)
     peakListAction.toggled.connect(partial(self._showHidePeakListView, spectrumGroup))
 
-
     return popMenu
-
-
-  def _onContextMenu(self, points):
-    positions = self.sender().mapToGlobal(points)
-    self.popMenu.move(positions.x(), positions.y() + 10)
-    self.popMenu.exec()
 
   def _getStrip(self):
     strips = self.spectrumDisplay.strips
@@ -132,115 +120,11 @@ class SpectrumGroupToolBar(ToolBar):
       self.spectrumDisplay._closeModule()
 
   def _showHidePeakListView(self, spectrumGroup):
-    print('_showHidePeakListView, action -> %s , spectrumGroup-> %s ' % (self.sender(), spectrumGroup))
-
-    spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in spectrumGroup.spectra]
-    peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews]
-    for plV in peakListViews:
-      if plV.isVisible():
-        plV.setVisible(False)
-      else:
-        plV.setVisible(True)
-    # peakListAction= self.sender()
-    # print(peakListAction.text())
-    # print('BOOL ', self.sender().isChecked(), peakListViews)
-    # if peakListAction.isChecked():
-    # self._showPeakList(spectrumGroupPeakLists, peakListViews)
-    # else:
-    #   self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
-
-  def _hidePeakLists(self, spectrumGroupPeakLists, peakListViews):
-    for peakList in spectrumGroupPeakLists:
-      if self.spectrumDisplay is not None:
-        for peakListView in peakListViews:
-          if peakList == peakListView.peakList:
-            peakListView.setVisible(False)
-
-  def _showPeakList(self, spectrumGroupPeakLists, peakListViews):
-    for peakList in spectrumGroupPeakLists:
-      if self.spectrumDisplay is not None:
-        for peakListView in peakListViews:
-          if peakList == peakListView.peakList:
-            peakListView.setVisible(True)
-
-
-
-#
-# class SpectrumGroupsWidget(QtGui.QWidget):
-#   def __init__(self, parent=None, spectrumDisplay=None, spectrumGroup=None, **kw):
-#     QtGui.QWidget.__init__(self, parent)
-#
-#     self.spectrumDisplay = spectrumDisplay
-#     if len(spectrumDisplay.strips) > 0:
-#       self.strip = spectrumDisplay.strips[0]
-#
-#     self.spectrumGroup = spectrumGroup
-#     self.spectrumGroupButton = Button(self, text=self.spectrumGroup.id,toggle=True)
-#
-#     self.spectrumGroupButton.setChecked(True)
-#     self.spectrumGroupButton.setMinimumSize(40,33)
-#     self.spectrumGroupButton.toggled.connect(self.toggleSpectrumGroups)
-#
-#     self.spectrumGroupButton.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-#     self.spectrumGroupButton.customContextMenuRequested.connect(self.onContextMenu)
-#
-#     self.popMenu = QtGui.QMenu(self)
-#     self.popMenu.addAction(QtGui.QAction('Delete',self, triggered=self.deleteSpectrumGroup))
-#     self.peakListCheckBox = QtGui.QAction('PeakLists',self, checkable = True, triggered=self.showHidePeakListView)
-#     self.peakListCheckBox.setChecked(True)
-#     self.popMenu.addAction(self.peakListCheckBox)
-#
-#     self.spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in self.spectrumGroup.spectra]
-#     self.peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews ]
-#     self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.spectrumDisplay.peakListViews ]
-#
-#   def onContextMenu(self, points):
-#     positions = self.spectrumGroupButton.mapToGlobal(points)
-#     self.popMenu.move(positions.x(), positions.y() + 10)
-#     self.popMenu.exec()
-#
-#   def toggleSpectrumGroups(self):
-#     if self.strip is not None:
-#       spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews
-#                        if spectrumView.spectrum in self.spectrumGroup.spectra]
-#
-#       if self.spectrumGroupButton.isChecked():
-#         for spectrumView in spectrumViews:
-#           spectrumView.setVisible(True)
-#           if hasattr(spectrumView, 'plot'):
-#             spectrumView.plot.show()
-#         self.showPeakList()
-#
-#       else:
-#         for spectrumView in spectrumViews:
-#           spectrumView.setVisible(False)
-#           if hasattr(spectrumView, 'plot'):
-#             spectrumView.plot.hide()
-#         self.hidePeakLists()
-#
-#   def deleteSpectrumGroup(self):
-#     if self.strip is not None:
-#       self.spectrumGroupButton.deleteLater()
-#       for spectrumView in self.strip.spectrumViews:
-#         if spectrumView.spectrum in self.spectrumGroup.spectra:
-#           spectrumView.delete()
-#
-#   def showHidePeakListView(self):
-#     if self.peakListCheckBox.isChecked():
-#       self.showPeakList()
-#     else:
-#       self.hidePeakLists()
-#
-#   def hidePeakLists(self):
-#     for peakList in self.spectrumGroupPeakLists:
-#       if self.spectrumDisplay is not None:
-#         for peakListView in self.spectrumDisplay.peakListViews:
-#           if peakList == peakListView.peakList:
-#             peakListView.setVisible(False)
-#
-#   def showPeakList(self):
-#     for peakList in self.spectrumGroupPeakLists:
-#       if self.spectrumDisplay is not None:
-#         for peakListView in self.spectrumDisplay.peakListViews:
-#           if peakList == peakListView.peakList:
-#             peakListView.setVisible(True)
+    spectrumGroupPeakLists = [peakList for spectrum in spectrumGroup.spectra for peakList in spectrum.peakLists ]
+    peakListViews = [plv for peakList in spectrumGroupPeakLists for plv in peakList.peakListViews]
+    for plv in peakListViews:
+      if plv is not None:
+        if plv.isVisible():
+          plv.setVisible(False)
+        else:
+          plv.setVisible(True)

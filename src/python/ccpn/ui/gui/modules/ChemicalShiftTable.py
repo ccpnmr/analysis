@@ -8,8 +8,7 @@ tertiary version by Ejb 9/5/17
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
@@ -29,24 +28,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-
-from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 from ccpn.util.Logging import getLogger
 ALL = '<all>'
@@ -63,6 +54,9 @@ class ChemicalShiftTableModule(CcpnModule):
 
   # we are subclassing this Module, hence some more arguments to the init
   def __init__(self, mainWindow, chemicalShiftLists=None, name='Chemical Shift Table'):
+    """
+    Initialise the Module widgets
+    """
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
@@ -70,19 +64,18 @@ class ChemicalShiftTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-
+    self.closeFunc = self._close
     # settings
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
-    self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+    self._CSTwidget = Widget(self.settingsWidget, setLayout=True,
                              grid=(0,0), vAlign='top', hAlign='left')
-    #self._NTSwidget = self.settingsWidget
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
     colwidth = 140
-    self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+    self.displaysWidget = ListCompoundWidget(self._CSTwidget,
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
@@ -95,7 +88,7 @@ class ChemicalShiftTableModule(CcpnModule):
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._CSTwidget,
                                              grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -105,7 +98,7 @@ class ChemicalShiftTableModule(CcpnModule):
                                             )
 
     self.markPositionsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._CSTwidget,
                                              grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -114,7 +107,7 @@ class ChemicalShiftTableModule(CcpnModule):
                                              checked = True
                                             )
     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._CSTwidget,
                                              grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -129,11 +122,13 @@ class ChemicalShiftTableModule(CcpnModule):
                                                moduleParent=self,
                                                grid=(0,0))
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.chemicalShiftTable, grid=(4, 0))
-    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.chemicalShiftTable, grid=(5, 0))
+    self.displayColumnWidget = ColumnViewSettings(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(5, 0))
 
   def _getDisplays(self):
-    "return list of displays to navigate; done so BackboneAssignment module can subclass"
+    """
+    Return list of displays to navigate - if needed
+    """
     displays = []
     # check for valid displays
     gids = self.displaysWidget.getTexts()
@@ -144,42 +139,23 @@ class ChemicalShiftTableModule(CcpnModule):
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
-  # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
-  #   "Navigate in selected displays to nmrResidue; skip if none defined"
-  #   logger.debug('nmrResidue=%s' % (nmrResidue.id))
-  # 
-  #   displays = self._getDisplays()
-  #   if len(displays) == 0:
-  #     logger.warn('Undefined display module(s); select in settings first')
-  #     showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
-  #     return
-  # 
-  #   self.application._startCommandBlock('%s.navigateToNmrResidue(project.getByPid(%r))' %
-  #       (self.className, nmrResidue.pid))
-  #   try:
-  #       # optionally clear the marks
-  #       if self.autoClearMarksWidget.checkBox.isChecked():
-  #           self.application.ui.mainWindow.clearMarks()
-  # 
-  #       # navigate the displays
-  #       for display in displays:
-  #           if len(display.strips) > 0:
-  #               navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-  #                                             widths=['full'] * len(display.strips[0].axisCodes),
-  #                                             showSequentialResidues = (len(display.axisCodes) > 2) and
-  #                                             self.sequentialStripsWidget.checkBox.isChecked(),
-  #                                             markPositions = self.markPositionsWidget.checkBox.isChecked()
-  #               )
-  #   finally:
-  #       self.application._endCommandBlock()
-
   def _getDisplayColumnWidget(self):
-    " CCPN-INTERNAL: used to get displayColumnWidget"
+    """
+    CCPN-INTERNAL: used to get displayColumnWidget
+    """
     return self.displayColumnWidget
 
   def _getSearchWidget(self):
-    " CCPN-INTERNAL: used to get searchWidget"
+    """
+    CCPN-INTERNAL: used to get searchWidget
+    """
     return self.searchWidget
+
+  def _close(self):
+    """
+    CCPN-INTERNAL: used to close the module
+    """
+    self.chemicalShiftTable._close()
 
 
 class ChemicalShiftTable(ObjectTable):
@@ -189,8 +165,8 @@ class ChemicalShiftTable(ObjectTable):
   columnDefs = [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
              ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
              ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
-             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLam(cs, 'value', float), 'Value of chemical shift, in selected ChemicalShiftList', None),
-             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable._stLam(cs, 'valueError', float), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
+             ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
+             ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable._stLamFloat(cs, 'valueError'), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
              ('Shift list peaks',
               lambda cs:'%3d ' % ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
                                                                                     'ChemicalShiftList', None),
@@ -204,6 +180,9 @@ class ChemicalShiftTable(ObjectTable):
   attributeName = 'chemicalShiftLists'
 
   def __init__(self, parent, application, moduleParent, **kwds):
+    """
+    Initialise the widgets for the module.
+    """
     self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
@@ -243,35 +222,27 @@ class ChemicalShiftTable(ObjectTable):
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
-    # self._peaksNotifier = Notifier(self._project,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-    #                                 self._updateCallback
-    #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-  # def addWidgetToTop(self, widget, col=2, colSpan=1):
-  #   "Convenience to add a widget to the top of the table; col >= 2"
-  #   if col < 2:
-  #     raise RuntimeError('Col has to be >= 2')
-  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  def addWidgetToTop(self, widget, col=2, colSpan=1):
+    """
+    Convenience to add a widget to the top of the table; col >= 2
+    """
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForChemicalShift(self, chemicalShiftList):
-    "Display the table for all chemicalShift"
-
-    # if self._chemicalShiftNotifier is not None:
-    #   # we have a new nmrChain and hence need to unregister the previous notifier
-    #   self._chemicalShiftNotifier.unRegister()
-    # # register a notifier for this nmrChain
-    # self._chemicalShiftNotifier = Notifier(chemicalShiftList,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'ChemicalShift',
-    #                                 self._updateCallback
-    #                               )
-
+    """
+    Display the table for all chemicalShift
+    """
     self.ncWidget.select(chemicalShiftList.pid)
     self._update(chemicalShiftList)
 
   def _updateCallback(self, data):
-    "callback for updating the table"
+    """
+    Notifier callback for updating the table
+    """
     thisChemicalShiftList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
     if self.chemicalShiftList in thisChemicalShiftList:
       self.displayTableForChemicalShift(self.chemicalShiftList)
@@ -279,7 +250,9 @@ class ChemicalShiftTable(ObjectTable):
       self.clearTable()
 
   def _update(self, chemicalShiftList):
-    "Update the table with chemicalShift"
+    """
+    Update the table
+    """
     if not self._updateSilence:
       self.clearTable()
       self._silenceCallback = True
@@ -289,14 +262,21 @@ class ChemicalShiftTable(ObjectTable):
       self.show()
 
   def setUpdateSilence(self, silence):
-    "Silences/unsilences the update of the table until switched again"
+    """
+    Silences/unsilences the update of the table until switched again
+    """
     self._updateSilence = silence
 
   def _actionCallback(self, chemicalShift, row, column):
+    """
+    Notifier DoubleClick action on item in table
+    """
     print(chemicalShift, row, column)
 
   def _selectionCallback(self, obj, row, col):
-    "Callback for selecting a row in the table"
+    """
+    Notifier Callback for selecting a row in the table
+    """
     self._current.chemicalShift = obj
 
     #FIXME:ED - this is copied form the original version below
@@ -306,7 +286,9 @@ class ChemicalShiftTable(ObjectTable):
       chemicalShift.project._appBase.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting NmrChain"
+    """
+    Notifier Callback for selecting NmrChain from the pull down menu
+    """
     self.chemicalShiftList = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.chemicalShiftList is not None:
@@ -314,23 +296,30 @@ class ChemicalShiftTable(ObjectTable):
     else:
       self.clearTable()
 
-  def destroy(self):
-    "Cleanup of self"
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
     if self._chemicalShiftNotifier is not None:
       self._chemicalShiftNotifier.unRegister()
     if self._peaksNotifier is not None:
       self._peaksNotifier.unRegister()
 
   def _updateSettingsWidgets(self):
-    ''' update settings Widgets according with the new displayed table '''
+    """
+    CCPN-INTERNAL: Update settings Widgets according with the new displayed table
+    """
     displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
     displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 
-  def _getShiftPeakCount(self, chemicalShift):
-    """return number of peaks assigned to NmrAtom in Experiments and PeakLists
-    using ChemicalShiftList"""
+  @staticmethod
+  def _getShiftPeakCount(chemicalShift):
+    """
+    CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
+    using ChemicalShiftList
+    """
     chemicalShiftList = chemicalShift.chemicalShiftList
     peaks = chemicalShift.nmrAtom.assignedPeaks
     return (len(set(x for x in peaks
@@ -338,6 +327,9 @@ class ChemicalShiftTable(ObjectTable):
 
   @staticmethod
   def _getCommentText(chemicalShift):
+    """
+    CCPN-INTERNAL: Get a comment from ObjectTable
+    """
     if chemicalShift.comment == '' or not chemicalShift.comment:
       return ' '
     else:
@@ -345,21 +337,18 @@ class ChemicalShiftTable(ObjectTable):
 
   @staticmethod
   def _setComment(chemicalShift, value):
+    """
+    CCPN-INTERNAL: Insert a comment into ObjectTable
+    """
     chemicalShift.comment = value
 
   @staticmethod
-  def _stLam(self, row, name, valType):
-    " CCPN-INTERNAL: used to display Table"
+  def _stLamFloat(row, name):
+    """
+    CCPN-INTERNAL: used to display Table
+    """
     try:
-      thisVal = getattr(row, name)
-      if valType is str:
-        return str(thisVal)
-      elif valType is float:
-        return float(thisVal)
-      elif valType is int:
-        return int(thisVal)
-      else:
-        return None
+      return float(getattr(row, name))
     except:
       return None
 

@@ -1,9 +1,11 @@
+"""
+Module Documentation here
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
@@ -23,14 +25,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
-
-from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
+from PyQt4 import QtGui
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
@@ -55,6 +53,9 @@ class RestraintTableModule(CcpnModule):
 
   # we are subclassing this Module, hence some more arguments to the init
   def __init__(self, mainWindow, name='Restraint Table', restraintLists=None):
+    """
+    Initialise the Module widgets
+    """
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
@@ -62,28 +63,20 @@ class RestraintTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-
-    # if not restraintLists:
-    #   if self.project is None:
-    #     restraintLists = []
-    #   else:
-    #     restraintLists = self.project.restraintLists
-    #
-    # self.restraintLists = restraintLists
+    self.closeFunc = self._close
     self.itemPid = itemPid = restraintLists
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
-    self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+    self._RTwidget = Widget(self.settingsWidget, setLayout=True,
                              grid=(0,0), vAlign='top', hAlign='left')
-    #self._NTSwidget = self.settingsWidget
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
 
     #FIXME:ED - need to check label text and function of these
     colwidth = 140
-    self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+    self.displaysWidget = ListCompoundWidget(self._RTwidget,
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
@@ -96,7 +89,7 @@ class RestraintTableModule(CcpnModule):
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._RTwidget,
                                              grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -106,7 +99,7 @@ class RestraintTableModule(CcpnModule):
                                             )
 
     self.markPositionsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._RTwidget,
                                              grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -115,7 +108,7 @@ class RestraintTableModule(CcpnModule):
                                              checked = True
                                             )
     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._RTwidget,
                                              grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -130,11 +123,13 @@ class RestraintTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.restraintTable, grid=(4, 0))
-    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.restraintTable, grid=(5, 0))
+    self.displayColumnWidget = ColumnViewSettings(parent=self._RTwidget, table=self.restraintTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._RTwidget, table=self.restraintTable, grid=(5, 0))
 
   def _getDisplays(self):
-    "return list of displays to navigate; done so BackboneAssignment module can subclass"
+    """
+    Return list of displays to navigate - if needed
+    """
     displays = []
     # check for valid displays
     gids = self.displaysWidget.getTexts()
@@ -146,23 +141,36 @@ class RestraintTableModule(CcpnModule):
     return displays
 
   def _getDisplayColumnWidget(self):
-    " CCPN-INTERNAL: used to get displayColumnWidget"
+    """
+    CCPN-INTERNAL: used to get displayColumnWidget
+    """
     return self.displayColumnWidget
 
   def _getSearchWidget(self):
-    " CCPN-INTERNAL: used to get searchWidget"
+    """
+    CCPN-INTERNAL: used to get searchWidget
+    """
     return self.searchWidget
+
+  def _close(self):
+    """
+    CCPN-INTERNAL: used to close the module
+    """
+    self.restraintTable._close()
 
 
 class RestraintTable(ObjectTable):
+  """
+  Class to present a RestraintTable pulldown list, wrapped in a Widget
+  """
   columnDefs = [('#', '_key', 'Restraint Id', None),
-                 ('Atoms', lambda restraint:RestraintTable._getContributions(RestraintTable, restraint),
+                 ('Atoms', lambda restraint:RestraintTable._getContributions(restraint),
                   'Atoms involved in the restraint', None),
                  ('Target Value.', 'targetValue', 'Target value for the restraint', None),
                  ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None),
                  ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None),
                  ('Error', 'error', 'Error on the restraint', None),
-                 ('Peaks', lambda restraint:'%3d ' % RestraintTable._getRestraintPeakCount(RestraintTable, restraint),
+                 ('Peaks', lambda restraint:'%3d ' % RestraintTable._getRestraintPeakCount(restraint),
                   'Number of peaks used to derive this restraint', None),
                  # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
                 ('Comment', lambda restraint:RestraintTable._getCommentText(restraint), 'Notes',
@@ -173,6 +181,9 @@ class RestraintTable(ObjectTable):
   attributeName = 'restraintLists'
 
   def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
+    """
+    Initialise the widgets for the module.
+    """
     self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
@@ -211,39 +222,27 @@ class RestraintTable(ObjectTable):
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
-    # self._peaksNotifier = Notifier(self._project,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-    #                                 self._updateCallback
-    #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-    # if self.itemPid:
-    #   self.thisObj = self._project.getByPid(self.itemPid)
-    #   self.displayTableForRestraint(self.thisObj)
-
-  # def addWidgetToTop(self, widget, col=2, colSpan=1):
-  #   "Convenience to add a widget to the top of the table; col >= 2"
-  #   if col < 2:
-  #     raise RuntimeError('Col has to be >= 2')
-  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  def addWidgetToTop(self, widget, col=2, colSpan=1):
+    """
+    Convenience to add a widget to the top of the table; col >= 2
+    """
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForRestraint(self, restraintList):
-    "Display the table for all Restraints"
-
-    # if self._restraintNotifier is not None:
-    #   # we have a new nmrChain and hence need to unregister the previous notifier
-    #   self._restraintNotifier.unRegister()
-    # # register a notifier for this structureEnsemble
-    # self._restraintNotifier = Notifier(restraint,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Restraint',
-    #                                 self._updateCallback
-    #                               )
-
+    """
+    Display the table for all Restraints"
+    """
     self.stWidget.select(restraintList.pid)
     self._update(restraintList)
 
   def _updateCallback(self, data):
-    "callback for updating the table"
+    """
+    Notifier callback for updating the table
+    """
     thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
     if self.restraintList in thisRestraintList:
       self.displayTableForRestraint(self.restraintList)
@@ -251,7 +250,9 @@ class RestraintTable(ObjectTable):
       self.clearTable()
 
   def _update(self, RestraintList):
-    "Update the table"
+    """
+    Update the table
+    """
     if not self._updateSilence:
       self.clearTable()
       self._silenceCallback = True
@@ -261,18 +262,27 @@ class RestraintTable(ObjectTable):
       self.show()
 
   def setUpdateSilence(self, silence):
-    "Silences/unsilences the update of the table until switched again"
+    """
+    Silences/unsilences the update of the table until switched again
+    """
     self._updateSilence = silence
 
   def _selectionCallback(self, restraint, row, col):
-    "Callback for selecting a row in the table"
+    """
+    Notifier Callback for selecting a row in the table
+    """
     self._current.restraint = restraint
 
   def _actionCallback(self, atomRecordTuple, row, column):
+    """
+    Notifier DoubleClick action on item in table
+    """
     print(atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting Restraint"
+    """
+    Notifier Callback for selecting restraint from the pull down menu
+    """
     self.restraintList = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.restraintList is not None:
@@ -281,8 +291,10 @@ class RestraintTable(ObjectTable):
     else:
       self.clearTable()
 
-  def destroy(self):
-    "Cleanup of self"
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
     if self._restraintNotifier is not None:
       self._restraintNotifier.unRegister()
     if self._peaksNotifier is not None:
@@ -290,21 +302,29 @@ class RestraintTable(ObjectTable):
 
   def navigateToRestraintInDisplay(restraint, display, stripIndex=0, widths=None,
                                     showSequentialStructures=False, markPositions=True):
-
+    """
+    Notifier Callback for selecting Object from item in the table
+    """
     getLogger().debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %
                       (display.id, restraint.id, showSequentialStructures, markPositions)
                       )
     return None
 
-  def _getContributions(self, restraint):
-    """return number of peaks assigned to NmrAtom in Experiments and PeakLists
-    using ChemicalShiftList"""
+  @staticmethod
+  def _getContributions(restraint):
+    """
+    CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
+    using ChemicalShiftList
+    """
     if restraint.restraintContributions[0].restraintItems:
       return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
 
-  def _getRestraintPeakCount(self, restraint):
-    """return number of peaks assigned to NmrAtom in Experiments and PeakLists
-    using ChemicalShiftList"""
+  @staticmethod
+  def _getRestraintPeakCount(restraint):
+    """
+    CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
+    using ChemicalShiftList
+    """
     peaks = restraint.peaks
     if peaks:
       return len(peaks)
@@ -312,10 +332,15 @@ class RestraintTable(ObjectTable):
       return 0
 
   def _callback(self):
+    """
+    CCPN-INTERNAL: Notifier callback inactive
+    """
     pass
 
   def _updateSettingsWidgets(self):
-    ''' update settings Widgets according with the new displayed table '''
+    """
+    CCPN-INTERNAL: Update settings Widgets according with the new displayed table
+    """
     displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
     displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
@@ -323,6 +348,9 @@ class RestraintTable(ObjectTable):
 
   @staticmethod
   def _getCommentText(chemicalShift):
+    """
+    CCPN-INTERNAL: Get a comment from ObjectTable
+    """
     if chemicalShift.comment == '' or not chemicalShift.comment:
       return ' '
     else:
@@ -330,6 +358,9 @@ class RestraintTable(ObjectTable):
 
   @staticmethod
   def _setComment(chemicalShift, value):
+    """
+    CCPN-INTERNAL: Insert a comment into ObjectTable
+    """
     chemicalShift.comment = value
 
 #
@@ -361,7 +392,7 @@ class RestraintTable(ObjectTable):
 # 
 #     self.restraintLists = restraintLists
 # 
-#     self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+#     self._RTwidget = Widget(self.settingsWidget, setLayout=True,
 #                              grid=(0,0), vAlign='top', hAlign='left')
 # 
 #     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
@@ -369,7 +400,7 @@ class RestraintTable(ObjectTable):
 # 
 #     #FIXME:ED - need to check label text and function of these
 #     colwidth = 140
-#     self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+#     self.displaysWidget = ListCompoundWidget(self._RTwidget,
 #                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
 #                                              vPolicy='minimal',
 #                                              #minimumWidths=(colwidth, 0, 0),
@@ -382,7 +413,7 @@ class RestraintTable(ObjectTable):
 #     self.displaysWidget.setFixedHeigths((None, None, 40))
 # 
 #     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-#                                              self._NTSwidget,
+#                                              self._RTwidget,
 #                                              grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
 #                                              #minimumWidths=(colwidth, 0),
 #                                              fixedWidths=(colwidth, 30),
@@ -392,7 +423,7 @@ class RestraintTable(ObjectTable):
 #                                             )
 # 
 #     self.markPositionsWidget = CheckBoxCompoundWidget(
-#                                              self._NTSwidget,
+#                                              self._RTwidget,
 #                                              grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
 #                                              #minimumWidths=(colwidth, 0),
 #                                              fixedWidths=(colwidth, 30),
@@ -401,7 +432,7 @@ class RestraintTable(ObjectTable):
 #                                              checked = True
 #                                             )
 #     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-#                                              self._NTSwidget,
+#                                              self._RTwidget,
 #                                              grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
 #                                              #minimumWidths=(colwidth, 0),
 #                                              fixedWidths=(colwidth, 30),

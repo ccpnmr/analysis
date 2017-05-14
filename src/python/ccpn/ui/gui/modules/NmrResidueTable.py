@@ -11,7 +11,7 @@ Geerten 1-7/12/2016; 11/04/2017
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner & Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -43,12 +43,12 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
-
 ALL = '<all>'
+
 
 class NmrResidueTableModule(CcpnModule):
   """
@@ -62,7 +62,9 @@ class NmrResidueTableModule(CcpnModule):
 
   # we are subclassing this Module, hence some more arguments to the init
   def __init__(self, mainWindow, name='NmrResidue Table'):
-
+    """
+    Initialise the Module widgets
+    """
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
@@ -70,8 +72,7 @@ class NmrResidueTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-
-    # settings
+    self.closeFunc = self._close
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -134,7 +135,9 @@ class NmrResidueTableModule(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(5, 0))
 
   def _getDisplays(self):
-    "return list of displays to navigate; done so BackboneAssignment module can subclass"
+    """
+    Return list of displays to navigate - if needed
+    """
     displays = []
     # check for valid displays
     gids = self.displaysWidget.getTexts()
@@ -146,7 +149,9 @@ class NmrResidueTableModule(CcpnModule):
     return displays
 
   def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
-    "Navigate in selected displays to nmrResidue; skip if none defined"
+    """
+    Navigate in selected displays to nmrResidue; skip if none defined
+    """
     logger.debug('nmrResidue=%s' % (nmrResidue.id))
 
     displays = self._getDisplays()
@@ -175,12 +180,22 @@ class NmrResidueTableModule(CcpnModule):
         self.application._endCommandBlock()
 
   def _getDisplayColumnWidget(self):
-    " CCPN-INTERNAL: used to get displayColumnWidget"
+    """
+    CCPN-INTERNAL: used to get displayColumnWidget
+    """
     return self.displayColumnWidget
 
   def _getSearchWidget(self):
-    " CCPN-INTERNAL: used to get searchWidget"
+    """
+    CCPN-INTERNAL: used to get searchWidget
+    """
     return self.searchWidget
+
+  def _close(self):
+    """
+    CCPN-INTERNAL: used to close the module
+    """
+    self.nmrResidueTable._close()
 
 
 class NmrResidueTable(ObjectTable):
@@ -201,6 +216,9 @@ class NmrResidueTable(ObjectTable):
   attributeName = 'nmrChains'
 
   def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, **kwds):
+    """
+    Initialise the widgets for the module.
+    """
     self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
@@ -242,50 +260,27 @@ class NmrResidueTable(ObjectTable):
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
-    # self._peaksNotifier = Notifier(self._project,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-    #                                 self._updateCallback
-    #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
-    # This widget will display a pulldown list of NmrChain pids in the project
-    # self.ncWidget = NmrChainPulldown(parent=self._widget,
-    #                                  project=self._project, default=0,  #first NmrChain in project (if present)
-    #                                  grid=(0,0), gridSpan=(1,1), minimumWidths=(0,100),
-    #                                  callback=self._selectionPulldownCallback
-    #                                  )
-
-    # if len(self._project.nmrChains) > 0:
-    #   self.displayTableForNmrChain(self._project.nmrChains[0])
-
-    # if self.itemPid:
-    #   self.thisObj = self._project.getByPid(self.itemPid)
-    #   self.displayTableForNmrChain(self.thisObj)
-
-  # def _addWidgetToTop(self, widget, col=2, colSpan=1):
-  #   "Convenience to add a widget to the top of the table; col >= 2"
-  #   if col < 2:
-  #     raise RuntimeError('Col has to be >= 2')
-  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  def addWidgetToTop(self, widget, col=2, colSpan=1):
+    """
+    Convenience to add a widget to the top of the table; col >= 2
+    """
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForNmrChain(self, nmrChain):
-    "Display the table for all NmrResidue's of nmrChain"
-
-    # if self._chainNotifier is not None:
-    #   we have a new nmrChain and hence need to unregister the previous notifier
-      # self._chainNotifier.unRegister()
-    # register a notifier for this nmrChain
-    # self._chainNotifier = Notifier(nmrChain,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrResidue',
-    #                                 self._updateCallback
-    #                               )
-    # self._chainNotifier.setDebug(True)
-
+    """
+    Display the table for all NmrResidue's of nmrChain
+    """
     self.ncWidget.select(nmrChain.pid)
     self._update(nmrChain)
 
   def _updateCallback(self, data):
-    "callback for updating the table"
+    """
+    Notifier callback for updating the table
+    """
     thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
     if self.nmrChain in thisChainList:
       self.displayTableForNmrChain(self.nmrChain)
@@ -298,7 +293,9 @@ class NmrResidueTable(ObjectTable):
       #   self._update(nmrChain)
 
   def _update(self, nmrChain):
-    "Update the table with NmrResidues of nmrChain"
+    """
+    Update the table with NmrResidues of nmrChain
+    """
     if not self._updateSilence:
       self.clearTable()
       self._silenceCallback = True
@@ -308,15 +305,21 @@ class NmrResidueTable(ObjectTable):
       self.show()
 
   def setUpdateSilence(self, silence):
-    "Silences/unsilences the update of the table until switched again"
+    """
+    Silences/unsilences the update of the table until switched again
+    """
     self._updateSilence = silence
 
   def _selectionCallback(self, nmrResidue, row, col):
-    "Callback for selecting a row in the table"
+    """
+    Notifier Callback for selecting a row in the table
+    """
     self._current.nmrResidue = nmrResidue
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting NmrChain"
+    """
+    Notifier Callback for selecting NmrChain
+    """
     self.nmrChain = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.nmrChain is not None:
@@ -326,24 +329,33 @@ class NmrResidueTable(ObjectTable):
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):
-    "Returns a sorted list of NmrAtom names"
+    """
+    Returns a sorted list of NmrAtom names
+    """
     return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms]),
                             key=CcpnSorting.stringSortKey))
 
   @staticmethod
   def _getNmrResiduePeakCount(nmrResidue):
+    """
+    Returns peak list count
+    """
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
-  def destroy(self):
-    "Cleanup of self"
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
     if self._chainNotifier is not None:
       self._chainNotifier.unRegister()
     if self._peaksNotifier is not None:
       self._peaksNotifier.unRegister()
 
   def _updateSettingsWidgets(self):
-    ''' update settings Widgets according with the new displayed table '''
+    """
+    Update settings Widgets according with the new displayed table
+    """
     displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
     displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()

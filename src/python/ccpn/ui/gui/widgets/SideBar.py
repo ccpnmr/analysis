@@ -284,24 +284,24 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     nmrChain = nmrResidue._parent
 
-    # # Remove NmrChain item and contents
-    # self._removeItem(nmrChain)
+    # Remove NmrChain item and contents
+    self._removeItem(nmrChain)
+
+    # Create NmrResidue items again - this gives them in correctly sorted order
+    self._createItem(nmrChain)
+    for nr in nmrChain.nmrResidues:
+      self._createItem(nr)
+      for nmrAtom in nr.nmrAtoms:
+        self._createItem(nmrAtom)
+
+    # nmrChain = nmrResidue._parent     # ejb - just insert the 1 item
+    # for nr in nmrChain.nmrResidues:
+    #   if (nr.pid == nmrResidue.pid):
+    #     self._createItem(nr)
     #
-    # # Create NmrResidue items again - this gives them in correctly sorted order
-    # item = self._createItem(nmrChain)
-
-    for nr in nmrChain.nmrResidues:  # ejb - sort the list
-      if (nr.pid == nmrResidue.pid):
-        self._createItem(nr)
-        # for nmrAtom in nr.nmrAtoms:
-        #   self._createItem(nmrAtom)
-
     # newPid = nmrChain.pid                   # ejb - expand the tree again from nmrChain
     # for item in self._findItems(newPid):
     #   item.setExpanded(True)
-
-    # either remove the chain which gets inserted at the end - rename works
-    # OR find item in list, rename fails
 
   def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
@@ -437,6 +437,7 @@ class SideBar(QtGui.QTreeWidget, Base):
     import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
+      # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
       if Pid.IDSEP not in oldPid or oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
         # Parent unchanged, just rename
@@ -444,17 +445,14 @@ class SideBar(QtGui.QTreeWidget, Base):
       else:
         # parent has changed - we must move and rename the entire item tree.
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
-        # objects = self._itemObjects(item, recursive=True)
-        # sip.delete(item) # this also removes child items
+        objects = self._itemObjects(item, recursive=True)
+        sip.delete(item) # this also removes child items
 
         # NB the first object cannot be found from its pid (as it has already been renamed)
         # So we do it this way
-
-        # self._createItem(obj)         # ejb - original bit
-        # for xx in objects[1:]:
-        #   self._createItem(xx)
-
-        item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
+        self._createItem(obj)
+        for xx in objects[1:]:
+          self._createItem(xx)
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
@@ -462,14 +460,16 @@ class SideBar(QtGui.QTreeWidget, Base):
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location
       import sip
-      # for item in self._findItems(oldPid):
-        # sip.delete(item) # this also removes child items
-        # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+      for item in self._findItems(oldPid):
+        sip.delete(item) # this also removes child items
+        item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+    else:
+      pass        # ejb - here just for a breakpoint
 
-    # self._refreshParentNmrChain(obj, oldPid)
+    self._refreshParentNmrChain(obj, oldPid)
 
-    for item in self._findItems(oldPid):
-      item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+    # for item in self._findItems(oldPid):
+    #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
@@ -649,7 +649,7 @@ class SideBar(QtGui.QTreeWidget, Base):
                'This function has not been implemented in the current version',
                colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
-      popup = NotesPopup(note=obj)
+      popup = NotesPopup(mainWindow=self.mainWindow, note=obj)
       popup.exec_()
       popup.raise_()
 

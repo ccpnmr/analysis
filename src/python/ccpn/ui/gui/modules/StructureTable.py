@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -34,18 +33,13 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
-from PyQt4 import QtGui, QtCore
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
-
 from ccpn.util.Logging import getLogger
 logger = getLogger()
-
 ALL = '<all>'
 
 class StructureTableModule(CcpnModule):
@@ -60,6 +54,9 @@ class StructureTableModule(CcpnModule):
 
   # we are subclassing this Module, hence some more arguments to the init
   def __init__(self, mainWindow, name='Structure Table', itemPid=None):
+    """
+    Initialise the Module widgets
+    """
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
@@ -67,6 +64,9 @@ class StructureTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
+    self.closeFunc = self._close
+    self.itemPid = itemPid      # read the passed in object
+                                # this could come from DataSet or Structures
 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # # add test structure Ensembles
@@ -134,22 +134,17 @@ class StructureTableModule(CcpnModule):
     #   pass
 
     # settings
-
-    self.itemPid = itemPid      # read the passed in object
-                                # this could come from DataSet or Structures
-
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
-    self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+    self._STwidget = Widget(self.settingsWidget, setLayout=True,
                              grid=(0,0), vAlign='top', hAlign='left')
-    #self._NTSwidget = self.settingsWidget
 
     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
     # underpinning the addNotifier call do not allow for it either
 
     #FIXME:ED - need to check label text and function of these
     colwidth = 140
-    self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+    self.displaysWidget = ListCompoundWidget(self._STwidget,
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
@@ -162,7 +157,7 @@ class StructureTableModule(CcpnModule):
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._STwidget,
                                              grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -172,7 +167,7 @@ class StructureTableModule(CcpnModule):
                                             )
 
     self.markPositionsWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._STwidget,
                                              grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -181,7 +176,7 @@ class StructureTableModule(CcpnModule):
                                              checked = True
                                             )
     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                                             self._NTSwidget,
+                                             self._STwidget,
                                              grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              #minimumWidths=(colwidth, 0),
                                              fixedWidths=(colwidth, 30),
@@ -197,57 +192,67 @@ class StructureTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0), itemPid=itemPid)
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.structureTable, grid=(4, 0))
-    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.structureTable, grid=(5, 0))
+    self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget, table=self.structureTable, grid=(4, 0))
+    self.searchWidget = ObjectTableFilter(parent=self._STwidget, table=self.structureTable, grid=(5, 0))
 
 
-  def _getDisplays(self):
-    "return list of displays to navigate; done so BackboneAssignment module can subclass"
+  def _getDisplays(self) -> list:
+    """
+    Return list of displays to navigate - if needed
+    """
     displays = []
     # check for valid displays
     gids = self.displaysWidget.getTexts()
     if len(gids) == 0: return displays
     if ALL in gids:
-        displays = self.application.ui.mainWindow.spectrumDisplays
+        displays = self.mainWindow.spectrumDisplays
     else:
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
   def _getDisplayColumnWidget(self):
-    " CCPN-INTERNAL: used to get displayColumnWidget"
+    """
+    CCPN-INTERNAL: used to get displayColumnWidget
+    """
     return self.displayColumnWidget
 
   def _getSearchWidget(self):
-    " CCPN-INTERNAL: used to get searchWidget"
+    """
+    CCPN-INTERNAL: used to get searchWidget
+    """
     return self.searchWidget
+
+  def _close(self):
+    """
+    CCPN-INTERNAL: used to close the module
+    """
+    self.structureTable._close()
 
 
 class StructureTable(ObjectTable):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
-
   #row.modelNumber, etc., may not exist..
-
   columnDefs = [
-                ('#', lambda row: StructureTable._stLam(row, 'Index', int), 'Index'),
-                ('modelNumber', lambda row: StructureTable._stLam(row, 'modelNumber', int), 'modelNumber'),
-                ('chainCode', lambda row: StructureTable._stLam(row, 'chainCode', str), 'chainCode'),
-                ('sequenceId', lambda row: StructureTable._stLam(row, 'sequenceId', int), 'sequenceId'),
-                ('insertionCode', lambda row: StructureTable._stLam(row, 'insertionCode', str), 'insertionCode'),
-                ('residueName', lambda row: StructureTable._stLam(row, 'residueName', str), 'residueName'),
-                ('atomName', lambda row: StructureTable._stLam(row, 'atomName', str), 'atomName'),
-                ('altLocationCode', lambda row: StructureTable._stLam(row, 'altLocationCode', str), 'altLocationCode'),
-                ('element', lambda row: StructureTable._stLam(row, 'element', str), 'element'),
-                ('x', lambda row: StructureTable._stLam(row, 'x', float), 'x'),
-                ('y', lambda row: StructureTable._stLam(row, 'y', float), 'y'),
-                ('z', lambda row: StructureTable._stLam(row, 'z', float), 'z'),
-                ('occupancy', lambda row: StructureTable._stLam(row, 'occupancy', float), 'occupancy'),
-                ('bFactor', lambda row: StructureTable._stLam(row, 'bFactor', float), 'bFactor'),
-                ('nmrChainCode', lambda row: StructureTable._stLam(row, 'nmrChainCode', str), 'nmrChainCode'),
-                ('nmrSequenceCode', lambda row: StructureTable._stLam(row, 'nmrSequenceCode', str), 'nmrSequenceCode'),
-                ('nmrResidueName', lambda row: StructureTable._stLam(row, 'nmrResidueName', str), 'nmrResidueName'),
-                ('nmrAtomName', lambda row: StructureTable._stLam(row, 'nmrAtomName', str), 'nmrAtomName')
+                ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index'),
+                ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber'),
+                ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode'),
+                ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId'),
+                ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode'),
+                ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName'),
+                ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName'),
+                ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode'),
+                ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element'),
+                ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x'),
+                ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y'),
+                ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z'),
+                ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy'),
+                ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor'),
+                ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode'),
+                ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode'),
+                ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName'),
+                ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName')
   ]
 
   className = 'StructureTable'
@@ -255,6 +260,14 @@ class StructureTable(ObjectTable):
   attributeName = 'structureEnsembles'
 
   def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
+    """
+    Initialise the widgets for the module.
+    :param parent: parent widget
+    :param application: needed
+    :param moduleParent: module area to insert module
+    :param itemPid: should be None
+    :param kwds:
+    """
     self.moduleParent=moduleParent
     self._application = application
     self._project = application.project
@@ -293,7 +306,7 @@ class StructureTable(ObjectTable):
                          grid = (3, 0), gridSpan = (1, 6)
                          )
 
-    # Notifier object to update the table if the nmrChain changes
+    # Notifier object to update the table if the Structure changes
     self._ensembleNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                       , StructureEnsemble.__name__
@@ -302,10 +315,6 @@ class StructureTable(ObjectTable):
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
-    # self._peaksNotifier = Notifier(self._project,
-    #                                [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'Peak',
-    #                                 self._updateCallback
-    #                                )
     self._updateSilence = False  # flag to silence updating of the table
 
     if self.itemPid:
@@ -315,20 +324,26 @@ class StructureTable(ObjectTable):
     else:
       self.thisObj=None
 
-  # def addWidgetToTop(self, widget, col=2, colSpan=1):
-  #   "Convenience to add a widget to the top of the table; col >= 2"
-  #   if col < 2:
-  #     raise RuntimeError('Col has to be >= 2')
-  #   self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+  def addWidgetToTop(self, widget, col=2, colSpan=1):
+    """
+    Convenience to add a widget to the top of the table; col >= 2
+    """
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
   def displayTableForStructure(self, structureEnsemble):
-    "Display the table for all StructureEnsembles"
-
+    """
+    Display the table for all StructureEnsembles
+    """
     self.stWidget.select(structureEnsemble.pid)
     self._update(structureEnsemble)
 
   def displayTableForDataSetStructure(self, structureEnsemble):
-    "Display the table for all StructureDataSet"
+    """
+    Display the table for all StructureDataSet
+    """
+
     # self.stWidget.select(structureEnsemble.pid)
     #
     # if self.thisDataSet:
@@ -360,6 +375,9 @@ class StructureTable(ObjectTable):
     #       self._updateDataSet(dt.attachedObject)
 
   def _getAttachedDataSet(self, item):
+    """
+    Get the DataSet object attached to this StructureEnsemble
+    """
     thisObj = item
     Found=False
     dd = dt = None
@@ -420,14 +438,12 @@ class StructureTable(ObjectTable):
     #   return None
 
   def _update(self, structureEnsemble):
-    "Update the table"
+    """
+    Update the table from StructureEnsemble
+    """
     if not self._updateSilence:
       self.clearTable()
       self._silenceCallback = True
-
-      # model = PandasModel(structureEnsemble.data)   # ejb - interesting, set QTableView form Pandas
-      # self.setModel(model)
-      # self.setSortingEnabled(True)
       tuples = structureEnsemble.data.as_namedtuples()
       self.setObjects(tuples)
       self._updateSettingsWidgets()
@@ -435,14 +451,12 @@ class StructureTable(ObjectTable):
       self.show()
 
   def _updateDataSet(self, structureData):
-    "Update the table"
+    """
+    Update the table from EnsembleData
+    """
     if not self._updateSilence:
       self.clearTable()
       self._silenceCallback = True
-
-      # model = PandasModel(structureEnsemble.data)   # ejb - interesting, set QTableView form Pandas
-      # self.setModel(model)
-      # self.setSortingEnabled(True)
       tuples = structureData.as_namedtuples()
       self.setObjects(tuples)
       self._updateSettingsWidgets()
@@ -450,30 +464,40 @@ class StructureTable(ObjectTable):
       self.show()
 
   def setUpdateSilence(self, silence):
-    "Silences/unsilences the update of the table until switched again"
+    """
+    Silences/unsilences the update of the table until switched again
+    """
     self._updateSilence = silence
 
   def _selectionCallback(self, structureData, row, col):
-    "Callback for selecting a row in the table"
+    """
+    Notifier Callback for selecting a row in the table
+    """
     self._current.structureData = structureData
 
   def _actionCallback(self, atomRecordTuple, row, column):
-      print(atomRecordTuple, row, column)
+    """
+    Notifier DoubleClick action on item in table
+    """
+    print(atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
-    "Callback for selecting Structure"
+    """
+    Notifier Callback for selecting Structure from the pull down menu
+    """
     self.stButtons.setIndex(0)
     self.thisObj = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.thisObj is not None:
-      # self.thisDataSet = self._getAttachedDataSet(item)
       self._getAttachedDataSet(self.thisObj)
       self.displayTableForStructure(self.thisObj)
     else:
       self.clearTable()
 
   def _selectionButtonCallback(self):
-    "Callback for selecting Structure Ensemble or Average"
+    """
+    Notifier Callback for selecting Structure Ensemble or Average
+    """
     item = self.stButtons.get()
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
     if self.thisObj is not None:
@@ -485,7 +509,9 @@ class StructureTable(ObjectTable):
       self.clearTable()
 
   def _updateCallback(self, data):
-    "callback for updating the table"
+    """
+    Notifier Callback for updating the table
+    """
     thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
     # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
     if self.thisObj in thisEnsembleList:
@@ -498,44 +524,67 @@ class StructureTable(ObjectTable):
     else:
       self.clearTable()
 
-  def destroy(self):
-    "Cleanup of self"
-    if self._ensembleNotifier is not None:
-      self._ensembleNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
-
-
   def navigateToStructureInDisplay(structureEnsemble, display, stripIndex=0, widths=None,
                                     showSequentialStructures=False, markPositions=True):
-
+    """
+    Notifier Callback for selecting Object from item in the table
+    """
     getLogger().debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %
                       (display.id, structureEnsemble.id, showSequentialStructures, markPositions)
                       )
-
     return None
 
   @staticmethod
-  def _stLam(row, name, valType):
+  def _stLamInt(row, name):
+    """
+    CCPN-INTERNAL: Insert an int into ObjectTable
+    """
     try:
-      thisVal = getattr(row, name)
-      if valType is str:
-        return str(thisVal)
-      elif valType is float:
-        return float(thisVal)
-      elif valType is int:
-        return int(thisVal)
-      else:
-        return None
+      return int(getattr(row, name))
+    except:
+      return None
+
+  @staticmethod
+  def _stLamFloat(row, name):
+    """
+    CCPN-INTERNAL: Insert a float into ObjectTable
+    """
+    try:
+      return float(getattr(row, name))
+    except:
+      return None
+
+  @staticmethod
+  def _stLamStr(row, name):
+    """
+    CCPN-INTERNAL: Insert a str into ObjectTable
+    """
+    try:
+      return str(getattr(row, name))
     except:
       return None
 
   def _updateSettingsWidgets(self):
-    ''' update settings Widgets according with the new displayed table '''
+    """
+    Update settings Widgets according with the new displayed table
+    """
     displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
     displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 
   def initialiseButtons(self, index):
+    """
+    Set index of radioButton
+    """
     self.stButtons.setIndex(index)
+
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
+    if self._ensembleNotifier is not None:
+      self._ensembleNotifier.unRegister()
+    if self._peaksNotifier is not None:
+      self._peaksNotifier.unRegister()
+

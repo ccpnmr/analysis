@@ -534,7 +534,7 @@ class PeakAssigner(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     self.project._appBase.current.unRegisterNotify(self._updateInterface, 'peaks')
-    self.close()
+    super(PeakAssigner, self)._closeModule()
 
 class NotOnLine(object):
   """

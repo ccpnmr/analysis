@@ -26,7 +26,7 @@ class CopyPeaksModule(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification
     """
     self.__deregisterNotifiers()
-    self.close()
+    super(CopyPeaksModule, self)._closeModule()
 
   def __registerNotifiers(self):
     self.project.registerNotifier('Peak', 'create', self._refreshInputPeaksWidget, onceOnly=True)

@@ -183,15 +183,13 @@ class ChemicalShiftsMapping(CcpnModule):
     self.addWidget(self.settingWidget, 0,0)
     self.addWidget(self.barGraphWidget, 0,1)
 
-
-
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
 
     self.settingWidget__deregisterNotifiers()
-    self.close()
+    super(ChemicalShiftsMapping, self)._closeModule()
 
 
 

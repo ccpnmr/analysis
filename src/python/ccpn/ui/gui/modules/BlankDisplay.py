@@ -139,6 +139,6 @@ class BlankDisplay(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule.
     """
-    CcpnModule._closeModule(self)
     logger.info('Shortcut "ND" to open a new blank display')
+    CcpnModule._closeModule(self)
 

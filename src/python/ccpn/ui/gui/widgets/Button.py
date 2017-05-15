@@ -93,6 +93,7 @@ if __name__ == '__main__':
   app = TestApplication()
 
   window = QtGui.QWidget()
+  window.setLayout(QtGui.QGridLayout())
 
   def click():
     print("Clicked")

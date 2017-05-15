@@ -62,7 +62,6 @@ class NotesEditorModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.closeFunc = self._close
     self.undo = self.project._undo
     self.note = note
 
@@ -188,9 +187,10 @@ class NotesEditorModule(CcpnModule):
     if self.note:
       self.note.delete()
 
-  def _close(self):
+  def _closeModule(self):
     """
-    Cleanup the notifiers when the window is closed
+    CCPN-INTERNAL: used to close the module
     """
     if self._noteNotifier is not None:
       self._noteNotifier.unRegister()
+    super(NotesEditorModule, self)._closeModule()

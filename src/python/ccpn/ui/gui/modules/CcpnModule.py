@@ -1,7 +1,7 @@
 """
 This file contains CcpnModule base class
 
-intial version by Simon;
+initial version by Simon;
 Extensively modified by Geerten 1-12/12/2016
 
 """

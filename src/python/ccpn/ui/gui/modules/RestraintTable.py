@@ -63,7 +63,6 @@ class RestraintTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.closeFunc = self._close
     self.itemPid = itemPid = restraintLists
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
@@ -152,11 +151,12 @@ class RestraintTableModule(CcpnModule):
     """
     return self.searchWidget
 
-  def _close(self):
+  def _closeModule(self):
     """
     CCPN-INTERNAL: used to close the module
     """
     self.restraintTable._close()
+    super(RestraintTableModule, self)._closeModule()
 
 
 class RestraintTable(ObjectTable):

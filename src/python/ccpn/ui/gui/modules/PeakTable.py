@@ -82,7 +82,7 @@ class PeakTable(CcpnModule):
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification """
     self.peakListTable.destroy()
-    self.close()
+    super(PeakTable, self)._closeModule()
 
 
 class PeakListTableWidget(ObjectTable):

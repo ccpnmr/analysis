@@ -64,7 +64,6 @@ class StructureTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.closeFunc = self._close
     self.itemPid = itemPid      # read the passed in object
                                 # this could come from DataSet or Structures
 
@@ -222,11 +221,12 @@ class StructureTableModule(CcpnModule):
     """
     return self.searchWidget
 
-  def _close(self):
+  def _closeModule(self):
     """
     CCPN-INTERNAL: used to close the module
     """
     self.structureTable._close()
+    super(StructureTableModule, self)._closeModule()
 
 
 class StructureTable(ObjectTable):

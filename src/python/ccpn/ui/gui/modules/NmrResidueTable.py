@@ -72,7 +72,6 @@ class NmrResidueTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.closeFunc = self._close
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -191,11 +190,12 @@ class NmrResidueTableModule(CcpnModule):
     """
     return self.searchWidget
 
-  def _close(self):
+  def _closeModule(self):
     """
     CCPN-INTERNAL: used to close the module
     """
     self.nmrResidueTable._close()
+    super(NmrResidueTableModule, self)._closeModule()
 
 
 class NmrResidueTable(ObjectTable):

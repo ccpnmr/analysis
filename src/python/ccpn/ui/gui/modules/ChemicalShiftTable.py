@@ -64,7 +64,6 @@ class ChemicalShiftTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.closeFunc = self._close
     # settings
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
@@ -151,11 +150,12 @@ class ChemicalShiftTableModule(CcpnModule):
     """
     return self.searchWidget
 
-  def _close(self):
+  def _closeModule(self):
     """
     CCPN-INTERNAL: used to close the module
     """
     self.chemicalShiftTable._close()
+    super(ChemicalShiftTableModule, self)._closeModule()
 
 
 class ChemicalShiftTable(ObjectTable):

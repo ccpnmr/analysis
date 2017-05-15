@@ -462,9 +462,10 @@ class SideBar(QtGui.QTreeWidget, Base):
       import sip
       for item in self._findItems(oldPid):
         sip.delete(item) # this also removes child items
-        item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
-    else:
-      pass        # ejb - here just for a breakpoint
+
+    #    # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+    # else:
+    #   pass        # ejb - here just for a breakpoint
 
     self._refreshParentNmrChain(obj, oldPid)
 

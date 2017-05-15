@@ -29,17 +29,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
-from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
+from ccpn.ui.gui.widgets.Widget import Widget
+from core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 
 UNITS = ['ppm', 'Hz', 'point']
+
 
 class PeakTable(CcpnModule):
   '''

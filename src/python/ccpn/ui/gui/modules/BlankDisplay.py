@@ -37,9 +37,10 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-
+from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
 logger = getLogger()
+
 
 
 class BlankDisplay(CcpnModule):
@@ -53,7 +54,7 @@ class BlankDisplay(CcpnModule):
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
-    self.project = mainWindow.application.project
+    # self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
     self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColour='#bec4f3', textSize='32',

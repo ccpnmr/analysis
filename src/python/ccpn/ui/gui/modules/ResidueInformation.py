@@ -36,6 +36,11 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 class ResidueInformation(CcpnModule):
 
+  includeSettingsWidget = False
+  maxSettingsState = 2
+  settingsOnTop = True
+  className = 'ResidueInformation'
+
   def __init__(self, mainWindow, name='Residue Information', **kw):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -97,39 +102,43 @@ class ResidueInformation(CcpnModule):
     if self.selectedChain == 'All':
       residues = self.project.residues
     else:
-      residues = self.selectedChain.residues
-    for residue in residues:
-      if residue.residueType == self.selectedResidueType.upper():
-        foundResidues.append([residue.previousResidue, residue, residue.nextResidue])
-    layout = self.residueWidget.layout()
-    for r in range(layout.rowCount()):
-      for n in range(3):
-        item = layout.itemAtPosition(r, n)
-        if item is not None:
-          item.widget().deleteLater()
+      if self.selectedChain is not None:
+        residues = self.selectedChain.residues
+      else: return
 
-    j = 0  # why was this introduced (it's not altered below)?
-    for i in range(len(foundResidues)):
+    if residues:
+      for residue in residues:
+        if residue.residueType == self.selectedResidueType.upper():
+          foundResidues.append([residue.previousResidue, residue, residue.nextResidue])
+      layout = self.residueWidget.layout()
+      for r in range(layout.rowCount()):
+        for n in range(3):
+          item = layout.itemAtPosition(r, n)
+          if item is not None:
+            item.widget().deleteLater()
 
-      if foundResidues[j+i][0] is not None:
-        label1 = Label(self, text=foundResidues[j+i][0].id,
-                     hAlign='c')
-        label1.setMaximumHeight(30)
-        if foundResidues[j+i][0].nmrResidue is not None:
-          label1.setStyleSheet(stylesheet)
+      j = 0  # why was this introduced (it's not altered below)?
+      for i in range(len(foundResidues)):
 
-        self.residueWidget.layout().addWidget(label1, j+i, 0)
-      if len(foundResidues[j+i]) > 1:
-        label2 = Label(self, text=foundResidues[j+i][1].id,
+        if foundResidues[j+i][0] is not None:
+          label1 = Label(self, text=foundResidues[j+i][0].id,
                        hAlign='c')
-        if foundResidues[j+i][1].nmrResidue is not None:
-          label2.setStyleSheet(stylesheet)
-        label2.setMaximumHeight(30)
-        self.residueWidget.layout().addWidget(label2, j+i, 1)
-      if len(foundResidues[j+i]) > 2:
-        label3 = Label(self, text=foundResidues[j+i][2].id,
-                       hAlign='c')
-        if foundResidues[j+i][2].nmrResidue is not None:
-          label3.setStyleSheet(stylesheet)
-        self.residueWidget.layout().addWidget(label3, j+i, 2)
-        label3.setMaximumHeight(30)
+          label1.setMaximumHeight(30)
+          if foundResidues[j+i][0].nmrResidue is not None:
+            label1.setStyleSheet(stylesheet)
+
+          self.residueWidget.layout().addWidget(label1, j+i, 0)
+        if len(foundResidues[j+i]) > 1:
+          label2 = Label(self, text=foundResidues[j+i][1].id,
+                         hAlign='c')
+          if foundResidues[j+i][1].nmrResidue is not None:
+            label2.setStyleSheet(stylesheet)
+          label2.setMaximumHeight(30)
+          self.residueWidget.layout().addWidget(label2, j+i, 1)
+        if len(foundResidues[j+i]) > 2:
+          label3 = Label(self, text=foundResidues[j+i][2].id,
+                         hAlign='c')
+          if foundResidues[j+i][2].nmrResidue is not None:
+            label3.setStyleSheet(stylesheet)
+          self.residueWidget.layout().addWidget(label3, j+i, 2)
+          label3.setMaximumHeight(30)

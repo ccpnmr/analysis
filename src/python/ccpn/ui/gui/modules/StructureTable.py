@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
+from ccpn.ui._implementation.Module import Module
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()

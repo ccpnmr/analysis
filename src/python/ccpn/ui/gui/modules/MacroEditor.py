@@ -36,6 +36,9 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 class MacroEditor(CcpnModule):
 
+  includeSettingsWidget = False
+  className = 'MacroEditor'
+
   def __init__(self, mainWindow=None, name='Macro Editor', showRecordButtons=False):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 

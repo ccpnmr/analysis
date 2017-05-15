@@ -54,19 +54,22 @@ class PipelineWorker(QtCore.QObject):
 
 
 class GuiPipeline(CcpnModule):
-  def __init__(self, application=None, pipelineMethods=None, project=None, templates=None, appSpecificMethods=True, **kw):
+  def __init__(self, mainWindow, pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
     super(GuiPipeline, self)
 
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application = self.mainWindow.application
+
     nameCount = 0
-    for module in application.ui.mainWindow.moduleArea.findAll()[1].values():
+
+    for module in self.mainWindow.moduleArea.findAll()[1].values():
       if hasattr(module, 'runPipeline'):
         nameCount += 1
 
     name = 'Pipeline-' + str(nameCount)
 
-    self.project = project
-    self.application = application
-    self.mainWindow = application.ui.mainWindow
+
 
     self.generalPreferences = self.application.preferences.general
     self.templatePath = self.generalPreferences.auxiliaryFilesPath

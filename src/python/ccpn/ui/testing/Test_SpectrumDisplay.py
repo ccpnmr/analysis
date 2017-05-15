@@ -43,7 +43,7 @@ class ParameterTest(WrapperTesting):
     project = self.project
     spectrum = self.loadData('spectra/hsqc.spc')[0]
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     window = project.getWindow('Main')
     display = window.createSpectrumDisplay(spectrum)
     undo.undo()

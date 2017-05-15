@@ -84,7 +84,7 @@ class RestraintListTest(WrapperTesting):
                                             tensorRhombicity=1.0, tensorIsotropicValue=0.0,
                                             tensorChainCode='A', tensorSequenceCode='11',
                                             tensorResidueType='TENSOR', origin='NOE')
-    self.undo.newWaypoint()
+    self.project.newUndoPoint()
     # Undo and redo all operations
     newList.rename('Chikka')
     self.undo.undo()

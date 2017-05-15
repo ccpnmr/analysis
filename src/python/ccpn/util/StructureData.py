@@ -34,7 +34,7 @@ import numpy
 import pandas as pd
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
-
+from json import dumps
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
@@ -257,7 +257,7 @@ class EnsembleData(pd.DataFrame):
     ('nmrChainCode', (str, None)),
     ('nmrSequenceCode', (str, '_nmrSequenceCodeConversion')),
     ('nmrResidueName', (str, None)),
-    ('nmrAtomName', (str, None)),
+    ('nmrAtomName', (str, None))
   ))
 
   @property
@@ -716,7 +716,10 @@ class EnsembleData(pd.DataFrame):
     Real= numbers.Real
 
     rowExists = True
-    if  isinstance(accessor, (int, numpy.integer)):
+    if isinstance(accessor, pd.Int64Index):
+      accessor = int(accessor[0])             # ejb - accessor becomes the wrong type on undo
+
+    if isinstance(accessor, (int, numpy.integer)):
       # This is utter shit! Why are numpy.integers not ints, or at least with a common superclass?
       # Shows again that numpy is an alien growth within python.
       index = accessor
@@ -728,6 +731,9 @@ class EnsembleData(pd.DataFrame):
         if index != nextIndex:
           raise ValueError("setValues cannot create a new row, "
                            "unless accessor is the next free integer index")
+
+      oldKw = dict((x, self[x]) for x in kwargs)    # store the original values
+
     elif isinstance(accessor, EnsembleData):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
       index = accessor.index
@@ -745,6 +751,10 @@ class EnsembleData(pd.DataFrame):
       assert (index[0] in self.index and aant == slan), (
         "Ensembles used for selection must be (or match) row in current ensemble")
 
+      sl = self.loc[index].as_namedtuples()   # ensemble get
+      nt = sl[0]._asdict()
+      oldKw = dict((x, nt[x]) for x in kwargs)
+
       # assert (index[0] in self.index
       #         and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
       #   "Ensembles used for selection must be (or match) row in current ensemble"
@@ -755,6 +765,13 @@ class EnsembleData(pd.DataFrame):
       assert rows.shape[0] == 1, "Boolean selector must select a single row."
       index = rows.index
       assert index[0] in self.index, "Boolean selector must select an existing row"   # ejb
+
+      try:
+        oldKw = dict((x, self[x]) for x in kwargs)
+      except KeyError:
+        raise ValueError("Attempt to set columns not present in DataFrame: %s"
+                         % list(kwargs))
+
     else:
       raise TypeError('accessor must be index, ensemble row, or selector.')
 
@@ -799,7 +816,17 @@ class EnsembleData(pd.DataFrame):
       # Type handling is done there and can be skipped here.
       # NB, various obvious alternatives, like just setting the row, do NOT work.
 
-      tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
+      # tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
+      # tempkw = dict((x, getattr(self.loc[index], x)) for x in kwargs)  # ejb - grab the original values
+      # tempkw = {t.__name__: t for t in slan[0]}
+      # tempkw = vars(slan[0])
+
+      # sl = self.loc[index].as_namedtuples()   # ensemble get
+      # nt = sl[0]._asdict()
+      # tempkw = dict((x, nt[x]) for x in kwargs)
+
+      # nt = slan[0]._asdict()
+      # tempkw = dumps(nt)
       for key,val in values.items():
         self.loc[index, key] = val
 
@@ -821,7 +848,7 @@ class EnsembleData(pd.DataFrame):
           #                                                    for x in kwargs),
           #              redoArgs=(index,), redoKwargs=kwargs)
           undo.newItem(self.setValues, self.setValues,
-                       undoArgs=(index,), undoKwargs=tempkw,
+                       undoArgs=(index,), undoKwargs=oldKw,
                        redoArgs=(index,), redoKwargs=kwargs)
         else:
           # undo addition of new row

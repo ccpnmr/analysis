@@ -271,7 +271,7 @@ class ChemicalShiftTable(ObjectTable):
     """
     Notifier DoubleClick action on item in table
     """
-    print(chemicalShift, row, column)
+    print('ChemicalShift>>>', chemicalShift, row, column)
 
   def _selectionCallback(self, obj, row, col):
     """

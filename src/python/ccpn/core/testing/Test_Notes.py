@@ -101,7 +101,8 @@ class NoteTest_setUp(WrapperTesting):
     Create an Undo point and check that the original/changed names are correct.
     """
     undo = self.project._undo
-    undo.newWaypoint()                                    # set a recovery point
+    newUndoPoint = self.project.newUndoPoint
+    newUndoPoint()                                    # set a recovery point
 
     self.note.rename('Changed')
     self.assertEqual(self.note.name, 'Changed')

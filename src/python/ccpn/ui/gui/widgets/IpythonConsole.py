@@ -103,7 +103,7 @@ class IpythonConsole(Widget, Base):
       if hasattr(self, 'project'):
         undo = self.project._undo
         if undo is not None:
-          undo.newWaypoint()
+          self.project.newUndoPoint()
 
 
 

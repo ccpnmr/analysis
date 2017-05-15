@@ -35,12 +35,12 @@ class StructurePopup(CcpnDialog):
     #FIXME:ED structure has no name
     self.structure = structure
     self.structureLabel = Label(self, "Structure Name ", grid=(0, 0))
-    self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
+    self.structureText = LineEdit(self, self.structure.label, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _okButton(self):
     newName = self.structureText.text()
-    if str(newName) != self.structure.name:
-      self.structure.rename(newName)
+    if str(newName) != self.structure.label:
+      self.structure.label = newName
     self.accept()
 

@@ -530,7 +530,7 @@ class ViewBox(pg.ViewBox):
 
       if not hasattr(peaks[0], 'startPosition'):
         # start of move
-        undo.newWaypoint()
+        project.newUndoPoint()
         undo.increaseBlocking()
 
       try:

@@ -896,15 +896,26 @@ class TestContainer(WrapperTesting):
                                                   , chainCode='F'
                                                   , sequenceId=6
                                                   , modelNumber=6)))  # check set correctly
-    # self.undo.undo()      # ejb - doesn't work here
-    # namedTuples = self.data.as_namedtuples()
-    # AtomRecord = namedTuples[0].__class__
-    # self.assertEquals(namedTuples[9], (AtomRecord(Index=10
-    #                                               , atomName='CD1'
-    #                                               , residueName='LEU'
-    #                                               , chainCode = 'C'
-    #                                               , sequenceId = 3
-    #                                               , modelNumber = 3)))  # check initial values
+    #FIXME:ED - check undo here
+    self.undo.undo()
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+                                                  , atomName='CD1'
+                                                  , residueName='LEU'
+                                                  , chainCode = 'C'
+                                                  , sequenceId = 3
+                                                  , modelNumber = 3)))  # check initial values
+
+    self.undo.redo()
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9], (AtomRecord(Index=10
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
 
   def testContainerTypes_pdSeries(self):
     """

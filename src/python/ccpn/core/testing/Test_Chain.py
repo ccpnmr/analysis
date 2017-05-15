@@ -201,7 +201,7 @@ class ChainTest(WrapperTesting):
     chain = self.project.createChain('ACDC', shortName='A', molType='protein' )
     nmrChain = self.project.newNmrChain(shortName='A')
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     chain.rename('B')
     self.assertEqual(chain.shortName, 'B')
     self.assertEqual(nmrChain.shortName, 'B')

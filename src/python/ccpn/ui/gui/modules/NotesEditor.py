@@ -62,7 +62,6 @@ class NotesEditorModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.undo = self.project._undo
     self.note = note
 
     self.spacer = Spacer(self.mainWidget, 5, 5
@@ -123,7 +122,7 @@ class NotesEditorModule(CcpnModule):
     Saves the text in the textbox to the note object.
     """
     #FIXME:ED check that updating all fields is one undo event
-    self.undo.newWaypoint()
+    self.project.newUndopoint()
     newText = self.textBox.toPlainText()
     self.note.text = newText
     self._setNoteName()

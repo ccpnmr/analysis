@@ -51,6 +51,22 @@ class CcpnModule(Dock):
   sets self.application, self.current, self.project and self.mainWindow
 
   Overide parameters for settings widget as needed
+
+  Usage:
+    __init__    initialises the module according to the settings given below:
+
+    _closeModule    closing of the module.
+
+                    If addition functionality is required, the correct
+                    procedure is to override this method within your class
+                    and end your method with super()._closeModule()
+
+                    e.q.
+                          def _closeModule(self):
+                            # your functions here
+                            super(<YourModule>, self)._closeModule()
+
+                    OR __init__ with closeFunc=<your close function>
   """
   moduleName = ''
   HORIZONTAL = 'horizontal'

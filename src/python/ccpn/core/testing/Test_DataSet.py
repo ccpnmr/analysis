@@ -42,7 +42,7 @@ class DataSetTest(WrapperTesting):
 
   def test_complex_creation(self):
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     dd = {
       'programName':'aaa.aaa',
       'programVersion':'bbb.bbb',
@@ -70,7 +70,7 @@ class CalculationStepTest(WrapperTesting):
 
   def test_complex_creation(self):
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     dataSet = self.project.newDataSet()
     dataSet2 = self.project.newDataSet(uuid='dataSet2-12345')
     dataSet3 = self.project.newDataSet(uuid='dataSet3-67890')
@@ -101,7 +101,7 @@ class CalculationStepTest(WrapperTesting):
 
   def test_link_setting(self):
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     dataSet = self.project.newDataSet()
     dataSet2 = self.project.newDataSet()
     dataSet3 = self.project.newDataSet()
@@ -128,7 +128,7 @@ class DataTest(WrapperTesting):
 
   def test_create_data(self):
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     dataSet = self.project.newDataSet()
     data1 = dataSet.newData(name='try1', attachedObjectPid='blah')
     undo.undo()
@@ -139,7 +139,7 @@ class DataTest(WrapperTesting):
 
   def test_data_object_link(self):
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     dataSet = self.project.newDataSet()
     data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
     self.assertEqual(data1.attachedObject, dataSet)
@@ -166,7 +166,7 @@ class DataTest(WrapperTesting):
     dataSet = self.project.newDataSet()
     data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     self.assertEqual(data1.parameters, {})
     data1.setParameter('aaa', 1)
     self.assertEqual(data1.parameters, {'aaa':1})
@@ -195,7 +195,7 @@ class DataTest(WrapperTesting):
       dataSet = self.project.newDataSet()
       data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
       undo = self.project._undo
-      undo.newWaypoint()
+      self.project.newUndoPoint()
       data1.setParameter('ndarray', numpy.ndarray((5,3,1)))
       undo.undo()
       undo.redo()
@@ -206,7 +206,7 @@ class DataTest(WrapperTesting):
       dataSet = self.project.newDataSet()
       data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
       undo = self.project._undo
-      undo.newWaypoint()
+      self.project.newUndoPoint()
       data1.setParameter('tensor', Tensor._fromDict({'orientationMatrix':numpy.identity(3),
                                      'isotropic':2.1, 'axial':-3.0, 'rhombic':0.9}))
       undo.undo()

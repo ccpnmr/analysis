@@ -166,7 +166,8 @@ class TestSample_setUp(WrapperTesting):
     Create an Undo point and check that the original/changed names are correct.
     """
     undo = self.project._undo
-    undo.newWaypoint()                                              # create a recovery point
+    newUndoPoint = self.project.newUndoPoint
+    newUndoPoint()                                              # create a recovery point
 
     self.newSample.rename('Changed')                                # new valid name
     self.assertEqual(self.newSample.name, 'Changed')

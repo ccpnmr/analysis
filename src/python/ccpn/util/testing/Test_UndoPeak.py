@@ -45,7 +45,7 @@ class PeakUndoTest(CoreTesting):
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()
-    project._undo.newWaypoint()
+    project.newUndoPoint()
     peak = peakList.newPeak()
     project._undo.undo()
     assert len(peakList.peaks) == 0, 'len(peakList.peaks) = %d' % len(peakList.peaks)
@@ -59,7 +59,7 @@ class PeakUndoTest(CoreTesting):
     peakList = dataSource.newPeakList()
     
     project._undo = Undo()
-    project._undo.newWaypoint()
+    project.newUndoPoint()
     peak = peakList.newPeak()
     project._undo.undo()
     project._undo.redo()

@@ -147,7 +147,8 @@ class GuiWindow():
     project = peaks[0].project
     undo = project._undo
 
-    undo.newWaypoint()
+    # undo.newWaypoint()
+    project.newUndoPoint()
     undo.increaseBlocking()
 
     currentParams = self._getPeaksParams(peaks)

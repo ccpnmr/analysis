@@ -227,6 +227,9 @@ class GuiSpectrumDisplay(CcpnModule):
     success = False
     obj = self.project.getByPid(pid)
     if obj is not None and isinstance(obj, Spectrum):
+      if self.isGrouped:
+        showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays. Open a new Blank Display (N,D)')
+        return success
       self.displaySpectrum(obj)
       success = True
     elif obj is not None and isinstance(obj, PeakList):

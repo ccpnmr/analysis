@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
-from ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
+from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 

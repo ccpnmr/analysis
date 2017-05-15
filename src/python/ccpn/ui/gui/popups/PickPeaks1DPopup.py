@@ -168,25 +168,12 @@ class ExcludeRegions(QtGui.QWidget):
         widget1.deleteLater()
 
 
-# class PickPeak1DPopup(QtGui.QDialog):
 class PickPeak1DPopup(CcpnDialog):
-  def __init__(self, parent=None, project=None
-               , title='Pick 1D Peak List', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(PickPeak1DPopup, self).__init__(parent)
+  def __init__(self, mainWindow, title='Pick 1D Peak', **kw):
+    CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
 
-    self.project = project
-    if not project:                                             # ejb
-      MessageDialog.showWarning(title, 'No project loaded')
-      self.close()
-      return
-    else:
-      if not self.project.peakLists:
-        MessageDialog.showWarning(title, 'No PeakList Found')
-        self.close()
-        return
-
-    self.mainWindow = parent
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
     self.application = self.mainWindow.application
     self._setMainLayout()
     self._setTabs()
@@ -196,7 +183,6 @@ class PickPeak1DPopup(CcpnDialog):
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
     self.setLayout(self.mainLayout)
-    self.setWindowTitle("Pick Peak 1D")
     self.resize(300, 400)
 
   def _setTabs(self):

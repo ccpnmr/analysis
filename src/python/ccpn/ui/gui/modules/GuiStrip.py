@@ -622,9 +622,6 @@ class GuiStrip(Frame):
     else:
       self.resetZoom()
 
-  def showSpectrum(self, guiSpectrumView):
-    raise Exception('should be implemented in subclass')
-
   def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together

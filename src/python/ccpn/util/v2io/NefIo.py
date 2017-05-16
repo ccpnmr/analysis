@@ -1083,7 +1083,7 @@ class CcpnNefReader:
     if self.defaultChemicalShiftList is None:
       # ChemicalShiftList should default to the unique ChemicalShIftList in the file
       # A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists
-      # given for all spectra- but this is nto hte place for validity checking
+      # given for all spectra- but this is not the place for validity checking
       self.defaultChemicalShiftList = shiftList
 
     # Read shifts loop
@@ -1121,7 +1121,7 @@ class CcpnNefReader:
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
      nef_rdc_restraint_list and ccpn_restraint_list"""
 
-    nmrConstraintStore = self.project.currentNmrConstraintStore
+    nmrConstraintStore = project.currentNmrConstraintStore
 
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
@@ -1221,7 +1221,7 @@ class CcpnNefReader:
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
      nef_rdc_restraint_list and ccpn_restraint_list"""
 
-    nmrConstraintStore = self.project.currentNmrConstraintStore
+    nmrConstraintStore = project.currentNmrConstraintStore
 
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
@@ -1298,52 +1298,228 @@ class CcpnNefReader:
 
   importers['nef_dihedral_restraint_list'] = load_nef_dihedral_restraint_list
 
+  'nef_spectrum_dimension_transfer':OD((
+    ('dimension_1',None),
+    ('dimension_2',None),
+    ('transfer_type',None),
+    ('is_indirect',None),
+  )),
 
   def load_nef_nmr_spectrum(self, project, saveFrame):
 
-    # No-Op  for now
-    return project
+    nmrProject = project.currentNmrProject
 
     dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
-    mapping = nef2CcpnMap[category]
+    experimentMapping = OD((
+      ('num_dimensions','numDim'),
+      # ('chemical_shift_list',None),
+      # ('experiment_classification','experiment.type'),
+      ('experiment_type','name'),
+      ('ccpn_spinning_rate','spinningRate'),
+      # ('ccpn_sample', None),
+    ))
+    experimentParams = {}
+    for key,tag in experimentMapping.items():
+      val = saveFrame.get(key)
+      if val is not None:
+        experimentParams[tag] = val
 
-    # Get peakList parameters and make peakList
-    peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+    dataSourceMapping = OD((
+      ('ccpn_spectrum_scale','scale'),
+      ('ccpn_spectrum_comment','details'),
+    ))
+    dataSourceParams = {}
+    for key,tag in dataSourceMapping.items():
+      val = saveFrame.get(key)
+      if val is not None:
+        dataSourceParams[tag] = val
 
-    # Get spectrum parameters
-    spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-                                                                  ccpnPrefix='spectrum')
+    dataStoreMapping = OD((
+      ('ccpn_spectrum_file_path', 'filePath'),
+      ('ccpn_file_header_size', 'headerSize'),
+      ('ccpn_file_number_type', 'numberType'),
+      ('ccpn_file_complex_stored_by', 'complexStoredBy'),
+      ('ccpn_file_scale_factor', 'scaleFactor'),
+      ('ccpn_file_is_big_endian', 'isBigEndian'),
+      ('ccpn_file_byte_number', 'nByte'),
+      ('ccpn_file_has_block_padding', 'hasBlockPadding'),
+      ('ccpn_file_block_header_size', 'blockHeaderSize'),
+      ('ccpn_file_type', 'fileType'),
+    ))
+    dataStoreParams = {}
+    for key,tag in dataStoreMapping.items():
+      val = saveFrame.get(key)
+      if val is not None:
+        dataStoreParams[tag] = val
+    peakListMapping = OD((
+      ('ccpn_peaklist_serial','serial'),
+      ('ccpn_peaklist_comment','details'),
+      ('ccpn_peaklist_name','name'),
+      ('ccpn_peaklist_is_simulated','isSimulated'),
+    ))
+    peakListParams = {}
+    for key,tag in peakListMapping.items():
+      val = saveFrame.get(key)
+      if val is not None:
+        peakListParams[tag] = val
 
-    # Get name from spectrum parameters, or from the frameCode
+    # Get DataSource name from spectrum parameters, or from the frameCode
     spectrumName = framecode[len(category) + 1:]
-    peakListSerial = peakListParameters.get('serial')
+    peakListSerial = peakListParams.get('serial')
     if peakListSerial:
       ss = '`%s`' % peakListSerial
       # Remove peakList serial suffix (which was added for disambiguation)
       # So that multiple peakLists all go to one Spectrum
       if spectrumName.endswith(ss):
         spectrumName = spectrumName[:-len(ss)]
+      dataSourceParams['name'] = spectrumName
 
-    spectrum = project.getSpectrum(spectrumName)
-    if spectrum is None:
+    for experiment in nmrProject.sortedExperiments():
+      dataSource = experiment.findFirstDataSource(name=spectrumName)
+      if dataSource is not None:
+        break
+    else:
+      dataSource = None
+    if dataSource is None:
       # Spectrum does not already exist - create it.
       # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
       frameCode = saveFrame.get('chemical_shift_list')
       if frameCode:
-        spectrumParameters['chemicalShiftList'] = self.frameCode2Object[frameCode]
+        experimentParams['shiftList'] = self.frameCode2Object[frameCode]
       else:
         # Defaults to first (there should be only one, but we want the read to work) ShiftList
-        spectrumParameters['chemicalShiftList'] = self.defaultChemicalShiftList
+        experimentParams['shiftList'] = self.defaultChemicalShiftList
 
+      refExperimentName = saveFrame.get('experiment_classification')
+      if refExperimentName is not None:
+        for expPrototype in project.sortedNmrExpPrototypes():
+          refExperiment = expPrototype.findFirstRefExperiment(name=refExperimentName)
+          if refExperiment is not None:
+            break
+        else:
+          refExperiment = None
+        if refExperiment is None:
+          # Should not happen. But at least we are preserving the information
+          experimentParams['userExpCode'] = refExperimentName
+        else:
+          experimentParams['refExperiment'] = refExperiment
 
-      frameCode = saveFrame.get('ccpn_sample')
-      if frameCode:
-        spectrumParameters['sample'] = self.frameCode2Object[frameCode]
+      nmrExperiment = nmrProject.newExperiment(**experimentParams)
+
+      # frameCode = saveFrame.get('ccpn_sample')
+      # if frameCode:
+      #   spectrumParameters['sample'] = self.frameCode2Object[frameCode]
+
+      expDimRefParams = {}
+      dataDimParams = {}
+      dataDimRefParams = {}
+      for row in saveFrame['nef_spectrum_dimension'].data:
+        dim = row['dimension_id']
+
+        if row.get('is_acquisition'):
+          nmrExperiment.findFirstExpDim(dim=dim).isAcquisition = True
+
+        dataDimParams[dim] = {}
+
+        dd = expDimRefParams[dim] = {}
+        val = row.get('axis_code')
+        if val:
+          dd['isotopeCodes'] = (val,)
+        val = row.get('spectrometer_frequency')
+        if val:
+          dd['sf'] = val
+        val = row.get('axis_unit')
+        if val:
+          dd['unit'] = val
+        val = row.get('ccpn_axis_code')
+        if val:
+          dd['name'] = val
+          dd['displayName'] = val
+        dd['isFolded'] = (row.get('folding') == 'mirror')
+
+        dd = dataDimRefParams[dim] = {}
+        val = row.get('spectral_width')
+        if val:
+          dd['spectralWidth'] = val
+        val = row.get('value_first_point')
+        if val:
+          dd['refValue'] = val
+          dd['refPoint'] = 1
+      # 'nef_spectrum_dimension':OD((
+        # ('dimension_id', None),
+        # ('axis_unit', 'unit'),
+        # ('axis_code', 'isotopeCodes'),
+        # ('spectrometer_frequency', 'sf'),
+        # ('spectral_width', 'spectralWidths'),
+        # ('value_first_point', None),
+        # ('folding', None),
+        # ('absolute_peak_positions', None), # NB not used
+        # ('is_acquisition', None),
+        # ('ccpn_axis_code', 'axisCodes'),
+      # )),
+
+      # NB PseudoDimensions are not yet supported
+      'ccpn_spectrum_dimension':OD((
+        # ('dimension_id', None),
+        # ('point_count', 'pointCounts'),
+        ('reference_point', 'referencePoints'),
+        # ('total_point_count', 'totalPointCounts'),
+        # ('point_offset', 'pointOffsets'),
+        # ('assignment_tolerance', 'assignmentTolerances'),
+        # ('lower_aliasing_limit', None),
+        # ('higher_aliasing_limit', None),
+        # ('measurement_type', 'measurementTypes'),
+        # ('phase_0', 'phases0'),
+        # ('phase_1', 'phases1'),
+        # ('window_function', 'windowFunctions'),
+        # ('lorentzian_broadening', 'lorentzianBroadenings'),
+        # ('gaussian_broadening', 'gaussianBroadenings'),
+        # ('sine_window_shift', 'sineWindowShifts'),
+        ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
+        ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
+      )),
+      loop = saveFrame.get('ccpn_spectrum_dimension')
+      if loop:
+        for row in loop.data:
+          dim = row['dimension_id']
+
+        dd = expDimRefParams[dim]
+        val = row.get('lower_aliasing_limit')
+        if val is not None:
+          dd['minAliasedFreq'] = val
+        val = row.get('upper_aliasing_limit')
+        if val is not None:
+          dd['maxAliasedFreq'] = val
+        val = row.get('measurement_type')
+        if val:
+          dd['measurementTypes'] = val
+
+        dd = dataDimRefParams[dim]
+        val = row.get('lower_aliasing_limit')
+        if val is not None:
+          dd['minAliasedFreq'] = val
+
+        dd = dataDimParams[dim]
+        val = row.get('point_count')
+        if val:
+          dd['numPoints'] = val
+        val = row.get('total_point_count')
+        if val:
+          dd['numPointsOrig'] = val
+        val = row.get('point_offset')
+        if val is not None:
+          dd['pointOffset'] = val
+        val = row.get('phase_0')
+        if val is not None:
+          dd['phase0'] = val
+        val = row.get('phase_1')
+        if val is not None:
+          dd['phase1'] = val
 
       # get per-dimension data - NB these are mandatory and cannot be worked around
       dimensionData = self.read_nef_spectrum_dimension(project,
@@ -1385,7 +1561,13 @@ class CcpnNefReader:
         self.load_ccpn_spectrum_dimension(spectrum, loop)
 
     # Make PeakLst
-    peakList = spectrum.newPeakList(**peakListParameters)
+    if 'serial' in peakListParams:
+      serial = peakListParams.pop('serial')
+    else:
+      serial = None
+    peakList = dataSource.newPeakList(**peakListParams)
+    if serial is not None:
+      resetSerial(peakList, serial)
 
     # Load peaks
     self.load_nef_peak(peakList, saveFrame.get('nef_peak'))
@@ -1880,27 +2062,6 @@ class CcpnNefReader:
   #
   importers['ccpn_complex'] = load_ccpn_complex
 
-  def load_ccpn_complex_chain(self, parent, loop):
-    """load ccpn_complex_chain loop"""
-
-    # Not updated. Invalid
-    raise NotImplementedError()
-
-    chains = []
-    for row in loop.data:
-      chain = self.project.getChain(row.get('complex_chain_code'))
-      if chain is None:
-        self.warning(
-          "No Chain found with code %s. Skipping Chain from Complex"
-          % row.get('complex_chain_code')
-        )
-      else:
-        chains.append(chain)
-    #
-    parent.chains = chains
-  #
-  importers['ccpn_complex_chain'] = load_ccpn_complex_chain
-
 
   def load_ccpn_sample(self, project, saveFrame):
 
@@ -2252,7 +2413,7 @@ class CcpnNefReader:
 
     The mapping gives the map from NEF tags to ccpn tags.
     If the ccpn tag is of the form <ccpnPrefix.tag> it is ignored unless
-    the first part of teh tag matches the passed-in ccpnPrefix
+    the first part of the tag matches the passed-in ccpnPrefix
     (NB the ccpnPrefix may contain '.')."""
 
     # Get attributes that have a simple tag mapping, and make a separate loop list

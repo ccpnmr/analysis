@@ -297,8 +297,94 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     """
     Test that structureEnsemble attribute .comment is populated.
     """
-    self.project.models[0].delete()
-    # self.project.models[0].clearData()      # can use either of these delete methods
+    undo = self.project._undo
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9:17], (
+      AtomRecord(Index=10, atomName='CD1', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=11, atomName='HD11', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=12, atomName='HD12', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=13, atomName='HD13', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=14, atomName='CD2', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=15, atomName='HD21', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=16, atomName='HD22', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=17, atomName='HD23', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3)
+    ))
+    self.project.models[2].delete()
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9:17], (
+      AtomRecord(Index=10, atomName='CE', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=11, atomName='HE1', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=12, atomName='HE2', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=13, atomName='HE3', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=14, atomName='CG', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=15, atomName='HG1', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=16, atomName='HG2', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=17, atomName='HG3', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5)
+    ))
+    undo.undo()            # ejb - this now does a group undo
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9:17], (
+      AtomRecord(Index=10, atomName='CD1', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=11, atomName='HD11', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=12, atomName='HD12', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=13, atomName='HD13', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=14, atomName='CD2', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=15, atomName='HD21', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=16, atomName='HD22', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3),
+      AtomRecord(Index=17, atomName='HD23', residueName='LEU', chainCode='C', sequenceId=3,
+                 modelNumber=3)
+    ))
+    undo.redo()
+
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[9:17], (
+      AtomRecord(Index=10, atomName='CE', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=11, atomName='HE1', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=12, atomName='HE2', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=13, atomName='HE3', residueName='MET', chainCode='D', sequenceId=4,
+                 modelNumber=4),
+      AtomRecord(Index=14, atomName='CG', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=15, atomName='HG1', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=16, atomName='HG2', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5),
+      AtomRecord(Index=17, atomName='HG3', residueName='THR', chainCode='E', sequenceId=5,
+                 modelNumber=5)
+    ))
 
   #=========================================================================================
   # test_properties_Model

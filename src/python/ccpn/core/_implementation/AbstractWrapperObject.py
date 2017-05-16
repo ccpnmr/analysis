@@ -557,7 +557,7 @@ class AbstractWrapperObject():
         del data2Obj[apiObj]
 
   def _setUniqueStringKey(self, defaultValue:str, keyTag:str='name') -> str:
-    """(re)set self._werappedData.keyTag to make it a unique key, using defaultValue
+    """(re)set self._wrappedData.keyTag to make it a unique key, using defaultValue
     if not set NB - is called BEFORE data2obj etc. dictionaries are set"""
 
     wrappedData = self._wrappedData

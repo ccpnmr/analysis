@@ -82,12 +82,13 @@ class TestPandasData(WrapperTesting):
     self.assertRaises(ValueError, setattr, self.data, 'occupancy',  (0,0,0.1,0.99,1,1.1))
 
   def test_sorting(self):
+    # TODO youshou
     self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
                         , self.undo.maxOperations# = maxOperations
                         , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
                         , self.undo.waypoints# = []  # array of last item in each waypoint
                         , self.undo._blocked# = False # Block/unblock switch - internal use only
-                        , self.undo._blockingLevel
+                        , self.undo.blocking
                         , len(self.undo)
                         , self.undo[0])# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
     print ('preUNDO STATE:                          ', self.UndoState)
@@ -98,7 +99,7 @@ class TestPandasData(WrapperTesting):
                         , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
                         , self.undo.waypoints# = []  # array of last item in each waypoint
                         , self.undo._blocked# = False # Block/unblock switch - internal use only
-                        , self.undo._blockingLevel# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                        , self.undo.blocking# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                         , len(self.undo)
                         , self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
     print ("preUNDO STATE, addition data['x']:      ", self.UndoState)
@@ -113,7 +114,7 @@ class TestPandasData(WrapperTesting):
                         , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
                         , self.undo.waypoints# = []  # array of last item in each waypoint
                         , self.undo._blocked# = False # Block/unblock switch - internal use only
-                        , self.undo._blockingLevel# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+                        , self.undo.blocking# = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                         , len(self.undo)
                         , self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
     print ("postUNDO STATE, deletion data['x']:     ", self.UndoState)

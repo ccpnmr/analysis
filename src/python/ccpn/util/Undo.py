@@ -103,7 +103,8 @@ class Undo(deque):
     self.nextIndex = 0   # points to next free slot (or first slot to redo)
     self.waypoints = []  # array of last item in each waypoint
     self._blocked = False # Block/unblock switch - internal use only
-    self._blockingLevel = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
+    self._blockingLevel = 0 # Blocking level - modify with increase/decreaseBlocking only
+    self._waypointBlockingLevel = 0 # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
     if maxWaypoints:
       self.newWaypoint()                      # DO NOT CHANGE THIS ONE
     deque.__init__(self)
@@ -117,7 +118,7 @@ class Undo(deque):
     Allows multiple external functions to set blocking without trampling each other
 
     Modify with increaseBlocking/decreaseBlocking only"""
-    return self._blockingLevel
+    return self._blockingLevel > 0
 
   def increaseBlocking(self):
     """Set one more level of blocking"""
@@ -127,6 +128,23 @@ class Undo(deque):
     """Reduce level of blocking - when level reaches zero, undo is unblocked"""
     if self._blockingLevel > 0:
       self._blockingLevel -= 1
+
+  @property
+  def waypointBlocking(self):
+    """Undo blocking. If true (non-zero) undo setting is blocked.
+    Allows multiple external functions to set blocking without trampling each other
+
+    Modify with increaseBlocking/decreaseBlocking only"""
+    return self._waypointBlockingLevel > 0
+
+  def increaseWaypointBlocking(self):
+    """Set one more level of blocking"""
+    self._waypointBlockingLevel += 1
+
+  def decreaseWaypointBlocking(self):
+    """Reduce level of blocking - when level reaches zero, undo is unblocked"""
+    if self._block_waypointBlockingLevelingLevel > 0:
+      self._waypointBlockingLevel -= 1
 
 
 
@@ -138,6 +156,9 @@ class Undo(deque):
     waypoints = self.waypoints
 
     if self.nextIndex < 1:
+      return
+
+    elif self._blockingLevel > 0 or self._waypointBlockingLevel > 0:
       return
 
     elif waypoints and waypoints[-1] == self.nextIndex -1:

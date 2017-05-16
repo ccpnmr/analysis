@@ -611,10 +611,12 @@ class Framework:
        peak=peakOrPid)"""
 
     undo = self.project._undo
-    if not self._echoBlocking and not undo.blocking:
-
+    if undo:
       # set undo step
-      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
+      undo.newWaypoint()     # DO NOT CHANGE
+      undo.increaseWaypointBlocking()
+    if not self._echoBlocking:
+
       self.project.suspendNotification()
 
       # Get list of command strings
@@ -640,6 +642,9 @@ class Framework:
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
     self.project._logger.debug('echoBlocking=%s' % self._echoBlocking)
+    undo = self.project._undo
+    if undo:
+      undo.decreaseWaypointBlocking()
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check

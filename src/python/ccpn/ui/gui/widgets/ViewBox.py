@@ -513,7 +513,9 @@ class ViewBox(pg.ViewBox):
       peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
       if not peaks:
         return
-      if len(peaks) != 1:
+      if len(peaks) == 1:
+        peak = peaks[0]
+      else:
         if event.isFinish():
           logger.warn('Can only move one peak at a time')
         return
@@ -525,36 +527,39 @@ class ViewBox(pg.ViewBox):
       deltaPosition = endPosition - startPosition
       deltaPosition = deltaPosition.x(), deltaPosition.y()
 
-      project = peaks[0].project
+      project = peak.project
       undo = project._undo
 
-      if not hasattr(peaks[0], 'startPosition'):
+      if not hasattr(peak, 'startPosition'):
         # start of move
         project.newUndoPoint()
         undo.increaseBlocking()
+        project.blankNotification()
 
       try:
-        for peak in peaks:
-          if not hasattr(peak, 'startPosition'):
-            peak.startPosition = peak.position
-          indices = peakListToIndicesDict[peak.peakList]
-          position = list(peak.startPosition)
-          for n, index in enumerate(indices):
-            position[index] += deltaPosition[n]
-          peak.position = position
+        if not hasattr(peak, 'startPosition'):
+          peak.startPosition = peak.position
+        indices = peakListToIndicesDict[peak.peakList]
+        position = list(peak.startPosition)
+        for n, index in enumerate(indices):
+          position[index] += deltaPosition[n]
+        peak.position = position
 
-      finally:
+      except:
+          undo.decreaseBlocking()
+          project.unblankNotification()
+
+      else:
         if event.isFinish():
           undo.decreaseBlocking()
-          for peak in peaks:
-            if hasattr(peak, 'startPosition'):
-              undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
-                           redoArgs=[peak, 'position', peak.position])
-              delattr(peak, 'startPosition')
-            # project._modifiedApiObject(peak._wrappedData)
-            peak._finaliseAction('change')
-            project._appBase.ui.echoCommands(
-              ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
+          project.unblankNotification()
+          if hasattr(peak, 'startPosition'):
+            undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+                         redoArgs=[peak, 'position', peak.position])
+            delattr(peak, 'startPosition')
+          peak._finaliseAction('change')
+          project._appBase.ui.echoCommands(
+            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
 
     elif middleMouse(event) or \

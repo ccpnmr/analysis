@@ -321,6 +321,30 @@ class Project(AbstractWrapperObject):
       undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
       self._logger.info("Added undoPoint")
 
+  def blockWaypoints(self):
+    """Block the setting of undo waypoints,
+    so that command echoing (_startCommandBLock) does not set waypoints
+
+    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again"""
+    undo = self._wrappedData.root._undo
+    if undo is None:
+      self._logger.warning("Trying to block waypoints but undo is not initialised")
+    else:
+      undo.increaseWaypointBlocking()
+      self._logger.info("Waypoint setting blocked")
+
+  def unblockWaypoints(self):
+    """Block the setting of undo waypoints,
+    so that command echoing (_startCommandBLock) does not set waypoints
+
+    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again"""
+    undo = self._wrappedData.root._undo
+    if undo is None:
+      self._logger.warning("Trying to unblock waypoints but undo is not initialised")
+    else:
+      undo.decreaseWaypointBlocking()
+      self._logger.info("Waypoint setting unblocked")
+
 
   # Should be removed:
   @property
@@ -597,6 +621,9 @@ class Project(AbstractWrapperObject):
     """Execute accumulated notifiers and resume immediate notifier execution"""
     return
     # TODO suspension temporarily disabled
+    # This was broken at one point, and we never found time to fix it
+    # It is a time-saving measure, allowing you to e.g. execute a
+    # peak-created notifier only once when creating hundreds of peaks in one operation
     if self._notificationSuspension > 1:
       self._notificationSuspension -= 1
     else:
@@ -627,10 +654,11 @@ class Project(AbstractWrapperObject):
     """Call startCommandBlock for wrapper object delete. Implementation only"""
 
     undo = self._undo
-    if not self._appBase._echoBlocking and not undo.blocking:
-
+    if undo:
       # set undo step
-      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
+      undo.newWaypoint()                      # DO NOT CHANGE TH
+      undo.increaseWaypointBlocking()
+    if not self._appBase._echoBlocking:
 
       getDataObj =  self._data2Obj.get
       ll = [getDataObj(x) for x in allWrappedData]
@@ -649,6 +677,10 @@ class Project(AbstractWrapperObject):
     """End block for delete command echoing
 
     MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
+    undo = self._undo
+    if undo:
+      undo.decreaseWaypointBlocking()
+
     if self._appBase._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
       self._appBase._echoBlocking -= 1

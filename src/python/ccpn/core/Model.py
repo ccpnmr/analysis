@@ -231,11 +231,23 @@ class Model(AbstractWrapperObject):
     self._wrappedData.details = value
 
   def clearData(self):
-    """Remove all data for model
+    """
+    Remove all data for model by successively calling the deleteRow method
     """
     data = self.structureEnsemble.data
     if data is not None:
-      data.drop(data._modelsSelector(self.serial))      # ejb - already seems to be empty
+      # data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty
+
+      # need iterrecords to check the modeNumber against the list and delete each individually
+      Found = True
+      while Found:
+        Found = False                             # set to False for the next iteration
+        self.itRec = data.records()
+        for rNum, rec in enumerate(self.itRec):
+          if int(rec['modelNumber']) == self.serial:
+            data.deleteRow(rNum+1, inplace=True)          # should also be able to undo this
+            Found = True
+            break                                 # break out for the next repeat
     else:
       logger.debug('StructureEnsemble %s contains no data for %s'.format(self.structureEnsemble.pid, self.pid))
 

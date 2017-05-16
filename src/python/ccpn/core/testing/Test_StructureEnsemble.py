@@ -297,8 +297,8 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     """
     Test that structureEnsemble attribute .comment is populated.
     """
-    # self.project.models[0].delete()
-    self.project.models[0].clearData()      # can use either of these delete methods
+    self.project.models[0].delete()
+    # self.project.models[0].clearData()      # can use either of these delete methods
 
   #=========================================================================================
   # test_properties_Model

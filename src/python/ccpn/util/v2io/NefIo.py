@@ -1,5 +1,25 @@
 """NEF I/O for CCPN V2 release, data model version 2.1.2
 
+Main functions for external use:
+
+loadNefFile(path, memopsRoot=None, overwriteExisting=False):
+  '''Load NEF file at path into memopsRoot, creating memopsRoot it not passed in'''
+
+loadProject(nefFilePath, projectName=None, pdbFileType='pdb', *pdbFilePaths):
+  '''Create new CCPN project from files at nefFilepath and (optional) pdbFilepaths
+
+  if one pdbFilePath is passed in, the routine reads all models in that file.
+  If multiple pdbFilePaths are passed in, the routine reads the first model from each file;
+  this is to read ensembles stored with one model per file.
+
+  The project name (determining the project directory) is taken from the NEF file if not passed in
+
+  pdbFileType determines the pdb file format(s) to try:
+  Default ('pdb') tries official PDB format, and robust read if that fails.
+  Alternatively, 'cns' tries cns format, then robust read,
+  and 'rough' tries robust read directly.'''
+
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -49,8 +69,11 @@ from .. import Common as commonUtil
 from .. import Constants as genConstants
 
 from ccp.general import Io as generalIo
+from ccp.util import Spectrum as spectrumLib
 from memops.general import Io as memopsIo
+from memops.universal import Io as uniIo
 from ccp.lib import MoleculeModify
+from ccp.lib import StructureIo
 from ccpnmr.analysis.core import MoleculeBasic
 from ccpnmr.analysis.core import AssignmentBasic
 from ccpnmr.analysis.core import ConstraintBasic
@@ -740,17 +763,42 @@ nef2CcpnMap = {
   )),
 
 }
+def loadProject(nefFilePath, projectName=None, pdbFileType='pdb', *pdbFilePaths):
+  """Create new CCPN project from files at nefFilepath and (optional) pdbFilepaths
+
+  if one pdbFilePath is passed in, the routine reads all models in that file.
+  If multiple pdbFilePaths are passed in, the routine reads the first model from each file;
+  this is to read ensembles stored with one model per file.
+
+  The project name (determining the project directory) is taken from the NEF file if not passed in
+
+  pdbFileType determines the pdb file format(s) to try:
+  Default ('pdb') tries official PDB format, and robust read if that fails.
+  Alternatively, 'cns' tries cns format, then robust read,
+  and 'rough' tries robust read directly."""
+
+  nefReader = CcpnNefReader()
+  dataBlock = nefReader.getNefData(nefFilePath)
+  if not projectName:
+    projectName = os.path.splitext(dataBlock.name)[0]
+  memopsRoot = memopsIo.newProject(projectName)
+  nefReader.importNewProject(memopsRoot, dataBlock)
+  if pdbFilePaths:
+    StructureIo.getStructureFromFiles(memopsRoot.findFirstMolSystem(), pdbFilePaths,
+                                      fileType=pdbFileType)
+  #
+  return memopsRoot
 
 
 
-def loadNefFile(path, memopsRoot=None, removeExisting=False):
+def loadNefFile(path, memopsRoot=None, overwriteExisting=False):
   """Load NEF file at path into memopsRoot, creting memopsRoot it not passed in"""
 
   nefReader = CcpnNefReader()
   dataBlock = nefReader.getNefData(path)
   if memopsRoot is None:
     name = os.path.splitext(dataBlock.name)[0]
-    memopsRoot = memopsIo.newProject(name, removeExisting=removeExisting)
+    memopsRoot = memopsIo.newProject(name, removeExisting=overwriteExisting)
   nefReader.importNewProject(memopsRoot, dataBlock)
   #
   return memopsRoot
@@ -1298,18 +1346,12 @@ class CcpnNefReader:
 
   importers['nef_dihedral_restraint_list'] = load_nef_dihedral_restraint_list
 
-  'nef_spectrum_dimension_transfer':OD((
-    ('dimension_1',None),
-    ('dimension_2',None),
-    ('transfer_type',None),
-    ('is_indirect',None),
-  )),
 
   def load_nef_nmr_spectrum(self, project, saveFrame):
 
     nmrProject = project.currentNmrProject
 
-    dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
+    return None
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1332,14 +1374,14 @@ class CcpnNefReader:
       ('ccpn_spectrum_scale','scale'),
       ('ccpn_spectrum_comment','details'),
     ))
-    dataSourceParams = {}
+    dataSourceParams = {'numDim':experimentParams['numDim']}
     for key,tag in dataSourceMapping.items():
       val = saveFrame.get(key)
       if val is not None:
         dataSourceParams[tag] = val
 
     dataStoreMapping = OD((
-      ('ccpn_spectrum_file_path', 'filePath'),
+      # ('ccpn_spectrum_file_path', 'filePath'),
       ('ccpn_file_header_size', 'headerSize'),
       ('ccpn_file_number_type', 'numberType'),
       ('ccpn_file_complex_stored_by', 'complexStoredBy'),
@@ -1410,6 +1452,8 @@ class CcpnNefReader:
           experimentParams['refExperiment'] = refExperiment
 
       nmrExperiment = nmrProject.newExperiment(**experimentParams)
+      dataSource = nmrExperiment.newDataSource(**dataSourceParams)
+      # NBNB TODO Add file storage parameters and object
 
       # frameCode = saveFrame.get('ccpn_sample')
       # if frameCode:
@@ -1464,10 +1508,10 @@ class CcpnNefReader:
       # )),
 
       # NB PseudoDimensions are not yet supported
-      'ccpn_spectrum_dimension':OD((
+      # 'ccpn_spectrum_dimension':OD((
         # ('dimension_id', None),
         # ('point_count', 'pointCounts'),
-        ('reference_point', 'referencePoints'),
+        # ('reference_point', 'referencePoints'),
         # ('total_point_count', 'totalPointCounts'),
         # ('point_offset', 'pointOffsets'),
         # ('assignment_tolerance', 'assignmentTolerances'),
@@ -1480,85 +1524,110 @@ class CcpnNefReader:
         # ('lorentzian_broadening', 'lorentzianBroadenings'),
         # ('gaussian_broadening', 'gaussianBroadenings'),
         # ('sine_window_shift', 'sineWindowShifts'),
-        ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
-        ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
-      )),
+        # ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
+        # ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
+      # )),
       loop = saveFrame.get('ccpn_spectrum_dimension')
+      referencePointDict = {}
       if loop:
+        isComplexDict = {}
+        blockSizesDict = {}
         for row in loop.data:
           dim = row['dimension_id']
 
-        dd = expDimRefParams[dim]
-        val = row.get('lower_aliasing_limit')
-        if val is not None:
-          dd['minAliasedFreq'] = val
-        val = row.get('upper_aliasing_limit')
-        if val is not None:
-          dd['maxAliasedFreq'] = val
-        val = row.get('measurement_type')
-        if val:
-          dd['measurementTypes'] = val
+          val = row.get('dimension_is_complex')
+          if val is not None:
+            isComplexDict[dim] = val
+          val = row.get('dimension_block_size')
+          if val:
+            blockSizesDict[dim] = val
+          val = row.get('reference_point')
+          if val:
+            referencePointDict[dim] = val
 
-        dd = dataDimRefParams[dim]
-        val = row.get('lower_aliasing_limit')
-        if val is not None:
-          dd['minAliasedFreq'] = val
+          dd = expDimRefParams[dim]
+          val = row.get('lower_aliasing_limit')
+          if val is not None:
+            dd['minAliasedFreq'] = val
+          val = row.get('upper_aliasing_limit')
+          if val is not None:
+            dd['maxAliasedFreq'] = val
+          val = row.get('measurement_type')
+          if val:
+            dd['measurementTypes'] = val
 
-        dd = dataDimParams[dim]
-        val = row.get('point_count')
-        if val:
-          dd['numPoints'] = val
-        val = row.get('total_point_count')
-        if val:
-          dd['numPointsOrig'] = val
-        val = row.get('point_offset')
-        if val is not None:
-          dd['pointOffset'] = val
-        val = row.get('phase_0')
-        if val is not None:
-          dd['phase0'] = val
-        val = row.get('phase_1')
-        if val is not None:
-          dd['phase1'] = val
+          dd = dataDimRefParams[dim]
+          val = row.get('lower_aliasing_limit')
+          if val is not None:
+            dd['minAliasedFreq'] = val
 
-      # get per-dimension data - NB these are mandatory and cannot be worked around
-      dimensionData = self.read_nef_spectrum_dimension(project,
-                                                       saveFrame['nef_spectrum_dimension'])
+          dd = dataDimParams[dim]
+          val = row.get('point_count')
+          if val:
+            dd['numPoints'] = val
+          val = row.get('total_point_count')
+          if val:
+            dd['numPointsOrig'] = val
+          val = row.get('point_offset')
+          if val is not None:
+            dd['pointOffset'] = val
+          val = row.get('phase_0')
+          if val is not None:
+            dd['phase0'] = val
+          val = row.get('phase_1')
+          if val is not None:
+            dd['phase1'] = val
+
+        if isComplexDict:
+          ll = list(isComplexDict.items())
+          ll.sort()
+          dataStoreParams['isComplex'] = [tt[1] for tt in ll]
+        if blockSizesDict:
+          ll = list(blockSizesDict.items())
+          ll.sort()
+          dataStoreParams['blockSizes'] = [tt[1] for tt in ll]
+
+
+
+
+      # NBNB TBD set up expPrototype links
+
+
+
+
+      # Make ExpDimRefs
+      for expDim in experiment.sortedExpDimRefs():
+        expDim.newExpDimRef(**expDimRefParams[expDim.dim])
+
+      # Make DataDims and DataDimRefs
+      for dim, params in sorted(dataDimParams.items()):
+        dataDim = dataSource.newFreqDataDim(dim=dim, **params)
+        expDimRef = experiment.findFirstExpDim(dim=dim).findFirstExpDimRef()
+        dataDim.newDataDimRef(expDimRef=expDimRef, **dataDimRefParams)
+
+      # Reset referencing to use referencePoint
+      for dim, refPoint in referencePointDict.items():
+        dataDimRef = dataSource.findFirstDataDim(dim=dim).findFirstDataDimRef()
+        refValue = dataDimRef.pointToValue(refPoint)
+        dataDimRef.refPoint = refPoint
+        dataDimRef.refValue = refValue
+
       # read  dimension transfer data
-      loopName = 'nef_spectrum_dimension_transfer'
-      # Those are treated elsewhere
-      loop = saveFrame.get(loopName)
+      loop = saveFrame.get('nef_spectrum_dimension_transfer')
       if loop:
-        data = loop.data
-        transferData = [
-          SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
-          for row in data
-        ]
-      else:
-        transferData = []
-
-      spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
-                                transferData=transferData)
-
-      # Set experiment transfers at the API level
-      if transferData and not spectrum.magnetisationTransfers:
-        spectrum._setMagnetisationTransfers(transferData)
+        for row in loop.data:
+          dims = [row.get(x) for x in ('dimension_1','dimension_2')]
+          expDimRefs = [experiment.findFirstExpDim(dim=dim).findFirstExpDimRef() for dim in dims]
+          transferType = row.get('transfer_type')
+          isDirect = not row.get('is_indirect')
+          experiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
+                                    isDirect=isDirect)
 
       # Make data storage object
       filePath = saveFrame.get('ccpn_spectrum_file_path')
       if filePath:
-        storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-          ccpnPrefix='spectrum._wrappedData.dataStore'
-        )
-        storageParameters['numPoints'] = spectrum.pointCounts
-        spectrum._wrappedData.addDataStore(filePath, **storageParameters)
-
-      # Load CCPN dimensions before peaks
-      loopName = 'ccpn_spectrum_dimension'
-      # Those are treated elsewhere
-      loop = saveFrame.get(loopName)
-      if loop:
-        self.load_ccpn_spectrum_dimension(spectrum, loop)
+        dataStoreParams['numPoints'] = [x.numPoints for x in dataSource.sortedDataDims()]
+        dataSource.addDataStore(filePath, **dataStoreParams)
 
     # Make PeakLst
     if 'serial' in peakListParams:
@@ -1572,15 +1641,6 @@ class CcpnNefReader:
     # Load peaks
     self.load_nef_peak(peakList, saveFrame.get('nef_peak'))
 
-    # Load remaining loops, with spectrum as parent
-    for loopName in loopNames:
-      if loopName not in  ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
-                           'nef_spectrum_dimension_transfer'):
-        # Those are treated elsewhere
-        loop = saveFrame.get(loopName)
-        if loop:
-          importer = self.importers[loopName]
-          importer(self, spectrum, loop)
     #
     return peakList
   #
@@ -3064,6 +3124,42 @@ def resetSerial(apiObject, newSerial):
       serialDict[downlink] = newSerial
     elif oldSerial == maxSerial:
       serialDict[downlink] = max(downdict)
+
+
+def addDataStore(dataSource, spectrumPath, **params):
+  """Create and set DataSource.dataStore.
+  The values of params are given by the 'tags' tuple, below"""
+
+  dirName, fileName = os.path.split(spectrumPath)
+  dataUrl = fetchDataUrl(dirName)
+  tags = ('numPoints', 'blockSizes', 'isBigEndian', 'numberType', 'headerSize', 'nByte',
+          'fileType', 'complexStoredBy')
+  attributeDict = dict((x, params.get(x)) for x in tags)
+
+  blockMatrix = spectrumLib.createBlockedMatrix(dataUrl, spectrumPath, **attributeDict)
+  dataSource.dataStore = blockMatrix
+
+def fetchDataUrl(memopsRoot, fullPath):
+  """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
+  and existing dataUrls"""
+  from memops.api.Implementation import Url
+  standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+  fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
+  standardTags = ('insideData', 'alongsideData', 'remoteData')
+  # Check standard DataUrls first
+  checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
+  # Then check other existing DataUrls
+  checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
+  for dataUrl in checkUrls:
+    directoryPath = os.path.join(dataUrl.url.path, '')
+    if fullPath.startswith(directoryPath):
+      break
+  else:
+    # No matches found, make a new one
+    dirName, path = os.path.split(fullPath)
+    dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
+  #
+  return dataUrl
 
 
 if __name__ == '__main__':

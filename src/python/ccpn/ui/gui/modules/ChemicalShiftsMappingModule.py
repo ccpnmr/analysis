@@ -177,9 +177,9 @@ class ChemicalShiftsMapping(CcpnModule):
   settingsOnTop = True
   className = 'ChemicalShiftsMapping'
 
-  def __init__(self, mainWindow, **kw):
+  def __init__(self, mainWindow, name='Chemical Shifts Mapping', **kw):
     # super(ChemicalShiftsMapping, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Chemical Shifts Mapping',  settingButton=True)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name,  settingButton=True)
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project
     self.application = self.mainWindow.application

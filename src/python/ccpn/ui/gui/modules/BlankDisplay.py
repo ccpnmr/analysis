@@ -48,13 +48,13 @@ class BlankDisplay(CcpnModule):
   includeSettingsWidget = False
   className = 'BlankDisplay'
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow, name='Blank Display'):
 
-    CcpnModule.__init__(self, parent=mainWindow.moduleArea, mainWindow=mainWindow, name='Blank Display')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
-    # self.project = mainWindow.application.project
+    self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
     self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColour='#bec4f3', textSize='32',

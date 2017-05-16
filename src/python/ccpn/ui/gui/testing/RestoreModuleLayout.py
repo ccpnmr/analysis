@@ -24,10 +24,7 @@ __date__ = "$Date: 2017-05-15 16:28:42 +0000 (Fri, May 15, 2017) $"
 #=========================================================================================
 
 
-from ccpn.AnalysisScreen import modules as sm
-from ccpn.AnalysisAssign import modules as am
-from ccpn.AnalysisMetabolomics.ui.gui import modules as mm
-import ccpn.ui.gui.modules as gm
+''' Testing functions to restore ccpn module layout. NB under development '''
 
 
 
@@ -36,7 +33,7 @@ def _ccpnModulesImporter(path):
   :param path: fullPath of the directory where are located the CcpnModules files
   :return: list of CcpnModule classes
   '''
-  __ccpnModules = []
+  _ccpnModules = []
   import pkgutil as _pkgutil
   import inspect as _inspect
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -47,9 +44,25 @@ def _ccpnModulesImporter(path):
       if _inspect.isclass(obj):
         if issubclass(obj, CcpnModule):
           if hasattr(obj, 'className'):
-            __ccpnModules.append(obj)
-  return __ccpnModules
+            _ccpnModules.append(obj)
+  return _ccpnModules
+
+def _openCcpnModule(ccpnModules, className, mainWindow, name):
+  if className in ccpnModules:
+    try:
+      newCcpnModule = ccpnModules[className](mainWindow=mainWindow, name=name)
+      mainWindow.moduleArea.addModule(newCcpnModule)
+    except Exception as e:
+      mainWindow.project._logger.warning("Layout restore failed: %s" % e)
 
 
-paths = [item.__path__ for item in [sm, am, mm, gm]]
-ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path)]
+def _initialiseCcpnModules():
+  from ccpn.AnalysisScreen import modules as sm
+  from ccpn.AnalysisAssign import modules as am
+  from ccpn.AnalysisMetabolomics.ui.gui import modules as mm
+  from ccpn.ui.gui import modules as gm
+
+  paths = [item.__path__ for item in [sm, am, mm, gm]]
+  ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path)]
+
+

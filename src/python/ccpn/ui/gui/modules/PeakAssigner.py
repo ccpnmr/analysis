@@ -64,9 +64,9 @@ class PeakAssigner(CcpnModule):
   settingsOnTop = True
   className = 'PeakAssigner'
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow,  name="Peak Assigner"):
 
-    CcpnModule.__init__(self, mainWindow=mainWindow, name="Peak Assigner")
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow

@@ -39,8 +39,8 @@ class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else th
   settingsOnTop = True
   className = 'ReferenceChemicalShifts'
 
-  def __init__(self, mainWindow):
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Reference ChemicalShifts',)
+  def __init__(self, mainWindow, name='Reference ChemicalShifts',):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.plotWidget = pg.PlotWidget()
     self.mainWindow = mainWindow

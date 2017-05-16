@@ -60,10 +60,10 @@ class SequenceModule(CcpnModule):
 
   className = 'SequenceModule'
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Sequence', closable=False)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closable=False)
 
     self.project = mainWindow.application.project
     self.colourScheme = mainWindow.application.colourScheme

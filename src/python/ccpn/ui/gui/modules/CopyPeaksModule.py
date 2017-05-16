@@ -13,9 +13,9 @@ class CopyPeaksModule(CcpnModule):
   settingsOnTop = True
   className = 'CopyPeaksModule'
 
-  def __init__(self, mainWindow, **kw):
+  def __init__(self, mainWindow, name='Copy Peaks to PeakLists', **kw):
     super(CopyPeaksModule, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Copy Peaks to PeakLists')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name )
     self.application = mainWindow.application
     self.project = mainWindow.project
 

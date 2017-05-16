@@ -1419,8 +1419,7 @@ class Framework:
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""
     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-    self.refChemShifts = ReferenceChemicalShifts(self.project, name='Reference Chemical Shifts',
-                                                 mainWindow=self.ui.mainWindow)
+    self.refChemShifts = ReferenceChemicalShifts(mainWindow=self.ui.mainWindow)
     self.ui.mainWindow.moduleArea.addModule(self.refChemShifts)
 
   ###################################################################################################################

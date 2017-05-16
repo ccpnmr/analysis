@@ -54,6 +54,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     GuiSpectrumView.__init__(self)
 
+    self._application = self.strip.spectrumDisplay.mainWindow.application
+
     self.data = self.spectrum.positions, self.spectrum.intensities
 
     # for strip in self.strips:
@@ -206,7 +208,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
     v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
   
-    colour = '#e4e15b' if self._appBase.colourScheme == 'dark' else '#000000'
+    colour = '#e4e15b' if self._application.colourScheme == 'dark' else '#000000'
     hTrace.setPen({'color':colour})
     hTrace.setData(x, v)
       

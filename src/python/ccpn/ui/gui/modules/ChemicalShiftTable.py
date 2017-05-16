@@ -282,8 +282,8 @@ class ChemicalShiftTable(ObjectTable):
     #FIXME:ED - this is copied form the original version below
     if obj: # should presumably always be the case
       chemicalShift = obj
-      chemicalShift.project._appBase.current.nmrAtom = chemicalShift.nmrAtom
-      chemicalShift.project._appBase.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
+      self._current.nmrAtom = chemicalShift.nmrAtom
+      self._current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
 
   def _selectionPulldownCallback(self, item):
     """

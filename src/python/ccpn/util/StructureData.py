@@ -767,7 +767,9 @@ class EnsembleData(pd.DataFrame):
       assert index[0] in self.index, "Boolean selector must select an existing row"   # ejb
 
       try:
-        oldKw = dict((x, self[x]) for x in kwargs)
+        sl = self.loc[index].as_namedtuples()  # ensemble get
+        nt = sl[0]._asdict()
+        oldKw = dict((x, nt[x]) for x in kwargs)
       except KeyError:
         raise ValueError("Attempt to set columns not present in DataFrame: %s"
                          % list(kwargs))

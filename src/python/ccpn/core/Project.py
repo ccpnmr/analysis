@@ -318,7 +318,7 @@ class Project(AbstractWrapperObject):
     if undo is None:
       self._logger.warning("Trying to add undoPoint but undo is not initialised")
     else:
-      undo.newWaypoint()
+      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
       self._logger.info("Added undoPoint")
 
 
@@ -630,7 +630,8 @@ class Project(AbstractWrapperObject):
     if not self._appBase._echoBlocking and not undo.blocking:
 
       # set undo step
-      undo.newWaypoint()
+      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
+
       getDataObj =  self._data2Obj.get
       ll = [getDataObj(x) for x in allWrappedData]
       ss = ', '.join(repr(x.pid) for x in ll if x is not None)

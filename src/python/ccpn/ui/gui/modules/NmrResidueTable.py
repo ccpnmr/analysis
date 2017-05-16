@@ -203,13 +203,16 @@ class NmrResidueTable(ObjectTable):
   Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
   """
   columnDefs = [
-    ('#',          lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number'),
-    ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain'),
-#    ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id'),
-    ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue'),
-    ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type'),
-    ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue'),
-    ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue), 'Number of peaks assigned to NmrResidue')
+    ('#',          lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+    ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+#    ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
+    ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+    ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+    ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
+    ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
+                  , 'Number of peaks assigned to NmrResidue', None),
+    ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
+     lambda nmr, value:NmrResidueTable._setComment(nmr, value))
   ]
 
   className = 'NmrResidueTable'
@@ -227,7 +230,7 @@ class NmrResidueTable(ObjectTable):
     self.nmrChain = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText) for colName, func, tipText in self.columnDefs]
+    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
 
@@ -326,6 +329,23 @@ class NmrResidueTable(ObjectTable):
       self.displayTableForNmrChain(self.nmrChain)
     else:
       self.clearTable()
+
+  @staticmethod
+  def _getCommentText(nmrResidue):
+    """
+    CCPN-INTERNAL: Get a comment from ObjectTable
+    """
+    if nmrResidue.comment == '' or not nmrResidue.comment:
+      return ' '
+    else:
+      return nmrResidue.comment
+
+  @staticmethod
+  def _setComment(nmrResidue, value):
+    """
+    CCPN-INTERNAL: Insert a comment into ObjectTable
+    """
+    nmrResidue.comment = value
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):

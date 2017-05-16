@@ -896,7 +896,6 @@ class TestContainer(WrapperTesting):
                                                   , chainCode='F'
                                                   , sequenceId=6
                                                   , modelNumber=6)))  # check set correctly
-    #FIXME:ED - check undo here
     self.undo.undo()
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__
@@ -906,7 +905,6 @@ class TestContainer(WrapperTesting):
                                                   , chainCode = 'C'
                                                   , sequenceId = 3
                                                   , modelNumber = 3)))  # check initial values
-
     self.undo.redo()
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__
@@ -977,6 +975,24 @@ class TestContainer(WrapperTesting):
                         , chainCode='F'
                         , sequenceId=6
                         , modelNumber=6)        # change the element
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[1], (AtomRecord(Index=2
+                                                  , atomName='HG23'
+                                                  , residueName='VAL'
+                                                  , chainCode='F'
+                                                  , sequenceId=6
+                                                  , modelNumber=6)))  # check set correctly
+    self.undo.undo()
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[1], (AtomRecord(Index=2
+                                                  , atomName='C'
+                                                  , residueName='ALA'
+                                                  , chainCode='A'
+                                                  , sequenceId=1
+                                                  , modelNumber=1)))  # check initial values
+    self.undo.redo()
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__
     self.assertEquals(namedTuples[1], (AtomRecord(Index=2

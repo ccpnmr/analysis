@@ -105,7 +105,7 @@ class Undo(deque):
     self._blocked = False # Block/unblock switch - internal use only
     self._blockingLevel = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
     if maxWaypoints:
-      self.newWaypoint()
+      self.newWaypoint()                      # DO NOT CHANGE THIS ONE
     deque.__init__(self)
 
     # Reset to True to unblank errors during undo/redo

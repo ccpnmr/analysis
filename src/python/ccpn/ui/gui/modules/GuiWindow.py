@@ -147,7 +147,6 @@ class GuiWindow():
     project = peaks[0].project
     undo = project._undo
 
-    # undo.newWaypoint()
     project.newUndoPoint()
     undo.increaseBlocking()
 

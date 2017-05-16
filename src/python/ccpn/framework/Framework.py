@@ -601,8 +601,7 @@ class Framework:
     if not self._echoBlocking and not undo.blocking:
 
       # set undo step
-      # undo.newWaypoint()
-      self.project.newUndoPoint()
+      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
       self.project.suspendNotification()
 
       # Get list of command strings

@@ -1271,10 +1271,16 @@ class Framework:
       prefFile = open(prefPath, 'w+')
       json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self.saveProject()
-      # Close and clean up project
-      self._closeProject()
-      QtGui.QApplication.quit()
+
+      success = self.saveProject()
+      if success is True:
+        # Close and clean up project
+        self._closeProject()
+        QtGui.QApplication.quit()
+      else:
+        if event:                             # ejb - don't close the project
+          event.ignore()
+
     elif reply == 'Quit without Saving':
       if event:
         event.accept()

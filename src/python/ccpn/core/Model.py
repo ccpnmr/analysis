@@ -31,6 +31,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 
 
 class ModelData:
@@ -231,7 +234,10 @@ class Model(AbstractWrapperObject):
     """Remove all data for model
     """
     data = self.structureEnsemble.data
-    data.drop(data._modelsSelector(self.serial))      # ejb - already seems to be empty
+    if data is not None:
+      data.drop(data._modelsSelector(self.serial))      # ejb - already seems to be empty
+    else:
+      logger.debug('StructureEnsemble %s contains no data for %s'.format(self.structureEnsemble.pid, self.pid))
 
   @classmethod
   def _getAllWrappedData(cls, parent: StructureEnsemble)-> list:
@@ -255,7 +261,7 @@ def _newModel(self:StructureEnsemble, serial:int=None, label:str=None, comment:s
       try:
         result.resetSerial(serial)
       except ValueError:
-        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+        logger.warning("Could not reset serial of %s to %s - keeping original value"
                                      %(result, serial))
       result._finaliseAction('rename')
   finally:

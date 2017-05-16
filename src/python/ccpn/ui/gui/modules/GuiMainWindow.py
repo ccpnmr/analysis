@@ -535,10 +535,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       prefFile = open(userPreferencesPath, 'w+')
       json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self.application.saveProject()
-      # Close and clean up project
-      self.application._closeProject()
-      QtGui.QApplication.quit()
+
+      success = self.application.saveProject()
+      if success is True:
+        # Close and clean up project
+        self.application._closeProject()      # close if saved
+        QtGui.QApplication.quit()
+      else:
+        if event:                             # ejb - don't close the project
+          event.ignore()
+
     elif reply == 'Quit without Saving':
       if event:
         event.accept()

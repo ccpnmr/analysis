@@ -840,6 +840,9 @@ class EnsembleData(pd.DataFrame):
     dfs = pdb2df(filename)
 
     ensemble = cls()
+    ensemble['serial'] = dfs['serial']  # We use the serial number to establish the index...
+    ensemble.set_index('serial', inplace=True)
+
     ensemble['modelNumber'] = dfs['model']
     ensemble['chainCode'] = dfs['chainID']
     ensemble['sequenceId'] = dfs['resSeq']
@@ -857,8 +860,8 @@ class EnsembleData(pd.DataFrame):
     ensemble['nmrSequenceCode'] = None
     ensemble['nmrResidueName'] = None
     ensemble['nmrAtomName'] = None
-    ensemble = ensemble.reset_index(drop=True)
-    return ensemble
+    ensemble.drop('serial')# And now we drop the serial number
+    return cls(ensemble)
 
 
   ### Pandas compatibility methods
@@ -1252,6 +1255,7 @@ def pdb2df(filename:str) -> pd.DataFrame:
       dfs = df
     else:
       dfs = dfs.append(df)
+  dfs.set_index('serial', inplace=True, drop=False)
   return dfs
 
 

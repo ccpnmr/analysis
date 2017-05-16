@@ -47,7 +47,7 @@ class InputWidget(Widget):
 
 
 class SettingWidget(Widget):
-  def __init__(self,parent=None, **kw):
+  def __init__(self, parent=None, **kw):
     super(SettingWidget, self).__init__()
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.project = self.application.project
@@ -171,12 +171,18 @@ class SettingWidget(Widget):
 
 
 class ChemicalShiftsMapping(CcpnModule):
+
   includeSettingsWidget = True
-  def __init__(self, project=None, **kw):
-    super(ChemicalShiftsMapping, self)
-    CcpnModule.__init__(self, name='Chemical Shifts Mapping',  settingButton=True)
-    self.project = project
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
+  className = 'ChemicalShiftsMapping'
+
+  def __init__(self, mainWindow, name='Chemical Shifts Mapping', **kw):
+    # super(ChemicalShiftsMapping, self)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name,  settingButton=True)
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application = self.mainWindow.application
 
     self.barGraphWidget = BarGraphWidget()
     self.settingWidget = SettingWidget(parent=self)
@@ -187,8 +193,8 @@ class ChemicalShiftsMapping(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
-
-    self.settingWidget__deregisterNotifiers()
+    # FIXME __deregisterNotifiers
+    # self.settingWidget.__deregisterNotifiers()
     super(ChemicalShiftsMapping, self)._closeModule()
 
 

@@ -37,9 +37,10 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-
+from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
 logger = getLogger()
+
 
 
 class BlankDisplay(CcpnModule):
@@ -47,9 +48,9 @@ class BlankDisplay(CcpnModule):
   includeSettingsWidget = False
   className = 'BlankDisplay'
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow, name='Blank Display'):
 
-    CcpnModule.__init__(self, parent=mainWindow.moduleArea, mainWindow=mainWindow, name='Blank Display')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application

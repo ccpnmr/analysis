@@ -54,11 +54,16 @@ class SequenceModule(CcpnModule):
   stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
   QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
   """
+  includeSettingsWidget = False
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
 
-  def __init__(self, mainWindow):
+  className = 'SequenceModule'
+
+  def __init__(self, mainWindow, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Sequence', closable=False)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closable=False)
 
     self.project = mainWindow.application.project
     self.colourScheme = mainWindow.application.colourScheme

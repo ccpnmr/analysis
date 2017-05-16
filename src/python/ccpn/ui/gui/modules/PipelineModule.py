@@ -54,7 +54,13 @@ class PipelineWorker(QtCore.QObject):
 
 
 class GuiPipeline(CcpnModule):
-  def __init__(self, mainWindow, pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
+
+  includeSettingsWidget = False
+  maxSettingsState = 2
+  settingsOnTop = True
+  className = 'GuiPipeline'
+
+  def __init__(self, mainWindow, name='', pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
     super(GuiPipeline, self)
 
     self.mainWindow = mainWindow

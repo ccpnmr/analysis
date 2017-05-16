@@ -38,7 +38,7 @@ class CreateSequence(CcpnDialog):
                            callbacks=[self.reject, self._createSequence])
     self.sequenceStart = 1
     self.chainCode = 'A'
-    # self.sequence = sequenceEditor.toPlainText()
+    self.sequence = self.sequenceEditor.toPlainText()
     self.moleculeName = None
     moleculeName.textChanged.connect(self._setMoleculeName)
     lineEdit1a.valueChanged.connect(self._setSequenceStart)

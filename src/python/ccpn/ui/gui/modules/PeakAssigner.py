@@ -62,10 +62,11 @@ class PeakAssigner(CcpnModule):
   includeSettingsWidget = True
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
+  className = 'PeakAssigner'
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow,  name="Peak Assigner"):
 
-    CcpnModule.__init__(self, mainWindow=mainWindow, name="Peak Assigner")
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow

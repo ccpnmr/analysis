@@ -8,10 +8,14 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 class CopyPeaksModule(CcpnModule):
 
+  includeSettingsWidget = False
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
   className = 'CopyPeaksModule'
-  def __init__(self, mainWindow, name,  **kw):
+
+  def __init__(self, mainWindow, name='Copy Peaks to PeakLists', **kw):
     super(CopyPeaksModule, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name='Copy Peaks to PeakLists')
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name )
     self.application = mainWindow.application
     self.project = mainWindow.project
 

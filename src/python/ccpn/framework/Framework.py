@@ -41,23 +41,24 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
 
+from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
-from ccpn.framework import Version
+from ccpn.util.Common import uniquify
 
+from ccpn.framework import Version
+from ccpn.framework.Current import Current
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.lib.misc import _checked
 
 from ccpn.ui import interfaces, defaultInterface
-from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT
-from ccpn.util.Common import uniquify
 
 from PyQt4 import QtGui
 _DEBUG = False
@@ -142,6 +143,9 @@ def defineProgramArguments():
                                                  help='Use dark colour scheme')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
   parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
+  parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
+  parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
+  parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
   parser.add_argument('projectPath', nargs='?', help='Project path')
 
   return parser
@@ -153,6 +157,8 @@ class Arguments:
   interface = 'NoUi'
   nologging = True
   debug = False
+  debug2 = False
+  debug3 = False
   skipUserPreferences = True
   projectPath = None
 
@@ -226,7 +232,14 @@ class Framework:
     # self.setupComponents(args)
 
     self.useFileLogger = not self.args.nologging
-    self.level = logging.DEBUG if self.args.debug else logging.INFO
+    if self.args.debug3:
+      self.level = Logging.DEBUG3
+    elif self.args.debug2:
+      self.level = Logging.DEBUG2
+    elif self.args.debug:
+      self.level = logging.DEBUG
+    else:
+      self.level = logging.INFO
 
     self.current      = None
 

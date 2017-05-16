@@ -31,9 +31,14 @@ __date__ = "$Date: 2017-03-17 12:22:34 +0000 (Fri, March 17, 2017) $"
 
 
 import datetime
+import functools
 import logging
 import os
 import time
+
+DEBUG1 = logging.DEBUG  # = 10
+DEBUG2 = 9
+DEBUG3 = 8
 
 defaultLogLevel = logging.INFO
 # defaultLogLevel = logging.DEBUG
@@ -66,6 +71,11 @@ def getLogger():
 
   return logger
 
+def _debug2(logger, msg, *args, **kwargs):
+  logger.log(DEBUG2, msg, *args, **kwargs)
+
+def _debug3(logger, msg, *args, **kwargs):
+  logger.log(DEBUG3, msg, *args, **kwargs)
 
 def createLogger(loggerName, project, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
@@ -120,6 +130,13 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a',
   if stream:
     handler = logging.StreamHandler(stream)
     _setupHandler(handler, level)
+
+  logger.debug1 = logger.debug
+  logger.debug2 = functools.partial(_debug2, logger)
+  logger.debug3 = functools.partial(_debug3, logger)
+
+  logging.addLevelName(DEBUG2, 'DEBUG2')
+  logging.addLevelName(DEBUG3, 'DEBUG3')
 
   return logger
 

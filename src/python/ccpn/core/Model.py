@@ -4,8 +4,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
@@ -13,7 +12,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
@@ -99,7 +98,7 @@ class ModelData:
         else:
           # Set e to a slice of the ensemble data
           e = self._ensemble.loc[mni[0]:mni[1]]
-          e.reset_index(inplace=True, drop=True)
+          # e.reset_index(inplace=True, drop=True)
 
       else:
         # This is not a column - the indices are irrelevant. Just work on the full ensemble
@@ -122,13 +121,15 @@ class ModelData:
       else:
         # Set get item from a slice of the ensemble data
         e = self._ensemble.loc[mni[0]:mni[1]]
-        e.reset_index(inplace=True, drop=True)
+        # e.reset_index(inplace=True, drop=True)
         return e[key]
 
     else:
       # Should probably throw an error, but anyway we leave that to pandas
-      return self._ensemble.__getitem__(key)
-
+      try:
+        return self._ensemble.__getitem__(key)
+      except:
+        raise KeyError("'Model' object has no key '{}'".format(key))
 
   def __setitem__(self, key:str, value:typing.Any) -> None:
 
@@ -140,7 +141,7 @@ class ModelData:
 
     else:
       e = self._ensemble.loc[mni[0]:mni[1]]
-      e.reset_index(inplace=True, drop=True)
+      # e.reset_index(inplace=True, drop=True)
 
       pd.set_option('chained_assignment', None)
       # NB This switch is a nasty hack, done to get the echoing and undoing to work

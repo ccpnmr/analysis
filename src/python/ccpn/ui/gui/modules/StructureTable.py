@@ -577,7 +577,6 @@ class StructureTable(ObjectTable):
       numRows = len(thisObj.index)
       thisObj[column] = '' * numRows
       thisData[column] = '' * numRows             # need to set in both dataframes
-
     except:
       showWarning(StructureTable._current[StructureTable.OBJECT].pid+' update table error', '')
       return
@@ -586,7 +585,7 @@ class StructureTable(ObjectTable):
       thisObj.setValues(thisData, **setKw)        # ejb - update the object
       # StructureTable._current[StructureTable.TABLE]._updateDataSet(thisObj)
 
-      tuples = thisObj.as_namedtuples()
+      tuples = thisObj.as_namedtuples()           # populate the table
       StructureTable._current[StructureTable.TABLE].setObjects(tuples)
 
   @staticmethod

@@ -59,7 +59,7 @@ class NmrResiduePopup(CcpnDialog):
 
     residueTypeLabel = Label(self, "Residue Type ", grid=(2, 0))
     self.residueTypePulldown = PulldownList(self, grid=(2, 1))
-    self.residueTypePulldown.setData(CCP_CODES)
+    self.residueTypePulldown.setData(('',)+CCP_CODES)              # ejb
     self.residueTypePulldown.setFixedWidth(100)
 
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
@@ -111,7 +111,10 @@ class NmrResiduePopup(CcpnDialog):
     self._getResidueType(self.seqCodePulldown.currentText())
 
   def _getResidueType(self, item):
-    residueType = item.split(' ')[1].capitalize()
+    try:
+      residueType = item.split(' ')[1].capitalize()       # ejb - crash when empty
+    except:
+      residueType = ''
     for type in self.residueTypePulldown.texts:
       if type.split(' ')[0] == residueType:
         self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.texts.index(type))

@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-from ccpn.util.Logging import getLogger
+from ccpn.util import Logging
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -135,7 +135,7 @@ class GuiSpectrumDisplay(CcpnModule):
                           So for now add option below to have it turned off (False) or on (True).
     """
 
-    print('GuiSpectrumDisplay>> mainWindow, name:', mainWindow, name)
+    Logging.getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
@@ -218,7 +218,7 @@ class GuiSpectrumDisplay(CcpnModule):
     CCPN INTERNAL: Also called from GuiStrip
     """
     for ii, pid in enumerate(data.get('pids',[])):
-      print('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
+      Logging.getLogger().debug('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
       self._handlePid(pid)
 
   def _handlePid(self, pid):
@@ -264,7 +264,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     if horizontal not in SCROLLBAR_POLICY_DICT or \
        vertical not in SCROLLBAR_POLICY_DICT:
-      getLogger().warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
+      Logging.getLogger().warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
     self.stripFrame.setScrollBarPolicies((horizontal, vertical))
 
   def _updatePivot(self):
@@ -364,7 +364,7 @@ class GuiSpectrumDisplay(CcpnModule):
     newStrip = self.strips[stripIndex].clone()
     mainWindow = self.mainWindow
     mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
-    getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
+    Logging.getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
                      % (self.pid, stripIndex))
     return newStrip
 

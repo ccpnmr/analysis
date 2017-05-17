@@ -77,9 +77,9 @@ def _debug2(logger, msg, *args, **kwargs):
 def _debug3(logger, msg, *args, **kwargs):
   logger.log(DEBUG3, msg, *args, **kwargs)
 
-def createLogger(loggerName, project, stream=None, level=None, mode='a',
+def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
-  """Return a (unique) logger for this project and with given programName, if any.
+  """Return a (unique) logger for this memopsRoot and with given programName, if any.
      Puts log output into a log file but also optionally can have output go to
      another, specified, stream (e.g. a console)
   """
@@ -90,7 +90,7 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a',
 
   #TODO: remove Api calls
   from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-  repositoryPath = apiIo.getRepositoryPath(project, 'userData')
+  repositoryPath = apiIo.getRepositoryPath(memopsRoot, 'userData')
   logDirectory = os.path.join(repositoryPath, 'logs')
 
   today = datetime.date.today()

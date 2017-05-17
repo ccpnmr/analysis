@@ -54,7 +54,7 @@ from ccpn.util import Ticks
 from ccpn.util.Colour import Colour
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
-from ccpn.util.Logging import getLogger
+from ccpn.util import Logging
 
 
 class GuiStrip(Frame):
@@ -75,7 +75,7 @@ class GuiStrip(Frame):
     self.application = self.mainWindow.application
     self.current = self.application.current
 
-    print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)
+    Logging.getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
                          acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                   )
@@ -592,7 +592,7 @@ class GuiStrip(Frame):
       x2 = x2LineEdit.get()
       y2 = y2LineEdit.get()
       if None in (x1, y1, x2, y2):
-        getLogger().warning('Zoom: must specify region completely')
+        Logging.getLogger().warning('Zoom: must specify region completely')
         return
       self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
       zoomPopup.close()

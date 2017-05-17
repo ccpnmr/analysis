@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-from ccpn.util.Logging import getLogger
+from ccpn.util import Logging
 
 class CcpnModule(Dock):
   """
@@ -85,9 +85,9 @@ class CcpnModule(Dock):
 
     super(CcpnModule, self).__init__(name=name, area=mainWindow.moduleArea,
                                      closable=closable)#, **kwds)   # ejb
-    print('CcpnModule>>>', type(self), mainWindow)
+    Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
-    getLogger().debug('module:"%s"' % (name,))
+    Logging.getLogger().debug('module:"%s"' % (name,))
 
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name

@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 from ccpn.util.Common import uniquify
+from ccpn.util import Logging
 
 
 #TODO:WAYNE: incorporate most functionality from GuiWindow and
@@ -75,7 +76,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     QtGui.QMainWindow.__init__(self)
     # Layout
     layout = self.layout()
-    print('GuiMainWindow: layout:', layout)
+
+    logger = Logging.getLogger()
+    logger.debug('GuiMainWindow: layout: %s' % layout)
 
     if layout is not None:
       layout.setContentsMargins(0, 0, 0, 0)
@@ -92,7 +95,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # Module area
     self.moduleArea = CcpnModuleArea(mainWindow=self)
-    print('GuiMainWindow.moduleArea: layout:', self.moduleArea.layout) ## pyqtgraph object
+    logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout) ## pyqtgraph object
     self.moduleArea.setGeometry(0, 0, 1000, 800)
     self.setCentralWidget(self.moduleArea)
 

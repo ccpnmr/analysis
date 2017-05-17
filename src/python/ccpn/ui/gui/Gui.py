@@ -41,11 +41,11 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 
-from ccpn.util.Logging import getLogger
+from ccpn.util import Logging
 
 def qtMessageHandler(*errors):
   for err in errors:
-    getLogger().warning('QT error: %s' % err)
+    Logging.getLogger().warning('QT error: %s' % err)
 
 # un/suppress messages
 QtCore.qInstallMsgHandler(qtMessageHandler)
@@ -279,22 +279,24 @@ class MainWindow(coreClass, _GuiMainWindow):
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
-    print('MainWindow>> project:', project)
-    print('MainWindow>> project._appBase:', project._appBase)
+    logger = Logging.getLogger()
+
+    logger.debug('MainWindow>> project: %s' % project)
+    logger.debug('MainWindow>> project._appBase: %s' % project._appBase)
 
     application = project._appBase
     _GuiMainWindow.__init__(self, application = application)
 
     # patches for now:
     project._mainWindow = self
-    print('MainWindow>> project._mainWindow:', project._mainWindow)
+    logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
 
     application._mainWindow = self
     application.ui.mainWindow = self
-    print('MainWindow>> application from QtCore..:', application)
-    print('MainWindow>> application.project:',  application.project)
-    print('MainWindow>> application._mainWindow:', application._mainWindow)
-    print('MainWindow>> application.ui.mainWindow:', application.ui.mainWindow)
+    logger.debug('MainWindow>> application from QtCore..: %s' % application)
+    logger.debug('MainWindow>> application.project: %s' %  application.project)
+    logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
+    logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
 
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
 #TODO:RASMUS: copy from MainWindow
@@ -341,7 +343,7 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
   """1D bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
-    print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
+    Logging.getLogger().debug('StripDisplay1d>> project: %s, project._appBase: %s' % (project, project._appBase))
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
     # hack for now
@@ -364,7 +366,7 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
-    print('\nSpectrumDisplayNd>> project:', project, 'project._appBase:', project._appBase)
+    Logging.getLogger().debug('SpectrumDisplayNd>> project: %s, project._appBase: %s' % (project, project._appBase))
     AbstractWrapperObject. __init__(self, project, wrappedData)
 
     # hack for now;
@@ -401,7 +403,7 @@ class Strip1d(coreClass, _GuiStrip1d):
     # hack : Postpone SpectrumLoading and PlotWidget stuff until later
     self._finaliseDone = True
 
-    print('\nStrip1d>> spectrumDisplay:', self.spectrumDisplay)
+    Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
     _GuiStrip1d.__init__(self, self.spectrumDisplay)
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)
     self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
@@ -418,7 +420,7 @@ class StripNd(coreClass, _GuiStripNd):
     # hack : Postpone SpectrumLoading and PlotWidget stuff until later
     self._finaliseDone = True
 
-    print('\nStripNd>> spectrumDisplay:', self.spectrumDisplay)
+    Logging.getLogger().debug('StripNd>> spectrumDisplay: %s' % self.spectrumDisplay)
     _GuiStripNd.__init__(self, self.spectrumDisplay)
 
     # cannot add the Frame until fully done
@@ -455,7 +457,7 @@ class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
     self._appBase = project._appBase
     self.application = project._appBase
 
-    print('SpectrumView1d>>', self)
+    Logging.getLogger().debug('SpectrumView1d>> %s' % self)
     _GuiSpectrumView1d.__init__(self)
 
 
@@ -470,7 +472,7 @@ class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
     self._appBase = project._appBase
     self.application = project._appBase
 
-    print('SpectrumViewNd>>', self, self.strip)
+    Logging.getLogger().debug('SpectrumViewNd>> %s %s' % (self, self.strip))
     _GuiSpectrumViewNd.__init__(self)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:

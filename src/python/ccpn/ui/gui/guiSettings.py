@@ -55,6 +55,7 @@ lucidaGrande12        = Font('Lucida Grande', 12)
 lucidaGrande14        = Font('Lucida Grande', 14)
 
 # widgets and modules
+textFontSmall   = helvetica10        # general text font
 textFont        = helvetica12        # general text font
 textFontBold    = helveticaBold12    # general text font bold
 textFontLarge   = helvetica14        # general text font large
@@ -73,15 +74,44 @@ LIGHT = 'light'
 DARK = 'dark'
 COLOUR_SCHEMES = (LIGHT, DARK)
 
+MARK_LINE_COLOUR_DICT = {
+  'CA': '#0000FF',
+  'CB': '#0024FF',
+  'CG': '#0048FF',
+  'CD': '#006DFF',
+  'CE': '#0091FF',
+  'CZ': '#00B6FF',
+  'CH': '#00DAFF',
+  'C': '#00FFFF',
+  'HA': '#FF0000',
+  'HB': '#FF0024',
+  'HG': '#FF0048',
+  'HD': '#FF006D',
+  'HE': '#FF0091',
+  'HZ': '#FF00B6',
+  'HH': '#FF00DA',
+  'H': '#FF00FF',
+  'N': '#00FF00',
+  'ND': '#3FFF00',
+  'NE': '#7FFF00',
+  'NZ': '#BFFF00',
+  'NH': '#FFFF00',
+}
+
 def getColourScheme():
   """
   :return: colourScheme
   """
-  application = QtCore.QCoreApplication.instance()._ccpnApplication
-  colourScheme = application.colourScheme
-  if colourScheme not in COLOUR_SCHEMES:
-    raise RuntimeError('Undefined colour scheme')
-  return colourScheme
+  app = QtCore.QCoreApplication.instance()
+  if hasattr(app,'_ccpnApplication'):
+    application = getattr(app,'_ccpnApplication')
+    colourScheme = application.colourScheme
+    if colourScheme not in COLOUR_SCHEMES:
+      raise RuntimeError('Undefined colour scheme')
+    return colourScheme
+  # for now to make the tests run
+  else:
+    return LIGHT
 
 
 def getColours():

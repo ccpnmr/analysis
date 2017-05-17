@@ -30,6 +30,8 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
+from PyQt4 import QtGui, QtCore
+
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -37,10 +39,17 @@ from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
-
-
 # This import initializes relative paths for QT style-sheets.  Do not remove!
-from ccpn.ui.gui.widgets import resources_rc
+
+from ccpn.util.Logging import getLogger
+
+def qtMessageHandler(*errors):
+  for err in errors:
+    getLogger().warning('QT error: %s' % err)
+
+# un/suppress messages
+QtCore.qInstallMsgHandler(qtMessageHandler)
+
 
 class Gui(Ui):
 
@@ -50,9 +59,7 @@ class Gui(Ui):
   def __init__(self, application):
     
     Ui.__init__(self, application)
-
     self._initQtApp()
-
 
   def _initQtApp(self):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
@@ -89,7 +96,7 @@ class Gui(Ui):
     project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
     project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
 
-    from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
+    from ccpn.ui.gui.modules import GuiPeakListView
     project.registerNotifier('PeakListView', 'create',
                              GuiPeakListView.GuiPeakListView._createdPeakListView)
     project.registerNotifier('PeakListView', 'delete',
@@ -100,10 +107,6 @@ class Gui(Ui):
     project.registerNotifier('NmrAtom', 'rename', GuiPeakListView._updateAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
-
-    from ccpn.ui.gui.widgets import SpinSystemLabel
-    project.registerNotifier('NmrResidue', 'rename', SpinSystemLabel._renameNmrResidueForGraphics)
-
 
     # API notifiers - see functions for comments on why this is done this way
     project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
@@ -132,22 +135,17 @@ class Gui(Ui):
 
   def start(self):
 
-    # show splash screen
-    # GWV comment out to speed up loading and reduce memory footprint
-    #splash = SplashScreen()
-    #self.qtApp.processEvents()  # needed directly after splashScreen show to show something
-    #splash.close()
-    #splash.finish(self.mainWindow)
-
     self.mainWindow._fillMacrosMenu()
     self.mainWindow._updateRestoreArchiveMenu()
-    self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
+    self.mainWindow.setUserShortcuts(self.application.preferences)
     project = self.application.project
     self.application.experimentClassifications = getExperimentClassifications(project)
 
     sys.stderr.write('==> Gui interface is ready\n' )
-    self.qtApp.start()
 
+    self.mainWindow.show()
+    self.mainWindow.raise_()
+    self.qtApp.start()
 
   def _showRegisterPopup(self):
     """Display registration popup"""
@@ -170,12 +168,10 @@ class Gui(Ui):
     mainWindow.namespace['current'] = self.application.current
     return mainWindow
 
-
   def echoCommands(self, commands:typing.List[str]):
     """Echo commands strings, one by one, to logger
     and store them in internal list for perusal
     """
-
     console = self.application.ui.mainWindow.pythonConsole
     logger = self.application.project._logger
 
@@ -183,29 +179,39 @@ class Gui(Ui):
       console._write(command + '\n')
       logger.info(command)
 
-
+  #TODO:RASMUS: should discuss how application should deal with it
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
-
+  #TODO: this should be made failsafe
   def addBlankDisplay(self, position='right', relativeTo=None):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
-
-    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
     try:
-      if 'Blank Display' in self.mainWindow.moduleArea.findAll()[1]:
-        blankDisplay = self.mainWindow.moduleArea.findAll()[1]['Blank Display']
-        if blankDisplay.isVisible():
-          return
-        else:
-          self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
+      mDict = self.mainWindow.moduleArea.currentModulesDict
+      if 'BlankDisplay' in mDict:
+        pass
+        # blankDisplay = mDict['BlankDisplay']
+        # blankDisplay.show()
       else:
-        blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
-        self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
-      return blankDisplay
+        # LM 28/04/17
+        # This is not called anymore when a spectrum display is opened.
+        # For some reason is impossible to open a new blank display. Must be some conflict with function name across
+        # Gui/Framework/GuiMainwindow/mainMindow for the addBlankDisplay() function.
+        # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
+
+
+        # blankDisplay = self.mainWindow.newBlankDisplay()
+        # return blankDisplay # Why a return blankDisplay?
+
+         # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
+        from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+        blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
+        self.mainWindow.moduleArea.addModule(blankDisplay, position='top'
+                                             , relativeTo=self.mainWindow.moduleArea)   # ejb
+
     finally:
       self.application._endCommandBlock()
 
@@ -249,28 +255,49 @@ class Gui(Ui):
     #     self.application._endCommandBlock()
 
 
-########################################################
-#
-#  Wrapper notifier functions
-
-
 
 #######################################################################################
 #
 #  Ui classes that map ccpn.ui._implementation
 #
+#######################################################################################
+
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+
 
 ## Window class
 coreClass = _coreClassMap['Window']
 
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
+
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiMainWindow.__init__(self)
+
+    print('MainWindow>> project:', project)
+    print('MainWindow>> project._appBase:', project._appBase)
+
+    application = project._appBase
+    _GuiMainWindow.__init__(self, application = application)
+
+    # patches for now:
+    project._mainWindow = self
+    print('MainWindow>> project._mainWindow:', project._mainWindow)
+
+    application._mainWindow = self
+    application.ui.mainWindow = self
+    print('MainWindow>> application from QtCore..:', application)
+    print('MainWindow>> application.project:',  application.project)
+    print('MainWindow>> application._mainWindow:', application._mainWindow)
+    print('MainWindow>> application.ui.mainWindow:', application.ui.mainWindow)
 
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
+#TODO:RASMUS: copy from MainWindow
 class SideWindow(coreClass, _GuiWindow):
   """GUI side window, corresponds to OS window"""
   def __init__(self, project:Project, wrappedData:'ApiWindow'):
@@ -295,23 +322,62 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 Mark = _coreClassMap['Mark']
 
 
+#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+# Also Rename
+# SpectrumDisplay1d.py; contains SpectrumDisplay1d (formerly StripDisplay1d) and
+#                       GuiStripDisplay
+# SpectrumDisplayNd.py: likeWise
+
+
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d as _GuiStripDisplay1d
+#TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
+#chaning the init signature of the GuiStripDisplay1d and passing the parameters along to
+# GuiSpectrumDisplay
+
 class StripDisplay1d(coreClass, _GuiStripDisplay1d):
   """1D bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
+    print('StripDisplay1d>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStripDisplay1d.__init__(self)
+
+    # hack for now
+    self.application = project._appBase
+
+    _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
+                                      name=self._wrappedData.name)
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
+
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
-class StripDisplayNd(coreClass, _GuiStripDisplayNd):
+#TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
+# NB: GWV had to comment out the name property to make it work
+# conflicts existed between the 'name' and 'window' attributes of the two classes
+# the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
+# mainWindow throughout
+
+class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
+    print('\nSpectrumDisplayNd>> project:', project, 'project._appBase:', project._appBase)
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStripDisplayNd.__init__(self)
+
+    # hack for now;
+    self.application = project._appBase
+    self._appBase = project._appBase
+
+    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
+                                      name=self._wrappedData.name
+                                )
+    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
+#old name
+StripDisplayNd = SpectrumDisplayNd
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
@@ -319,8 +385,8 @@ def _factoryFunction(project:Project, wrappedData) -> coreClass:
     return StripDisplay1d(project, wrappedData)
   else:
     return StripDisplayNd(project, wrappedData)
-
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
+
 
 ## Strip class
 coreClass = _coreClassMap['Strip']
@@ -329,16 +395,35 @@ class Strip1d(coreClass, _GuiStrip1d):
   """1D strip"""
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
+
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStrip1d.__init__(self)
+
+    # hack : Postpone SpectrumLoading and PlotWidget stuff until later
+    self._finaliseDone = True
+
+    print('\nStrip1d>> spectrumDisplay:', self.spectrumDisplay)
+    _GuiStrip1d.__init__(self, self.spectrumDisplay)
+    stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+    self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
+
 
 from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd
 class StripNd(coreClass, _GuiStripNd):
   """ND strip """
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
     """Local override init for Qt subclass"""
+
     AbstractWrapperObject. __init__(self, project, wrappedData)
-    _GuiStripNd.__init__(self)
+
+    # hack : Postpone SpectrumLoading and PlotWidget stuff until later
+    self._finaliseDone = True
+
+    print('\nStripNd>> spectrumDisplay:', self.spectrumDisplay)
+    _GuiStripNd.__init__(self, self.spectrumDisplay)
+
+    # cannot add the Frame until fully done
+    stripIndex = self.spectrumDisplay.orderedStrips.index(self)
+    self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
@@ -354,7 +439,9 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Axis class - put in namespace for documentation
 Axis = _coreClassMap['Axis']
 
-
+# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 ## SpectrumView class
 coreClass = _coreClassMap['SpectrumView']
 from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
@@ -363,7 +450,14 @@ class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
+
+    print('SpectrumView1d>>', self)
     _GuiSpectrumView1d.__init__(self)
+
 
 from ccpn.ui.gui.modules.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
 class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
@@ -371,6 +465,12 @@ class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
+
+    print('SpectrumViewNd>>', self, self.strip)
     _GuiSpectrumViewNd.__init__(self)
 
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
@@ -384,14 +484,20 @@ def _factoryFunction(project:Project, wrappedData) -> coreClass:
 
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
+# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+# Any Factory function to _implementation or abstractWrapper
+#
 ## PeakListView class
 coreClass = _coreClassMap['PeakListView']
-from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView as _GuiPeakListView
+from ccpn.ui.gui.modules.GuiPeakListView import GuiPeakListView as _GuiPeakListView
 class _PeakListView(coreClass, _GuiPeakListView):
   """Peak List View for 1D or nD PeakList"""
   def __init__(self, project:Project, wrappedData:'ApiStripPeakListView'):
     """Local override init for Qt subclass"""
     AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
     _GuiPeakListView.__init__(self)
 
 Gui._factoryFunctions[coreClass.className] = _PeakListView

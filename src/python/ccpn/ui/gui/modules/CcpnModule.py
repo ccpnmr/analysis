@@ -1,7 +1,7 @@
 """
 This file contains CcpnModule base class
 
-intial version by Simon;
+initial version by Simon;
 Extensively modified by Geerten 1-12/12/2016
 
 """
@@ -25,29 +25,25 @@ __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-
+__author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
+
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-from ccpn.ui.gui.widgets.Button import Button
+
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
+from ccpn.ui.gui.widgets.Widget import ScrollableWidget
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-from functools import partial
-
-#Module = Dock
-#ModuleLabel = DockLabel
 from ccpn.util.Logging import getLogger
-
-logger = getLogger()
 
 class CcpnModule(Dock):
   """
@@ -55,6 +51,22 @@ class CcpnModule(Dock):
   sets self.application, self.current, self.project and self.mainWindow
 
   Overide parameters for settings widget as needed
+
+  Usage:
+    __init__    initialises the module according to the settings given below:
+
+    _closeModule    closing of the module.
+
+                    If addition functionality is required, the correct
+                    procedure is to override this method within your class
+                    and end your method with super()._closeModule()
+
+                    e.q.
+                          def _closeModule(self):
+                            # your functions here
+                            super(<YourModule>, self)._closeModule()
+
+                    OR __init__ with closeFunc=<your close function>
   """
   moduleName = ''
   HORIZONTAL = 'horizontal'
@@ -65,21 +77,20 @@ class CcpnModule(Dock):
   includeSettingsWidget = False
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
+  settingsMinimumSizes = (100, 50)
 
+  def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
-  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
-    super(CcpnModule, self).__init__(name, self, closable=closable)
+    #TODO:GEERTEN: make mainWindow actually do something
+
+    super(CcpnModule, self).__init__(name=name, area=mainWindow.moduleArea,
+                                     closable=closable)#, **kwds)   # ejb
+    print('CcpnModule>>>', type(self), mainWindow)
+
+    getLogger().debug('module:"%s"' % (name,))
+
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
-
-    # useful definitions to have
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.current = self.application.current
-    self.project = self.application.project
-    self.mainWindow = self.application.ui.mainWindow
-
-    # GWV: logger seems not to work??
-    self.project._logger.debug('CcpnModule.__init__: %s, %s, %s' % (self.application, self.current, self.project))
 
     # hide original dock label and generate a new CCPN one
     self._originalLabel = self.label
@@ -92,42 +103,54 @@ class CcpnModule(Dock):
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=self.widgetArea, setLayout=True)  #QtGui.QWidget(self)
+    #self.mainWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     # optional settings widget area
     self.settingsState = 0  # current state (not shown)
     self.settingsWidget = None
     if self.includeSettingsWidget:
-      #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
-      self.settingsWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
+      # self.settingsWidget = ScrollableWidget(parent=self.widgetArea, setLayout=True,
+      #                                       scrollBarPolicies=('always','asNeeded'),
+      #                                       minimumSizes=self.settingsMinimumSizes
+      #                                      )
+      self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
+      self.settingsWidget = Frame(showBorder=True)
+      # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
+      # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
+      self._settingsScrollArea.setWidget(self.settingsWidget)
+      #self.settingsWidget.setLayout(QtGui.QGridLayout())
+      self.settingsWidget.setGridLayout()
+      self._settingsScrollArea.setWidgetResizable(True)
+      #self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)
+      #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
       if self.settingsOnTop:
-        self.addWidget(self.settingsWidget, 0, 0)
+        # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
+        self.addWidget(self._settingsScrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
       else:
         self.addWidget(self.mainWidget, 0, 0)
-        self.addWidget(self.settingsWidget, 1, 0)
-      self.settingsWidget.hide()
+        # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
+        self.addWidget(self.settingsWidget._scrollArea, 1, 0)
+      # self.settingsWidget._sequenceGraphScrollArea.hide()
+      self._settingsScrollArea.hide()
+
     else:
+      self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
 
-    # self.widgetArea.setStyleSheet("""
-    # Dock > QWidget {
-    #   padding: 0;
-    #   margin: 0px 0px 0px 0px;
-    #   border: 4px solid;
-    # }
-    # """)
+    # always explicitly show the mainWidget
+    self.mainWidget.show()
 
-  # @property
-  # def moduleName(self):
-  #   'return  module name'
-  #   if self is not None:
-  #     return CcpnModule.moduleName
-  #
-  # @moduleName.setter
-  # def moduleName(self, name):
-  #   CcpnModule.moduleName = name
+    # set parenting relations
+    self.setParent(mainWindow.moduleArea)   # ejb
+    self.widgetArea.setParent(self)
 
+  # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
+  # def getName(self):
+  #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
+  #   return self.name()
 
   def resizeEvent(self, event):
     self.setOrientation(self.labelOrientation, force=True)
@@ -142,28 +165,6 @@ class CcpnModule(Dock):
     # }
     # """)
 
-  def placeSettingsButton(self, buttonParent, buttonGrid):
-    """
-    Depreciated
-    """
-    logger.warning('Depreciated code')
-    if self.includeSettingsWidget:
-      settingsButton = Button(buttonParent, icon='icons/applications-system', grid=buttonGrid, hPolicy='fixed', toggle=True)
-      settingsButton.toggled.connect(partial(self.toggleSettingsWidget, settingsButton))
-      settingsButton.setChecked(False)
-
-  def toggleSettingsWidget(self, button=None):
-    """
-    Toggles display of settings widget in module.
-    """
-    if self.includeSettingsWidget:
-      if button.isChecked():
-        self.settingsWidget.show()
-      else:
-        self.settingsWidget.hide()
-    else:
-      logger.debug('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
-
   def _settingsCallback(self):
     """
     Toggles display of settings widget in module.
@@ -172,12 +173,15 @@ class CcpnModule(Dock):
       self.settingsState = (self.settingsState + 1) % self.maxSettingsState
       if self.settingsState == 0:
         self.mainWidget.show()
-        self.settingsWidget.hide()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
+        self._settingsScrollArea.hide()
       elif self.settingsState == 1:
         self.mainWidget.show()
-        self.settingsWidget.show()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
+        self._settingsScrollArea.show()
       elif self.settingsState == 2:
-        self.settingsWidget.show()
+        # self.settingsWidget._sequenceGraphScrollArea.hide()
+        self._settingsScrollArea.hide()
         self.mainWidget.hide()
     else:
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
@@ -218,7 +222,10 @@ class CcpnModuleLabel(DockLabel):
     self.fixedWidth = True
     self.setFont(moduleLabelFont)
     #print('>>', name, self.module.application.colourScheme)
-    if self.module.application.colourScheme == 'light':
+
+    from ccpn.ui.gui.guiSettings import getColourScheme
+    self.colourScheme = getColourScheme()
+    if self.colourScheme == 'light':
       self.backgroundColour = '#bd8413'
       #self.backgroundColour = '#EDC151'
       self.foregroundColour = '#fdfdfc'
@@ -303,7 +310,7 @@ class CcpnModuleLabel(DockLabel):
 
   def paintEvent(self, ev):
     """
-    Copied from the parent VerticlLabel class to allow for modification in StyleSheet
+    Copied from the parent VerticalLabel class to allow for modification in StyleSheet
     """
     p = QtGui.QPainter(self)
 

@@ -1,3 +1,29 @@
+"""
+This file contains the routines for message dialogues
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:04 +0100 (Fri, April 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from PyQt4 import QtCore, QtGui
 
@@ -33,29 +59,28 @@ class MessageDialog(QtGui.QMessageBox):
     self.setText(basicText)
     self.setInformativeText(message)
     self.setIcon(icon)
+    self.setMinimumWidth(300)
 
     palette = QtGui.QPalette()
     self.setPalette(palette)
 
     if iconPath:
       image = QtGui.QPixmap(iconPath)
-      scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
+      scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
       self.setIconPixmap(scaledImage)
-
 
 
 def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
   """Display an info message
   """
-
   dialog = MessageDialog('Information', title, message, Information, iconPath, parent)
   dialog.setStandardButtons(Ok)
 
   #dialog = QtGui.QMessageBox.information(parent, title, message)
   dialog.raise_()
   dialog.exec_()
-  
   return 
+
 
 def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
@@ -63,12 +88,12 @@ def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog.setStandardButtons(Ok | Cancel)
   dialog.setDefaultButton(Ok)
-  
+
   dialog.raise_()
   return dialog.exec_() == Ok
 
-def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
+def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
                          
@@ -77,6 +102,7 @@ def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
   dialog.raise_()
   return dialog.exec_() == Yes
+
 
 def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
@@ -90,12 +116,13 @@ def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPa
   
   if result == Retry:
     return True
-  
+
   elif result == Cancel:
     return False
-  
+
   else:
     return None    
+
 
 def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
@@ -109,12 +136,13 @@ def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPa
   
   if result == Save:
     return True
-  
+
   elif result == Discard:
     return False
   
   else:
     return None    
+
 
 def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
 
@@ -123,7 +151,6 @@ def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.setStandardButtons(Close)
   dialog.raise_()
   dialog.exec_()
- 
   return
 
 def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None, iconPath=None):
@@ -145,6 +172,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   else:
     return texts[index]  
 
+
 def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   
   dialog = MessageDialog('Error', title, message, Critical, iconPath, parent)
@@ -152,8 +180,8 @@ def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.setStandardButtons(Close)
   dialog.raise_()
   dialog.exec_()
-  
   return
+
 
 def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   
@@ -162,8 +190,8 @@ def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.setStandardButtons(Close)
   dialog.raise_()
   dialog.exec_()
-  
   return
+
 
 if __name__ == '__main__':
 

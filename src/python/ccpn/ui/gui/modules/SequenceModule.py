@@ -1,8 +1,9 @@
 """
-This file contains SequenceModule module
+This file contains the SequenceModule module
 
 intial version by Simon;
-modified by Geerten 1-9/12/2016
+GWV: modified 1-9/12/2016
+GWV: 13/04/2017: Disconnected from Sequence Graph; Needs rafactoring
 
 """
 #=========================================================================================
@@ -39,14 +40,13 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import textFontHuge
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
 
 class SequenceModule(CcpnModule):
-
   """
   The module displays all chains in the project as one-letter amino acids. The one letter residue
   sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
@@ -54,19 +54,25 @@ class SequenceModule(CcpnModule):
   stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
   QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
   """
+  includeSettingsWidget = False
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
 
-  def __init__(self, project):
+  className = 'SequenceModule'
+
+  def __init__(self, mainWindow, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
-    CcpnModule.__init__(self, name='Sequence', closable=False)
+    #TODO: make closable
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closable=False)
 
-    self.project = project
-    self.colourScheme = project._appBase.colourScheme
+    self.project = mainWindow.application.project
+    self.colourScheme = mainWindow.application.colourScheme
     #self.label.hide()
+
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scrollArea.scene = QtGui.QGraphicsScene(self)
-    self.project = project
     self.scrollContents = QtGui.QGraphicsView(self.scrollArea.scene, self)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
@@ -83,10 +89,10 @@ class SequenceModule(CcpnModule):
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
     self.widgetHeight = 0 # dynamically calculated from the number of chains
-    if not project.chains:
+    if not self.project.chains:
       self._addChainLabel(placeholder=True)
     else:
-      for chain in project.chains:
+      for chain in self.project.chains:
         self._addChainLabel(chain)
 
     #GWV: removed fixed height restrictions but maximum height instead
@@ -167,15 +173,15 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
         self.residueDict[residue.sequenceCode] = newResidue
         i += 1
 
-class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
+
+class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
   fontSize = 20
 
   def __init__(self, parent, project, residue, scene, labelPosition, index, yPosition):
 
     QtGui.QGraphicsTextItem.__init__(self)
-    DropBase.__init__(self, project._appBase)
-    self.setAcceptDrops(True)
+    Base.__init__(self, acceptDrops=True)
 
     self.project = project
     self.residue = residue
@@ -210,7 +216,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
 
-
   def _styleResidue(self):
     """
     A convenience function for applying the correct styling to GuiChainResidues depending on their state.
@@ -221,7 +226,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     else:
       self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
 
-
   def _setFontBold(self):
     """
     Sets font to bold, necessary as QtGui.QGraphicsTextItems are used for display of residue
@@ -230,7 +234,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     format = QtGui.QTextCharFormat()
     format.setFontWeight(75)
     self.textCursor().mergeCharFormat(format)
-
 
   def _dragEnterEvent(self, event:QtGui.QMouseEvent):
     """
@@ -259,7 +262,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       item.setDefaultTextColor(QtGui.QColor(colour))
     event.accept()
 
-
   def processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
     Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
@@ -285,18 +287,18 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                              res.shortName+'</strong></div>')
-      if self._appBase is not None:
-        appBase = self._appBase
-      else:
-        appBase = self._appBase
-      if hasattr(appBase, 'backboneModule'):
-        nmrResidueTable = appBase.backboneModule.nmrResidueTable
-        nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
-        nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
-
-      event.accept()
-    self.parent.parent.overlay.hide()
-    self.project._appBase.sequenceGraph.resetSequenceGraph()
+    #   if self._appBase is not None:
+    #     appBase = self._appBase
+    #   else:
+    #     appBase = self._appBase
+    #   if hasattr(appBase, 'backboneModule'):
+    #     nmrResidueTable = appBase.backboneModule.nmrResidueTable
+    #     nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
+    #     nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
+    #
+    #   event.accept()
+    # self.parent.parent.overlay.hide()
+    # self.project._appBase.sequenceGraph.resetSequenceGraph()
 
 
 

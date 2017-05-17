@@ -1,3 +1,30 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 from PyQt4 import QtCore, QtGui
 
 import decimal
@@ -14,11 +41,12 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
+
 
 class ExcludeRegions(QtGui.QWidget):
-
   '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
-
   def __init__(self, parent=None,**kw):
     super(ExcludeRegions, self).__init__(parent)
 
@@ -139,12 +167,13 @@ class ExcludeRegions(QtGui.QWidget):
       else:
         widget1.deleteLater()
 
-class PickPeak1DPopup(QtGui.QDialog):
 
-  def __init__(self, parent=None, project=None,  **kw):
-    super(PickPeak1DPopup, self).__init__(parent)
-    self.project = project
-    self.mainWindow = parent
+class PickPeak1DPopup(CcpnDialog):
+  def __init__(self, mainWindow, title='Pick 1D Peak', **kw):
+    CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
     self.application = self.mainWindow.application
     self._setMainLayout()
     self._setTabs()
@@ -154,7 +183,6 @@ class PickPeak1DPopup(QtGui.QDialog):
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
     self.setLayout(self.mainLayout)
-    self.setWindowTitle("Pick Peak 1D")
     self.resize(300, 400)
 
   def _setTabs(self):

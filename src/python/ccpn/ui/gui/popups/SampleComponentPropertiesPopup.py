@@ -1,23 +1,25 @@
+"""
+Module Documentation here
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: luca $"
+__author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -30,6 +32,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
@@ -37,10 +40,14 @@ C_COMPONENT_UNIT = ['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
 Labelling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 
 
-class EditSampleComponentPopup(QtGui.QDialog):
+# class EditSampleComponentPopup(QtGui.QDialog):
+class EditSampleComponentPopup(CcpnDialog):
+  def __init__(self, parent=None, project=None
+               , sample=None, sampleComponent=None, newSampleComponent=False
+               , title='Edit Sample Component', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    # super(EditSampleComponentPopup, self).__init__(parent)
 
-  def __init__(self, parent=None, project=None, sample=None, sampleComponent=None, newSampleComponent=False, **kw):
-    super(EditSampleComponentPopup, self).__init__(parent)
     self.project = project
     self.sample = sample
     self.newSampleComponentToCreate = newSampleComponent

@@ -7,11 +7,17 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 
 class CopyPeaksModule(CcpnModule):
-  def __init__(self, project,  **kw):
+
+  includeSettingsWidget = False
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
+  className = 'CopyPeaksModule'
+
+  def __init__(self, mainWindow, name='Copy Peaks to PeakLists', **kw):
     super(CopyPeaksModule, self)
-    CcpnModule.__init__(self, name='Copy Peaks to PeakLists')
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.project = project
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name )
+    self.application = mainWindow.application
+    self.project = mainWindow.project
 
     self._setMainLayout()
     self._createWidgets()
@@ -24,7 +30,7 @@ class CopyPeaksModule(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification
     """
     self.__deregisterNotifiers()
-    self.close()
+    super(CopyPeaksModule, self)._closeModule()
 
   def __registerNotifiers(self):
     self.project.registerNotifier('Peak', 'create', self._refreshInputPeaksWidget, onceOnly=True)

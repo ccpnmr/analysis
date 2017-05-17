@@ -1,4 +1,6 @@
-"""Module Documentation here
+"""
+Module to assign peaks
+Responds to current.peaks
 
 """
 #=========================================================================================
@@ -36,10 +38,7 @@ from PyQt4 import QtGui
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib.AssignmentLib import ATOM_NAMES
-from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
-                                                      peaksAreOnLine,
-                                                      sameAxisCodes)
+from ccpn.core.lib.AssignmentLib import ATOM_NAMES, nmrAtomsForPeaks, peaksAreOnLine, sameAxisCodes
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -63,14 +62,18 @@ class PeakAssigner(CcpnModule):
   includeSettingsWidget = True
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
+  className = 'PeakAssigner'
 
-  def __init__(self, parent=None):
+  def __init__(self, mainWindow,  name="Peak Assigner"):
 
-    CcpnModule.__init__(self, parent=parent, name="Peak Assigner")
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    # inherited from CcpnModule:
-    # self.application, self.current, self.project, self.mainWindow
-    self.colourScheme = self.mainWindow.colourScheme
+    # Derive application, project, and current from mainWindow
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+    self.colourScheme = self.application.colourScheme
 
     self.listWidgets = []
     self.objectTables = []
@@ -104,7 +107,7 @@ class PeakAssigner(CcpnModule):
 
     # Main content widgets
     self.peakLabel = Label(self.mainWidget, text='Peak:', bold=True, grid=(0,0), vAlign='center', margins=[2,5,2,5])
-    self.selectionFrame = Frame(self.mainWidget, fShape='noFrame', grid=(1, 0), vAlign='top')
+    self.selectionFrame = Frame(self.mainWidget, showBorder=True, fShape='noFrame', grid=(1, 0), vAlign='top')
     self.selectionLayout = QtGui.QGridLayout()
     self.selectionLayout.setSpacing(0)
     self.selectionLayout.setContentsMargins(0, 0, 0, 0)
@@ -532,7 +535,7 @@ class PeakAssigner(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     self.project._appBase.current.unRegisterNotify(self._updateInterface, 'peaks')
-    self.close()
+    super(PeakAssigner, self)._closeModule()
 
 class NotOnLine(object):
   """

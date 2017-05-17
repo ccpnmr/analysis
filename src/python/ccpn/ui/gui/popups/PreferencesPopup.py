@@ -1,29 +1,26 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -41,12 +38,22 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
-class PreferencesPopup(QtGui.QDialog):
-  def __init__(self, parent=None, preferences=None, project=None, **kw):
-    super(PreferencesPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+# class PreferencesPopup(QtGui.QDialog, Base):
+class PreferencesPopup(CcpnDialog):
+  def __init__(self, parent=None, preferences=None, project=None, title='Preferences', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # super(PreferencesPopup, self).__init__(parent)
+    # Base.__init__(self, setLayout=True, **kw)
+
+    if not project:                                         # ejb - should always be loaded
+      MessageDialog.showWarning(title, 'No project loaded')
+      self.close()
+      return
+
     self.project = project
     self.preferences = preferences
     self.oldPreferences = preferences

@@ -1,28 +1,25 @@
-"""Module Documentation here
 """
-
+Module Documentation here
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:42 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: rhfogh $"
-
 __date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
 #=========================================================================================
 # Start of code
@@ -45,44 +42,48 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 from ccpn.util import Register
 from ccpn.util import Url
+
 
 SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 
-class SubmitMacroPopup(QtGui.QDialog):
-
+# class SubmitMacroPopup(QtGui.QDialog):
+class SubmitMacroPopup(CcpnDialog):
   # parent mandatory and that needs to have attributes _appBase and colourScheme
-  def __init__(self, parent, title='Submit Macro Form'):
-    QtGui.QDialog.__init__(self, parent=parent)
-    self.setWindowTitle(title)
+  def __init__(self, parent=None, title='Submit Macro Form', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # QtGui.QDialog.__init__(self, parent=parent)
+    # self.setWindowTitle(title)
 
+    self.setContentsMargins(5, 5, 5, 5)
     self._registrationDict = Register.loadDict()
 
-    frame = Frame(self)
+    # frame = Frame(self, setLayout=True)     # ejb
 
     row = 0
     for key in ('name', 'organisation', 'email'):
-      label = Label(frame, text='%s: ' % metaUtil.upperFirst(key), grid=(row,0))
-      label = Label(frame, text=self._registrationDict.get(key), grid=(row,1))
+      label = Label(self, text='%s: ' % metaUtil.upperFirst(key), grid=(row,0))
+      label = Label(self, text=self._registrationDict.get(key), grid=(row,1))
       row += 1
 
-    button = Button(frame, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
-    self.pathEntry = Entry(frame, maxLength=200, grid=(row,1))
+    button = Button(self, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
+    self.pathEntry = Entry(self, maxLength=200, grid=(row,1))
     row += 1
 
-    label = Label(frame, text='Keywords: ', grid=(row,0))
-    self.keywordsEntry = Entry(frame, grid=(row,1))
+    label = Label(self, text='Keywords: ', grid=(row,0))
+    self.keywordsEntry = Entry(self, grid=(row,1))
     row += 1
 
-    label = Label(frame, text='Description: ', grid=(row,0))
-    self.textEditor = TextEditor(frame, grid=(row,1))
+    label = Label(self, text='Description: ', grid=(row,0))
+    self.textEditor = TextEditor(self, grid=(row,1))
     row += 1
 
-    button = Button(frame, 'Submit', callback=self._submitMacro, grid=(row, 1))
+    button = Button(self, 'Submit', callback=self._submitMacro, grid=(row, 1))
 
   def _selectMacro(self):
     
@@ -141,3 +142,14 @@ class SubmitMacroPopup(QtGui.QDialog):
           msg, colourScheme=self.parent().colourScheme)
       
     self.hide()
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+
+  app = TestApplication()
+  popup = SubmitMacroPopup()
+
+  popup.show()
+  popup.raise_()
+
+  app.start()

@@ -80,127 +80,25 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 logger = getLogger()
 
-
-def doDebug(msg):
-  if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
-    sys.stderr.write(msg +'\n')
-
-def controlShiftLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('DEBUG mouse: Control-shift-left-Mouse event at %s' % event.pos())
-  return result
-
-def controlLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-left-Mouse event at %s' % event.pos())
-  return result
-
-def shiftLeftMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-left-Mouse event at %s' % event.pos())
-  return result
-
-def leftMouse(event:QtGui.QMouseEvent):
-  # Return True for left-Mouse event
-  result = event.button() == QtCore.Qt.LeftButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Left-Mouse event at %s' % event.pos())
-  return result
-
-def controlShiftRightMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-shift-right-Mouse event at %s' % event.pos())
-  return result
-
-def controlRightMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-right-Mouse event at %s' % event.pos())
-  return result
-
-def shiftRightMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-right-Mouse event at %s' % event.pos())
-  return result
-
-def rightMouse(event:QtGui.QMouseEvent):
-  # Return True for right-Mouse event
-  result = event.button() == QtCore.Qt.RightButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Right-Mouse event at %s' % event.pos())
-  return result
-
-def controlShiftMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-shift-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-shift-middle-Mouse event at %s' % event.pos())
-  return result
-
-def controlMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for control(cmd)-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Control-middle-Mouse event at %s' % event.pos())
-  return result
-
-def shiftMiddleMouse(event:QtGui.QMouseEvent):
-  # Return True for shift-middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
-    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
-  if result:
-    doDebug('Shift-middle-Mouse event at %s' % event.pos())
-  return result
-
-def middleMouse(event:QtGui.QMouseEvent):
-  # Return True for middle-Mouse event
-  result = event.button() == QtCore.Qt.MiddleButton \
-    and not event.modifiers()
-  if result:
-    doDebug('Middle-Mouse event at %s' % event.pos())
-  return result
+# GWV: moved to ccpn.ui.gui.lib.mouseEvents on 17/04/2017
+from ccpn.ui.gui.lib.mouseEvents import \
+  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 
 
-class CrossHair():
+class CrossHair:
   "class to implement a cross-hair"
 
-  def __init__(self, parent, position=Point(0,0), show=True, rgb=None, colour=None, **kwds):
+  def __init__(self, plotWidget, position=Point(0,0), show=True, rgb=None, colour=None, moveable=False, **kwds):
     """CrossHair init,
        stetting color, using rgb or colour, which-ever is
                        not None (default to grey) + optional **kwds
        setting visibility
-       add CrossHair to parent using addItem method
+       it adds CrossHair hLine and vLine plot items to parent using addItem method
     """
+    self.plotWidget = plotWidget
+
     if rgb:
       pen = pg.functions.mkPen(color=rgb, **kwds)
     elif colour:
@@ -208,22 +106,35 @@ class CrossHair():
     else:
       pen = pg.functions.mkPen(color=(129,129,129), **kwds)
 
-    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=pen)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=pen)
-    parent.addItem(self.vLine, ignoreBounds=True)
-    parent.addItem(self.hLine, ignoreBounds=True)
-    self._parent = parent
+    self.vLine = pg.InfiniteLine(angle=90, movable=moveable, pen=pen)
+    self.hLine = pg.InfiniteLine(angle=0, movable=moveable, pen=pen)
+    plotWidget.addItem(self.vLine, ignoreBounds=True)
+    plotWidget.addItem(self.hLine, ignoreBounds=True)
 
-    self.setPosition(position)
+    self.setPointPosition(position)
     if show:
       self.show()
     else:
       self.hide()
 
-  def setPosition(self, position):
-    self.vLine.setPos(position)
-    self.hLine.setPos(position)
-    self._position = position  # last set position
+  def setPosition(self, xPos:float, yPos:float):
+    "Set position in world xPos, yPos coordinates"
+    self.setVline(xPos)
+    self.setHline(yPos)
+
+  def setVline(self, xPos:float):
+    "Set vertical line in world xPos coordinates"
+    if xPos is not None:
+      self.vLine.setPos(xPos)
+
+  def setHline(self, yPos:float):
+    "Set horizontal  in world xPos coordinates"
+    if yPos is not None:
+      self.hLine.setPos(yPos)
+
+  def setPointPosition(self, position:QtCore.QPointF):
+    "Set position in Point syntax"
+    self.setPosition(position.x(), position.y())
 
   def show(self):
     #print(">> show")
@@ -247,19 +158,19 @@ class CrossHair():
 
 class ViewBox(pg.ViewBox):
   """
-  Base-class to implement mouse and drag events in in PlotWidget.py; it will inherit the same parent as PlotWidget
+  Base-class to implement mouse and drag events in PlotWidget.py;
+  it will inherit the same parent as PlotWidget
   """
-  sigClicked = QtCore.Signal(object)
 
-  def __init__(self, current=None, parent=None, *args, **kwds):
-    pg.ViewBox.__init__(self, *args, **kwds)
-    self.current = current
-    self.menu = None # Override pyqtgraph ViewBoxMenu
+  def __init__(self, strip):
+    pg.ViewBox.__init__(self)
+
+    # Override pyqtgraph ViewBoxMenu
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
-    self.current = current
-    self.parent = parent
+    self.strip = strip
+    self.current = strip.spectrumDisplay.mainWindow.application.current
 
-    # self.rbScaleBox: Native pyQTgraph; used for Zoom
+    # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
     self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
     self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
@@ -275,7 +186,6 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
 
-    self.project = current._project
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
@@ -316,10 +226,10 @@ class ViewBox(pg.ViewBox):
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
-    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
-    click events.
+    Re-implementation of PyQtGraph mouse click event to allow custom actions 
+    for different mouse click events.
     """
-    self.current.strip = self.parentObject().parent
+    self.current.strip = self.strip
     xPosition = self.mapSceneToView(event.pos()).x()
     yPosition = self.mapSceneToView(event.pos()).y()
     self.current.positions = [xPosition, yPosition]
@@ -386,7 +296,7 @@ class ViewBox(pg.ViewBox):
         self._resetBoxes()
         self._successiveClicks = Point(event.pos())
         position = self.mapSceneToView(event.pos())
-        self.crossHair.setPosition(position)
+        self.crossHair.setPointPosition(position)
         self.crossHair.show()
       else:
         self._setView(Point(self._successiveClicks), Point(event.pos()))
@@ -466,9 +376,9 @@ class ViewBox(pg.ViewBox):
     self.crossHair.hide()
 
   def _hoverEvent(self, event):
-    self.current.viewBox = self
     if hasattr(event, '_scenePos'):
-      self.position = self.mapSceneToView(event.pos())
+      position = self.mapSceneToView(event.pos())
+      self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """
@@ -497,8 +407,8 @@ class ViewBox(pg.ViewBox):
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     drag events.
     """
+    self.current.strip = self.strip
 
-    self.current.strip = self.parentObject().parent
     if leftMouse(event):
       # Left-drag: Panning of the spectrum
       pg.ViewBox.mouseDragEvent(self, event)
@@ -525,57 +435,6 @@ class ViewBox(pg.ViewBox):
 
         peaks = self.current.strip.peakPickRegion(selectedRegion)
         self.current.peaks = peaks
-
-        # minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
-        # peaks = list(self.current.peaks)
-        #
-        # for spectrumView in self.current.strip.spectrumViews:
-        #   if not spectrumView.isVisible():
-        #     continue
-        #   peakList = spectrumView.spectrum.peakLists[0]
-        #   if self.current.project._appBase.ui.mainWindow is not None:
-        #     mainWindow = self.current.project._appBase.ui.mainWindow
-        #   else:
-        #     mainWindow = self.current.project._appBase._mainWindow
-        #   console = mainWindow.pythonConsole
-        #
-        #   if spectrumView.spectrum.dimensionCount > 1:
-        #     sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-        #     spectrumAxisCodes = spectrumView.spectrum.axisCodes
-        #     stripAxisCodes = self.current.strip.axisCodes
-        #     sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
-        #
-        #     remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-        #     for n, axisCode in enumerate(spectrumAxisCodes):
-        #       # idx = stripAxisCodes.index(axisCode)
-        #       idx = remapIndices[n]
-        #       sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-        #     newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-        #                                     doPos=spectrumView.displayPositiveContours,
-        #                                     doNeg=spectrumView.displayNegativeContours,
-        #                                     fitMethod='gaussian', minDropfactor=minDropfactor)
-        #   else:
-        #     # 1D's
-        #     y0 = startPosition.y()
-        #     y1 = endPosition.y()
-        #     y0, y1 = min(y0, y1), max(y0, y1)
-        #     newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
-        #
-        #   # Add the new peaks to selection
-        #   #for peak in newPeaks:
-        #   #  # peak.isSelected = True
-        #   #  self.current.addPeak(peak)
-        #   peaks.extend(newPeaks)
-        #
-        # self.current.peaks = peaks
-        #
-        # for spectrumView in self.current.strip.spectrumViews:
-        #   for window in self.current.project.windows:
-        #     for spectrumDisplay in window.spectrumDisplays:
-        #       for strip in spectrumDisplay.strips:
-        #         spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
-        #         if peakList.spectrum in spectra:
-        #           strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
       # Control(Cmd)+left drag: selects peaks
@@ -645,6 +504,7 @@ class ViewBox(pg.ViewBox):
                     #self.current.addPeak(peak)
                     peaks.append(peak)
         self.current.peaks = peaks
+
     elif controlMiddleMouse(event):
       # Control(Cmd)+middle drag: move a selected peak
 
@@ -653,7 +513,9 @@ class ViewBox(pg.ViewBox):
       peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
       if not peaks:
         return
-      if len(peaks) != 1:
+      if len(peaks) == 1:
+        peak = peaks[0]
+      else:
         if event.isFinish():
           logger.warn('Can only move one peak at a time')
         return
@@ -665,36 +527,39 @@ class ViewBox(pg.ViewBox):
       deltaPosition = endPosition - startPosition
       deltaPosition = deltaPosition.x(), deltaPosition.y()
 
-      project = peaks[0].project
+      project = peak.project
       undo = project._undo
 
-      if not hasattr(peaks[0], 'startPosition'):
+      if not hasattr(peak, 'startPosition'):
         # start of move
-        undo.newWaypoint()
+        project.newUndoPoint()
         undo.increaseBlocking()
+        project.blankNotification()
 
       try:
-        for peak in peaks:
-          if not hasattr(peak, 'startPosition'):
-            peak.startPosition = peak.position
-          indices = peakListToIndicesDict[peak.peakList]
-          position = list(peak.startPosition)
-          for n, index in enumerate(indices):
-            position[index] += deltaPosition[n]
-          peak.position = position
+        if not hasattr(peak, 'startPosition'):
+          peak.startPosition = peak.position
+        indices = peakListToIndicesDict[peak.peakList]
+        position = list(peak.startPosition)
+        for n, index in enumerate(indices):
+          position[index] += deltaPosition[n]
+        peak.position = position
 
-      finally:
+      except:
+          undo.decreaseBlocking()
+          project.unblankNotification()
+
+      else:
         if event.isFinish():
           undo.decreaseBlocking()
-          for peak in peaks:
-            if hasattr(peak, 'startPosition'):
-              undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
-                           redoArgs=[peak, 'position', peak.position])
-              delattr(peak, 'startPosition')
-            # project._modifiedApiObject(peak._wrappedData)
-            peak._finaliseAction('change')
-            project._appBase.ui.echoCommands(
-              ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
+          project.unblankNotification()
+          if hasattr(peak, 'startPosition'):
+            undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+                         redoArgs=[peak, 'position', peak.position])
+            delattr(peak, 'startPosition')
+          peak._finaliseAction('change')
+          project._appBase.ui.echoCommands(
+            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
 
     elif middleMouse(event) or \
@@ -731,10 +596,11 @@ class ViewBox(pg.ViewBox):
     ax = QtCore.QRectF(point1, point2)
     ax = self.childGroup.mapRectFromParent(ax)
     self.showAxRect(ax)
-    # This was copied from pyqtgraph viewbox, but appears a oddly
+    # GWV: This was copied from pyqtgraph viewbox, but appears a oddly
     # implemented zoom stack, which could amount to a memory leak
     #self.axHistoryPointer += 1
     #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+
 
 def _peaksVisibleInStrip(peaks, strip):
 

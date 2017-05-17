@@ -26,19 +26,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtGui
 
 from ccpn.core.Chain import Chain
-from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
-from ccpn.core.lib.AssignmentLib import getNmrResiduePrediction, getNmrAtomPrediction
+from ccpn.core.lib.AssignmentLib import CCP_CODES,  getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 
+import sys
 
-class NmrResiduePopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, **kw):
-    super(NmrResiduePopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+class NmrResiduePopup(CcpnDialog):
+  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, title='Nmr Residues', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    # super(NmrResiduePopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+
     self.setStyleSheet("border: 0px solid")
     self.parent = parent
     self.project = nmrResidue.project
@@ -60,18 +65,25 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
     applyButton = Button(self, grid=(6, 1), text='Apply', callback=self._assignResidue)
+    closeButton = Button(self, grid=(6, 2), text='Close', callback=self.reject)
 
     self._updatePopup(nmrResidue)
 
 
   def _getResidueTypeProb(self, currentNmrResidue):
-    predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
-    preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
-    predictedTypes = [x[0] for x in predictions]
-    remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
-    possibilities = [currentNmrResidue.residueType]+preds1+remainingResidues
-    self.residueTypePulldown.setData(possibilities)
+    try:
+      self.project.chemicalShiftLists[0]
+    except Exception:
+      getLogger().warning('No chemicalShiftLists in project.')
+      return
 
+    if len(self.project.chemicalShiftLists[0]) > 0:
+      predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
+      preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
+      predictedTypes = [x[0] for x in predictions]
+      remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
+      possibilities = [currentNmrResidue.residueType]+preds1+remainingResidues
+      self.residueTypePulldown.setData(possibilities)
 
   def _updatePopup(self, nmrResidue):
     if nmrResidue is not None:

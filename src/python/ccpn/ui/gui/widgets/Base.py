@@ -1,5 +1,9 @@
-"""Module Documentation here
+"""
+Base class for gridding, optionally setting up size policies and layout,
+optionally inserting itself into parent using keyword, grid, gridspan, hAlign, vAlign
 
+The proper way for adding widgets explicitly is:
+widget.getLayout().addWidget(row, col, [rowspan, [colspan])
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -29,15 +33,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
-
-from ccpn.framework.Translation import Translation
-
 from pyqtgraph.dockarea import Dock
+from ccpn.ui.gui.widgets.DropBase import DropBase
+
+from ccpn.util.Logging import getLogger
 
 HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
   'right': QtCore.Qt.AlignRight,
   'center': QtCore.Qt.AlignHCenter,
+  'centre': QtCore.Qt.AlignHCenter,
   'l': QtCore.Qt.AlignLeft,
   'r': QtCore.Qt.AlignRight,
   'c': QtCore.Qt.AlignHCenter,
@@ -63,28 +68,41 @@ POLICY_DICT = {
   'ignored': QtGui.QSizePolicy.Ignored,
 }
 
-FRAME_DICT = {
-  # Shadow
-  'plain': QtGui.QFrame.Plain,
-  'raised': QtGui.QFrame.Raised,
-  'sunken': QtGui.QFrame.Sunken,
-  # Shapes
-  'noFrame': QtGui.QFrame.NoFrame,
-  'box': QtGui.QFrame.Box,
-  'panel': QtGui.QFrame.Panel,
-  'styledPanel': QtGui.QFrame.StyledPanel,
-  'hLine': QtGui.QFrame.HLine,
-  'vLine': QtGui.QFrame.VLine,
-}
 
+class Base(DropBase):
 
-class Base():
+  def __init__(self, isFloatWidget=False,
+                     tipText=None,
+                     bgColor=None, fgColor=None,
 
-  def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
-               hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
-               fShape=None, fShadow=None,
-               bgColor=None, fgColor=None,
-               isFloatWidget=False):
+                     # keywords related to optional layout
+                     setLayout=False,
+                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(0,0),
+
+                     # keywords for adding to parent
+                     grid=(None, None), gridSpan=(1,1), stretch=(0,0),
+                     hAlign=None, vAlign=None,
+
+                     # keywords related to dropable properties
+                     acceptDrops=False,
+               ):
+    """
+    
+    :param tipText:  add tiptext to widget
+    :param grid:     insert widget at (row,col) of parent layout (if available)
+    :param gridSpan: extend widget over (rows,cols); default (1,1)
+    :param stretch:  stretch factor (row,col) of widget; default (0, 0)
+    :param hAlign:   horizontal alignment: left, right, centre (center, l, r, c)
+    :param vAlign:   vertical alignment: top, bottom, centre (center, t, b. c)
+    :param hPolicy:  horizontal policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
+    :param vPolicy:  vertical policy of widget: fixed, minimum, maximum, preferred, expanding, minimumExpanding, ignored
+    :param bgColor:  background RGB colour tuple; depreciated: use styleSheet routines instead
+    :param fgColor:  foreground RGB colour tuple; depreciated: use styleSheet routines instead
+    :param isFloatWidget: indicates widget to be floating
+    """
+
+    # define the 'droppable' methods
+    DropBase.__init__(self, acceptDrops=acceptDrops)
 
     # Tool tips
     if tipText:
@@ -93,87 +111,105 @@ class Base():
     if isinstance(self, Dock):
       return
 
-    parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
-    # print('parent',parent)
-    if parent and not isFloatWidget:
-      # Setup gridding within parent
-      if isinstance(parent, Dock):
-        layout = parent.widgetArea.layout()
-      else:
-        layout = parent.layout()
-      if not layout:
-        layout = QtGui.QGridLayout(parent)
-        # layout.setSpacing(2)
-
-        # setContentsMargin(left, top, right, bottom)
-        #layout.setContentsMargins(2,2,2,2)
-        layout.setContentsMargins(1,1,1,1)
-        layout.setContentsMargins(0, 0, 0, 0)
-        parent.setLayout( layout )
-      if isinstance(layout, QtGui.QGridLayout):
-        row, col = self._getRowCol(grid)
-        rowStr, colStr = stretch
-        layout.setRowStretch(row, rowStr)
-        layout.setColumnStretch(col, colStr)
-
-        rowSpan, colSpan = gridSpan
-        hAlign = HALIGN_DICT.get(hAlign, 0)
-
-        vAlign = VALIGN_DICT.get(vAlign, 0)
-        align = hAlign | vAlign
-        layout.addWidget(self, row, col, rowSpan, colSpan, QtCore.Qt.Alignment(align))
-
     if hPolicy or vPolicy:
       hPolicy = POLICY_DICT.get(hPolicy, 0)
       vPolicy = POLICY_DICT.get(vPolicy, 0)
       self.setSizePolicy(hPolicy, vPolicy)
 
     # Setup colour overrides (styles used primarily)
+    ##3 depreciated
     if bgColor:
       self.setAutoFillBackground(True)
-      rgb = QtGui.QColor(bgColor).getRgb()[:3]
-      self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
+      #rgb = QtGui.QColor(bgColor).getRgb()[:3]
+      self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  bgColor)
 
     if fgColor:
       self.setAutoFillBackground(True)
-      rgb = QtGui.QColor(fgColor).getRgb()[:3]
-      self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  rgb)
+      #rgb = QtGui.QColor(fgColor).getRgb()[:3]
+      self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  fgColor)
 
-    # define frame styles
-    if fShape or fShadow:
-      """
-      Define frame properties:
-      TODO: GWV: routine is called but appears not to change much in the appearance
-      """
-      shape = FRAME_DICT.get(fShape, QtGui.QFrame.NoFrame)
-      shadow = FRAME_DICT.get(fShadow, 0)
-      #print('Base.framestyle>', shape | shadow)
-      self.setFrameStyle(shape | shadow)
-      self.setMidLineWidth(2)
+    if setLayout:
+      self.setGridLayout(margins=margins, spacing=spacing)
 
-  def _getRowCol(self, grid):
+    # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
+    # or grid[1] (vertical) are defined
+    if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
+      self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
+                        hAlign=hAlign, vAlign=vAlign)
 
-    if isinstance(self.parent(), Dock):
-      layout = self.parent().layout
+  def setGridLayout(self, margins=(0,0,0,0), spacing=(0,0)):
+    "Add a QGridlayout to self"
+    layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
+                                    # layout, we are going to add one
+    if layout is None:
+      layout = QtGui.QGridLayout(self)
+      layout.setContentsMargins(*margins)
+      layout.setHorizontalSpacing(spacing[0])
+      layout.setVerticalSpacing(spacing[1])
+      self.setLayout(layout)
     else:
-      layout = self.parent().layout()
+      getLogger().warning('Widget %s already has a layout!' % self)
 
+  def getLayout(self):
+    "return the layout of self"
+    layout = self._getLayout(self)
+    if layout is None:
+      getLogger().warning('Unable to query layout of %s' % self)
+    return layout
+
+  @staticmethod
+  def _getLayout(widget):
+    "return the layout of widget"
+    layout = None
+    try:
+      layout = QtGui.QWidget.layout(widget)
+    except:
+      pass
+    return layout
+
+  def _addToParent(self, grid, gridSpan, stretch, hAlign, vAlign):
+    "Add widget to parent of self (if can be obtained)"
+
+    parent = self.parent() if hasattr(self, 'parent') else None # Not all Qt objects have a parent
+    if parent is None:
+      getLogger().warning('No parent: Cannot add widget %s (grid=%s)' % (self,grid))
+      return
+
+    # have to use _getLayout() functionality as not all widget descend from Base;
+    layout = self._getLayout(parent)
+    if layout is None:
+      getLogger().warning('No layout for parent widget %s of %s' % (parent,self))
+      return
+
+    if isinstance(layout, QtGui.QGridLayout):
+      row, col = self._getRowCol(layout, grid)
+      rowStr, colStr = stretch
+      layout.setRowStretch(row, rowStr)
+      layout.setColumnStretch(col, colStr)
+
+      rowSpan, colSpan = gridSpan
+      hAlign = HALIGN_DICT.get(hAlign, 0)
+
+      vAlign = VALIGN_DICT.get(vAlign, 0)
+      align = hAlign | vAlign
+      layout.addWidget(self, row, col, rowSpan, colSpan, QtCore.Qt.Alignment(align))
+
+  @staticmethod
+  def _getRowCol(layout, grid):
+    "Returns (row, col) tuple from layout, using grid or using current rowCount"
+    if layout is None:
+      getLogger().warning('Layout is None, cannot get (row, col) tuple')
+      return (0, 0)
     if grid:
       row, col = grid
       if row is None:
-        row = 1
-
+        row = 0
       if col is None:
-        col = 1
+        col = 0
     else:
       row = layout.rowCount()
       col = 0
-
     return row, col
-
-
-
-
 
 
  

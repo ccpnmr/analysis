@@ -29,24 +29,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from typing import Sequence
+
+from PyQt4 import QtCore
 
 from ccpn.core.Project import Project
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from typing import Sequence
-from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
 
-  def __init__(self):
+  def __init__(self, mainWindow, name):
     # if not apiSpectrumDisplay1d.strips:
     #   apiSpectrumDisplay1d.newStrip1d()
 
-    GuiSpectrumDisplay.__init__(self)
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
     self._fillToolBar()
     # self.addSpinSystemSideLabel()
     self.setAcceptDrops(True)
@@ -64,7 +64,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     """
 
     # NB should not be imported at top of file to avoid potential cyclic imports
-    from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
+    from ccpn.ui.gui.modules import GuiPeakListView
 
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
@@ -98,14 +98,14 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     Adds specific icons for 1d spectra to the spectrum utility toolbar.
     """
     spectrumUtilToolBar = self.spectrumUtilToolBar
-    spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64))
+    #spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor
 
-    GuiSpectrumDisplay._fillToolBar(self)
-
+    # GWV: removed: GuiSpectrumDisplay._fillToolBar(self)
+    #TODO: See Nd case on how to do this better
 
     # Disable add and remove strips, as they're broken
-    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-    spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
     # spectrumUtilToolBar.actions()[0].setDisabled(True)
 
     # Why does asking for the icon size fix it?  I don't know, but it does!

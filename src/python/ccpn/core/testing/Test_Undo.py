@@ -11,18 +11,16 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:35 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:47 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -44,7 +42,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_make_chain_undo(self):
     project = self.project._wrappedData.root
     project._undo = Undo()
-    project._undo.newWaypoint()
+    self.project.newUndoPoint()
     molSystem = project.findFirstMolSystem(code='MS1')
     chainA = molSystem.findFirstChain(code='A')
     self.project.blankNotification()
@@ -58,7 +56,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_make_chain_undo_redo(self):
     project = self.project._wrappedData.root
     project._undo = Undo()
-    project._undo.newWaypoint()
+    self.project.newUndoPoint()
     molSystem = project.findFirstMolSystem(code='MS1')
     chainA = molSystem.findFirstChain(code='A')
     self.project.blankNotification()
@@ -74,7 +72,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_copy_chain_undo(self):
     apiProject = self.project._wrappedData.root
     apiProject._undo = Undo()
-    apiProject._undo.newWaypoint()
+    self.project.newUndoPoint()
     molSystem = apiProject.findFirstMolSystem(code='MS1')
     apiChainA = molSystem.findFirstChain(code='A')
     chainA = self.project._data2Obj.get(apiChainA)
@@ -85,7 +83,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_copy_chain_undo_redo(self):
     apiProject = self.project._wrappedData.root
     apiProject._undo = Undo()
-    apiProject._undo.newWaypoint()
+    self.project.newUndoPoint()
     molSystem = apiProject.findFirstMolSystem(code='MS1')
     apiChainA = molSystem.findFirstChain(code='A')
     chainA = self.project._data2Obj.get(apiChainA)
@@ -97,7 +95,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_residues_undo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       residues = molSystem.findFirstChain(code='A').sortedResidues()
       residues[22].delete()
@@ -110,7 +108,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_residues_undo_redo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       residues = molSystem.findFirstChain(code='A').sortedResidues()
       residues[22].delete()
@@ -124,7 +122,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_chain_undo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       chain = molSystem.findFirstChain(code='A')
       chain.delete()
@@ -134,7 +132,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_chain_undo_redo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       chain = molSystem.findFirstChain(code='A')
       chain.delete()
@@ -145,7 +143,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_molSystem_undo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       molSystem.delete()
       project._undo.undo()
@@ -154,7 +152,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_molSystem_undo_redo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       molSystem = project.findFirstMolSystem(code='MS1')
       molSystem.delete()
       project._undo.undo()
@@ -164,7 +162,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_resonances_undo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       resonances = project.findFirstNmrProject().sortedResonances()
       for ii in range(1,10):
         resonances[ii].delete()
@@ -175,7 +173,7 @@ class ComplexUndoTest(WrapperTesting):
   def test_delete_resonances_undo_redo(self):
       project = self.project._wrappedData.root
       project._undo = Undo()
-      project._undo.newWaypoint()
+      self.project.newUndoPoint()
       resonances = project.findFirstNmrProject().sortedResonances()
       for ii in range(1,10):
         resonances[ii].delete()

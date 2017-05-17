@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     def __init__(self, parent=None):
 
-      BasePopup.__init__(self, parent, 'Test Popup', modal=False)
+      BasePopup.__init__(self, parent, 'Test Popup', modal=False, setLayout=True)
 
       self.setGeometry(600, 400, 50, 50)
       
@@ -153,6 +153,8 @@ if __name__ == '__main__':
 
   popup = None
   window = QtGui.QWidget()
+  layout = QtGui.QGridLayout()
+  window.setLayout(layout)
 
   def new():
 

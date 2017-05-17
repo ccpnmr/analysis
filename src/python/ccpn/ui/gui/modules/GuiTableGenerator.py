@@ -52,7 +52,8 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       self.unitPulldown = unitPulldown
       self._getColumns(columns, tipTexts)
       self.tipTexts = tipTexts
-      self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], actionCallback=actionCallback,
+      self.table = ObjectTable(parent=self, columns=self._getColumns(columns, tipTexts),
+                               objects=[], actionCallback=actionCallback,
                                multiSelect=multiSelect, selectionCallback=selectionCallback,
                                grid=(0, 0), gridSpan=(1, 5))
 

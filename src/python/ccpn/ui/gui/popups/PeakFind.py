@@ -39,12 +39,16 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Widget import Widget
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-class PeakFindPopup(QtGui.QDialog, Base):
+class PeakFindPopup(CcpnDialog):
+# class PeakFindPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, current=None, **kw):
-    super(PeakFindPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
+    # super(PeakFindPopup, self).__init__(parent)
+    # Base.__init__(self, **kw)
+
     self.project = project
     self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
@@ -70,8 +74,6 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
     self.checkBox3.setChecked(True)
     self._updateContents()
-
-
 
     self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                                 callbacks=[self.reject, self._pickPeaks])

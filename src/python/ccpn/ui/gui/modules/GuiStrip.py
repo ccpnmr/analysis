@@ -22,125 +22,137 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-import pyqtgraph as pg
-from functools import partial
-
-from PyQt4 import QtGui, QtCore
-
-from ccpn.core.Project import Project
-from ccpn.core.PeakList import PeakList
-from ccpn.core.Peak import Peak
-
-from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
-from ccpn.ui.gui.widgets.Widget import Widget
-
-from ccpn.util.Colour import Colour
-from ccpn.util import Ticks
 import typing
 
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
+import pyqtgraph as pg
+from PyQt4 import QtGui, QtCore, QtOpenGL
+
+from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Project import Project
+from ccpn.core.lib.Notifiers import Notifier
+
+from ccpn.ui.gui.guiSettings import textFontSmall
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
-# def _sufficientlyDifferentWidth(region1, region2):
-#
-#   w1 = abs(region1[1] - region1[0])
-#   w2 = abs(region2[1] - region2[0])
-#   d = abs(w1 - w2)
-#
-#   return d > 1.0e-5 * max(w1, w2)
-#
-# def _scaleRegion(otherPreviousRegion, region, previousRegion):
-#
-#   otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
-#   regionWidth = abs(region[1] - region[0])
-#   previousRegionWidth = abs(previousRegion[1] - previousRegion[0])
-#
-#   otherRegionWidth = otherPreviousRegionWidth * regionWidth / previousRegionWidth
-#   otherRegionPosition = 0.5 * (otherPreviousRegion[1] + otherPreviousRegion[0])
-#
-#   return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
-  
-class GuiStrip(Widget): # DropBase needs to be first, else the drop events are not processed
 
-  sigClicked = QtCore.Signal(object, object)
+from ccpn.util import Ticks
+from ccpn.util.Colour import Colour
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
-  def __init__(self, useOpenGL=False):
-    
-    self.stripFrame = self._parent.stripFrame
-    self.guiSpectrumDisplay = self._parent  # NBNB TBD is it worth keeping both?
+from ccpn.util.Logging import getLogger
 
-    Widget.__init__(self)
-    # DropBase.__init__(self, self._parent._appBase)
-    # DropBase.__init__(self, self._parent._appBase, self.dropCallback)
-    self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
-                                 useOpenGL=useOpenGL, strip=self)
-              # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
-    # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
-    self.stripFrame.layout().addWidget(self.plotWidget, 0,
-                                       self.guiSpectrumDisplay.orderedStrips.index(self))
 
-    self._appBase = self._parent._appBase
-    self.current = self._appBase.current
+class GuiStrip(Frame):
 
-    self.colourScheme = self._appBase.colourScheme
-    if self.colourScheme == 'light':
-      self.background = '#f7ffff'
-      self.foreground = '#080000'
-      self.gridColour = '#080000'
-    else:
-      self.background = '#080000'
-      self.foreground = '#f7ffff'
-      self.gridColour = '#f7ffff'
-    self.plotWidget.setBackground(self.background)
+  def __init__(self, spectrumDisplay, useOpenGL=False):
+    """
+    Basic strip class; used in StripNd and Strip1d
 
-    self.current.registerNotify(self._highlightCurrentStrip, 'strips')
+    :param spectrumDisplay: spectrumDisplay instance
+
+    This module inherits attributes from the Strip wrapper class:
+    Use clone() method to make a copy
+    """
+
+    # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
+    # self.spectrumDisplay = spectrumDisplay
+    self.mainWindow = self.spectrumDisplay.mainWindow
+    self.application = self.mainWindow.application
+    self.current = self.application.current
+
+    print('GuiStrip>>> spectrumDisplay:', self.spectrumDisplay)
+    Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
+                         acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                  )
+
+    # it appears to be required to explicitly set these, otherwise
+    # the Widget will not fill all available space
+    ###self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    # The strip is responsive on restore to the contentMargins set here
+    self.setContentsMargins(5, 0, 5, 0)
+    self.setMinimumWidth(250)
+    self.setMinimumHeight(200)
+
+    self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
+                                 showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)
+    self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    # GWV: plotWidget appears not to be responsive to contentsMargins
+    self.plotWidget.setContentsMargins(10, 30, 10, 30)
+    self.getLayout().addWidget(self.plotWidget, 1, 0)
+
+    # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
+    # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
+    self._stripToolBarWidget = Widget(parent=self, setLayout=True,
+                                      hPolicy='expanding',
+                                      grid=(2, 0)
+                                      )
+    self._stripToolBarWidget.setFixedHeight(30)
+
+    # Widgets for _stripIdLabel and _stripLabel
+    self._labelWidget = Widget(parent=self, setLayout=True,
+                                     hPolicy='expanding', vAlign='center',
+                                     grid=(0, 0)
+                                    )
+    self._labelWidget.setFixedHeight(34)
+
+    # display and pid
+    #TODO:GEERTEN correct once pid has been reviewed
+    self._stripIdLabel = Label(parent=self._labelWidget,
+                               text='.'.join(self.id.split('.')[2:]),
+                               grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    self._stripIdLabel.setFont(textFontSmall)
+
+    # Displays a draggable label for the strip
+    #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
+    self._stripLabel = _StripLabel(parent=self._labelWidget,
+                                   text='test',
+                                   grid=(2,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    self._stripLabel.setFont(textFontSmall)
+    self.hideStripLabel()
+
+    # A label to display the cursor positions (updated by _showMousePosition)
+    self._cursorLabel = Label(parent=self._labelWidget,
+                               text='',
+                               grid=(0,2), gridSpan=(1,2),
+                               hAlign='right', vAlign='center', hPolicy='minimum', vPolicy='expanding')
+    self._stripIdLabel.setFont(textFontSmall)
+
+    # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
-    self.plotItem.parent = self
-    self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
     self.viewBox = self.plotItem.vb
+
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
 
-    self._appBase.project.registerNotifier('Peak', 'create', self._updateDisplayedPeaks)
-
-
-    #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
-    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[0].code)
-    #self.yAxis = Axis(self.plotWidget, orientation='left', #pen=self.foreground,
-    #                  viewBox=self.viewBox, axisCode=self.orderedAxes[1].code)
-
-    for orientation in ('left', 'top'):
-      axisItem = self.plotItem.axes[orientation]['item']
-      axisItem.hide()
-    for orientation in ('right', 'bottom'):
-      axisItem = self.plotItem.axes[orientation]['item']
-      axisItem.setPen(color=self.foreground)
-    self.gridShown = True
-
-
-    # self.viewBox.sigClicked.connect(self._mouseClicked)
-    self.grid = CcpnGridItem(self.gridColour)
-    self.plotWidget.addItem(self.grid)
-    self.setMinimumWidth(200)
-    self._createCrossHair()
-    self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
+    self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
+    self._showCrossHair()
+    # callbacks
+    ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
     self.storedZooms = []
     
     self.beingUpdated = False
     self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
-    
+
+    # need to keep track of mouse position because Qt shortcuts don't provide
+    # the widget or the position of where the cursor is
     self.axisPositionDict = {}  # axisCode --> position
-    # need to keep track of mouse position because Qt shortcuts don't provide the widget or the position of where the cursor is
-    
+
     self.vRulerLineDict = {}  # ruler --> vertical line for that ruler
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
     self.rulerLabelDict = {}  # ruler --> label for that ruler
@@ -161,37 +173,77 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
     self.haveSetVPhasingPivot = False
 
-    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setPosition')
-    # Notifiers.registerNotify(self._axisRegionUpdated, 'ccpnmr.gui.Task.Axis', 'setWidth')
-    # Notifiers.registerNotify(self.rulerCreated, 'ccpnmr.gui.Task.Ruler', '__init__')
-    # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
+    # notifier for highlighting the strip
+    self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+    # Notifier for updating the peaks
+    self._peakNotifier = Notifier(self.project, [Notifier.CREATE], 'Peak', self._updateDisplayedPeaks)
+    # Notifier for change of stripLabel
+    self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
+    #self._stripNotifier.setDebug(True)
+    #self._peakNotifier.setDebug(True)
 
+    # For now, all dropevents are not strip specific, use spectrumDisplay's
+    # handling
+    self._droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self.spectrumDisplay._processDroppedItems)
 
-  def _updateDisplayedPeaks(self, peak):
-    self.showPeaks(peak.peakList)
+    self.show()
+
+  @property
+  def gridIsVisible(self):
+    "True if grid is visible"
+    return self.plotWidget.grid.isVisible()
+
+  @property
+  def crossHairIsVisible(self):
+    "True if crosshair is visible"
+    return self.plotWidget.crossHair1.isVisible()
+
+  @property
+  def pythonConsole(self):
+    return self.mainWindow.pythonConsole
+
+  def getStripLabel(self):
+    """Return the stripLabel widget"""
+    return self._stripLabel
+
+  def setStripLabelText(self, text: str):
+    """set the text of the _stripLabel"""
+    if text is not None:
+      self._stripLabel.setText(text)
+
+  def getStripLabelText(self) -> str:
+    """return the text of the _stripLabel"""
+    return self._stripLabel.text()
+
+  def showStripLabel(self, doShow: bool=True):
+    """show / hide the _stripLabel"""
+    self._stripLabel.setVisible(doShow)
+
+  def hideStripLabel(self):
+    "Hide the _stripLabel; convienience"
+    self._stripLabel.setVisible(False)
+
+  def _updateStripLabel(self, callbackDict):
+    "Update the striplabel if it represented a NmrResidue that has changed its id"
+    text = self.getStripLabelText()
+    if callbackDict['oldPid'] == text:
+      self.setStripLabelText(callbackDict['object'].pid)
 
   def _unregisterStrip(self):
-    self.current.unRegisterNotify(self._highlightCurrentStrip, 'strips')
-    self._appBase.project.unRegisterNotifier('Peak', 'create', self._updateDisplayedPeaks)
+    self._stripNotifier.unRegister()
+    self._peakNotifier.unRegister()
+    self._stripLabelNotifier.unRegister()
+    self._droppedNotifier.unRegister()
 
-  def _highlightCurrentStrip(self, strips=None):
+  def _updateDisplayedPeaks(self, data):
+    "Callback when peaks have changed"
+    self.showPeaks(data['object'].peakList)
 
-    if self._appBase.colourScheme == 'light':
-      axisColour = '#3333ff'
-    elif self._appBase.colourScheme == 'dark':
-      axisColour = '#00ff00'
-    else:
-      return
-
-    # if self is self.current.strips[0]:
-    if self is self.current.strip:
-      for orientation in ('right', 'bottom'):
-        axisItem = self.plotItem.axes[orientation]['item']
-        axisItem.setPen(color=axisColour)
-    else:
-      for orientation in ('right', 'bottom'):
-        axisItem = self.plotItem.axes[orientation]['item']
-        axisItem.setPen(color=self.foreground)
+  def _highlightCurrentStrip(self, data):
+    "Callback to highlight the axes of current strip"
+    self.plotWidget.highlightAxes(self is self.current.strip)
 
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
@@ -226,7 +278,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
     fontsize = 10
     for n, tick in enumerate(xMajorTicks):
-      if self.grid.isVisible():
+      if self.plotWidget.grid.isVisible():
         printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
       printer.writeLine(tick, printer.y0, tick, printer.y0+xTickHeight)
       text = xMajorText[n]
@@ -237,34 +289,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       printer.writeLine(printer.x0, printer.y1-tick, printer.x0+0.5*yTickHeight, printer.y1-tick)
 
     for n, tick in enumerate(yMajorTicks):
-      if self.grid.isVisible():
+      if self.plotWidget.grid.isVisible():
         printer.writeLine(printer.x0, printer.y1-tick, printer.x1, printer.y1-tick, colour='#888888')
       printer.writeLine(printer.x0, printer.y1-tick, printer.x0+yTickHeight, printer.y1-tick)
       text = yMajorText[n]
       printer.writeText(text, printer.x0+yTickHeight+0.5*fontsize*0.7, printer.y1-tick+0.5*fontsize)
-
-  # def addStrip(self):
-  #
-  #   newStrip = self.strips[0].clone()
-  #   print('spectrumViews', newStrip.spectrumViews)
-  #   for spectrumView in newStrip.spectrumViews:
-  #     spectrumView.connectStrip(newStrip)
-
-
-  #
-  #
-  # def setupAxes(self):
-  #
-  #   # this is called from GuiSpectrumView because the axes are not ready when the strip is created
-  #   # TBD: but that means this is called for every spectrum in the strip, which is not what we want
-  #   self.viewBox.setXRange(*self.orderedAxes[0].region)
-  #   self.viewBox.setYRange(*self.orderedAxes[1].region)
-  #   self.xAxisTextItem = AxisTextItem(self.plotWidget, orientation='top',
-  #                                 axisCode=self.orderedAxes[0].code)
-  #   self.yAxisTextItem = AxisTextItem(self.plotWidget, orientation='left',
-  #                                 axisCode=self.orderedAxes[1].code)
-  #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
-  #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
   def _newPhasingTrace(self):
     for spectrumView in self.spectrumViews:
@@ -356,8 +385,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       spectrumView._changedPhasingDirection()
       
   def _updatePhasing(self):
-    #colour = '#ffffff' if self.background == 'k' else '#000000'
-    colour = '#e4e15b' if self._appBase.colourScheme == 'dark' else '#000000'
+    #
+    # TODO:GEERTEN: Fix with proper stylesheet
+    colour = '#e4e15b' if self.application.colourScheme == 'dark' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
@@ -365,9 +395,10 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       
   def _updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
-    
     # this code is complicated because need to keep viewBox region and axis region in sync
     # and there can be different viewBoxes with the same axis
+
+    if not self._finaliseDone: return
 
     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
 
@@ -383,16 +414,20 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       maxDiff = abs(r1[1] - r2[1])
       return (minDiff > tol) or (maxDiff > tol)
 
+    if not self._finaliseDone: return
+
     yRange = list(self.viewBox.viewRange()[1])
-    for strip in self.guiSpectrumDisplay.strips:
+    for strip in self.spectrumDisplay.strips:
       stripYRange = list(self.viewBox.viewRange()[1])
       if _widthsChangedEnough(stripYRange, yRange):
         strip.viewBox.setYRange(*yRange, padding=0)
 
+  #TODO:WAYNE: Make this part of PlotWidget, pass axes label strings on init (
   def _moveAxisCodeLabels(self):
     """
     Puts axis code labels in the correct place on the PlotWidget
     """
+    if not self._finaliseDone: return
     ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
     ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
@@ -407,93 +442,49 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       item.setPos(x, y)
     # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
 
-  # def hideCrossHairs(self):
-  #   """
-  #   Hides all crosshairs in all strips in parent spectrum display.
-  #   """
-  #   for strip in self.guiSpectrumDisplay.guiStrips:
-  #     strip.hideCrossHair()
-
-  def _createCrossHair(self):
-    """
-    Creates a single or double cross hair depending on specification in application preferences.
-    """
-    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    self.plotWidget.addItem(self.vLine, ignoreBounds=True)
-    self.plotWidget.addItem(self.hLine, ignoreBounds=True)
-    self.vLine2 = pg.InfiniteLine(angle=90, movable=False, pen=self.foreground)
-    self.hLine2 = pg.InfiniteLine(angle=0, movable=False, pen=self.foreground)
-    if self._appBase.preferences.general.doubleCrossHair is True:
-      self.plotWidget.addItem(self.vLine2, ignoreBounds=True)
-      self.plotWidget.addItem(self.hLine2, ignoreBounds=True)
-
   def _toggleCrossHair(self):
-    """
-    Toggles whether crosshair is visible.
-    """
-    self.vLine.setVisible(not self.vLine.isVisible())
-    self.hLine.setVisible(not self.hLine.isVisible())
-    self.vLine2.setVisible(not self.vLine2.isVisible())
-    self.hLine2.setVisible(not self.hLine2.isVisible())
+    " Toggles whether crosshair is visible"
+    self.plotWidget.crossHair1.toggle()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.toggle()
 
   def _showCrossHair(self):
-    """
-    Displays cross hair in strip.
-    """
-    self.vLine.show()
-    self.hLine.show()
-    self.vLine2.show()
-    self.hLine2.show()
+    "Displays crosshair in strip"
+    self.plotWidget.crossHair1.show()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.show()
 
   def _hideCrossHair(self):
-    """
-    Hides cross hair in strip.
-    """
-    self.vLine.hide()
-    self.hLine.hide()
-    self.vLine2.hide()
-    self.hLine2.hide()
+    "Hides crosshair in strip."
+    self.plotWidget.crossHair1.hide()
+    if self.showDoubleCrossHair:
+      self.plotWidget.crossHair2.hide()
 
   def toggleGrid(self):
-    """
-    Toggles whether grid is visible in the strip.
-    """
-    self.grid.setVisible(not self.grid.isVisible())
+    "Toggles whether grid is visible in the strip."
+    self.plotWidget.toggleGrid()
 
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
     # TBD: the naive approach below should be improved
     return axisCode #if axisCode[0].isupper() else axisCode
-      
-  def _setCrossHairPosition(self, axisPositionDict):
-    """
-    # CCPN INTERNAL
-    Called in _setCrossHairPosition method of GuiSpectrumDisplay
-    """
-    axes = self.orderedAxes
-    position = axisPositionDict.get(self._crosshairCode(axes[0].code))
-    position2 = axisPositionDict.get(self._crosshairCode(axes[1].code))
-    if position is not None:
-      self.vLine.setPos(position)
-    if position2 is not None:
-      self.vLine2.setPos(position2)
-    position = axisPositionDict.get(self._crosshairCode(axes[1].code))
-    position2 = axisPositionDict.get(self._crosshairCode(axes[0].code))
-    if position is not None:
-      self.hLine.setPos(position)
-    if position2 is not None:
-      self.hLine2.setPos(position2)
 
   def _createMarkAtCursorPosition(self, task):
     # TBD: this creates a mark in all dims, is that what we want??
+
+    if not self._finaliseDone: return
+
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
     mark = task.newMark('white', positions, axisCodes)
 
   #
+  #TODO:API: remove
   def _rulerCreated(self, apiRuler):
+
+    if not self._finaliseDone: return
+
     axisCode = apiRuler.axisCode # TBD: use label and unit
     position = apiRuler.position
     if apiRuler.mark.colour[0] == '#':
@@ -522,51 +513,17 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
             
   def _initRulers(self):
     
-    for mark in self.spectrumDisplay.window.task.marks:
+    for mark in self.spectrumDisplay.mainWindow.task.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
-
-  def _mouseMoved(self, positionPixel):
-    """
-    Updates the position of the crosshair when the mouse is moved.
-    """
-
-    if self.isDeleted:
-      return
-
-    # position is in pixels
-
-    if self.plotWidget.sceneBoundingRect().contains(positionPixel):
-      self.mousePixel = (positionPixel.x(), positionPixel.y())
-      mousePoint = self.viewBox.mapSceneToView(positionPixel) # mouse point is in ppm
-      axisPositionDict = self.axisPositionDict
-      position = []
-      for n, axis in enumerate(self.orderedAxes):
-        # TBD: what if x and y have the same (or related) axis codes?
-        if n == 0:
-          pos = mousePoint.x()
-        elif n == 1:
-          pos = mousePoint.y()
-        else:
-          pos = axis.position
-        axisPositionDict[self._crosshairCode(axis.code)] = pos
-        position.append(pos)
-      self.mousePosition = tuple(position) # position is in ppm
-      for window in self._project.windows:
-        window._setCrossHairPosition(axisPositionDict)
-      ###self.vLine.setPos(mousePoint.x())
-      ###self.hLine.setPos(mousePoint.y())
-      ###for vLine in self.guiSpectrumDisplay._appBase.vLines:
-      ###  vLine.setPos(self.mousePoint.x())
-      ###for hLine in self.guiSpectrumDisplay._appBase.hLines:
-      ###  hLine.setPos(self.mousePoint.y())
-    ###return self.mousePoint
 
   def _showMousePosition(self, pos:QtCore.QPointF):
     """
     Displays mouse position for both axes by axis code.
     """
+    if not self._finaliseDone: return
+
     if self.isDeleted:
       return
 
@@ -575,7 +532,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       format = "%s: %.3f  %s: %.4g"
     else:
       format = "%s: %.2f  %s: %.2f"
-    self.guiSpectrumDisplay.positionBox.setText(format %
+
+    self._cursorLabel.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
 
@@ -583,7 +541,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     Zooms strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    if not self._finaliseDone: return
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(*xRegion, padding=padding)
     self.viewBox.setYRange(*yRegion, padding=padding)
 
@@ -591,83 +550,84 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     Zooms x axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    if not self._finaliseDone: return
+
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x1, x2, padding=padding)
 
   def zoomY(self, y1:float, y2:float):
     """
     Zooms y axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    if not self._finaliseDone: return
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setYRange(y1, y2, padding=padding)
 
   def resetZoom(self):
     """
     Zooms both axis of strip to the specified region
     """
-    padding = self._appBase.preferences.general.stripRegionPadding
+    if not self._finaliseDone: return
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.autoRange(padding=padding)
-
-  def _zoomTo(self, x1:float, x2:float, y1:float, y2:float):
-    self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
-    self.zoomPopup.close()
 
   def showZoomPopup(self):
     """
     Creates and displays a popup for zooming to a region in the strip.
     """
-    self.zoomPopup = QtGui.QDialog()
-    layout = QtGui.QGridLayout()
-    layout.addWidget(QtGui.QLabel(text='x1'), 0, 0)
-    x1 = QtGui.QLineEdit()
-    layout.addWidget(x1, 0, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='x2'), 0, 2)
-    x2 = QtGui.QLineEdit()
-    layout.addWidget(x2, 0, 3, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y1'), 1, 0,)
-    y1 = QtGui.QLineEdit()
-    layout.addWidget(y1, 1, 1, 1, 1)
-    layout.addWidget(QtGui.QLabel(text='y2'), 1, 2)
-    y2 = QtGui.QLineEdit()
-    layout.addWidget(y2, 1, 3, 1, 1)
-    okButton = QtGui.QPushButton(text="OK")
-    okButton.clicked.connect(partial(self._zoomTo, float(x1.text()), float(x2.text()),
-                                                   float(y1.text()), float(y2.text())
-                                     )
-                             )
-    cancelButton = QtGui.QPushButton(text='Cancel')
-    layout.addWidget(okButton,2, 1)
-    layout.addWidget(cancelButton, 2, 3)
-    cancelButton.clicked.connect(self.zoomPopup.close)
-    self.zoomPopup.setLayout(layout)
-    self.zoomPopup.exec_()
+    zoomPopup = QtGui.QDialog()
+
+    Label(zoomPopup, text='x1', grid=(0, 0))
+    x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))
+    Label(zoomPopup, text='x2', grid=(0, 2))
+    x2LineEdit = FloatLineEdit(zoomPopup, grid=(0, 3))
+    Label(zoomPopup, text='y1', grid=(1, 0))
+    y1LineEdit = FloatLineEdit(zoomPopup, grid=(1, 1))
+    Label(zoomPopup, text='y2', grid=(1, 2))
+    y2LineEdit = FloatLineEdit(zoomPopup, grid=(1, 3))
+
+    def _zoomTo():
+      x1 = x1LineEdit.get()
+      y1 = y1LineEdit.get()
+      x2 = x2LineEdit.get()
+      y2 = y2LineEdit.get()
+      if None in (x1, y1, x2, y2):
+        getLogger().warning('Zoom: must specify region completely')
+        return
+      self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
+      zoomPopup.close()
+
+    Button(zoomPopup, text='OK', callback=_zoomTo, grid=(2, 0), gridSpan=(1, 2))
+    Button(zoomPopup, text='Cancel', callback=zoomPopup.close, grid=(2, 2), gridSpan=(1, 2))
+
+    zoomPopup.exec_()
 
   def _storeZoom(self):
     """
     Adds current region to the zoom stack for the strip.
     """
+    if not self._finaliseDone: return
     self.storedZooms.append(self.viewBox.viewRange())
 
   def _restoreZoom(self):
     """
     Restores last saved region to the zoom stack for the strip.
     """
+    if not self._finaliseDone: return
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
-      padding = self._appBase.preferences.general.stripRegionPadding
+      padding = self.application.preferences.general.stripRegionPadding
       self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
       self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
     else:
       self.resetZoom()
-
-  def showSpectrum(self, guiSpectrumView):
-    raise Exception('should be implemented in subclass')
 
   def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together
     # NBNB TBD 2) This should not be called for each strip
 
+    if not self._finaliseDone: return
     if not peaks:
       peaks = peakList.peaks
 
@@ -676,7 +636,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       return
 
     peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
-    self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+    self.spectrumDisplay.showPeaks(peakListView, peaks)
 
   def _resetRemoveStripAction(self):
     """Update interface when a strip is created or deleted.
@@ -684,18 +644,19 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       NB notifier is executed after deletion is final but before the wrapper is updated.
       len() > 1 check is correct also for delete
     """
-    self.spectrumDisplay._resetRemoveStripAction()
+    pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
 
 # Notifiers:
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""
 
+  strip = axis.strip
+  if not strip._finaliseDone: return
+
   position = axis.position
   width = axis.width
   region = (position - width/2., position + width/2.)
-
-  strip = axis.strip
 
   index = strip.axisOrder.index(axis.code)
   if not strip.beingUpdated:
@@ -705,11 +666,11 @@ def _axisRegionChanged(axis:'Axis'):
     try:
       if index == 0:
         # X axis
-        padding = strip._appBase.preferences.general.stripRegionPadding
+        padding = strip.application.preferences.general.stripRegionPadding
         strip.viewBox.setXRange(*region, padding=padding)
       elif index == 1:
         # Y axis
-        padding = strip._appBase.preferences.general.stripRegionPadding
+        padding = strip.application.preferences.general.stripRegionPadding
         strip.viewBox.setYRange(*region, padding=padding)
       else:
         # One of the Z axes
@@ -719,7 +680,7 @@ def _axisRegionChanged(axis:'Axis'):
               if peakListView.isVisible():
                 peakList = peakListView.peakList
                 peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
-                strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
+                strip.spectrumDisplay.showPeaks(peakListView, peaks)
 
         if len(strip.axisOrder) > 2:
           n = index - 2
@@ -818,15 +779,40 @@ def _setupGuiStrip(project:Project, apiStrip):
   """Set up graphical parameters for completed strips - for notifiers"""
   strip = project._data2Obj[apiStrip]
 
+  if not strip._finaliseDone: return
+
   orderedAxes = strip.orderedAxes
   axisOrder = strip.axisOrder
-  padding = strip._appBase.preferences.general.stripRegionPadding
+  padding = strip.application.preferences.general.stripRegionPadding
 
   strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
-  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
-                                    axisCode=axisOrder[0])
-  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',
-                                    axisCode=axisOrder[1])
+  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top', axisCode=axisOrder[0])
+  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left', axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
+
+
+class AxisTextItem(pg.TextItem):
+
+  def __init__(self, plotWidget, orientation, axisCode=None, units=None, mappedDim=None):
+
+    self.plotWidget = plotWidget
+    self.orientation = orientation
+    self.axisCode = axisCode
+    self.units = units
+    self.mappedDim = mappedDim
+    pg.TextItem.__init__(self, text=axisCode, color=plotWidget.gridColour)
+    if orientation == 'top':
+      self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
+      self.anchor = pg.Point(0, 1)
+    else:
+      self.setPos(plotWidget.plotItem.vb.boundingRect().topRight())
+      self.anchor = pg.Point(1, 0)
+    plotWidget.scene().addItem(self)
+
+  def _setUnits(self, units):
+    self.units = units
+
+  def _setAxisCode(self, axisCode):
+    self.axisCode = str(axisCode)

@@ -21,7 +21,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -45,7 +44,6 @@ from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
-
 
 
 class NmrResidue(AbstractWrapperObject):

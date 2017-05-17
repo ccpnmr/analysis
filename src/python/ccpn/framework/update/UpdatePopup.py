@@ -3,40 +3,42 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 #from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 
 from ccpn.framework.update.UpdateAgent import UpdateAgent
 
-class UpdatePopup(QtGui.QDialog, UpdateAgent):
 
-  def __init__(self, parent=None, title='Update CCPN code'):
- 
+# class UpdatePopup(QtGui.QDialog, UpdateAgent):
+class UpdatePopup(CcpnDialog, UpdateAgent):
+  def __init__(self, parent=None, title='Update CCPN code', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
     version = QtCore.QCoreApplication.applicationVersion()
-
-    QtGui.QDialog.__init__(self, parent=parent)
+    # QtGui.QDialog.__init__(self, parent=parent)
     UpdateAgent.__init__(self, version)
 
     #self.appName = QtCore.QCoreApplication.applicationName()
 
     self.setWindowTitle(title)
 
-    frame = Frame(self)
+    # frame = Frame(self, setLayout=True)   # ejb
     row = 0
 
-    #label = Label(frame, 'Server location:', grid=(row, 0))
-    #label = Label(frame, self.server, grid=(row, 1))
+    #label = Label(self, 'Server location:', grid=(row, 0))
+    #label = Label(self, self.server, grid=(row, 1))
     #row += 1
 
-    label = Label(frame, 'Installation location:', grid=(row, 0))
-    label = Label(frame, text=self.installLocation, grid=(row, 1))
+    label = Label(self, 'Installation location:', grid=(row, 0))
+    label = Label(self, text=self.installLocation, grid=(row, 1))
     row += 1
 
-    label = Label(frame, 'Version:', grid=(row, 0))
-    label = Label(frame, text=version, grid=(row, 1))
+    label = Label(self, 'Version:', grid=(row, 0))
+    label = Label(self, text=version, grid=(row, 1))
     row += 1
 
-    label = Label(frame, 'Number of updates:', grid=(row, 0))
-    self.updatesLabel = Label(frame, text='TBD', grid=(row, 1))
+    label = Label(self, 'Number of updates:', grid=(row, 0))
+    self.updatesLabel = Label(self, text='TBD', grid=(row, 1))
     row += 1
 
 
@@ -46,7 +48,7 @@ class UpdatePopup(QtGui.QDialog, UpdateAgent):
                 'Install the updates from the server',
                 'Close update dialog')
     icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
-    buttonList = ButtonList(frame, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
+    buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
     row += 1
 
     self.resize(600,200)

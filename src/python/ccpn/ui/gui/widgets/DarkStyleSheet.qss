@@ -1,7 +1,7 @@
 QWidget {
     padding: 0;
     margin: 0px 0px 0px 0px;
-
+    border: 0px;
 }
 QTextEdit {
         background-color: #f7ffff;
@@ -16,6 +16,12 @@ QFrame {
 }
 Frame {
     border: 1px solid #bec4f3;
+}
+
+QLabel {
+    padding: 0;
+    margin: 2px 2px 2px 2px;
+    border: 0px;
 }
 
 CallTipWidget {
@@ -202,19 +208,21 @@ QDialog::header {
 					background-color:#2a3358;
 					}
 
-ListWidget {background-color: #000021;
+/* not working */
+QListWidget {background-color: #FDFDFC;
              color: #f7ffff;
-             border: 1px solid #424a71;
+             border: 1px solid white;
              margin: 0px 0px 0px 0px;
              font-weight: normal;
 }
-
+/*
 QListWidget {background-color: #000021;
              color: #f7ffff;
              border: 1px solid #424a71;
              margin: 0px 0px 0px 0px;
              font-weight: normal;
 }
+*/
 
 ObjectTable {
              border: 1px #182548;

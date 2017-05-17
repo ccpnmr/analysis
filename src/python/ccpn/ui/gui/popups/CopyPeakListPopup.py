@@ -1,12 +1,41 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-
-class CopyPeakListPopup(QtGui.QDialog):
-  def __init__(self, parent, **kw):
-    super(CopyPeakListPopup, self).__init__(parent)
+# class CopyPeakListPopup(QtGui.QDialog):
+class CopyPeakListPopup(CcpnDialog):
+  def __init__(self, parent=None, title='Copy PeakList', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    # super(CopyPeakListPopup, self).__init__(parent)
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.project = self.application.project
@@ -99,3 +128,26 @@ class CopyPeakListPopup(QtGui.QDialog):
       self.targetSpectraPullDown.select(defaultSpectrum.pid)
       # print('Selected defaultSpectrum: "self.project.spectra[-1]" ', defaultSpectrum) #Testing statement to be deleted
       return
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+  import ccpn.core.testing.WrapperTesting as WT
+
+  app = TestApplication()
+  app._ccpnApplication = app
+  app.colourScheme = 'dark'
+
+  thisWT = WT.WrapperTesting()
+  thisWT.setUp()
+
+  app.project = thisWT.project
+
+  popup = CopyPeakListPopup()       # too many errors for testing here...
+
+  popup.show()
+  popup.raise_()
+
+  app.start()
+
+  WT.WrapperTesting.tearDown(thisWT)

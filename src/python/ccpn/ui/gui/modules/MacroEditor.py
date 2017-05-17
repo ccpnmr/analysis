@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt4 import QtGui
 
-from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -35,15 +34,20 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 
-class MacroEditor(DropBase, CcpnModule):
+class MacroEditor(CcpnModule):
 
-  def __init__(self, parent, mainWindow, name, showRecordButtons=False):
-    CcpnModule.__init__(self, name=name)
+  includeSettingsWidget = False
+  className = 'MacroEditor'
 
-    self.parent = parent
+  def __init__(self, mainWindow=None, name='Macro Editor', showRecordButtons=False):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
     self.mainWindow = mainWindow
-    self.parent.addModule(self)
-    self.preferences = self.mainWindow.preferences
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+    self.preferences = self.application.preferences
+
     # macro selection
     self.label1 = Label(self, 'Macro Name')
     self.lineEdit1 = LineEdit(self)

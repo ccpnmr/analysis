@@ -53,16 +53,18 @@ from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
 
 from ccpnmodel.ccpncore.memops import Notifiers
 
-def _getLevels(count, base, factor):
-  
+#TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
+# attributes
+def _getLevels(count:int, base:float, factor:float)->list:
+  "return a list with contour levels"
   levels = []
   if count > 0:
     levels = [base]
     for n in range(count-1):
       levels.append(numpy.float32(factor * levels[-1]))
-
   return levels
-       
+
+
 class GuiSpectrumViewNd(GuiSpectrumView):
   
   ###PeakListItemClass = PeakListNdItem
@@ -113,6 +115,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
 
+    # have to have this set before _setupBorderItem called
+    self._application = self.strip.spectrumDisplay.mainWindow.application
+
     # have to setup border item before superclass constructor called because latter calls
     # setVisible and that in turn expects there to be a border item
     self._setupBorderItem()
@@ -138,11 +143,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._setupTrace()
 
   # override of Qt setVisible
+
   def setVisible(self, visible):
     GuiSpectrumView.setVisible(self, visible)
-    if self._appBase.preferences.general.showSpectrumBorder:
+    if self._application.preferences.general.showSpectrumBorder:
       self.borderItem.setVisible(visible)
-    
+
   def _setupBorderItem(self):
     spectrumLimits = self.spectrum.spectrumLimits
     displayIndices = self._displayOrderSpectrumDimensionIndices
@@ -167,14 +173,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
     self.strip.viewBox.addItem(self.borderItem)
 
-    # when below is called, self._appBase is not yet set up so use self._project._appBase
-    self.borderItem.setVisible(self._project._appBase.preferences.general.showSpectrumBorder)
+    self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder)
         
   def _setBorderItemHidden(self, checked):
     """
     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
     """
-    self.borderItem.setVisible(self._appBase.preferences.general.showSpectrumBorder and self.isVisible())
+    self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
   
   def _addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
@@ -615,9 +620,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     except GLError:  # invalid framebuffer operation
       pass
 
-  def boundingRect(self):  # seems necessary to have
-      
-    return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring
+  # def boundingRect(self):  # seems necessary to have
+  #
+  #   return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TODO: remove hardwiring
   
   ##### functions not to be used externally #####
   # NBNB TBD internal functions should start with UNDERSCORE!

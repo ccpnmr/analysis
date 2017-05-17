@@ -6,6 +6,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.lib import Window
 
+from ccpn.util.Logging import getLogger
+
 
 def _getCurrentZoomRatio(viewRange):
   xRange, yRange = viewRange
@@ -14,6 +16,7 @@ def _getCurrentZoomRatio(viewRange):
   yMin, yMax = yRange
   yRatio = (yMax - yMin)
   return xRatio, yRatio
+
 
 def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typing.List[str]=None,
                               widths:typing.List[float]=None):
@@ -65,8 +68,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
         continue
 
 
-
-def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
+def matchAxesAndNmrAtoms(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom]):
 
   shiftDict = {}
   shiftList = strip.spectra[0].chemicalShiftList
@@ -80,7 +82,8 @@ def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
 
   return shiftDict
 
-def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
+
+def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   """
   Determines whether a given shift is within the bounds of the specified axis of the specified
   strip.
@@ -107,16 +110,23 @@ def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
   else:
     return min(minima) < shift.value <= max(maxima)
 
-def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], widths=None,
-                              markPositions:bool=False):
+
+def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], widths=None,
+                              markPositions:bool=False, setNmrResidueLabel=False):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
   and spectrum displays to the positions specified by the peak.
   """
+  getLogger().debug('strip: %r, nmrAtoms:%s, widths=%s, markPositions:%s, setSpinSystemLabel:%s' %
+                    (strip.pid, nmrAtoms, widths, markPositions, setNmrResidueLabel)
+                   )
 
   if not strip:
-    print('no strip specified')
+    getLogger().warning('navigateToNmrAtomsInStrip: no strip specified')
     return
+
+  if len(nmrAtoms) == 0:
+    getLogger().warning('navigateToNmrAtomsInStrip: no atoms specified')
 
   shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
   # atomPositions = shiftDict[strip.axisOrder[2]]
@@ -131,6 +141,73 @@ def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], w
     else:
       positions.append('')
   navigateToPositionInStrip(strip, positions, widths=widths)
+
   if markPositions:
-    Window.markPositions(strip.project, list(shiftDict.keys()), list(shiftDict.values()))
+    strip.spectrumDisplay.mainWindow.markPositions(list(shiftDict.keys()), list(shiftDict.values()))
+
+  if setNmrResidueLabel:
+    strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)
+    strip.showStripLabel()
+
+
+def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None,
+                                  showSequentialResidues=False, markPositions=True):
+  """
+  Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in
+  strips[stripIndex-1] and strips[stripIndex+1]
+  return list of strips
+  
+  :param nmrResidue: 
+  :param display: 
+  :param showSequentialResidues: boolean selecting if sequential strips are displayed
+  :param markPositions: boolean selecting if marks are displayed
+  :return list of strips 
+  """
+
+  getLogger().debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %
+               (display.id, nmrResidue.id, showSequentialResidues, markPositions)
+               )
+
+  nmrResidue = nmrResidue.mainNmrResidue
+  strips = []
+  if showSequentialResidues and nmrResidue.nmrChain.isConnected:
+      # showing sequential strips
+      while len(display.strips) < 3:
+          display.addStrip()
+      stripIndex = max(stripIndex - 1, 0)
+
+      # display the previousNmrResidue if not None
+      previousNmrResidue = nmrResidue.previousNmrResidue
+      if previousNmrResidue is not None:
+        navigateToNmrAtomsInStrip(display.strips[stripIndex], previousNmrResidue.nmrAtoms,
+                                  widths=None, markPositions=False, setNmrResidueLabel=True)
+        strips.append(display.strips[stripIndex])
+      else:
+        strips.append(None)
+
+      stripIndex += 1
+      if nmrResidue is not None:
+        navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
+                                  widths=None, markPositions=markPositions, setNmrResidueLabel=True)
+        strips.append(display.strips[stripIndex])
+      else:
+        strips.append(None)
+
+      stripIndex += 1
+      # display the nextNmrResidue if not None
+      nextNmrResidue = nmrResidue.nextNmrResidue
+      if nextNmrResidue is not None:
+        navigateToNmrAtomsInStrip(display.strips[stripIndex], nextNmrResidue.nmrAtoms,
+                                  widths=None, markPositions=False, setNmrResidueLabel=True)
+        strips.append(display.strips[stripIndex])
+      else:
+        strips.append(None)
+
+  else:
+      # not showing sequential strips
+      navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
+                                widths=None, markPositions=markPositions, setNmrResidueLabel=True)
+      strips.append(display.strips[stripIndex])
+
+  return strips
 

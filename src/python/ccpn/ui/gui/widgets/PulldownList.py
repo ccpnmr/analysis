@@ -1,4 +1,5 @@
-"""Module Documentation here
+"""
+PulldownList widget
 
 """
 #=========================================================================================
@@ -33,9 +34,11 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 
-# TBD: Cascading categories, prob via Menu
+from ccpn.util.Logging import getLogger
+logger = getLogger()
 
 NULL = object()
+
 
 class PulldownList(QtGui.QComboBox, Base):
 
@@ -54,15 +57,6 @@ class PulldownList(QtGui.QComboBox, Base):
 
     PulldownList.setData(self, texts, objects, index, icons)
     self.setCallback(callback)
-#    self.setStyleSheet("""QCombobox { padding: 0;}
-#                          QCombobox QAbstractItemView::item {
-#                           padding-top: 2px;
-#                           padding-bottom: 2px;
-#                           }
-#                          """)
-#    self.setMinimumWidth(100)
-#    self.setMinimumHeight(18)
-#    self.view().setMinimumHeight(18*3)
     self.setStyleSheet("""
     PulldownList {
       padding-top: 3px;
@@ -106,7 +100,7 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def setSelected(self, item, doCallback=False):
 
-    print("ccpn.ui.gui.widgets.PulldownList.setSelected is depecated use; .select()")
+    print("ccpn.ui.gui.widgets.PulldownList.setSelected is deprecated use; .select()")
     
     self.select(item)
 
@@ -120,31 +114,31 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def getSelected(self):
   
-    # print("ccpn.ui.gui.widgets.PulldownList.getSelected is depecated use; .currentData()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelected is deprecated use; .currentData()")
 
     return self.currentData()
 
   def getObject(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getObject is depecated use; .currentObject()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getObject is deprecated use; .currentObject()")
     
     return self.currentObject()
 
   def getText(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getText is depecated use; .currentText()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getText is deprecated use; .currentText()")
    
     return self.currentText()
 
   def getSelectedIndex(self):
     
-    # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is depecated use; .currentIndex()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is deprecated use; .currentIndex()")
 
     return self.currentIndex()
 
   def setup(self):
     
-    print("ccpn.ui.gui.widgets.PulldownList.setup is depecated use; .setData")
+    print("ccpn.ui.gui.widgets.PulldownList.setup is deprecated use; .setData")
 
     return self.currentIndex()
  
@@ -240,6 +234,7 @@ class PulldownList(QtGui.QComboBox, Base):
       elif self.texts:
         self.callback(self.texts[index])
 
+
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
@@ -247,17 +242,36 @@ if __name__ == '__main__':
   
   app = TestApplication()
 
-  texts = ['Int','Float','String', '']
+  texts =   ['Int','Float','String', '']
   objects = [int, float, str, 'Green']
   icons = [None, None, None, Icon(color='#008000')]
 
   def callback(object):
     print('callback', object)
 
+  def callback2(object):
+    print('callback2', object)
+
   popup = BasePopup(title='Test PulldownList')
-  popup.setSize(250,50)
+  #popup.setSize(250,50)
+  policyDict = dict(
+    vAlign='top',
+    hPolicy = 'expanding',
+  )
+  policyDict = dict(
+    vAlign='top',
+   # hAlign='left',
+  )
+  #policyDict = dict(
+  #   hAlign='left',
+  # )
+  #policyDict = {}
+
   pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
-                              objects=objects, callback=callback)
+                              objects=objects, callback=callback, grid=(0,0), **policyDict
+                              )
   pulldownList.clearEditText()
+
+
   app.start()
 

@@ -1,5 +1,24 @@
-"""Module Documentation here
+"""
+This widget implements the nD (n>2) strip. 
+Strips are contained within a SpectrumDisplay.
 
+Some of the available methods:
+
+changeZPlane(n:int=0, planeCount:int=None, position:float=None): Changes the position 
+    of the z axis of the strip by number of planes or a ppm position, depending
+    on which is specified.
+nextZPlane(n:int=0): Decreases z ppm position by one plane
+prevZPlane(n:int=0): Decreases z ppm position by one plane
+
+resetZoom(axis=None): Resets zoom of strip axes to limits of maxima and minima of 
+    the limits of the displayed spectra.
+    
+toggleHorizontalTrace(self): Toggles display of the horizontal trace.
+toggleVerticalTrace(self): Toggles display of the vertical trace.
+
+setStripLabelText(text:str):  set the text of the stripLabel
+getStripLabelText() -> str:  get the text of the stripLabel
+showStripLabel(doShow:bool):  show/hide the stripLabel
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -11,25 +30,22 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__author__ = "$Author: CCPN $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-#from PyQt4 import QtGui, QtCore, QtOpenGL
+
 from PyQt4 import QtGui, QtCore
 
 # import math
@@ -41,16 +57,14 @@ from functools import partial
 from ccpn.core.PeakList import PeakList
 # from ccpn.core.Peak import Peak
 
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-
 # from ccpn.ui.gui.widgets.Button import Button
 # from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar
-
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.util.Logging import getLogger
+
 
 import typing
 
@@ -59,14 +73,77 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 class GuiStripNd(GuiStrip):
+  """
+  Main Strip for Nd spectra object
 
-  def __init__(self):
-    GuiStrip.__init__(self, useOpenGL=True)
+  This module inherits the following attributes from the Strip wrapper class:
+
+  serial          serial number of Strip, used in Pid and to identify the Strip
+                    :return <str>
+  axisCodes         Fixed string Axis codes in original display order
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  axisOrder         String Axis codes in display order, determine axis display order
+                      axisOrder = <sequence>:(X, Y, Z1, Z2, ...)
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  positions         Axis centre positions, in display order
+                      positions = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  widths            Axis display widths, in display order
+                      widths = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  units             Axis units, in display order
+                      :return <Tuple>
+  spectra           List of the spectra attached to the strip
+                    (whether display is currently turned on or not)
+                      :return <Tuple>:(<Spectrum>, ...)
+
+  delete            Delete a strip
+  clone             Create new strip that duplicates this one, appending it at the end
+  moveTo            Move strip to index newIndex in orderedStrips
+                      moveTo(newIndex:int)
+                        :param newIndex:<int> new index position
+  resetAxisOrder    Reset display to original axis order
+  findAxis          Find axis
+                      findAxis(axisCode)
+                        :param axisCode:
+                        :return axis
+  displaySpectrum   Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+                      displaySpectrum(spectrum:Spectrum, axisOrder:Sequence=()
+                        :param spectrum:<Spectrum> additional spectrum to display
+                        :param axisOrder:<Sequence>=() new axis ordering
+  peakIsInPlane     Return whether the peak is in currently displayed planes for strip
+                      peakIsInPlane(peak:Peak)
+                        :param peak:<Peak> peak of interest
+                        :return <bool>
+  peakIsInFlankingPlane   Return whether the peak is in planes flanking currently displayed planes for strip
+                            peakIsInFlankingPlane(peak:Peak)
+                              :param peak:<Peak> peak of interest
+                              :return <bool>
+  peakPickPosition  Pick peak at position for all spectra currently displayed in strip
+                      peakPickPosition(position:List[float])
+                        :param position:<List> coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  peakPickRegion    Peak pick all spectra currently displayed in strip in selectedRegion
+                      selectedRegion:List[List[float])
+                        :param selectedRegion:<List>  of <List> of coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  """
+  # TODO:ED: complete the above; also port to GuiStrip1d
+
+  def __init__(self, spectrumDisplay):
+    """
+    Initialise Nd spectra object
+
+    :param spectrumDisplay: spectrumDisplay instance
+    """
+    #print('GuiStripNd>>', self.spectrumDisplay)
+    GuiStrip.__init__(self, spectrumDisplay, useOpenGL=True)
 
     # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
     ###self.peakLayerDict = {}  # peakList --> peakLayer
     ###self.peakListViewDict = {}  # peakList --> peakListView
-    
+    self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
+
     self.haveSetupZWidgets = False
     self.viewBox.menu = self._get2dContextMenu()
     self.viewBox.invertX()
@@ -74,68 +151,75 @@ class GuiStripNd(GuiStrip):
     ###self.region = guiSpectrumDisplay.defaultRegion()
     self.planeLabel = None
     self.axesSwapped = False
-    self._addPlaneToolbar()
-    if self._appBase.ui.mainWindow is not None:
-      self.pythonConsole = self._appBase.ui.mainWindow.pythonConsole
-    else:
-      self.pythonConsole = self._appBase._mainWindow.pythonConsole
-    self.logger = self._project._logger
-    self.mouseDragEvent = self._mouseDragEvent
-    self.updateRegion = self._updateRegion
 
-  def _mouseDragEvent(self, event):
-    """
-    Re-implemented mouse event to enable smooth panning.
-    """
-    if event.button() == QtCore.Qt.RightButton:
-      pass
-    else:
-      self.viewBox.mouseDragEvent(self, event)
+    self.planeToolbar = None
+    # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
+    # Adds the plane toolbar to the strip.
+    callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
+    self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
+                                     grid=(0,0), hPolicy='minimum', hAlign='center', vAlign='center')
+    #self._stripToolBarWidget.addWidget(self.planeToolbar)
+    #self.planeToolBar.hide()
+    # test
+    #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
+
+    #self.mouseDragEvent = self._mouseDragEvent
+    self.updateRegion = self._updateRegion
 
   def _get2dContextMenu(self) -> Menu:
     """
     Creates and returns the Nd context menu
     """
-    self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.guiSpectrumDisplay.toggleToolbar, checkable=True)
-    self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self._toggleCrossHair, checkable=True)
-    self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
-    self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)
-    self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-    plusOneAction = self.contextMenu.addAction("Add Contour Level", self.guiSpectrumDisplay.addContourLevel)
-    plusOneIcon = Icon('icons/contour-add')
-    plusOneAction.setIcon(plusOneIcon)
-    plusOneAction.setToolTip('Add One Level')
-    minusOneAction = self.contextMenu.addAction("Remove Contour Level", self.guiSpectrumDisplay.removeContourLevel)
-    minusOneIcon = Icon('icons/contour-remove')
-    minusOneAction.setIcon(minusOneIcon)
-    minusOneAction.setToolTip('Remove One Level ')
-    upBy2Action = self.contextMenu.addAction("Raise Base Level", self.guiSpectrumDisplay.raiseContourBase)
-    upBy2Icon = Icon('icons/contour-base-up')
-    upBy2Action.setIcon(upBy2Icon)
-    upBy2Action.setToolTip('Raise Contour Base Level')
-    downBy2Action = self.contextMenu.addAction("Lower Base Level", self.guiSpectrumDisplay.lowerContourBase)
-    downBy2Icon = Icon('icons/contour-base-down')
-    downBy2Action.setIcon(downBy2Icon)
-    downBy2Action.setToolTip('Lower Contour Base Level')
-    storeZoomAction = self.contextMenu.addAction("Store Zoom", self.guiSpectrumDisplay._storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
-    storeZoomAction.setIcon(storeZoomIcon)
-    storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = self.contextMenu.addAction("Restore Zoom", self.guiSpectrumDisplay._restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
-    restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')
-    resetZoomAction = self.contextMenu.addAction("Reset Zoom", self.resetZoom)
-    resetZoomIcon = Icon('icons/zoom-full')
-    resetZoomAction.setIcon(resetZoomIcon)
-    resetZoomAction.setToolTip('Reset Zoom')
-    printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-    printIcon = Icon('icons/print')
-    printAction.setIcon(printIcon)
-    printAction.setToolTip('Print Spectrum Display to File')
+    class tType:
+      menu, item, actn = range(1,4)
 
-    self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+    self._spectrumUtilActions = {}
+    self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
+
+    toolBarItems = [
+       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
+      (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
+      (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      None,                                 ''),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      None,                                 ''),
+      (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
+
+      (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
+      (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
+      (tType.actn, 'Raise Base Level',      'icons/contour-base-up',  'Raise Contour Base Level', True,   True,       self.spectrumDisplay.raiseContourBase,''),
+      (tType.actn, 'Lower Base Level',      'icons/contour-base-down','Lower Contour Base Level', True,   True,       self.spectrumDisplay.lowerContourBase,''),
+      (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
+      (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
+      (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
+      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True, lambda:self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
+
+      (tType.menu, 'Navigate To',           '',                       '',                         True,   True,       None,                                 'navigateToMenu')
+    ]
+
+    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+      # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+      def tempMethod():           # ejb - how does this work?????
+        return
+      if aType == tType.menu:
+        action = self.contextMenu.addMenu(aName)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
+
+      elif aType == tType.item:
+        # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
+        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self, tempMethod.__name__, action)                # add to self
+
+      elif aType == tType.actn:
+        # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
+        action = self.contextMenu.addAction(aName, callback)
+        if icon is not None:
+          ic = Icon(icon)
+          action.setIcon(ic)
+        self._spectrumUtilActions[aName] = action
 
     # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     # self.spectrumDisplays = self.getSpectrumDisplays()
@@ -145,15 +229,9 @@ class GuiStripNd(GuiStrip):
     #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
     #   self.navigateToMenu.addAction(spectrumDisplay)
 
+    self.crossHairAction.setChecked(self.crossHairIsVisible)
+    self.gridAction.setChecked(self.gridIsVisible)
 
-
-    self.crossHairAction.setChecked(self.vLine.isVisible())
-
-    if self.grid.isVisible():
-      self.gridAction.setChecked(True)
-    else:
-      self.gridAction.setChecked(False)
-    # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
   def resetZoom(self, axis=None):
@@ -182,7 +260,7 @@ class GuiStripNd(GuiStrip):
     zoomYArray = ([min(yArray), max(yArray)])
     self.zoomToRegion(zoomXArray, zoomYArray)
     self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
+    getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
@@ -325,7 +403,7 @@ class GuiStripNd(GuiStrip):
       if planeLabel.minimum() <= position <= planeLabel.maximum():
         zAxis.position = position
         self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
-        self.logger.info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
+        getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
         #planeLabel.setValue(zAxis.position)
 
       # else:
@@ -345,7 +423,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.nextZPlane()" % self.pid)
+    getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
 
   def prevZPlane(self, n:int=0):
     """
@@ -353,17 +431,7 @@ class GuiStripNd(GuiStrip):
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-    self.logger.info("strip = application.getByGid('%s')\nstrip.prevZPlane()" % self.pid)
-
-  def _addPlaneToolbar(self):
-    """
-    Adds the plane toolbar to the strip.
-    """
-    callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
-
-    self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
-                                     hAlign='center', vAlign='c', callbacks=callbacks)
-    self.planeToolbar.setMinimumWidth(250)
+    getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
 
   def _setZPlanePosition(self, n:int, value:float):
     """

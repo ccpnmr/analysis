@@ -128,7 +128,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
     result = False
 
-    # TBD: this is probably not good enough
+    #TODO: this is probably not good enough
     if value.typeName() == 'QString':
       value = str(value.toString())
       result = self.setDataForCell(index.row(), index.column(), value)

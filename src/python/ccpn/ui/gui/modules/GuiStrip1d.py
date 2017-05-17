@@ -36,9 +36,70 @@ from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.widgets.Menu import Menu
 
 class GuiStrip1d(GuiStrip):
+  """
+  Main Strip for 1d spectra object
 
-  def __init__(self):
-    GuiStrip.__init__(self)
+  This module inherits the following attributes from the Strip wrapper class:
+
+  serial          serial number of Strip, used in Pid and to identify the Strip
+                    :return <str>
+  axisCodes         Fixed string Axis codes in original display order
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  axisOrder         String Axis codes in display order, determine axis display order
+                      axisOrder = <sequence>:(X, Y, Z1, Z2, ...)
+                      :return <tuple>:(X, Y, Z1, Z2, ...)
+  positions         Axis centre positions, in display order
+                      positions = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  widths            Axis display widths, in display order
+                      widths = <Tuple>
+                      :return <Tuple>:(<float>, ...)
+  units             Axis units, in display order
+                      :return <Tuple>
+  spectra           List of the spectra attached to the strip
+                    (whether display is currently turned on or not)
+                      :return <Tuple>:(<Spectrum>, ...)
+
+  delete            Delete a strip
+  clone             Create new strip that duplicates this one, appending it at the end
+  moveTo            Move strip to index newIndex in orderedStrips
+                      moveTo(newIndex:int)
+                        :param newIndex:<int> new index position
+  resetAxisOrder    Reset display to original axis order
+  findAxis          Find axis
+                      findAxis(axisCode)
+                        :param axisCode:
+                        :return axis
+  displaySpectrum   Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+                      displaySpectrum(spectrum:Spectrum, axisOrder:Sequence=()
+                        :param spectrum:<Spectrum> additional spectrum to display
+                        :param axisOrder:<Sequence>=() new axis ordering
+  peakIsInPlane     Return whether the peak is in currently displayed planes for strip
+                      peakIsInPlane(peak:Peak)
+                        :param peak:<Peak> peak of interest
+                        :return <bool>
+  peakIsInFlankingPlane   Return whether the peak is in planes flanking currently displayed planes for strip
+                            peakIsInFlankingPlane(peak:Peak)
+                              :param peak:<Peak> peak of interest
+                              :return <bool>
+  peakPickPosition  Pick peak at position for all spectra currently displayed in strip
+                      peakPickPosition(position:List[float])
+                        :param position:<List> coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  peakPickRegion    Peak pick all spectra currently displayed in strip in selectedRegion
+                      selectedRegion:List[List[float])
+                        :param selectedRegion:<List>  of <List> of coordinates to test
+                        :return <Tuple>:(<Peak>, ...)
+  """
+
+  def __init__(self, spectrumDisplay):
+    """
+    Initialise Nd spectra object
+
+    :param spectrumDisplay Main spectrum display Module object
+    """
+    GuiStrip.__init__(self, spectrumDisplay)
+
     self.viewBox.invertX()
     self.plotWidget.showGrid(x=True, y=True)
     self.gridShown = True
@@ -48,16 +109,6 @@ class GuiStrip1d(GuiStrip):
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
-    # below causes a problem because wrapper not ready yet at this point
-    #for spectrumView in self.spectrumViews:
-    #  spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],
-    #                        spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
-    #                        strip=self)
-
-
-  # def _printToFile(self, printer):
-  #   self.showExportDialog()
-    # raise Exception('1D printing not enabled yet')
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -86,7 +137,6 @@ class GuiStrip1d(GuiStrip):
       self.gridAction.setChecked(False)
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
-    # self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
     self.contextMenu.addAction("Print to File...", self.showExportDialog)
     self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     return self.contextMenu
@@ -110,29 +160,9 @@ class GuiStrip1d(GuiStrip):
     """
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    padding = self._appBase.preferences.general.stripRegionPadding
+    padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x2, x1, padding=padding)
 
-  # def showPeaks(self, peakList:PeakList, peaks=None):
-  #   """
-  #   Displays peaks in specified peaklist in the strip.
-  #   """
-  #   if not peaks:
-  #     peaks = peakList.peaks
-  #
-  #   peakListView = self._findPeakListView(peakList)
-  #   if not peakListView:
-  #     return
-  #
-  #   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
-  #   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
-
-  # def hidePeaks(self, peakList:PeakList):
-  #   """
-  #   Hides peaks in specified peaklist from strip.
-  #   """
-  #   peakListView = self._findPeakListView(peakList)
-  #   peakListView.setVisible(False)
 
   def _findPeakListView(self, peakList:PeakList):
 

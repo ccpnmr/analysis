@@ -79,6 +79,20 @@ class Current:
   # create the doc-string dynamically from definitions above;
   # cannot do newlines as Python console falls over when querying using the current? syntax (too many newlines?)
 
+
+  #: Short class name, for PID.
+  shortClassName = 'CU'
+  # Attribute it necessary as subclasses must use superclass className
+  className = 'Current'
+
+  _parentClass = None  # For now, setting to Framework generates cyclic imports
+
+  #: Name of plural link to instances of class
+  _pluralLinkName = None
+
+  #: List of child classes.
+  _childClasses = []
+
   ll = []
   for cls in sorted(_currentClasses.keys(), key=operator.attrgetter('className')):
     ss = noCap(cls.className)
@@ -111,6 +125,8 @@ Use print(current) to get a list of attribute, value pairs')
     # initialise non-=auto fields
     self._project = project
 
+    self._pid = '%s:current' % self.shortClassName
+
     for field in _fields:
       setattr(self, '_' + field, [])
 
@@ -119,10 +135,16 @@ Use print(current) to get a list of attribute, value pairs')
     for field in _fields:
       notifies[field] = []
 
-    self.registerNotify(self._updateSelectedPeaks, 'peaks')
+    self.registerNotify(self._updateSelectedPeaks, 'peaks')  # Optimization; see below
+
+  @property
+  def pid(self):
+    return self._pid
 
   def registerNotify(self, notify, field):
     """Register notifier function 'notify' to be called on field 'field'
+    
+    Return notify
 
     E.g. current.registerNotify(highlightSelectedPeaks, 'peaks')
     Where highlightSelectedPeaks is a function that takes a list of peaks as its only input
@@ -139,10 +161,19 @@ Use print(current) to get a list of attribute, value pairs')
     """
 
     self._notifies[field].append(notify)
+    return notify
 
   def unRegisterNotify(self, notify, field):
-    """Remove 'current' notifier"""
-    self._notifies[field].remove(notify)
+    """Remove notifier for field"""
+    try:
+      callbacks = self._notifies[field]
+    except:
+      KeyError('field "%s" not found; unable to unRegister from current' % field)
+
+    try:
+      callbacks.remove(notify)
+    except:
+      IndexError('callback not found; unable to unRegister from current')
 
   def _updateSelectedPeaks(self, currentPeaks):
     """ Update selected status of peaks.
@@ -162,6 +193,9 @@ Use print(current) to get a list of attribute, value pairs')
     return self._project
 
   def __str__(self):
+    return '<Current>'
+
+  def asString(self):
     """
     Return string representation of self listing all attribute, value pairs
     """

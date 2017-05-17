@@ -10,18 +10,16 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:33 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -391,7 +389,7 @@ class Substance(AbstractWrapperObject):
       | 'B.211.ALA.CB':{'12C':0.32, '13C':0.68},}"""
 
     result = {}
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
     if dd:
       for chain in self.chains:
         # NBNB this relies on residues being sorted by seqId, and so being
@@ -425,9 +423,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
-    if dd is None:
-      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
@@ -449,9 +445,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
-    if dd is None:
-      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
@@ -474,7 +468,7 @@ class Substance(AbstractWrapperObject):
     if atom.residue.chain not in self.chains:
       raise ValueError("Atom %s and its chain do not match the Substance" % atom)
 
-    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    dd = self._ccpnInternalData.get('_specificAtomLabelling')
     if dd:
       residue = atom.residue
       residueIndex = residue.chain.residues.index(residue)
@@ -483,7 +477,7 @@ class Substance(AbstractWrapperObject):
 
   def clearSpecificAtomLabelling(self):
     """Clear specificAtomLabelling"""
-    self.ccpnInternalData['_specificAtomLabelling'] = {}
+    self._ccpnInternalData['_specificAtomLabelling'] = {}
 
 
   def updateSpecificAtomLabelling(self, dictionary:typing.Dict[str,typing.Dict[str,float]]):

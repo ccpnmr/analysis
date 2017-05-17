@@ -41,7 +41,7 @@ class PhasingFrame(Frame):
 
   def __init__(self, parent=None, includeDirection=True, callback=None, returnCallback=None, directionCallback=None, **kw):
 
-    Frame.__init__(self, parent, **kw)
+    Frame.__init__(self, parent, setLayout=True, **kw)
     
     self.callback = callback
     self.returnCallback = returnCallback if returnCallback else self.doCallback
@@ -51,31 +51,42 @@ class PhasingFrame(Frame):
       'startVal': -180,
       'endVal': 180,
       'value': 0,
+      'step':1,
+      'bigStep':3,
       #'showNumber': True,
-      'tickInterval': 90,
+      'tickInterval': 30,
+      'spinbox':True,
     }
     value = '%4d' % sliderDict['value']
     
-    label = Label(self, text='ph0', grid=(0,0))
+    self.label0 = Label(self, text='ph0', grid=(0,0))
+    self.label0.setFixedWidth(30)
     self.phLabel0 = Label(self, text=value, grid=(0, 1))
+    self.phLabel0.setFixedWidth(35)
     self.slider0 = Slider(self, callback=self.setPh0, grid=(0, 2), **sliderDict)
-    
+    self.slider0.setFixedWidth(200)
+
     sliderDict = {
       'startVal': -360,
       'endVal': 360,
       'value': 0,
+      'step':1,
       #'showNumber': True,
-      'tickInterval': 90,
+      'tickInterval': 60,
     }
     value = '%4d' % sliderDict['value']
     
-    label = Label(self, text='ph1', grid=(0,3))
+    self.label1 = Label(self, text='ph1', grid=(0,3))
+    self.label1.setFixedWidth(30)
     self.phLabel1 = Label(self, text=value, grid=(0, 4))
+    self.phLabel1.setFixedWidth(35)
     self.slider1 = Slider(self, callback=self.setPh1, grid=(0, 5), **sliderDict)
-    
-    label = Label(self, text='piv', grid=(0,6))
+    self.slider1.setFixedWidth(200)
+
+    self.PivotLabel = Label(self, text='pivot', grid=(0,6))
+    self.PivotLabel.setFixedWidth(35)
     self.pivotEntry = FloatEntry(self, callback=lambda value: self.returnCallback(), decimals=2, grid=(0,7))
-    self.pivotEntry.setMaximumWidth(60)
+    self.pivotEntry.setFixedWidth(60)
     
     if includeDirection:
       self.directionList = PulldownList(self, texts=directionTexts,

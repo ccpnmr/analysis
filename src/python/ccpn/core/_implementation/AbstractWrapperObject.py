@@ -248,11 +248,13 @@ class AbstractWrapperObject():
   @property
   def isDeleted(self) -> bool:
     """True if this object is deleted."""
+    # The many variants are to make sure this catches deleted objects
+    # also during the deletion process, for filtering
     return (not hasattr(self, '_wrappedData') or self._wrappedData is None
-            or not hasattr(self._project, '_data2Obj'))
+            or not hasattr(self._project, '_data2Obj') or self._wrappedData.isDeleted)
 
   @property
-  def ccpnInternalData(self) -> dict:
+  def _ccpnInternalData(self) -> dict:
     """Dictionary containing arbitrary type data for internal use.
 
     Data can be nested strings, numbers, lists, tuples, (ordered) dicts,
@@ -260,14 +262,19 @@ class AbstractWrapperObject():
     object that can be serialised to JSON. This does NOT include CCPN or
     CCPN API objects.
 
+    NB This returns the INTERNAL dictionary. There is NO encapsulation
+
     Data are kept on save and reload, but there is NO guarantee against
     trampling by other code"""
-    return self._wrappedData.ccpnInternalData
+    result = self._wrappedData.ccpnInternalData
+    if result is None:
+      result = self._wrappedData.ccpnInternalData = {}
+    return result
 
-  @ccpnInternalData.setter
-  def ccpnInternalData(self, value):
-    if not (value is None or isinstance(value, dict)):
-      raise ValueError("ccpnInternalData must be None or a dictionary, was %s" % value)
+  @_ccpnInternalData.setter
+  def _ccpnInternalData(self, value):
+    if not (isinstance(value, dict)):
+      raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
     self._wrappedData.ccpnInternalData = value
   
   # CCPN abstract properties
@@ -356,7 +363,7 @@ class AbstractWrapperObject():
 
     Returns None for invalid or unrecognised input strings.
     """
-
+    #TODO:RASMUS: Raise exception when this is a deleted project
     if pidstring is None:
       return None
 
@@ -550,7 +557,7 @@ class AbstractWrapperObject():
         del data2Obj[apiObj]
 
   def _setUniqueStringKey(self, defaultValue:str, keyTag:str='name') -> str:
-    """(re)set self._werappedData.keyTag to make it a unique key, using defaultValue
+    """(re)set self._wrappedData.keyTag to make it a unique key, using defaultValue
     if not set NB - is called BEFORE data2obj etc. dictionaries are set"""
 
     wrappedData = self._wrappedData
@@ -722,7 +729,8 @@ class AbstractWrapperObject():
       else:
         for dd in iterator:
           for notifier in dd:
-            self._project._logger.debug('finaliseAction notifier: %s; %s; %s'
+            # GWV: Maybe only at the higest debug level
+            self._project._logger.debug('Notifier: %s; %s; %s'
                                         % (action, self, notifier))
             notifier(self)
 

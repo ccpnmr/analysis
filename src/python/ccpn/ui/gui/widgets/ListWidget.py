@@ -1,12 +1,46 @@
+"""
+List widget
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 
+
 class ListWidget(QtGui.QListWidget, Base):
 
-  def __init__(self, parent, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
+  # To be done more rigeriously later
+  _styleSheet = """
+  QListWidget {background-color: #f7ffff; 
+               color: #122043; 
+               font-weight: normal;
+               margin: 0px 0px 0px 0px;
+               padding: 2px 2px 2px 2px;
+               border: 1px solid #182548;
+               }
+  """
+  def __init__(self, parent=None, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -30,6 +64,8 @@ class ListWidget(QtGui.QListWidget, Base):
       self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
     self.contextMenuItem = 'Delete'
+
+    self.setStyleSheet(self._styleSheet)
 
   def contextCallback(self, remove=True):
 
@@ -77,7 +113,6 @@ class ListWidget(QtGui.QListWidget, Base):
 
   def removeItem(self):
     self.takeItem(self.currentRow())
-
 
   def mousePressEvent(self, event):
     self._mouse_button = event.button()
@@ -131,3 +166,39 @@ class ListWidget(QtGui.QListWidget, Base):
       event.setDropAction(QtCore.Qt.MoveAction)
       self.emit(QtCore.SIGNAL("dropped"), items)
       super(ListWidget, self).dropEvent(event)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  from ccpn.ui.gui.widgets.Icon import Icon
+
+  app = TestApplication()
+
+  texts = ['Int', 'Float', 'String', 'icon']
+  objects = [int, float, str, 'Green']
+  icons = [None, None, None, Icon(color='#008000')]
+
+  def callback(object):
+    print('callback', object)
+
+
+  def callback2(object):
+    print('callback2', object)
+
+  popup = BasePopup(title='Test PulldownList')
+
+  # policyDict = dict(
+  #   vAlign='top',
+  #   hPolicy='expanding',
+  # )
+  # policyDict = dict(
+  #   vAlign='top',
+  #   # hAlign='left',
+  # )
+  # policyDict = dict(
+  #   hAlign='left',
+  # )
+  policyDict = {}
+
+  app.start()

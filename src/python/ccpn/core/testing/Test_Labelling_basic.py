@@ -1,3 +1,6 @@
+"""Module Documentation here
+
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -12,64 +15,178 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:34 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Ed Brooksbank $"
+__date__ = "$Date: 2017-03-30 15:03:06 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
-class TestLabellingBasic(WrapperTesting):
+
+#=========================================================================================
+# TestLabellingBasic_No_setUp
+#=========================================================================================
+
+class TestLabellingBasic_No_setUp(WrapperTesting):
+  """
+  Test functions that require a valid Sample and Chain to be instantiated.
+  """
+
+  #=========================================================================================
+  # test_SampleComponentLabelling
+  #=========================================================================================
+  pass
+
+
+#=========================================================================================
+# TestLabellingBasic_setUp
+#=========================================================================================
+
+class TestLabellingBasic_setUp(WrapperTesting):
+  """
+  Test functions that require a valid Sample and Chain to be instantiated.
+  """
+
+  #=========================================================================================
+  # setUp     Initialise a valid Sample with a valid Chain
+  #=========================================================================================
+
   def setUp(self):
+    """
+    Create a valid Sample with the name 'ValidSample'.
+    """
     with self.initialSetup():
-      self.sample = self.project.newSample('test sample')
-      self.chain1 = self.project.createChain(sequence='QWERTYIPASDF', molType='protein',
-                                             compoundName='typewriter')
+      self.sample = self.project.newSample('ValidSample')
+      # self.chain1 = self.project.createChain(sequence='QWERTYIPASDF', molType='protein',
+      #                                        compoundName='typewriter')
 
-  def testUniformLabelling(self):
-    sc1 = self.sample.newSampleComponent(name='acomponent')
+  #=========================================================================================
+  # checkNumComponents
+  #=========================================================================================
 
+  def checkNumComponents(self, num:int):
+    """
+    Test that sampleComponent and sjubstance are the required length.
+    :param num:
+    """
+    self.assertEqual(len(self.project.sampleComponents), num)
+    self.assertEqual(len(self.project.substances), num)
 
-  def _test_newSampleComponentWithoutName(self):
-    self.assertRaises(TypeError, self.sample.newSampleComponent)
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 1)
+  #=========================================================================================
+  # test_SampleComponent_good_name        Valid tests
+  #=========================================================================================
 
-  def test_newSampleComponentEmptyName(self):
-    self.assertRaises(ApiError, self.sample.newSampleComponent, '')
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 1)
+  def test_SampleComponentLabelling(self):
+    """
+    Test that creating a new SampleComponent with name 'ValidSampleComponent' and
+    Labelling as 'ValidLabelling' creates a valid sampleComponent.
+    """
+    self.newSC = self.sample.newSampleComponent('ValidSampleComponent', 'ValidLabelling')
+    self.assertEqual(self.newSC.pid, 'SC:ValidSample.ValidSampleComponent.ValidLabelling')
+    self.checkNumComponents(1)
 
-  def test_newSampleComponent(self):
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 1)
+  def test_SampleComponentLabelling_None(self):
+    """
+    Test that creating a new SampleComponent with name 'ValidSampleComponent' and
+    Labelling as None creates a valid sampleComponent.
+    """
+    self.sample.newSampleComponent('ValidSampleComponent', None)
+    self.checkNumComponents(1)
 
-    sc = self.sample.newSampleComponent('test sample component')
+  #=========================================================================================
+  # test_SampleComponent_bad_name   bad sampleComponent
+  #=========================================================================================
 
-    self.assertEqual(sc.pid, 'SC:test sample.test sample component.')
-    self.assertEqual(len(self.project.sampleComponents), 1)
-    self.assertEqual(len(self.project.substances), 2)
-    self.assertIs(self.project.sampleComponents[0], sc)
+  def test_SampleComponentLabelling_BadSC(self):
+    """
+    Test that creating a new SampleComponent with name '^Badname' and
+    Labelling as a valid name raises an error and no component is added.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('^Badname', 'ValidLabelling')
+    self.checkNumComponents(0)
 
-  def test_newSampleComponent2(self):
-    self.assertEqual(len(self.project.sampleComponents), 0)
-    self.assertEqual(len(self.project.substances), 1)
+  def test_SampleComponentLabelling_Bad_ES(self):
+    """
+    Test that creating a new SampleComponent with name '^Badname' and
+    Labelling as an empty string raises an error and no component is added.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('^Badname', '')
+    self.checkNumComponents(0)
 
-    sc = self.sample.newSampleComponent('typewriter')
-    self.assertEqual(sc.pid, 'SC:test sample.typewriter.')
-    self.assertEqual(len(self.project.sampleComponents), 1)
-    self.assertEqual(len(self.project.substances), 1)
-    self.assertIs(self.project.sampleComponents[0], sc)
+  def test_SampleComponentLabelling_Bad_Badname(self):
+    """
+    Test that creating a new SampleComponent with name '^Badname' and
+    Labelling as '^Badname' raises an error and no component is added.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('^Badname', '^Badname')
+    self.checkNumComponents(0)
 
-    sc2 = self.sample.newSampleComponent('typewriter', 'italic')
-    self.assertEqual(sc2.pid, 'SC:test sample.typewriter.italic')
-    self.assertEqual(len(self.project.sampleComponents), 2)
-    self.assertEqual(len(self.project.substances), 2)
-    self.assertIs(self.project.sampleComponents[1], sc2)
+  def test_SampleComponentLabelling_Bad_None(self):
+    """
+    Test that creating a new SampleComponent with name '^Badname' and
+    Labelling as None raises an error and no component is added.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('^Badname', None)
+    self.checkNumComponents(0)
+
+  def test_SampleComponentLabelling_Bad_Int(self):
+    """
+    Test that creating a new SampleComponent with name '^Badname' and
+    Labelling as 42 (non-string) raises an error and no component is added.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('^Badname', 42)
+    self.checkNumComponents(0)
+
+  #=========================================================================================
+  # test_SampleComponent_bad_name   bad labelling
+  #=========================================================================================
+
+  def test_SampleComponentLabelling_ES(self):
+    """
+    Test that creating a new SampleComponent with Labelling as empty string raises an error
+    and no component is added.
+    """
+    # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
+    #   self.sample.newSampleComponent('ValidSampleComponent', '')
+    #
+    with self.assertRaisesRegexp(ValueError, "SampleComponent 'labelling' name must be set"):
+      self.sample.newSampleComponent('ValidSampleComponent', '')
+    self.checkNumComponents(0)
+
+  def test_SampleComponentLabelling_Badname(self):
+    """
+    Test that creating a new SampleComponent with Labelling as '^Badname' raises an error
+    and no component is added.
+    ^ is a bad character and not to be included in strings.
+    """
+    # with self.assertRaisesRegexp(ValueError, 'Character'):
+    #   self.sample.newSampleComponent('ValidSampleComponent', '^Badname')
+    #
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.sample.newSampleComponent('ValidSampleComponent', '^Badname')
+    self.checkNumComponents(0)
+
+  def test_SampleComponentLabelling_Int(self):
+    """
+    Test that creating a new SampleComponent with Labelling as 42 (non-string) raises an error
+    and no component is added.
+    """
+    # with self.assertRaisesRegexp(TypeError, 'not iterable'):
+    #   self.sample.newSampleComponent('ValidSampleComponent', 42)
+    #
+    with self.assertRaisesRegexp(TypeError, "SampleComponent 'labelling' name must be a string"):
+      self.sample.newSampleComponent('ValidSampleComponent', 42)
+    self.checkNumComponents(0)
+

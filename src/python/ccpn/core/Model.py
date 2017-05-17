@@ -4,24 +4,21 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:59 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: CCPN $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -34,6 +31,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 
 
 class ModelData:
@@ -68,7 +68,10 @@ class ModelData:
     in theory need not be integers). These should be used with self._ensemble.loc"""
     data = self._ensemble
     if data is not None:
-      modelFilter = data[data['modelNumber'] == self._modelNumber]
+      # NB, you have to do this with a Series,
+      # as new DataFrames are automatically reset to 1-start index
+      modelNumberSeries = data['modelNumber']
+      modelFilter = modelNumberSeries[modelNumberSeries == self._modelNumber]
       if modelFilter.shape[0] > 0:
         modelStart = modelFilter.index[0]
         modelEnd = modelFilter.index[-1]
@@ -98,7 +101,7 @@ class ModelData:
         else:
           # Set e to a slice of the ensemble data
           e = self._ensemble.loc[mni[0]:mni[1]]
-          e.reset_index(inplace=True, drop=True)
+          # e.reset_index(inplace=True, drop=True)
 
       else:
         # This is not a column - the indices are irrelevant. Just work on the full ensemble
@@ -121,13 +124,15 @@ class ModelData:
       else:
         # Set get item from a slice of the ensemble data
         e = self._ensemble.loc[mni[0]:mni[1]]
-        e.reset_index(inplace=True, drop=True)
+        # e.reset_index(inplace=True, drop=True)
         return e[key]
 
     else:
       # Should probably throw an error, but anyway we leave that to pandas
-      return self._ensemble.__getitem__(key)
-
+      try:
+        return self._ensemble.__getitem__(key)
+      except:
+        raise KeyError("'Model' object has no key '{}'".format(key))
 
   def __setitem__(self, key:str, value:typing.Any) -> None:
 
@@ -139,7 +144,7 @@ class ModelData:
 
     else:
       e = self._ensemble.loc[mni[0]:mni[1]]
-      e.reset_index(inplace=True, drop=True)
+      # e.reset_index(inplace=True, drop=True)
 
       pd.set_option('chained_assignment', None)
       # NB This switch is a nasty hack, done to get the echoing and undoing to work
@@ -209,7 +214,7 @@ class Model(AbstractWrapperObject):
 
   @property
   def data(self) -> ModelData:
-    """Model data pandas object - a view on the dat ain the StructureEnsemble."""
+    """Model data pandas object - a view on the data in the StructureEnsemble."""
     result = self._modelData
     if result is None:
       result = self._modelData = ModelData(model=self)
@@ -226,10 +231,25 @@ class Model(AbstractWrapperObject):
     self._wrappedData.details = value
 
   def clearData(self):
-    """Remove all data for model
+    """
+    Remove all data for model by successively calling the deleteRow method
     """
     data = self.structureEnsemble.data
-    data.drop(data._modelsSelector(self.serial))
+    if data is not None:
+      # data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty
+
+      # need iterrecords to check the modeNumber against the list and delete each individually
+      Found = True
+      while Found:
+        Found = False                             # set to False for the next iteration
+        self.itRec = data.records()
+        for rNum, rec in enumerate(self.itRec):
+          if int(rec['modelNumber']) == self.serial:
+            data.deleteRow(rNum+1, inplace=True)          # should also be able to undo this
+            Found = True
+            break                                 # break out for the next repeat
+    else:
+      logger.debug('StructureEnsemble %s contains no data for %s'.format(self.structureEnsemble.pid, self.pid))
 
   @classmethod
   def _getAllWrappedData(cls, parent: StructureEnsemble)-> list:
@@ -253,7 +273,7 @@ def _newModel(self:StructureEnsemble, serial:int=None, label:str=None, comment:s
       try:
         result.resetSerial(serial)
       except ValueError:
-        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+        logger.warning("Could not reset serial of %s to %s - keeping original value"
                                      %(result, serial))
       result._finaliseAction('rename')
   finally:

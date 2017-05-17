@@ -12,7 +12,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,7 +22,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -74,10 +72,18 @@ class SpectrumDisplay(AbstractWrapperObject):
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
-  def name(self) -> str:
-    """SpectrumDisplay name"""
+  def title(self) -> str:
+    """SpectrumDisplay title
+
+    (corresponds to its name, but the name 'name' is taken by PyQt"""
     return self._wrappedData.name
-    
+
+  # def getName(self):
+  #   """Return name of self; alternative for name as GuiSpectrumDisplay is subclassed
+  #   from this wrapper object and from CcpnModule
+  #   """
+  #   return self._wrappedData.name
+
   @property
   def _parent(self) -> Task:
     """Task containing spectrumDisplay."""
@@ -107,6 +113,7 @@ class SpectrumDisplay(AbstractWrapperObject):
   @property
   def axisCodes(self) -> Tuple[str, ...]:
     """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+    # TODO axisCodes shold be unique, but I am not sure this is enforced
     return self._wrappedData.axisCodes
 
   @property
@@ -127,6 +134,9 @@ class SpectrumDisplay(AbstractWrapperObject):
   @property
   def window(self) -> Window:
     """Gui window showing SpectrumDisplay"""
+    # TODO: RASMUS window clashes with a Qt attribute.
+    # This should be renamed, but that also requires refactoring
+    # possibly with a model change that modifies the Task/Window/Module relationship
     return self._project._data2Obj.get(self._wrappedData.window)
 
   @window.setter
@@ -225,25 +235,27 @@ class SpectrumDisplay(AbstractWrapperObject):
     """Find axis """
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-  def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
-    """Display additional spectrum, with spectrum axes ordered according ton axisOrder
-    """
-    spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-
-    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
-                                defaults={'axisOrder':()})
-    try:
-      self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
-    finally:
-      self._endCommandEchoBlock()
+  #TODO:RASMUS;
+  #TODO:ED: not a wrapper method; move to Gui class - moved
+  # def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
+  #   """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+  #   """
+  #   spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+  #
+  #   self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+  #                               defaults={'axisOrder':()})
+  #   try:
+  #     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+  #   finally:
+  #     self._endCommandEchoBlock()
 
 
 # newSpectrumDisplay functions
 def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
-                       name:str=None, window:Window=None, comment:str=None,
+                        title:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
 
-  defaults = collections.OrderedDict((('stripDirection', 'Y'), ('name', None),
+  defaults = collections.OrderedDict((('stripDirection', 'Y'), ('title', None),
                                      ('window', None), ('comment', None),
                                      ('independentStrips', False), ('nmrResidue', None)))
 
@@ -262,16 +274,16 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
   )
   # Add name, setting and insuring uniqueness if necessary
-  if name is None:
+  if title is None:
     if 'intensity' in axisCodes:
-      name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
+      title = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
     else:
-      name = ''.join([str(x) for x in axisCodes])
-  elif Pid.altCharacter in name:
+      title = ''.join([str(x) for x in axisCodes])
+  elif Pid.altCharacter in title:
     raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
-  while apiTask.findFirstModule(name=name):
-    name = commonUtil.incrementName(name)
-  displayPars['name'] = name
+  while apiTask.findFirstModule(name=title):
+    title = commonUtil.incrementName(title)
+  displayPars['name'] = title
 
   self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
                               parName='newSpectrumDisplay')
@@ -320,7 +332,7 @@ del _newSpectrumDisplay
 
 
 def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence[str]=(),
-                          axisOrder:Sequence[str]=(), name:str=None, positions:Sequence[float]=(),
+                          axisOrder:Sequence[str]=(), title:str=None, positions:Sequence[float]=(),
                           widths:Sequence[float]=(), units:Sequence[str]=(),
                           stripDirection:str='Y', is1D:bool=False,
                           independentStrips:bool=False):
@@ -338,12 +350,12 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
 
   inputValues = locals()
 
-  defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('name', None),
+  defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
                                      ('positions', ()), ('widths', ()), ('units', ()),
                                       ('stripDirection', 'Y'), ('is1D', False),
                                      ('independentStrips', False)))
 
-  if name and Pid.altCharacter in name:
+  if title and Pid.altCharacter in title:
     raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 
   spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
@@ -402,7 +414,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
   try:
     display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
                                       independentStrips=independentStrips,
-                                      name=name)
+                                      title=title)
 
     # Set unit, position and width
     orderedApiAxes = display._wrappedData.orderedAxes
@@ -500,4 +512,4 @@ Project._apiNotifiers.extend(
 )
 
 # Drag-n-drop functions:
-SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum
+# SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum     # ejb moved to GuiSpectrumDisplay

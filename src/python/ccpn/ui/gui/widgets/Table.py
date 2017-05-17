@@ -1,91 +1,110 @@
 """
 
+Basic Usage:
+  
+  define a list of Column(columnName, func, tipText=tipText) objects, 
+  where func obtains the value for the object displayed in a row and
+   tipText is optional;
+  
+  e.g. Column('index', lambda row: row.index, tipText='index of the row')
+  
+  define a list of objects (or empty):
+  objectList = list(myObjects) if myObjects is not None else []
+  
+  define optional actionCallback and/or selectionCallback functions
+  
+  ObjectTable(parent=parent, columns=columnList, objects=objectList, 
+              actionCallback=actionCallback, selectionCallback=selectionCallback,
+              ....)
+  
+  use setObjects(objects) method to set objects
+  use show() to show
+  use clearTable() to clear the table
+
+
 Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html)
 
 QTableView Class Reference
 [QtGui module]
-
 The QTableView class provides a default model/view implementation of a table view. More...
-
 Inherits QAbstractItemView.
-
 Inherited by QTableWidget.
 
 Methods
 
-__init__ (self, QWidget parent = None)
-clearSpans (self)
-int columnAt (self, int x)
-columnCountChanged (self, int oldCount, int newCount)
-columnMoved (self, int column, int oldIndex, int newIndex)
-columnResized (self, int column, int oldWidth, int newWidth)
-int columnSpan (self, int row, int column)
-int columnViewportPosition (self, int column)
-int columnWidth (self, int column)
-currentChanged (self, QModelIndex current, QModelIndex previous)
-Qt.PenStyle gridStyle (self)
-hideColumn (self, int column)
-hideRow (self, int row)
-QHeaderView horizontalHeader (self)
-int horizontalOffset (self)
-horizontalScrollbarAction (self, int action)
-QModelIndex indexAt (self, QPoint p)
-bool isColumnHidden (self, int column)
-bool isCornerButtonEnabled (self)
-bool isIndexHidden (self, QModelIndex index)
-bool isRowHidden (self, int row)
-bool isSortingEnabled (self)
-QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)
-paintEvent (self, QPaintEvent e)
-resizeColumnsToContents (self)
-resizeColumnToContents (self, int column)
-resizeRowsToContents (self)
-resizeRowToContents (self, int row)
-int rowAt (self, int y)
-rowCountChanged (self, int oldCount, int newCount)
-int rowHeight (self, int row)
-rowMoved (self, int row, int oldIndex, int newIndex)
-rowResized (self, int row, int oldHeight, int newHeight)
-int rowSpan (self, int row, int column)
-int rowViewportPosition (self, int row)
-scrollContentsBy (self, int dx, int dy)
-scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)
-selectColumn (self, int column)
-list-of-QModelIndex selectedIndexes (self)
-selectionChanged (self, QItemSelection selected, QItemSelection deselected)
-selectRow (self, int row)
-setColumnHidden (self, int column, bool hide)
-setColumnWidth (self, int column, int width)
-setCornerButtonEnabled (self, bool enable)
-setGridStyle (self, Qt.PenStyle style)
-setHorizontalHeader (self, QHeaderView header)
-setModel (self, QAbstractItemModel model)
-setRootIndex (self, QModelIndex index)
-setRowHeight (self, int row, int height)
-setRowHidden (self, int row, bool hide)
-setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)
-setSelectionModel (self, QItemSelectionModel selectionModel)
-setShowGrid (self, bool show)
-setSortingEnabled (self, bool enable)
-setSpan (self, int row, int column, int rowSpan, int columnSpan)
-setVerticalHeader (self, QHeaderView header)
-setWordWrap (self, bool on)
-showColumn (self, int column)
-bool showGrid (self)
-showRow (self, int row)
-int sizeHintForColumn (self, int column)
-int sizeHintForRow (self, int row)
-sortByColumn (self, int column)
-sortByColumn (self, int column, Qt.SortOrder order)
-timerEvent (self, QTimerEvent event)
-updateGeometries (self)
-QHeaderView verticalHeader (self)
-int verticalOffset (self)
-verticalScrollbarAction (self, int action)
-QStyleOptionViewItem viewOptions (self)
-QRect visualRect (self, QModelIndex index)
-QRegion visualRegionForSelection (self, QItemSelection selection)
-bool wordWrap (self)
+    __init__ (self, QWidget parent = None)
+    clearSpans (self)
+    int columnAt (self, int x)
+    columnCountChanged (self, int oldCount, int newCount)
+    columnMoved (self, int column, int oldIndex, int newIndex)
+    columnResized (self, int column, int oldWidth, int newWidth)
+    int columnSpan (self, int row, int column)
+    int columnViewportPosition (self, int column)
+    int columnWidth (self, int column)
+    currentChanged (self, QModelIndex current, QModelIndex previous)
+    Qt.PenStyle gridStyle (self)
+    hideColumn (self, int column)
+    hideRow (self, int row)
+    QHeaderView horizontalHeader (self)
+    int horizontalOffset (self)
+    horizontalScrollbarAction (self, int action)
+    QModelIndex indexAt (self, QPoint p)
+    bool isColumnHidden (self, int column)
+    bool isCornerButtonEnabled (self)
+    bool isIndexHidden (self, QModelIndex index)
+    bool isRowHidden (self, int row)
+    bool isSortingEnabled (self)
+    QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)
+    paintEvent (self, QPaintEvent e)
+    resizeColumnsToContents (self)
+    resizeColumnToContents (self, int column)
+    resizeRowsToContents (self)
+    resizeRowToContents (self, int row)
+    int rowAt (self, int y)
+    rowCountChanged (self, int oldCount, int newCount)
+    int rowHeight (self, int row)
+    rowMoved (self, int row, int oldIndex, int newIndex)
+    rowResized (self, int row, int oldHeight, int newHeight)
+    int rowSpan (self, int row, int column)
+    int rowViewportPosition (self, int row)
+    scrollContentsBy (self, int dx, int dy)
+    scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)
+    selectColumn (self, int column)
+    list-of-QModelIndex selectedIndexes (self)
+    selectionChanged (self, QItemSelection selected, QItemSelection deselected)
+    selectRow (self, int row)
+    setColumnHidden (self, int column, bool hide)
+    setColumnWidth (self, int column, int width)
+    setCornerButtonEnabled (self, bool enable)
+    setGridStyle (self, Qt.PenStyle style)
+    setHorizontalHeader (self, QHeaderView header)
+    setModel (self, QAbstractItemModel model)
+    setRootIndex (self, QModelIndex index)
+    setRowHeight (self, int row, int height)
+    setRowHidden (self, int row, bool hide)
+    setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)
+    setSelectionModel (self, QItemSelectionModel selectionModel)
+    setShowGrid (self, bool show)
+    setSortingEnabled (self, bool enable)
+    setSpan (self, int row, int column, int rowSpan, int columnSpan)
+    setVerticalHeader (self, QHeaderView header)
+    setWordWrap (self, bool on)
+    showColumn (self, int column)
+    bool showGrid (self)
+    showRow (self, int row)
+    int sizeHintForColumn (self, int column)
+    int sizeHintForRow (self, int row)
+    sortByColumn (self, int column)
+    sortByColumn (self, int column, Qt.SortOrder order)
+    timerEvent (self, QTimerEvent event)
+    updateGeometries (self)
+    QHeaderView verticalHeader (self)
+    int verticalOffset (self)
+    verticalScrollbarAction (self, int action)
+    QStyleOptionViewItem viewOptions (self)
+    QRect visualRect (self, QModelIndex index)
+    QRegion visualRegionForSelection (self, QItemSelection selection)
+    bool wordWrap (self)
 
 """
 #=========================================================================================
@@ -122,24 +141,26 @@ import pandas as pd
 import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.BasePopup import BasePopup
+from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+
 from collections import OrderedDict
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 
 class ObjectTable(QtGui.QTableView, Base):
 
-  columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums
-  rowSizeHint = 200  # total size hint (total size for all rows
+  columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums)
+  rowSizeHint = 200  # total size hint (total size for all rows)
 
   def __init__(self, parent, columns,
                objects=None,
@@ -227,6 +248,12 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.tableContextMenu)
 
+  def clearTable(self):
+    "remove all objects from the table"
+    self._silenceCallback = True
+    self.setObjects([])
+    self._silenceCallback = False
+
   def sizeHint(self):
 
     return QtCore.QSize(max(10, self.columnSizeHint*len(self.columns)), self.rowSizeHint)
@@ -280,22 +307,6 @@ class ObjectTable(QtGui.QTableView, Base):
 
     if self._silenceCallback:
       return
-    #
-    # if self.graphPanel and self.graphPanel.isVisible():
-    #   graph = self.graphPanel.graph
-    #   graph.coordsOff()
-    #   rows = self.getSelectedRows()
-    #   vLines = []
-    #   hLines = []
-    #
-    #   for row in rows:
-    #     for dataSet in graph.dataSets:
-    #       x, y = dataSet.dataPoints[row][:2]
-    #       vLines.append(x)
-    #       hLines.append(y)
-    #
-    #   graph.drawVerticalLines(vLines)
-    #   graph.drawHorizontalLines(hLines)
 
     elif self.selectionCallback:
       index = self.getCurrentIndex()
@@ -540,7 +551,10 @@ class ObjectTable(QtGui.QTableView, Base):
 
       self.setFocus(QtCore.Qt.OtherFocusReason)
 
-
+  def getColumnInt(self, columnName):
+    for i, column in enumerate(self.columns):
+      if column.heading == columnName:
+        return i
 
   def setupHeaderStretch(self):
 
@@ -605,21 +619,6 @@ class ObjectTable(QtGui.QTableView, Base):
     action = menu.exec_(self.mapToGlobal(pos))
     if action == exportMenu:
       self.exportDialog()
-
-    # if action == searchMenu:
-    #   if not hasattr(self, 'searchPopup'):
-    #     self.openSearchPopup()
-    #   else:
-    #     if not self.searchPopup.isOpened:
-    #       self.openSearchPopup()
-    # if action == copyMenu:
-    #   self.copyRow()
-
-  def openSearchPopup(self):
-    self.searchPopup = ObjectTableFilter(self)
-    self.searchPopup.show()
-    self.searchPopup.raise_()
-
 
 
   def exportDialog(self):
@@ -1088,6 +1087,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
     else:
       return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
+
 class ObjectHeaderView(QtGui.QHeaderView):
 
   def __init__(self, orient, parent):
@@ -1135,9 +1135,6 @@ EXPORT_FORMATS = (TAB_FORMAT, COMMA_FORMAT)
 
 class ObjectTableExport(QtGui.QDialog, Base):
 
-
-  # def __init__(self, table):
-
   def __init__(self, table=None, **kw):
     super(ObjectTableExport, self).__init__(table)
     # BasePopup.__init__(self, title='Export Table Text', transient=True, modal=True)
@@ -1151,200 +1148,163 @@ class ObjectTableExport(QtGui.QDialog, Base):
     values = [True] * len(labels)
     label = Label(self, 'Export format:', grid=(3,0))
     self.formatPulldown = PulldownList(self, EXPORT_FORMATS, grid=(3,1))
-
-
-
     self.setMaximumWidth(300)
 
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 
+class ColumnViewSettings(Widget):
+  ''' hide show check boxes corresponding to the table columns '''
+
+  def __init__(self, table, parent=None, direction='v', **kw):
+    Widget.__init__(self, parent, setLayout=True, **kw)
+    self.direction=direction
+    self.table = table
+    self.checkBoxes = []
+    self.initCheckBoxes()
+    self.filterLabel =  Label(self, 'Display Columns', grid=(0,0), vAlign='b')
+
+  def initCheckBoxes(self):
+    columns = self.table.columns
+    if columns:
+      for i, colum in enumerate(columns):
+        tipTex = 'Hide/Show %s column' % colum.heading
+        if self.direction=='v':
+          cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack,  checked=True,
+                        hAlign='l',tipText= tipTex,)
+        else:
+          cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack,  checked=True,
+                        hAlign='l',tipText= tipTex,)
+
+        cb.setMinimumSize(cb.sizeHint()*1.3)
+
+        self.checkBoxes.append(cb)
 
 
-class ObjectTableFilter(QtGui.QDialog):
+  def checkBoxCallBack(self):
+    checkBox = self.sender()
+    name = checkBox.text()
+    if checkBox.isChecked():
+      self._showColumn(name)
+    else:
+      self._hideColumn(name)
 
-  def __init__(self, parent=None, **kw):
-    super(ObjectTableFilter, self).__init__(parent)
-    self.setMinimumHeight(110)
+  def updateWidgets(self, table):
+    self.table = table
+    if self.checkBoxes:
+      for cb in self.checkBoxes:
+        cb.deleteLater()
+    self.checkBoxes = []
+    self.initCheckBoxes()
 
-    self.setMaximumWidth(700)
-    self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-    self.isOpened = True
+  def _hideColumn(self, name):
+    self.table.hideColumn(self.table.getColumnInt(columnName=name))
 
-    self.table = parent
-    tablePos = self.table.pos()
-    tablePos.setY(tablePos.y() + 30)
-    self.move(tablePos)
-    self.status = None
+  def _showColumn(self, name):
+    self.table.showColumn(self.table.getColumnInt(columnName=name))
+
+
+class ObjectTableFilter(Widget):
+
+  def __init__(self, table, parent=None, **kw):
+    Widget.__init__(self, parent, setLayout=True, **kw)
+    self.table = table
+
     self.origObjects = self.table.objects
+
+    labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='l')
+    self.columnOptions = PulldownList(self, grid=(0, 1), hAlign='l')
+    labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='l')
+    self.edit = LineEdit(self,grid=(0,3), hAlign='l')
+    self.edit.setMinimumSize(self.edit.sizeHint())
+
+    self.searchButtons = ButtonList(self, texts=['Reset','Search'],
+                                   tipTexts=['Restore Table','Search'],
+                                   callbacks=[self.restoreTable,self.findOnTable ],
+                                   grid=(0, 4), hAlign='c')
+
+    # self.clearButton = Button(self, text='Reset',
+    #                                 tipText='Restore Table',
+    #                                 callback=self.restoreTable,
+    #                                 grid=(0, 4), hAlign='c')
+    # self.searchButton = Button(self, text='Search',
+    #                             tipText='Search in Table',
+    #                             callback=self.findOnTable,
+    #                             grid=(0, 5), hAlign='c')
+
+    # self.clearButton.setMinimumSize(self.clearButton.sizeHint()*1.5)
+    # self.searchButton.setMinimumSize(self.searchButton.sizeHint()*1.5)
+
+    self.setColumnOptions()
+
+  def setColumnOptions(self):
     columns = self.table.columns
     texts = [c.heading for c in columns]
-    objects = range(len(columns))
-    tIndex = self.table.getCurrentIndex()
-    if tIndex is None:
-      index = 0
-    else:
-      index = tIndex.column()
-    gridRow = 0
-    gridColumn = 0
-    labelColumn = Label(self, 'Filter Column', grid=(gridRow,gridColumn))
-    gridColumn += 1
-    self.colPulldown = PulldownList(self, texts, objects, index=index, grid=(gridRow,gridColumn))
-    gridColumn += 1
-    labelObjects = Label(self, 'Objects to filter', grid=(gridRow,gridColumn))
-    gridColumn += 1
-    self.edit = LineEdit(self,grid=(gridRow,gridColumn))
-    gridColumn += 1
+    objectsRange = range(len(columns))
+
+    self.columnOptions.clear()
+    self.columnOptions.addItem('Whole Table', object=None)
+    for i, text in enumerate(texts):
+      self.columnOptions.addItem(text, objectsRange[i])
+    self.columnOptions.setIndex(0)
+
+  def updateWidgets(self, table):
+    self.table = table
+    self.origObjects = self.table.objects
+    self.setColumnOptions()
 
 
-    self.mode = RadioButtons(self, texts= ['Select Only', 'Filter'],
-                                   selectedInd=0,
-                                   callback=None,
-                                   direction='h',
-                                   tipTexts=None,
-                                   grid=(gridRow, gridColumn))
 
-    gridRow = 1
-    gridColumn = 4
-
-    self.button = Button(self, text='Search',callback =self.findOnTable,  grid=(gridRow,gridColumn))
-    self.button.setStyleSheet("margin:4px;")
-
-    gridRow = 3
-    gridColumn = 4
-    apply = ButtonList(self, texts=['Close','Cancel','Apply'],
-                       tipTexts=['Restore Table and Close','Restore Table',
-                                 'Keep Filtered Table and Close. '
-                                 'NB: To show again all the table contents you will need to close and reopen it'],
-                       callbacks=[self.closePopup,self.restoreTable,self.applyFilter],
-                       grid=(gridRow, gridColumn))
-
-    gridRow = 2
-    gridColumn = 0
-    self.msg = Label(self, text='Not Found', grid=(gridRow, gridColumn))
-    self.msg.hide()
-
-  def closePopup(self):
-    self.table.setObjects(self.origObjects)
-    self.close()
-    self.isOpened = False
-
-  def applyFilter(self):
-    self.close()
-    self.isOpened = False
 
   def restoreTable(self):
+    # origObjects =  [obj for obj in self.origObjects if obj is not None]
     self.table.setObjects(self.origObjects)
-    self.msg.hide()
     self.edit.clear()
 
   def findOnTable(self):
-    self.hideNotFoundMsg()
+    if self.edit.text() == '' or None:
+      self.restoreTable()
+      return
+    self.table.setObjects(self.origObjects)
+
     text = self.edit.text()
     columns = self.table.columns
-    objCol = columns[self.colPulldown.currentObject()]
 
+    if self.columnOptions.currentObject() is None:
+      allMatched = []
+      for i in range(len(columns)):
+        objCol = columns[i]
+        matched = self.searchMatches(objCol, text)
+        allMatched.append(matched)
+      matched = set([i for m in allMatched for i in m])   #making a single list of matching objs
+
+    else:
+      objCol = columns[self.columnOptions.currentObject()]
+      matched = self.searchMatches(objCol, text)
+
+    if matched:
+      self.table.setObjects(matched)
+    else:
+
+      MessageDialog.showWarning('Not found', '')
+
+
+  def searchMatches(self, objCol, text):
     matched = []
     objs = self.table.objects
     for obj in objs:
       value = u'%s' % (objCol.getValue(obj))
       if str(text) in str(value):
         matched.append(obj)
+      elif str(text) == str(value):
+        matched.append(obj)
+    return  matched
 
-    if len(matched)>1:
-      if self.mode.get() == 'Select Only':
-        self.table.setCurrentObjects(matched)
-        return
-      else:
-        self.setFilteredObjects()
-    else:
-      self.showNotFoundMsg()
 
   def setFilteredObjects(self):
     selected = self.table.getSelectedObjects()
     self.table.setObjects(selected)
 
-  def hideNotFoundMsg(self):
-    self.msg.hide()
-
-  def showNotFoundMsg(self):
-    self.msg.show()
-
-  # def handleButton(self):
-  #   items = self.table.model.findItems(
-  #     self.edit.text(), QtCore.Qt.MatchExactly)
-  #   if items:
-  #     results = '\n'.join(
-  #       'row %d column %d' % (item.row() + 1, item.column() + 1)
-  #       for item in items)
-  #   else:
-  #     results = 'Found Nothing'
-
-  # def close(self):
-  #
-  #   BasePopup.close(self)
-
-  # def unfilterTable(self):
-  #
-  #   self.table.setObjects(self.origObjects)
-  #   self.status = None
-  #
-  # def filterInclude(self, *event):
-  #
-  #   self.filterTable(True)
-  #
-  # def filterExclude(self, *event):
-  #
-  #   self.filterTable(False)
-
-  # def filterTable(self, includeMatches=True):
-  #
-  #   if not self.origObjects:
-  #     self.status = None
-  #     return
-  #
-  #   string = self.entry.get()
-  #   if not string:
-  #     self.status = None
-  #     return
-  #
-  #   self.status = includeMatches
-  #   columns = self.table.columns
-  #   objCol = columns[self.colPulldown.currentObject()]
-  #   mode = self.filterModeRadio.get()
-  #   flag = re.S
-  #
-  #   def exclude(a,b,c):
-  #     return not re.search(a,b,c)
-  #
-  #   if includeMatches:
-  #     find = re.search
-  #   else:
-  #     find = exclude
-  #
-  #   if mode != SEARCH_MODES[2]:
-  #     string = re.escape(string)
-  #
-  #   if mode == SEARCH_MODES[0]:
-  #     flag = re.I
-  #
-  #   objects = []
-  #   objectsAppend = objects.append
-  #
-  #   if self.filterObjRadio.getIndex() == 0:
-  #     filterObjs = self.origObjects
-  #   else:
-  #     filterObjs = self.table.getSelectedObjects()
-  #
-  #   for  obj in filterObjs:
-  #     value = u'%s' % (objCol.getValue(obj))
-  #     match = find(string, value, flag)
-  #
-  #     if match:
-  #       objectsAppend(obj)
-  #
-  #   self.table.clearSelection()
-  #   self.table.setObjects(objects, None)
 
 class Column:
 

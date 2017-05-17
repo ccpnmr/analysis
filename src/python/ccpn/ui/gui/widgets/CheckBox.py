@@ -1,4 +1,5 @@
-"""Module Documentation here
+"""
+CheckBox widget
 
 """
 #=========================================================================================
@@ -35,20 +36,34 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class CheckBox(QtGui.QCheckBox, Base):
 
-  def __init__(self, parent, checked=False, text='', callback=None, **kw):
+  def __init__(self, parent=None, checked=False, text='', callback=None, **kw):
 
     QtGui.QCheckBox.__init__(self, parent)
     self.setChecked(checked)
     if text:
       self.setText(text)
     Base.__init__(self, **kw)
-
     if callback:
       self.setCallback(callback)
 
   def get(self):
-
     return self.isChecked()
 
   def setCallback(self, callback):
     self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+
+  app = TestApplication()
+
+  def callback():
+    print('callback')
+
+  popup = BasePopup(title='Test CheckBox')
+
+  checkBox1 = CheckBox(parent=popup, text="test", callback=callback, grid=(0, 0)
+                      )
+  app.start()

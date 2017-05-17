@@ -1,4 +1,5 @@
-"""Module Documentation here
+"""
+This module implements the Button class
 
 """
 
@@ -39,18 +40,15 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class Button(QtGui.QPushButton, Base):
 
-  def __init__(self, parent, text='', callback=None, icon=None,
-               toggle=None, **kw):
+  def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, **kw):
 
     #text = translator.translate(text): not needed as it calls setText which does the work
 
     QtGui.QPushButton.__init__(self, parent)
     Base.__init__(self, **kw)
-    # self.timer = QtCore.QTimer()
-    # self.timer.setSingleShot(True)
-    # self.double_clicked = False
-    # self.timer.timeout.connect(self.singleClick)
+
     self.setText(text)
+
     if icon: # filename or pixmap
       self.setIcon(Icon(icon))
       self.setIconSize(QtCore.QSize(22,22))
@@ -58,40 +56,8 @@ class Button(QtGui.QPushButton, Base):
       self.setCheckable(True)
       self.setSelected(toggle)
 
-    self.callback = None
+    self._callback = None
     self.setCallback(callback)
-    #
-    # self.setStyleSheet(''' Button {background-color: #535a83;
-    #         border: 1px solid #182548;
-    #         color: #bec4f3;
-    #         }''')
-
-  # def mouseReleaseEvent(self, event):
-  #   if not self.double_clicked:
-  #       self.timer.start(100)
-  #   else:
-  #       self.double_clicked = False
-  #
-  # def mouseDoubleClickEvent(self, event):
-  #   if event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
-  #     self.timer.stop()
-  #     self.double_clicked = True
-  #     if self.action:
-  #       self.action()
-  #
-  # def singleClick(self):
-  #   if self.double_clicked == False:
-  #     self.toggle()
-  #   else:
-
-
-  # def mousePressEvent(self, event):
-  #   if event.button() == QtCore.Qt.RightButton and not (event.modifiers()):
-  #     event.accept()
-  #     self.action()
-  #
-  #   elif event.button() == QtCore.Qt.LeftButton and not (event.modifiers()):
-  #     self.toggle()
 
   def setSelected(self, selected):
 
@@ -102,21 +68,22 @@ class Button(QtGui.QPushButton, Base):
         self.setChecked(UNCHECKED)
 
   def setCallback(self, callback):
-
-    if self.callback:
-      self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
-
+    "Sets callback; disconnects if callback=None"
+    if self._callback is not None:
+      self.disconnect(self, QtCore.SIGNAL('clicked()'), self._callback)
     if callback:
       self.connect(self, QtCore.SIGNAL('clicked()'), callback)
       # self.clicked.connect doesn't work with lambda, yet...
-
-    self.callback = callback
+    self._callback = callback
 
   def setText(self, text):
+    "Set the text of the button, applying the translator first"
+    self._text = translator.translate(text)
+    QtGui.QPushButton.setText(self, self._text)
 
-    text = translator.translate(text)
-    QtGui.QPushButton.setText(self, text)
-
+  def getText(self):
+    "Get the text of the button"
+    return self._text
 
 
 if __name__ == '__main__':
@@ -126,6 +93,7 @@ if __name__ == '__main__':
   app = TestApplication()
 
   window = QtGui.QWidget()
+  window.setLayout(QtGui.QGridLayout())
 
   def click():
     print("Clicked")
@@ -141,7 +109,7 @@ if __name__ == '__main__':
   b2.setEnabled(False)
 
   b3 = Button(window, text='I am green', callback=click,
-             tipText='Mmm, green', bgColor='#80FF80',
+             tipText='Mmm, green', #bgColor='#80FF80',
              grid=(0, 2))
 
   b4 = Button(window, icon='icons/system-help.png', callback=click,

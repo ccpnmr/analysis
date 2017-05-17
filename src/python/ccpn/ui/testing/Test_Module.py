@@ -42,14 +42,14 @@ class ModuleTest(WrapperTesting):
   def test_creation_1(self):
     project = self.project
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     task = project.tasks[0]
     task2 = project.newTask('TestTask')
     window2 = project.newWindow(title='W2')
     window2.task = task2
     module1 = task.newModule('TestMod')
     module2 = task.newModule('TestMod')
-    module3 = task2.newModule('TestMod', window=window2, name='MyOwn', comment='really?')
+    module3 = task2.newModule('TestMod', window=window2, title='MyOwn', comment='really?')
     module4 = task.newModule('DifferentMod')
     undo.undo()
     undo.undo()
@@ -78,7 +78,7 @@ class ModuleTest(WrapperTesting):
     # this is left for now.
     project = self.project
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     task2 = project.newTask('TestTask')
     window2 = project.newWindow(title='W2')
     undo.undo()
@@ -108,7 +108,7 @@ class ParameterTest(WrapperTesting):
 
 
     undo = self.project._undo
-    undo.newWaypoint()
+    self.project.newUndoPoint()
     self.assertEqual(module1.parameters, {})
     module1.setParameter('aaa', 1)
     self.assertEqual(module1.parameters, {'aaa':1})
@@ -132,7 +132,7 @@ class ParameterTest(WrapperTesting):
       task = project.newTask('TestTask')
       module1 = task.newModule('TestMod')
       undo = self.project._undo
-      undo.newWaypoint()
+      self.project.newUndoPoint()
       module1.setParameter('ndarray', numpy.ndarray((5,3,1)))
       undo.undo()
       undo.redo()
@@ -144,7 +144,7 @@ class ParameterTest(WrapperTesting):
       task = project.newTask('TestTask')
       module1 = task.newModule('TestMod')
       undo = self.project._undo
-      undo.newWaypoint()
+      self.project.newUndoPoint()
       module1.setParameter('tensor', Tensor._fromDict({'orientationMatrix':numpy.identity(3),
                                      'xx':2.1, 'yy':-3, 'zz':0.9}))
       undo.undo()

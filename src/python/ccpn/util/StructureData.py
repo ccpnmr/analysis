@@ -4,26 +4,22 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:07 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 16:40:29 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -38,9 +34,30 @@ import numpy
 import pandas as pd
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
+from json import dumps
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
+NaN = math.nan
+
+# def _setIndexLock(fn):
+#   global _indexLockVal
+#   _indexLockVal = 0
+#
+#   # if we want to do something AFTER the  call to 'fn' we have to define another inner function
+#   # so we have somewhere to place the post 'fn' code - MUST RETURN A FUNCTION
+#   def _indexLock(*args, **kwargs):      # the same arguments as fn
+#
+#     # _indexLockVal += 1
+#     fn_ret = fn(*args, **kwargs)         # call 'fn' here - don't forget the brackets
+#     # _indexLockVal -= 1
+#
+#     return fn_ret                     # if fn returned a value then we need to match it here
+#
+#   return _indexLock             # and return the outer function
+
+
+
 
 
 class EnsembleData(pd.DataFrame):
@@ -240,7 +257,7 @@ class EnsembleData(pd.DataFrame):
     ('nmrChainCode', (str, None)),
     ('nmrSequenceCode', (str, '_nmrSequenceCodeConversion')),
     ('nmrResidueName', (str, None)),
-    ('nmrAtomName', (str, None)),
+    ('nmrAtomName', (str, None))
   ))
 
   @property
@@ -266,12 +283,72 @@ class EnsembleData(pd.DataFrame):
     # NB ModelData temporarily resets this to a Model object
     self.__containingObject = None
 
-    # Reset index to one-start - unless it was passed in explicitly.
-    if 'index' not in kwargs:
-      self.reset_index(drop=True, inplace=True)
+    # TODO: ED
+    # reset_index should only happen when you create a new Ensemble
+    # (or put in data in ana empty one), not in general
+    # Otherwise it has too many unpredictable consequences when pandas
+    # creates sopies.
+    # So the reset)index calls should be *removed* from ModelData,
+    # and here should be triggered only in specific circumstances,
+    # when self._containingObject is set and probably not always even then.
+    # That would then replace the _indexOverride handling you have put in
+    # (since it would have a wider scope);.
 
+    # Reset index to one-start - unless it was passed in explicitly.
+    # if 'index' not in kwargs:
+    #   self.reset_index(drop=True, inplace=True)
+    #   pass
+    # else:
+    #   pass              # ejb - this never gets hit...
+    #
+    # pass
+
+
+    # try:
+    #   if _indexOverride:      # ejb - cheating with _indexOverride
+    #     pass                  # skip the indexing
+    # except:
+    #   self.reset_index(drop=True, inplace=True)
+
+
+
+      # try:
+        # arglist = str(args).split(' \\').split()
+        # if "'index'" not in arglist:
+        # arglist = str(self.dtypes).split()    # ejb - needs 464 below
+        # if 'IndexTemp' not in arglist:
+        #   self.reset_index(drop=True, inplace=True)  # ejb need ignore sometimes
+        #   pass
+      # finally:
+      #   pass
+
+      #   for ii, argitem in enumerate(arglist):
+      #     if argitem is 'Axis':
+      #       thisindex = arglist(ii+2)
+      #   pass
+      # except:
+      #   pass
+      # try:
+      #   ax = self.axes[0]
+      #   pass
+      # except:
+      #   pass
+      # pass
 
   ### Making selections
+
+  # def drop(self, labels, axis = 0, level = None, inplace = False, errors = 'raise'):    # ejb
+  #   """
+  #   Overload the Pandas drop to reset the indexing after items have been removed
+  #   :param labels:
+  #   :param axis:
+  #   :param level:
+  #   :param inplace:
+  #   :param errors:
+  #   :return:
+  #   """
+  #   super().drop(labels, axis, level, inplace, errors)
+  #   # self.reset_index(drop=True, inplace=True)
 
   def selector(self, index=None, chainCodes=None, residueNames=None, sequenceIds=None,
                atomNames=None, modelNumbers=None, ids=None,
@@ -283,7 +360,8 @@ class EnsembleData(pd.DataFrame):
 
     Returns Pandas Series of booleans
     """
-    s = pd.Series((True,) * self.shape[0])
+    s = pd.Series((True,) * self.shape[0], index=self.index) #range(1,self.shape[0]+1))      # ejb
+    # s = pd.Series((True,) * self.shape[0], index=range(1,self.shape[0]+1))      # ejb
     if index is not None:
       s = s & self._indexSelector(index)
     if chainCodes is not None:
@@ -309,7 +387,7 @@ class EnsembleData(pd.DataFrame):
   def _stringSelector(self, expression:typing.Union[str, typing.Iterable[str]],
                       columnName:str) -> pd.Series:
     """Select column 'columnName' based on 'expression',
-    which must wither be or convert to a sequence of strings
+    which must either be or convert to a sequence of strings
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
@@ -320,6 +398,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     expression = [int(x) for x in expression]
@@ -330,6 +409,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     return self['modelNumber'].isin(expression)
@@ -339,6 +419,7 @@ class EnsembleData(pd.DataFrame):
     """
     if isinstance(expression, str):
       expression = listFromString(expression)
+      expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
     return self.index.isin(expression)
@@ -347,7 +428,7 @@ class EnsembleData(pd.DataFrame):
     """Select records based on 'expression',
     which must either be or convert to a sequence of string atom IDs
     """
-    s = pd.Series((False,) * self.shape[0])
+    s = pd.Series((False,) * self.shape[0], index=self.index)    # ejb
     if isinstance(expression, str):
       expression = listFromString(expression)
     for i in expression:
@@ -426,7 +507,7 @@ class EnsembleData(pd.DataFrame):
       *columnNames: All positional arguments indicate the columns to extract.
                     If there are no columnNames, all columns are extracted.
 
-      **kwargs: ALl keyword-value arguments are passed to the selector function.
+      **kwargs: All keyword-value arguments are passed to the selector function.
 
     Returns a new EnsembleData
     """
@@ -434,12 +515,32 @@ class EnsembleData(pd.DataFrame):
       columnNames = self.columns
 
     if selector is None:
-      return self.extract(self.selector(**kwargs), *columnNames)
+      return self.extract(self.selector(**kwargs), *columnNames)   # ejb
 
     else:
       try:
         if self.shape[0] == selector.shape[0]:
-          return self.ix[selector, columnNames]
+          # return self.ix[selector, columnNames]
+
+          # global _indexOverride
+          # _indexOverride = True                   # ejb - just need existence
+          newEx = self.ix[selector, columnNames]
+          # del _indexOverride
+          return newEx
+
+          # return self.ix[selector, ('Index',)+columnNames]    # ejb
+          # newEx = self.ix[selector, ('IndexTemp',)+columnNames]   # Pandas should rename it as _1
+          # try:
+          #   self.__global__._indexOverride = True
+          #   newEx.drop('IndexTemp', axis=1, inplace=True)     # drop the rogue column
+          #   del self.__global__._indexOverride
+          # except:
+          #   pass
+          # return newEx
+          # need to remove the bad column from newEx
+          # return self.ix[selector, columnNames+('Index',)]
+
+
         else:
           raise ValueError('Selectors must be the same length as the number of atom records.')
       except AttributeError:
@@ -469,11 +570,125 @@ class EnsembleData(pd.DataFrame):
   ### Record-wise assignment of values
 
   def addRow(self, **kwargs):
-    """Add row with values matching kwargs, setting index to next available index
-
-    See setValues for details"""
+    """
+    Add row with values matching kwargs, setting index to next available index
+    See setValues for details
+    """
     nextIndex =  max(self.index) + 1 if self.shape[0] else 1
     self.setValues(nextIndex, **kwargs)
+
+  def _insertRow(self, *args, **kwargs):
+    """
+    Currently called by undo to re-insert a row.
+    Add the **kwargs to new element at the bottom of each column.
+    Modify the index and sort the new row into the correct position.
+    :param index in *args:
+    :param kwargs:
+    :return:
+    """
+    index = int(args[0])
+    len = self.shape[0]                         # current rows
+    for key in kwargs:
+      super().loc[len+1, key] = kwargs[key]     # force an extra row
+
+    neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
+    self.index = neworder                       # set the new index
+    self.sort_index(inplace=True)                     # and re-sort the table
+
+  def deleteRow(self, *args, **kwargs):
+    """
+    Delete a numbered row of the table.
+    index must exist and be a specified row.
+    An undo event is added corresponding to self._insertRow above.
+    :param index in *args:
+    :param kwargs:
+    :return:
+    """
+    try:
+      index = int(args[0])
+    except:
+      raise ValueError('deleteRow: Row not specified')
+
+    rowExists = False
+    if index in self.index:       # the index must exist
+      rowExists = True
+    else:
+      raise ValueError('deleteRow: Row does not exist')
+
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteRow', values=kwargs)
+
+    try:
+      colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
+
+      super().drop(index, **kwargs)       # delete the row
+      self.reset_index(drop=True, inplace=True)     # ejb
+
+      if containingObject is not None:
+        undo = containingObject._project._undo
+        if undo is not None:                        # add the undo event
+            undo.newItem(self._insertRow, self.deleteRow,
+                         undoArgs=(index,), undoKwargs=colData,
+                         redoArgs=(index,), redoKwargs=kwargs)
+
+    finally:
+      if containingObject is not None:
+        containingObject._endCommandEchoBlock()
+
+  def _insertCol(self, *args, **kwargs):
+    """
+    Currently called by undo to re-insert a column.
+    Add the **kwargs to the column across the index.
+    Currently *args are not checked for multiple values
+    :param colIndex in *args:
+    :param kwargs:
+    :return:
+    """
+    colIndex = str(args[0])       # get the index from the first arg value
+    for sInd in kwargs:
+      super().loc[int(sInd), colIndex] = kwargs[sInd]
+
+  def deleteCol(self, *args, **kwargs):
+    """
+    Delete a named column from the table, colIndex must exist.
+    An undo event is added corresponding to self._insertCol above.
+    :param colIndex in *args:
+    :param kwargs:
+    :return:
+    """
+    try:
+      colIndex = str(args[0])
+    except:
+      raise ValueError('deleteCol: Column not specified')
+
+    colExists = False
+    if colIndex in self.columns:       # the index must exist
+      colExists = True
+    else:
+      raise ValueError('deleteCol: Column does not exist.')
+
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
+
+    try:
+      colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
+
+      super().drop(colIndex, **kwargs)
+
+      if containingObject is not None:
+        undo = containingObject._project._undo
+        if undo is not None:                        # add the undo event
+            undo.newItem(self._insertCol, self.deleteCol,
+                         undoArgs=(colIndex,), undoKwargs=colData,
+                         redoArgs=(colIndex,), redoKwargs=kwargs)
+
+    finally:
+      if containingObject is not None:
+        containingObject._endCommandEchoBlock()
 
   def setValues(self, accessor:typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
     """
@@ -501,7 +716,10 @@ class EnsembleData(pd.DataFrame):
     Real= numbers.Real
 
     rowExists = True
-    if  isinstance(accessor, (int, numpy.integer)):
+    if isinstance(accessor, pd.Int64Index):
+      accessor = int(accessor[0])             # ejb - accessor becomes the wrong type on undo
+
+    if isinstance(accessor, (int, numpy.integer)):
       # This is utter shit! Why are numpy.integers not ints, or at least with a common superclass?
       # Shows again that numpy is an alien growth within python.
       index = accessor
@@ -513,18 +731,49 @@ class EnsembleData(pd.DataFrame):
         if index != nextIndex:
           raise ValueError("setValues cannot create a new row, "
                            "unless accessor is the next free integer index")
+
+      oldKw = dict((x, self[x]) for x in kwargs)    # store the original values
+
     elif isinstance(accessor, EnsembleData):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
       index = accessor.index
-      assert (index in self.index
-              and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
-        "Ensembles used for selection must be (or match) row in current ensemble"
-      )
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      #
+      # global _indexOverride
+      # _indexOverride = True  # ejb - just need existence
+      aant = accessor.as_namedtuples()      # testing for below
+      slan = self.loc[index].as_namedtuples()
+      # del _indexOverride
+
+      # tsit = tuple(self.itertuples(name='AtomRecord'))[index[0]]
+      #tuple(self.itertuples(name='AtomRecord'))
+
+      assert (index[0] in self.index and aant == slan), (
+        "Ensembles used for selection must be (or match) row in current ensemble")
+
+      sl = self.loc[index].as_namedtuples()   # ensemble get
+      nt = sl[0]._asdict()
+      oldKw = dict((x, nt[x]) for x in kwargs)
+
+      # assert (index[0] in self.index
+      #         and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
+      #   "Ensembles used for selection must be (or match) row in current ensemble"
+      # )
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     elif isinstance(accessor, pd.Series): # selector
       rows = accessor[accessor == True]
       assert rows.shape[0] == 1, "Boolean selector must select a single row."
       index = rows.index
-      assert index in self.index, "Boolean selector must select an existing row"
+      assert index[0] in self.index, "Boolean selector must select an existing row"   # ejb
+
+      try:
+        sl = self.loc[index].as_namedtuples()  # ensemble get
+        nt = sl[0]._asdict()
+        oldKw = dict((x, nt[x]) for x in kwargs)
+      except KeyError:
+        raise ValueError("Attempt to set columns not present in DataFrame: %s"
+                         % list(kwargs))
+
     else:
       raise TypeError('accessor must be index, ensemble row, or selector.')
 
@@ -558,6 +807,8 @@ class EnsembleData(pd.DataFrame):
     if containingObject is not None:
       # undo and echoing
       containingObject._startCommandEchoBlock('data.setValues', values=kwargs)
+      undo = containingObject._project._undo      # ejb
+      undo.increaseBlocking()       # ejb
 
     try:
       # We must do this one by one - passing in the dictionary
@@ -566,28 +817,46 @@ class EnsembleData(pd.DataFrame):
       # Internally this calls self.__setitem__.
       # Type handling is done there and can be skipped here.
       # NB, various obvious alternatives, like just setting the row, do NOT work.
+
+      # tempkw = dict((x, self.loc[index].get(x)) for x in kwargs)  # ejb - grab the original values
+      # tempkw = dict((x, getattr(self.loc[index], x)) for x in kwargs)  # ejb - grab the original values
+      # tempkw = {t.__name__: t for t in slan[0]}
+      # tempkw = vars(slan[0])
+
+      # sl = self.loc[index].as_namedtuples()   # ensemble get
+      # nt = sl[0]._asdict()
+      # tempkw = dict((x, nt[x]) for x in kwargs)
+
+      # nt = slan[0]._asdict()
+      # tempkw = dumps(nt)
       for key,val in values.items():
         self.loc[index, key] = val
 
     finally:
       if containingObject is not None:
+        undo.decreaseBlocking()  # ejb
         containingObject._endCommandEchoBlock()
 
+    # ejb/Rasmus removed here, should be covered by __setItem__
+    # must be this way around, otherwise setValues with new column gets transposed
     if containingObject is not None:
       undo = containingObject._project._undo
       if undo is not None:
         # set up undo functions
         if rowExists:
           # Undo modification of existing row
+          # undo.newItem(self.setValues, self.setValues,
+          #              undoArgs=(index,), undoKwargs=dict((x, self.loc[index].get(x))
+          #                                                    for x in kwargs),
+          #              redoArgs=(index,), redoKwargs=kwargs)
           undo.newItem(self.setValues, self.setValues,
-                       undoArgs=(index,), undoKwargs=dict((x, self.loc[index].get(x))
-                                                             for x in kwargs),
+                       undoArgs=(index,), undoKwargs=oldKw,
                        redoArgs=(index,), redoKwargs=kwargs)
         else:
           # undo addition of new row
           undo.newItem(self.drop, self.setValues,
                        undoArgs=(index,), undoKwargs={'inplace':True},
-                       redoArgs=(index, ), redoKwargs=kwargs)
+                       redoArgs=(index,), redoKwargs=kwargs)
 
 
   ### PDB mapping
@@ -595,12 +864,12 @@ class EnsembleData(pd.DataFrame):
   @classmethod
   def from_pdb(cls, filename: str) -> pd.DataFrame:
     """
-    Create an EnsembleData from a Pandas DataFrame representing a pdb file
+    Create an EnsembleData from a pdb file.
     """
     dfs = pdb2df(filename)
-    # pdbName = '.'.join(filename.split('.')[:-1])
-    # ensemble = cls(name=pdbName)
+
     ensemble = cls()
+
     ensemble['modelNumber'] = dfs['model']
     ensemble['chainCode'] = dfs['chainID']
     ensemble['sequenceId'] = dfs['resSeq']
@@ -618,8 +887,7 @@ class EnsembleData(pd.DataFrame):
     ensemble['nmrSequenceCode'] = None
     ensemble['nmrResidueName'] = None
     ensemble['nmrAtomName'] = None
-    ensemble = ensemble.reset_index(drop=True)
-    return ensemble
+    return cls(ensemble)
 
 
   ### Pandas compatibility methods
@@ -667,10 +935,18 @@ class EnsembleData(pd.DataFrame):
     # reset index to one-origin successive integers
     self.index = range(1, len(reordered) + 1)
 
-  def reset_index(self, *args, **kwargs):
+  def reset_index(self, *args, inplace=False, **kwargs):
     """reset_index - overridden to generate index starting at one."""
-    super().reset_index(*args, **kwargs)
-    self.index = range(1, self.shape[0] + 1)
+    if inplace:
+      new_obj = self
+    else:
+      new_obj = self.copy()
+    new_obj.__class__.__bases__[0].reset_index(new_obj, *args, inplace=inplace, **kwargs)
+    # new_obj.index = range(1, self.shape[0] + 1)
+    new_obj.index = new_obj.index + 1
+
+    if not inplace:
+      return new_obj
 
 
   def __setitem__(self, key:str, value:typing.Any) -> None:
@@ -697,11 +973,12 @@ class EnsembleData(pd.DataFrame):
         # We can make a nice-looking synonym later, if we want.
         # NB with large objects the echo will be huge and ugly.
         # But it is almost impossible to compress the great variety of value types Pandas allow.
+
         containingObject._startCommandEchoBlock('data.__setitem__', key, value)
         project = containingObject._project
         project.blankNotification()
         undo = project._undo
-        undo.increaseBlocking()
+        # undo.increaseBlocking()       # ejb
 
       # WE need a copy, not a view, as this is used for undoing etc.
       oldValue = self.get(key)
@@ -731,7 +1008,6 @@ class EnsembleData(pd.DataFrame):
             super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
           else:
             super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
-
 
         if firstData:
           self.reset_index(drop=True, inplace=True)
@@ -764,8 +1040,24 @@ class EnsembleData(pd.DataFrame):
         if containingObject is not None:
           project._endCommandEchoBlock()
           project.unblankNotification()
-          undo.decreaseBlocking()
+          # undo.decreaseBlocking()          # ejb
 
+      # if containingObject is not None:
+      #   # WARNING This code is also called when you do ModelData.__setitem__
+      #   # In those cases containingObject is temporarily rest to the Model object
+      #   # Any bugs/modifications that arise in this code must consider ModelData as well
+      #   undo = containingObject._project._undo
+      #   if undo is not None:
+      #     # set up undo functions
+      #     if oldValue is None:
+      #       # undo addition of new column
+      #       undo.newItem(self.drop, self.__setitem__,
+      #                    undoArgs=(key,), undoKwargs={'axis':1, 'inplace':True},
+      #                    redoArgs=(key, value))
+      #     else:
+      #       # Undo overwrite of existing column
+      #       undo.newItem(super().__setitem__, self.__setitem__,
+      #                    undoArgs=(key, oldValue), redoArgs=(key, value))
 
   def _modelNumberConversion(self, force:bool=False):
     """Convert modelNumber series to valid data, changing value *in place*
@@ -810,7 +1102,7 @@ class EnsembleData(pd.DataFrame):
     for val in self[key]:
       if val is None or isinstance(val,str):
         appnd(val)
-      elif isinstance(val, int):
+      elif isinstance(val, (int, numpy.integer)):
         appnd(str(val))
       elif isinstance(val, Real):
         if isnan(val):
@@ -919,10 +1211,17 @@ def valueToOptionalType(x, dataType:type, force=False) -> typing.Optional['dataT
     return x
 
   elif force:
-    return dataType(x)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # return dataType(x)
+    try:
+      return dataType(x)
+    except:
+      raise TypeError("Value %s does not correspond to type %s" % (x, dataType))
+    #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   else:
-    raise ValueError("Value %s does not correspond to type %s" % (x, dataType))
+    raise TypeError("Value %s does not correspond to type %s" % (x, dataType))
 
 
 def valueToOptionalInt(x, force:bool=False) -> typing.Optional[int]:
@@ -947,35 +1246,87 @@ def valueToOptionalInt(x, force:bool=False) -> typing.Optional[int]:
       # value equal to integer
       return int(x)
 
+  elif isinstance(x, str):
+    try:
+      return int(x)
+    except ValueError:
+      raise TypeError("Value %s does not correspond to an integer" % x)
+
   else:
-    raise ValueError("Value %s does not correspond to an integer" % x)
+    raise TypeError("Value %s does not correspond to an integer" % x)
 
 
 def pdb2df(filename:str) -> pd.DataFrame:
   """
   Create a Pandas dataframe from a pdb file.
   """
-  from io import StringIO
-  colspecs = [(0, 6), (6, 11), (12, 16), (16, 17), (17, 20), (21, 22), (22, 26), (26, 27),
-              (30, 38), (38, 46), (46, 54), (54, 60), (60, 66), (76, 78), (78, 80)]
-  colnames = ['ATOM', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq', 'iCode',
-              'x', 'y', 'z', 'occupancy', 'tempFactor', 'element', 'charge']
   with open(filename) as f:
+    pdbString = []
+    modelNumber = 1
     dfs = None
-    i = None
-    pdb = []
     for l in f:
-      if l.startswith('ATOM'):
-        pdb.append(l)
-      elif l.startswith('MODEL'):
-        if i is not None:
-          df = pd.read_fwf(StringIO(''.join(pdb)), header=None, colspecs=colspecs, names=colnames)
-          df['model'] = i
-          df = df[df['ATOM'] == 'ATOM']
+      if l.startswith('MODEL'):
+        if len(pdbString) > 0:
+          df = _pdbStringToDf(pdbString, modelNumber)
           if dfs is None:
             dfs = df
           else:
             dfs = dfs.append(df)
-        i = l.split()[1]
-        pdb = []
+          pdbString = []
+        modelNumber = l.split()[1]
+      elif l.startswith('ATOM'):
+        pdbString.append(l)
+    df = _pdbStringToDf(pdbString, modelNumber)
+    if dfs is None:
+      print('new dfs')
+      dfs = df
+    else:
+      dfs = dfs.append(df)
+  dfs['idx'] = pd.np.arange(dfs.shape[0]) +1
+  dfs.set_index('idx', inplace=True)
   return dfs
+
+
+def _pdbStringToDf(modelLines:list, modelNumber=1):
+  from io import StringIO
+
+  colspecs = [(0, 6), (6, 11), (12, 16), (16, 17), (17, 20), (21, 22), (22, 26), (26, 27),
+              (30, 38), (38, 46), (46, 54), (54, 60), (60, 66), (76, 78), (78, 80)]
+  colnames = ['ATOM', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq', 'iCode',
+              'x', 'y', 'z', 'occupancy', 'tempFactor', 'element', 'charge']
+
+  pdbString = ''.join(modelLines)
+
+  df = pd.read_fwf(StringIO(pdbString), header=None, colspecs=colspecs, names=colnames)
+  df['model'] = modelNumber
+  df = df[df['ATOM'] == 'ATOM']
+  return df
+
+
+def averageStructure(ensemble:EnsembleData) -> EnsembleData:
+  '''
+  Calculate the average structure from all the models in an EnsembleData object.
+
+  '''
+
+  identifierColumns = ['chainCode', 'sequenceId', 'atomName']  # Still need to include altLocationCode
+  dataColumns = ['x', 'y', 'z', 'occupancy', 'bFactor']
+  dataColumns = [c for c in dataColumns if c in ensemble.columns]
+  allColumns = identifierColumns + ['residueName', 'element'] + dataColumns
+
+  ddEnsemble = ensemble.drop_duplicates(identifierColumns).copy()
+  ddEnsemble['_idx'] = ddEnsemble.index
+  ddEnsemble = ddEnsemble.sort_values(['chainCode', 'sequenceId', '_idx'])
+
+  # Have pandas do the calculation for us:
+  df = ensemble.groupby(identifierColumns)
+  df = df[dataColumns].mean()
+  df = df.reset_index()  # Flatten the multi-index
+  df = df.merge(ddEnsemble, on=identifierColumns, how='left', suffixes=['', '_ensemble'])
+  df = df.sort_values(['chainCode', 'sequenceId', '_idx'])
+  df = df.reset_index()
+
+  df = EnsembleData(df)
+  df = df[allColumns]
+  df = df.reset_index()
+  return df

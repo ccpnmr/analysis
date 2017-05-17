@@ -10,18 +10,16 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:32 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -320,8 +318,32 @@ class Project(AbstractWrapperObject):
     if undo is None:
       self._logger.warning("Trying to add undoPoint but undo is not initialised")
     else:
-      undo.newWaypoint()
+      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
       self._logger.info("Added undoPoint")
+
+  def blockWaypoints(self):
+    """Block the setting of undo waypoints,
+    so that command echoing (_startCommandBLock) does not set waypoints
+
+    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again"""
+    undo = self._wrappedData.root._undo
+    if undo is None:
+      self._logger.warning("Trying to block waypoints but undo is not initialised")
+    else:
+      undo.increaseWaypointBlocking()
+      self._logger.info("Waypoint setting blocked")
+
+  def unblockWaypoints(self):
+    """Block the setting of undo waypoints,
+    so that command echoing (_startCommandBLock) does not set waypoints
+
+    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again"""
+    undo = self._wrappedData.root._undo
+    if undo is None:
+      self._logger.warning("Trying to unblock waypoints but undo is not initialised")
+    else:
+      undo.decreaseWaypointBlocking()
+      self._logger.info("Waypoint setting unblocked")
 
 
   # Should be removed:
@@ -599,6 +621,9 @@ class Project(AbstractWrapperObject):
     """Execute accumulated notifiers and resume immediate notifier execution"""
     return
     # TODO suspension temporarily disabled
+    # This was broken at one point, and we never found time to fix it
+    # It is a time-saving measure, allowing you to e.g. execute a
+    # peak-created notifier only once when creating hundreds of peaks in one operation
     if self._notificationSuspension > 1:
       self._notificationSuspension -= 1
     else:
@@ -629,10 +654,12 @@ class Project(AbstractWrapperObject):
     """Call startCommandBlock for wrapper object delete. Implementation only"""
 
     undo = self._undo
-    if not self._appBase._echoBlocking and not undo.blocking:
-
+    if undo:
       # set undo step
-      undo.newWaypoint()
+      undo.newWaypoint()                      # DO NOT CHANGE TH
+      undo.increaseWaypointBlocking()
+    if not self._appBase._echoBlocking:
+
       getDataObj =  self._data2Obj.get
       ll = [getDataObj(x) for x in allWrappedData]
       ss = ', '.join(repr(x.pid) for x in ll if x is not None)
@@ -650,6 +677,10 @@ class Project(AbstractWrapperObject):
     """End block for delete command echoing
 
     MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
+    undo = self._undo
+    if undo:
+      undo.decreaseWaypointBlocking()
+
     if self._appBase._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
       self._appBase._echoBlocking -= 1
@@ -742,8 +773,9 @@ class Project(AbstractWrapperObject):
 
     target = operator.attrgetter(pathToObject)(wrappedData)
 
-    self._project._logger.debug('_notifyRelatedApiObject: %s: %s.%s = %s'
-                                % (action, wrappedData, pathToObject, target))
+    # GWV: a bit too much for now; should be the highest debug level only
+    #self._project._logger.debug('%s: %s.%s = %s'
+    #                            % (action, wrappedData, pathToObject, target))
 
     if not target:
       pass
@@ -781,7 +813,9 @@ class Project(AbstractWrapperObject):
     # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    # TODO suspension temporarily disabled
+    # Notification suspension postpones notifications (and removes duplicates)
+    # It is broken and has been disabled for a long time.
+    # There may be some accumulated bugs when (if)it is turned back on.
     if False and self._notificationSuspension:
       ll = self._pendingNotifications
       for dd in iterator:
@@ -795,45 +829,83 @@ class Project(AbstractWrapperObject):
   # Library functions
 
   def loadData(self, path:str) -> typing.Optional[typing.List]:
-    """Load data from path, determining type first."""
+    """
+    Load data from path, determining type first.
+    Return None for Un-recognised or un-parsable files; return empty list for ???
+    """
 
-    dataType, subType, usePath = ioFormats.analyseUrl(path)
+    # TODO: RASMUS:
+    # RASMUS EXPLANATION (to my successor)
+    # loadData does too many things: it is used for handling dropped files,
+    # which includes a system for deciding what actions are taken where for what file types,
+    # and it is called directly for loading e.g. a spectrum.
+    #
+    # Part of the idea was that a file of type 'Xyz' being dropped would trigger
+    # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
+    # in question. That allowed you to control which drops were allowed where, and what
+    # specific actions should be triggered.
+    #
+    # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
+    # My proposal (hopefully consistent with GV's (?)) would be to use this function
+    # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
+    # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
+    # spectrum or a project (currently loadData is (too) widely used.
+    # Some of these functions may or may not need to be written first.
+    # That still leaves the question of how to handle a case where e.g. a text
+    # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
+    # but that must be thought out and decided.
+    # Anyway, this function should have a proper and consistent return type (as GV says)
+    # Maybe we should consider returning a dictionary rather than a list of tuples??
 
     # urlInfo is list of triplets of (type, subType, modifiedUrl),
-
     # e.g. ('Spectrum', 'Bruker', newUrl)
+    dataType, subType, usePath = ioFormats.analyseUrl(path)
+
+    #TODO:RASMUS: Replace prints by logger calls
+    #TODO:RASMUS: Fix all return types; define properly first
     if dataType is None:
       print("Skipping: file data type not recognised for %s" % usePath)
+      return None
 
     elif dataType == 'Dirs':
       # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
       paths = usePath
+      #TODO:RASMUS: Undefined return type
       for path in paths:
         self.loadData(path)
 
     elif not os.path.exists(usePath):
       print("Skipping: no file found at %s" % usePath)
+      return []
+
     elif dataType == 'Text':
       # Special case - you return the text instead of a list of Pids
+      # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+      # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
+      #TODO:RASMUS: return type is not a list
       return open(usePath).read()
 
     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+      # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
       self._appBase.runMacro(usePath)
 
     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
       projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
       project = self.loadProject(projectPath, ioFormats.CCPN)
+      #TODO:RASMUS: use python tmpdir or V3 calss
+      # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
       project._wrappedData.root._temporaryDirectory = temporaryDirectory
       return [project]
 
     else:
-
+      # No idea what is going on here
+      #TODO: use a dictionary to define
       funcname = '_load' + dataType
       if funcname == '_loadProject':
         return [self.loadProject(usePath, subType)]
 
       elif funcname == '_loadSpectrum':
-        # NBNB TBD FIXME check if loadSpectrum should start with underscore
+        # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
         # (NB referred to elsewhere
         return self.loadSpectrum(usePath, subType)
 
@@ -843,7 +915,7 @@ class Project(AbstractWrapperObject):
       else:
         print("Skipping: project has no function %s" % funcname)
 
-    return None
+    return []
 
   # Data loaders and dispatchers
   def _loadSequence(self, path:str, subType:str) -> list:
@@ -861,20 +933,38 @@ class Project(AbstractWrapperObject):
     #
     return chains
 
-  def _loadStructure(self, path:str, subType:str) -> list:
-    """Load Structure ensemble(s) from file into Wrapper project"""
 
-    # NBNB TODO FIXME The loader should be replaced with one that uses the current model
-    # Meanwhile this should make the old loader work
-    from ccpnmodel.v_3_0_2.upgrade import upgradeToPandasData
+  def _loadStructure(self, path:str, subType:str):
+    '''
+    Load Structure ensemble(s) from file into Wrapper project
+    '''
 
-    if subType == ioFormats.PDB:
-      apiEnsemble = pdbIo.loadStructureEnsemble(self._apiNmrProject.molSystem, path)
-      upgradeToPandasData(apiEnsemble)
+    from ccpn.util.StructureData import averageStructure
+    if subType == 'PDB':
+      label, ensemble = self._loadPdbStructure(path)
     else:
-      raise ValueError("Structure file type %s is not recognised" % subType)
-    #
-    return [self._data2Obj[apiEnsemble]]
+      raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
+    se = self.newStructureEnsemble()
+    se.data = ensemble
+    se.label = label
+
+    ds = self.newDataSet(title=label)
+    d = ds.newData(name='Derived')
+    # TODO: Rasmus fix me!
+    # d.setParameter('average', averageStructure(ensemble))
+
+    return [se]
+
+  def _loadPdbStructure(self, path):
+    import os
+    from ccpn.util.StructureData import EnsembleData
+
+    label = os.path.split(path)[1]
+    label = label.split('.')[:-1]
+    label = '_'.join(label)
+
+    ensemble = EnsembleData.from_pdb(path)
+    return label, ensemble
 
   def loadProject(self, path:str, subType:str) -> "Project":
     """Load project from file into application and return the new project"""
@@ -888,14 +978,14 @@ class Project(AbstractWrapperObject):
   def loadSpectrum(self, path:str, subType:str) -> list:
     """Load spectrum from file into application"""
 
-    # NBNB TBD FIXME check for rename
+    # #TODO:RASMUS FIXME check for rename
 
     apiDataSource = self._wrappedData.loadDataSource(path, subType)
     if apiDataSource is None:
       return []
     else:
       spectrum = self._data2Obj[apiDataSource]
-      spectrum.resetAssignmentTolerances()
+      spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
       return [spectrum]
 
   def _loadLookupFile(self, path:str, subType:str, ):

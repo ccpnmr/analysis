@@ -11,9 +11,12 @@ from qtconsole.inprocess import QtInProcessKernelManager
 
 class IpythonConsole(Widget, Base):
 
-    def __init__(self, parent=None, namespace=None, mainWindow=None, historyFile=None, **kw):
+    def __init__(self, mainWindow, namespace=None, **kw):
 
-        Widget.__init__(self)
+        if namespace is None:
+          namespace = mainWindow.namespace
+
+        Widget.__init__(self, parent=mainWindow, setLayout=True)
         Base.__init__(self, **kw)
 
         km = QtInProcessKernelManager()
@@ -23,10 +26,13 @@ class IpythonConsole(Widget, Base):
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
+        #TODO:GEERTEN: Sort Stylesheet issues
         self.setStyleSheet(self.mainWindow.styleSheet())
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
+        #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
+        #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
         consoleLayout = QtGui.QGridLayout()
         buttonLayout = QtGui.QGridLayout()
         self.setMinimumHeight(100)
@@ -97,7 +103,7 @@ class IpythonConsole(Widget, Base):
       if hasattr(self, 'project'):
         undo = self.project._undo
         if undo is not None:
-          undo.newWaypoint()
+          self.project.newUndoPoint()
 
 
 

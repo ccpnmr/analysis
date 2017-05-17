@@ -99,8 +99,8 @@ class Data(AbstractWrapperObject):
     """attached object - derived from self.attachedObjectPid.
 
     If no attached object matching attachedObjectPid can be found
-    (object has been renamed, deleted, or teh attachedObjectPid is incorrect)
-    this attriibute has the value None."""
+    (object has been renamed, deleted, or the attachedObjectPid is incorrect)
+    this attribute has the value None."""
     ss = self._wrappedData.attachedObjectPid
     if ss:
       return self.getByPid(ss)

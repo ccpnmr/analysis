@@ -43,7 +43,7 @@ class ButtonList(QtGui.QWidget, Base):
                tipTexts=None, direction='h', commands=None, images=None, **kw):
 
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, setLayout=True, **kw)     # ejb - added setLayout
 
 
 
@@ -80,7 +80,7 @@ class ButtonList(QtGui.QWidget, Base):
 
     self.buttons = []
     self.addButtons(texts, callbacks, icons, tipTexts)
-  
+
   def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
   
     if tipTexts is None:
@@ -96,6 +96,7 @@ class ButtonList(QtGui.QWidget, Base):
       icons.append(None)  
     
     j = len(self.buttons)
+
     for i, text in enumerate(texts):
       if 'h' in self.direction:
         grid = (0,i+j)
@@ -104,10 +105,13 @@ class ButtonList(QtGui.QWidget, Base):
         
       button = Button(self, text, callbacks[i], icons[i],
                       tipText=tipTexts[i], grid=grid)
-      button.setMinimumWidth(20)
+      # button.setMinimumWidth(20)
+
+      width = button.fontMetrics().boundingRect(text).width() + 7
+      button.setMinimumWidth(width*1.5)
+
       self.buttons.append(button)
-    
-      
+
 class UtilityButtonList(ButtonList):
 
   def __init__(self, parent,
@@ -189,6 +193,7 @@ if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
   def callback(text):
     print('callback', text)
@@ -198,10 +203,16 @@ if __name__ == '__main__':
   icons = [None, None, 'icons/applications-system.png']
 
   app = TestApplication()
-  popup = BasePopup(title='Test ButtonList')
-  popup.setSize(200,60)
-  buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons)
-  utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
-  
+  popup = CcpnDialog(windowTitle='Test ButtonList')
+
+  # popup.setSize(200,200)
+  popup.setGeometry(200,200,200,200)
+
+  buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons, grid=(2,2))
+  # utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
+
+  popup.show()
+  popup.raise_()
+
   app.start()
 

@@ -1,4 +1,6 @@
-"""Module Documentation here
+"""
+This Module implements the main graphics window functionality
+It works in concert with a wrapper object for storing/retrieving attibute values
 
 """
 #=========================================================================================
@@ -15,18 +17,18 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
 __dateModified__ = "$dateModified: 2017-04-07 11:40:38 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-
 __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import datetime
 import json
 import os
@@ -37,8 +39,11 @@ from PyQt4.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 
+from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
+
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
@@ -46,25 +51,57 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
 from ccpn.util.Common import uniquify
+
+
+#TODO:WAYNE: incorporate most functionality from GuiWindow and
+#TODO:TJ: functionality from FrameWork
+# For readability there should be a class:
+# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
+# The latter should all be private methods!
+# For readability there should be a class:
+# _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
+# The latter should all be private methods!
+#
+# The docstring of GuiMainWindow should detail how this setup is
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
-  def __init__(self):
+  def __init__(self, application):
+
     QtGui.QMainWindow.__init__(self)
+    # Layout
+    layout = self.layout()
+    print('GuiMainWindow: layout:', layout)
 
-    self.setGeometry(540, 40, 900, 900)
+    if layout is not None:
+      layout.setContentsMargins(0, 0, 0, 0)
+      layout.setSpacing(0)
 
-    GuiWindow.__init__(self)
-    # self._appBase._mainWindow = self
-    self.application._mainWindow = self
+    self.setGeometry(200, 40, 1100, 900)
+
+    # connect a close event, cleaning up things as needed
+    self.closeEvent = self._closeEvent
+    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
+
+    GuiWindow.__init__(self, application)
+    self.application = application
+
+    # Module area
+    self.moduleArea = CcpnModuleArea(mainWindow=self)
+    print('GuiMainWindow.moduleArea: layout:', self.moduleArea.layout) ## pyqtgraph object
+    self.moduleArea.setGeometry(0, 0, 1000, 800)
+    self.setCentralWidget(self.moduleArea)
+
+
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
     self._initProject()
-    self.closeEvent = self._closeEvent
-    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
+    self._setShortcuts()
 
     # do not need an unRegisterNotify because those removed when mainWindow / project destroyed
     self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
@@ -72,12 +109,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.feedbackPopup = None
     self.updatePopup = None
 
+    # blank display opened later by the _initLayout if there is nothing to show otherwise
+    # self.newBlankDisplay()
+
+    self.statusBar().showMessage('Ready')
+    self.show()
 
   def _initProject(self):
     """
     Puts relevant information from the project into the appropriate places in the main window.
-
     """
+    #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
     isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
 
     project = self._project
@@ -90,8 +132,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
-    self.colourScheme = self._appBase.colourScheme
-    self._appBase._updateRecentFiles()
+    self._fillRecentProjectsMenu()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
     if hasattr(self.application.project._wrappedData.root, '_temporaryDirectory'):
@@ -126,15 +167,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return a.menu() or a
     raise ValueError('Menu item not found.')
 
-
   def _setupWindow(self):
     """
     Sets up SideBar, python console and splitters to divide up main window properly.
 
     """
-    self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
-    self.splitter3 = QtGui.QSplitter(QtCore.Qt.Vertical)
-
+    #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
     self.setStyleSheet("""QSplitter{
                                     background-color: #bec4f3;
                                     }
@@ -148,6 +186,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                                     """)
 
+    # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,
                       'preferences': self.application.preferences,
@@ -160,19 +199,40 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                       'loadProject': self.application.loadProject,
                       'newProject': self.application.newProject,
                      }
-    self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
 
+    self.pythonConsole = IpythonConsole(self)
+
+    #TODO:LUCA: find out where the string is stored when you type '?' in the console; prepend this string
+#     self.pythonConsole.ipythonWidget.__doc__ = \
+# """
+# CcpNmr IPython Console Area (shortcut 'PY' to toggle)
+#
+# Access to:
+#
+#     application, project, current, ui, mainWindow, preferences
+#     redo(), undo(), loadProject(), newProject()
+#
+# """ + self.pythonConsole.ipythonWidget.__doc__
 
     self.sideBar = SideBar(parent=self)
-    self.sideBar.setDragDropMode(self.sideBar.DragDrop)
-    self.splitter3.addWidget(self.sideBar)
-    self.splitter1.addWidget(self.splitter3)
     self.sideBar.itemDoubleClicked.connect(self._raiseObjectProperties)
-    self.splitter1.addWidget(self.moduleArea)
-    self.setCentralWidget(self.splitter1)
-    self.statusBar().showMessage('Ready')
-    self._setShortcuts()
 
+    # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
+    self._horizontalSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+    # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
+    # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+
+    # GWV: do not understand this order
+    # self._verticalSplitter.addWidget(self.sideBar)
+    # self._horizontalSplitter.addWidget(self._verticalSplitter)
+    # self._horizontalSplitter.addWidget(self.moduleArea)
+    # self.setCentralWidget(self._horizontalSplitter)
+
+    # GWV: there is no need for the above as the moduleArea generates its splitter
+    # when required
+    self._horizontalSplitter.addWidget(self.sideBar)
+    self._horizontalSplitter.addWidget(self.moduleArea)
+    self.setCentralWidget(self._horizontalSplitter)
 
   def _setupMenus(self):
     """
@@ -181,7 +241,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     This currently pulls info on what menus to create from Framework.  Once GUI and Project are
     separated, Framework should be able to call a method to set the menus.
-
     """
 
     self._menuBar = MenuBar(self)
@@ -189,7 +248,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._createMenu(m)
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
-    self.show()
 
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
@@ -238,8 +296,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       ss = ''
     result = MessageDialog.showYesNo(title,
-          'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss),
-          colourScheme=self.colourScheme)
+          'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss))
 
     return result
 
@@ -253,12 +310,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if result:
       if projectDir is None:
         dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                            acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
+                            acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
         projectDir = dialog.selectedFile()
 
       if projectDir:
         self.application.loadProject(projectDir)
-
 
 
   def _raiseObjectProperties(self, item):
@@ -284,13 +340,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects
     specified in the preferences file.
     """
-    recentFileLocations = uniquify(self.application.preferences.recentFiles)
+    recentFileLocations = self.application._getRecentFiles()
     recentFileMenu = self.getMenuAction('Project->Open Recent')
     recentFileMenu.clear()
     for recentFile in recentFileLocations:
-     action = Action(self, text=recentFile, translate=False,
+      action = Action(self, text=recentFile, translate=False,
                      callback=partial(self.application.loadProject, path=recentFile))
-     recentFileMenu.addAction(action)
+      recentFileMenu.addAction(action)
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                     callback=self.application.clearRecentProjects))
@@ -299,8 +355,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _fillMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
-    TODO: make sure that running a macro adds it to the prefs and calls this function
     """
+    #TODO: make sure that running a macro adds it to the prefs and calls this function
 
     runMacrosMenu = self.getMenuAction('Macro->Run Recent')
     runMacrosMenu.clear()
@@ -416,10 +472,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return
       else:
         from ccpn.ui.gui.modules.PluginModule import PluginModule
-        pluginModule = PluginModule(interactor=plugin, application=self.application)
+        pluginModule = PluginModule(interactor=plugin, application=self.application
+                                    , mainWindow=self)   # ejb
     else:
       pluginModule = plugin.guiModule(name=plugin.PLUGINNAME, parent=self,
-                                      interactor=plugin, application=self.application)
+                                      interactor=plugin, application=self.application
+                                      , mainWindow=self)
     plugin.ui = pluginModule
     self.application.ui.pluginModules.append(pluginModule)
     self.moduleArea.addModule(pluginModule)
@@ -445,7 +503,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def displayProjectSummary(self):
     info = MessageDialog.showInfo('Not implemented yet',
-          'This function has not been implemented in the current version', colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
 
 
   def _closeEvent(self, event=None):
@@ -453,8 +511,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Saves application preferences. Displays message box asking user to save project or not.
     Closes Application.
     """
-    prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-    directory = os.path.dirname(prefPath)
+    from ccpn.framework.PathsAndUrls import userPreferencesPath
+    #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
+    #TODO:TJ move all of the saving of preferences to FrameWork
+    directory = os.path.dirname(userPreferencesPath)
     if not os.path.exists(directory):
       try:
         os.makedirs(directory)
@@ -462,35 +522,59 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
         return
 
-    prefFile = open(prefPath, 'w+')
-    json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+    prefFile = open(userPreferencesPath, 'w+')
+    json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                         ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                          colourScheme=self.colourScheme)
+                                     ['Save and Quit', 'Quit without Saving', 'Cancel'],
+                                   )
     if reply == 'Save and Quit':
       if event:
         event.accept()
-      prefFile = open(prefPath, 'w+')
-      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      prefFile = open(userPreferencesPath, 'w+')
+      json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self._appBase.saveProject()
-      # Close and clean up project
-      self._appBase._closeProject()
-      QtGui.QApplication.quit()
+
+      success = self.application.saveProject()
+      if success is True:
+        # Close and clean up project
+        self.application._closeProject()      # close if saved
+        QtGui.QApplication.quit()
+      else:
+        if event:                             # ejb - don't close the project
+          event.ignore()
+
     elif reply == 'Quit without Saving':
       if event:
         event.accept()
-      prefFile = open(prefPath, 'w+')
-      json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+      prefFile = open(userPreferencesPath, 'w+')
+      json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self._appBase._closeProject()
+      self.application._closeProject()
       QtGui.QApplication.quit()
     else:
       if event:
         event.ignore()
 
+  #TODO:LUCA: this cannot be correct and ModuleArea is not updates; The proper way should be
+  # that moduleArea handles this: self.moduleArea.deleteModule(blankDisplay)
+  def deleteBlankDisplay(self):
+    """
+    Removes blank display from main window modulearea if one is present.
+    """
+    if 'Blank Display' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
+      blankDisplay.close()
+
+  def newBlankDisplay(self, position='bottom', relativeTo=None):
+    "Adds new blank display to module area; returns BlankDisplay instance"
+    blankDisplay = BlankDisplay(mainWindow=self)
+    #FIXME:ED - still crashes when loading some projects
+    if not relativeTo:
+      relativeTo = self.moduleArea     # ejb
+    self.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
+    return blankDisplay
 
   def newMacroFromLog(self):
     """
@@ -502,7 +586,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     editor.textBox.setText(text)
 
 
-  # the below is in Framework (slightly different implementation) so presumably does not belong here???
+  #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
+  #Framework owns the command, this part juts get the file to run
   def runMacro(self, macroFile:str=None):
     """
     Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
@@ -510,9 +595,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     if macroFile is None:
       dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
-                          acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
-      if os.path.exists(self._appBase.preferences.general.userMacroPath):
-        dialog.setDirectory(self._appBase.preferences.general.userMacroPath)
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
+      if os.path.exists(self.application.preferences.general.userMacroPath):
+        dialog.setDirectory(self.application.preferences.general.userMacroPath)
       macroFile = dialog.selectedFile()
       if not macroFile:
         return
@@ -525,11 +610,17 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:
-      spectrumDisplay._resetRemoveStripAction()
+      pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
 
   def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
+    #TODO:LUCA: Docstring needed
 
-    current = self._appBase.current
+    try:
+      saveName = spectrumDisplayOrStrip.title+'.svg'
+    except:
+      saveName=''
+
+    current = self.application.current
     if not spectrumDisplayOrStrip:
       spectrumDisplayOrStrip = current.spectrumDisplay
     if not spectrumDisplayOrStrip and current.strip:
@@ -543,7 +634,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
 
       if not path:
-        dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text='Print to File',
+        dialog = FileDialog(parent=self
+                            , directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
                             acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
                             filter='SVG (*.svg)')
         path = dialog.selectedFile()
@@ -592,3 +684,32 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           printer.startRegion(xOutputRegion, yOutputRegion)
           spectrumDisplayOrStrip._printToFile(printer)
 
+  _mouseMovedSignal = QtCore.pyqtSignal(dict)
+
+  def _mousePositionMoved(self, strip:GuiStrip, position:QtCore.QPointF):
+    """ CCPN INTERNAL: called from ViewBox
+    This is called when the mouse cursor position has changed in some strip
+    :param strip: The strip the mouse cursor is hovering over
+    :param position: The cursor position in "natural" (e.g. ppm) units
+    :return: None
+    """
+    axisCodes = strip.axisCodes
+    orderedAxes = strip.orderedAxes
+
+    # positionDict
+    #   strip --> strip
+    #   axisCode --> position (for each axisCode in strip)
+    # for the first two axes the position is provided by the cursor
+    # for the z axes the position is provided as the center of the axis region (i.e. the position)
+
+    mouseMovedDict = dict(strip=strip)
+    for n, axisCode in enumerate(axisCodes):
+      if n == 0:
+        pos = position.x()
+      elif n == 1:
+        pos = position.y()
+      else:
+        pos = orderedAxes[n].position
+      mouseMovedDict[axisCode] = pos
+
+    self._mouseMovedSignal.emit(mouseMovedDict)

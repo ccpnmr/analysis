@@ -41,23 +41,24 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
 
+from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
-from ccpn.framework import Version
+from ccpn.util.Common import uniquify
 
+from ccpn.framework import Version
+from ccpn.framework.Current import Current
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.lib.misc import _checked
 
 from ccpn.ui import interfaces, defaultInterface
-from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT
-from ccpn.util.Common import uniquify
 
 from PyQt4 import QtGui
 _DEBUG = False
@@ -142,6 +143,9 @@ def defineProgramArguments():
                                                  help='Use dark colour scheme')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
   parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
+  parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
+  parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
+  parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
   parser.add_argument('projectPath', nargs='?', help='Project path')
 
   return parser
@@ -153,6 +157,8 @@ class Arguments:
   interface = 'NoUi'
   nologging = True
   debug = False
+  debug2 = False
+  debug3 = False
   skipUserPreferences = True
   projectPath = None
 
@@ -226,7 +232,14 @@ class Framework:
     # self.setupComponents(args)
 
     self.useFileLogger = not self.args.nologging
-    self.level = logging.DEBUG if self.args.debug else logging.INFO
+    if self.args.debug3:
+      self.level = Logging.DEBUG3
+    elif self.args.debug2:
+      self.level = Logging.DEBUG2
+    elif self.args.debug:
+      self.level = logging.DEBUG
+    else:
+      self.level = logging.INFO
 
     self.current      = None
 
@@ -345,6 +358,7 @@ class Framework:
 
     self.project = project
     if hasattr(self, '_mainWindow'):
+      print('>>>framework._initialiseProject:')
       self.ui.initialize(self._mainWindow)
 
       # Get the mainWindow out of the application top level once it's been transferred to ui
@@ -366,6 +380,8 @@ class Framework:
       from ccpn.ui.gui.Gui import Gui
       ui = Gui(self)
       ui.qtApp._ccpnApplication = self
+      # ui.mainWindow is None upon initialization: gets filled later
+      print('frameWork._getUI>>>', self, ui, ui.mainWindow)
     else:
       from ccpn.ui.Ui import NoUi
       ui = NoUi(self)
@@ -470,7 +486,7 @@ class Framework:
 
     # Initialise displays
     for spectrumDisplay in project.windows[0].spectrumDisplays: # there is exactly one window
-      spectrumDisplay._resetRemoveStripAction()
+      pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
 
     # Initialise strips
     for strip in project.strips:
@@ -492,8 +508,12 @@ class Framework:
           spectrumView._createdSpectrumView()
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
-    self._initLayout()
-    # self._restoreLayout()
+    # add blank Display
+    if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
+      self.ui.mainWindow.newBlankDisplay()
+    # FIXME: LM. Restore Layout
+    # Restore Layout currently unstable. Unexpected bugs from pyqtgraph conteiners. Needs a better refactoring
+    # self._initLayout()
 
   def _initLayout(self):
     """
@@ -518,7 +538,7 @@ class Framework:
       """function internal to _initLayout"""
       contentToRemove = []
       for content in contents:
-         if isinstance(content, (tuple, list)):
+        if isinstance(content, (tuple, list)):
           if content:
             if content[0] == 'dock':
               key = content[1]
@@ -528,6 +548,7 @@ class Framework:
                 else:
                   keysSeen.add(key)
                   func = getattr(self, MODULE_DICT[key])
+                  print('FrameWork._initLayout>', func)
                   func()
             else:
               _analyseContents(content)
@@ -538,10 +559,12 @@ class Framework:
     # ===
     # start of the actual method code
     # ===
-    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+    yamlPath = os.path.join(self.project.path, 'layouts', 'layout.yaml')
+    if os.path.exists(yamlPath):
+      #print('FrameWork._initLayout>', yamlPath)
       try:
-        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-          names, layout = yaml.load(f)
+        with open(yamlPath) as f:
+          layout = yaml.load(f)
 
         typ, contents, state = layout['main']  # main window
         _analyseContents(contents)
@@ -561,6 +584,9 @@ class Framework:
       except Exception as e:
         # for now just ignore restore failures
         self.project._logger.warning("Layout restore failed: %s" % e)
+
+    if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
+      self.ui.mainWindow.newBlankDisplay()
 
   def getByPid(self, pid):
     return self.project.getByPid(pid)
@@ -585,10 +611,12 @@ class Framework:
        peak=peakOrPid)"""
 
     undo = self.project._undo
-    if not self._echoBlocking and not undo.blocking:
-
+    if undo:
       # set undo step
-      undo.newWaypoint()
+      undo.newWaypoint()     # DO NOT CHANGE
+      undo.increaseWaypointBlocking()
+    if not self._echoBlocking:
+
       self.project.suspendNotification()
 
       # Get list of command strings
@@ -603,16 +631,20 @@ class Framework:
       self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
-    self.project._logger.debug('startCommandBlock. command=%s, echoBlocking=%s, undo.blocking=%s'
+    self.project._logger.debug('command=%s, echoBlocking=%s, undo.blocking=%s'
                                % (command, self._echoBlocking, undo.blocking))
 
 
+  #TODO:TJ: Why is this a private method; it is and should be used all over the code?
   def _endCommandBlock(self):
     """End block for command echoing,
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
-    self.project._logger.debug('endCommandBlock. echoBlocking=%s' % self._echoBlocking)
+    self.project._logger.debug('echoBlocking=%s' % self._echoBlocking)
+    undo = self.project._undo
+    if undo:
+      undo.decreaseWaypointBlocking()
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
@@ -789,6 +821,7 @@ class Framework:
       (),
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
+      ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
@@ -804,6 +837,8 @@ class Framework:
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')])
                   )),
+      (),
+      ("Notes Table", self.showNotesEditorTable, [('shortcut', 'no')]),
       (),
       ("Python Console", self.toggleConsole, [('shortcut', 'py'),
                                               ('checkable', True),
@@ -856,9 +891,6 @@ class Framework:
   ###################################################################################################################
   ## MENU callbacks:  Project
   ###################################################################################################################
-
-
-
 
   def createNewProject(self):
     okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
@@ -958,6 +990,9 @@ class Framework:
       text = 'Load Data'
 
     if paths is None:
+      #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
+      # NBNB TBD I assume here that path is either a string or a list lf string paths.
+      # NBNB #FIXME if incorrect
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                           acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
       path = dialog.selectedFile()
@@ -968,7 +1003,8 @@ class Framework:
     elif isinstance(paths, str):
       paths = [paths]
 
-    self.ui.mainWindow.processDropData(paths, dataType='urls')
+    for path in paths:
+      self.project.loadData(path)
 
   def _saveLayout(self):
     moduleArea = self.ui.mainWindow.moduleArea
@@ -979,28 +1015,30 @@ class Framework:
       os.makedirs(layoutPath)
     import yaml
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
-      yaml.dump([currentModulesDict, layout], stream)
+      yaml.dump(layout, stream)
       stream.close()
 
-
-  def _restoreLayout(self):
-    import yaml, os
-    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
-      try:
-        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-          modulesDict, layoutState =  yaml.load(f)
-
-        import ccpn.ui.gui.modules as gm
-        ccpnModules = gm.importCcpnModules(modulesDict)
-        for ccpnModule in ccpnModules:
-          newModule = ccpnModule(self.project)
-          self.ui.mainWindow.moduleArea.addModule(newModule)
-
-        self.ui.mainWindow.moduleArea.restoreState(layoutState)
-
-      except Exception as e:
-        # for now just ignore restore failures
-        self.project._logger.warning("Layout restore failed: %s" % e)
+  # GWV while refactoring: This routine seems not to be called
+  #TODO:TJ: Confirm and delete
+  # def _restoreLayout(self):
+  #   import yaml, os
+  #   if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+  #     try:
+  #       with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+  #         modulesDict, layoutState =  yaml.load(f)
+  #
+  #       import ccpn.ui.gui.modules as gm
+  #       ccpnModules = gm.importCcpnModules(modulesDict)
+  #       for ccpnModule in ccpnModules:
+  #         #FIXME: is this correct?
+  #         newModule = ccpnModule(self.ui.gui.mainWindow)
+  #         self.ui.mainWindow.moduleArea.addModule(newModule)
+  #
+  #       self.ui.mainWindow.moduleArea.restoreState(layoutState)
+  #
+  #     except Exception as e:
+  #       # for now just ignore restore failures
+  #       self.project._logger.warning("Layout restore failed: %s" % e)
 
   #
   # def _openCcpnModule(self, ccpnModules, **kwargs):
@@ -1021,7 +1059,7 @@ class Framework:
     else:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
-      self._updateRecentFiles()
+      self.ui.mainWindow._fillRecentProjectsMenu()
       self._saveLayout()
 
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
@@ -1042,13 +1080,39 @@ class Framework:
       return self._saveProject(newPath=newPath, createFallback=createFallback,
                                overwriteExisting=overwriteExisting)
 
+  # GWV: This routine should not be used as it calls the graphics mainWindow routine
+  # Instead: The graphics part now calls _getRecentFiles
+  #
+  # def _updateRecentFiles(self, oldPath=None):
+  #   project = self.project
+  #   path = project.path
+  #   recentFiles = self.preferences.recentFiles
+  #   mainWindow = self.ui.mainWindow or self._mainWindow
+  #
+  #   if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
+  #     if path in recentFiles:
+  #       recentFiles.remove(path)
+  #     elif oldPath in recentFiles:
+  #       recentFiles.remove(oldPath)
+  #     elif len(recentFiles) >= 10:
+  #       recentFiles.pop()
+  #     recentFiles.insert(0, path)
+  #   recentFiles = uniquify(recentFiles)
+  #   mainWindow._fillRecentProjectsMenu()
+  #   self.preferences.recentFiles = recentFiles
 
-  def _updateRecentFiles(self, oldPath=None):
+  def _getRecentFiles(self, oldPath=None) -> list:
+    """Get and return a list of recent files, setting reference to
+       self as first element, unless it is a temp project
+       update the preferences with the new list
+       
+       CCPN INTERNAL: called by MainWindow
+    """
     project = self.project
     path = project.path
     recentFiles = self.preferences.recentFiles
-    mainWindow = self.ui.mainWindow or self._mainWindow
 
+    #TODO:RASMUS: replace by new function on project: isTemporary()
     if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
       if path in recentFiles:
         recentFiles.remove(path)
@@ -1058,9 +1122,8 @@ class Framework:
         recentFiles.pop()
       recentFiles.insert(0, path)
     recentFiles = uniquify(recentFiles)
-    mainWindow._fillRecentProjectsMenu()
     self.preferences.recentFiles = recentFiles
-
+    return recentFiles
 
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
@@ -1077,7 +1140,8 @@ class Framework:
       successful = False
       self.project._logger.info("Project not saved - no valid destination selected")
 
-    self._updateRecentFiles(oldPath=oldPath)
+    self._getRecentFiles(oldPath=oldPath) # this will also update the list
+    self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
     return successful
 
@@ -1214,19 +1278,27 @@ class Framework:
     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
+    # reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
+    #                                 ['Save and Quit', 'Quit without Saving', 'Cancel'],
+    #                                 colourScheme=self.ui.mainWindow.colourScheme)
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-                                    ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                    colourScheme=self.ui.mainWindow.colourScheme)
+                                    ['Save and Quit', 'Quit without Saving', 'Cancel'])   # ejb
     if reply == 'Save and Quit':
       if event:
         event.accept()
       prefFile = open(prefPath, 'w+')
       json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self.saveProject()
-      # Close and clean up project
-      self._closeProject()
-      QtGui.QApplication.quit()
+
+      success = self.saveProject()
+      if success is True:
+        # Close and clean up project
+        self._closeProject()
+        QtGui.QApplication.quit()
+      else:
+        if event:                             # ejb - don't close the project
+          event.ignore()
+
     elif reply == 'Quit without Saving':
       if event:
         event.accept()
@@ -1267,35 +1339,48 @@ class Framework:
   ###################################################################################################################
 
   def showSpectrumGroupsPopup(self):
-    from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-    SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
+    if not self.project.spectra:
+      self.project._logger.warn('Project has no Specta. Spectrum groups cannot be displayed')
+      MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    else:
+      from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+      SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
 
 
   def showProjectionPopup(self):
     if not self.project.spectra:
+      self.project._logger.warn('Project has no Specta. Make Projection Popup cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
-      return
-    from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-    popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
-    popup.exec_()
+    else:
+      from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+      popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
+      popup.exec_()
 
 
   def showExperimentTypePopup(self):
     """
     Displays experiment type popup.
     """
-    from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
-    popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
-    popup.exec_()
+    if not self.project.spectra:
+      self.project._logger.warn('Experiment Type Selection: Project has no Specta.')
+      MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+    else:
+      from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+      popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
+      popup.exec_()
 
 
   def showPeakPickPopup(self):
     """
     Displays Peak Picking Popup.
     """
-    from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-    popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
-    popup.exec_()
+    if not self.project.peakLists:
+      self.project._logger.warn('Peak Picking: Project has no Specta.')
+      MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
+    else:
+      from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+      popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
+      popup.exec_()
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:
@@ -1338,9 +1423,10 @@ class Framework:
     """
     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
-    self.sequenceModule = SequenceModule(self.project)
-    self.ui.mainWindow.moduleArea.addModule(self.sequenceModule,
-                                            position=position, relativeTo=relativeTo)
+    mainWindow = self.ui.mainWindow
+    self.sequenceModule = SequenceModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.sequenceModule,
+                                    position=position, relativeTo=relativeTo)
     return self.sequenceModule
 
 
@@ -1357,8 +1443,8 @@ class Framework:
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""
     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-    self.refChemShifts = ReferenceChemicalShifts(self.project, self.ui.mainWindow.moduleArea)
-
+    self.refChemShifts = ReferenceChemicalShifts(mainWindow=self.ui.mainWindow)
+    self.ui.mainWindow.moduleArea.addModule(self.refChemShifts)
 
   ###################################################################################################################
   ## MENU callbacks:  VIEW
@@ -1382,26 +1468,50 @@ class Framework:
     """
     Displays Chemical Shift table.
     """
+    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+
+    mainWindow = self.ui.mainWindow
     if not self.project.chemicalShiftLists:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
       MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed')
       return
     from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
-    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self.project.chemicalShiftLists)
-    self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.chemicalShiftTable = ChemicalShiftTableModule(mainWindow=mainWindow)   # ejb, chemicalShiftLists=self.project.chemicalShiftLists)
+    mainWindow.moduleArea.addModule(self.chemicalShiftTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
 
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
-    nmrResidueTableModule = NmrResidueTableModule(self.ui.mainWindow, self.project)
-    #nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
-    #nmrResidueTableModule.layout.addWidget(nmrResidueTable)
-    self.ui.mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
+
+
+  def showStructureTable(self, position='bottom', relativeTo=None):
+    """Displays Structure Table"""
+    from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+
+    structureTableModule = StructureTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
+    self.project._logger.info("application.showStructureTable()")
 
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
@@ -1409,13 +1519,18 @@ class Framework:
     Displays Peak table on left of main window with specified list selected.
     """
     from ccpn.ui.gui.modules.PeakTable import PeakTable
+
+    mainWindow = self.ui.mainWindow
     if not self.project.peakLists:
       self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed')
       return
-    self.peakTable = PeakTable(self.project, selectedList=selectedList)
-    self.ui.mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.peakTable = PeakTable(mainWindow)
+    mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
 
@@ -1423,16 +1538,34 @@ class Framework:
     """
     Displays Peak table on left of main window with specified list selected.
     """
-    from ccpn.ui.gui.modules.RestraintTable import RestraintTable
-    if not self.project.restraintLists:
-      self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
-      MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
-      return
-    restraintTable = RestraintTable(self.project, selectedList=selectedList, project=self.project)
-    self.ui.mainWindow.moduleArea.addModule(restraintTable, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
+    from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
+    mainWindow = self.ui.mainWindow
+    # if not self.project.restraintLists:
+    #   self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
+    #   MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
+    #   return
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.restraintTable = RestraintTableModule(mainWindow=mainWindow, restraintLists=selectedList)
+    mainWindow.moduleArea.addModule(self.restraintTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")
 
+  def showNotesEditorTable(self, position:str='bottom', relativeTo:CcpnModule=None):
+    """
+    Displays Notes Editing Table
+    """
+    from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+    mainWindow = self.ui.mainWindow
+
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.notesTable = NotesEditorModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.notesTable, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
+    self.project._logger.info("application.showNotesEditorTable()")
 
   def showPrintSpectrumDisplayPopup(self):
     from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
@@ -1442,34 +1575,33 @@ class Framework:
       SelectSpectrumDisplayPopup(project=self.project).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
-
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """
-    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
+    Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.
     """
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
 
-    if hasattr(self, 'assigner'):
-      return
-
-    self.assigner = SequenceGraph(self, project=self.project)
-    if hasattr(self, 'backboneModule'):
-      self.backboneModule._connectSequenceGraph(self.assigner)
-
-    if relativeTo is not None:
-      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
-    else:
-      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.sequenceGraph = SequenceGraph(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.sequenceGraph, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
-    return self.assigner
+    return self.sequenceGraph
 
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
     from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
-    self.atomSelector = AtomSelector(parent=self.ui.mainWindow, project=self.project)
-    self.ui.mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.atomSelector = AtomSelector(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
@@ -1506,17 +1638,21 @@ class Framework:
     Toggles whether python console is displayed at bottom of the main window.
     """
 
-    if 'Python Console' in self.ui.mainWindow.moduleArea.findAll()[1]:
-      if self.ui.mainWindow.pythonConsoleModule.isVisible():
-        self.ui.mainWindow.pythonConsoleModule.hide()
+    mainWindow = self.ui.mainWindow
+
+    if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
+      if mainWindow.pythonConsoleModule.isVisible():
+        mainWindow.pythonConsoleModule.hide()
       else:
-        self.ui.mainWindow.moduleArea.moveModule(self.ui.mainWindow.pythonConsoleModule, 'bottom', None)
+        mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
     else:
+      #TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);
+      # initialise in GuiMainWindow on __init__; set appropriate Menu callbacks
+      from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
-      self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console', closeFunc=closeFunc)
-      self.ui.mainWindow.pythonConsoleModule.layout.addWidget(self.ui.mainWindow.pythonConsole)
-      self.ui.mainWindow.moduleArea.addModule(self.ui.mainWindow.pythonConsoleModule, 'bottom')
+      mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
+      mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
 
   #################################################################################################
@@ -1527,29 +1663,44 @@ class Framework:
     """
     Displays macro editor.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+    # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
+    # self.project._logger.info("application.showMacroEditor()")
 
   def newMacroFromConsole(self):
     """
     Displays macro editor with contents of python console inside.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-    editor.textBox.setText(self.ui.mainWindow.pythonConsole.textEditor.toPlainText())
+    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    #FIXME:ED - haven't checked this properly
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    self.editor.textBox.setText(mainWindow.pythonConsole.textEditor.toPlainText())
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   def newMacroFromLog(self):
     """
     Displays macro editor with contents of the log.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    #FIXME:ED - haven't checked this properly
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+
     l = open(self.project._logger.logPath, 'r').readlines()
     text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
-    editor.textBox.setText(text)
+    self.editor.textBox.setText(text)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   def startMacroRecord(self):
     """
     Displays macro editor with additional buttons for recording a macro.
     """
-    self.macroEditor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor", showRecordButtons=True)
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
@@ -1557,7 +1708,8 @@ class Framework:
   def defineUserShortcuts(self):
 
     from ccpn.ui.gui.modules.ShortcutModule import ShortcutModule
-    self.shortcutModule = ShortcutModule(self.ui.mainWindow)
+    # self.shortcutModule = ShortcutModule(self.ui.mainWindow)
+    ShortcutModule(mainWindow=self.ui.mainWindow).exec_()   # ejb
 
   def runMacro(self, macroFile:str=None):
     """
@@ -1598,7 +1750,7 @@ class Framework:
       self._systemOpen(path)
     else:
       from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-      newModule = CcpnModule(title)
+      newModule = CcpnModule(mainWindow=self.ui.mainWindow, name=title)
       view = CcpnWebView(path)
       newModule.addWidget(view)
       self.ui.mainWindow.moduleArea.addModule(newModule)

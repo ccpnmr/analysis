@@ -33,63 +33,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtCore, QtGui
 
 import typing
-
-from ccpn.core.lib import PeakLib
+from ccpn.core.lib import AssignmentLib
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
+from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
-from ccpn.ui.gui.DropBase import DropBase
-from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpn.ui.gui import guiSettings
 
-class GuiWindow(DropBase):
+
+#TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
+# For readability there should be a class
+# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
+# The latter should all be private methods!
+
+class GuiWindow():
   
-  def __init__(self):
-    
-    DropBase.__init__(self, self._parent._appBase)
-
-    self.moduleArea = CcpnModuleArea()
-    # self.moduleArea = DockArea()
-    self.moduleArea.guiWindow = self
-    self.moduleArea.setGeometry(0, 0, 12000, 8000)
-    if not self._wrappedData.modules:
-      blankDisplay = GuiBlankDisplay(self.moduleArea)
-      self.moduleArea.addModule(blankDisplay, position=None)
-
-            
-  def deleteBlankDisplay(self):
-    """
-    Removes blank display from main window modulearea if one is present.
-    """
-    if 'Blank Display' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
-      blankDisplay.close()
-    # if self.blankDisplay:
-    #   self.blankDisplay.setParent(None)
-    #   self.blankDisplay = None
-    #
-  def loadData(self, paths=None, text=None):
-    """
-    Opens a file dialog box and loads data from selected file.
-    """
-    if text is None:
-      text='Load Data'
-    if paths is None:
-      dialog = FileDialog(self, fileMode=0, text=text, preferences=self._appBase.preferences.general)
-      paths = dialog.selectedFiles()[0]
-
-    # NBNB TBD I assume here that path is either a string or a list lf string paths.
-    # NBNB FIXME if incorrect
-
-    if not paths:
-      return
-    elif isinstance(paths,str):
-      paths = [paths]
-
-    self.processDropData(paths, dataType='urls')
-
+  def __init__(self, application):
+    self.application = application
 
   def _setShortcuts(self):
     """
@@ -106,7 +68,8 @@ class GuiWindow(DropBase):
     # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current),
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
+                                                              current=self.application.current),
                     context=context)
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
@@ -141,7 +104,7 @@ class GuiWindow(DropBase):
     # NBNB Moved here from Current
     # NBNB TODO: more general deletion
 
-    current = self._appBase.current
+    current = self.application.current
     peaks = current.peaks
     if peaks:
       n = len(peaks)
@@ -149,19 +112,10 @@ class GuiWindow(DropBase):
       msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
       if MessageDialog.showYesNo(title, msg, parent):
         current.project.deleteObjects(*peaks)
-        # no longer needed - echo done from function
-        # for peak in peaks[:]:
-        #   if current.project._appBase.ui.mainWindow is not None:
-        #     mainWindow = current.project._appBase.ui.mainWindow
-        #   else:
-        #     mainWindow = current.project._appBase._mainWindow
-        #   mainWindow.pythonConsole.writeConsoleCommand('peak.delete()', peak=peak)
-        #   peak.delete()
 
-
-
+  #FIXME:WAYNE: I don't think this can be correct
   def getCurrentPositionAndStrip(self):
-    current = self._appBase.current
+    current = self.application.current
     current.strip = current.viewBox.parentObject().parent
     cursorPosition = (current.viewBox.position.x(),
                       current.viewBox.position.y())
@@ -171,7 +125,6 @@ class GuiWindow(DropBase):
     # current.position = tuple(position)
     current.cursorPosition = cursorPosition
     return current.strip, current.cursorPosition
-
 
   def _getPeaksParams(self, peaks):
     params = []
@@ -187,19 +140,19 @@ class GuiWindow(DropBase):
       peak.lineWidths = lineWidths
 
   def refitCurrentPeaks(self):
-    peaks = self._appBase.current.peaks
+    peaks = self.application.current.peaks
     if not peaks:
       return
 
     project = peaks[0].project
     undo = project._undo
 
-    undo.newWaypoint()
+    project.newUndoPoint()
     undo.increaseBlocking()
 
     currentParams = self._getPeaksParams(peaks)
     try:
-      PeakLib.refitPeaks(peaks)
+      AssignmentLib.refitPeaks(peaks)
     finally:
       undo.decreaseBlocking()
       undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
@@ -254,14 +207,14 @@ class GuiWindow(DropBase):
       spectrumDisplay.togglePhaseConsole()
       
   def newPhasingTrace(self):
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip._newPhasingTrace()
 
       
   def setPhasingPivot(self):
     
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip._setPhasingPivot()
     
@@ -269,7 +222,7 @@ class GuiWindow(DropBase):
     """
     Removes all phasing traces from all strips.
     """
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip.removePhasingTraces()
 
@@ -278,8 +231,8 @@ class GuiWindow(DropBase):
     """
     Sets current.peaks to an empty list.
     """
-    # self._appBase.current.peaks = []
-    self._appBase.current.clearPeaks()
+    # self.application.current.peaks = []
+    self.application.current.clearPeaks()
 
   def toggleCrossHairAll(self):
     """
@@ -300,7 +253,7 @@ class GuiWindow(DropBase):
     """
     Creates a mark at the current cursor position in the current strip.
     """
-    strip = self._appBase.current.strip
+    strip = self.application.current.strip
     if strip and self.task:
       strip._createMarkAtCursorPosition(self.task)
     
@@ -308,6 +261,8 @@ class GuiWindow(DropBase):
     """
     Clears all marks in all windows for the current task.
     """
+    #TODO:WAYNE: make a method in strip: clearAtomLabels() which get called here so that is no hard encoding
+    # against non-modelled attributes.
     for mark in self.task.marks[:]:
       mark.delete()
     for spectrumDisplay in self.spectrumDisplays:
@@ -316,6 +271,32 @@ class GuiWindow(DropBase):
           strip.plotWidget.removeItem(atomLabel)
         for atomLabel in strip.yAxisAtomLabels:
           strip.plotWidget.removeItem(atomLabel)
+
+  def markPositions(self, axisCodes, chemicalShifts):
+    """
+    Create marks based on the axisCodes and adds annotations where appropriate.
+
+    :param axisCodes: The axisCodes making a mark for
+    :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
+    """
+    project = self.application.project
+    project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
+    try:
+      task = self.task
+
+      colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+      for ii, axisCode in enumerate(axisCodes):
+        for chemicalShift in chemicalShifts[ii]:
+          atomName = chemicalShift.nmrAtom.name
+          # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+          colour = colourDict.get(atomName[:min(2,len(atomName))])
+          if colour:
+            task.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
+          else:
+            task.newMark('white', [chemicalShift.value], [axisCode])
+
+    finally:
+      project._endCommandEchoBlock()
 
   def toggleGridAll(self):
     """
@@ -330,12 +311,4 @@ class GuiWindow(DropBase):
     """
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
-    
-  def _setCrossHairPosition(self, axisPositionDict:typing.Dict[str, float]):
-    """
-    # CCPN INTERNAL - called in mouseMoved method of GuiStrip
-    Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.
-    """
-    for spectrumDisplay in self.spectrumDisplays:
-      spectrumDisplay._setCrossHairPosition(axisPositionDict)
 

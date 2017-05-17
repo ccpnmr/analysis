@@ -84,6 +84,7 @@ class Strip(AbstractWrapperObject):
   @property
   def axisCodes(self) ->  Tuple[str, ...]:
     """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+    # TODO axisCodes shold be unique, but I am not sure this is enforced
     return self._wrappedData.axisCodes
 
   @property
@@ -129,10 +130,12 @@ class Strip(AbstractWrapperObject):
     """get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
     return parent._wrappedData.sortedStrips()
 
+  #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
+  #TODO:ED: confer with rasmus and me to refactor while writing tests
   def delete(self):
     """Overrides normal delete"""
 
-    # NBNB TODO - should this not be moved to the corresponding GUI class?
+    #TODO:RASMUS - should this not be moved to the corresponding GUI class?
     # Is there always a layout, regardless of application?
 
     # NB - echoing should be done normally, through the delete command
@@ -182,9 +185,6 @@ class Strip(AbstractWrapperObject):
     self._startCommandEchoBlock('clone')
     try:
       newStrip = self._project._data2Obj.get(self._wrappedData.clone())
-
-      # NBNB TODO Why is this necessary? Presumably it should be the same width as the source?
-      newStrip.setMinimumWidth(200)
     finally:
       self._endCommandEchoBlock()
     
@@ -275,13 +275,15 @@ class Strip(AbstractWrapperObject):
 
 
   def findAxis(self, axisCode):
-    """Reset display to original axis order"""
+    """Find axis"""
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
   def displaySpectrum(self, spectrum:Spectrum, axisOrder:Sequence=()):
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
+    print('Strip.displaySpectrum>>> _finaliseDone', self._finaliseDone, spectrum)
+    if not self._finaliseDone: return
 
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
@@ -552,6 +554,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
 SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
 
+#TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
 # SpectrumDisplay.orderedStrips property
 def getter(self) -> Tuple[Strip, ...]:
   ff = self._project._data2Obj.get
@@ -564,5 +567,6 @@ SpectrumDisplay.orderedStrips = property(getter, setter, None,
 del getter
 del setter
 
+# SHOULD NOT BE HERE like this
 # Drag-n-drop functions:
-Strip.processSpectrum = Strip.displaySpectrum
+#Strip.processSpectrum = Strip.displaySpectrum

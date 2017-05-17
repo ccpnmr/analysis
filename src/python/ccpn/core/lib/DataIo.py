@@ -564,9 +564,7 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock,chainOrder:str=None) -> 
           nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
         except ValueError:
           nmrAtom = nmrResidue.fetchNmrAtom(name=atomName)
-        dd = nmrAtom.ccpnInternalData
-        if not dd:
-          dd = nmrAtom.ccpnInternalData = {}
+        dd = nmrAtom._ccpnInternalData
         # NB when the same NmrAtom appears twice we get the ambiguity code
         # and original name from the LAST occurrence
         dd.update({'ambiguityCode':ambiguityCode, 'originalName':atomName})
@@ -635,7 +633,7 @@ def collapseXH3Groups(nmrChain:'NmrChain'):
                                          % previous.pid)
 
 def convertBmrbAmbiguousAtoms(nmrChain):
-  """Convert NmrAtoms with na.ccpnInternalData['ambiguityCode'] 2 or 3
+  """Convert NmrAtoms with na._ccpnInternalData['ambiguityCode'] 2 or 3
   to the 'xy' convention.
   Names are of form 'Nabi'  or 'Nabi%' or 'NAbi*' where 'N' is a one-letter nucleus code.
   'ab' is any string that is not an integer or '@' followed by an integer
@@ -665,11 +663,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
     for nmrAtom in nmrResidue.nmrAtoms:
       name = nmrAtom.name
 
-      dd2 = nmrAtom.ccpnInternalData
-      if dd2:
-        ambiguityCode = dd2.get('ambiguityCode')
-      else:
-        ambiguityCode = None
+      ambiguityCode = nmrAtom._ccpnInternalData.get('ambiguityCode')
 
       if ambiguityCode == 5:
         # interresidue ambiguity
@@ -698,20 +692,6 @@ def convertBmrbAmbiguousAtoms(nmrChain):
             newName = name[:-1] + 'x'
           # NB, if the name is already taken we get a nameclash
           nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
-
-      # elif name.endswith('"'):
-      #   # Should not happen, but it looks like " can be used instead of ''        dd2 = nmrAtom.ccpnInternalData
-      #   dd2 = nmrAtom.ccpnInternalData
-      #   if dd2:
-      #     xx = dd2.get('ambiguityCode')
-      #     if xx in ('2','3'):
-      #       # Ambiguous = set the name
-      #       newName = name[:-1] + 'y'
-      #       # NB, if the name is already taken we get a nameclash
-      #       print ('@~@~newName', newName)
-      #       nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
-      #       nmrAtom.ccpnInternalData['originalName'] = name
-
 
       elif len(name) > 2:
         if name[-1] in '123':
@@ -752,12 +732,10 @@ def convertBmrbAmbiguousAtoms(nmrChain):
 
           na = ll[ii]
           if na is not None:
-            dd2 = na.ccpnInternalData
-            if dd2:
-              xx = dd2.get('ambiguityCode')
-              if xx in (2,3):
-                ambiguityCode = xx
-                break
+            xx = na._ccpnInternalData.get('ambiguityCode')
+            if xx in (2,3):
+              ambiguityCode = xx
+              break
         else:
           for ll2 in dd.values():
             del ll2[ii]
@@ -792,11 +770,11 @@ def convertBmrbAmbiguousAtoms(nmrChain):
 def remapRestraintItems(project):
   """Remap restraintItems from original names to massaged names
 
-  - relies on NmrAtom.ccpnInternalData['originalName'] being set"""
+  - relies on NmrAtom._ccpnInternalData['originalName'] being set"""
   remap = {}
   for nmrAtom in project.nmrAtoms:
     atomId = nmrAtom._id
-    originalName = nmrAtom.ccpnInternalData.get('originalName')
+    originalName = nmrAtom._ccpnInternalData.get('originalName')
     if originalName:
       if atomId.endswith('%'):
         if atomId[-2] in 'XY':

@@ -70,6 +70,7 @@ import numpy
 import operator
 from typing import Sequence, Tuple, Optional
 from ccpn.util import Common as commonUtil
+from ccpn.util import Constants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -726,6 +727,7 @@ class Spectrum(AbstractWrapperObject):
 
   @axisCodes.setter
   def axisCodes(self, value):
+    # TODO axisCodes shold be unique, but I am not sure this is enforced
     self._setExpDimRefAttribute('axisCode', value, mandatory=False)
 
   @property
@@ -829,6 +831,21 @@ class Spectrum(AbstractWrapperObject):
   @assignmentTolerances.setter
   def assignmentTolerances(self, value):
     self._setDataDimRefAttribute('assignmentTolerance', value)
+
+  @property
+  def defaultAssignmentTolerances(self):
+    """Default assignment tolerances, per dimension.
+
+    NB for Fid or Sampled dimensions value will be None
+    """
+    tolerances = [None] * self.dimensionCount
+    for ii, dimensionType in enumerate(self.dimensionTypes):
+      if dimensionType == 'Frequency':
+        tolerance = Constants.isotope2Tolerance.get(self.isotopeCodes[ii],
+                                                    Constants.defaultAssignmentTolerance)
+        tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
+    #
+    return tolerances
 
   @property
   def spectralWidths(self) -> Tuple[Optional[float], ...]:
@@ -1032,29 +1049,6 @@ Use axisCodes to set magnetisation transfers instead.""")
     return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
   # Library functions
-
-  def resetAssignmentTolerances(self):
-    """Reset assignment tolerances to default values"""
-
-    self._startCommandEchoBlock('resetAssignmentTolerances')
-    try:
-      tolerances = [[]] * self.dimensionCount
-      for ii, isotopeCode in enumerate(self.isotopeCodes):
-        if isotopeCode == '1H':
-          tolerance = max([0.02, self.spectralWidths[ii]/self.pointCounts[ii]])
-          tolerances[ii] = tolerance
-        elif isotopeCode == '13C' or isotopeCode == '15N':
-          tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
-          tolerances[ii] = tolerance
-        elif isotopeCode:
-          tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
-          tolerances[ii] = tolerance
-        else:
-          tolerances[ii] = None
-
-      self.assignmentTolerances = tolerances
-    finally:
-      self._endCommandEchoBlock()
 
   def getPositionValue(self, position):
 

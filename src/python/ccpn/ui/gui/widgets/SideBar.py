@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -21,7 +21,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: Wayne Boucher $"
-
 __date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 #=========================================================================================
 # Start of code
@@ -31,7 +30,7 @@ from collections import OrderedDict
 
 import json
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, Qt
 
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -39,10 +38,10 @@ from ccpn.core.Project import Project
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core import _coreClassMap
 from ccpn.core.lib import Pid
-from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.widgets.Base import Base
 
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-from ccpn.ui.gui.modules.NotesEditor import NotesEditor
+from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
@@ -55,9 +54,17 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
+from ccpn.ui.gui.popups.NotesPopup import NotesPopup
+from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.guiSettings import sidebarFont
+
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
+from ccpn.util.Constants import ccpnmrJsonData
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -110,89 +117,132 @@ NEW_ITEM_DICT = {
 }
 ### Flag example code removed in revision 7686
 
-class SideBar(DropBase, QtGui.QTreeWidget):
-  def __init__(self, parent=None ):
+class SideBar(QtGui.QTreeWidget, Base):
+  def __init__(self, parent=None, mainWindow=None):
+
     QtGui.QTreeWidget.__init__(self, parent)
+    Base.__init__(self, acceptDrops=True)
+
+    self.mainWindow = parent                      # ejb - needed for moduleArea
 
     self._typeToItem = dd = {}
 
     self.setFont(sidebarFont)
     self.header().hide()
     self.setDragEnabled(True)
-    self._appBase = parent._appBase
     self.setExpandsOnDoubleClick(False)
     self.setDragDropMode(self.InternalMove)
     self.setMinimumWidth(200)
+
     self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
     self.projectItem.setFlags(self.projectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
+
     self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setFlags(self.spectrumItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumItem.setText(0, "Spectra")
+
     self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.spectrumGroupItem.setFlags(self.spectrumGroupItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumGroupItem.setText(0, "SpectrumGroups")
+
     self.newSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
     self.newSpectrumGroup.setFlags(self.newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSpectrumGroup.setText(0, "<New SpectrumGroup>")
+
     self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setFlags(self.samplesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.samplesItem.setText(0, 'Samples')
+
     self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
     self.newSample.setFlags(self.newSample.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSample.setText(0, "<New Sample>")
+
     self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.substancesItem.setText(0, "Substances")
+
     self.newSubstance = QtGui.QTreeWidgetItem(self.substancesItem)
     self.newSubstance.setFlags(self.newSubstance.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSubstance.setText(0, "<New Substance>")
+
     self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chainItem.setText(0, "Chains")
+
     self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setFlags(self.newChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newChainItem.setText(0, '<New Chain>')
+
     self.complexItem = dd['MX'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.complexItem.setFlags(self.complexItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.complexItem.setText(0, "Complexes")
+
     # TODO make COmplexEditor, install it in _createNewObject, and uncomment this
     # self.newComplex = QtGui.QTreeWidgetItem(self.complexItem)
     # self.newComplex.setFlags(self.newComplex.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     # self.newComplex.setText(0, "<New Complex>")
+
     self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setFlags(self.nmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.nmrChainItem.setText(0, "NmrChains")
+
     self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
     self.newNmrChainItem.setFlags(self.newNmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNmrChainItem.setText(0, '<New NmrChain>')
+
     self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chemicalShiftListsItem.setFlags(self.chemicalShiftListsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chemicalShiftListsItem.setText(0, "Chemical Shift Lists")
+
     self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
     self.newChemicalShiftListItem.setFlags(self.newChemicalShiftListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newChemicalShiftListItem.setText(0, '<New ChemicalShiftList>')
+
     self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setFlags(self.structuresItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.structuresItem.setText(0, "Structures")
+
+    self.newStructuresListItem = QtGui.QTreeWidgetItem(self.structuresItem)   # ejb
+    self.newStructuresListItem.setFlags(self.newStructuresListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    self.newStructuresListItem.setText(0, '<New StructureEnsemble>')
+
     self.dataSetsItem = dd['DS'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.dataSetsItem.setFlags(self.dataSetsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.dataSetsItem.setText(0, "DataSets")
+
     self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
     self.newDataSetItem.setFlags(self.newDataSetItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newDataSetItem.setText(0, '<New Dataset>')
+
     self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setFlags(self.notesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.notesItem.setText(0, "Notes")
+
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNoteItem.setText(0, '<New Note>')
+
     self.mousePressEvent = self._mousePressEvent
     self.dragMoveEvent = self._dragMoveEvent
     self.dragEnterEvent = self._dragEnterEvent
 
+    self.setDragDropMode(self.DragDrop)
+    self.setAcceptDrops(True)
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                       self._processDroppedItems)
 
+  #TODO:RASMUS: assure that there is a save query first before loading a project onto an existing roject
+  #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
+  def _processDroppedItems(self, data):
+    "Handle the dropped urls"
+    for url in data.get('urls',[]):
+      print('SideBar._processDroppedItems>>> dropped:', url)
+      objects = self.project.loadData(url)
+      if objects is None or len(objects) == 0:
+        showWarning('Invalid File', 'Cannot handle "%s"' % url)
 
   def setProject(self, project:Project):
     """
@@ -215,8 +265,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
     project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
-    # TODO Add similar set of notifiers, and similar function for Complex/Chain
-
+    # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
 
   def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
@@ -228,7 +277,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       for obj in spectrum.peakLists + spectrum.integralLists:
         self._createItem(obj)
 
-  def _refreshParentNmrChain(self, nmrResidue:NmrResidue):
+  def _refreshParentNmrChain(self, nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
     Replaces normal _createItem notifier for NmrResidues"""
@@ -244,6 +293,15 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       self._createItem(nr)
       for nmrAtom in nr.nmrAtoms:
         self._createItem(nmrAtom)
+
+    # nmrChain = nmrResidue._parent     # ejb - just insert the 1 item
+    # for nr in nmrChain.nmrResidues:
+    #   if (nr.pid == nmrResidue.pid):
+    #     self._createItem(nr)
+    #
+    # newPid = nmrChain.pid                   # ejb - expand the tree again from nmrChain
+    # for item in self._findItems(newPid):
+    #   item.setExpanded(True)
 
   def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
@@ -288,7 +346,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
         if objFromPid is not None:
           contextMenu.addAction('Delete', partial(self._deleteItemObject, objFromPid))
-          contextMenu.exec_(self.mapToGlobal(event.pos()))
+          contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+          contextMenu.exec()
 
 
   def _deleteItemObject(self,  obj):
@@ -378,6 +437,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
+      # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
       if Pid.IDSEP not in oldPid or oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
         # Parent unchanged, just rename
@@ -403,8 +463,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       for item in self._findItems(oldPid):
         sip.delete(item) # this also removes child items
 
-    #
-    self._refreshParentNmrChain(obj)
+    #    # item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+    # else:
+    #   pass        # ejb - here just for a breakpoint
+
+    self._refreshParentNmrChain(obj, oldPid)
+
+    # for item in self._findItems(oldPid):
+    #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
@@ -413,7 +479,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
 
-  def _findItems(self, objPid:str) -> QtGui.QTreeWidgetItem:
+  def _findItems(self, objPid:str) -> list:     #QtGui.QTreeWidgetItem
     """Find items that match objPid - returns empty list if no matches"""
 
     if objPid[:2] in classesInSideBar:
@@ -454,7 +520,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         text = item.text(0)
         if ':' in text:
           itemData = json.dumps({'pids':[text]})
-          event.mimeData().setData('ccpnmr-json', itemData)
+          event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
 
 
@@ -474,17 +540,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup = PeakListPropertiesPopup(peakList=obj)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SG':
       popup = SpectrumGroupEditor(project=self.project, spectrumGroup=obj)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SA':
       popup = SamplePropertiesPopup(obj, project=self.project)
       popup.exec_()
       popup.raise_()
-
     elif obj.shortClassName == 'SC':
       popup = EditSampleComponentPopup(sampleComponent=obj)
       popup.exec_()
@@ -506,13 +569,34 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'CL':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = ChemicalShiftListPopup(chemicalShiftList=obj)
+      popup.exec_()
+      popup.raise_()
+
+      # info = showInfo('Not implemented yet!',
+      #     'This function has not been implemented in the current version',
+      #     colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = StructurePopup(structure=obj)
+      popup.exec_()
+      popup.raise_()
+
+      # info = showInfo('Not implemented yet!',
+      #     'This function has not been implemented in the current version',
+      #     colourScheme=self.colourScheme)
+
+      # if self.mainWindow:
+      #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+      #
+      #   self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+      #   self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+      #                                   relativeTo=self.mainWindow.moduleArea)
+      #   self.mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
+      #   self.project._logger.info("application.showStructureTable()")
+      #
+      # else:
+      #   showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
+
     elif obj.shortClassName == 'MC':
       #to be decided when we design structure
       info = showInfo('Not implemented yet!',
@@ -524,10 +608,32 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'DS':
-      #to be decided when we design structure
       popup = DataSetPopup(dataSet=obj)
       popup.exec_()
       popup.raise_()
+
+      # ejb - test DataSet
+      # if self.mainWindow:
+      #
+      #   # Use StructureTable for the moment
+      #
+      #   if obj.title is 'ensembleCCPN':
+      #     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+      #
+      #     self.structureTableModule = StructureTableModule(self.mainWindow, itemPid=obj.pid)
+      #     self.mainWindow.moduleArea.addModule(self.structureTableModule, position='bottom',
+      #                                     relativeTo=self.mainWindow.moduleArea)
+      #     self.mainWindow.pythonConsole.writeConsoleCommand("application.showDataSetStructureTable()")
+      #     self.project._logger.info("application.showDataSetStructureTable()")
+      #   else:
+      #     showInfo('Not implemented yet!',
+      #              'This function has not been implemented in the current version',
+      #              colourScheme=self.colourScheme)
+
+
+
+
+
     elif obj.shortClassName == 'RL':
       #to be decided when we design structure
       showInfo('Not implemented yet!',
@@ -538,23 +644,43 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       showInfo('Not implemented yet!',
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
+    elif obj.shortClassName == 'IL':
+      # to be decided when we design structure
+      showInfo('Not implemented yet!',
+               'This function has not been implemented in the current version',
+               colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
-      if self._appBase.ui.mainWindow is not None:
-        mainWindow = self._appBase.ui.mainWindow
-      else:
-        mainWindow = self._appBase._mainWindow
-      self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
-                                     name='Notes Editor', note=obj)
+      popup = NotesPopup(mainWindow=self.mainWindow, note=obj)
+      popup.exec_()
+      popup.raise_()
+
+      # if self._application.ui.mainWindow is not None:
+      #   mainWindow = self._application.ui.mainWindow
+      # else:
+      #   mainWindow = self._application._mainWindow
+      # self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
+      #                                name='Notes Editor', note=obj)
+
+      # #FIXME:ED should be a popup or consistency
+      # if self.mainWindow:
+      #   self.notesEditor = NotesEditor(mainWindow=self.mainWindow, name='Notes Editor', note=obj)
+      #   self.mainWindow.moduleArea.addModule(self.notesEditor, position='bottom',
+      #                                   relativeTo=self.mainWindow.moduleArea)
+      #   self.mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditor()")
+      #   self.project._logger.info("application.showNotesEditor()")
+      # else:
+      #   showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
+
 
   def _createNewObject(self, item):
     """Create new object starting from the <New> item
     """
 
-    if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
+    if item.text(0) == "<New IntegralList>" or item.text(0) == "<New PeakList>":
 
-      if item.text(0) == "<New Peak List>":
+      if item.text(0) == "<New PeakList>":
         self.project.getByPid(item.parent().text(0)).newPeakList()
-      if item.text(0) == "<New Integral List>":
+      if item.text(0) == "<New IntegralList>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
 
       # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)

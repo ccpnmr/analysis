@@ -1,11 +1,9 @@
-"""Peak-related functions and utiliities
+"""Module Documentation here
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import collections
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
                "Simon P Skinner & Geerten W Vuister")
@@ -17,24 +15,41 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:34 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca $"
+__dateModified__ = "$dateModified: 2017-04-07 11:40:40 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
+__author__ = "$Author: Luca $"
 
-__date__ = "$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $"
+__date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-# import typing
-from typing import Sequence
-from ccpn.core.Peak import Peak
 
-def refitPeaks(peaks:Sequence[Peak], method:str='gaussian'):
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
-  from ccpnmodel.ccpncore.lib.spectrum import Peak as LibPeak
-  LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
+
+class PythonConsoleModule(CcpnModule):
+  '''
+  This class implements the module by wrapping a PeakListTable instance
+  '''
+
+  includeSettingsWidget = False
+  maxSettingsState = 2
+  settingsOnTop = True
+
+  className = 'PythonConsoleModule'
+
+  def __init__(self, mainWindow, name='Python Console', closeFunc=None, **kwds):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
+
+    self.mainWindow = mainWindow
+    self.pythonConsoleWidget = self.mainWindow.pythonConsole
+
+    self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
+
+
+

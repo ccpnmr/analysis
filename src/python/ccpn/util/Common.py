@@ -1,11 +1,14 @@
 """Miscellaneous common utilities
-
 """
+# NB must be Python 2.7 and 3.x compatible
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import itertools
-from typing import Sequence
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
@@ -31,21 +34,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 """Common utilities
-
-NB Must conform to Python 2.1. Imported in ObjectDomain.
 """
 
 import datetime
 import os
 import random
 import sys
-import typing
-# import collections
 import string
-# from functools import total_ordering
+import itertools
 
-from ccpn.util import Path, Constants
-from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
+from . import Path, Constants
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -85,7 +83,7 @@ def getCcpFileString(fileNameString):
   return convertStringToFileName(fileNameString, validFileNamePartChars,
                                    defaultFileNameChar)
 
-def incrementName(name:str) -> str:
+def incrementName(name):
   """Add '_1' to name or change suffix '_n' to '_(n+1) """
   ll = name.rsplit('_',1)
   if len(ll) == 2:
@@ -149,7 +147,7 @@ def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
         __import__(modname, {}, {}, [ff])
       except:
         # We want log output, not an Exception in all cases here
-        from ccpn.util.Logging import getLogger
+        from .Logging import getLogger
         getLogger().warning("Import failed for %s.%s" % (modname,ff))
 
   for name in listdir2:
@@ -168,7 +166,7 @@ def parseSequenceCode(value):
 
   # sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
 
-  tt = coreLibConstants.sequenceCodePattern.match(value.strip()).groups()
+  tt = Constants.sequenceCodePattern.match(value.strip()).groups()
 
   if tt[0] is None and not tt[1]:
     # special case: entire string matches offset modifier and is misread
@@ -180,7 +178,7 @@ def parseSequenceCode(value):
       tt[2] and int(tt[2]),      # None or an integer
     )
 
-def splitIntFromChars(value:str):
+def splitIntFromChars(value):
   """convert a string with a leading integer optionally followed by characters
   into an (integer,string) tuple"""
 
@@ -199,7 +197,7 @@ def splitIntFromChars(value:str):
 
   return number,chars
 
-def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
+def dictionaryProduct(dict1, dict2):
   """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""
   result = {}
   for key1,val1 in dict1.items():
@@ -208,13 +206,13 @@ def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
   #
   return result
 
-def uniquify(sequence:typing.Sequence) -> list:
+def uniquify(sequence):
   """Get list of unique elements in sequence, in order of first appearance"""
   seen = set()
   seen_add = seen.add
   return [x for x in sequence if x not in seen and not seen_add(x)]
 
-def isClose(a:float, b:float, relTolerance:float=1e-05, absTolerance=1e-08) -> bool:
+def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
   """Are a and b identical within reasonable floating point tolerance?
   Uses sum of relative (relTolerance) and absolute (absTolerance) difference
 
@@ -242,14 +240,14 @@ def isClose(a:float, b:float, relTolerance:float=1e-05, absTolerance=1e-08) -> b
 #   #
 #   return data
 
-def stringToIdentifier(value:str) -> str:
-  """Convert string to identifier, replacing non-alphanumeric values by underscore"""
-  if value.isidentifier():
-    return value
-  else:
-    return ''.join(x if x.isalnum() else '_' for x in value)
+# def stringToIdentifier(value):
+#   """Convert string to identifier, replacing non-alphanumeric values by underscore"""
+#   if value.isidentifier():
+#     return value
+#   else:
+#     return ''.join(x if x.isalnum() else '_' for x in value)
 
-def getTimeStamp() -> str:
+def getTimeStamp():
   """Get iso-formtted timestamp"""
   return datetime.datetime.today().isoformat()
 
@@ -260,7 +258,7 @@ def getUuid(programName, timeStamp=None):
   return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))
 
 
-def name2IsotopeCode(name:str=None) -> str:
+def name2IsotopeCode(name=None):
   """Get standard isotope code matching atom name or axisCode string
 
   """
@@ -282,7 +280,7 @@ def name2IsotopeCode(name:str=None) -> str:
   return result
 
 
-def isotopeCode2Nucleus(isotopeCode:str=None):
+def isotopeCode2Nucleus(isotopeCode=None):
   if not isotopeCode:
     return None
 
@@ -299,7 +297,7 @@ def isotopeCode2Nucleus(isotopeCode:str=None):
   #   return None
 
 
-def name2ElementSymbol(name:str) -> str:
+def name2ElementSymbol(name):
   """Get standard element symbol matching name or axisCode
 
   NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
@@ -334,7 +332,7 @@ def name2ElementSymbol(name:str) -> str:
   # return result
 
 
-def checkIsotope(text:str) -> str:
+def checkIsotope(text):
   """Convert isotope specifier string to most probable isotope code - defaulting to '1H'
 
   This function is intended for external format isotope specifications, *not* for
@@ -369,7 +367,7 @@ def checkIsotope(text:str) -> str:
   return result
 
 
-def axisCodeMatch(axisCode:str, refAxisCodes:Sequence[str])->str:
+def axisCodeMatch(axisCode, refAxisCodes):
   """Get refAxisCode that best matches axisCode """
   for ii,indx in enumerate(_axisCodeMapIndices([axisCode], refAxisCodes)):
     if indx == 0:
@@ -379,7 +377,7 @@ def axisCodeMatch(axisCode:str, refAxisCodes:Sequence[str])->str:
     return None
 
 
-def axisCodeMapping(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->dict:
+def axisCodeMapping(axisCodes, refAxisCodes):
   """get {axisCode:refAxisCode} mapping dictionary
   all axisCodes must match, or dictionary will be empty
   NB a series of single-letter axisCodes (e.g. 'N', 'HCN') can be passed in as a string"""
@@ -393,8 +391,7 @@ def axisCodeMapping(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->dict:
   #
   return result
 
-def reorder(values:typing.Sequence, axisCodes:typing.Sequence[str],
-            refAxisCodes:typing.Sequence[str]) -> list:
+def reorder(values, axisCodes, refAxisCodes):
   """reorder values in axisCode order to refAxisCode order, by matching axisCodes
 
   NB, the result will be the length of refAxisCodes, with additional Nones inserted
@@ -409,7 +406,7 @@ def reorder(values:typing.Sequence, axisCodes:typing.Sequence[str],
   return result
 
 
-def _axisCodeMapIndices(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->list:
+def _axisCodeMapIndices(axisCodes, refAxisCodes):
   """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
   all axisCodes must match, but result can contain None if refAxisCodes is longer
   if axisCodes contain duplicates, you will get one of possible matches"""
@@ -484,7 +481,7 @@ def _axisCodeMapIndices(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->li
   return result
 
 
-def axisCodesCompare(code:str, code2:str, mismatch:int=0) -> int:
+def axisCodesCompare(code, code2, mismatch=0):
   """Score code, code2 for matching. Score is length of common prefix, or 'mismatch' if None"""
 
   if not code or not code2 or code[0] != code2[0]:
@@ -519,7 +516,7 @@ def axisCodesCompare(code:str, code2:str, mismatch:int=0) -> int:
   return score
 
 
-def doAxisCodesMatch(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->bool:
+def doAxisCodesMatch(axisCodes, refAxisCodes):
   """Return True if axisCodes match refAxisCodes else False"""
   if len(axisCodes) != len(refAxisCodes):
     return False
@@ -531,7 +528,7 @@ def doAxisCodesMatch(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->bool:
   return True
 
 
-def stringifier(*fields, floatFormat:str=None) -> typing.Callable[[object], str]:
+def stringifier(floatFormat=None, *fields):
   """Get stringifier function, that will format an object x according to
 
   <str(x): field1=x.field1, field2=x.field2, ...>
@@ -558,8 +555,8 @@ def stringifier(*fields, floatFormat:str=None) -> typing.Callable[[object], str]
 
 class LocalFormatter(string.Formatter):
   """Overrides the string formatter to change the float formatting"""
-  def __init__(self, overrideFloatFormat:str='.6g'):
-    super().__init__()
+  def __init__(self, overrideFloatFormat='.6g'):
+    super(LocalFormatter, self).__init__()
     self.overrideFloatFormat = overrideFloatFormat
 
   def convert_field(self, value, conversion):
@@ -584,7 +581,12 @@ class LocalFormatter(string.Formatter):
     elif conversion == 'r':
         return repr(value)
     elif conversion == 'a':
-        return ascii(value)
+        try:
+          return ascii(value)
+        except NameError:
+          # Likely we are in Python 2.
+          # As ascii behaves like Python 2 repr, this should be the correct workaround
+          return repr(value)
     raise ValueError("Unknown conversion specifier {0!s}".format(conversion))
 
 stdLocalFormatter = LocalFormatter()

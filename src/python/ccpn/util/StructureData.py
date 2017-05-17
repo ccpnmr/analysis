@@ -869,8 +869,6 @@ class EnsembleData(pd.DataFrame):
     dfs = pdb2df(filename)
 
     ensemble = cls()
-    ensemble['serial'] = dfs['serial']  # We use the serial number to establish the index...
-    ensemble.set_index('serial', inplace=True)
 
     ensemble['modelNumber'] = dfs['model']
     ensemble['chainCode'] = dfs['chainID']
@@ -889,7 +887,6 @@ class EnsembleData(pd.DataFrame):
     ensemble['nmrSequenceCode'] = None
     ensemble['nmrResidueName'] = None
     ensemble['nmrAtomName'] = None
-    ensemble.drop('serial')# And now we drop the serial number
     return cls(ensemble)
 
 
@@ -945,7 +942,8 @@ class EnsembleData(pd.DataFrame):
     else:
       new_obj = self.copy()
     new_obj.__class__.__bases__[0].reset_index(new_obj, *args, inplace=inplace, **kwargs)
-    new_obj.index = range(1, self.shape[0] + 1)
+    # new_obj.index = range(1, self.shape[0] + 1)
+    new_obj.index = new_obj.index + 1
 
     if not inplace:
       return new_obj
@@ -1284,7 +1282,8 @@ def pdb2df(filename:str) -> pd.DataFrame:
       dfs = df
     else:
       dfs = dfs.append(df)
-  dfs.set_index('serial', inplace=True, drop=False)
+  dfs['idx'] = pd.np.arange(dfs.shape[0]) +1
+  dfs.set_index('idx', inplace=True)
   return dfs
 
 
@@ -1315,12 +1314,19 @@ def averageStructure(ensemble:EnsembleData) -> EnsembleData:
   dataColumns = [c for c in dataColumns if c in ensemble.columns]
   allColumns = identifierColumns + ['residueName', 'element'] + dataColumns
 
+  ddEnsemble = ensemble.drop_duplicates(identifierColumns).copy()
+  ddEnsemble['_idx'] = ddEnsemble.index
+  ddEnsemble = ddEnsemble.sort_values(['chainCode', 'sequenceId', '_idx'])
+
   # Have pandas do the calculation for us:
   df = ensemble.groupby(identifierColumns)
   df = df[dataColumns].mean()
+  df = df.reset_index()  # Flatten the multi-index
+  df = df.merge(ddEnsemble, on=identifierColumns, how='left', suffixes=['', '_ensemble'])
+  df = df.sort_values(['chainCode', 'sequenceId', '_idx'])
   df = df.reset_index()
-  df = df.merge(ensemble.drop_duplicates(identifierColumns),
-                on=identifierColumns, how='left', suffixes=['', '_ensemble'])
-  df = df[allColumns]
 
-  return EnsembleData(df)
+  df = EnsembleData(df)
+  df = df[allColumns]
+  df = df.reset_index()
+  return df

@@ -94,7 +94,7 @@ class Note(AbstractWrapperObject):
     #
     if value is not None:
       if not isinstance(value, str):
-        raise TypeError("Note name text must be a string")  # ejb catch non-string
+        raise TypeError("Note text must be a string")  # ejb catch non-string
     self._wrappedData.text = value
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
@@ -133,20 +133,42 @@ class Note(AbstractWrapperObject):
     #
     if not isinstance(value, str):
       raise TypeError("Note name must be a string")   # ejb catch non-string
-    elif not value:
+    if not value:
       raise ValueError("Note name must be set")       # ejb catch empty string
-    elif Pid.altCharacter in value:
+    if Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-    else:
-      self._startCommandEchoBlock('rename', value)
-      try:
-        self._wrappedData.name = value
-      finally:
-        self._endCommandEchoBlock()
+    self._startCommandEchoBlock('rename', value)
+    try:
+      self._wrappedData.name = value        # put this last as it calls the notifier
+    finally:
+      self._endCommandEchoBlock()
 
+  # def change(self, name:str, text:str):
+  #   """
+  #   Rename Note, changing its name and Pid.
+  #   updates all fields as a single Notifier event
+  #   """
+  #   if not isinstance(name, str):
+  #     raise TypeError("Note name must be a string")   # ejb catch non-string
+  #   elif not name:
+  #     raise ValueError("Note name must be set")       # ejb catch empty string
+  #   elif Pid.altCharacter in name:
+  #     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+  #
+  #   if text is not None:
+  #     if not isinstance(text, str):
+  #       raise TypeError("Note name text must be a string")      # ejb catch non-string
+  #
+  #   else:
+  #     self._startCommandEchoBlock('update', name, text)
+  #     try:
+  #       self._wrappedData.name = name
+  #       self._wrappedData.text = text
+  #     finally:
+  #       self._endCommandEchoBlock()
 
   # Implementation functions
   @classmethod
@@ -165,11 +187,14 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
   #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
   #
   if not isinstance(name, str):
-    raise TypeError("Note name must be a string")     # ejb catch non-string
-  elif not name:
-    raise ValueError("Note name must be set")         # ejb catch empty string
-  elif Pid.altCharacter in name:
+    raise TypeError("Note name must be a string")  # ejb catch non-string
+  if not name:
+    raise ValueError("Note name must be set")  # ejb catch empty string
+  if Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+  if text is not None:
+    if not isinstance(text, str):
+      raise TypeError("Note text must be a string")  # ejb catch non-string
   #
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 

@@ -244,7 +244,7 @@ class Model(AbstractWrapperObject):
       containingObject = data._containingObject     # supresses the creation of intermediate
       if containingObject is not None:              # wayPoints - this becomes a single undo event
         # undo and echoing
-        containingObject._startCommandEchoBlock('model.clearData', values={'model':self})
+        containingObject._startCommandEchoBlock('clearData')
 
       Found = True
       while Found:

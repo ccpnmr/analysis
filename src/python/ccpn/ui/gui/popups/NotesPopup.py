@@ -45,7 +45,7 @@ class NotesPopup(CcpnDialog):
     self.current = mainWindow.application.current
     self.note = note
 
-    self.noteLabel = Label(self, "Note Name ", grid=(0, 0))
+    self.noteLabel = Label(self, "Note Name: "+self.note.pid, grid=(0, 0))
     self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
@@ -53,7 +53,9 @@ class NotesPopup(CcpnDialog):
     """
     When ok button pressed: update Note and exit
     """
-    newName = self.noteText.text()
+    newName = self.noteText.text()              # ejb - update the note if changed
     if str(newName) != self.note.name:
       self.note.rename(newName)
     self.accept()
+
+

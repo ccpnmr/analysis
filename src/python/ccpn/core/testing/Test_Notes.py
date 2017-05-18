@@ -176,7 +176,7 @@ class NoteTest_setUp(WrapperTesting):
     # with self.assertRaisesRegexp(ApiError, 'String input is not of a valid type'):
     #   self.note.text = 42
     #
-    with self.assertRaisesRegexp(TypeError, 'Note name text must be a string'):
+    with self.assertRaisesRegexp(TypeError, 'Note text must be a string'):
       self.note.text = 42
     self.assertEqual(self.note.header, None)
 

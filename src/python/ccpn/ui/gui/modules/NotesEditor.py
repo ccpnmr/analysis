@@ -76,11 +76,6 @@ class NotesEditorModule(CcpnModule):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
-    self._noteNotifier = Notifier(self.project
-                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                  , Note.__name__
-                                  , self._updateCallback)
-
     #~~~~~~~~~~ define noteWidget box to contain man editing
     self.noteWidget = Widget(self.mainWidget, grid=(3,0), gridSpan=(4,5), setLayout=True)
     self.noteWidget.hide()
@@ -92,8 +87,8 @@ class NotesEditorModule(CcpnModule):
                          , grid=(2,3), gridSpan=(1,1))
     self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,6))
 
-    if note:                            # if note exists then populate the widget
-      self.textBox.setText(note.text)
+    if self.note:                            # if note exists then populate the widget
+      self.textBox.setText(self.note.text)
       self.lineEdit1.setText(self.note.name)
 
     self.buttonBox = ButtonList(self.noteWidget, texts=['Apply', 'Delete']
@@ -108,24 +103,37 @@ class NotesEditorModule(CcpnModule):
                          , grid=(7,4), gridSpan=(1,1))
 
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
-    self.processText = self._processText
+    # self.processText = self._processText
 
-  def _setNoteName(self):
-    """
-    Sets the name of the note based on the text in the Note name text box.
-    The rename notifier handles the actual rename
-    """
-    self.note.rename(self.lineEdit1.text())
+    self._noteNotifier = None
+    self._setNotifier()
+
+  def _setNotifier(self):
+    self._clearNotifier()
+    self._noteNotifier = Notifier(self.project
+                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                  , Note.__name__
+                                  , self._updateCallback)
+
+  def _clearNotifier(self):
+    if self._noteNotifier is not None:
+      self._noteNotifier.unRegister()
 
   def _applyNote(self):
-    """
-    Saves the text in the textbox to the note object.
-    """
-    #FIXME:ED check that updating all fields is one undo event
-    self.project.newUndopoint()
-    newText = self.textBox.toPlainText()
-    self.note.text = newText
-    self._setNoteName()
+    self._clearNotifier()
+    if self.note:
+      name = self.lineEdit1.text()
+      text = self.textBox.toPlainText()
+
+      self.note._startCommandEchoBlock('_applyNote')
+
+      self.note.rename(name)          # ejb - order doesn't matter inside the commandEchoBlock
+      self.note.text = text
+
+      self.note._endCommandEchoBlock()
+
+      self.noWidget.select(self.note.pid)
+    self._setNotifier()
 
   def _reject(self):
     """
@@ -133,39 +141,32 @@ class NotesEditorModule(CcpnModule):
     """
     self._closeModule()
 
-  def _processText(self, text, event):
-    """
-    Populate the boxes from self.notes
-    """
-    if not self.note:
-      self.note = self.project.newNote()
-    self.textBox.setText(text)
-    self.overlay.hide()
-
   def _selectionPulldownCallback(self, item):
     """
     Notifier Callback for selecting Note from the pull down menu
     """
-    self.thisObj = self.project.getByPid(item)
-    if self.thisObj is not None:
-      self.displayTableForNote(self.thisObj)
+    self.note = self.project.getByPid(item)
+    if self.note is not None:
+      self._update(self.note)
     else:
       self.noteWidget.hide()
 
-  def displayTableForNote(self, note):
-    """
-    Display the table for specified Note
-    """
-    self.noWidget.select(note.pid)
-    self._update(note)
+  # def displayTableForNote(self, note):
+  #   """
+  #   Display the table for specified Note
+  #   """
+  #   self.noWidget.select(note.pid)
+  #   self._update(note)
 
   def _updateCallback(self, data):
     """
     Notifier callback for updating the note
     """
     thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the notesList
+    modifiedNote = data[Notifier.OBJECT]
+
     if self.note in thisNoteList:
-      self.displayTableForNote(self.note)
+      self._update(self.note)
     else:
       self.noteWidget.hide()
 
@@ -173,7 +174,7 @@ class NotesEditorModule(CcpnModule):
     """
     Update the note
     """
-    self.note = note
+    self.noWidget.select(note.pid)
     self.textBox.setText(note.text)
     self.lineEdit1.setText(note.name)
     self.noteWidget.show()
@@ -190,6 +191,5 @@ class NotesEditorModule(CcpnModule):
     """
     CCPN-INTERNAL: used to close the module
     """
-    if self._noteNotifier is not None:
-      self._noteNotifier.unRegister()
+    self._clearNotifier()
     super(NotesEditorModule, self)._closeModule()

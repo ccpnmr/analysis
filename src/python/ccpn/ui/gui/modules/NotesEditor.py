@@ -103,12 +103,16 @@ class NotesEditorModule(CcpnModule):
                          , grid=(7,4), gridSpan=(1,1))
 
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
-    # self.processText = self._processText
 
     self._noteNotifier = None
     self._setNotifier()
 
   def _setNotifier(self):
+    """
+    Set a Notifier to call when a note is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+    """
     self._clearNotifier()
     self._noteNotifier = Notifier(self.project
                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
@@ -116,12 +120,20 @@ class NotesEditorModule(CcpnModule):
                                   , self._updateCallback)
 
   def _clearNotifier(self):
+    """
+    clean up the notifiers
+    """
     if self._noteNotifier is not None:
       self._noteNotifier.unRegister()
 
   def _applyNote(self):
-    self._clearNotifier()
-    if self.note:
+    """
+    Called by clicking the apply button in the module.
+    Temporarily disable notifiers, and define commandEchoBlock so all changes
+    are treated as a single undo/redo event
+    """
+    self._clearNotifier()             # disable the notifier while updating object other
+    if self.note:                     # calls _updateCallBack during _applyNote
       name = self.lineEdit1.text()
       text = self.textBox.toPlainText()
 
@@ -151,16 +163,9 @@ class NotesEditorModule(CcpnModule):
     else:
       self.noteWidget.hide()
 
-  # def displayTableForNote(self, note):
-  #   """
-  #   Display the table for specified Note
-  #   """
-  #   self.noWidget.select(note.pid)
-  #   self._update(note)
-
   def _updateCallback(self, data):
     """
-    Notifier callback for updating the note
+    Notifier callback for updating module when a Note is create/delete/rename/change
     """
     thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the notesList
     modifiedNote = data[Notifier.OBJECT]
@@ -172,7 +177,7 @@ class NotesEditorModule(CcpnModule):
 
   def _update(self, note):
     """
-    Update the note
+    Update the Note widgets
     """
     self.noWidget.select(note.pid)
     self.textBox.setText(note.text)

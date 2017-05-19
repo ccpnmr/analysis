@@ -37,9 +37,11 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldow
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.ChemicalShift import ChemicalShift
 from PyQt4 import QtGui
-
 from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 ALL = '<all>'
 
 class ChemicalShiftTableModule(CcpnModule):
@@ -53,7 +55,7 @@ class ChemicalShiftTableModule(CcpnModule):
   className = 'ChemicalShiftTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, chemicalShiftLists=None, name='Chemical Shift Table'):
+  def __init__(self, mainWindow=None, name='Chemical Shift Table', chemicalShiftList=None):
     """
     Initialise the Module widgets
     """
@@ -64,7 +66,6 @@ class ChemicalShiftTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    # settings
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -124,6 +125,15 @@ class ChemicalShiftTableModule(CcpnModule):
     self.displayColumnWidget = ColumnViewSettings(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(4, 0))
     self.searchWidget = ObjectTableFilter(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(5, 0))
 
+    if chemicalShiftList is not None:
+      self.select(chemicalShiftList)
+
+  def select(self, chemicalShiftList=None):
+    """
+    Manually select a ChemicalShiftList from the pullDown
+    """
+    self.chemicalShiftTable.select(chemicalShiftList)
+
   def _getDisplays(self):
     """
     Return list of displays to navigate - if needed
@@ -179,7 +189,7 @@ class ChemicalShiftTable(ObjectTable):
   className = 'ChemicalShiftListTable'
   attributeName = 'chemicalShiftLists'
 
-  def __init__(self, parent, application, moduleParent, **kwds):
+  def __init__(self, parent, application, moduleParent, chemicalShiftList=None, **kwds):
     """
     Initialise the widgets for the module.
     """
@@ -215,14 +225,17 @@ class ChemicalShiftTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
     # Notifier object to update the table if the nmrChain changes
-    self._chemicalShiftNotifier = Notifier(self._project
-                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                   , ChemicalShiftList.__name__
-                                   , self._updateCallback)
+    self._chemicalShiftListNotifier = None
+    self._chemicalShiftNotifier = None
+
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
+    self._setNotifiers()
+
+    if chemicalShiftList is not None:
+        self.select(chemicalShiftList)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -231,6 +244,23 @@ class ChemicalShiftTable(ObjectTable):
     if col < 2:
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+
+  def select(self, chemicalShiftList=None):
+    """
+    Manually select a ChemicalShiftList from the pullDown
+    """
+    if chemicalShiftList is None:
+      logger.debug('select: No ChemicalShiftList selected')
+      raise ValueError('select: No ChemicalShiftList selected')
+    else:
+      if not isinstance(chemicalShiftList, ChemicalShiftList):
+        logger.debug('select: Object is not of type ChemicalShiftList')
+        raise TypeError('select: Object is not of type ChemicalShiftList')
+      else:
+        for widgetObj in self.ncWidget.textList:
+          if chemicalShiftList.pid == widgetObj:
+            self.chemicalShiftList = chemicalShiftList
+            self.ncWidget.select(self.chemicalShiftList.pid)
 
   def displayTableForChemicalShift(self, chemicalShiftList):
     """
@@ -254,11 +284,8 @@ class ChemicalShiftTable(ObjectTable):
     Update the table
     """
     if not self._updateSilence:
-      self.clearTable()
-      self._silenceCallback = True
       self.setObjects(chemicalShiftList.chemicalShifts)
       self._updateSettingsWidgets()
-      self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -271,13 +298,14 @@ class ChemicalShiftTable(ObjectTable):
     """
     Notifier DoubleClick action on item in table
     """
-    print('ChemicalShift>>>', chemicalShift, row, column)
+    logger.debug('ChemicalShiftTable>>>', chemicalShift, row, column)
 
   def _selectionCallback(self, obj, row, col):
     """
     Notifier Callback for selecting a row in the table
     """
     self._current.chemicalShift = obj
+    ChemicalShiftTableModule._currentCallback = {'object':self.chemicalShiftList, 'table':self}
 
     #FIXME:ED - this is copied form the original version below
     if obj: # should presumably always be the case
@@ -287,7 +315,7 @@ class ChemicalShiftTable(ObjectTable):
 
   def _selectionPulldownCallback(self, item):
     """
-    Notifier Callback for selecting NmrChain from the pull down menu
+    Notifier Callback for selecting ChemicalShiftList from the pull down menu
     """
     self.chemicalShiftList = self._project.getByPid(item)
     # print('>selectionPulldownCallback>', item, type(item), nmrChain)
@@ -295,24 +323,6 @@ class ChemicalShiftTable(ObjectTable):
       self.displayTableForChemicalShift(self.chemicalShiftList)
     else:
       self.clearTable()
-
-  def _close(self):
-    """
-    Cleanup the notifiers when the window is closed
-    """
-    if self._chemicalShiftNotifier is not None:
-      self._chemicalShiftNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
-
-  def _updateSettingsWidgets(self):
-    """
-    CCPN-INTERNAL: Update settings Widgets according with the new displayed table
-    """
-    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-    displayColumnWidget.updateWidgets(self)
-    searchWidget = self.moduleParent._getSearchWidget()
-    searchWidget.updateWidgets(self)
 
   @staticmethod
   def _getShiftPeakCount(chemicalShift):
@@ -330,10 +340,13 @@ class ChemicalShiftTable(ObjectTable):
     """
     CCPN-INTERNAL: Get a comment from ObjectTable
     """
-    if chemicalShift.comment == '' or not chemicalShift.comment:
+    try:
+      if chemicalShift.comment == '' or not chemicalShift.comment:
+        return ' '
+      else:
+        return chemicalShift.comment
+    except:
       return ' '
-    else:
-      return chemicalShift.comment
 
   @staticmethod
   def _setComment(chemicalShift, value):
@@ -351,6 +364,49 @@ class ChemicalShiftTable(ObjectTable):
       return float(getattr(row, name))
     except:
       return None
+
+
+  def _setNotifiers(self):
+    """
+    Set a Notifier to call when an object is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+    """
+    self._clearNotifiers()
+    self._chemicalShiftListNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , ChemicalShiftList.__name__
+                                      , self._updateCallback)
+    self._chemicalShiftNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                      , ChemicalShift.__name__
+                                      , self._updateCallback)
+
+  def _clearNotifiers(self):
+    """
+    clean up the notifiers
+    """
+    if self._chemicalShiftListNotifier is not None:
+      self._chemicalShiftListNotifier.unRegister()
+    if self._chemicalShiftNotifier is not None:
+      self._chemicalShiftNotifier.unRegister()
+    if self._peaksNotifier is not None:
+      self._peaksNotifier.unRegister()
+
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
+    self._clearNotifiers()
+
+  def _updateSettingsWidgets(self):
+    """
+    CCPN-INTERNAL: Update settings Widgets according with the new displayed table
+    """
+    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+    displayColumnWidget.updateWidgets(self)
+    searchWidget = self.moduleParent._getSearchWidget()
+    searchWidget.updateWidgets(self)
 
 # class ChemicalShiftTable(CcpnModule):
 #   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):

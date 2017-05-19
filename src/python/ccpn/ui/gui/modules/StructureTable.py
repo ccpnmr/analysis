@@ -55,7 +55,7 @@ class StructureTableModule(CcpnModule):
   className = 'StructureTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, name='Structure Table', structureEnsemble=None):
+  def __init__(self, mainWindow=None, name='Structure Table', structureEnsemble=None):
     """
     Initialise the Module widgets
     """
@@ -465,12 +465,12 @@ class StructureTable(ObjectTable):
     Update the table from StructureEnsemble
     """
     if not self._updateSilence:
+      # self._silenceCallback = True
       # self.clearTable()
-      self._silenceCallback = True
       tuples = structureEnsemble.data.as_namedtuples()
       self.setObjects(tuples)
       self._updateSettingsWidgets()
-      self._silenceCallback = False
+      # self._silenceCallback = False
       self.show()
 
   def _updateDataSet(self, structureData):
@@ -478,12 +478,12 @@ class StructureTable(ObjectTable):
     Update the table from EnsembleData
     """
     if not self._updateSilence:
+      # self._silenceCallback = True
       # self.clearTable()
-      self._silenceCallback = True
       tuples = structureData.as_namedtuples()
       self.setObjects(tuples)
       self._updateSettingsWidgets()
-      self._silenceCallback = False
+      # self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -565,11 +565,11 @@ class StructureTable(ObjectTable):
     """
     try:
       if structure.comment == '' or not structure.comment:
-        return ''
+        return ' '
       else:
         return structure.comment
     except:
-      return ''       # .comment may not exist
+      return ' '       # .comment may not exist
 
   @staticmethod
   def _setComment(structure, column, value):

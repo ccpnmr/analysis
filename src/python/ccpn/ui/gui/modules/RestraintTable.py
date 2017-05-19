@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintsPulldown
 from ccpn.core.RestraintList import RestraintList
+from ccpn.core.Restraint import Restraint
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -52,7 +53,7 @@ class RestraintTableModule(CcpnModule):
   className = 'RestraintTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, name='Restraint Table', restraintLists=None):
+  def __init__(self, mainWindow=None, name='Restraint Table', restraintList=None):
     """
     Initialise the Module widgets
     """
@@ -63,7 +64,6 @@ class RestraintTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.restraintLists = None
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -125,14 +125,14 @@ class RestraintTableModule(CcpnModule):
     self.displayColumnWidget = ColumnViewSettings(parent=self._RTwidget, table=self.restraintTable, grid=(4, 0))
     self.searchWidget = ObjectTableFilter(parent=self._RTwidget, table=self.restraintTable, grid=(5, 0))
 
-    if restraintLists is not None:
-      self.select(restraintLists)
+    if restraintList is not None:
+      self.select(restraintList)
 
-  def select(self, restraintLists=None):
+  def select(self, restraintList=None):
     """
     Manually select a StructureEnsemble from the pullDown
     """
-    self.restraintTable.select(restraintLists)
+    self.restraintTable.select(restraintList)
 
   def _getDisplays(self):
     """
@@ -192,7 +192,7 @@ class RestraintTable(ObjectTable):
   OBJECT = 'object'
   TABLE = 'table'
 
-  def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
+  def __init__(self, parent, application, moduleParent, restraintList=None, **kwds):
     """
     Initialise the widgets for the module.
     """
@@ -211,7 +211,7 @@ class RestraintTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
-    self.stWidget = RestraintsPulldown(parent=self._widget
+    self.rtWidget = RestraintsPulldown(parent=self._widget
                                      , project=self._project, default=0
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
@@ -227,14 +227,17 @@ class RestraintTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
 
-    self._restraintNotifier = Notifier(self._project
-                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                   , RestraintList.__name__
-                                   , self._updateCallback)
+    self._restraintListNotifier = None
+    self._restraintNotifier = None
+    
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
+    self._setNotifiers()
+
+    if restraintList is not None:
+      self.select(restraintList)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -244,11 +247,28 @@ class RestraintTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
+  def select(self, restraintList=None):
+    """
+    Manually select a NmrChain from the pullDown
+    """
+    if restraintList is None:
+      logger.debug('select: No RestraintList selected')
+      raise ValueError('select: No RestraintList selected')
+    else:
+      if not isinstance(restraintList, RestraintList):
+        logger.debug('select: Object is not of type RestraintList')
+        raise TypeError('select: Object is not of type RestraintList')
+      else:
+        for widgetObj in self.rtWidget.textList:
+          if restraintList.pid == widgetObj:
+            self.nmrChain = restraintList
+            self.rtWidget.select(self.nmrChain.pid)
+
   def displayTableForRestraint(self, restraintList):
     """
     Display the table for all Restraints"
     """
-    self.stWidget.select(restraintList.pid)
+    self.rtWidget.select(restraintList.pid)
     self._update(restraintList)
 
   def _updateCallback(self, data):
@@ -261,16 +281,13 @@ class RestraintTable(ObjectTable):
     else:
       self.clearTable()
 
-  def _update(self, RestraintList):
+  def _update(self, restraintList):
     """
     Update the table
     """
     if not self._updateSilence:
-      self.clearTable()
-      self._silenceCallback = True
-      self.setObjects(RestraintList.restraints)
+      self.setObjects(restraintList.restraints)
       self._updateSettingsWidgets()
-      self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -284,12 +301,13 @@ class RestraintTable(ObjectTable):
     Notifier Callback for selecting a row in the table
     """
     self._current.restraint = restraint
+    RestraintTableModule._currentCallback = {'object':self.restraintList, 'table':self}
 
   def _actionCallback(self, atomRecordTuple, row, column):
     """
     Notifier DoubleClick action on item in table
     """
-    print(atomRecordTuple, row, column)
+    logger.debug('RestraintTable>>>', atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
     """
@@ -303,21 +321,12 @@ class RestraintTable(ObjectTable):
     else:
       self.clearTable()
 
-  def _close(self):
-    """
-    Cleanup the notifiers when the window is closed
-    """
-    if self._restraintNotifier is not None:
-      self._restraintNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
-
   def navigateToRestraintInDisplay(restraint, display, stripIndex=0, widths=None,
                                     showSequentialStructures=False, markPositions=True):
     """
     Notifier Callback for selecting Object from item in the table
     """
-    getLogger().debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %
+    logger.debug('display=%r, nmrResidue=%r, showSequentialResidues=%s, markPositions=%s' %
                       (display.id, restraint.id, showSequentialStructures, markPositions)
                       )
     return None
@@ -349,6 +358,60 @@ class RestraintTable(ObjectTable):
     """
     pass
 
+  @staticmethod
+  def _getCommentText(chemicalShift):
+    """
+    CCPN-INTERNAL: Get a comment from ObjectTable
+    """
+    try:
+      if chemicalShift.comment == '' or not chemicalShift.comment:
+        return ''
+      else:
+        return chemicalShift.comment
+    except:
+      return ''
+
+  @staticmethod
+  def _setComment(chemicalShift, value):
+    """
+    CCPN-INTERNAL: Insert a comment into ObjectTable
+    """
+    chemicalShift.comment = value
+
+  def _setNotifiers(self):
+    """
+    Set a Notifier to call when an object is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+    """
+    self._clearNotifiers()
+    self._restraintListNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , RestraintList.__name__
+                                      , self._updateCallback)
+    self._restraintNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                      , Restraint.__name__
+                                      , self._updateCallback)
+
+  def _clearNotifiers(self):
+    """
+    clean up the notifiers
+    """
+    if self._restraintListNotifier is not None:
+      self._restraintListNotifier.unRegister()
+    if self._restraintNotifier is not None:
+      self._restraintNotifier.unRegister()
+    if self._peaksNotifier is not None:
+      self._peaksNotifier.unRegister()
+
+  def _close(self):
+    """
+    Cleanup the notifiers when the window is closed
+    """
+    self._clearNotifiers()
+
+
   def _updateSettingsWidgets(self):
     """
     CCPN-INTERNAL: Update settings Widgets according with the new displayed table
@@ -357,23 +420,6 @@ class RestraintTable(ObjectTable):
     displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
-
-  @staticmethod
-  def _getCommentText(chemicalShift):
-    """
-    CCPN-INTERNAL: Get a comment from ObjectTable
-    """
-    if chemicalShift.comment == '' or not chemicalShift.comment:
-      return ' '
-    else:
-      return chemicalShift.comment
-
-  @staticmethod
-  def _setComment(chemicalShift, value):
-    """
-    CCPN-INTERNAL: Insert a comment into ObjectTable
-    """
-    chemicalShift.comment = value
 
 #
 #     tipTexts = ['Restraint Id',

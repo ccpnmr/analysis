@@ -45,8 +45,8 @@ from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from PyQt4 import QtGui
-
 from ccpn.util.Logging import getLogger
+
 logger = getLogger()
 ALL = '<all>'
 
@@ -62,7 +62,7 @@ class NmrResidueTableModule(CcpnModule):
   className = 'NmrResidueTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, name='NmrResidue Table', nmrChain=None):
+  def __init__(self, mainWindow=None, name='NmrResidue Table', nmrChain=None):
     """
     Initialise the Module widgets
     """
@@ -139,7 +139,7 @@ class NmrResidueTableModule(CcpnModule):
 
   def select(self, nmrChain=None):
     """
-    Manually select a StructureEnsemble from the pullDown
+    Manually select an NmrChain from the pullDown
     """
     self.nmrResidueTable.select(nmrChain)
 
@@ -227,6 +227,9 @@ class NmrResidueTable(ObjectTable):
 
   className = 'NmrResidueTable'
   attributeName = 'nmrChains'
+
+  OBJECT = 'object'
+  TABLE = 'table'
 
   def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
     """
@@ -329,11 +332,14 @@ class NmrResidueTable(ObjectTable):
     Update the table with NmrResidues of nmrChain
     """
     if not self._updateSilence:
-      self.clearTable()
-      self._silenceCallback = True
+      # try:
+      #   self.clearTable()
+      # except:
+      #   logger.warning('NmrResidueTable>>> Error trying to clear the table')
+      # self._silenceCallback = True
       self.setObjects(nmrChain.nmrResidues)
       self._updateSettingsWidgets()
-      self._silenceCallback = False
+      # self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):

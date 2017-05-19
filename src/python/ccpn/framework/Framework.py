@@ -1536,7 +1536,7 @@ class Framework:
     self.project._logger.info("application.showPeakTable()")
 
 
-  def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:PeakList=None):
+  def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, restraintList:PeakList=None):
     """
     Displays Peak table on left of main window with specified list selected.
     """
@@ -1549,7 +1549,7 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.restraintTable = RestraintTableModule(mainWindow=mainWindow, restraintLists=selectedList)
+    self.restraintTable = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
     mainWindow.moduleArea.addModule(self.restraintTable, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")

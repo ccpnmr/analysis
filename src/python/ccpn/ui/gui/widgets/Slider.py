@@ -160,7 +160,7 @@ class Slider(QtGui.QSlider, Base):
 class SliderSpinBox(QtGui.QWidget, Base):
   def __init__(self,parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kw):
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, setLayout=True, **kw)
 
     if value is None:
       value = startVal

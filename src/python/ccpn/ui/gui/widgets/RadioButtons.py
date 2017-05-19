@@ -41,7 +41,7 @@ class RadioButtons(QtGui.QWidget, Base):
 
 
     QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    Base.__init__(self, setLayout=True, **kw)
 
     if texts is None:
       texts = []

@@ -37,19 +37,20 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
+from ccpn.ui.gui.widgets.Widget import Widget
 
 
-class ExcludeRegions(QtGui.QWidget):
+class ExcludeRegions(Widget,Base):
   '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
   def __init__(self, parent=None,**kw):
-    super(ExcludeRegions, self).__init__(parent)
-
+    Widget.__init__(self, parent)
+    Base.__init__(self, setLayout=True, **kw)
 
     self.solvents = {'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
                      'Acetone-d6 & Water': [0,0, 2.15,2.0, 2.90, 2.80],
@@ -78,9 +79,9 @@ class ExcludeRegions(QtGui.QWidget):
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
     self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='c')
-    self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2,2))
+    self.scrollArea = ScrollArea(self, setLayout=True, grid=(2, 0), gridSpan=(2,2))
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = QtGui.QFrame()
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
     self.regioncount = 0
     self.excludedRegions = []
@@ -172,9 +173,13 @@ class PickPeak1DPopup(CcpnDialog):
   def __init__(self, mainWindow, title='Pick 1D Peak', **kw):
     CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
 
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application = self.mainWindow.application
+    if mainWindow is None: #This allows opening the popup for graphical tests
+      self.project = None
+    else:
+      self.mainWindow = mainWindow
+      self.project = self.mainWindow.project
+      self.application = self.mainWindow.application
+
     self._setMainLayout()
     self._setTabs()
     self._setWidgets()
@@ -187,19 +192,19 @@ class PickPeak1DPopup(CcpnDialog):
 
   def _setTabs(self):
     self.tabWidget = QtGui.QTabWidget()
-    self.tabGeneralSetup = QtGui.QFrame()
+    self.tabGeneralSetup = Frame(self, setLayout=False)
     self.tabGeneralSetupLayout = QtGui.QGridLayout()
     self.tabGeneralSetup.setLayout(self.tabGeneralSetupLayout)
-    self.excludedRegionsTab = ExcludeRegions()
+    self.excludedRegionsTab = ExcludeRegions(self)
     self.tabWidget.addTab(self.tabGeneralSetup, 'General')
     self.tabWidget.addTab(self.excludedRegionsTab, 'Exclude Regions')
     self._setSelectionScrollArea()
 
   def _setSelectionScrollArea(self):
 
-    self.scrollArea = ScrollArea(self)
+    self.scrollArea = ScrollArea(self, setLayout=False)
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = QtGui.QFrame()
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
   def _setWidgets(self):
@@ -237,7 +242,7 @@ class PickPeak1DPopup(CcpnDialog):
                                         texts=['Cancel', 'Find Peaks'],
                                         callbacks=[self.reject, self._pickFromSelectedSpectra],
                                         tipTexts=[None, None],
-                                        direction='h', hAlign='r')
+                                        direction='h', hAlign='c')
     self.pickNegativeLabel = Label(self, text='Pick negative peaks')
     self.pickNegativeCheckBox = CheckBox(self, checked=True)
 
@@ -285,19 +290,21 @@ class PickPeak1DPopup(CcpnDialog):
     self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All',grid=(0, 0))
     self.spectrumCheckBox.stateChanged.connect(self._checkAllSpectra)
     self.allCheckBoxes = []
-    for i, spectrum in enumerate(self.project.spectra):
-      self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 0))
-      self.allCheckBoxes.append(self.spectrumCheckBox)
+    if self.project is not None:
+      for i, spectrum in enumerate(self.project.spectra):
+        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 0))
+        self.allCheckBoxes.append(self.spectrumCheckBox)
 
   def _addSpectrumGroupsCheckBoxes(self):
     self.spGroupsCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All SG', grid=(0, 0))
     self.spGroupsCheckBox.hide()
     self.spGroupsCheckBox.stateChanged.connect(self._checkAllSpectrumGroups)
     self.allSG_CheckBoxes = []
-    for i, sg in enumerate(self.project.spectrumGroups):
-      self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid), grid=(i + 1, 0))
-      self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
-      self.spectrumGroupCheckBox.hide()
+    if self.project is not None:
+      for i, sg in enumerate(self.project.spectrumGroups):
+        self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid), grid=(i + 1, 0))
+        self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
+        self.spectrumGroupCheckBox.hide()
 
 
   def _checkAllSpectrumGroups(self, state):
@@ -355,3 +362,14 @@ class PickPeak1DPopup(CcpnDialog):
       spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, ignoredRegions=ignoredRegions,
                                                 noiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()
+
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+
+  app = TestApplication()
+  popup = PickPeak1DPopup(mainWindow=None)
+  popup.show()
+  popup.raise_()
+  app.start()

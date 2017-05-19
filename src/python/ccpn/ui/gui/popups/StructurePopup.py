@@ -29,16 +29,24 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 class StructurePopup(CcpnDialog):
-  def __init__(self, parent=None, structure=None, title='Structures', **kw):
+  """
+  Open a small popup to allow changing the label of a StructureEnsemble
+  """
+  def __init__(self, parent=None, mainWindow=None, title='Notes', structure=None, **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    #FIXME:ED structure has no name
     self.structure = structure
-    self.structureLabel = Label(self, "Structure Name ", grid=(0, 0))
+    self.structureLabel = Label(self, "Structure Name: "+self.structure.pid, grid=(0, 0))
     self.structureText = LineEdit(self, self.structure.label, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _okButton(self):
+    """
+    When ok button pressed: update StructureEnsemble and exit
+    """
     newName = self.structureText.text()
     if str(newName) != self.structure.label:
       self.structure.label = newName

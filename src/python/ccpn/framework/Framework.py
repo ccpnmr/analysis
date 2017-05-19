@@ -40,6 +40,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
+from ccpn.core.lib.Pid import Pid
 
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -1485,7 +1486,7 @@ class Framework:
     self.project._logger.info("application.showChemicalShiftTable()")
 
 
-  def showNmrResidueTable(self, position='bottom', relativeTo=None):
+  def showNmrResidueTable(self, position='bottom', relativeTo=None, nmrChain=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
 
@@ -1493,13 +1494,13 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow)
+    nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
 
-  def showStructureTable(self, position='bottom', relativeTo=None):
+  def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
     """Displays Structure Table"""
     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
 
@@ -1508,7 +1509,8 @@ class Framework:
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
 
-    structureTableModule = StructureTableModule(mainWindow=mainWindow)
+    structureTableModule = StructureTableModule(mainWindow=mainWindow
+                                                , structureEnsemble=structureEnsemble)
     mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
     self.project._logger.info("application.showStructureTable()")
@@ -1552,7 +1554,7 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")
 
-  def showNotesEditorTable(self, position:str='bottom', relativeTo:CcpnModule=None):
+  def showNotesEditorTable(self, position:str='bottom', relativeTo:CcpnModule=None, note=None):
     """
     Displays Notes Editing Table
     """
@@ -1562,7 +1564,7 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.notesTable = NotesEditorModule(mainWindow=mainWindow)
+    self.notesTable = NotesEditorModule(mainWindow=mainWindow, note=note)
     mainWindow.moduleArea.addModule(self.notesTable, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
     self.project._logger.info("application.showNotesEditorTable()")

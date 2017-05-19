@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue
 from PyQt4 import QtGui
 
 from ccpn.util.Logging import getLogger
@@ -61,7 +62,7 @@ class NmrResidueTableModule(CcpnModule):
   className = 'NmrResidueTableModule'
 
   # we are subclassing this Module, hence some more arguments to the init
-  def __init__(self, mainWindow, name='NmrResidue Table'):
+  def __init__(self, mainWindow, name='NmrResidue Table', nmrChain=None):
     """
     Initialise the Module widgets
     """
@@ -72,7 +73,7 @@ class NmrResidueTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-
+    
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
     self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
@@ -132,6 +133,15 @@ class NmrResidueTableModule(CcpnModule):
     # settingsWidget
     self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(4, 0))
     self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(5, 0))
+    
+    if nmrChain is not None:
+      self.select(nmrChain)
+
+  def select(self, nmrChain=None):
+    """
+    Manually select a StructureEnsemble from the pullDown
+    """
+    self.nmrResidueTable.select(nmrChain)
 
   def _getDisplays(self):
     """
@@ -218,7 +228,7 @@ class NmrResidueTable(ObjectTable):
   className = 'NmrResidueTable'
   attributeName = 'nmrChains'
 
-  def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, **kwds):
+  def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
     """
     Initialise the widgets for the module.
     """
@@ -255,15 +265,17 @@ class NmrResidueTable(ObjectTable):
                          )
 
     # Notifier object to update the table if the nmrChain changes
-    self._chainNotifier = Notifier(self._project
-                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                   , NmrChain.__name__
-                                   , self._updateCallback)
+    self._chainNotifier = None
+    self._residueNotifier = None
 
     #TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peaksNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
+    self._setNotifiers()
+
+    if nmrChain is not None:
+      self.select(nmrChain)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -272,6 +284,23 @@ class NmrResidueTable(ObjectTable):
     if col < 2:
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
+
+  def select(self, nmrChain=None):
+    """
+    Manually select a NmrChain from the pullDown
+    """
+    if nmrChain is None:
+      logger.debug('select: No NmrChain selected')
+      raise ValueError('select: No NmrChain selected')
+    else:
+      if not isinstance(nmrChain, NmrChain):
+        logger.debug('select: Object is not of type NmrChain')
+        raise TypeError('select: Object is not of type NmrChain')
+      else:
+        for widgetObj in self.ncWidget.textList:
+          if nmrChain.pid == widgetObj:
+            self.nmrChain = nmrChain
+            self.ncWidget.select(self.nmrChain.pid)
 
   def displayTableForNmrChain(self, nmrChain):
     """
@@ -318,6 +347,7 @@ class NmrResidueTable(ObjectTable):
     Notifier Callback for selecting a row in the table
     """
     self._current.nmrResidue = nmrResidue
+    NmrResidueTableModule._currentCallback = {'object':self.nmrChain, 'table':self}
 
   def _selectionPulldownCallback(self, item):
     """
@@ -335,10 +365,13 @@ class NmrResidueTable(ObjectTable):
     """
     CCPN-INTERNAL: Get a comment from ObjectTable
     """
-    if nmrResidue.comment == '' or not nmrResidue.comment:
-      return ' '
-    else:
-      return nmrResidue.comment
+    try:
+      if nmrResidue.comment == '' or not nmrResidue.comment:
+        return ''
+      else:
+        return nmrResidue.comment
+    except:
+      return ''
 
   @staticmethod
   def _setComment(nmrResidue, value):
@@ -363,14 +396,38 @@ class NmrResidueTable(ObjectTable):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
+  def _setNotifiers(self):
+    """
+    Set a Notifier to call when an object is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+    """
+    self._clearNotifiers()
+    self._chainNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , NmrChain.__name__
+                                      , self._updateCallback)
+    self._residueNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                      , NmrResidue.__name__
+                                      , self._updateCallback)
+
+  def _clearNotifiers(self):
+    """
+    clean up the notifiers
+    """
+    if self._chainNotifier is not None:
+      self._chainNotifier.unRegister()
+    if self._residueNotifier is not None:
+      self._residueNotifier.unRegister()
+    if self._peaksNotifier is not None:
+      self._peaksNotifier.unRegister()
+
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
-    if self._chainNotifier is not None:
-      self._chainNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
+    self._clearNotifiers()
 
   def _updateSettingsWidgets(self):
     """

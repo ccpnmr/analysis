@@ -53,7 +53,7 @@ class NotesPopup(CcpnDialog):
     """
     When ok button pressed: update Note and exit
     """
-    newName = self.noteText.text()              # ejb - update the note if changed
+    newName = self.noteText.text()
     if str(newName) != self.note.name:
       self.note.rename(newName)
     self.accept()

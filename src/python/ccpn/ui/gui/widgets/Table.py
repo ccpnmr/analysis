@@ -367,7 +367,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
       if row >= 0:
         obj = self.objects[row]
-        if self.callback:
+        if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
           self.callback(obj, row, col)
 
 

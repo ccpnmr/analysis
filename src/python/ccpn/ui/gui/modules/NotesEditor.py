@@ -35,6 +35,9 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NotesPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Note import Note
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 
 
 class NotesEditorModule(CcpnModule):
@@ -62,7 +65,7 @@ class NotesEditorModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.note = note
+    self.note = None
 
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
@@ -87,10 +90,6 @@ class NotesEditorModule(CcpnModule):
                          , grid=(2,3), gridSpan=(1,1))
     self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,6))
 
-    if self.note:                            # if note exists then populate the widget
-      self.textBox.setText(self.note.text)
-      self.lineEdit1.setText(self.note.name)
-
     self.buttonBox = ButtonList(self.noteWidget, texts=['Apply', 'Delete']
                                 , callbacks=[self._applyNote, self._deleteNote]
                                 , grid=(6,4), gridSpan=(1,2))
@@ -105,21 +104,41 @@ class NotesEditorModule(CcpnModule):
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
 
     self._noteNotifier = None
-    self._setNotifier()
+    self._setNotifiers()
 
-  def _setNotifier(self):
+    if note is not None:
+      self.select(note)
+
+  def select(self, note=None):
+    """
+    Manually select a Note from the pullDown
+    """
+    if note is None:
+      logger.debug('select: No Note selected')
+      raise ValueError('select: No Note selected')
+    else:
+      if not isinstance(note, Note):
+        logger.debug('select: Object is not of type Note')
+        raise TypeError('select: Object is not of type Note')
+      else:
+        for widgetObj in self.noWidget.textList:
+          if note.pid == widgetObj:
+            self.note = note
+            self.noWidget.select(self.note.pid)
+
+  def _setNotifiers(self):
     """
     Set a Notifier to call when a note is created/deleted/renamed/changed
     rename calls on name
     change calls on any other attribute
     """
-    self._clearNotifier()
+    self._clearNotifiers()
     self._noteNotifier = Notifier(self.project
                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                   , Note.__name__
                                   , self._updateCallback)
 
-  def _clearNotifier(self):
+  def _clearNotifiers(self):
     """
     clean up the notifiers
     """
@@ -132,7 +151,7 @@ class NotesEditorModule(CcpnModule):
     Temporarily disable notifiers, and define commandEchoBlock so all changes
     are treated as a single undo/redo event
     """
-    self._clearNotifier()             # disable the notifier while updating object other
+    self._clearNotifiers()             # disable the notifier while updating object other
     if self.note:                     # calls _updateCallBack during _applyNote
       name = self.lineEdit1.text()
       text = self.textBox.toPlainText()
@@ -145,7 +164,7 @@ class NotesEditorModule(CcpnModule):
       self.note._endCommandEchoBlock()
 
       self.noWidget.select(self.note.pid)
-    self._setNotifier()
+    self._setNotifiers()
 
   def _reject(self):
     """
@@ -196,5 +215,5 @@ class NotesEditorModule(CcpnModule):
     """
     CCPN-INTERNAL: used to close the module
     """
-    self._clearNotifier()
+    self._clearNotifiers()
     super(NotesEditorModule, self)._closeModule()

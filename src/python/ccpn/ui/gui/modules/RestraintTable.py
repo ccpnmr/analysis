@@ -63,7 +63,7 @@ class RestraintTableModule(CcpnModule):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.itemPid = itemPid = restraintLists
+    self.restraintLists = None
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
@@ -125,6 +125,15 @@ class RestraintTableModule(CcpnModule):
     self.displayColumnWidget = ColumnViewSettings(parent=self._RTwidget, table=self.restraintTable, grid=(4, 0))
     self.searchWidget = ObjectTableFilter(parent=self._RTwidget, table=self.restraintTable, grid=(5, 0))
 
+    if restraintLists is not None:
+      self.select(restraintLists)
+
+  def select(self, restraintLists=None):
+    """
+    Manually select a StructureEnsemble from the pullDown
+    """
+    self.restraintTable.select(restraintLists)
+
   def _getDisplays(self):
     """
     Return list of displays to navigate - if needed
@@ -179,6 +188,9 @@ class RestraintTable(ObjectTable):
 
   className = 'RestraintTable'
   attributeName = 'restraintLists'
+
+  OBJECT = 'object'
+  TABLE = 'table'
 
   def __init__(self, parent, application, moduleParent, itemPid=None, **kwds):
     """

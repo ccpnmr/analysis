@@ -25,24 +25,50 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 
+
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.Label import Label
+
+class MyModule(CcpnModule):
+  '''
+  This is example of CCPN module Usage. See below how to run it alone for graphical testing purposes.
+  '''
+  includeSettingsWidget = True
+  maxSettingsState = 2
+  settingsOnTop = True
+
+  className = 'MyModule'
+
+  def __init__(self, mainWindow, name):
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+    # mainWidget
+    self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))
+
+    # settingsWidget
+    self.testingLabel = Label(parent=self.settingsWidget, text='Testing my settings space', grid=(0, 0), hAlign='c')
+
+
+
 '''
 To test a ccpn Module graphic :
-Copy and past at the botton of the CcpnModule file you want to run. 
+Copy and past this script at the botton of the CcpnModule file you want to run. 
 
 >> change CcpnModule with the Module to test  
 >> module = YourModule(mainWindow=None)
-
+'''
 
 if __name__ == '__main__':
+  from PyQt4 import QtGui
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-  from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
   app = TestApplication()
   win = QtGui.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None)
-  module = CcpnModule(mainWindow=None)
+
+  module = MyModule(mainWindow=None, name='My Module')
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)
@@ -53,8 +79,6 @@ if __name__ == '__main__':
   app.start()
 
 
-
-'''
 
 
 

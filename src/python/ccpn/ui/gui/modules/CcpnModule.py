@@ -82,13 +82,16 @@ class CcpnModule(Dock):
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
     #TODO:GEERTEN: make mainWindow actually do something
+    area = None
+    if mainWindow is not None:
+      area = mainWindow.moduleArea
 
-    super(CcpnModule, self).__init__(name=name, area=mainWindow.moduleArea,
+    super(CcpnModule, self).__init__(name=name, area=area,
                                      closable=closable)#, **kwds)   # ejb
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
     Logging.getLogger().debug('module:"%s"' % (name,))
-
+    self.mainWindow = mainWindow
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
 
@@ -144,7 +147,8 @@ class CcpnModule(Dock):
     self.mainWidget.show()
 
     # set parenting relations
-    self.setParent(mainWindow.moduleArea)   # ejb
+    if self.mainWindow is not None:
+      self.setParent(self.mainWindow.moduleArea)   # ejb
     self.widgetArea.setParent(self)
 
   # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'

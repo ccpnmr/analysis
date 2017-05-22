@@ -60,7 +60,7 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/feedback/submitFeedback.py'
 
 class FeedbackPopup(CcpnDialog):
 # class FeedbackPopup(QtGui.QDialog):
-  # parent mandatory and that needs to have attributes _appBase and colourScheme
+  # parent mandatory and that needs to have attribute application
   def __init__(self, parent=None, title='Feedback Form', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # QtGui.QDialog.__init__(self, parent=parent)
@@ -102,12 +102,12 @@ class FeedbackPopup(CcpnDialog):
     if not feedback:
       return
       
-    appBase = self.parent()._appBase
+    application = self.parent().application
     
     if includeProject:
       # cannot use tempfile because that always hands back open object and tarfile needs actual path
       filePrefix = 'feedback%s' % random.randint(1, 10000000)
-      project = appBase.project
+      project = application.project
       projectPath = project.path
       directory = os.path.dirname(projectPath)
       filePrefix = os.path.join(directory, filePrefix)
@@ -121,13 +121,13 @@ class FeedbackPopup(CcpnDialog):
       fileName = None
       
     data = {}
-    data['version'] = appBase.applicationVersion
+    data['version'] = application.applicationVersion
     
     data['feedback'] = feedback
     
     for key in ('name', 'organisation', 'email'):
       data[key] = self._registrationDict.get(key, 'None')
-      
+
     if fileName:
       try:
         response = Url.uploadFile(SCRIPT_URL, fileName, data)
@@ -143,9 +143,8 @@ class FeedbackPopup(CcpnDialog):
     else:
       title = 'Failure'
       msg = 'Problem submitting feedback'
-      
-    info = MessageDialog.showInfo(title,
-          msg, colourScheme=self.parent().colourScheme)
+
+    info = MessageDialog.showInfo(title, msg)
       
     #print(response)
     self.hide()

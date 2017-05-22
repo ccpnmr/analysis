@@ -2,9 +2,13 @@ import collections
 import json
 import time
 from collections import OrderedDict
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 
+import pandas as pd
 from PyQt4 import QtCore, QtGui
-
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -18,7 +22,12 @@ from ccpn.ui.gui.widgets.PipelineWidgets import PipelineDropArea
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.DropBase import DropBase
+
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -58,7 +67,7 @@ class GuiPipeline(CcpnModule):
 
   includeSettingsWidget = True
   maxSettingsState = 2
-  settingsPosition = 'right'
+  settingsPosition = 'left'
   className = 'GuiPipeline'
 
   def __init__(self, mainWindow, name='', pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
@@ -74,6 +83,8 @@ class GuiPipeline(CcpnModule):
       self.moduleArea = self.mainWindow.moduleArea
       self.preferences = self.application.preferences
       self.current = self.application.current
+      self._spectrumNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'Spectrum',
+                                        self._refreshInputDataList)
 
       nameCount = 0
 
@@ -105,6 +116,9 @@ class GuiPipeline(CcpnModule):
       self.methodsPreferences = self._setAppSpecificMethods('AnalysisScreen')
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
     self.currentRunningPipeline = []
+
+    self.interactor = PipelineInteractor(self.application)
+
 
   def _setModuleName(self):
     pipelineModules = []
@@ -390,47 +404,53 @@ class GuiPipeline(CcpnModule):
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
 
   def _createAllSettingWidgets(self):
-    # R0w 0
+    #
     self.pipelineReNameLabel = Label(self, 'Name')
     self.settingsWidgets.append(self.pipelineReNameLabel)
     self.pipelineReNameTextEdit = LineEdit(self, str(self.pipelineNameLabel.text()))
     self.settingsWidgets.append(self.pipelineReNameTextEdit)
-    # R0w 1
+    #
+
     self.inputDataLabel = Label(self, 'Input Data')
     self.settingsWidgets.append(self.inputDataLabel)
-    self.inputDataPulldownList = PulldownList(self, '')
-    self.settingsWidgets.append(self.inputDataPulldownList)
-    # R0w 2
+    self.inputDataList = ListWidget(self, )
+    self.inputDataList.setAcceptDrops(True)
+
+    # self.inputDataList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+    self.setInputDataList(self.getInputData())
+    self.settingsWidgets.append(self.inputDataList)
+
+    #
     self.autoLabel = Label(self, 'Auto Run')
     self.settingsWidgets.append(self.autoLabel)
     self.autoCheckBox = CheckBox(self,)
     self.settingsWidgets.append(self.autoCheckBox)
-    # R0w 3
+    #
     self.savePipelineLabel = Label(self, 'Save in')
     self.settingsWidgets.append(self.savePipelineLabel)
     self.savePipelineLineEdit = LineEdit(self, '')
     self.settingsWidgets.append(self.savePipelineLineEdit)
-    # R0w 4
+    #
     self.addBoxLabel = Label(self, 'Add Method On')
     self.settingsWidgets.append(self.addBoxLabel)
     self.addBoxPosition = RadioButtons(self,texts=['top', 'bottom'], selectedInd=0,direction='h')
     self.addBoxPosition.setMaximumHeight(20)
     self.settingsWidgets.append(self.addBoxPosition)
-    # R0w 5
+    #
     self.autoActiveLabel = Label(self, 'Auto active')
     self.settingsWidgets.append(self.autoActiveLabel)
     self.autoActiveCheckBox = CheckBox(self, )
     self.autoActiveCheckBox.setChecked(True)
     self.settingsWidgets.append(self.autoActiveCheckBox)
 
-    # R0w 6
+    #
     self.filter = Label(self, 'Methods filter')
     self.settingsWidgets.append(self.filter)
     self.filterButton = Button(self, icon = self.filterIcon, callback = self.filterMethodPopup)
     self.filterButton.setStyleSheet(transparentStyle)
     self.settingsWidgets.append(self.filterButton)
 
-    # R0w 7
+    #
     self.spacerLabel = Label(self, '')
     self.spacerLabel.setMaximumHeight(1)
     self.settingsWidgets.append(self.spacerLabel)
@@ -479,6 +499,7 @@ class GuiPipeline(CcpnModule):
     self._displayStopButton()
     self._updateSettingsParams()
     self._setSettingsParams()
+    self.setDataSelection()
     # self._hideSettingWidget()
 
   def _cancelSettingsCallBack(self):
@@ -515,10 +536,60 @@ class GuiPipeline(CcpnModule):
       i, j = position
       layout.addWidget(widget, i, j)
 
-class FilterMethods(QtGui.QDialog):
+  def setDataSelection(self):
 
-  def __init__(self, parent=None,  **kw):
-    super(FilterMethods, self).__init__(parent)
+    dataTexts = self.inputDataList.getTexts()
+    if self.project is not None:
+      for text in dataTexts:
+        obj  = self.project.getByPid(text)
+        if isinstance(obj, Spectrum) or isinstance(obj, SpectrumGroup):
+          print(obj)
+        else:
+          print(obj, 'Not available.')
+
+
+    # self.interactor.sources = [s.text() for s in self.inputDataList.selectedItems()]
+
+
+
+  def getData(self):
+    """
+    Should this move to the interactors???
+    """
+    if self.project is not None:
+      return [self.project.getByPid('SP:{}'.format(source)) for source in self.interactor.sources]
+    else:
+      return []
+
+  def setInputDataList(self, inputData=None):
+    self.inputDataList.clear()
+    if inputData is not None:
+      self.inputDataList.setObjects(inputData, name='pid')
+      sdo = [s.name for s in inputData]
+      self.inputDataList.addItems(sdo)
+
+
+  def getInputData(self):
+    '''Get 1D Spectra from project'''
+    sd = []
+    if self.project is not None:
+      sd += [s for s in self.project.spectra if
+             (len(s.axisCodes) == 1) and (s.axisCodes[0].startswith('H'))]
+    return sd
+
+  def _refreshInputDataList(self, *args):
+    try:
+      spectrumGroups = []
+      self.setInputDataList(self.getInputData())
+    except:
+      print('No input data available')
+
+
+class FilterMethods(CcpnDialog):
+
+  def __init__(self, parent=None, title='Filter Methods', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    # super(FilterMethods, self).__init__(parent)
     self.pipelineModule = parent
     self._setMainLayout()
     self._setWidgets()
@@ -583,7 +654,7 @@ class FilterMethods(QtGui.QDialog):
   def _setSelectionScrollArea(self):
     self.scrollArea = ScrollArea(self)
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = QtGui.QFrame()
+    self.scrollAreaWidgetContents = Frame(None, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
   def _addWidgetsToLayout(self):
@@ -593,9 +664,35 @@ class FilterMethods(QtGui.QDialog):
     self.mainLayout.addWidget(self.applyCancelButtons, 2, 1,)
 
   def _okButtonCallBack(self):
-
     self.pipelineModule.methodPulldown.setData(self._getSelectedMethods())
     self.accept()
+
+class PipelineInteractor:
+
+  def __init__(self, application):
+    self.project = None
+    if application is not None:
+      self.project = application.project
+      self.sources = []
+
+  @property
+  def sources(self):
+    return self.__sources
+
+  @sources.setter
+  def sources(self, value):
+    self.__sources = value
+
+  def getData(self):
+    if self.project is not None:
+      return [self.project.getByPid('SP:{}'.format(source))
+              for source in self.sources]
+    else:
+      return []
+
+  def _getDataFrame(self):
+    return pd.DataFrame([x for x in self.getData()])
+
 
 
 from collections import OrderedDict

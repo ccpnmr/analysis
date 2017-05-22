@@ -1,6 +1,7 @@
 import collections
 import json
 import time
+import os
 from collections import OrderedDict
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Spectrum import Spectrum
@@ -13,7 +14,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, LineEditButtonDialog
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
@@ -75,6 +76,7 @@ class GuiPipeline(CcpnModule):
 
     self.project = None
     self.application = None
+    self.savingDataPath = os.path.expanduser("~")+'/newPipeline.json'
 
     if mainWindow is not None:
       self.mainWindow = mainWindow
@@ -83,8 +85,9 @@ class GuiPipeline(CcpnModule):
       self.moduleArea = self.mainWindow.moduleArea
       self.preferences = self.application.preferences
       self.current = self.application.current
-      self._spectrumNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'Spectrum',
-                                        self._refreshInputDataList)
+      # self._spectrumNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'Spectrum',
+      #                                   self._refreshInputDataList)
+
 
       nameCount = 0
 
@@ -95,11 +98,12 @@ class GuiPipeline(CcpnModule):
       name = 'Pipeline-' + str(nameCount)
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
+      self.savingDataPath = str(self.generalPreferences.dataPath)
 
     self.currentPipelineBoxNames = []
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
-                                               ('savePath', None), #str(self.generalPreferences.dataPath)),
+                                               ('savePath', self.savingDataPath), #str(self.generalPreferences.dataPath)),
                                                ('autoRun', False),('addPosit', 'bottom'),
                                                ('autoActive', True),])
 
@@ -117,7 +121,8 @@ class GuiPipeline(CcpnModule):
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
     self.currentRunningPipeline = []
 
-    self.interactor = PipelineInteractor(self.application)
+    # self.interactor = PipelineInteractor(self.application)
+    self._inputData = set()
 
 
   def _setModuleName(self):
@@ -279,11 +284,26 @@ class GuiPipeline(CcpnModule):
       self._saveToJson()
 
   def _saveToJson(self):
-    self.jsonPath = str(self.savePipelineLineEdit.text()) + '/' + str(self.pipelineNameLabel.text()) + '.json'
-    with open(self.jsonPath, 'w') as fp:
-      json.dump(self.jsonData, fp, indent=2)
-      fp.close()
-    print('File saved in: ', self.jsonPath)
+    '''Tries to catch various error in giving the saving path '''
+    savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
+    if os.path.exists(savingPath):
+      if not savingPath.endswith('.json'):
+        try:
+          if savingPath.endswith('/'):
+            savingPath += str(self.pipelineNameLabel.text()) + '.json'
+          else:
+            savingPath+='.json'
+        except:
+          print('Insert a valid file path. E.g ~/pipeline.json')
+      self.savingDataPath = savingPath
+
+    if os.path.exists(self.savingDataPath):
+      with open(self.savingDataPath, 'w') as fp:
+        json.dump(self.savingDataPath, fp, indent=2)
+        fp.close()
+      print('File saved in: ', self.savingDataPath)
+
+    print('File not saved. Insert a valid file path. E.g /yourPath/pipeline.json')
 
   def _createPipelineWidgets(self):
     self._addMethodPullDownWidget()
@@ -415,9 +435,7 @@ class GuiPipeline(CcpnModule):
     self.settingsWidgets.append(self.inputDataLabel)
     self.inputDataList = ListWidget(self, )
     self.inputDataList.setAcceptDrops(True)
-
     # self.inputDataList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-    self.setInputDataList(self.getInputData())
     self.settingsWidgets.append(self.inputDataList)
 
     #
@@ -426,9 +444,9 @@ class GuiPipeline(CcpnModule):
     self.autoCheckBox = CheckBox(self,)
     self.settingsWidgets.append(self.autoCheckBox)
     #
-    self.savePipelineLabel = Label(self, 'Save in')
+    self.savePipelineLabel = Label(self, 'Save as')
     self.settingsWidgets.append(self.savePipelineLabel)
-    self.savePipelineLineEdit = LineEdit(self, '')
+    self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.AnyFile)
     self.settingsWidgets.append(self.savePipelineLineEdit)
     #
     self.addBoxLabel = Label(self, 'Add Method On')
@@ -468,7 +486,7 @@ class GuiPipeline(CcpnModule):
   def _updateSettingsParams(self):
     name = str(self.pipelineReNameTextEdit.text())
     rename = str(self.pipelineReNameTextEdit.text())
-    savePath = str(self.savePipelineLineEdit.text())
+    savePath = str(self.savePipelineLineEdit.lineEdit.text())
     autoRun = self.autoCheckBox.get()
     addPosit = self.addBoxPosition.get()
     autoActive = self.autoActiveCheckBox.get()
@@ -486,8 +504,7 @@ class GuiPipeline(CcpnModule):
 
   def _setSettingsParams(self):
     widgets = [self.pipelineNameLabel.setText, self.pipelineReNameTextEdit.setText,
-               self.savePipelineLineEdit.setText, self.autoCheckBox.setChecked, self.addBoxPosition.set]
-
+               self.savePipelineLineEdit.lineEdit.setText, self.autoCheckBox.setChecked, self.addBoxPosition.set]
     for widget, value in zip(widgets, self.pipelineSettingsParams.values()):
       widget(value)
 
@@ -542,47 +559,48 @@ class GuiPipeline(CcpnModule):
     if self.project is not None:
       for text in dataTexts:
         obj  = self.project.getByPid(text)
-        if isinstance(obj, Spectrum) or isinstance(obj, SpectrumGroup):
-          print(obj)
+        if isinstance(obj, Spectrum):
+          self._inputData.update([obj])
+        elif isinstance(obj, SpectrumGroup):
+          self._inputData.update(obj.spectra)
         else:
           print(obj, 'Not available.')
-
+      print(self._inputData)
 
     # self.interactor.sources = [s.text() for s in self.inputDataList.selectedItems()]
 
 
-
-  def getData(self):
-    """
-    Should this move to the interactors???
-    """
-    if self.project is not None:
-      return [self.project.getByPid('SP:{}'.format(source)) for source in self.interactor.sources]
-    else:
-      return []
-
-  def setInputDataList(self, inputData=None):
-    self.inputDataList.clear()
-    if inputData is not None:
-      self.inputDataList.setObjects(inputData, name='pid')
-      sdo = [s.name for s in inputData]
-      self.inputDataList.addItems(sdo)
-
-
-  def getInputData(self):
-    '''Get 1D Spectra from project'''
-    sd = []
-    if self.project is not None:
-      sd += [s for s in self.project.spectra if
-             (len(s.axisCodes) == 1) and (s.axisCodes[0].startswith('H'))]
-    return sd
-
-  def _refreshInputDataList(self, *args):
-    try:
-      spectrumGroups = []
-      self.setInputDataList(self.getInputData())
-    except:
-      print('No input data available')
+  #
+  # def getData(self):
+  #   """
+  #   Should this move to the interactors???
+  #   """
+  #   if self.project is not None:
+  #     return [self.project.getByPid('SP:{}'.format(source)) for source in self.interactor.sources]
+  #   else:
+  #     return []
+  #
+  # def setInputDataList(self, inputData=None):
+  #   self.inputDataList.clear()
+  #   if inputData is not None:
+  #     self.inputDataList.setObjects(inputData, name='pid')
+  #     sdo = [s.name for s in inputData]
+  #     self.inputDataList.addItems(sdo)
+  #
+  #
+  # def getInputData(self):
+  #   '''Get 1D Spectra from project'''
+  #   sd = []
+  #   if self.project is not None:
+  #     sd += [s for s in self.project.spectra if
+  #            (len(s.axisCodes) == 1) and (s.axisCodes[0].startswith('H'))]
+  #   return sd
+  #
+  # def _refreshInputDataList(self, *args):
+  #   try:
+  #     self.setInputDataList(self.getInputData())
+  #   except:
+  #     print('No input data available')
 
 
 class FilterMethods(CcpnDialog):

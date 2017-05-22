@@ -100,6 +100,12 @@ class ListWidget(QtGui.QListWidget, Base):
         objects.append(obj)
     return objects
 
+  def getTexts(self):
+    items = []
+    for index in range(self.count()):
+      items.append(self.item(index))
+    return [i.text() for i in items]
+
   def selectObject(self, obj):
     for item in self.items:
       itemObject = item.data(QtCore.Qt.UserRole)
@@ -130,7 +136,9 @@ class ListWidget(QtGui.QListWidget, Base):
     Raise the context menu
     """
     menu = self.getContextMenu()
-    menu.popup(event.globalPos())
+    if menu:
+      menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+      menu.exec()
 
   def getContextMenu(self):
     contextMenu = Menu('', self, isFloatWidget=True)

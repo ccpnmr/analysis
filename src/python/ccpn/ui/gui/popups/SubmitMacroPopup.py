@@ -54,7 +54,6 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # class SubmitMacroPopup(QtGui.QDialog):
 class SubmitMacroPopup(CcpnDialog):
-  # parent mandatory and that needs to have attributes _appBase and colourScheme
   def __init__(self, parent=None, title='Submit Macro Form', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # QtGui.QDialog.__init__(self, parent=parent)
@@ -101,7 +100,7 @@ class SubmitMacroPopup(CcpnDialog):
     filePath = self.pathEntry.get()
     if not filePath or not os.path.exists(filePath) or not os.path.isfile(filePath):
       dialog = MessageDialog.showError('Error',
-          'Path does not exist or is not file', colourScheme=self.parent().colourScheme)
+          'Path does not exist or is not file')
       logger.error('Path specified for macro does not exist or is not file: %s' % filePath)
       return
       
@@ -110,7 +109,7 @@ class SubmitMacroPopup(CcpnDialog):
     
     if not keywords or not description:
       dialog = MessageDialog.showError('Error',
-          'Both keywords and description required', colourScheme=self.parent().colourScheme)
+          'Both keywords and description required')
       logger.error('Both keywords and description required for macro')
       return
       
@@ -126,7 +125,7 @@ class SubmitMacroPopup(CcpnDialog):
       data[key] = self._registrationDict.get(key, 'None')
       
     try:
-     response = Url.uploadFile(SCRIPT_URL, filePath, data)
+      response = Url.uploadFile(SCRIPT_URL, filePath, data)
     except urllib.error.HTTPError as e:
       response = str(e)
     if 'Macro successfully uploaded' in response:
@@ -138,8 +137,7 @@ class SubmitMacroPopup(CcpnDialog):
       loggerMsg = 'Problem submitting macro: %s' % response
       
     logger.info(loggerMsg)
-    info = MessageDialog.showInfo(title,
-          msg, colourScheme=self.parent().colourScheme)
+    info = MessageDialog.showInfo(title,  msg)
       
     self.hide()
 

@@ -63,33 +63,39 @@ class GuiPipeline(CcpnModule):
   def __init__(self, mainWindow, name='', pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
     super(GuiPipeline, self)
 
-    self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application = self.mainWindow.application
+    self.project = None
 
-    nameCount = 0
+    if mainWindow is not None:
+      self.mainWindow = mainWindow
+      self.project = self.mainWindow.project
+      self.application = self.mainWindow.application
+      self.moduleArea = self.mainWindow.moduleArea
+      self.preferences = self.application.preferences
+      self.current = self.application.current
 
-    for module in self.mainWindow.moduleArea.findAll()[1].values():
-      if hasattr(module, 'runPipeline'):
-        nameCount += 1
+      nameCount = 0
 
-    name = 'Pipeline-' + str(nameCount)
+      for module in self.mainWindow.moduleArea.findAll()[1].values():
+        if hasattr(module, 'runPipeline'):
+          nameCount += 1
+
+      name = 'Pipeline-' + str(nameCount)
 
 
 
-    self.generalPreferences = self.application.preferences.general
-    self.templatePath = self.generalPreferences.auxiliaryFilesPath
-    self.currentPipelineBoxNames = []
+      self.generalPreferences = self.application.preferences.general
+      self.templatePath = self.generalPreferences.auxiliaryFilesPath
+      self.currentPipelineBoxNames = []
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
-                                               ('savePath', str(self.generalPreferences.dataPath)),
+                                               ('savePath', None), #str(self.generalPreferences.dataPath)),
                                                ('autoRun', False),('addPosit', 'bottom'),
                                                ('autoActive', True),])
 
     self.templates = self._getPipelineTemplates(templates)
     self.pipelineMethods = self._getPipelineMethods(pipelineMethods)
 
-    CcpnModule.__init__(self, mainWindow=self.mainWindow, name=name)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self._setIcons()
     self._setMainLayout()
@@ -589,3 +595,25 @@ class FilterMethods(QtGui.QDialog):
 
     self.pipelineModule.methodPulldown.setData(self._getSelectedMethods())
     self.accept()
+
+
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
+  app = TestApplication()
+
+  win = QtGui.QMainWindow()
+
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  module = GuiPipeline(mainWindow=None)
+  moduleArea.addModule(module)
+
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % module.moduleName)
+  win.show()
+
+  app.start()

@@ -36,7 +36,7 @@ class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else th
 
   includeSettingsWidget = False
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
   className = 'ReferenceChemicalShifts'
 
   def __init__(self, mainWindow, name='Reference ChemicalShifts',):

@@ -45,6 +45,13 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.util import Logging
 
+settingsWidgetPositions = {
+                           'top':    {'settings':(0,0), 'widget':(1,0)},
+                           'bottom': {'settings':(1,0), 'widget':(0,0)},
+                           'left':   {'settings':(0,0), 'widget':(0,1)},
+                           'right':  {'settings':(0,1), 'widget':(0,0)},
+                           }
+
 class CcpnModule(Dock):
   """
   Base class for CCPN modules
@@ -76,7 +83,7 @@ class CcpnModule(Dock):
   # overide in specific module implementations
   includeSettingsWidget = False
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-  settingsOnTop = True
+  settingsPosition = 'top'
   settingsMinimumSizes = (100, 50)
 
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
@@ -128,15 +135,25 @@ class CcpnModule(Dock):
       #self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)
       #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
-      if self.settingsOnTop:
-        # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
+      # if self.settingsOnTop:
+      #   # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
+      #   self.addWidget(self._settingsScrollArea, 0, 0)
+      #   self.addWidget(self.mainWidget, 1, 0)
+      # else:
+      #   # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
+      #   self.addWidget(self._settingsScrollArea, 1, 0)
+      #   self.addWidget(self.mainWidget, 1, 1)
+      # # self.settingsWidget._sequenceGraphScrollArea.hide()
+
+      if self.settingsPosition in settingsWidgetPositions:
+        hSettings, vSettings = settingsWidgetPositions[self.settingsPosition]['settings']
+        hWidget, vWidget = settingsWidgetPositions[self.settingsPosition]['widget']
+        self.addWidget(self._settingsScrollArea, hSettings, vSettings)
+        self.addWidget(self.mainWidget, hWidget, vWidget)
+      else: #default as settings on top and widget below
         self.addWidget(self._settingsScrollArea, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)
-      else:
-        self.addWidget(self.mainWidget, 0, 0)
-        # self.addWidget(self.settingsWidget.getScrollArea(), 1, 0)
-        self.addWidget(self.settingsWidget._scrollArea, 1, 0)
-      # self.settingsWidget._sequenceGraphScrollArea.hide()
+
       self._settingsScrollArea.hide()
 
     else:

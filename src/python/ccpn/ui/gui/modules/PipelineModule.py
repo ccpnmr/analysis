@@ -18,6 +18,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import PipelineDropArea
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Frame import Frame
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -55,9 +56,9 @@ class PipelineWorker(QtCore.QObject):
 
 class GuiPipeline(CcpnModule):
 
-  includeSettingsWidget = False
+  includeSettingsWidget = True
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'right'
   className = 'GuiPipeline'
 
   def __init__(self, mainWindow, name='', pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
@@ -165,10 +166,10 @@ class GuiPipeline(CcpnModule):
 
 
   def _setMainLayout(self):
-    self.mainFrame = QtGui.QFrame()
+    self.mainFrame = Frame(self.mainWidget, setLayout=False)
     self.mainLayout = QtGui.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
-    self.layout.addWidget(self.mainFrame, 0,0,0,0)
+    self.mainWidget.getLayout().addWidget(self.mainFrame, 0, 0, 0 ,0)
 
   def _setSecondaryLayouts(self):
     self.settingFrameLayout = QtGui.QHBoxLayout()

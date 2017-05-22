@@ -56,7 +56,7 @@ class SequenceModule(CcpnModule):
   """
   includeSettingsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-  settingsOnTop = True
+  settingsPosition = 'top'
 
   className = 'SequenceModule'
 

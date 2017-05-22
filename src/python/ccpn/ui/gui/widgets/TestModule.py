@@ -35,7 +35,7 @@ class MyModule(CcpnModule):
   '''
   includeSettingsWidget = True
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
 
   className = 'MyModule'
 

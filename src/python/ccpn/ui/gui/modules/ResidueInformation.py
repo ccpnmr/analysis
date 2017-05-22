@@ -38,7 +38,7 @@ class ResidueInformation(CcpnModule):
 
   includeSettingsWidget = False
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
   className = 'ResidueInformation'
 
   def __init__(self, mainWindow, name='Residue Information', **kw):

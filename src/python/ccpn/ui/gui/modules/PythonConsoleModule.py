@@ -39,7 +39,7 @@ class PythonConsoleModule(CcpnModule):
 
   includeSettingsWidget = False
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
 
   className = 'PythonConsoleModule'
 

@@ -249,7 +249,6 @@ class SideBar(QtGui.QTreeWidget, Base):
     Sets the specified project as a class attribute so it can be accessed from elsewhere
     """
     self.project = project
-    self.colourScheme = project._appBase.colourScheme
 
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():
@@ -572,18 +571,10 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup = ChemicalShiftListPopup(chemicalShiftList=obj)
       popup.exec_()
       popup.raise_()
-
-      # info = showInfo('Not implemented yet!',
-      #     'This function has not been implemented in the current version',
-      #     colourScheme=self.colourScheme)
     elif obj.shortClassName == 'SE':
       popup = StructurePopup(structure=obj)
       popup.exec_()
       popup.raise_()
-
-      # info = showInfo('Not implemented yet!',
-      #     'This function has not been implemented in the current version',
-      #     colourScheme=self.colourScheme)
 
       # if self.mainWindow:
       #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
@@ -595,18 +586,16 @@ class SideBar(QtGui.QTreeWidget, Base):
       #   self.project._logger.info("application.showStructureTable()")
       #
       # else:
-      #   showInfo('No mainWindow?', '', colourScheme=self.colourScheme)
+      #   showInfo('No mainWindow?', '')
 
     elif obj.shortClassName == 'MC':
       #to be decided when we design structure
       info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
     elif obj.shortClassName == 'MD':
       #to be decided when we design structure
       showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
     elif obj.shortClassName == 'DS':
       popup = DataSetPopup(dataSet=obj)
       popup.exec_()
@@ -631,24 +620,18 @@ class SideBar(QtGui.QTreeWidget, Base):
       #              colourScheme=self.colourScheme)
 
 
-
-
-
     elif obj.shortClassName == 'RL':
       #to be decided when we design structure
       showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
     elif obj.shortClassName == 'RE':
       #to be decided when we design structure
       showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+          'This function has not been implemented in the current version')
     elif obj.shortClassName == 'IL':
       # to be decided when we design structure
       showInfo('Not implemented yet!',
-               'This function has not been implemented in the current version',
-               colourScheme=self.colourScheme)
+               'This function has not been implemented in the current version')
     elif obj.shortClassName == 'NO':
       popup = NotesPopup(mainWindow=self.mainWindow, note=obj)
       popup.exec_()
@@ -739,8 +722,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
       else:
         info = showInfo('Not implemented yet!',
-            'This function has not been implemented in the current version',
-            colourScheme=self.colourScheme)
+            'This function has not been implemented in the current version')
 
 
 

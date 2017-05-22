@@ -558,7 +558,7 @@ class ViewBox(pg.ViewBox):
                          redoArgs=[peak, 'position', peak.position])
             delattr(peak, 'startPosition')
           peak._finaliseAction('change')
-          project._appBase.ui.echoCommands(
+          self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
             ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
 

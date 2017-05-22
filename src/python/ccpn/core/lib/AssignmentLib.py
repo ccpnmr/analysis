@@ -665,7 +665,10 @@ def peaksAreOnLine(peaks:typing.List[Peak], dim:int):
     spectra = set(peak.peakList.spectrum for peak in peaks)
     ll = [y for y in (x.assignmentTolerances[dim] for x in spectra) if y]
     if ll:
-      tolerance = min(*ll)
+      if len(ll) == 1:
+        tolerance = ll[0]
+      else:
+        tolerance = min(*ll) # this fails if len(ll) == 1, hence the above
     else:
       tolerance = Constants.defaultAssignmentTolerance
     # tolerance = min([getAssignmentToleranceForPeakDimension(peak, dim) for peak in peaks])

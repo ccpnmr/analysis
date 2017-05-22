@@ -37,6 +37,8 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.Sample import Sample
+from ccpn.core.Substance import Substance
 # from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Peak import Peak
@@ -54,7 +56,10 @@ _currentClasses = {
   Chain:{},
   Residue:{},
   ChemicalShiftList:{},
-  ChemicalShift:{}
+  ChemicalShift:{},
+  Sample:{},
+  Substance:{}
+
 }
 
 _currentExtraFields = {

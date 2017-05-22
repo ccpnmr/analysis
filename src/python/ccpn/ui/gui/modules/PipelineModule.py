@@ -65,6 +65,7 @@ class GuiPipeline(CcpnModule):
     super(GuiPipeline, self)
 
     self.project = None
+    self.application = None
 
     if mainWindow is not None:
       self.mainWindow = mainWindow
@@ -81,11 +82,9 @@ class GuiPipeline(CcpnModule):
           nameCount += 1
 
       name = 'Pipeline-' + str(nameCount)
-
-
-
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
+
     self.currentPipelineBoxNames = []
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
@@ -110,7 +109,6 @@ class GuiPipeline(CcpnModule):
   def _setModuleName(self):
     pipelineModules = []
     for module in self.mainWindow.moduleArea.findAll()[1].values():
-      print(module)
       if hasattr(module, 'GuiPipeline'):
         print('GuiPipeline')
       if hasattr(module, 'runPipeline'):
@@ -184,10 +182,10 @@ class GuiPipeline(CcpnModule):
 
   def _createSettingButtonGroup(self):
     self.pipelineNameLabel = Label(self, 'NewPipeline')
-    self.settingButtons = ButtonList(self, texts=['', '', ''],
-                                     callbacks=[self._openSavedPipeline, self._savePipeline , self.settingsPipelineWidgets],
-                                     icons=[self.openRecentIcon, self.saveIcon, self.settingIcon],
-                                     tipTexts=['', '', '' ], direction='H')
+    self.settingButtons = ButtonList(self, texts=['', ''],
+                                     callbacks=[self._openSavedPipeline, self._savePipeline],
+                                     icons=[self.openRecentIcon, self.saveIcon],
+                                     tipTexts=['', ''], direction='H')
     self.settingFrameLayout.addWidget(self.pipelineNameLabel)
 
     self._addMenuToOpenButton()
@@ -209,7 +207,7 @@ class GuiPipeline(CcpnModule):
 
   def _getPathFromDialogBox(self):
     dialog = FileDialog(self, text="Open Pipeline",
-                        acceptMode=FileDialog.AcceptOpen, preferences=self.generalPreferences)
+                        acceptMode=FileDialog.AcceptOpen)
     return dialog.selectedFile()
 
   def _getPipelineBoxesFromFile(self, params, boxesNames):
@@ -218,7 +216,7 @@ class GuiPipeline(CcpnModule):
       for key, value in i.items():
         if value[0].upper() in boxesNames:
           pipelineMethod = self.pipelineMethods[key]
-          pipelineBox = pipelineMethod(parent=self, name = value[0], params = value[1],  project=self.project)
+          pipelineBox = pipelineMethod(parent=self, application=self.application, name = value[0], params = value[1])
           pipelineBox.setActive(value[2])
           pipelineBoxes.append(pipelineBox)
     return pipelineBoxes
@@ -304,7 +302,8 @@ class GuiPipeline(CcpnModule):
 
     '''
     self.goButton = ButtonList(self, texts=['','',''],icons=[self.stopIcon, self.goIcon, self.goIcon,],
-                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self.runPipeline])
+                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self.runPipeline],
+                               hAlign='c')
     self.goButton.buttons[0].hide()
     self.goButton.buttons[1].hide()
     self.goButton.setStyleSheet(transparentStyle)
@@ -379,16 +378,16 @@ class GuiPipeline(CcpnModule):
     self._createSettingsGroupBox()
     self._createAllSettingWidgets()
     self._addWidgetsToLayout(self.settingsWidgets, self.settingWidgetsLayout)
-    self.settingFrame.hide()
-    self._hideSettingWidget()
+    # self.settingFrame.hide()
+    # self._hideSettingWidget()
     self._setSettingsParams()
 
   def _createSettingsGroupBox(self):
-    self.settingFrame = GroupBox('Pipeline Settings')
+    self.settingFrame = Frame(self, setLayout=False)
     self.settingFrame.setMaximumWidth(300)
     self.settingWidgetsLayout = QtGui.QGridLayout()
     self.settingFrame.setLayout(self.settingWidgetsLayout)
-    self.pipelineAreaLayout.addWidget(self.settingFrame, 1)
+    self.settingsWidget.getLayout().addWidget(self.settingFrame)
 
   def _createAllSettingWidgets(self):
     # R0w 0
@@ -435,7 +434,8 @@ class GuiPipeline(CcpnModule):
     self.spacerLabel = Label(self, '')
     self.spacerLabel.setMaximumHeight(1)
     self.settingsWidgets.append(self.spacerLabel)
-    self.applyCancelsettingButtons = ButtonList(self, texts=['Cancel', 'Ok'],callbacks=[self._cancelSettingsCallBack, self._okSettingsCallBack], direction='H')
+    self.applyCancelsettingButtons = ButtonList(self, texts=['Cancel', 'Apply'], callbacks=[self._cancelSettingsCallBack, self._applySettingsCallBack],
+                                                direction='H', hAlign='c')
     self.settingsWidgets.append(self.applyCancelsettingButtons)
 
 
@@ -475,15 +475,15 @@ class GuiPipeline(CcpnModule):
   def _renamePipeline(self):
     self.pipelineName = self.lineEdit.text()
 
-  def _okSettingsCallBack(self):
+  def _applySettingsCallBack(self):
     self._displayStopButton()
     self._updateSettingsParams()
     self._setSettingsParams()
-    self._hideSettingWidget()
+    # self._hideSettingWidget()
 
   def _cancelSettingsCallBack(self):
     self._setSettingsParams()
-    self._hideSettingWidget()
+    # self._hideSettingWidget()
 
   def _hideSettingWidget(self):
     self.settingFrame.hide()

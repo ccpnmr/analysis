@@ -299,13 +299,16 @@ class EditSampleComponentPopup(CcpnDialog):
       self.buttons.buttons[2].setEnabled(False)
 
   def _applyChanges(self):
-    if self.newSampleComponentToCreate:
-      self._createNewComponent()
-    for property, value in self._getCallBacksDict().items():
-      property(value)
-    self.nameComponentLineEdit.setReadOnly(True)
-    self.labellingPulldownList.setEnabled(False)
-
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      if self.newSampleComponentToCreate:
+        self._createNewComponent()
+      for property, value in self._getCallBacksDict().items():
+        property(value)
+      self.nameComponentLineEdit.setReadOnly(True)
+      self.labellingPulldownList.setEnabled(False)
+    finally:
+      self.project._endCommandEchoBlock()
 
   def _okButton(self):
     self._applyChanges()

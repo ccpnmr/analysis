@@ -475,10 +475,14 @@ class SubstancePropertiesPopup(CcpnDialog):
       property(value)
 
   def _applyChanges(self):
-    if self.createNewSubstance:
-      self._createNewSubstance()
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      if self.createNewSubstance:
+        self._createNewSubstance()
 
-    self._setValue()
+      self._setValue()
+    finally:
+      self.project._endCommandEchoBlock()
 
   def _okButton(self):
 

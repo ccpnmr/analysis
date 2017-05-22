@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
@@ -294,7 +294,7 @@ class StructureTable(ObjectTable):
     self.thisDataSet = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
@@ -316,7 +316,7 @@ class StructureTable(ObjectTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=columns, objects = [],
+                         columns=self.STcolumns, objects = [],
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
@@ -465,12 +465,10 @@ class StructureTable(ObjectTable):
     Update the table from StructureEnsemble
     """
     if not self._updateSilence:
-      # self._silenceCallback = True
-      # self.clearTable()
       tuples = structureEnsemble.data.as_namedtuples()
+      self.setColumns(self.STcolumns)
       self.setObjects(tuples)
       self._updateSettingsWidgets()
-      # self._silenceCallback = False
       self.show()
 
   def _updateDataSet(self, structureData):
@@ -478,12 +476,10 @@ class StructureTable(ObjectTable):
     Update the table from EnsembleData
     """
     if not self._updateSilence:
-      # self._silenceCallback = True
-      # self.clearTable()
       tuples = structureData.as_namedtuples()
+      self.setColumns(self.STcolumns)
       self.setObjects(tuples)
       self._updateSettingsWidgets()
-      # self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -601,7 +597,6 @@ class StructureTable(ObjectTable):
       # StructureTable._currentCallback[StructureTable.TABLE]._updateDataSet(thisObj)
 
       tuples = thisData.as_namedtuples()           # populate the table
-      
       thisTable.setObjects(tuples)
 
       #FIXME:ED need to spawn a change event on the other tables - forced with changing comment

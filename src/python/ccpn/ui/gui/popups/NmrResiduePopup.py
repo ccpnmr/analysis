@@ -77,7 +77,7 @@ class NmrResiduePopup(CcpnDialog):
       getLogger().warning('No chemicalShiftLists in project.')
       return
 
-    if len(self.project.chemicalShiftLists[0]) > 0:
+    if len(self.project.chemicalShiftLists) > 0:
       predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
       preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
       predictedTypes = [x[0] for x in predictions]
@@ -133,21 +133,24 @@ class NmrResiduePopup(CcpnDialog):
 
   def _assignResidue(self):
     chain = self.project.getByPid(self.chainPulldown.currentText())
-    if isinstance(chain, Chain):
-      residueItem = self.seqCodePulldown.currentText().split(' ')
-      residue = self.project.getByPid('MR:%s.%s.%s' % (chain.shortName, residueItem[0], residueItem[1]))
-      self.nmrResidue.residue = residue
-    else:
-      seqCode = self.seqCodePulldown.currentText().split(' ')[0]
-      residueType = self.residueTypePulldown.currentText().split(' ')[0].upper()
-      newSeqCode = '.'.join([seqCode, residueType])
-      self.nmrResidue.rename(newSeqCode)
+    self.project._startCommandEchoBlock('_assignResidue')
+    try:
+      if isinstance(chain, Chain):
+        residueItem = self.seqCodePulldown.currentText().split(' ')
+        residue = self.project.getByPid('MR:%s.%s.%s' % (chain.shortName, residueItem[0], residueItem[1]))
+        self.nmrResidue.residue = residue
+      else:
+        seqCode = self.seqCodePulldown.currentText().split(' ')[0]
+        residueType = self.residueTypePulldown.currentText().split(' ')[0].upper()
+        newSeqCode = '.'.join([seqCode, residueType])
+        self.nmrResidue.rename(newSeqCode)
 
-    self.nmrResidueLabel.setText("NMR Residue: %s" % self.nmrResidue.id)
-    if self.parent:
-      if self.parent.name() == 'PEAK ASSIGNER':
-        self.parent.emptyAllTablesAndLists()
-        self.parent.updateTables()
-        self.parent.updateAssignedNmrAtomsListwidgets()
-        self.parent.updateWidgetLabels()
-
+      self.nmrResidueLabel.setText("NMR Residue: %s" % self.nmrResidue.id)
+      if self.parent:
+        if self.parent.name() == 'PEAK ASSIGNER':
+          self.parent.emptyAllTablesAndLists()
+          self.parent.updateTables()
+          self.parent.updateAssignedNmrAtomsListwidgets()
+          self.parent.updateWidgetLabels()
+    finally:
+      self.project._endCommandEchoBlock()

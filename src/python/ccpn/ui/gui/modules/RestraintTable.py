@@ -205,7 +205,7 @@ class RestraintTable(ObjectTable):
     self.restraintList = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.RLcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForRestraints method
     self.spacer = Spacer(self._widget, 5, 5
@@ -220,7 +220,7 @@ class RestraintTable(ObjectTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=columns, objects=[],
+                         columns=self.RLcolumns, objects=[],
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
@@ -286,6 +286,7 @@ class RestraintTable(ObjectTable):
     Update the table
     """
     if not self._updateSilence:
+      self.setColumns(self.RLcolumns)
       self.setObjects(restraintList.restraints)
       self._updateSettingsWidgets()
       self.show()

@@ -37,7 +37,7 @@ class NmrAtomPopup(CcpnDialog):
     self.nmrResiduePulldown.setData([x.id for x in self.nmrAtom.project.nmrResidues])
     self.nmrResiduePulldown.select(self.nmrAtom.nmrResidue.id)
     leftOverLabel = Label(self, grid=(5, 0))
-    applyButton = Button(self, grid=(6, 1), text='Apply', callback=self.applyChanges)
+    applyButton = Button(self, grid=(6, 1), text='Apply', callback=self._applyChanges)
     applyButton = Button(self, grid=(6, 2), text='Close', callback=self.reject)
     isotopeCode = nmrAtom.isotopeCode
     nucleus = isotopeCode2Nucleus(isotopeCode)
@@ -52,23 +52,26 @@ class NmrAtomPopup(CcpnDialog):
       self.nmrAtomNamePulldown.select(self.nmrAtom.name)
 
 
-  def applyChanges(self):
-    if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
-      self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
+  def _applyChanges(self):
+    self.project._startCommandEchoBlock('applyChanges')
+    try:
+      if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
+        self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
 
-    if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
-      nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
-      if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
-                                           (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
-        showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
-                    'NmrAtom of another NmrResidue without merging', colourScheme=self.colourScheme)
+      if self.nmrAtom.nmrResidue.id != self.nmrResiduePulldown.currentText():
+        nmrResidue = self.project.getByPid('NR:%s' % self.nmrResiduePulldown.currentText())
 
-      else:
-        self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
-                              sequenceCode=nmrResidue.sequenceCode,
-                              residueType=nmrResidue.residueType,
-                              mergeToExisting=self.mergeBox.isChecked())
+        if not self.mergeBox.isChecked() and self.project.getByPid('NA:%s.%s' %
+                                             (nmrResidue.id, self.nmrAtomNamePulldown.currentText())):
+          showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
+                      'NmrAtom of another NmrResidue without merging', colourScheme=self.colourScheme)
 
-      self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
+        else:
+          self.nmrAtom.assignTo(chainCode=nmrResidue.nmrChain.shortName,
+                                sequenceCode=nmrResidue.sequenceCode,
+                                residueType=nmrResidue.residueType,
+                                mergeToExisting=self.mergeBox.isChecked())
 
-
+        self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
+    finally:
+      self.project._endCommandEchoBlock()

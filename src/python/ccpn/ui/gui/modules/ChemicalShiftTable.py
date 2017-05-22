@@ -201,7 +201,7 @@ class ChemicalShiftTable(ObjectTable):
     self.chemicalShiftList = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.CScolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForNmrChain method
     self.spacer = Spacer(self._widget, 5, 5
@@ -218,7 +218,7 @@ class ChemicalShiftTable(ObjectTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=columns, objects=[],
+                         columns=self.CScolumns, objects=[],
                          autoResize=True,
                          actionCallback=self._actionCallback,
                          selectionCallback=self._selectionCallback,
@@ -284,6 +284,7 @@ class ChemicalShiftTable(ObjectTable):
     Update the table
     """
     if not self._updateSilence:
+      self.setColumns(self.CScolumns)
       self.setObjects(chemicalShiftList.chemicalShifts)
       self._updateSettingsWidgets()
       self.show()

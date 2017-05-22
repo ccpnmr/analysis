@@ -73,10 +73,14 @@ class CopyPeakListPopup(CcpnDialog):
     self.mainLayout.addWidget(self.okCancelButtons, 2, 1)
 
   def _okButton(self):
+    self.project._startCommandEchoBlock('_okButton')
+    try:
       self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
       self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getText())
       self._copyPeakListToSpectrum()
+    finally:
       self.accept()
+      self.project._endCommandEchoBlock()
 
   def _copyPeakListToSpectrum(self):
     if self.sourcePeakList is not None:

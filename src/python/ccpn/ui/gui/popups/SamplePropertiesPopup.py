@@ -286,8 +286,12 @@ class SamplePropertiesPopup(CcpnDialog):
     }
 
   def _applyChanges(self):
-    for property, value in self._getCallBacksDict().items():
-      property(value)
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      for property, value in self._getCallBacksDict().items():
+        property(value)
+    finally:
+      self.project._endCommandEchoBlock()
 
   def _okButton(self):
     self._applyChanges()

@@ -337,29 +337,31 @@ class SpectrumGroupEditor(CcpnDialog):
       self._populateLeftPullDownList()
 
   def _applyChanges(self):
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
+      rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
 
-    leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
-    rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
+      if self.addNewSpectrumGroup:
+        self._applyToNewSG(leftWidgetSpectra)
 
-    if self.addNewSpectrumGroup:
-      self._applyToNewSG(leftWidgetSpectra)
+      if self.editorMode:
+        if self.leftPullDownSelection.text != 'Select an Option':
+          self.spectrumGroup = self.project.getByPid('SG:'+self.leftPullDownSelection.getText())
 
-    if self.editorMode:
-      if self.leftPullDownSelection.text != 'Select an Option':
-        self.spectrumGroup = self.project.getByPid('SG:'+self.leftPullDownSelection.getText())
+      if self.spectrumGroup:
+        self._applyToCurrentSG(leftWidgetSpectra)
 
-    if self.spectrumGroup:
-      self._applyToCurrentSG(leftWidgetSpectra)
+      if self.rightPullDownSelection.getText() == ' ':
+        return # don't do changes to spectra
 
-    if self.rightPullDownSelection.getText() == ' ':
-      return # don't do changes to spectra
+      if self.rightPullDownSelection.getText() == 'Available Spectra':
+        return # don't do changes to spectra
 
-    if self.rightPullDownSelection.getText() == 'Available Spectra':
-      return # don't do changes to spectra
-
-    else:
-     self._updateRightSGspectra(rightWidgetSpectra)
-
+      else:
+       self._updateRightSGspectra(rightWidgetSpectra)
+    finally:
+      self.project._endCommandEchoBlock()
 
   def _applyToNewSG(self, leftWidgetSpectra):
     name = str(self.leftSpectrumGroupLineEdit.text())

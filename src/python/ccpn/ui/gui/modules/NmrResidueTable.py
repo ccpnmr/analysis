@@ -243,7 +243,8 @@ class NmrResidueTable(ObjectTable):
     self.nmrChain = None
 
     # create the column objects
-    columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
 
@@ -261,7 +262,7 @@ class NmrResidueTable(ObjectTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=columns, objects = [],
+                         columns=self.NMRcolumns, objects = [],
                          autoResize=True,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
                          grid = (3, 0), gridSpan = (1, 6)
@@ -332,14 +333,9 @@ class NmrResidueTable(ObjectTable):
     Update the table with NmrResidues of nmrChain
     """
     if not self._updateSilence:
-      # try:
-      #   self.clearTable()
-      # except:
-      #   logger.warning('NmrResidueTable>>> Error trying to clear the table')
-      # self._silenceCallback = True
+      self.setColumns(self.NMRcolumns)
       self.setObjects(nmrChain.nmrResidues)
       self._updateSettingsWidgets()
-      # self._silenceCallback = False
       self.show()
 
   def setUpdateSilence(self, silence):

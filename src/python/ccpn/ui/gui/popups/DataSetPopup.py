@@ -46,34 +46,3 @@ class DataSetPopup(CcpnDialog):
     newName = self.dataSetText.text()
     self.dataSet.title = newName
     self.accept()
-
-  # def _getCallBacksDict(self):
-  #   return {
-  #     self._changeDataSetName: self.dataSetText.text()
-  #   }
-  #
-  # def _changeDataSetName(self, value):
-  #   if str(value) != self.dataSet.name:
-  #     self.dataSet.rename(value)
-  #
-  # def _applyChanges(self):
-  #   for property, value in self._getCallBacksDict().items():
-  #     property(value)
-  #
-  # def _okButton(self):
-  #   self._applyChanges()
-  #   self.accept()
-
-if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-
-  app = TestApplication()
-  # app.dataSet.title = 'Title here...'
-  popup = DataSetPopup()
-
-  popup.show()
-  popup.raise_()
-
-  app.start()
-
-

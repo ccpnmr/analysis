@@ -83,25 +83,29 @@ class PeakFindPopup(CcpnDialog):
     self._updateContents()
 
   def _pickPeaks(self):
-    peakList = self.peakList
-    positions = [[x.value(), y.value()] for x,y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
+    self.project._startCommandEchoBlock('_pickPeaks')
+    try:
+      peakList = self.peakList
+      positions = [[x.value(), y.value()] for x,y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
 
 
-    doPos=True
-    doNeg=True
-    if self.checkBox1.isChecked():
-      # Positive only
-      doNeg=False
-    elif self.checkBox2.isChecked():
-      # negative only
-      doPos=False
-    # Checking the third box turns the others off and sets both. Hence default
-    peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
+      doPos=True
+      doNeg=True
+      if self.checkBox1.isChecked():
+        # Positive only
+        doNeg=False
+      elif self.checkBox2.isChecked():
+        # negative only
+        doPos=False
+      # Checking the third box turns the others off and sets both. Hence default
+      peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
-    for strip in self.project.strips:
-      strip.showPeaks(peakList)
+      for strip in self.project.strips:
+        strip.showPeaks(peakList)
 
-    self.accept()
+    finally:
+      self.accept()
+      self.project._endCommandEchoBlock()
 
   def _updateContents(self):
 

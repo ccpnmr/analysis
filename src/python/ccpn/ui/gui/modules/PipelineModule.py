@@ -85,7 +85,7 @@ class GuiPipeline(CcpnModule):
 
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
-      self.currentPipelineBoxNames = []
+    self.currentPipelineBoxNames = []
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
                                                ('savePath', None), #str(self.generalPreferences.dataPath)),
@@ -102,7 +102,7 @@ class GuiPipeline(CcpnModule):
     self._setPipelineThread()
     self._setSecondaryLayouts()
     if appSpecificMethods:
-      self.methodsPreferences = self._setAppSpecificMethods()
+      self.methodsPreferences = self._setAppSpecificMethods('AnalysisScreen')
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
     self.currentRunningPipeline = []
 
@@ -140,13 +140,13 @@ class GuiPipeline(CcpnModule):
     else:
       return {'Empty':'Empty'}
 
-  def _setAppSpecificMethods(self):
+  def _setAppSpecificMethods(self, applicationName):
     '''set data in pull down if selected application specific method '''
     filteredMethod = [selectMethodLabel,]
     for method in self.pipelineMethods.values():
       if hasattr(method, 'applicationsSpecific'):
         applicationsSpecific = method.applicationsSpecific(method)
-        if self.application.applicationName in applicationsSpecific:
+        if applicationName in applicationsSpecific:
           filteredMethod.append(method.methodName(method))
     self.methodPulldown.setData(sorted(filteredMethod))
 
@@ -353,7 +353,7 @@ class GuiPipeline(CcpnModule):
     objMethod = self.pipelineMethods[selected]
     position = self.pipelineSettingsParams['addPosit']
 
-    self.pipelineWidget = objMethod(parent=self, name=name, params=None, project=self.project)
+    self.pipelineWidget = objMethod(parent=self, application=None, name=name, params=None, project=self.project)
 
     self.pipelineArea.addDock(self.pipelineWidget, position=position)
     autoActive = self.pipelineSettingsParams['autoActive']
@@ -597,6 +597,17 @@ class FilterMethods(QtGui.QDialog):
     self.accept()
 
 
+from collections import OrderedDict
+
+pipelineFilesDirName = '/guiPipeline/'
+templates =   OrderedDict((
+                          ('Wlogsy', 'WlogsyTemplate'),
+                          ('STD', 'STDTemplate'),
+                          ('Broadening1H', 'Broadening1HTemplate'),
+                          ('t1Rho', 't1RhoTemplate'),
+                         ))
+
+
 
 
 if __name__ == '__main__':
@@ -606,9 +617,10 @@ if __name__ == '__main__':
   app = TestApplication()
 
   win = QtGui.QMainWindow()
-
+  from ccpn.AnalysisScreen import guiPipeline as _pm
+  pipelineMethods = _pm.__all__
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  module = GuiPipeline(mainWindow=None)
+  module = GuiPipeline(mainWindow=None,  pipelineMethods=pipelineMethods, templates=templates)
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)

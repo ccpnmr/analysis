@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
@@ -580,6 +580,8 @@ class StructureTable(ObjectTable):
     thisObj = StructureTable._currentCallback[StructureTable.OBJECT]
     thisData = thisObj.data
     thisTable = StructureTable._currentCallback[StructureTable.TABLE]
+    # thisTable.setUpdatesEnabled(False)
+    # thisTable.blockSignals(True)
 
     thisDataItem = thisData.extract(index=[index])     # strange, needs to be a list
     try:
@@ -607,6 +609,8 @@ class StructureTable(ObjectTable):
 
       thisTable._setNotifiers()
       thisObj.comment = tempLabel
+      # thisTable.blockSignals(False)
+      # thisTable.setUpdatesEnabled(True)
 
   @staticmethod
   def _stLamInt(row, name):
@@ -677,3 +681,13 @@ class StructureTable(ObjectTable):
     Cleanup the notifiers when the window is closed
     """
     self._clearNotifiers()
+
+  # def resizeEvent(self, event):
+  #   logger.info('table.resize '+str(self.resizeCount))
+  #   self.resizeCount+=1
+  #   return super(StructureTable, self).resizeEvent(event)
+  #
+  # def paintEvent(self, event):
+  #   logger.info('table.paint '+str(self.paintCount))
+  #   self.paintCount+=1
+  #   return super(StructureTable, self).paintEvent(event)

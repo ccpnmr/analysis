@@ -137,8 +137,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
 """        
-    # for strip in self.strips:
-    self._addSpectrumItem(self.strip)
+    self.strip.viewBox.addItem(self)
 
     self._setupTrace()
 
@@ -180,16 +179,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
     """
     self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
-  
-  def _addSpectrumItem(self, strip):
-    if self not in strip.plotWidget.scene().items():
-      strip.plotWidget.scene().addItem(self)
-    ###self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??
-        
-  def _removeSpectrumItem(self, strip):
-    if self in strip.plotWidget.scene().items():
-      strip.plotWidget.scene().removeItem(self)
-
+          
   def _setupTrace(self):
     
     self.hTrace = pg.PlotDataItem()

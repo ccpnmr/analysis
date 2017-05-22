@@ -126,13 +126,13 @@ class ChemicalShiftTableModule(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(5, 0))
 
     if chemicalShiftList is not None:
-      self.select(chemicalShiftList)
+      self.selectChemicalShiftList(chemicalShiftList)
 
-  def select(self, chemicalShiftList=None):
+  def selectChemicalShiftList(self, chemicalShiftList=None):
     """
     Manually select a ChemicalShiftList from the pullDown
     """
-    self.chemicalShiftTable.select(chemicalShiftList)
+    self.chemicalShiftTable._selectChemicalShiftList(chemicalShiftList)
 
   def _getDisplays(self):
     """
@@ -235,7 +235,7 @@ class ChemicalShiftTable(ObjectTable):
     self._setNotifiers()
 
     if chemicalShiftList is not None:
-        self.select(chemicalShiftList)
+        self._selectChemicalShiftList(chemicalShiftList)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -245,16 +245,16 @@ class ChemicalShiftTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-  def select(self, chemicalShiftList=None):
+  def _selectChemicalShiftList(self, chemicalShiftList=None):
     """
     Manually select a ChemicalShiftList from the pullDown
     """
     if chemicalShiftList is None:
-      logger.debug('select: No ChemicalShiftList selected')
+      logger.warning('select: No ChemicalShiftList selected')
       raise ValueError('select: No ChemicalShiftList selected')
     else:
       if not isinstance(chemicalShiftList, ChemicalShiftList):
-        logger.debug('select: Object is not of type ChemicalShiftList')
+        logger.warning('select: Object is not of type ChemicalShiftList')
         raise TypeError('select: Object is not of type ChemicalShiftList')
       else:
         for widgetObj in self.ncWidget.textList:

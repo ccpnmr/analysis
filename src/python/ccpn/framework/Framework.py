@@ -60,8 +60,10 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT
+from ccpn.util.Logging import getLogger
 
 from PyQt4 import QtGui
+logger = getLogger()
 _DEBUG = False
 
 componentNames = ('Assignment', 'Screening', 'Structure')
@@ -584,7 +586,7 @@ class Framework:
         self.ui.mainWindow.moduleArea.restoreState(layout)
       except Exception as e:
         # for now just ignore restore failures
-        self.project._logger.warning("Layout restore failed: %s" % e)
+        logger.warning("Layout restore failed: %s" % e)
 
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
       self.ui.mainWindow.newBlankDisplay()
@@ -632,7 +634,7 @@ class Framework:
       self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
-    self.project._logger.debug('command=%s, echoBlocking=%s, undo.blocking=%s'
+    logger.debug('command=%s, echoBlocking=%s, undo.blocking=%s'
                                % (command, self._echoBlocking, undo.blocking))
 
 
@@ -642,7 +644,7 @@ class Framework:
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
-    self.project._logger.debug('echoBlocking=%s' % self._echoBlocking)
+    logger.debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
     if undo:
       undo.decreaseWaypointBlocking()
@@ -839,7 +841,7 @@ class Framework:
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')])
                   )),
       (),
-      ("Notes Table", self.showNotesEditorTable, [('shortcut', 'no')]),
+      ("Notes Table", self.showNotesEditor, [('shortcut', 'no')]),
       (),
       ("Python Console", self.toggleConsole, [('shortcut', 'py'),
                                               ('checkable', True),
@@ -1039,7 +1041,7 @@ class Framework:
   #
   #     except Exception as e:
   #       # for now just ignore restore failures
-  #       self.project._logger.warning("Layout restore failed: %s" % e)
+  #       logger.warning("Layout restore failed: %s" % e)
 
   #
   # def _openCcpnModule(self, ccpnModules, **kwargs):
@@ -1136,10 +1138,10 @@ class Framework:
       successful = self._saveProject(newPath=newProjectPath, createFallback=False)
 
       if not successful:
-        self.project._logger.warning("Saving project to %s aborted" % newProjectPath)
+        logger.warning("Saving project to %s aborted" % newProjectPath)
     else:
       successful = False
-      self.project._logger.info("Project not saved - no valid destination selected")
+      logger.info("Project not saved - no valid destination selected")
 
     self._getRecentFiles(oldPath=oldPath) # this will also update the list
     self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
@@ -1272,7 +1274,7 @@ class Framework:
       try:
         os.makedirs(directory)
       except Exception as e:
-        self.project._logger.warning('Preferences not saved: %s' % (directory, e))
+        logger.warning('Preferences not saved: %s' % (directory, e))
         return
 
     prefFile = open(prefPath, 'w+')
@@ -1341,7 +1343,7 @@ class Framework:
 
   def showSpectrumGroupsPopup(self):
     if not self.project.spectra:
-      self.project._logger.warn('Project has no Specta. Spectrum groups cannot be displayed')
+      logger.warning('Project has no Specta. Spectrum groups cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
@@ -1350,7 +1352,7 @@ class Framework:
 
   def showProjectionPopup(self):
     if not self.project.spectra:
-      self.project._logger.warn('Project has no Specta. Make Projection Popup cannot be displayed')
+      logger.warning('Project has no Specta. Make Projection Popup cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
@@ -1363,7 +1365,7 @@ class Framework:
     Displays experiment type popup.
     """
     if not self.project.spectra:
-      self.project._logger.warn('Experiment Type Selection: Project has no Specta.')
+      logger.warning('Experiment Type Selection: Project has no Specta.')
       MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
@@ -1376,7 +1378,7 @@ class Framework:
     Displays Peak Picking Popup.
     """
     if not self.project.peakLists:
-      self.project._logger.warn('Peak Picking: Project has no Specta.')
+      logger.warning('Peak Picking: Project has no Specta.')
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
@@ -1385,7 +1387,7 @@ class Framework:
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:
-      self.project._logger.warn('Project has no Peak Lists. Peak Lists cannot be copied')
+      logger.warning('Project has no Peak Lists. Peak Lists cannot be copied')
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
       return
     else:
@@ -1403,7 +1405,7 @@ class Framework:
     """
     from ccpn.ui.gui.modules.CreateSequence import CreateSequence
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
-    self.project._logger.info("application.showMoleculePopup()")
+    logger.info("application.showMoleculePopup()")
     popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
 
 
@@ -1415,7 +1417,7 @@ class Framework:
     else:
       self.showSequenceModule()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
-    self.project._logger.info("application.toggleSequenceModule()")
+    logger.info("application.toggleSequenceModule()")
 
 
   def showSequenceModule(self, position='top', relativeTo=None):
@@ -1465,26 +1467,24 @@ class Framework:
     self.__blankDisplay = value
 
 
-  def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnModule=None):
+  def showChemicalShiftTable(self
+                             , position:str='bottom'
+                             , relativeTo:CcpnModule=None
+                             , chemicalShiftList=None):
     """
     Displays Chemical Shift table.
     """
     from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
 
     mainWindow = self.ui.mainWindow
-    if not self.project.chemicalShiftLists:
-      self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
-      MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed')
-      return
-    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.chemicalShiftTable = ChemicalShiftTableModule(mainWindow=mainWindow)   # ejb, chemicalShiftLists=self.project.chemicalShiftLists)
-    mainWindow.moduleArea.addModule(self.chemicalShiftTable, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
-    self.project._logger.info("application.showChemicalShiftTable()")
-
+    self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
+    mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()\n")
+    logger.info("application.showChemicalShiftTable()")
+    return self.chemicalShiftTableModule
 
   def showNmrResidueTable(self, position='bottom', relativeTo=None, nmrChain=None):
     """Displays Nmr Residue Table"""
@@ -1494,11 +1494,11 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
-    mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
-    self.project._logger.info("application.showNmrResidueTable()")
-
+    self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
+    mainWindow.moduleArea.addModule(self.nmrResidueTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()\n")
+    logger.info("application.showNmrResidueTable()")
+    return self.nmrResidueTableModule
 
   def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
     """Displays Structure Table"""
@@ -1508,33 +1508,29 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-
-    structureTableModule = StructureTableModule(mainWindow=mainWindow
+    self.structureTableModule = StructureTableModule(mainWindow=mainWindow
                                                 , structureEnsemble=structureEnsemble)
-    mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
-    self.project._logger.info("application.showStructureTable()")
+    mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
 
+    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
+    logger.info("application.showStructureTable()")
+    return self.structureTableModule
 
-  def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
+  def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, peakList:PeakList=None):
     """
     Displays Peak table on left of main window with specified list selected.
     """
-    from ccpn.ui.gui.modules.PeakTable import PeakTable
+    from ccpn.ui.gui.modules.PeakTable import PeakTableModule
 
     mainWindow = self.ui.mainWindow
-    if not self.project.peakLists:
-      self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
-      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed')
-      return
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.peakTable = PeakTable(mainWindow)
-    mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
-    self.project._logger.info("application.showPeakTable()")
-
+    self.peakTableModule = PeakTableModule(mainWindow, peakList=peakList)
+    mainWindow.moduleArea.addModule(self.peakTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()\n")
+    logger.info("application.showPeakTable()")
+    return  self.peakTableModule
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, restraintList:PeakList=None):
     """
@@ -1542,19 +1538,16 @@ class Framework:
     """
     from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
     mainWindow = self.ui.mainWindow
-    # if not self.project.restraintLists:
-    #   self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
-    #   MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
-    #   return
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.restraintTable = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
-    mainWindow.moduleArea.addModule(self.restraintTable, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
-    self.project._logger.info("application.showRestraintTable()")
+    self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
+    mainWindow.moduleArea.addModule(self.restraintTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()\n")
+    logger.info("application.showRestraintTable()")
+    return self.restraintTableModule
 
-  def showNotesEditorTable(self, position:str='bottom', relativeTo:CcpnModule=None, note=None):
+  def showNotesEditor(self, position:str='bottom', relativeTo:CcpnModule=None, note=None):
     """
     Displays Notes Editing Table
     """
@@ -1564,10 +1557,11 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.notesTable = NotesEditorModule(mainWindow=mainWindow, note=note)
-    mainWindow.moduleArea.addModule(self.notesTable, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
-    self.project._logger.info("application.showNotesEditorTable()")
+    self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow, note=note)
+    mainWindow.moduleArea.addModule(self.notesEditorModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()\n")
+    logger.info("application.showNotesEditorTable()")
+    return self.notesEditorModule
 
   def showPrintSpectrumDisplayPopup(self):
     from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
@@ -1577,35 +1571,35 @@ class Framework:
       SelectSpectrumDisplayPopup(project=self.project).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
-  def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
+  def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None, nmrChain=None):
     """
     Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.
     """
-    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
+    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
 
     mainWindow = self.ui.mainWindow
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.sequenceGraph = SequenceGraph(mainWindow=mainWindow)
-    mainWindow.moduleArea.addModule(self.sequenceGraph, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
-    self.project._logger.info("application.showSequenceGraph()")
-    return self.sequenceGraph
+    self.sequenceGraphModule = SequenceGraphModule(mainWindow=mainWindow, nmrChain=nmrChain)
+    mainWindow.moduleArea.addModule(self.sequenceGraphModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()\n")
+    logger.info("application.showSequenceGraph()")
+    return self.sequenceGraphModule
 
-  def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
+  def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None, nmrAtom=None):
     """Displays Atom Selector."""
-    from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
+    from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelectorModule
 
     mainWindow = self.ui.mainWindow
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.atomSelector = AtomSelector(mainWindow=mainWindow)
-    mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
-    self.project._logger.info("application.showAtomSelector()")
-    return self.atomSelector
+    self.atomSelectorModule = AtomSelectorModule(mainWindow=mainWindow, nmrAtom=nmrAtom)
+    mainWindow.moduleArea.addModule(self.atomSelectorModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()\n")
+    logger.info("application.showAtomSelector()")
+    return self.atomSelectorModule
 
   def toggleToolbar(self):
     if self.current.strip is not None:
@@ -1669,7 +1663,7 @@ class Framework:
     self.editor = MacroEditor(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
-    # self.project._logger.info("application.showMacroEditor()")
+    # logger.info("application.showMacroEditor()")
 
   def newMacroFromConsole(self):
     """
@@ -1691,7 +1685,7 @@ class Framework:
     mainWindow = self.ui.mainWindow
     self.editor = MacroEditor(mainWindow=mainWindow)
 
-    l = open(self.project._logger.logPath, 'r').readlines()
+    l = open(logger.logPath, 'r').readlines()
     text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
     self.editor.textBox.setText(text)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
@@ -1704,7 +1698,7 @@ class Framework:
     self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
-    self.project._logger.info("application.startMacroRecord()")
+    logger.info("application.startMacroRecord()")
 
 
   def defineUserShortcuts(self):

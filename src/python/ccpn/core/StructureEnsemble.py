@@ -31,7 +31,9 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.util import Undo
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
+from ccpn.util.Logging import getLogger
 
+logger = getLogger()
 
 class StructureEnsemble(AbstractWrapperObject):
   """Ensemble of coordinate structures."""
@@ -167,7 +169,7 @@ def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:En
     if data is None:
       result.data = EnsembleData()
     else:
-      self._logger.warning(
+      logger.warning(
         "EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
       #FIXME:ED - crashes without the following line, is the wrapper not instantiated?
       result.data = EnsembleData()    # ejb

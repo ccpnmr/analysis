@@ -135,13 +135,13 @@ class NmrResidueTableModule(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(5, 0))
     
     if nmrChain is not None:
-      self.select(nmrChain)
+      self.selectNmrChain(nmrChain)
 
-  def select(self, nmrChain=None):
+  def selectNmrChain(self, nmrChain=None):
     """
     Manually select an NmrChain from the pullDown
     """
-    self.nmrResidueTable.select(nmrChain)
+    self.nmrResidueTable._selectNmrChain(nmrChain)
 
   def _getDisplays(self):
     """
@@ -165,7 +165,7 @@ class NmrResidueTableModule(CcpnModule):
 
     displays = self._getDisplays()
     if len(displays) == 0:
-      logger.warn('Undefined display module(s); select in settings first')
+      logger.warning('Undefined display module(s); select in settings first')
       showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
       return
 
@@ -279,7 +279,7 @@ class NmrResidueTable(ObjectTable):
     self._setNotifiers()
 
     if nmrChain is not None:
-      self.select(nmrChain)
+      self._selectNmrChain(nmrChain)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -289,16 +289,16 @@ class NmrResidueTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-  def select(self, nmrChain=None):
+  def _selectNmrChain(self, nmrChain=None):
     """
     Manually select a NmrChain from the pullDown
     """
     if nmrChain is None:
-      logger.debug('select: No NmrChain selected')
+      logger.warning('select: No NmrChain selected')
       raise ValueError('select: No NmrChain selected')
     else:
       if not isinstance(nmrChain, NmrChain):
-        logger.debug('select: Object is not of type NmrChain')
+        logger.warning('select: Object is not of type NmrChain')
         raise TypeError('select: Object is not of type NmrChain')
       else:
         for widgetObj in self.ncWidget.textList:

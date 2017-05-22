@@ -126,13 +126,13 @@ class RestraintTableModule(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self._RTwidget, table=self.restraintTable, grid=(5, 0))
 
     if restraintList is not None:
-      self.select(restraintList)
+      self.selectRestraintList(restraintList)
 
-  def select(self, restraintList=None):
+  def selectRestraintList(self, restraintList=None):
     """
     Manually select a StructureEnsemble from the pullDown
     """
-    self.restraintTable.select(restraintList)
+    self.restraintTable._selectRestraintList(restraintList)
 
   def _getDisplays(self):
     """
@@ -237,7 +237,7 @@ class RestraintTable(ObjectTable):
     self._setNotifiers()
 
     if restraintList is not None:
-      self.select(restraintList)
+      self._selectRestraintList(restraintList)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -247,7 +247,7 @@ class RestraintTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-  def select(self, restraintList=None):
+  def _selectRestraintList(self, restraintList=None):
     """
     Manually select a NmrChain from the pullDown
     """

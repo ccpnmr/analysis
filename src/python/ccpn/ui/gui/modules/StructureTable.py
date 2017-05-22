@@ -199,13 +199,13 @@ class StructureTableModule(CcpnModule):
     self.searchWidget = ObjectTableFilter(parent=self._STwidget, table=self.structureTable, grid=(5, 0))
     
     if structureEnsemble is not None:
-      self.select(structureEnsemble)
+      self.selectStructureEnsemble(structureEnsemble)
 
-  def select(self, structureEnsemble=None):
+  def selectStructureEnsemble(self, structureEnsemble=None):
     """
     Manually select a StructureEnsemble from the pullDown
     """
-    self.structureTable.select(structureEnsemble)
+    self.structureTable._selectStructureEnsemble(structureEnsemble)
 
   def _getDisplays(self) -> list:
     """
@@ -328,7 +328,7 @@ class StructureTable(ObjectTable):
     self._setNotifiers()
 
     if structureEnsemble is not None:
-      self.select(structureEnsemble)
+      self._selectStructureEnsemble(structureEnsemble)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -338,22 +338,22 @@ class StructureTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-  def select(self, structureEnsemble=None):
+  def _selectStructureEnsemble(self, structureEnsemble=None):
     """
     Manually select a StructureEnsemble from the pullDown
     """
     if structureEnsemble is None:
-      logger.debug('select: No StructureEnsemble selected')
+      logger.warning('select: No StructureEnsemble selected')
       raise ValueError('select: No StructureEnsemble selected')
     else:
       if not isinstance(structureEnsemble, StructureEnsemble):
-        logger.debug('select: Object is not of type StructureEnsemble')
+        logger.warning('select: Object is not of type StructureEnsemble')
         raise TypeError('select: Object is not of type StructureEnsemble')
       else:
         for widgetObj in self.stWidget.textList:
           if structureEnsemble.pid == widgetObj:
             self.thisObj = structureEnsemble
-            self.thisDataSet = self._getAttachedDataSet(self.thisObj)
+            self.thisDataSet = None
             self.stWidget.select(self.thisObj.pid)
 
   def displayTableForStructure(self, structureEnsemble):
@@ -386,6 +386,7 @@ class StructureTable(ObjectTable):
       self._updateDataSet(averageStructure(structureEnsemble.data))
     except:
       info = showWarning(self.thisObj.pid+' contains no Average', '')
+      logger.warning(self.thisObj.pid+' contains no Average', '')
       self.stButtons.setIndex(0)
 
     # self.stWidget.select(structureEnsemble.pid)

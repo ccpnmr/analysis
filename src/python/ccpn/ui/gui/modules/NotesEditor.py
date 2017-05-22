@@ -107,18 +107,18 @@ class NotesEditorModule(CcpnModule):
     self._setNotifiers()
 
     if note is not None:
-      self.select(note)
+      self.selectNote(note)
 
-  def select(self, note=None):
+  def selectNote(self, note=None):
     """
     Manually select a Note from the pullDown
     """
     if note is None:
-      logger.debug('select: No Note selected')
+      logger.warning('select: No Note selected')
       raise ValueError('select: No Note selected')
     else:
       if not isinstance(note, Note):
-        logger.debug('select: Object is not of type Note')
+        logger.warning('select: Object is not of type Note')
         raise TypeError('select: Object is not of type Note')
       else:
         for widgetObj in self.noWidget.textList:

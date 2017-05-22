@@ -37,11 +37,16 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Widget import Widget
 from core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Peak import Peak
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 
 UNITS = ['ppm', 'Hz', 'point']
 
 
-class PeakTable(CcpnModule):
+class PeakTableModule(CcpnModule):
   '''
   This class implements the module by wrapping a PeakListTable instance
   '''
@@ -52,7 +57,7 @@ class PeakTable(CcpnModule):
 
   className = 'PeakTable'
 
-  def __init__(self, mainWindow, name='PeakList Table'):
+  def __init__(self, mainWindow=None, name='PeakList Table', peakList=None):
 
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
@@ -70,6 +75,14 @@ class PeakTable(CcpnModule):
     self.displayColumnWidget = ColumnViewSettings(parent=self.settingsWidget, table=self.peakListTable, grid=(0, 0))
     self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
 
+    if peakList is not None:
+      self.selectPeakList(peakList)
+
+  def selectPeakList(self, peakList=None):
+    """
+    Manually select a peakList from the pullDown
+    """
+    self.peakListTable._selectPeakList(peakList)
 
   def _getDisplayColumnWidget(self):
     " CCPN-INTERNAL: used to get displayColumnWidget"
@@ -82,14 +95,14 @@ class PeakTable(CcpnModule):
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification """
     self.peakListTable.destroy()
-    super(PeakTable, self)._closeModule()
+    super(PeakTableModule, self)._closeModule()
 
 
 class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent, moduleParent, application, **kwds):
+  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
     self._project = application.project
     self._current = application.current
     self.moduleParent = moduleParent
@@ -105,8 +118,11 @@ class PeakListTableWidget(ObjectTable):
 
     ## create Pulldown for selection of peakList
     gridHPos = 0
-    self.pLwidget = PeakListPulldown(parent=self._widget, project=self._project,grid=(0, gridHPos), gridSpan=(1, 1),
-                                     minimumWidths=(0, 100),callback=self._pulldownPLcallback)
+    self.pLwidget = PeakListPulldown(parent=self._widget
+                                     , project=self._project
+                                     , grid=(0, gridHPos), gridSpan=(1, 1)
+                                     , showSelectName=True
+                                     , minimumWidths=(0, 100),callback=self._pulldownPLcallback)
 
     ## create widgets for selection of position units
     gridHPos+=1
@@ -121,8 +137,8 @@ class PeakListTableWidget(ObjectTable):
     self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak', self._peakNotifierNotifierCallback)
 
     ## populate the table if there are peaklists in the project
-    self._updateTable()
-
+    if peakList is not None:
+      self._selectPeakList(peakList)
 
   def _getTableColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
@@ -198,6 +214,23 @@ class PeakListTableWidget(ObjectTable):
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 
+  def _selectPeakList(self, peakList=None):
+    """
+    Manually select a PeakList from the pullDown
+    """
+    if peakList is None:
+      logger.warning('select: No PeakList selected')
+      raise ValueError('select: No PeakList selected')
+    else:
+      if not isinstance(peakList, PeakList):
+        logger.warning('select: Object is not of type PeakList')
+        raise TypeError('select: Object is not of type PeakList')
+      else:
+        for widgetObj in self.pLwidget.textList:
+          if peakList.pid == widgetObj:
+            self._selectedPeakList = peakList
+            self.pLwidget.select(self._selectedPeakList.pid)
+
   ##################   Widgets callbacks  ##################
 
   def _actionCallback(self, peak, *args):
@@ -207,7 +240,7 @@ class PeakListTableWidget(ObjectTable):
     if self._current.strip is not None:
       navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
     else:
-      self._project._logger.warn('Impossible to navigate to peak position. Set a current strip first')
+      logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
   def _selectionCallback(self, peaks, *args):
     """

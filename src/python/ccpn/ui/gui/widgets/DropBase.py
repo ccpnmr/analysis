@@ -37,8 +37,6 @@ import json
 from ccpn.core.lib.Pid import Pid
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 
 class DropBase:
   """
@@ -83,8 +81,8 @@ class DropBase:
     if self.acceptDrops():
 
       dataDict = self.parseEvent(event)
-      logger.debug('Accepted drop with data:%s' % dataDict)
-      print('DropBase-event>', self, 'callback:', self._dropEventCallback, 'data:', dataDict)
+      getLogger().debug('Accepted drop with data:%s' % dataDict)
+      getLogger().debug('DropBase-event>: %s callback: %s data: %s' % (self, self._dropEventCallback, dataDict))
 
       if dataDict is not None and len(dataDict) > 1:
         event.accept()
@@ -92,7 +90,7 @@ class DropBase:
           self._dropEventCallback(dataDict)
 
     else:
-      logger.debug('Widget not droppable')
+      getLogger().debug('Widget not droppable')
 
   def parseEvent(self, event):
     """ 

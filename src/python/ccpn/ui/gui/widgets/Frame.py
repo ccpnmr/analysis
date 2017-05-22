@@ -75,7 +75,6 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.ScrollArea import SCROLLBAR_POLICY_DICT
 from ccpn.ui.gui.widgets.Widget import Widget
 
 

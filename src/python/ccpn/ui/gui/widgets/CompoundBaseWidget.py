@@ -26,7 +26,6 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 
 NULL = object()
 
@@ -124,7 +123,7 @@ class CompoundBaseWidget(Frame):
       raise RuntimeError('Widget has no notifiers attribute')
     nf = getattr(self, NOTIFIERS)
     nf.append(notifier)
-    logger.debug('Added notifier %s to widget %s' % (notifier, self))
+    getLogger().debug('Added notifier %s to widget %s' % (notifier, self))
 
   def deleteNotifiers(self):
     "Delete all notifiers associated with the widget"

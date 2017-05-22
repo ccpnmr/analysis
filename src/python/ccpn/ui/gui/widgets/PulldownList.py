@@ -34,9 +34,6 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 
-from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 NULL = object()
 
 

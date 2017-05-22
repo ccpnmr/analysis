@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.ui.gui.widgets.Base import Base
+#from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox

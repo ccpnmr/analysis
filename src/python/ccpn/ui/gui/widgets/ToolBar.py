@@ -31,7 +31,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Menu import Menu
 
 from PyQt4 import QtGui, QtCore
 

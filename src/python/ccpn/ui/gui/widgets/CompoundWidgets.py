@@ -36,9 +36,6 @@ from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.util.Colour import spectrumColours
 from ccpn.core.lib.Notifiers import Notifier
 
-from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 class ListCompoundWidget(CompoundBaseWidget):
   """
   Compound class comprising a Label, a PulldownList, and a ListWidget, combined in a 

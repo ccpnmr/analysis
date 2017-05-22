@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui
 
 from ccpn.ui.gui.widgets.Entry import FloatEntry
 from ccpn.ui.gui.widgets.Label import Label
@@ -114,6 +113,7 @@ if __name__ == '__main__':
 
   import os
   import sys
+  from PyQt4 import QtGui
 
   def myCallback(ph0, ph1, pivot, direction):
     print(ph0, ph1, pivot, direction)

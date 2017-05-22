@@ -39,8 +39,6 @@ from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
-from ccpn.util.Logging import getLogger
-
 
 #TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
 # as it is only there and is just a small wrapper arount a pyqtgraph class

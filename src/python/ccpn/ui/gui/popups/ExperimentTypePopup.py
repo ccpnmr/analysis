@@ -27,7 +27,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
 
-from ccpn.ui.gui.widgets.Base import Base
+#from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList

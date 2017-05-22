@@ -27,7 +27,6 @@ from PyQt4 import QtCore, QtGui
 
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 class CcpnDock(Dock):

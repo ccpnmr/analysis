@@ -78,7 +78,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 
 # GWV: moved to ccpn.ui.gui.lib.mouseEvents on 17/04/2017
 from ccpn.ui.gui.lib.mouseEvents import \
@@ -517,7 +516,7 @@ class ViewBox(pg.ViewBox):
         peak = peaks[0]
       else:
         if event.isFinish():
-          logger.warn('Can only move one peak at a time')
+          getLogger().warn('Can only move one peak at a time')
         return
 
       startPoint = Point(event.buttonDownPos())
@@ -590,7 +589,7 @@ class ViewBox(pg.ViewBox):
           if self.current.strip.spectrumViews[0].strip != self.current.peak.peakList.spectrum.spectrumViews[0].strip:
             # self._deselectPeaks()
             self.current.clearPeaks()
-            logger.warn('Can only multi select from current strip')
+            getLogger().warn('Can only multi select from current strip')
 
   def _setView(self, point1, point2):
     ax = QtCore.QRectF(point1, point2)

@@ -41,7 +41,6 @@ from ccpn.ui.gui.widgets.Widget import Widget
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-from ccpn.core.NmrResidue import NmrResidue
 
 
 from PyQt4 import QtGui, QtCore

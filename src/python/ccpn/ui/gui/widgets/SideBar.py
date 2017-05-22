@@ -41,7 +41,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui.gui.widgets.Base import Base
 
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+#from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup

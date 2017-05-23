@@ -83,7 +83,7 @@ def convertDataToHdf5(spectrum:Spectrum, outputPath:str):
   
   dimensionCount = spectrum.dimensionCount
   if dimensionCount == 1:
-    dataset[...] = spectrum.getSliceData()
+    dataset[...] = spectrum.intensities #spectrum.getSliceData()
   else:
     pointCounts = numpy.array(pointCounts)
     (n, cumulPoints) = _cumulativeArray(pointCounts[2:])

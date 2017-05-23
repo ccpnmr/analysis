@@ -291,24 +291,24 @@ class GuiPipeline(CcpnModule):
   def _saveToJson(self):
     '''Tries to catch various error in giving the saving path '''
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
-    if os.path.exists(savingPath):
-      if not savingPath.endswith('.json'):
-        try:
-          if savingPath.endswith('/'):
-            savingPath += str(self.pipelineNameLabel.text()) + '.json'
-          else:
-            savingPath+='.json'
-        except:
-          print('Insert a valid file path. E.g ~/pipeline.json')
-      self.savingDataPath = savingPath
 
-    if os.path.exists(self.savingDataPath):
+    if not savingPath.endswith('.json'):
+      try:
+        if savingPath.endswith('/'):
+          savingPath += str(self.pipelineNameLabel.text()) + '.json'
+        else:
+          savingPath+='.json'
+      except:
+        print('Insert a valid file path. E.g ~/pipeline.json')
+    self.savingDataPath = str(savingPath)
+
+    try:
       with open(self.savingDataPath, 'w') as fp:
         json.dump(self.savingDataPath, fp, indent=2)
         fp.close()
       print('File saved in: ', self.savingDataPath)
-
-    print('File not saved. Insert a valid file path. E.g /yourPath/pipeline.json')
+    except:
+      print('File not saved. Insert a valid file path. E.g /yourPath/pipeline.json')
 
   def _createPipelineWidgets(self):
     self._addMethodPullDownWidget()

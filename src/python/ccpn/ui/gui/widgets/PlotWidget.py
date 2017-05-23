@@ -39,6 +39,8 @@ from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
+from ccpn.util.Colour import Colour
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 #TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
@@ -166,6 +168,7 @@ class PlotWidget(pg.PlotWidget):
     :return:  None
     """
     strip = self.strip
+    if strip.isDeleted: return
     if not strip._finaliseDone: return
 
     axes = strip.orderedAxes
@@ -210,6 +213,8 @@ class PlotWidget(pg.PlotWidget):
       x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
       textPosition = (x, position)
       textAnchor = 0
+    else:
+      return
 
     line = pg.InfiniteLine(angle=angle, movable=False, pen=colour)
     line.setPos(position)

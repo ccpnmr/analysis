@@ -50,7 +50,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 
 
 from ccpn.util import Ticks
-from ccpn.util.Colour import Colour
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 from ccpn.util.Logging import getLogger
@@ -656,12 +655,6 @@ def _axisRegionChanged(axis:'Axis'):
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """Notifier function for creating rulers"""
-  axisCode = apiRuler.axisCode # TBD: use label and unit
-  position = apiRuler.position
-  label = apiRuler.label
-  colour = None
-  if apiRuler.mark.colour[0] == '#':
-    colour = Colour(apiRuler.mark.colour)
   task = project._data2Obj[apiRuler.mark.guiTask]
   for strip in task.strips:
     strip.plotWidget._addRulerLine(apiRuler)

@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.ViewBox import CrossHair
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 #TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
 # as it is only there and is just a small wrapper arount a pyqtgraph class
@@ -60,6 +61,15 @@ class PlotWidget(pg.PlotWidget):
     self.setInteractive(True)
     self.plotItem.setAcceptDrops(True)
     self.plotItem.setMenuEnabled(enableMenu=True, enableViewBoxMenu=False)
+
+    self.rulerLineDict = {}  # ruler --> line for that ruler
+    self.rulerLabelDict = {}  # ruler --> label for that ruler
+
+    self.xAxisAtomLabels = []
+    self.yAxisAtomLabels = []
+
+    self.xAxisTextItem = None
+    self.yAxisTextItem = None
 
     self.hideButtons()
 
@@ -164,7 +174,115 @@ class PlotWidget(pg.PlotWidget):
     #print('>>', strip, xPos, yPos)
     self.crossHair1.setPosition(xPos, yPos)
 
+    strip.axisPositionDict[axes[0].code] = xPos
+    strip.axisPositionDict[axes[1].code] = yPos
+
     #TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum
     xPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
     yPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
     self.crossHair2.setPosition(xPos, yPos)
+
+  # NBNB TODO code uses API object. REFACTOR
+
+  def _addRulerLine(self, apiRuler:ApiRuler):
+    """CCPN internal
+       Called from GuiStrip when a ruler is created
+       This adds a line into the PlotWidget"""
+
+    axisCode = apiRuler.axisCode # TODO: use label and unit
+    position = apiRuler.position
+    label = apiRuler.label
+    if apiRuler.mark.colour[0] == '#':  # TODO: why this restriction???
+      colour = Colour(apiRuler.mark.colour)  # TODO: this is a CCPN object, does it work to set pen=colour below
+    else:
+      colour = self.foreground
+    strip = self.strip
+    axisOrder = strip.axisOrder
+
+    # TODO: is the below correct (so the correct axes)?
+    if axisCode == axisOrder[0]:
+      angle = 90
+      y = self.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
+      textPosition = (position, y)
+      textAnchor = 1
+    elif axisCode == axisOrder[1]:
+      angle = 0
+      x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
+      textPosition = (x, position)
+      textAnchor = 0
+
+    line = pg.InfiniteLine(angle=angle, movable=False, pen=colour)
+    line.setPos(position)
+    self.addItem(line, ignoreBounds=True)
+    self.rulerLineDict[apiRuler] = line
+    if label:
+      textItem = pg.TextItem(label, color=colour)
+      textItem.anchor = pg.Point(0, textAnchor)
+      textItem.setPos(*textPosition)
+      self.addItem(textItem)
+      self.xAxisAtomLabels.append(textItem)
+      self.rulerLabelDict[apiRuler] = textItem
+
+  def _removeRulerLine(self, apiRuler:ApiRuler):
+    """CCPN internal
+       Called from GuiStrip when a ruler is deleted
+       This removes a line into the PlotWidget"""
+
+    if apiRuler in self.rulerLineDict:
+      line = self.rulerLineDict.pop(apiRuler)
+      self.removeItem(line)
+    if apiRuler in self.rulerLabelDict:
+      label = self.rulerLabelDict.pop(apiRuler)
+      self.removeItem(label)
+
+
+  # TODO:WAYNE: Make this part of PlotWidget [done], pass axes label strings on init [??]
+  def _moveAxisCodeLabels(self):
+    """CCPN internal
+       Called from a notifier in GuiStrip
+       Puts axis code labels in the correct place on the PlotWidget
+    """
+    if not self.strip._finaliseDone: return
+    self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
+    self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
+    for item in self.xAxisAtomLabels:
+      y = self.plotItem.vb.mapSceneToView(self.strip.viewBox.boundingRect().bottomLeft()).y()
+      x = item.pos().x()
+      item.setPos(x, y)
+    for item in self.yAxisAtomLabels:
+      x = self.plotItem.vb.mapSceneToView(self.strip.viewBox.boundingRect().bottomLeft()).x()
+      y = item.pos().y()
+      item.setPos(x, y)
+
+  def _initTextItems(self):
+    """CCPN internal
+       Called from GuiStrip when axes are ready
+    """
+    axisOrder = self.strip.axisOrder
+    self.xAxisTextItem = AxisTextItem(self, orientation='top', axisCode=axisOrder[0])
+    self.yAxisTextItem = AxisTextItem(self, orientation='left', axisCode=axisOrder[1])
+
+
+class AxisTextItem(pg.TextItem):
+
+  def __init__(self, plotWidget, orientation, axisCode=None, units=None, mappedDim=None):
+
+    self.plotWidget = plotWidget
+    self.orientation = orientation
+    self.axisCode = axisCode
+    self.units = units
+    self.mappedDim = mappedDim
+    pg.TextItem.__init__(self, text=axisCode, color=plotWidget.gridColour)
+    if orientation == 'top':
+      self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
+      self.anchor = pg.Point(0, 1)
+    else:
+      self.setPos(plotWidget.plotItem.vb.boundingRect().topRight())
+      self.anchor = pg.Point(1, 0)
+    plotWidget.scene().addItem(self)
+
+  def _setUnits(self, units):
+    self.units = units
+
+  def _setAxisCode(self, axisCode):
+    self.axisCode = str(axisCode)

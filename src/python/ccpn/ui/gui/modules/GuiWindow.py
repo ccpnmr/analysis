@@ -261,16 +261,8 @@ class GuiWindow():
     """
     Clears all marks in all windows for the current task.
     """
-    #TODO:WAYNE: make a method in strip: clearAtomLabels() which get called here so that is no hard encoding
-    # against non-modelled attributes.
     for mark in self.task.marks[:]:
       mark.delete()
-    for spectrumDisplay in self.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
-        for atomLabel in strip.xAxisAtomLabels:
-          strip.plotWidget.removeItem(atomLabel)
-        for atomLabel in strip.yAxisAtomLabels:
-          strip.plotWidget.removeItem(atomLabel)
 
   def markPositions(self, axisCodes, chemicalShifts):
     """

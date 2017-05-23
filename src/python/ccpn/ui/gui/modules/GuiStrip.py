@@ -43,7 +43,6 @@ from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -54,7 +53,7 @@ from ccpn.util import Ticks
 from ccpn.util.Colour import Colour
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
-from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 
 class GuiStrip(Frame):
@@ -75,7 +74,7 @@ class GuiStrip(Frame):
     self.application = self.mainWindow.application
     self.current = self.application.current
 
-    Logging.getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
+    getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
                          acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                   )
@@ -136,9 +135,6 @@ class GuiStrip(Frame):
     self.plotItem = self.plotWidget.plotItem
     self.viewBox = self.plotItem.vb
 
-    self.xAxisAtomLabels = []
-    self.yAxisAtomLabels = []
-
     self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
     self._showCrossHair()
     # callbacks
@@ -153,9 +149,6 @@ class GuiStrip(Frame):
     # the widget or the position of where the cursor is
     self.axisPositionDict = {}  # axisCode --> position
 
-    self.vRulerLineDict = {}  # ruler --> vertical line for that ruler
-    self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
-    self.rulerLabelDict = {}  # ruler --> label for that ruler
     self._initRulers()
     
     self.mousePixel = None
@@ -422,26 +415,6 @@ class GuiStrip(Frame):
       if _widthsChangedEnough(stripYRange, yRange):
         strip.viewBox.setYRange(*yRange, padding=0)
 
-  #TODO:WAYNE: Make this part of PlotWidget, pass axes label strings on init (
-  def _moveAxisCodeLabels(self):
-    """
-    Puts axis code labels in the correct place on the PlotWidget
-    """
-    if not self._finaliseDone: return
-    ###self.xAxis.textItem.setPos(self.viewBox.boundingRect().bottomLeft())
-    ###self.yAxis.textItem.setPos(self.viewBox.boundingRect().topRight())
-    self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
-    self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
-    for item in self.xAxisAtomLabels:
-      y = self.plotWidget.plotItem.vb.mapSceneToView(self.viewBox.boundingRect().bottomLeft()).y()
-      x = item.pos().x()
-      item.setPos(x, y)
-    for item in self.yAxisAtomLabels:
-      x = self.plotWidget.plotItem.vb.mapSceneToView(self.viewBox.boundingRect().bottomLeft()).x()
-      y = item.pos().y()
-      item.setPos(x, y)
-    # self.textItem.setPos(self.viewBox.boundingRect().topLeft())
-
   def _toggleCrossHair(self):
     " Toggles whether crosshair is visible"
     self.plotWidget.crossHair1.toggle()
@@ -470,53 +443,22 @@ class GuiStrip(Frame):
     return axisCode #if axisCode[0].isupper() else axisCode
 
   def _createMarkAtCursorPosition(self, task):
-    # TBD: this creates a mark in all dims, is that what we want??
+    # TODO: this creates a mark in all dims, is that what we want??
 
     if not self._finaliseDone: return
 
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-    mark = task.newMark('white', positions, axisCodes)
+    task.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
 
-  #
-  #TODO:API: remove
-  def _rulerCreated(self, apiRuler):
-
-    if not self._finaliseDone: return
-
-    axisCode = apiRuler.axisCode # TBD: use label and unit
-    position = apiRuler.position
-    if apiRuler.mark.colour[0] == '#':
-      colour = Colour(apiRuler.mark.colour)
-    else:
-      colour = self.foreground
-    # TBD: is the below correct (so the correct axes)?
-    if axisCode == self.axisOrder[0]:
-      line = pg.InfiniteLine(angle=90, movable=False, pen=colour)
-      line.setPos(position)
-      self.plotWidget.addItem(line, ignoreBounds=True)
-      self.vRulerLineDict[apiRuler] = line
-
-    if axisCode == self.axisOrder[1]:
-      line = pg.InfiniteLine(angle=0, movable=False, pen=colour)
-      line.setPos(position)
-      self.plotWidget.addItem(line, ignoreBounds=True)
-      self.hRulerLineDict[apiRuler] = line
-
-  def _rulerDeleted(self, apiRuler):
-    for dd in self.vRulerLineDict, self.hRulerLineDict:
-      if apiRuler in dd:
-        line = dd[apiRuler]
-        del dd[apiRuler]
-        self.plotWidget.removeItem(line)
-            
+  # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
   def _initRulers(self):
     
     for mark in self.spectrumDisplay.mainWindow.task.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
-        self._rulerCreated(apiRuler)
+        self.plotWidget._addRulerLine(apiRuler)
 
   def _showMousePosition(self, pos:QtCore.QPointF):
     """
@@ -592,7 +534,7 @@ class GuiStrip(Frame):
       x2 = x2LineEdit.get()
       y2 = y2LineEdit.get()
       if None in (x1, y1, x2, y2):
-        Logging.getLogger().warning('Zoom: must specify region completely')
+        getLogger().warning('Zoom: must specify region completely')
         return
       self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
       zoomPopup.close()
@@ -713,7 +655,7 @@ def _axisRegionChanged(axis:'Axis'):
 # NBNB TODO code uses API object. REFACTOR
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
-  """]Notifier function for creating rulers"""
+  """Notifier function for creating rulers"""
   axisCode = apiRuler.axisCode # TBD: use label and unit
   position = apiRuler.position
   label = apiRuler.label
@@ -722,53 +664,13 @@ def _rulerCreated(project:Project, apiRuler:ApiRuler):
     colour = Colour(apiRuler.mark.colour)
   task = project._data2Obj[apiRuler.mark.guiTask]
   for strip in task.strips:
-    axisOrder = strip.axisOrder
-    # TBD: is the below correct (so the correct axes)?
-    if axisCode == axisOrder[0]:
-      if colour:
-        line = pg.InfiniteLine(angle=90, movable=False, pen=colour)
-      else:
-        line = pg.InfiniteLine(angle=90, movable=False, pen=strip.foreground)
-      line.setPos(position)
-      strip.plotWidget.addItem(line, ignoreBounds=True)
-      strip.vRulerLineDict[apiRuler] = line
-      if label:
-        textItem = pg.TextItem(label, color=colour)
-        y = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
-        textItem.anchor = pg.Point(0, 1)
-        textItem.setPos(position, y)
-        strip.plotWidget.addItem(textItem)
-        strip.xAxisAtomLabels.append(textItem)
-        strip.rulerLabelDict[apiRuler] = textItem
-
-
-    elif axisCode == axisOrder[1]:
-      if colour:
-        line = pg.InfiniteLine(angle=0, movable=False, pen=colour)
-      else:
-        line = pg.InfiniteLine(angle=0, movable=False, pen=strip.foreground)
-      line.setPos(position)
-      strip.plotWidget.addItem(line, ignoreBounds=True)
-      strip.hRulerLineDict[apiRuler] = line
-      if label:
-        textItem = pg.TextItem(label, color=colour)
-        x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
-        textItem.anchor = pg.Point(0, 0)
-        textItem.setPos(x, position)
-        strip.plotWidget.addItem(textItem)
-        strip.yAxisAtomLabels.append(textItem)
-        strip.rulerLabelDict[apiRuler] = textItem
+    strip.plotWidget._addRulerLine(apiRuler)
 
 def _rulerDeleted(project:Project, apiRuler:ApiRuler):
+  """Notifier function for deleting rulers"""
   task = project._data2Obj[apiRuler.mark.guiTask]
   for strip in task.strips:
-    for dd in strip.vRulerLineDict, strip.hRulerLineDict:
-      if apiRuler in dd:
-        line = dd.pop(apiRuler)
-        strip.plotWidget.removeItem(line)
-      if apiRuler in strip.rulerLabelDict:
-        label = strip.rulerLabelDict.pop(apiRuler)
-        strip.plotWidget.removeItem(label)
+    strip.plotWidget._removeRulerLine(apiRuler)
 
 # Add notifier functions to Project
 
@@ -782,37 +684,11 @@ def _setupGuiStrip(project:Project, apiStrip):
   if not strip._finaliseDone: return
 
   orderedAxes = strip.orderedAxes
-  axisOrder = strip.axisOrder
   padding = strip.application.preferences.general.stripRegionPadding
 
   strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
-  strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top', axisCode=axisOrder[0])
-  strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left', axisCode=axisOrder[1])
-  strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
+  strip.plotWidget._initTextItems()
+  strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
 
-
-class AxisTextItem(pg.TextItem):
-
-  def __init__(self, plotWidget, orientation, axisCode=None, units=None, mappedDim=None):
-
-    self.plotWidget = plotWidget
-    self.orientation = orientation
-    self.axisCode = axisCode
-    self.units = units
-    self.mappedDim = mappedDim
-    pg.TextItem.__init__(self, text=axisCode, color=plotWidget.gridColour)
-    if orientation == 'top':
-      self.setPos(plotWidget.plotItem.vb.boundingRect().bottomLeft())
-      self.anchor = pg.Point(0, 1)
-    else:
-      self.setPos(plotWidget.plotItem.vb.boundingRect().topRight())
-      self.anchor = pg.Point(1, 0)
-    plotWidget.scene().addItem(self)
-
-  def _setUnits(self, units):
-    self.units = units
-
-  def _setAxisCode(self, axisCode):
-    self.axisCode = str(axisCode)

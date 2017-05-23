@@ -498,12 +498,6 @@ class Framework:
       # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
       #   strip.setZWidgets()
 
-    # Initialise Rulers
-    for task in project.tasks:
-      for apiMark in task._wrappedData.sortedMarks():
-        for apiRuler in apiMark.sortedRulers():
-          GuiStrip._rulerCreated(project, apiRuler)
-
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
       for strip in spectrumDisplay.strips:

@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
-
+DropHereLabel = 'Drop here SP or SG'
 # styleSheets
 transparentStyle = "background-color: transparent; border: 0px solid transparent"
 selectMethodLabel = '< Select Method >'
@@ -322,11 +322,15 @@ class GuiPipeline(CcpnModule):
     self.setMethodPullDownData()
     self.methodPulldown.installEventFilter(self)
 
+
+
   def setMethodPullDownData(self):
     self.methodPulldownData = [k for k in sorted(self.pipelineMethods.keys())]
     self.methodPulldownData.insert(0, selectMethodLabel)
     self.methodPulldown.setData(self.methodPulldownData)
     self.methodPulldown.activated[str].connect(self._selectMethod)
+    print(self.methodPulldown.objects)
+    self.methodPulldown.insertSeparator(2)
 
   def eventFilter(self, source, event):
     '''Filter to disable the wheel event in the methods pulldown. Otherwise each scroll would add a box!'''
@@ -441,7 +445,14 @@ class GuiPipeline(CcpnModule):
     self.inputDataList = ListWidget(self)
     self.inputDataList.setAcceptDrops(True)
     # self.inputDataList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+    color = QtGui.QColor('Red')
+    header = QtGui.QListWidgetItem(DropHereLabel)
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(color)
+    self.inputDataList.addItem(header)
+
     self.settingsWidgets.append(self.inputDataList)
+    self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
 
     #
     self.autoLabel = Label(self, 'Auto Run')
@@ -481,6 +492,10 @@ class GuiPipeline(CcpnModule):
                                                 direction='H', hAlign='c')
     self.settingsWidgets.append(self.applyCancelsettingButtons)
 
+  def _itemsDropped(self):
+    if len(self.inputDataList.getTexts())==1:
+      if DropHereLabel in self.inputDataList.getTexts():
+        self.inputDataList.clear()
 
   def settingsPipelineWidgets(self):
     if self.settingFrame.isHidden():
@@ -567,12 +582,13 @@ class GuiPipeline(CcpnModule):
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
-        if isinstance(obj, Spectrum):
-          self._inputData.update([obj])
-        elif isinstance(obj, SpectrumGroup):
-          self._inputData.update(obj.spectra)
-        else:
-          print(obj, 'Not available.')
+        if object is not None:
+          if isinstance(obj, Spectrum):
+            self._inputData.update([obj])
+          elif isinstance(obj, SpectrumGroup):
+            self._inputData.update(obj.spectra)
+          else:
+            print(obj, 'Not available.')
 
 
     # self.interactor.sources = [s.text() for s in self.inputDataList.selectedItems()]

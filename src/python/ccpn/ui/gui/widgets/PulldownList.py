@@ -235,10 +235,14 @@ class PulldownList(QtGui.QComboBox, Base):
         self.callback(self.texts[index])
 
 
+
+
+
+
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
   
   app = TestApplication()
 
@@ -252,7 +256,7 @@ if __name__ == '__main__':
   def callback2(object):
     print('callback2', object)
 
-  popup = BasePopup(title='Test PulldownList')
+  popup = CcpnDialog(windowTitle='Test PulldownList', setLayout=True)
   #popup.setSize(250,50)
   policyDict = dict(
     vAlign='top',
@@ -270,8 +274,13 @@ if __name__ == '__main__':
   pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
                               objects=objects, callback=callback, grid=(0,0), **policyDict
                               )
+  pulldownList.insertSeparator(2)
   pulldownList.clearEditText()
 
 
+  popup.show()
+  popup.raise_()
   app.start()
+
+
 

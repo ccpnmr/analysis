@@ -208,11 +208,13 @@ class PlotWidget(pg.PlotWidget):
       y = self.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
       textPosition = (position, y)
       textAnchor = 1
+      labels = self.xAxisAtomLabels
     elif axisCode == axisOrder[1]:
       angle = 0
       x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
       textPosition = (x, position)
       textAnchor = 0
+      labels = self.yAxisAtomLabels
     else:
       return
 
@@ -225,7 +227,7 @@ class PlotWidget(pg.PlotWidget):
       textItem.anchor = pg.Point(0, textAnchor)
       textItem.setPos(*textPosition)
       self.addItem(textItem)
-      self.xAxisAtomLabels.append(textItem)
+      labels.append(textItem)
       self.rulerLabelDict[apiRuler] = textItem
 
   def _removeRulerLine(self, apiRuler:ApiRuler):

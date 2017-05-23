@@ -177,9 +177,12 @@ class ListWidget(QtGui.QListWidget, Base):
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
       items = []
-      event.setDropAction(QtCore.Qt.CopyAction)   # ejb - changed from Move
-      self.emit(QtCore.SIGNAL("dropped"), items)
-      super(ListWidget, self).dropEvent(event)
+      if event.source() != self: #otherwise duplicates
+        event.setDropAction(QtCore.Qt.CopyAction)   # ejb - changed from Move
+        self.emit(QtCore.SIGNAL("dropped"), items)
+        super(ListWidget, self).dropEvent(event)
+      else:
+        event.ignore()
 
 
 if __name__ == '__main__':

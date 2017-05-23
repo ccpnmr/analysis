@@ -438,7 +438,7 @@ class GuiPipeline(CcpnModule):
 
     self.inputDataLabel = Label(self, 'Input Data')
     self.settingsWidgets.append(self.inputDataLabel)
-    self.inputDataList = ListWidget(self, )
+    self.inputDataList = ListWidget(self)
     self.inputDataList.setAcceptDrops(True)
     # self.inputDataList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     self.settingsWidgets.append(self.inputDataList)

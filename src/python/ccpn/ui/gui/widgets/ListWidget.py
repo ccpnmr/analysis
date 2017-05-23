@@ -91,6 +91,7 @@ class ListWidget(QtGui.QListWidget, Base):
   def getObjects(self):
      return list(self.objects)
 
+
   def getSelectedObjects(self):
     indexes =  self.selectedIndexes()
     objects = []
@@ -141,12 +142,17 @@ class ListWidget(QtGui.QListWidget, Base):
       menu.exec()
 
   def getContextMenu(self):
+    # FIXME this context menu must be more generic and editable
     contextMenu = Menu('', self, isFloatWidget=True)
     if self.rightMouseCallback is None:
       contextMenu.addItem("Delete", callback=self.removeItem)
+      contextMenu.addItem("Delete All", callback=self._deleteAll)
     else:
       contextMenu.addItem("Delete", callback=self.contextCallback)
     return contextMenu
+
+  def _deleteAll(self):
+    self.clear()
 
   def dragEnterEvent(self, event):
     if event.mimeData().hasUrls():

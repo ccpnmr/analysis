@@ -324,7 +324,7 @@ class NmrResidueTable(ObjectTable):
       self.clearTable()
 
       # nmrChain = data['theObject']
-      # # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
+    logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
       # if nmrChain is not None:
       #   self._update(nmrChain)
 
@@ -356,7 +356,7 @@ class NmrResidueTable(ObjectTable):
     Notifier Callback for selecting NmrChain
     """
     self.nmrChain = self._project.getByPid(item)
-    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self.nmrChain)
     if self.nmrChain is not None:
       self.displayTableForNmrChain(self.nmrChain)
     else:

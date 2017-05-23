@@ -315,7 +315,7 @@ class RestraintTable(ObjectTable):
     Notifier Callback for selecting restraint from the pull down menu
     """
     self.restraintList = self._project.getByPid(item)
-    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self.restraintList)
     if self.restraintList is not None:
       # self.thisDataSet = self._getAttachedDataSet(item)
       self.displayTableForRestraint(self.restraintList)

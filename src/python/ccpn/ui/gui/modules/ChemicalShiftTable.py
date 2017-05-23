@@ -319,7 +319,7 @@ class ChemicalShiftTable(ObjectTable):
     Notifier Callback for selecting ChemicalShiftList from the pull down menu
     """
     self.chemicalShiftList = self._project.getByPid(item)
-    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self.chemicalShiftList)
     if self.chemicalShiftList is not None:
       self.displayTableForChemicalShift(self.chemicalShiftList)
     else:

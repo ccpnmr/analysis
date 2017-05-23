@@ -508,7 +508,7 @@ class StructureTable(ObjectTable):
     """
     self.stButtons.setIndex(0)
     self.thisObj = self._project.getByPid(item)
-    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
     if self.thisObj is not None:
       # self._getAttachedDataSet(self.thisObj)        # no DataSets yet
       self.displayTableForStructure(self.thisObj)
@@ -520,7 +520,7 @@ class StructureTable(ObjectTable):
     Notifier Callback for selecting Structure Ensemble or Average
     """
     item = self.stButtons.get()
-    # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
     if self.thisObj is not None:
       if item is 'Ensemble':
         self.displayTableForStructure(self.thisObj)
@@ -534,10 +534,10 @@ class StructureTable(ObjectTable):
     Notifier Callback for updating the table
     """
     thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the object
-    # print('>updateCallback>', data['notifier'], nmrChain, data['trigger'], data['object'], self._updateSilence)
+    logger.debug('>updateCallback>', data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence)
     if self.thisObj in thisEnsembleList:
       item = self.stButtons.get()
-      # print('>selectionPulldownCallback>', item, type(item), nmrChain)
+      logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
       if item is 'Ensemble':
         self.displayTableForStructure(self.thisObj)
       elif item is 'Average':

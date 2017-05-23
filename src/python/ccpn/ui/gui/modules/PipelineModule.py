@@ -562,6 +562,9 @@ class GuiPipeline(CcpnModule):
 
     dataTexts = self.inputDataList.getTexts()
     if self.project is not None:
+      if len(dataTexts) == 0:
+        self._inputData.clear()
+        return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
         if isinstance(obj, Spectrum):
@@ -570,7 +573,7 @@ class GuiPipeline(CcpnModule):
           self._inputData.update(obj.spectra)
         else:
           print(obj, 'Not available.')
-      print(self._inputData)
+
 
     # self.interactor.sources = [s.text() for s in self.inputDataList.selectedItems()]
 

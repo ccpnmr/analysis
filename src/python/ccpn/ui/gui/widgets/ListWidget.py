@@ -171,7 +171,7 @@ class ListWidget(QtGui.QListWidget, Base):
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
       items = []
-      event.setDropAction(QtCore.Qt.MoveAction)
+      event.setDropAction(QtCore.Qt.CopyAction)   # ejb - changed from Move
       self.emit(QtCore.SIGNAL("dropped"), items)
       super(ListWidget, self).dropEvent(event)
 

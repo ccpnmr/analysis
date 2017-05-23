@@ -522,6 +522,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           itemData = json.dumps({'pids':[text]})
           event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
+          event.mimeData().setData('copy/move', 'Okay')
 
 
   def _dragMoveEvent(self, event:QtGui.QMouseEvent):

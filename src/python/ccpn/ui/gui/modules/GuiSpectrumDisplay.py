@@ -324,6 +324,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # self.module.close()
     #self.delete()
     CcpnModule._closeModule(self)
+    self.delete()
 
   def removeStrip(self, strip):
     "Remove strip if it belongs to self"

@@ -166,6 +166,11 @@ class GuiPipeline(CcpnModule):
         applicationsSpecific = method.applicationsSpecific(method)
         if applicationName in applicationsSpecific:
           filteredMethod.append(method.methodName(method))
+      elif hasattr(method, 'preferredMethod'):
+        if method.preferredMethod:
+          print(method)
+          filteredMethod.append(method)
+
     self.methodPulldown.setData(sorted(filteredMethod))
 
   def keyPressEvent(self, KeyEvent):
@@ -387,7 +392,7 @@ class GuiPipeline(CcpnModule):
     objMethod = self.pipelineMethods[selected]
     position = self.pipelineSettingsParams['addPosit']
 
-    self.pipelineWidget = objMethod(parent=self, application=None, name=name, params=None, project=self.project)
+    self.pipelineWidget = objMethod(parent=self, application=self.application, name=name, params=None, project=self.project)
 
     self.pipelineArea.addDock(self.pipelineWidget, position=position)
     autoActive = self.pipelineSettingsParams['autoActive']

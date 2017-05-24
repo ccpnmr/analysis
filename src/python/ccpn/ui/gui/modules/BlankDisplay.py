@@ -75,7 +75,7 @@ class BlankDisplay(CcpnModule):
     success = False # denote if we got a valid spectrum and should delete BlankDisplay
     # process urls
     for url in data.get('urls',[]):
-      print('BlankDisplay._processDroppedItems>>> dropped:', url)
+      getLogger().debug('dropped: %s' % url)
       objects = self.project.loadData(url)
 
       if objects is not None and len(objects) > 0:
@@ -89,7 +89,7 @@ class BlankDisplay(CcpnModule):
                                                            # the same method used to process the pids
     # process pids
     for ii, pid in enumerate(data.get('pids',[])):
-      print('BlankDisplay._processDroppedItems>>> dropped:', pid)
+      getLogger().debug('dropped: %s' % pid)
       success = success or self._handlePid(pid)
 
     if success:

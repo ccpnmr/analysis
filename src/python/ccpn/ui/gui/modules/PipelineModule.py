@@ -277,6 +277,7 @@ class GuiPipeline(CcpnModule):
 
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [boxes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
+    print('Saving')
     currentBoxesNames = list(self.pipelineArea.findAll()[1].keys())
     if len(currentBoxesNames)>0:
       self.jsonData = []
@@ -304,7 +305,7 @@ class GuiPipeline(CcpnModule):
 
     try:
       with open(self.savingDataPath, 'w') as fp:
-        json.dump(self.savingDataPath, fp, indent=2)
+        json.dump(self.jsonData, fp, indent=2)
         fp.close()
       print('File saved in: ', self.savingDataPath)
     except:

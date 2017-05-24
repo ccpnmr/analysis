@@ -241,8 +241,8 @@ class SideBar(QtGui.QTreeWidget, Base):
     for url in data.get('urls',[]):
       print('SideBar._processDroppedItems>>> dropped:', url)
       objects = self.project.loadData(url)
-      if objects is None or len(objects) == 0:
-        showWarning('Invalid File', 'Cannot handle "%s"' % url)
+      # if objects is None or len(objects) == 0:
+      #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
 
   def setProject(self, project:Project):
     """

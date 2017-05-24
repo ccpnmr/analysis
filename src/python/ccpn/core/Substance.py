@@ -4,17 +4,16 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
+__dateModified__ = "$dateModified: 2017-05-24 16:28:34 +0100 (Wed, May 24, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -56,7 +55,7 @@ class Substance(AbstractWrapperObject):
   The most common case (by far) is substanceType 'Molecule', which corresponds to a chemical entity,
   such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,
   and other molecular attributes as appropriate. Such a Substance may be associated with one
-  or more Chains, and cna be used as a starting point to generate new Chains, using the
+  or more Chains, and can be used as a starting point to generate new Chains, using the
   Project.createPolymerSubstance() function.
 
   ADVANCED: It is also possible to create Substances with substanceType 'Material' or 'Cell'.
@@ -604,7 +603,7 @@ class Substance(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newSubstance(self:Project, name:str, labelling:str=None, substanceType:str='Molecule',
+def _newSubstance(self:Project, name:str=None, labelling:str=None, substanceType:str='Molecule',
                   userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
                   empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
                   synonyms:typing.Sequence[str]=(), atomCount:int=0, bondCount:int=0,
@@ -632,10 +631,30 @@ def _newSubstance(self:Project, name:str, labelling:str=None, substanceType:str=
     )
   )
 
-  for ss in (name, labelling):
-    if ss and Pid.altCharacter in ss:
-      raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+  # for ss in (name, labelling):
+  #   if ss and Pid.altCharacter in ss:
+  #     raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
+  #                      (Pid.altCharacter, name, labelling))
+  #
+  if not isinstance(name, str):
+    raise TypeError("ccpn.Substance name must be a string")     # ejb
+  elif not name:
+    raise ValueError("ccpn.Substance name must be set")         # ejb
+  elif Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
+           (Pid.altCharacter, name, labelling))
+
+  if labelling is not None:        # 'None' caught by below as default
+    if not isinstance(labelling, str):
+      raise TypeError("ccpn.Substance 'labelling' name must be a string")   # ejb
+    elif not labelling:
+      raise ValueError("ccpn.Substance 'labelling' name must be set")       # ejb
+    elif Pid.altCharacter in labelling:
+      raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                        (Pid.altCharacter, name, labelling))
+  #
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   apiNmrProject = self._wrappedData
   apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore

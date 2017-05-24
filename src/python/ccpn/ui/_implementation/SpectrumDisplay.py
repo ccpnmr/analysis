@@ -6,17 +6,16 @@
 #=========================================================================================
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:02 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-05-24 16:28:34 +0100 (Wed, May 24, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -41,6 +40,10 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
+logger = getLogger()
 
 class SpectrumDisplay(AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
@@ -404,7 +407,9 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
     dimensionOrdering.append(0)
 
   if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
-    print( "Display of sampled dimension spectra is not implemented yet")
+    # logger.warning( "Display of sampled dimension spectra is not implemented yet")
+    # showWarning("createSpectrumDisplay", "Display of sampled dimension spectra is not implemented yet")
+    # return
     raise NotImplementedError(
       "Display of sampled dimension spectra is not implemented yet")
     # # NBNB TBD FIXME

@@ -255,7 +255,7 @@ def _newSampleComponent(self:Sample, name:str=None, labelling:str=None, role:str
     elif not labelling:
       raise ValueError("ccpn.SampleComponent 'labelling' name must be set")       # ejb
     elif Pid.altCharacter in labelling:
-      raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+      raise ValueError("Character %s not allowed in ccpn.SampleComponent labelling, id: %s.%s" %
                        (Pid.altCharacter, name, labelling))
   #
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb

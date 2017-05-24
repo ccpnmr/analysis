@@ -10,7 +10,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
 __dateModified__ = "$dateModified: 2017-04-11 15:24:25 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
@@ -817,7 +817,7 @@ class Framework:
       (),
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
-      ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
+      # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
@@ -1493,22 +1493,22 @@ class Framework:
     getLogger().info("application.showNmrResidueTable()")
     return self.nmrResidueTableModule
 
-  def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
-    """Displays Structure Table"""
-    from ccpn.ui.gui.modules.StructureTable import StructureTableModule
-
-    mainWindow = self.ui.mainWindow
-    #FIXME:ED - sometimes crashes
-    if not relativeTo:
-      relativeTo = mainWindow.moduleArea      # ejb
-    self.structureTableModule = StructureTableModule(mainWindow=mainWindow
-                                                , structureEnsemble=structureEnsemble)
-    mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
-
-    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
-    getLogger().info("application.showStructureTable()")
-    return self.structureTableModule
-
+  # def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
+  #   """Displays Structure Table"""
+  #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+  #
+  #   mainWindow = self.ui.mainWindow
+  #   #FIXME:ED - sometimes crashes
+  #   if not relativeTo:
+  #     relativeTo = mainWindow.moduleArea      # ejb
+  #   self.structureTableModule = StructureTableModule(mainWindow=mainWindow
+  #                                               , structureEnsemble=structureEnsemble)
+  #   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
+  #
+  #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
+  #   logger.info("application.showStructureTable()")
+  #   return self.structureTableModule
+  #
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, peakList:PeakList=None):
     """
     Displays Peak table on left of main window with specified list selected.

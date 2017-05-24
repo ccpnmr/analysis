@@ -40,7 +40,6 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
-from ccpn.core.lib.Pid import Pid
 
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -63,7 +62,7 @@ from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Logging import getLogger
 
 from PyQt4 import QtGui
-logger = getLogger()
+
 _DEBUG = False
 
 componentNames = ('Assignment', 'Screening', 'Structure')
@@ -384,7 +383,7 @@ class Framework:
       ui = Gui(self)
       ui.qtApp._ccpnApplication = self
       # ui.mainWindow is None upon initialization: gets filled later
-      print('frameWork._getUI>>>', self, ui, ui.mainWindow)
+      getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
     else:
       from ccpn.ui.Ui import NoUi
       ui = NoUi(self)
@@ -580,7 +579,7 @@ class Framework:
         self.ui.mainWindow.moduleArea.restoreState(layout)
       except Exception as e:
         # for now just ignore restore failures
-        logger.warning("Layout restore failed: %s" % e)
+        getLogger().warning("Layout restore failed: %s" % e)
 
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
       self.ui.mainWindow.newBlankDisplay()
@@ -628,7 +627,7 @@ class Framework:
       self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
-    logger.debug('command=%s, echoBlocking=%s, undo.blocking=%s'
+    getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
                                % (command, self._echoBlocking, undo.blocking))
 
 
@@ -638,7 +637,7 @@ class Framework:
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
 
-    logger.debug('echoBlocking=%s' % self._echoBlocking)
+    getLogger().debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
     if undo:
       undo.decreaseWaypointBlocking()
@@ -1035,7 +1034,7 @@ class Framework:
   #
   #     except Exception as e:
   #       # for now just ignore restore failures
-  #       logger.warning("Layout restore failed: %s" % e)
+  #       getLogger().warning("Layout restore failed: %s" % e)
 
   #
   # def _openCcpnModule(self, ccpnModules, **kwargs):
@@ -1132,10 +1131,10 @@ class Framework:
       successful = self._saveProject(newPath=newProjectPath, createFallback=False)
 
       if not successful:
-        logger.warning("Saving project to %s aborted" % newProjectPath)
+        getLogger().warning("Saving project to %s aborted" % newProjectPath)
     else:
       successful = False
-      logger.info("Project not saved - no valid destination selected")
+      getLogger().info("Project not saved - no valid destination selected")
 
     self._getRecentFiles(oldPath=oldPath) # this will also update the list
     self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
@@ -1268,7 +1267,7 @@ class Framework:
       try:
         os.makedirs(directory)
       except Exception as e:
-        logger.warning('Preferences not saved: %s' % (directory, e))
+        getLogger().warning('Preferences not saved: %s' % (directory, e))
         return
 
     prefFile = open(prefPath, 'w+')
@@ -1337,7 +1336,7 @@ class Framework:
 
   def showSpectrumGroupsPopup(self):
     if not self.project.spectra:
-      logger.warning('Project has no Specta. Spectrum groups cannot be displayed')
+      getLogger().warning('Project has no Specta. Spectrum groups cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
@@ -1346,7 +1345,7 @@ class Framework:
 
   def showProjectionPopup(self):
     if not self.project.spectra:
-      logger.warning('Project has no Specta. Make Projection Popup cannot be displayed')
+      getLogger().warning('Project has no Specta. Make Projection Popup cannot be displayed')
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
@@ -1359,7 +1358,7 @@ class Framework:
     Displays experiment type popup.
     """
     if not self.project.spectra:
-      logger.warning('Experiment Type Selection: Project has no Specta.')
+      getLogger().warning('Experiment Type Selection: Project has no Specta.')
       MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
@@ -1372,7 +1371,7 @@ class Framework:
     Displays Peak Picking Popup.
     """
     if not self.project.peakLists:
-      logger.warning('Peak Picking: Project has no Specta.')
+      getLogger().warning('Peak Picking: Project has no Specta.')
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
@@ -1381,7 +1380,7 @@ class Framework:
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:
-      logger.warning('Project has no Peak Lists. Peak Lists cannot be copied')
+      getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
       return
     else:
@@ -1399,7 +1398,7 @@ class Framework:
     """
     from ccpn.ui.gui.modules.CreateSequence import CreateSequence
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
-    logger.info("application.showMoleculePopup()")
+    getLogger().info("application.showMoleculePopup()")
     popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
 
 
@@ -1411,7 +1410,7 @@ class Framework:
     else:
       self.showSequenceModule()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
-    logger.info("application.toggleSequenceModule()")
+    getLogger().info("application.toggleSequenceModule()")
 
 
   def showSequenceModule(self, position='top', relativeTo=None):
@@ -1477,7 +1476,7 @@ class Framework:
     self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
     mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()\n")
-    logger.info("application.showChemicalShiftTable()")
+    getLogger().info("application.showChemicalShiftTable()")
     return self.chemicalShiftTableModule
 
   def showNmrResidueTable(self, position='bottom', relativeTo=None, nmrChain=None):
@@ -1491,7 +1490,7 @@ class Framework:
     self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
     mainWindow.moduleArea.addModule(self.nmrResidueTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()\n")
-    logger.info("application.showNmrResidueTable()")
+    getLogger().info("application.showNmrResidueTable()")
     return self.nmrResidueTableModule
 
   def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
@@ -1507,7 +1506,7 @@ class Framework:
     mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
 
     mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
-    logger.info("application.showStructureTable()")
+    getLogger().info("application.showStructureTable()")
     return self.structureTableModule
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, peakList:PeakList=None):
@@ -1523,7 +1522,7 @@ class Framework:
     self.peakTableModule = PeakTableModule(mainWindow, peakList=peakList)
     mainWindow.moduleArea.addModule(self.peakTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()\n")
-    logger.info("application.showPeakTable()")
+    getLogger().info("application.showPeakTable()")
     return  self.peakTableModule
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, restraintList:PeakList=None):
@@ -1538,7 +1537,7 @@ class Framework:
     self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
     mainWindow.moduleArea.addModule(self.restraintTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()\n")
-    logger.info("application.showRestraintTable()")
+    getLogger().info("application.showRestraintTable()")
     return self.restraintTableModule
 
   def showNotesEditor(self, position:str='bottom', relativeTo:CcpnModule=None, note=None):
@@ -1554,7 +1553,7 @@ class Framework:
     self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow, note=note)
     mainWindow.moduleArea.addModule(self.notesEditorModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()\n")
-    logger.info("application.showNotesEditorTable()")
+    getLogger().info("application.showNotesEditorTable()")
     return self.notesEditorModule
 
   def showPrintSpectrumDisplayPopup(self):
@@ -1578,7 +1577,7 @@ class Framework:
     self.sequenceGraphModule = SequenceGraphModule(mainWindow=mainWindow, nmrChain=nmrChain)
     mainWindow.moduleArea.addModule(self.sequenceGraphModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()\n")
-    logger.info("application.showSequenceGraph()")
+    getLogger().info("application.showSequenceGraph()")
     return self.sequenceGraphModule
 
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None, nmrAtom=None):
@@ -1592,7 +1591,7 @@ class Framework:
     self.atomSelectorModule = AtomSelectorModule(mainWindow=mainWindow, nmrAtom=nmrAtom)
     mainWindow.moduleArea.addModule(self.atomSelectorModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()\n")
-    logger.info("application.showAtomSelector()")
+    getLogger().info("application.showAtomSelector()")
     return self.atomSelectorModule
 
   def toggleToolbar(self):
@@ -1657,7 +1656,7 @@ class Framework:
     self.editor = MacroEditor(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
-    # logger.info("application.showMacroEditor()")
+    # getLogger().info("application.showMacroEditor()")
 
   def newMacroFromConsole(self):
     """
@@ -1679,7 +1678,7 @@ class Framework:
     mainWindow = self.ui.mainWindow
     self.editor = MacroEditor(mainWindow=mainWindow)
 
-    l = open(logger.logPath, 'r').readlines()
+    l = open(getLogger().logPath, 'r').readlines()
     text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
     self.editor.textBox.setText(text)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
@@ -1692,7 +1691,7 @@ class Framework:
     self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
-    logger.info("application.startMacroRecord()")
+    getLogger().info("application.startMacroRecord()")
 
 
   def defineUserShortcuts(self):

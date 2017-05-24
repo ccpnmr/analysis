@@ -2,17 +2,16 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:01 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-05-24 16:28:34 +0100 (Wed, May 24, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -32,13 +31,24 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 class TestSubstanceCreation(WrapperTesting):
 
 
-  def test_newSubstanceWithoutName(self):
-    self.assertRaises(TypeError, self.project.newSubstance)
+  def test_newSubstance_WithoutName(self):
+    """
+    Test that creating a new Substance with no parameter raises TypeError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+      self.project.newSubstance()
 
-  def test_newSubstanceEmptyName(self):
-    self.assertRaises(ApiError, self.project.newSubstance, '')
+  def test_newSubstance_EmptyName(self):
+    """
+    Test that creating a new Substance with '' raises ValueError.
+    """
+    with self.assertRaisesRegexp(ValueError, 'name must be set'):
+     self.project.newSubstance('')
 
-  def test_newSubstance(self):
+  def test_newSubstance_name(self):
+    """
+    Test that creating a new Substance with name 'test substance' creates a valid Substance.
+    """
     s = self.project.newSubstance('test substance')
 
     self.assertEqual(len(self.project.substances), 1)

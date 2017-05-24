@@ -7,24 +7,23 @@
 from ccpn.util.Path import joinPath
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:34 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-05-24 16:28:34 +0100 (Wed, May 24, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
 
+__author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -126,3 +125,34 @@ def commandParameterString(*params, values:dict=None, defaults:dict=None):
         ll.append('%s=%s' % (tag, repr(val)))
   #
   return ', '.join(ll)
+
+def callList(fn):
+  """
+  Wrapper to give the call stack for then current function
+  Add callList=None, callStr=None to the parameter list for the function
+  """
+  def inner(*args, **kwargs):
+    import inspect
+    stack = inspect.stack()
+    minStack = len(stack)     # min(stack_size, len(stack))
+    modules = [(index, inspect.getmodule(stack[index][0]))
+               for index in range(1, minStack)]
+    callers = [(0, fn.__module__, fn.__name__)]
+    for index, module in modules:
+      try:
+        name = module.__name__
+      except:
+        name = '<NOT_FOUND>'
+      callers.append((index, name, stack[index][3]))
+
+    s = '{index:>5} : {module:^%i} : {name}' % 20
+    printStr = []
+    for i in range(0, len(callers)):
+      printStr.append(s.format(index=callers[i][0], module=callers[i][1], name=callers[i][2]))
+
+    kwargs['callList'] = callers
+    kwargs['callStr'] = '\n'.join(printStr)
+
+    fn(*args, **kwargs)
+
+  return inner

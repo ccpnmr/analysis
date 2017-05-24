@@ -37,10 +37,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
-logger = getLogger()
-
 
 
 class BlankDisplay(CcpnModule):
@@ -97,7 +94,7 @@ class BlankDisplay(CcpnModule):
 
     if success:
       self.mainWindow.deleteBlankDisplay()
-      logger.info('application.deleteBlankDisplay()')
+      getLogger().info('application.deleteBlankDisplay()')
 
   def _handlePid(self, pid):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
@@ -118,8 +115,8 @@ class BlankDisplay(CcpnModule):
     self.mainWindow.pythonConsole.writeConsoleCommand(
       "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
     self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
-    logger.info('spectrum = project.getByPid(%r)' % spectrum.id)
-    logger.info('application.createSpectrumDisplay(spectrum)')
+    getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+    getLogger().info('application.createSpectrumDisplay(spectrum)')
 
   def _handleSpectrumGroup(self, spectrumGroup):
     '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
@@ -140,6 +137,6 @@ class BlankDisplay(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule.
     """
-    logger.info('Shortcut "ND" to open a new blank display')
+    getLogger().info('Shortcut "ND" to open a new blank display')
     CcpnModule._closeModule(self)
 

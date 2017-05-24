@@ -55,7 +55,7 @@ class Substance(AbstractWrapperObject):
   The most common case (by far) is substanceType 'Molecule', which corresponds to a chemical entity,
   such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,
   and other molecular attributes as appropriate. Such a Substance may be associated with one
-  or more Chains, and cna be used as a starting point to generate new Chains, using the
+  or more Chains, and can be used as a starting point to generate new Chains, using the
   Project.createPolymerSubstance() function.
 
   ADVANCED: It is also possible to create Substances with substanceType 'Material' or 'Cell'.
@@ -638,20 +638,20 @@ def _newSubstance(self:Project, name:str=None, labelling:str=None, substanceType
   #                      (Pid.altCharacter, name, labelling))
   #
   if not isinstance(name, str):
-    raise TypeError("ccpn.SampleComponent name must be a string")     # ejb
+    raise TypeError("ccpn.Substance name must be a string")     # ejb
   elif not name:
-    raise ValueError("ccpn.SampleComponent name must be set")         # ejb
+    raise ValueError("ccpn.Substance name must be set")         # ejb
   elif Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
            (Pid.altCharacter, name, labelling))
 
   if labelling is not None:        # 'None' caught by below as default
     if not isinstance(labelling, str):
-      raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")   # ejb
+      raise TypeError("ccpn.Substance 'labelling' name must be a string")   # ejb
     elif not labelling:
-      raise ValueError("ccpn.SampleComponent 'labelling' name must be set")       # ejb
+      raise ValueError("ccpn.Substance 'labelling' name must be set")       # ejb
     elif Pid.altCharacter in labelling:
-      raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
+      raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
                        (Pid.altCharacter, name, labelling))
   #
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb

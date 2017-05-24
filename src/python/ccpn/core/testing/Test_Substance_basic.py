@@ -29,7 +29,13 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
 class TestSubstanceCreation(WrapperTesting):
+  """
+  Test functions that do not require a valid Sample to be instantiated.
+  """
 
+  #=========================================================================================
+  # test_newSubstance        valid names
+  #=========================================================================================
 
   def test_newSubstance_WithoutName(self):
     """
@@ -37,6 +43,15 @@ class TestSubstanceCreation(WrapperTesting):
     """
     with self.assertRaisesRegexp(TypeError, 'name must be a string'):
       self.project.newSubstance()
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_newSubstance_None(self):
+    """
+    Test that creating a new Substance with None raises ValueError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+     self.project.newSubstance(None)
+    self.assertEqual(len(self.project.substances), 0)
 
   def test_newSubstance_EmptyName(self):
     """
@@ -44,6 +59,7 @@ class TestSubstanceCreation(WrapperTesting):
     """
     with self.assertRaisesRegexp(ValueError, 'name must be set'):
      self.project.newSubstance('')
+    self.assertEqual(len(self.project.substances), 0)
 
   def test_newSubstance_name(self):
     """
@@ -55,8 +71,10 @@ class TestSubstanceCreation(WrapperTesting):
     self.assertIs(self.project.substances[0], s)
     self.assertEqual(s.pid, 'SU:test substance.')
 
-
   def test_newSubstance_WithFields(self):
+    """
+    Test that creating a new Substance with parameters creates a valid Substance.
+    """
     s = self.project.newSubstance('test substance',
                                   userCode='test_userCode',
                                   smiles=';-)')
@@ -67,6 +85,39 @@ class TestSubstanceCreation(WrapperTesting):
     self.assertEqual(s.userCode, 'test_userCode')
     self.assertEqual(s.smiles, ';-)')
 
+  #=========================================================================================
+  # test_newSubstance_bad_name        invalid names
+  #=========================================================================================
+
+  def test_newSubstance_Badname(self):
+    """
+    Test that creating a new Substance with '^Badname' raises an error.
+    ^ is a bad character and not to be included in strings.
+    """
+    with self.assertRaisesRegexp(ValueError, 'Character'):
+      self.project.newSubstance('^Badname')
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_newSubstance_Int(self):
+    """
+    Test that creating a new Substance with 42 (non-string) raises an error.
+    """
+    # with self.assertRaisesRegexp(TypeError, 'argument of type'):
+    #   self.project.newSubstance(42)
+    #
+    with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+      self.project.newSubstance(42)
+    self.assertEqual(len(self.project.substances), 0)
+
+
+class TestSubstance_CreationFetch(WrapperTesting):
+  """
+  Test functions that do not require a valid Sample to be instantiated.
+  """
+
+  #=========================================================================================
+  # test_newSubstance        fetch operations
+  #=========================================================================================
 
   def test_createPolymerSubstance(self):
     s = self.project.createPolymerSubstance('acd', name='test', molType='protein')
@@ -214,16 +265,44 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.userCode)
 
   def test_MoleculeSubstanceWithSmilesProperties(self):
+    """
+    Test that the smiles property can be set.
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   smiles='CCCC')
     self.assertEqual(s.smiles, 'CCCC')
+    s.smiles = 'DDDD'
+    self.assertEqual(s.smiles, 'DDDD')
+
+  def test_MoleculeSubstanceWithNoSmilesProperties(self):
+    """
+    Test that the smiles property cannot be set for no attribute
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule')
+    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
+      s.smiles = 'CCCC'
 
   def test_MoleculeSubstanceWithinChiProperties(self):
+    """
+    Test that the inChi property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   inChi='1/C2H6O/c1-2-3/h3H,2H2,1H3')
     self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H3')
+    s.inChi = '1/C2H6O/c1-2-3/h3H,2H2,1H4'
+    self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H4')
+
+  def test_MoleculeSubstanceWithNoInChiProperties(self):
+    """
+    Test that the inChi property of Substance cannot be set for no attribute
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule')
+    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
+      s.inChi = '1/C2H6O/c1-2-3/h3H,2H2,1H4'
 
   def test_MoleculeSubstanceWithLabellingProperties(self):
     s = self.project.newSubstance('test substance',
@@ -232,10 +311,25 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.labelling, 'anything')
 
   def test_MoleculeSubstanceWithCasNumberProperties(self):
+    """
+    Test that the casNumber property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   casNumber='64-17-5')
     self.assertEqual(s.casNumber, '64-17-5')
+    s.casNumber = '64-16-3'
+    self.assertEqual(s.casNumber, '64-16-3')
+
+  def test_MoleculeSubstanceWithNoCasNumberProperties(self):
+    """
+    Test that the casNumber property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule')
+    s.casNumber = '64-16-3'
+    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
+      self.assertEqual(s.casNumber, '64-16-3')
 
   def test_MoleculeSubstanceWithUserCodeCasNumberProperties(self):
     s = self.project.newSubstance('test substance',
@@ -262,10 +356,15 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.comment, 'random comment.')
 
   def test_MoleculeSubstanceWithSynonymsProperties(self):
+    """
+    Test that the synonyms property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   synonyms=['syn1','syn2'])
     self.assertEqual(s.synonyms, ('syn1', 'syn2'))
+    s.synonyms = ['syn1','syn3']
+    self.assertEqual(s.synonyms, ('syn1', 'syn3'))
 
   def test_MoleculeSubstanceWithAtomCountProperties(self):
     s = self.project.newSubstance('test substance',
@@ -439,11 +538,16 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.userCode, 'test code')
 
   def test_PolymerSubstanceWithSmilesProperties(self):
+    """
+    Test that the smiles property of Substance can be set.
+    """
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
                                             smiles='CCCC')
     self.assertEqual(s.smiles, 'CCCC')
+    s.smiles = 'DDDD'
+    self.assertEqual(s.smiles, 'DDDD')
 
   def test_PolymerSubstanceWithSynonymsProperties(self):
     s = self.project.createPolymerSubstance('acd',

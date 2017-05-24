@@ -26,7 +26,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
-
+from ccpn.util.Constants import ccpnmrJsonData
 
 class ListWidget(QtGui.QListWidget, Base):
 
@@ -176,9 +176,21 @@ class ListWidget(QtGui.QListWidget, Base):
         links.append(str(url.toLocalFile()))
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
+
+      encodedData = event.mimeData().data(ccpnmrJsonData)
+      stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
+      eventData = stream.readQVariantHash()
+
       items = []
       if event.source() != self: #otherwise duplicates
-        event.setDropAction(QtCore.Qt.CopyAction)   # ejb - changed from Move
+        actionType = QtCore.Qt.CopyAction
+        if 'dragAction' in eventData.keys():        # put these strings somewhere else
+          if eventData['dragAction'] == 'copy':
+            actionType = QtCore.Qt.CopyAction             # ejb - changed from Move
+          elif eventData['dragAction'] == 'move':
+            actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
+
+        event.setDropAction(actionType)
         self.emit(QtCore.SIGNAL("dropped"), items)
         super(ListWidget, self).dropEvent(event)
       else:

@@ -541,8 +541,12 @@ class Substance(AbstractWrapperObject):
     ill be used. Labelling 'None'  means 'Natural abundance'"""
 
     oldName = self.name
-    if name is None:
-      name = oldName
+    # if name is None:
+    #   name = oldName
+    if not isinstance(name, str):
+      raise TypeError("ccpn.Sample.name must be a string")  # ejb
+    elif not name:
+      raise ValueError("ccpn.Sample.name must be set")  # ejb
     elif Pid.altCharacter in name:
       raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
@@ -550,8 +554,12 @@ class Substance(AbstractWrapperObject):
     apiLabeling = labelling
     if labelling is None:
       apiLabeling = DEFAULT_LABELLING
-    elif  Pid.altCharacter in labelling:
-        raise ValueError("Character %s not allowed in ccpn.Sample.labelling" % Pid.altCharacter)
+    elif not isinstance(labelling, str):
+      raise TypeError("ccpn.Sample.labelling must be a string")
+    elif not labelling:
+      raise ValueError("ccpn.Sample.labelling must be set")
+    elif Pid.altCharacter in labelling:
+      raise ValueError("Character %s not allowed in ccpn.Sample.labelling" % Pid.altCharacter)
 
     self._startCommandEchoBlock('rename', name, labelling)
     undo = self._project._undo
@@ -798,6 +806,19 @@ def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:st
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
     raise ValueError("Molecule name %s is already in use for API Molecule")
 
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+  if labelling is not None:
+    if not isinstance(labelling, str):
+      raise TypeError("ccpn.Substance 'labelling' name must be a string")
+    elif not labelling:
+      raise ValueError("ccpn.Substance 'labelling' name must be set")
+    elif Pid.altCharacter in labelling:
+      raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
+                       (Pid.altCharacter, name, labelling))
+  #
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
   self._startCommandEchoBlock('createPolymerSubstance', sequence, name,
                               values=locals(), defaults=defaults,
                               parName='newPolymerSubstance')
@@ -871,13 +892,19 @@ SampleComponent.substance = property(getter, None, None,
 
 def getter(self:Spectrum) -> Substance:
   apiRefComponent = self._apiDataSource.experiment.refComponent
-  return apiRefComponent or self._project._data2Obj[apiRefComponent]
+  # return apiRefComponent and self._project._data2Obj[apiRefComponent]
+
+  return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)
+
 def setter(self:Spectrum, value:Substance):
-  apiRefComponent = value or value._apiSubstance
+  # apiRefComponent = value and value._apiSubstance
+
+  apiRefComponent = None if value is None else value._apiSubstance
+
   self._apiDataSource.experiment.refComponent = apiRefComponent
 #
 Spectrum.referenceSubstance = property(getter, setter, None,
-                                       "Substance that has this Spectrum as reference spectrum")
+                                       "Substance that has this Spectrum as a reference spectrum")
 del getter
 del setter
 

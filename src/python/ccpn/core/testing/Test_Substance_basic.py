@@ -71,6 +71,9 @@ class TestSubstanceCreation(WrapperTesting):
     self.assertIs(self.project.substances[0], s)
     self.assertEqual(s.pid, 'SU:test substance.')
 
+    with self.assertRaisesRegexp(ValueError, 'already exists'):
+      s2 = self.project.newSubstance('test substance')
+
   def test_newSubstance_WithFields(self):
     """
     Test that creating a new Substance with parameters creates a valid Substance.
@@ -120,18 +123,26 @@ class TestSubstance_CreationFetch(WrapperTesting):
   #=========================================================================================
 
   def test_createPolymerSubstance(self):
+    """
+    Test that creating a new Substance populates the array
+    """
     s = self.project.createPolymerSubstance('acd', name='test', molType='protein')
 
     self.assertEqual(len(self.project.substances), 1)
     self.assertIs(self.project.substances[0], s)
 
-
   def test_fetchSubstanceThatAlreadyExists(self):
+    """
+    Test that the correct Substance is fetched
+    """
     s1 = self.project.newSubstance('test substance')
     s2 = self.project.fetchSubstance('test substance')
     self.assertIs(s1, s2)
 
   def test_fetchSubstanceNewSubstance(self):
+    """
+    Test that the correct (different) Substance is fetched
+    """
     s1 = self.project.newSubstance('test substance')
     s2 = self.project.fetchSubstance('another test substance')
 
@@ -156,7 +167,6 @@ class TestSubstance_CreationFetch(WrapperTesting):
 
     self.assertEqual(len(self.project.substances), 1)
     self.assertEqual(self.project.substances[0].pid, 'SU:Molecule_1.')
-
 
 
 class TestExistingSubstancesWithSameNameReused(WrapperTesting):
@@ -184,6 +194,11 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
     self.assertEquals(physicalChain.substances, newPhysicalChain.substances)
     self.assertIsNot(physicalChain, newPhysicalChain)
 
+
+
+#=========================================================================================
+# SubstanceProperties        Test bare substances
+#=========================================================================================
 
 class SubstanceProperties(WrapperTesting):
 
@@ -264,156 +279,14 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
 
-  def test_MoleculeSubstanceWithSmilesProperties(self):
-    """
-    Test that the smiles property can be set.
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  smiles='CCCC')
-    self.assertEqual(s.smiles, 'CCCC')
-    s.smiles = 'DDDD'
-    self.assertEqual(s.smiles, 'DDDD')
-
-  def test_MoleculeSubstanceWithNoSmilesProperties(self):
-    """
-    Test that the smiles property cannot be set for no attribute
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule')
-    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
-      s.smiles = 'CCCC'
-
-  def test_MoleculeSubstanceWithinChiProperties(self):
-    """
-    Test that the inChi property of Substance can be set
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  inChi='1/C2H6O/c1-2-3/h3H,2H2,1H3')
-    self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H3')
-    s.inChi = '1/C2H6O/c1-2-3/h3H,2H2,1H4'
-    self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H4')
-
-  def test_MoleculeSubstanceWithNoInChiProperties(self):
-    """
-    Test that the inChi property of Substance cannot be set for no attribute
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule')
-    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
-      s.inChi = '1/C2H6O/c1-2-3/h3H,2H2,1H4'
-
-  def test_MoleculeSubstanceWithLabellingProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  labelling='anything')
-    self.assertEqual(s.labelling, 'anything')
-
-  def test_MoleculeSubstanceWithCasNumberProperties(self):
-    """
-    Test that the casNumber property of Substance can be set
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  casNumber='64-17-5')
-    self.assertEqual(s.casNumber, '64-17-5')
-    s.casNumber = '64-16-3'
-    self.assertEqual(s.casNumber, '64-16-3')
-
-  def test_MoleculeSubstanceWithNoCasNumberProperties(self):
-    """
-    Test that the casNumber property of Substance can be set
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule')
-    s.casNumber = '64-16-3'
-    with self.assertRaisesRegexp(TypeError, 'Substance has no attribute'):
-      self.assertEqual(s.casNumber, '64-16-3')
-
-  def test_MoleculeSubstanceWithUserCodeCasNumberProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  userCode='test code')
-    self.assertEqual(s.userCode, 'test code')
-
-  def test_MoleculeSubstanceWithEmpiricalFormulaProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  empiricalFormula='C6H12O6')
-    self.assertEqual(s.empiricalFormula, 'C6H12O6')
-
-  def test_MoleculeSubstanceWithMolecularMassProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  molecularMass=42.0)
-    self.assertEqual(s.molecularMass, 42.0)
-
-  def test_MoleculeSubstanceWithCommentProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  comment='random comment.')
-    self.assertEqual(s.comment, 'random comment.')
-
-  def test_MoleculeSubstanceWithSynonymsProperties(self):
-    """
-    Test that the synonyms property of Substance can be set
-    """
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  synonyms=['syn1','syn2'])
-    self.assertEqual(s.synonyms, ('syn1', 'syn2'))
-    s.synonyms = ['syn1','syn3']
-    self.assertEqual(s.synonyms, ('syn1', 'syn3'))
-
-  def test_MoleculeSubstanceWithAtomCountProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  atomCount=12)
-    self.assertEqual(s.atomCount, 12)
-
-  def test_MoleculeSubstanceWithBondCountProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  bondCount=11)
-    self.assertEqual(s.bondCount, 11)
-
-  def test_MoleculeSubstanceWithRingCountProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  ringCount=3)
-    self.assertEqual(s.ringCount, 3)
-
-  def test_MoleculeSubstanceWithHBondDonorCountProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  hBondDonorCount=2)
-    self.assertEqual(s.hBondDonorCount, 2)
-
-  def test_MoleculeSubstanceWithHBondAcceptorCountProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  hBondAcceptorCount=2)
-    self.assertEqual(s.hBondAcceptorCount, 2)
-
-  def test_MoleculeSubstanceWithPolarSurfaceAreaProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  polarSurfaceArea=2)
-    self.assertEqual(s.polarSurfaceArea, 2)
-
-  def test_MoleculeSubstanceWithLogPartitionCoefficientProperties(self):
-    s = self.project.newSubstance('test substance',
-                                  substanceType='Molecule',
-                                  logPartitionCoefficient=2)
-    self.assertEqual(s.logPartitionCoefficient, 2)
-
-
   @unittest.skip
   def test_bareMaterialSubstanceProperties(self):
+    """
+    Test that a Material type Substance initiates correctly
+    """
     s = self.project.newSubstance('test substance', substanceType='Material')
 
-    # MOved below initialisation of 's'. Rasmus.
+    # Moved below initialisation of 's'. Rasmus.
     self.assertIsNone(s.smiles)
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -425,7 +298,6 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Material')
     self.assertIs(s.project, self.project)
-
 
     self.assertEqual(s.chains, ())
     self.assertEqual(s.synonyms, ())
@@ -449,7 +321,10 @@ class SubstanceProperties(WrapperTesting):
 
   @unittest.skip
   def test_bareCellSubstanceProperties(self):
-    # name, labelling, usercode, synonyms, details
+    """
+    Test that a Cell type Substance initiates correctly
+    with name, labelling, usercode, synonyms, details
+    """
     s = self.project.newSubstance('test substance', substanceType='Cell')
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -485,6 +360,9 @@ class SubstanceProperties(WrapperTesting):
 
   @unittest.skip
   def test_bareCompositeSubstanceProperties(self):
+    """
+    Test that a Composite type Substance initiates correctly
+    """
     s = self.project.newSubstance('test substance', substanceType='Composite')
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -518,24 +396,331 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
 
-  # @unittest.expectedFailure
+
+#=========================================================================================
+# Test_MoleculeSubstance        Molecule type testing
+#=========================================================================================
+
+class Test_MoleculeSubstance(WrapperTesting):
+  """
+  Test Substances of type Molecule
+  """
+
+  def test_MoleculeSubstanceWithSmilesProperties(self):
+    """
+    Test that the smiles property can be set.
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  smiles='CCCC')
+    self.assertEqual(s.smiles, 'CCCC')
+    s.smiles = 'DDDD'
+    self.assertEqual(s.smiles, 'DDDD')
+
+  def test_MoleculeSubstanceWithinChiProperties(self):
+    """
+    Test that the inChi property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  inChi='1/C2H6O/c1-2-3/h3H,2H2,1H3')
+    self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H3')
+    s.inChi = '1/C2H6O/c1-2-3/h3H,2H2,1H4'
+    self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H4')
+
+  def test_MoleculeSubstanceWithLabellingProperties(self):
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  labelling='anything')
+    self.assertEqual(s.labelling, 'anything')
+
+  def test_MoleculeSubstanceWithLabellingProperties_None(self):
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  labelling=None)
+    self.assertEqual(s.labelling, None)
+
+  def test_MoleculeSubstanceWithLabellingProperties_ES(self):
+    with self.assertRaisesRegexp(ValueError, 'name must be set'):
+      s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  labelling='')
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_MoleculeSubstanceWithLabellingProperties_Badname(self):
+    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+      s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  labelling='^Badname')
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_MoleculeSubstanceWithLabellingProperties_Int(self):
+    with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+      s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  labelling=12)
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_MoleculeSubstanceWithCasNumberProperties(self):
+    """
+    Test that the casNumber property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  casNumber='64-17-5')
+    self.assertEqual(s.casNumber, '64-17-5')
+    s.casNumber = '64-16-3'
+    self.assertEqual(s.casNumber, '64-16-3')
+
+  def test_MoleculeSubstanceWithUserCodeCasNumberProperties(self):
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  userCode='test code')
+    self.assertEqual(s.userCode, 'test code')
+    s.userCode = 'another test'
+    self.assertEqual(s.userCode, 'another test')
+
+  def test_MoleculeSubstanceWithEmpiricalFormulaProperties(self):
+    """
+    Test that the empiricalFormula property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  empiricalFormula='C6H12O6')
+    self.assertEqual(s.empiricalFormula, 'C6H12O6')
+    s.empiricalFormula = 'C6H10O4'
+    self.assertEqual(s.empiricalFormula, 'C6H10O4')
+
+  def test_MoleculeSubstanceWithMolecularMassProperties(self):
+    """
+    Test that the molecularMass property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  molecularMass=42.0)
+    self.assertEqual(s.molecularMass, 42.0)
+    s.molecularMass = 43.0
+    self.assertEqual(s.molecularMass, 43.0)
+
+  def test_MoleculeSubstanceWithCommentProperties(self):
+    """
+    Test that the comment property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  comment='random comment.')
+    self.assertEqual(s.comment, 'random comment.')
+    s.comment = 'changed comment'
+    self.assertEqual(s.comment, 'changed comment')
+
+  def test_MoleculeSubstanceWithSynonymsProperties(self):
+    """
+    Test that the synonyms property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  synonyms=['syn1','syn2'])
+    self.assertEqual(s.synonyms, ('syn1', 'syn2'))
+    s.synonyms = ['syn1','syn3']
+    self.assertEqual(s.synonyms, ('syn1', 'syn3'))
+
+  def test_MoleculeSubstanceWithAtomCountProperties(self):
+    """
+    Test that the atomCount property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  atomCount=12)
+    self.assertEqual(s.atomCount, 12)
+    s.atomCount = 15
+    self.assertEqual(s.atomCount, 15)
+
+  def test_MoleculeSubstanceWithBondCountProperties(self):
+    """
+    Test that the bondCount property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  bondCount=11)
+    self.assertEqual(s.bondCount, 11)
+    s.bondCount = 15
+    self.assertEqual(s.bondCount, 15)
+
+  def test_MoleculeSubstanceWithRingCountProperties(self):
+    """
+    Test that the ringCount property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  ringCount=3)
+    self.assertEqual(s.ringCount, 3)
+    s.ringCount = 5
+    self.assertEqual(s.ringCount, 5)
+
+  def test_MoleculeSubstanceWithHBondDonorCountProperties(self):
+    """
+    Test that the hBondDonorCount property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  hBondDonorCount=2)
+    self.assertEqual(s.hBondDonorCount, 2)
+    s.hBondDonorCount = 3
+    self.assertEqual(s.hBondDonorCount, 3)
+
+  def test_MoleculeSubstanceWithHBondAcceptorCountProperties(self):
+    """
+    Test that the hBondAcceptCount property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  hBondAcceptorCount=2)
+    self.assertEqual(s.hBondAcceptorCount, 2)
+    s.hBondAcceptorCount = 3
+    self.assertEqual(s.hBondAcceptorCount, 3)
+
+  def test_MoleculeSubstanceWithPolarSurfaceAreaProperties(self):
+    """
+    Test that the polarSurfaceArea property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  polarSurfaceArea=2)
+    self.assertEqual(s.polarSurfaceArea, 2)
+    s.polarSurfaceArea = 3
+    self.assertEqual(s.polarSurfaceArea, 3)
+
+  def test_MoleculeSubstanceWithLogPartitionCoefficientProperties(self):
+    """
+    Test that the logPartitionCoefficient property of Substance can be set
+    """
+    s = self.project.newSubstance('test substance',
+                                  substanceType='Molecule',
+                                  logPartitionCoefficient=2)
+    self.assertEqual(s.logPartitionCoefficient, 2)
+    s.logPartitionCoefficient = 3
+    self.assertEqual(s.logPartitionCoefficient, 3)
+
+#=========================================================================================
+# Test_PolymerSubstance        Polymer type testing
+#=========================================================================================
+
+class Test_PolymerSubstance(WrapperTesting):
+  """
+  Test Substances of type Polymer
+  """
+
   def test_bareUndefinedSubstanceProperties(self):
-    self.assertRaises(ValueError, self.project.newSubstance, name='test substance',
-                      substanceType='other')
+    """
+    Test that an undefined Substance raises an error
+    """
+    with self.assertRaises(ValueError):
+      s = self.project.newSubstance(name='test substance', substanceType='other')
+
+  def test_PolymerSubstance_noSequence(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
+    with self.assertRaisesRegexp(ValueError, 'createPolymerSubstance requires non-empty sequence'):
+      s = self.project.createPolymerSubstance(None,
+                                              name='test polymer substance',
+                                              molType='protein',
+                                              labelling='H')
+    self.assertEqual(len(self.project.substances), 0)
+
+    s = self.project.createPolymerSubstance('acd',
+                                            name='test polymer substance',
+                                            molType='protein',
+                                            labelling='H')
+    with self.assertRaisesRegexp(ValueError, 'already exists'):
+      s = self.project.createPolymerSubstance('acd',
+                                            name='test polymer substance',
+                                            molType='protein',
+                                            labelling='H')
+    with self.assertRaisesRegexp(ValueError, 'already in use'):
+      s = self.project.createPolymerSubstance('acd',
+                                            name='test polymer substance',
+                                            molType='protein',
+                                            labelling='K')
+    self.assertEqual(len(self.project.substances), 1)
 
   def test_PolymerSubstanceWithLabellingProperties(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
                                             labelling='H')
     self.assertEqual(s.labelling, 'H')
+    s2 = self.project.fetchSubstance(name='test polymer substance', labelling='H')
+    self.assertIs(s,s2)
+    s3 = self.project.fetchSubstance(name='test polymer substance', labelling='K')
+    self.assertIsNot(s,s3)
+
+  def test_PolymerSubstanceWithLabellingProperties_None(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
+    s = self.project.createPolymerSubstance('acd',
+                                            name='test polymer substance',
+                                            molType='protein',
+                                            labelling=None)
+    self.assertEqual(s.labelling, None)
+    self.assertEqual(len(self.project.substances), 1)
+
+    with self.assertRaisesRegexp(ValueError, 'already exists'):
+      s = self.project.createPolymerSubstance('acd',
+                                            name='test polymer substance',
+                                            molType='protein',
+                                            labelling=None)
+    self.assertEqual(len(self.project.substances), 1)
+
+  def test_PolymerSubstanceWithLabellingProperties_ES(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
+    with self.assertRaisesRegexp(ValueError, 'name must be set'):
+      s = self.project.createPolymerSubstance('acd',
+                                              name='test polymer substance',
+                                              molType='protein',
+                                              labelling='')
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_PolymerSubstanceWithLabellingProperties_Badname(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
+    # with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+      s = self.project.createPolymerSubstance('acd',
+                                              name='test polymer substance',
+                                              molType='protein',
+                                              labelling='^Badname')
+    self.assertEqual(len(self.project.substances), 0)
+
+  def test_PolymerSubstanceWithLabellingProperties_Int(self):
+    """
+    Test that the labelling property of Substance can be set.
+    """
+    with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+      s = self.project.createPolymerSubstance('acd',
+                                              name='test polymer substance',
+                                              molType='protein',
+                                              labelling=12)
+    self.assertEqual(len(self.project.substances), 0)
 
   def test_PolymerSubstanceWithUserCodeProperties(self):
+    """
+    Test that the userCode property of Substance can be set.
+    """
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
                                             userCode='test code')
     self.assertEqual(s.userCode, 'test code')
+    s.userCode = 'changed code'
+    self.assertEqual(s.userCode, 'changed code')
 
   def test_PolymerSubstanceWithSmilesProperties(self):
     """
@@ -550,23 +735,38 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.smiles, 'DDDD')
 
   def test_PolymerSubstanceWithSynonymsProperties(self):
+    """
+    Test that the synonyms property of Substance can be set.
+    """
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
                                             synonyms=['syn1','syn2'])
     self.assertEqual(s.synonyms, ('syn1','syn2'))
+    s.synonyms = ['syn3','syn4']
+    self.assertEqual(s.synonyms, ('syn3','syn4'))
 
   def test_PolymerSubstanceWithCommentsProperties(self):
+    """
+    Test that the comment property of Substance can be set.
+    """
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
                                             comment = 'test comment')
     self.assertEqual(s.comment, 'test comment')
+    s.comment = 'changed comment'
+    self.assertEqual(s.comment, 'changed comment')
 
-  def _test_PolymerSubstanceWithStartNumberProperties(self):
-    s = self.project.createPolymerSubstance('acd',
-                                            name='test polymer substance',
-                                            molType='protein',
-                                            startNumber=7)
-    # self.assertEqual(s.startNumber, 7)
-
+  # property doesn't exists
+  # def _test_PolymerSubstanceWithStartNumberProperties(self):
+  #   """
+  #   Test that the startNumber property of Substance can be set.
+  #   """
+  #   s = self.project.createPolymerSubstance('acd',
+  #                                           name='test polymer substance',
+  #                                           molType='protein',
+  #                                           startNumber=7)
+  #   self.assertEqual(s.startNumber, 7)
+  #   s.startNumber = 8
+  #   self.assertEqual(s.startNumber, 8)

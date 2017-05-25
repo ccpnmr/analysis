@@ -53,7 +53,7 @@ class PeakTableModule(CcpnModule):
 
   includeSettingsWidget = True
   maxSettingsState = 2
-  settingsOnTop = True
+  settingsPosition = 'top'
 
   className = 'PeakTable'
 

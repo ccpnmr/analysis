@@ -26,7 +26,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
-
+from ccpn.util.Constants import ccpnmrJsonData
 
 class ListWidget(QtGui.QListWidget, Base):
 
@@ -91,6 +91,7 @@ class ListWidget(QtGui.QListWidget, Base):
   def getObjects(self):
      return list(self.objects)
 
+
   def getSelectedObjects(self):
     indexes =  self.selectedIndexes()
     objects = []
@@ -99,6 +100,12 @@ class ListWidget(QtGui.QListWidget, Base):
       if obj is not None:
         objects.append(obj)
     return objects
+
+  def getTexts(self):
+    items = []
+    for index in range(self.count()):
+      items.append(self.item(index))
+    return [i.text() for i in items]
 
   def selectObject(self, obj):
     for item in self.items:
@@ -130,15 +137,22 @@ class ListWidget(QtGui.QListWidget, Base):
     Raise the context menu
     """
     menu = self.getContextMenu()
-    menu.popup(event.globalPos())
+    if menu:
+      menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+      menu.exec()
 
   def getContextMenu(self):
+    # FIXME this context menu must be more generic and editable
     contextMenu = Menu('', self, isFloatWidget=True)
     if self.rightMouseCallback is None:
       contextMenu.addItem("Delete", callback=self.removeItem)
+      contextMenu.addItem("Delete All", callback=self._deleteAll)
     else:
       contextMenu.addItem("Delete", callback=self.contextCallback)
     return contextMenu
+
+  def _deleteAll(self):
+    self.clear()
 
   def dragEnterEvent(self, event):
     if event.mimeData().hasUrls():
@@ -162,10 +176,25 @@ class ListWidget(QtGui.QListWidget, Base):
         links.append(str(url.toLocalFile()))
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
+
+      encodedData = event.mimeData().data(ccpnmrJsonData)
+      stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
+      eventData = stream.readQVariantHash()
+
       items = []
-      event.setDropAction(QtCore.Qt.MoveAction)
-      self.emit(QtCore.SIGNAL("dropped"), items)
-      super(ListWidget, self).dropEvent(event)
+      if event.source() != self: #otherwise duplicates
+        actionType = QtCore.Qt.CopyAction
+        if 'dragAction' in eventData.keys():        # put these strings somewhere else
+          if eventData['dragAction'] == 'copy':
+            actionType = QtCore.Qt.CopyAction             # ejb - changed from Move
+          elif eventData['dragAction'] == 'move':
+            actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
+
+        event.setDropAction(actionType)
+        self.emit(QtCore.SIGNAL("dropped"), items)
+        super(ListWidget, self).dropEvent(event)
+      else:
+        event.ignore()
 
 
 if __name__ == '__main__':

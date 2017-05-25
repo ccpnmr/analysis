@@ -240,8 +240,8 @@ class SideBar(QtGui.QTreeWidget, Base):
     for url in data.get('urls',[]):
       print('SideBar._processDroppedItems>>> dropped:', url)
       objects = self.project.loadData(url)
-      if objects is None or len(objects) == 0:
-        showWarning('Invalid File', 'Cannot handle "%s"' % url)
+      # if objects is None or len(objects) == 0:
+      #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
 
   def setProject(self, project:Project):
     """
@@ -517,7 +517,14 @@ class SideBar(QtGui.QTreeWidget, Base):
       if item:
         text = item.text(0)
         if ':' in text:
-          itemData = json.dumps({'pids':[text]})
+
+          mimeData = QtCore.QMimeData()
+          itemData = QtCore.QByteArray()
+          stream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+          stream.writeQVariantHash({'pids':text, 'dragAction':'copy'})    # need to get rid of these strings
+          # mimeData.setData('dinner', data)
+
+          # itemData = json.dumps({'pids':[text]})
           event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
 

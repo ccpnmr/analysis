@@ -101,7 +101,53 @@ class FileDialog(QtGui.QFileDialog):
       return None
 
 
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Button import Button
+from os.path import expanduser
+
+class LineEditButtonDialog(QtGui.QWidget, Base):
+  def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, setLayout=True, **kw)
+    self.openPathIcon = Icon('icons/directory')
+
+    if textDialog is None:
+      self.textDialog = ''
+    else:
+      self.textDialog = textDialog
+
+    if textLineEdit is None:
+      self.textLineEdit = expanduser("~")
+    else:
+      self.textLineEdit = textLineEdit
+
+    if fileMode is None:
+      self.fileMode = QtGui.QFileDialog.AnyFile
+    else:
+      self.fileMode = fileMode
+
+    self.lineEdit = LineEdit(self, text=self.textLineEdit, grid=(0, 0), hAlign='c')
+    button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')
+    button.setStyleSheet("border: 0px solid transparent")
+
+  def _openFileDialog(self):
+    self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
+               acceptMode=QtGui.QFileDialog.AcceptOpen,)
+    selectedFile = self.fileDialog.selectedFile()
+    if selectedFile:
+      self.lineEdit.setText(str(selectedFile))
 
 
 
 
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+  app = TestApplication()
+  popup = CcpnDialog(windowTitle='Test LineEditButtonDialog')
+  slider = LineEditButtonDialog(parent=popup)
+  popup.show()
+  popup.raise_()
+  app.start()

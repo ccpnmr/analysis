@@ -61,7 +61,7 @@ class PeakAssigner(CcpnModule):
   # overide in specific module implementations
   includeSettingsWidget = True
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-  settingsOnTop = True
+  settingsPosition = 'top'
   className = 'PeakAssigner'
 
   def __init__(self, mainWindow,  name="Peak Assigner"):

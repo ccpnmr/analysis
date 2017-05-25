@@ -4007,8 +4007,8 @@ if __name__ == '__main__':
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
-  nefpath = _exportToNef(path)
-  _testNefIo(nefpath)
-  # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
+  # nefpath = _exportToNef(path)
+  # _testNefIo(nefpath)
+  nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

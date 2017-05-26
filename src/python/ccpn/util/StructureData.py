@@ -40,26 +40,6 @@ from json import dumps
 IDSEP = '.'
 NaN = math.nan
 
-# def _setIndexLock(fn):
-#   global _indexLockVal
-#   _indexLockVal = 0
-#
-#   # if we want to do something AFTER the  call to 'fn' we have to define another inner function
-#   # so we have somewhere to place the post 'fn' code - MUST RETURN A FUNCTION
-#   def _indexLock(*args, **kwargs):      # the same arguments as fn
-#
-#     # _indexLockVal += 1
-#     fn_ret = fn(*args, **kwargs)         # call 'fn' here - don't forget the brackets
-#     # _indexLockVal -= 1
-#
-#     return fn_ret                     # if fn returned a value then we need to match it here
-#
-#   return _indexLock             # and return the outer function
-
-
-
-
-
 class EnsembleData(pd.DataFrame):
   """
   Structure Ensemble data - as a Pandas DataFrame
@@ -275,6 +255,16 @@ class EnsembleData(pd.DataFrame):
         "EnsembleData._containingObject must be None, StructureEnsemble or Model, was %s"
         % value
       )
+
+  @property
+  def _structureEnsemble(self) -> typing.Optional['StructureEnsemble']:
+    """Get containing StructureEnsemble, whether container is StructureEnsemble or Model"""
+    result = self.__containingObject
+    if hasattr(result, 'className' and result.className == 'Model'):
+      result = result.structureEnsemble
+    #
+    return result
+
 
   def __init__(self, *args, **kwargs) -> None:
     super().__init__(*args, **kwargs)
@@ -632,6 +622,8 @@ class EnsembleData(pd.DataFrame):
             undo.newItem(self._insertRow, self.deleteRow,
                          undoArgs=(index,), undoKwargs=colData,
                          redoArgs=(index,), redoKwargs=kwargs)
+        # assert  self._structureEnsemble is not None # given that containingObject exists
+        self._structureEnsemble._finaliseAction('change')
 
     finally:
       if containingObject is not None:
@@ -649,6 +641,10 @@ class EnsembleData(pd.DataFrame):
     colIndex = str(args[0])       # get the index from the first arg value
     for sInd in kwargs:
       super().loc[int(sInd), colIndex] = kwargs[sInd]
+
+    structureEnsemble = self._structureEnsemble
+    if structureEnsemble is not None:
+      structureEnsemble._finaliseAction('change')
 
   def deleteCol(self, *args, **kwargs):
     """
@@ -685,6 +681,8 @@ class EnsembleData(pd.DataFrame):
             undo.newItem(self._insertCol, self.deleteCol,
                          undoArgs=(colIndex,), undoKwargs=colData,
                          redoArgs=(colIndex,), redoKwargs=kwargs)
+        # assert  self._structureEnsemble is not None # given that containingObject exists
+        self._structureEnsemble._finaliseAction('change')
 
     finally:
       if containingObject is not None:
@@ -857,6 +855,8 @@ class EnsembleData(pd.DataFrame):
           undo.newItem(self.drop, self.setValues,
                        undoArgs=(index,), undoKwargs={'inplace':True},
                        redoArgs=(index,), redoKwargs=kwargs)
+      # assert  self._structureEnsemble is not None # given that containingObject exists
+      self._structureEnsemble._finaliseAction('change')
 
 
   ### PDB mapping
@@ -899,9 +899,14 @@ class EnsembleData(pd.DataFrame):
 
   def __setattr__(self, name:str, value:typing.Any) -> None:
     if name in self._reservedColumns:
+      # notification done at the __setitem__ level
       self[name] = value
     else:
       super().__setattr__(name, value)
+
+      structureEnsemble = self._structureEnsemble
+      if structureEnsemble is not None:
+        structureEnsemble._finaliseAction('change')
 
 
   ### Property type checking
@@ -935,6 +940,10 @@ class EnsembleData(pd.DataFrame):
     # reset index to one-origin successive integers
     self.index = range(1, len(reordered) + 1)
 
+    structureEnsemble = self._structureEnsemble
+    if structureEnsemble is not None:
+      structureEnsemble._finaliseAction('change')
+
   def reset_index(self, *args, inplace=False, **kwargs):
     """reset_index - overridden to generate index starting at one."""
     if inplace:
@@ -945,7 +954,11 @@ class EnsembleData(pd.DataFrame):
     # new_obj.index = range(1, self.shape[0] + 1)
     new_obj.index = new_obj.index + 1
 
-    if not inplace:
+    if inplace:
+      structureEnsemble = self._structureEnsemble
+      if structureEnsemble is not None:
+        structureEnsemble._finaliseAction('change')
+    else:
       return new_obj
 
 
@@ -1029,6 +1042,9 @@ class EnsembleData(pd.DataFrame):
               undo.newItem(super().__setitem__, self.__setitem__,
                            undoArgs=(key, oldValue), redoArgs=(key, value))
 
+          # assert  self._structureEnsemble is not None # given that containingObject exists
+          self._structureEnsemble._finaliseAction('change')
+
       except:
         # We set the new value before the try:, so we need to go back to the previous state
         if oldValue is None:
@@ -1041,23 +1057,6 @@ class EnsembleData(pd.DataFrame):
           project._endCommandEchoBlock()
           project.unblankNotification()
           # undo.decreaseBlocking()          # ejb
-
-      # if containingObject is not None:
-      #   # WARNING This code is also called when you do ModelData.__setitem__
-      #   # In those cases containingObject is temporarily rest to the Model object
-      #   # Any bugs/modifications that arise in this code must consider ModelData as well
-      #   undo = containingObject._project._undo
-      #   if undo is not None:
-      #     # set up undo functions
-      #     if oldValue is None:
-      #       # undo addition of new column
-      #       undo.newItem(self.drop, self.__setitem__,
-      #                    undoArgs=(key,), undoKwargs={'axis':1, 'inplace':True},
-      #                    redoArgs=(key, value))
-      #     else:
-      #       # Undo overwrite of existing column
-      #       undo.newItem(super().__setitem__, self.__setitem__,
-      #                    undoArgs=(key, oldValue), redoArgs=(key, value))
 
   def _modelNumberConversion(self, force:bool=False):
     """Convert modelNumber series to valid data, changing value *in place*

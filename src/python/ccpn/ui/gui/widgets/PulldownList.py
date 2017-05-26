@@ -127,6 +127,12 @@ class PulldownList(QtGui.QComboBox, Base):
    
     return self.currentText()
 
+  def getItemIndex(self, text):
+    for i in range(self.count()):
+      if self.itemText(i) == text:
+        return i
+
+
   def getSelectedIndex(self):
     
     # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is deprecated use; .currentIndex()")

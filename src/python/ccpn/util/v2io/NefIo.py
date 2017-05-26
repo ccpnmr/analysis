@@ -74,6 +74,7 @@ from memops.general import Io as memopsIo
 from memops.universal import Io as uniIo
 from ccp.lib import MoleculeModify
 from ccp.lib import StructureIo
+from ccp.lib import NmrExpPrototype as NmrExpPrototypeLib
 from ccpnmr.analysis.core import MoleculeBasic
 from ccpnmr.analysis.core import AssignmentBasic
 from ccpnmr.analysis.core import ConstraintBasic
@@ -763,11 +764,11 @@ nef2CcpnMap = {
   )),
 
 }
-def loadProject(nefFilePath, projectName=None, pdbFileType='pdb', *pdbFilePaths):
+def loadProject(nefFilePath, pdbFilePaths=None, projectName=None, pdbFileType='pdb'):
   """Create new CCPN project from files at nefFilepath and (optional) pdbFilepaths
 
   if one pdbFilePath is passed in, the routine reads all models in that file.
-  If multiple pdbFilePaths are passed in, the routine reads the first model from each file;
+  If a sequence of pdbFilePaths are passed in, the routine reads the first model from each file;
   this is to read ensembles stored with one model per file.
 
   The project name (determining the project directory) is taken from the NEF file if not passed in
@@ -784,8 +785,12 @@ def loadProject(nefFilePath, projectName=None, pdbFileType='pdb', *pdbFilePaths)
   memopsRoot = memopsIo.newProject(projectName)
   nefReader.importNewProject(memopsRoot, dataBlock)
   if pdbFilePaths:
-    StructureIo.getStructureFromFiles(memopsRoot.findFirstMolSystem(), pdbFilePaths,
-                                      fileType=pdbFileType)
+    if isinstance(pdbFilePaths, str):
+      StructureIo.getStructureFromFile(memopsRoot.findFirstMolSystem(), pdbFilePaths,
+                                       fileType=pdbFileType)
+    else:
+      StructureIo.getStructureFromFiles(memopsRoot.findFirstMolSystem(), pdbFilePaths,
+                                        fileType=pdbFileType)
   #
   return memopsRoot
 
@@ -814,6 +819,9 @@ class CcpnNefReader:
     self.warnings = []
     self.errors = []
     self.testing = testing
+
+    # Information for mappinf NmrExpPrototype dimensionos
+    self.refExpDimRefCodeMap = NmrExpPrototypeLib.refExpDimRefCodeMap()
 
     # Map for resolving crosslinks in NEF file
     self.frameCode2Object = {}
@@ -1453,7 +1461,6 @@ class CcpnNefReader:
 
       nmrExperiment = nmrProject.newExperiment(**experimentParams)
       dataSource = nmrExperiment.newDataSource(**dataSourceParams)
-      # NBNB TODO Add file storage parameters and object
 
       # frameCode = saveFrame.get('ccpn_sample')
       # if frameCode:
@@ -1494,39 +1501,7 @@ class CcpnNefReader:
         if val:
           dd['refValue'] = val
           dd['refPoint'] = 1
-      # 'nef_spectrum_dimension':OD((
-        # ('dimension_id', None),
-        # ('axis_unit', 'unit'),
-        # ('axis_code', 'isotopeCodes'),
-        # ('spectrometer_frequency', 'sf'),
-        # ('spectral_width', 'spectralWidths'),
-        # ('value_first_point', None),
-        # ('folding', None),
-        # ('absolute_peak_positions', None), # NB not used
-        # ('is_acquisition', None),
-        # ('ccpn_axis_code', 'axisCodes'),
-      # )),
 
-      # NB PseudoDimensions are not yet supported
-      # 'ccpn_spectrum_dimension':OD((
-        # ('dimension_id', None),
-        # ('point_count', 'pointCounts'),
-        # ('reference_point', 'referencePoints'),
-        # ('total_point_count', 'totalPointCounts'),
-        # ('point_offset', 'pointOffsets'),
-        # ('assignment_tolerance', 'assignmentTolerances'),
-        # ('lower_aliasing_limit', None),
-        # ('higher_aliasing_limit', None),
-        # ('measurement_type', 'measurementTypes'),
-        # ('phase_0', 'phases0'),
-        # ('phase_1', 'phases1'),
-        # ('window_function', 'windowFunctions'),
-        # ('lorentzian_broadening', 'lorentzianBroadenings'),
-        # ('gaussian_broadening', 'gaussianBroadenings'),
-        # ('sine_window_shift', 'sineWindowShifts'),
-        # ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
-        # ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
-      # )),
       loop = saveFrame.get('ccpn_spectrum_dimension')
       referencePointDict = {}
       if loop:
@@ -1587,14 +1562,6 @@ class CcpnNefReader:
           ll.sort()
           dataStoreParams['blockSizes'] = [tt[1] for tt in ll]
 
-
-
-
-      # NBNB TBD set up expPrototype links
-
-
-
-
       # Make ExpDimRefs
       for expDim in experiment.sortedExpDimRefs():
         expDim.newExpDimRef(**expDimRefParams[expDim.dim])
@@ -1611,6 +1578,15 @@ class CcpnNefReader:
         refValue = dataDimRef.pointToValue(refPoint)
         dataDimRef.refPoint = refPoint
         dataDimRef.refValue = refValue
+
+      # Set refExpDimRef links
+      if refExperiment is not None:
+        for refExpDimRef in refExperiment.sortedRefExpDimRefs():
+          name =self.refExpDimRefCodeMap[refExpDimRef]
+          for expDim in experiment.sortedExpDims():
+            expDimRef = expDim.findFirstExpDimRef(name=name)
+            if expDimRef is not None:
+              expDimRef.refExpDimRef = refExpDimRef
 
       # read  dimension transfer data
       loop = saveFrame.get('nef_spectrum_dimension_transfer')
@@ -1629,7 +1605,7 @@ class CcpnNefReader:
         dataStoreParams['numPoints'] = [x.numPoints for x in dataSource.sortedDataDims()]
         dataSource.addDataStore(filePath, **dataStoreParams)
 
-    # Make PeakLst
+    # Make PeakList
     if 'serial' in peakListParams:
       serial = peakListParams.pop('serial')
     else:
@@ -1885,11 +1861,7 @@ class CcpnNefReader:
 
     result = []
 
-    dimensionCount = peakList.spectrum.dimensionCount
-
-    mapping = nef2CcpnMap[loop.name]
-    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-
+    dimensionCount = peakList.dataSource.numDim
     # Get name map for per-dimension attributes
     max = dimensionCount + 1
     multipleAttributes = {
@@ -1906,10 +1878,15 @@ class CcpnNefReader:
 
     for row in loop.data:
 
-      parameters = self._parametersFromLoopRow(row, map2)
+      serial = row['peak_id']
+      parameters = {}
+      parameters['volume'] = row.get('volume')
+      parameters['height'] = row.get('height')
+      parameters['figureOfMerit'] = row.get('ccpn_figure_of_merit')
+      parameters['annotation'] = row.get('ccpn_annotation')
+      parameters['details'] = row.get('ccpn_comment')
 
       # get or make peak
-      serial = parameters['serial']
       peak = peaks.get(serial)
       # TODO check if peak parameters are the same for all rows, and do something about it
       # For now we simply use the first row that appears
@@ -1917,10 +1894,24 @@ class CcpnNefReader:
         # start of a new peak
 
         # finalise last peak
+        NBNB TODO
         if result and assignedNmrAtoms:
           # There is a peak in result, and the peak has assignments to set
           result[-1].assignedNmrAtoms = assignedNmrAtoms
           assignedNmrAtoms.clear()
+
+        # Make new peak
+        peak = peakList.newPeak(**parameters)
+        resetSerial(peak, serial)
+        peaks[serial] = peak
+        result.append(peak)
+
+        # Add dimension attributes
+        values = tuple(row.get(x) for x in multipleAttributes['position'])
+        errors = tuple(row.get(x) for x in multipleAttributes['positionError'])
+        for ii,peakDim in enumerate(peak.sortedPeakDims()):
+          peakDim.value = values[ii]
+          peakDim.valueError = errors[ii]
 
         # make new peak  multipleAttributes
         # parameters['position'] = row._get('position')[:dimensionCount]
@@ -1936,30 +1927,29 @@ class CcpnNefReader:
       sequenceCodes = tuple(row.get(x) for x in multipleAttributes['sequenceCodes'])
       residueTypes = tuple(row.get(x) for x in multipleAttributes['residueTypes'])
       atomNames = tuple(row.get(x) for x in multipleAttributes['atomNames'])
-      # chainCodes = row._get('chain_code')[:dimensionCount]
-      # sequenceCodes = row._get('sequence_code')[:dimensionCount]
-      # residueTypes = row._get('residue_name')[:dimensionCount]
-      # atomNames = row._get('atom_name')[:dimensionCount]
       assignments = zip(chainCodes, sequenceCodes, residueTypes, atomNames)
       nmrAtoms = []
       foundAssignment = False
       for tt in assignments:
         if all(x is None for x in tt):
           # No assignment
-          nmrAtoms.append(None)
+          nmrAtoms.append((None,))
         elif tt[1] and tt[3]:
           # Enough for an assignment - make it
           foundAssignment = True
-          nmrResidue = self.produceNmrResidue(*tt[:3])
-          nmrAtom = self.produceNmrAtom(nmrResidue, tt[3])
-          nmrAtoms.append(nmrAtom)
+          # Necessary to create Resonncegroup, if it does not exist:
+          dummy = self.fetchResidueMap(*tt[:3])
+          resonances = self.fetchAtomMap([tt[0] or self.defaultChainCode,
+                                         tt[1], tt[3]])
+          nmrAtoms.append(resonances)
         else:
           # partial and unusable assignment
           self.warning("Uninterpretable Peak assignment for peak %s: %s. Set to None"
                        % (peak.serial, tt))
-          nmrAtoms.append(None)
+          nmrAtoms.append((None,))
       if foundAssignment:
-        assignedNmrAtoms.append(nmrAtoms)
+        resonanceTuples = itertools.product(*nmrAtoms)
+        assignedNmrAtoms.extend(resonanceTuples)
 
     # finalise last peak
     if result and assignedNmrAtoms:

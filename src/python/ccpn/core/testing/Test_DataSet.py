@@ -234,7 +234,7 @@ class DataTest(WrapperTesting):
     data1.setParameter('pandasDataframe', self.Panda)
     undo.undo()
     undo.redo()
-    self.assertTrue(isinstance(data1.parameters['pandasDataframe'], self.Panda))
+    self.assertTrue(isinstance(data1.parameters['pandasDataframe'], self.Panda.__class__))
 
   def test_EnsembleData_parameter(self):
     """
@@ -256,6 +256,6 @@ class DataTest(WrapperTesting):
     data1.setParameter('EnsembleData', self.data)
     undo.undo()
     undo.redo()
-    self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data))
+    self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data.__class__))
 
 

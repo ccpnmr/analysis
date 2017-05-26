@@ -260,7 +260,7 @@ class EnsembleData(pd.DataFrame):
   def _structureEnsemble(self) -> typing.Optional['StructureEnsemble']:
     """Get containing StructureEnsemble, whether container is StructureEnsemble or Model"""
     result = self.__containingObject
-    if hasattr(result, 'className' and result.className == 'Model'):
+    if hasattr(result, 'className') and result.className == 'Model':
       result = result.structureEnsemble
     #
     return result
@@ -510,31 +510,12 @@ class EnsembleData(pd.DataFrame):
     else:
       try:
         if self.shape[0] == selector.shape[0]:
-          # return self.ix[selector, columnNames]
-
-          # global _indexOverride
-          # _indexOverride = True                   # ejb - just need existence
           newEx = self.ix[selector, columnNames]
-          # del _indexOverride
           return newEx
-
-          # return self.ix[selector, ('Index',)+columnNames]    # ejb
-          # newEx = self.ix[selector, ('IndexTemp',)+columnNames]   # Pandas should rename it as _1
-          # try:
-          #   self.__global__._indexOverride = True
-          #   newEx.drop('IndexTemp', axis=1, inplace=True)     # drop the rogue column
-          #   del self.__global__._indexOverride
-          # except:
-          #   pass
-          # return newEx
-          # need to remove the bad column from newEx
-          # return self.ix[selector, columnNames+('Index',)]
-
 
         else:
           raise ValueError('Selectors must be the same length as the number of atom records.')
       except AttributeError:
-        # raise ValueError("selector must be an integer, a Pandas series, or None")
         raise ValueError("selector must be a Pandas series or None")
 
 
@@ -567,6 +548,32 @@ class EnsembleData(pd.DataFrame):
     nextIndex =  max(self.index) + 1 if self.shape[0] else 1
     self.setValues(nextIndex, **kwargs)
 
+
+  # TODO ED: This is a draft, to get row info from either namedtuples or series.
+  # COnsider if useful?
+  # def addRows(self, rows):
+  #   """
+  #   Add rows, from a list of namedtuples of Pandas series
+  #   """
+  #
+  #   # TODO add undo, echoing, notification, index handling
+  #   if not rows:
+  #     return
+  #
+  #   nextIndex =  max(self.index) + 1 if self.shape[0] else 1
+  #   if hasattr(rows[0], '_asdict'):
+  #     # series of namedtuples or equivalent
+  #     for row in rows:
+  #       self.setValues(nextIndex, **row._asdict())
+  #       nextIndex += 1
+  #   elif hasattr(rows[0], 'to_dict'):
+  #     for row in rows:
+  #       self.setValues(nextIndex, **row.to_dict())
+  #       nextIndex += 1
+  #   else:
+  #     raise TypeError("Object %s lacks 'asdict' and 'to_dict' method")
+
+
   def _insertRow(self, *args, **kwargs):
     """
     Currently called by undo to re-insert a row.
@@ -584,6 +591,24 @@ class EnsembleData(pd.DataFrame):
     neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
     self.index = neworder                       # set the new index
     self.sort_index(inplace=True)                     # and re-sort the table
+
+  def deleteSelectedRows(self, selector):
+    """Delete rows identified by selector.
+
+    Selector created, e.g. by self.selector)"""
+
+    # TODO NBNB add echo handling,undo, notifier, index handling
+
+    selection = self.extract(selector)
+    if not selection.shape[0]:
+      # nothing to delete
+      return
+
+    # To use in undo, possibly together with addRows??
+    # NBNB index handling!
+    deleteRows = selection.as_namedtuples()
+
+    self.drop(selector, inplace=True)
 
   def deleteRow(self, *args, **kwargs):
     """

@@ -39,22 +39,22 @@ from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 # checkGetSetAttr
 #=========================================================================================
 
-def checkGetSetAttr(cls, func, funcAttribute, funcParam, *funcOut):
+def checkGetSetAttr(cls, obj, attrib, value, *funcOut):
   """
   Test that the object has a populated attribute.
   Read the attribute using getattr(), if it not populated then an error is raised.
   If populated, then test the setter/getter are consistent.
 
-  :param func:
-  :param funcAttribute:
-  :param funcParam:
+  :param obj:
+  :param attrib:
+  :param value:
   """
-  thisParam = getattr(func, funcAttribute)
-  setattr(func, funcAttribute, funcParam)
+  thisParam = getattr(obj, attrib)
+  setattr(obj, attrib, value)
   if not funcOut:
-    cls.assertEqual(getattr(func, funcAttribute), funcParam)
+    cls.assertEqual(getattr(obj, attrib), value)
   else:
-    cls.assertEqual(getattr(func, funcAttribute), funcOut[0])
+    cls.assertEqual(getattr(obj, attrib), funcOut[0])
 
 
 #=========================================================================================

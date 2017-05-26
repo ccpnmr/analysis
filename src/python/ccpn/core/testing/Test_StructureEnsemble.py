@@ -342,7 +342,6 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
                  modelNumber=5)
     ))
     undo.undo()            # ejb - this now does a group undo
-    return
 
     namedTuples = self.data.as_namedtuples()
     AtomRecord = namedTuples[0].__class__

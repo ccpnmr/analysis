@@ -770,3 +770,38 @@ class Test_PolymerSubstance(WrapperTesting):
   #   self.assertEqual(s.startNumber, 7)
   #   s.startNumber = 8
   #   self.assertEqual(s.startNumber, 8)
+
+  def test_SubstanceExists(self):
+    """
+    Test creation of substances of different type with the same name/different label
+    """
+    s = self.project.newSubstance('test substance Molecule', substanceType='Molecule')
+
+    self.assertEqual(s.pid, 'SU:test substance Molecule.')
+    self.assertEqual(s.longPid, 'Substance:test substance Molecule.')
+    self.assertEqual(s.shortClassName, 'SU')
+
+    with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+      s = self.project.newSubstance('test substance Molecule', substanceType='Material', labelling='different')
+
+    with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+      s = self.project.newSubstance('test substance Molecule', substanceType='Cell', labelling='different')
+
+    with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+      s = self.project.newSubstance('test substance Molecule', substanceType='Composite', labelling='different')
+
+    s = self.project.newSubstance('test substance Cell', substanceType='Cell')
+
+    self.assertEqual(s.pid, 'SU:test substance Cell.')
+    self.assertEqual(s.longPid, 'Substance:test substance Cell.')
+    self.assertEqual(s.shortClassName, 'SU')
+
+    with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
+      s = self.project.newSubstance('test substance Cell', substanceType='Molecule', labelling='different')
+
+  def test_Substance_atom(self):
+    """
+    Test that the spectrumHits are correct
+    """
+    pass
+

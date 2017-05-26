@@ -268,7 +268,7 @@ class TestSample_setUp(WrapperTesting):
     """
     self.assertEqual(str(self.newSample.spectra), '()')
 
-  def test_properties_Sample_spectraHits(self):
+  def test_properties_Sample_spectrumHits(self):
     """
     Test that Sample attribute .spectrumHits is populated.
     """

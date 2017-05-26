@@ -162,4 +162,19 @@ class Test_Substance_SpectrumLink(WrapperTesting):
     spectrum.referenceSubstance = substance1
     substance2 = spectrum.referenceSubstance
 
+#=========================================================================================
+# Test_Substance_SpectrumLink
+#=========================================================================================
 
+class Test_Substance_LoadSubstanceRename(WrapperTesting):
+  """
+  Test renaming loaded file with spectrumHits
+  """
+  projectPath = None
+
+  def test_Substance_LoadRename(self):
+    """
+    Test renaming of Substance and links
+    """
+    self.loadData('../../../data/testProjects/AnalysisScreen_Demo1/Lookup_Demo.xls')
+    self.assertGreater(len(self.project.substances), 0)

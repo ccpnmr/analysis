@@ -22,14 +22,15 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import collections
 import datetime
 import numpy
+import pandas as pd
 from ccpn.util.Tensor import Tensor
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
@@ -217,5 +218,44 @@ class DataTest(WrapperTesting):
       self.assertAlmostEquals(tensor.axial, -3.0)
       self.assertAlmostEquals(tensor.rhombic, 0.9)
 
+  def test_Pandas_parameter(self):
+    """
+    Test that a Pandas Dataframe can be stored as a Dataset parameter
+    """
+    dataSet = self.project.newDataSet()
+    data1 = dataSet.newData(name='Pandas', attachedObjectPid=dataSet.pid)
+    self.assertEqual(data1.attachedObject, dataSet)
+    undo = self.project._undo
+    self.project.newUndoPoint()
+
+    # generate Pandas Dataframe
+    self.Panda = pd.DataFrame(numpy.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
+
+    data1.setParameter('pandasDataframe', self.Panda)
+    undo.undo()
+    undo.redo()
+    self.assertTrue(isinstance(data1.parameters['pandasDataframe'], self.Panda))
+
+  def test_EnsembleData_parameter(self):
+    """
+    Test that an EnsembleData can be stored as a Dataset parameter
+    """
+    dataSet = self.project.newDataSet()
+    data1 = dataSet.newData(name='EnsembleData', attachedObjectPid=dataSet.pid)
+    self.assertEqual(data1.attachedObject, dataSet)
+    undo = self.project._undo
+    self.project.newUndoPoint()
+
+    # generate simplew EnsembleData
+    self.ensemble = self.project.newStructureEnsemble()
+    self.data = self.ensemble.data
+    self.data['y'] = [2, 1, 2, 1, 2, 1, 2, 1] * 2
+    self.data['z'] = None
+    self.data['modelNumber'] = [2, 2, 2, 2, 1, 1, 1, 1] * 2
+
+    data1.setParameter('EnsembleData', self.data)
+    undo.undo()
+    undo.redo()
+    self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data))
 
 

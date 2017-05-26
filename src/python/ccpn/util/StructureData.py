@@ -260,7 +260,7 @@ class EnsembleData(pd.DataFrame):
   def _structureEnsemble(self) -> typing.Optional['StructureEnsemble']:
     """Get containing StructureEnsemble, whether container is StructureEnsemble or Model"""
     result = self.__containingObject
-    if hasattr(result, 'className' and result.className == 'Model'):
+    if hasattr(result, 'className') and result.className == 'Model':
       result = result.structureEnsemble
     #
     return result

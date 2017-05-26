@@ -34,8 +34,9 @@ Qkeys = QtGui.QKeySequence
 DropHereLabel = 'Drop here SP or SG'
 # styleSheets
 transparentStyle = "background-color: transparent; border: 0px solid transparent"
-selectMethodLabel = '< Select Method >'
-
+selectPipeLabel = '< Select Pipe >'
+preferredPipeLabel = '-- Preferred Pipes --'
+otherPipeLabel =     '-- Other Pipes --'
 
 class PipelineWorker(QtCore.QObject):
   'Object managing the  auto run pipeline simulation'
@@ -105,7 +106,7 @@ class GuiPipeline(CcpnModule):
     self.guiPipes = guiPipes
     self.currentRunningPipeline = []
     self.currentGuiPipesNames = []
-    self.templates = self._getPipelineTemplates(templates)
+    self.pipelineTemplates = templates
 
 
 
@@ -124,6 +125,7 @@ class GuiPipeline(CcpnModule):
     self._setPipelineThread()
     self._setSecondaryLayouts()
 
+    # start the pipelineWorker
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
 
 
@@ -135,9 +137,11 @@ class GuiPipeline(CcpnModule):
 
   @guiPipes.setter
   def guiPipes(self, guiPipes):
-    '''Set the guiPipes to the guiPipeline
-    
     '''
+    Set the guiPipes to the guiPipeline
+    :param guiPipes:  GuiPipe class
+    '''
+
     if guiPipes is not None:
       allGuiPipes = []
       for guiPipe in guiPipes:
@@ -146,53 +150,29 @@ class GuiPipeline(CcpnModule):
     else:
       self._guiPipes = []
 
-  # @property
-  # def preferredGuiPipes(self):
-  #   return self._preferredGuiPipes
-  #
-  # @preferredGuiPipes.setter
-  # def preferredGuiPipes(self, preferredGuiPipes):
-  #   preferredGuiPipes = {}
-  #   if preferredGuiPipes is None:
-  #     for guiPipe in self.guiPipes:
-  #       if guiPipe is not None:
-  #         if guiPipe.preferredMethod:
-  #           preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
-  #   else:
-  #     for guiPipe in preferredGuiPipes:
-  #       if guiPipe is not None:
-  #         if guiPipe.preferredMethod:
-  #           preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
-  #   self._preferredGuiPipes = preferredGuiPipes
+  #  TODO put notifier to update the pulldown when guiPipes chenage
 
-  def _getPipelineTemplates(self, templates):
-    if templates is not None:
-      return templates
+
+  @property
+  def pipelineTemplates(self):
+    return self._pipelineTemplates
+
+  @pipelineTemplates.setter
+  def pipelineTemplates(self, pipelineTemplates):
+    '''
+    Set the pipelineTemplates to the guiPipeline
+    :param pipelineTemplates:  [{templateName: templateClass}]
+    '''
+
+    if pipelineTemplates is not None:
+      self._pipelineTemplates = pipelineTemplates
     else:
-      return {'Empty':'Empty'}
+      self._pipelineTemplates = []
 
-  def _setAppSpecificMethods(self, applicationName):
-    '''set data in pull down if selected application specific guiPipe '''
-    filteredMethod = [selectMethodLabel,]
-    for guiPipe in self._guiPipes.values():
-      if hasattr(guiPipe, 'applicationsSpecific'):
-        applicationsSpecific = guiPipe.applicationsSpecific(guiPipe)
-        if applicationName in applicationsSpecific:
-          filteredMethod.append(guiPipe.pipeName(guiPipe))
-      elif hasattr(guiPipe, 'preferredMethod'):
-        if guiPipe.preferredMethod:
-          print(guiPipe)
-          filteredMethod.append(guiPipe)
-    self.pipePulldown.setData(sorted(filteredMethod))
-    self.pipePulldown.insertSeparator(3)
-
-  # def _setPreferredGuiPipes(self):
+      #  TODO put notifier to update the pulldown when guiPipes chenage
 
 
-  def keyPressEvent(self, KeyEvent):
-    ''' Run the pipeline by pressing the enter key '''
-    if KeyEvent.key() == Qt.Key_Enter:
-      self.runPipeline()
+
 
 
   ####################################_________ GUI SETUP ____________###########################################
@@ -241,8 +221,8 @@ class GuiPipeline(CcpnModule):
     menu = QtGui.QMenu()
     templatesItem = menu.addAction('Templates')
     subMenu = QtGui.QMenu()
-    if self.templates is not None:
-      for item in self.templates.keys():
+    if self.pipelineTemplates is not None:
+      for item in self.pipelineTemplates:
         templatesSubItem = subMenu.addAction(item)
       openItem = menu.addAction('Open...', self._openSavedPipeline)
       templatesItem.setMenu(subMenu)
@@ -264,9 +244,9 @@ class GuiPipeline(CcpnModule):
 
 
   def _setDataPipesPulldown(self):
-    self.pipePulldownData = [selectMethodLabel,]
-    preferredGuiPipes = ['Preferred Pipes']
-    otherGuiPipes = ['Others Pipes']
+    self.pipePulldownData = [selectPipeLabel, ]
+    preferredGuiPipes = [preferredPipeLabel, ]
+    otherGuiPipes = [otherPipeLabel, ]
 
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
@@ -275,13 +255,16 @@ class GuiPipeline(CcpnModule):
             preferredGuiPipes.append(guiPipe.pipeName(guiPipe))
           else:
             otherGuiPipes.append(guiPipe.pipeName(guiPipe))
-    countPreferredGuiPipes = len(preferredGuiPipes)
+
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
-
     self.pipePulldown.setData(self.pipePulldownData)
-    self.pipePulldown.model().item(0).setEnabled(False)
+
+    disablePreferredPipeLabel = self.pipePulldown.getItemIndex(preferredPipeLabel)
+    self.pipePulldown.model().item(disablePreferredPipeLabel).setEnabled(False)
+    disableOtherPipeLabel = self.pipePulldown.getItemIndex(otherPipeLabel)
+    self.pipePulldown.model().item(disableOtherPipeLabel).setEnabled(False)
 
 
 
@@ -325,8 +308,49 @@ class GuiPipeline(CcpnModule):
       for guiPipe in guiPipes:
         guiPipe.closeBox()
 
+  def keyPressEvent(self, KeyEvent):
+    ''' Run the pipeline by pressing the enter key '''
+    if KeyEvent.key() == Qt.Key_Enter:
+      self.runPipeline()
+
+  def _getSerialName(self, guiPipeName):
+    self.currentGuiPipesNames.append(guiPipeName)
+    count = len(self.pipelineArea.findAll()[1])
+    if count == 0:
+      self.currentGuiPipesNames = []
+    counter = collections.Counter(self.currentGuiPipesNames)
+    return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
 
 
+  ####################################_________ GUI CallBacks ____________###########################################
+
+  def _selectMethod(self, selected):
+
+    guiPipeName = self._getSerialName(str(selected))
+    self._addGuiPipe(guiPipeName, selected)
+    self.pipePulldown.setIndex(0)
+
+
+
+  def _addGuiPipe(self, name, selected):
+    for guiPipe in self.guiPipes:
+      if guiPipe.pipeName(guiPipe) == selected:
+        position = self.pipelineSettingsParams['addPosit']
+        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,
+                                      project=self.project)
+        self.pipelineArea.addDock(self.pipelineWidget, position=position)
+        autoActive = self.pipelineSettingsParams['autoActive']
+        self.pipelineWidget.label.checkBox.setChecked(autoActive)
+
+  def runPipeline(self):
+    self.currentRunningPipeline = []
+    if len(self.pipelineArea.findAll()[1]) > 0:
+      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+      for guiPipe in guiPipes:
+        if guiPipe.isActive() and hasattr(guiPipe, 'runMethod'):
+          result = guiPipe.runMethod()
+          guiPipe = (guiPipe, result)
+          self.currentRunningPipeline.append(guiPipe)
 
   ####################################_________ Thread  SETUP ____________##############################################
   def _setPipelineThread(self):
@@ -411,49 +435,7 @@ class GuiPipeline(CcpnModule):
 
 
 
-
-  def runPipeline(self):
-    self.currentRunningPipeline = []
-    if len(self.pipelineArea.findAll()[1])>0:
-      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-      for guiPipe in guiPipes:
-        if guiPipe.isActive() and hasattr(guiPipe, 'runMethod'):
-          result = guiPipe.runMethod()
-          guiPipe = (guiPipe, result)
-          self.currentRunningPipeline.append(guiPipe)
-
-
-  def _selectMethod(self, selected):
-
-
-
-    guiPipeName = self._getSerialName(str(selected))
-    self._addGuiPipe(guiPipeName, selected)
-    self.pipePulldown.setIndex(0)
-
-  def _getSerialName(self, guiPipeName):
-    self.currentGuiPipesNames.append(guiPipeName)
-    count = len(self.pipelineArea.findAll()[1])
-    if count == 0:
-      self.currentGuiPipesNames = []
-    counter = collections.Counter(self.currentGuiPipesNames)
-    return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
-
-
-  def _addGuiPipe(self, name, selected):
-    print(self._guiPipes, selected)
-    for guiPipe in self.guiPipes:
-      if guiPipe.pipeName(guiPipe) == selected:
-        position = self.pipelineSettingsParams['addPosit']
-        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None, project=self.project)
-        self.pipelineArea.addDock(self.pipelineWidget, position=position)
-        autoActive = self.pipelineSettingsParams['autoActive']
-        self.pipelineWidget.label.checkBox.setChecked(autoActive)
-
-
-
-
-  ''' PIPELINE SETTINGS '''
+  ####################################_________ GUI PIPELINE SETTINGS ____________####################################
 
   def _pipelineBoxesWidgetParams(self, currentBoxesNames):
     self.savePipelineParams = []
@@ -641,41 +623,6 @@ class GuiPipeline(CcpnModule):
             print(obj, 'Not available.')
 
 
-    # self.interactor.sources = [s.text() for s in self.inputDataList.selectedItems()]
-
-
-  #
-  # def getData(self):
-  #   """
-  #   Should this move to the interactors???
-  #   """
-  #   if self.project is not None:
-  #     return [self.project.getByPid('SP:{}'.format(source)) for source in self.interactor.sources]
-  #   else:
-  #     return []
-  #
-  # def setInputDataList(self, inputData=None):
-  #   self.inputDataList.clear()
-  #   if inputData is not None:
-  #     self.inputDataList.setObjects(inputData, name='pid')
-  #     sdo = [s.name for s in inputData]
-  #     self.inputDataList.addItems(sdo)
-  #
-  #
-  # def getInputData(self):
-  #   '''Get 1D Spectra from project'''
-  #   sd = []
-  #   if self.project is not None:
-  #     sd += [s for s in self.project.spectra if
-  #            (len(s.axisCodes) == 1) and (s.axisCodes[0].startswith('H'))]
-  #   return sd
-  #
-  # def _refreshInputDataList(self, *args):
-  #   try:
-  #     self.setInputDataList(self.getInputData())
-  #   except:
-  #     print('No input data available')
-
 
 class FilterMethods(CcpnDialog):
 
@@ -736,7 +683,7 @@ class FilterMethods(CcpnDialog):
           cb.setChecked(False)
 
   def _getSelectedMethods(self):
-    guiPipes = [selectMethodLabel, ]
+    guiPipes = [selectPipeLabel, ]
     for cb in self.allMethodCheckBoxes:
       if cb.isChecked():
         guiPipe = cb.text()
@@ -758,6 +705,7 @@ class FilterMethods(CcpnDialog):
   def _okButtonCallBack(self):
     self.pipelineModule.pipePulldown.setData(self._getSelectedMethods())
     self.accept()
+
 
 class PipelineInteractor:
 
@@ -787,6 +735,8 @@ class PipelineInteractor:
 
 
 
+
+
 from collections import OrderedDict
 
 pipelineFilesDirName = '/guiPipeline/'
@@ -810,7 +760,9 @@ if __name__ == '__main__':
   from ccpn.AnalysisScreen import guiPipeline as _pm
   pipelineMethods = _pm.__all__
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  module = GuiPipeline(mainWindow=None,  guiPipes=pipelineMethods, templates=templates)
+  module = GuiPipeline(mainWindow=None, guiPipes = pipelineMethods)
+
+
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)

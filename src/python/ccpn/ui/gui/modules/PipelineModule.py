@@ -2,6 +2,7 @@ import collections
 import json
 import time
 import os
+
 from collections import OrderedDict
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Spectrum import Spectrum
@@ -15,7 +16,6 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, LineEditButtonDialog
-from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -25,9 +25,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.DropBase import DropBase
 
 
 Qt = QtCore.Qt
@@ -64,20 +62,24 @@ class PipelineWorker(QtCore.QObject):
     print('Pipeline Thread stopped')
 
 
+
 class GuiPipeline(CcpnModule):
 
   includeSettingsWidget = True
   maxSettingsState = 2
   settingsPosition = 'left'
   className = 'GuiPipeline'
+  moduleName = 'Pipeline-'
 
-  def __init__(self, mainWindow, name='', pipelineMethods=None, templates=None, appSpecificMethods=True, **kw):
+  def __init__(self, mainWindow, name='', guiPipes=None, templates=None, **kw):
     super(GuiPipeline, self)
 
+    # this guarantees to open the module as Gui testing
     self.project = None
     self.application = None
-    self.savingDataPath = os.path.expanduser("~")+'/newPipeline.json'
+    self.savingDataPath = os.path.expanduser("~")+'/'
 
+    # set project related variables
     if mainWindow is not None:
       self.mainWindow = mainWindow
       self.project = self.mainWindow.project
@@ -85,72 +87,91 @@ class GuiPipeline(CcpnModule):
       self.moduleArea = self.mainWindow.moduleArea
       self.preferences = self.application.preferences
       self.current = self.application.current
-      # self._spectrumNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'Spectrum',
-      #                                   self._refreshInputDataList)
 
-
-      nameCount = 0
-
-      for module in self.mainWindow.moduleArea.findAll()[1].values():
-        if hasattr(module, 'runPipeline'):
+      # FIXME hack to give serial number to the pipeline module
+      nameCount = 1
+      for module in self.mainWindow.moduleArea.currentModules:
+        if isinstance(module, GuiPipeline):
           nameCount += 1
+      name = self.moduleName + str(nameCount)
 
-      name = 'Pipeline-' + str(nameCount)
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
+    self._inputData = set()
+    self.guiPipes = guiPipes
+    pp  = []
+    for guiPipe in guiPipes:
+      if guiPipe.preferredMethod:
+       pp.append(guiPipe)
+    self.preferredGuiPipes = pp
+
+
+
+
     self.currentPipelineBoxNames = []
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
-                                               ('savePath', self.savingDataPath), #str(self.generalPreferences.dataPath)),
+                                               ('savePath', self.savingDataPath),
                                                ('autoRun', False),('addPosit', 'bottom'),
                                                ('autoActive', True),])
 
     self.templates = self._getPipelineTemplates(templates)
-    self.pipelineMethods = self._getPipelineMethods(pipelineMethods)
+    # self.pipelineMethods = self._getPipelineMethods(pipelineMethods)
 
+    # init the CcpnModule
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
+    # set the graphics
     self._setIcons()
     self._setMainLayout()
     self._setPipelineThread()
     self._setSecondaryLayouts()
-    if appSpecificMethods:
-      self.methodsPreferences = self._setAppSpecificMethods('AnalysisScreen')
+
+    # FIXME hack to to better
+    # self.guiPipesPreferences = self._setAppSpecificMethods('AnalysisScreen')
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
     self.currentRunningPipeline = []
 
     # self.interactor = PipelineInteractor(self.application)
-    self._inputData = set()
 
+  @property
+  def guiPipes(self):
+    return self._guiPipes
 
-  def _setModuleName(self):
-    pipelineModules = []
-    for module in self.mainWindow.moduleArea.findAll()[1].values():
-      if hasattr(module, 'GuiPipeline'):
-        print('GuiPipeline')
-      if hasattr(module, 'runPipeline'):
-        print('runPipeline')
-      if isinstance(module, self):
-        print('isIST')
-
-
-  def _getPipelineMethods(self, methods):
+  @guiPipes.setter
+  def guiPipes(self, guiPipes):
+    '''Set the guiPipes to the guiPipeline
+    guiPipes = dictionary of  {pipeName: pipeObject}
     '''
-    methods = {name: object}
-    name = str will appear in the method pulldown
-    obj = any subclass of pipeline Box
-    '''
-    if methods is not None:
-      all = []
-      for method in methods:
-        i = (method.methodName(method), method)
-        all.append(i)
-      return dict(all)
-
+    if guiPipes is not None:
+      allGuiPipes = {}
+      for guiPipe in guiPipes:
+        allGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+      self._guiPipes = allGuiPipes
     else:
-      return {}
+      self._guiPipes = {}
+
+  @property
+  def preferredGuiPipes(self):
+    return self._preferredGuiPipes
+
+  @preferredGuiPipes.setter
+  def preferredGuiPipes(self, preferredGuiPipes):
+    preferredGuiPipes = {}
+    if preferredGuiPipes is None:
+      for guiPipe in self.guiPipes:
+        if guiPipe is not None:
+          if guiPipe.preferredMethod:
+            preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+    else:
+      for guiPipe in preferredGuiPipes:
+        if guiPipe is not None:
+          if guiPipe.preferredMethod:
+            preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+
+    self._preferredGuiPipes = preferredGuiPipes
 
   def _getPipelineTemplates(self, templates):
     if templates is not None:
@@ -159,25 +180,30 @@ class GuiPipeline(CcpnModule):
       return {'Empty':'Empty'}
 
   def _setAppSpecificMethods(self, applicationName):
-    '''set data in pull down if selected application specific method '''
+    '''set data in pull down if selected application specific guiPipe '''
     filteredMethod = [selectMethodLabel,]
-    for method in self.pipelineMethods.values():
-      if hasattr(method, 'applicationsSpecific'):
-        applicationsSpecific = method.applicationsSpecific(method)
+    for guiPipe in self._guiPipes.values():
+      if hasattr(guiPipe, 'applicationsSpecific'):
+        applicationsSpecific = guiPipe.applicationsSpecific(guiPipe)
         if applicationName in applicationsSpecific:
-          filteredMethod.append(method.methodName(method))
-      elif hasattr(method, 'preferredMethod'):
-        if method.preferredMethod:
-          print(method)
-          filteredMethod.append(method)
+          filteredMethod.append(guiPipe.pipeName(guiPipe))
+      elif hasattr(guiPipe, 'preferredMethod'):
+        if guiPipe.preferredMethod:
+          print(guiPipe)
+          filteredMethod.append(guiPipe)
+    self.pipePulldown.setData(sorted(filteredMethod))
+    self.pipePulldown.insertSeparator(3)
 
-    self.methodPulldown.setData(sorted(filteredMethod))
+  # def _setPreferredGuiPipes(self):
+
 
   def keyPressEvent(self, KeyEvent):
-
+    ''' Run the pipeline by pressing the enter key '''
     if KeyEvent.key() == Qt.Key_Enter:
       self.runPipeline()
 
+
+  ####################################_________ GUI SETUP ____________###########################################
   def _setIcons(self):
     self.settingIcon = Icon('icons/applications-system')
     self.saveIcon = Icon('icons/save')
@@ -185,7 +211,6 @@ class GuiPipeline(CcpnModule):
     self.goIcon = Icon('icons/play')
     self.stopIcon = Icon('icons/stop')
     self.filterIcon = Icon('icons/edit-find')
-
 
   def _setMainLayout(self):
     self.mainFrame = Frame(self.mainWidget, setLayout=False)
@@ -205,57 +230,19 @@ class GuiPipeline(CcpnModule):
     self._createSettingWidgets()
 
   def _createSettingButtonGroup(self):
+    self.nameLabel = Label(self, 'Pipeline Name:')
     self.pipelineNameLabel = Label(self, 'NewPipeline')
     self.settingButtons = ButtonList(self, texts=['', ''],
                                      callbacks=[self._openSavedPipeline, self._savePipeline],
                                      icons=[self.openRecentIcon, self.saveIcon],
                                      tipTexts=['', ''], direction='H')
+    self.settingFrameLayout.addWidget(self.nameLabel)
     self.settingFrameLayout.addWidget(self.pipelineNameLabel)
 
     self._addMenuToOpenButton()
     self.settingButtons.setStyleSheet(transparentStyle)
     self.settingFrameLayout.addStretch(1)
     self.settingFrameLayout.addWidget(self.settingButtons)
-
-  def _setPipelineThread(self):
-    self.pipelineThread = QtCore.QThread()
-    self.pipelineThread.start()
-    self.pipelineWorker = PipelineWorker()
-    self.pipelineWorker.moveToThread(self.pipelineThread)
-
-  def openJsonFile(self, path):
-    if path is not None:
-      with open(str(path), 'r') as jf:
-        data = json.load(jf)
-      return data
-
-  def _getPathFromDialogBox(self):
-    dialog = FileDialog(self, text="Open Pipeline",
-                        acceptMode=FileDialog.AcceptOpen)
-    return dialog.selectedFile()
-
-  def _getPipelineBoxesFromFile(self, params, boxesNames):
-    pipelineBoxes = []
-    for i in params:
-      for key, value in i.items():
-        if value[0].upper() in boxesNames:
-          pipelineMethod = self.pipelineMethods[key]
-          pipelineBox = pipelineMethod(parent=self, application=self.application, name = value[0], params = value[1])
-          pipelineBox.setActive(value[2])
-          pipelineBoxes.append(pipelineBox)
-    return pipelineBoxes
-
-  def _openSavedPipeline(self):
-
-    path = self._getPathFromDialogBox()
-    state, params, boxesNames, pipelineSettings = self.openJsonFile(path)
-    pipelineBoxes = self._getPipelineBoxesFromFile(params, boxesNames)
-    self._closeExistingPipelineBoxes()
-    for pipelineBox in pipelineBoxes:
-      self.pipelineArea.addBox(pipelineBox)
-    self.pipelineArea.restoreState(state)
-    self.pipelineSettingsParams = OrderedDict(pipelineSettings)
-    self._setSettingsParams()
 
   def _addMenuToOpenButton(self):
     openButton = self.settingButtons.buttons[0]
@@ -269,14 +256,114 @@ class GuiPipeline(CcpnModule):
       templatesItem.setMenu(subMenu)
     openButton.setMenu(menu)
 
-  def _closeExistingPipelineBoxes(self):
-    boxes = self.pipelineArea.findAll()[1].values()
-    if len(boxes)>0:
-      for box in boxes:
-        box.closeBox()
+
+  def _createPipelineWidgets(self):
+    self._addPipesPullDownWidget()
+    self._addGoButtonWidget()
+    self._addPipelineDropArea()
+
+
+  def _addPipesPullDownWidget(self):
+    self.pipePulldown = PulldownList(self, )
+    self.pipePulldown.setMinimumWidth(200)
+    self.goAreaLayout.addWidget(self.pipePulldown)
+    self._setDataPipesPulldown()
+    self.pipePulldown.installEventFilter(self)
+
+
+  def _setDataPipesPulldown(self):
+
+    self.pipePulldownData = [k for k in sorted(self.preferredGuiPipes.keys())]
+    self.pipePulldownData.insert(0, selectMethodLabel)
+    self.pipePulldown.setData(self.pipePulldownData)
+    self.pipePulldown.activated[str].connect(self._selectMethod)
+
+    self.pipePulldown.insertSeparator(2)
+
+  def eventFilter(self, source, event):
+    '''Filter to disable the wheel event in the guiPipes pulldown. Otherwise each scroll would add a guiPipe!'''
+    if event.type() == QtCore.QEvent.Wheel:
+      return True
+    return False
+
+  def _addGoButtonWidget(self):
+    '''
+    First Two button are reserved for autoRun mode. They are hidden if the setting autoRun is not checked.
+    NB the stop callback needs to be a lambda call
+
+    '''
+    self.goButton = ButtonList(self, texts=['','',''],icons=[self.stopIcon, self.goIcon, self.goIcon,],
+                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self.runPipeline],
+                               hAlign='c')
+    self.goButton.buttons[0].hide()
+    self.goButton.buttons[1].hide()
+    self.goButton.setStyleSheet(transparentStyle)
+    self.goAreaLayout.addWidget(self.goButton, )
+    self.goAreaLayout.addStretch(1)
+
+  def _addPipelineDropArea(self):
+    self.pipelineArea = PipelineDropArea()
+    scroll = ScrollArea(self)
+    scroll.setWidget(self.pipelineArea)
+    scroll.setWidgetResizable(True)
+    self.pipelineAreaLayout.addWidget(scroll)
+
+
+  def _closeAllGuiPipes(self):
+    guiPipes = self.pipelineArea.currentGuiPipes
+    if len(guiPipes) > 0:
+      for guiPipe in guiPipes:
+        guiPipe.closeBox()
+
+
+
+
+  ####################################_________ Thread  SETUP ____________##############################################
+  def _setPipelineThread(self):
+    self.pipelineThread = QtCore.QThread()
+    self.pipelineThread.start()
+    self.pipelineWorker = PipelineWorker()
+    self.pipelineWorker.moveToThread(self.pipelineThread)
+
+
+
+
+  ####################################_________ Saving Restoring  SETUP ____________####################################
+  def openJsonFile(self, path):
+    if path is not None:
+      with open(str(path), 'r') as jf:
+        data = json.load(jf)
+      return data
+
+  def _getPathFromDialogBox(self):
+    dialog = FileDialog(self, text="Open Pipeline",
+                        acceptMode=FileDialog.AcceptOpen)
+    return dialog.selectedFile()
+
+  def _getPipelineBoxesFromFile(self, params, guiPipesNames):
+    pipelineBoxes = []
+    for i in params:
+      for key, value in i.items():
+        if value[0].upper() in guiPipesNames:
+          pipelineMethod = self._guiPipes[key]
+          pipelineBox = pipelineMethod(parent=self, application=self.application, name = value[0], params = value[1])
+          pipelineBox.setActive(value[2])
+          pipelineBoxes.append(pipelineBox)
+    return pipelineBoxes
+
+  def _openSavedPipeline(self):
+    path = self._getPathFromDialogBox()
+    state, params, guiPipesNames, pipelineSettings = self.openJsonFile(path)
+    pipelineBoxes = self._getPipelineBoxesFromFile(params, guiPipesNames)
+    self._closeAllGuiPipes()
+    for pipelineBox in pipelineBoxes:
+      self.pipelineArea.addBox(pipelineBox)
+    self.pipelineArea.restoreState(state)
+    self.pipelineSettingsParams = OrderedDict(pipelineSettings)
+    self._setSettingsParams()
 
   def _savePipeline(self):
-    '''jsonData = [{pipelineArea.state}, [boxes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
+    '''jsonData = [{pipelineArea.state}, [guiPipes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
     print('Saving')
     currentBoxesNames = list(self.pipelineArea.findAll()[1].keys())
     if len(currentBoxesNames)>0:
@@ -311,108 +398,58 @@ class GuiPipeline(CcpnModule):
     except:
       print('File not saved. Insert a valid file path. E.g /yourPath/pipeline.json')
 
-  def _createPipelineWidgets(self):
-    self._addMethodPullDownWidget()
-    self._addGoButtonWidget()
-    self._addPipelineDropArea()
 
-  def _addMethodPullDownWidget(self):
-    self.methodPulldown = PulldownList(self, )
-    self.methodPulldown.setMinimumWidth(200)
-    self.goAreaLayout.addWidget(self.methodPulldown)
-    self.setMethodPullDownData()
-    self.methodPulldown.installEventFilter(self)
-
-
-
-  def setMethodPullDownData(self):
-    self.methodPulldownData = [k for k in sorted(self.pipelineMethods.keys())]
-    self.methodPulldownData.insert(0, selectMethodLabel)
-    self.methodPulldown.setData(self.methodPulldownData)
-    self.methodPulldown.activated[str].connect(self._selectMethod)
-    print(self.methodPulldown.objects)
-    self.methodPulldown.insertSeparator(2)
-
-  def eventFilter(self, source, event):
-    '''Filter to disable the wheel event in the methods pulldown. Otherwise each scroll would add a box!'''
-    if event.type() == QtCore.QEvent.Wheel:
-      return True
-    return False
-
-  def _addGoButtonWidget(self):
-    '''
-    First Two button are reserved for autoRun mode. They are hidden if the setting autoRun is not checked.
-    NB the stop callback needs to be a lambda call
-
-    '''
-    self.goButton = ButtonList(self, texts=['','',''],icons=[self.stopIcon, self.goIcon, self.goIcon,],
-                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self.runPipeline],
-                               hAlign='c')
-    self.goButton.buttons[0].hide()
-    self.goButton.buttons[1].hide()
-    self.goButton.setStyleSheet(transparentStyle)
-    self.goAreaLayout.addWidget(self.goButton, )
-    self.goAreaLayout.addStretch(1)
-
-  def _addPipelineDropArea(self):
-    self.pipelineArea = PipelineDropArea()
-    scroll = ScrollArea(self)
-    scroll.setWidget(self.pipelineArea)
-    scroll.setWidgetResizable(True)
-    self.pipelineAreaLayout.addWidget(scroll)
 
 
 
   def runPipeline(self):
     self.currentRunningPipeline = []
     if len(self.pipelineArea.findAll()[1])>0:
-      boxes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-      for box in boxes:
-        if box.isActive() and hasattr(box, 'runMethod'):
-          result = box.runMethod()
-          method = (box, result)
-          self.currentRunningPipeline.append(method)
+      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+      for guiPipe in guiPipes:
+        if guiPipe.isActive() and hasattr(guiPipe, 'runMethod'):
+          result = guiPipe.runMethod()
+          guiPipe = (guiPipe, result)
+          self.currentRunningPipeline.append(guiPipe)
 
 
   def _selectMethod(self, selected):
-
     if str(selected) == selectMethodLabel:
       return
+    guiPipeName = self._getSerialName(str(selected))
+    self._addGuiPipe(guiPipeName, selected)
+    self.pipePulldown.setIndex(0)
 
-    boxName = self._getSerialName(str(selected))
-    self._addMethodBox(boxName, selected)
-    self.methodPulldown.setIndex(0)
-
-  def _getSerialName(self, boxName):
-    self.currentPipelineBoxNames.append(boxName)
+  def _getSerialName(self, guiPipeName):
+    self.currentPipelineBoxNames.append(guiPipeName)
     count = len(self.pipelineArea.findAll()[1])
     if count == 0:
       self.currentPipelineBoxNames = []
     counter = collections.Counter(self.currentPipelineBoxNames)
-    return str(boxName) + '-' + str(counter[str(boxName)])
+    return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
 
 
-  def _addMethodBox(self, name, selected):
-
-    objMethod = self.pipelineMethods[selected]
+  def _addGuiPipe(self, name, selected):
+    print(self._guiPipes, selected)
+    objMethod = self._guiPipes[selected]
     position = self.pipelineSettingsParams['addPosit']
-
     self.pipelineWidget = objMethod(parent=self, application=self.application, name=name, params=None, project=self.project)
-
     self.pipelineArea.addDock(self.pipelineWidget, position=position)
     autoActive = self.pipelineSettingsParams['autoActive']
     self.pipelineWidget.label.checkBox.setChecked(autoActive)
+
+
 
 
   ''' PIPELINE SETTINGS '''
 
   def _pipelineBoxesWidgetParams(self, currentBoxesNames):
     self.savePipelineParams = []
-    for boxName in currentBoxesNames:
-      boxMethod = self.pipelineArea.docks[str(boxName)]
-      state = boxMethod.isActive()
-      params = boxMethod.getWidgetsParams()
-      newDict = {boxMethod.methodName(): (boxName, params, state)}
+    for guiPipeName in currentBoxesNames:
+      guiPipeMethod = self.pipelineArea.docks[str(guiPipeName)]
+      state = guiPipeMethod.isActive()
+      params = guiPipeMethod.getWidgetsParams()
+      newDict = {guiPipeMethod.pipeName(): (guiPipeName, params, state)}
       self.savePipelineParams.append(newDict)
     return self.savePipelineParams
 
@@ -657,17 +694,17 @@ class FilterMethods(CcpnDialog):
 
   def _addMethodCheckBoxes(self):
     self.allMethodCheckBoxes = []
-    for i, method in enumerate(self.pipelineModule.methodPulldownData[1:]):
-      self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(method), grid=(i + 1, 0))
+    for i, guiPipe in enumerate(self.pipelineModule.pipePulldownData[1:]):
+      self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe), grid=(i + 1, 0))
       self.allMethodCheckBoxes.append(self.spectrumCheckBox)
     self.updateMethodCheckBoxes()
     self.updateSelectAllCheckBox()
 
   def updateMethodCheckBoxes(self):
 
-    for method in self.pipelineModule.methodPulldown.texts:
+    for guiPipe in self.pipelineModule.pipePulldown.texts:
       for cb in self.allMethodCheckBoxes:
-        if cb.text() == method:
+        if cb.text() == guiPipe:
           cb.setChecked(True)
 
   def updateSelectAllCheckBox(self):
@@ -687,12 +724,12 @@ class FilterMethods(CcpnDialog):
           cb.setChecked(False)
 
   def _getSelectedMethods(self):
-    methods = [selectMethodLabel, ]
+    guiPipes = [selectMethodLabel, ]
     for cb in self.allMethodCheckBoxes:
       if cb.isChecked():
-        method = cb.text()
-        methods.append(method)
-    return sorted(methods)
+        guiPipe = cb.text()
+        guiPipes.append(guiPipe)
+    return sorted(guiPipes)
 
   def _setSelectionScrollArea(self):
     self.scrollArea = ScrollArea(self)
@@ -707,7 +744,7 @@ class FilterMethods(CcpnDialog):
     self.mainLayout.addWidget(self.applyCancelButtons, 2, 1,)
 
   def _okButtonCallBack(self):
-    self.pipelineModule.methodPulldown.setData(self._getSelectedMethods())
+    self.pipelineModule.pipePulldown.setData(self._getSelectedMethods())
     self.accept()
 
 class PipelineInteractor:
@@ -761,7 +798,7 @@ if __name__ == '__main__':
   from ccpn.AnalysisScreen import guiPipeline as _pm
   pipelineMethods = _pm.__all__
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  module = GuiPipeline(mainWindow=None,  pipelineMethods=pipelineMethods, templates=templates)
+  module = GuiPipeline(mainWindow=None,  guiPipes=pipelineMethods, templates=templates)
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)

@@ -281,6 +281,7 @@ class GuiPipeline(CcpnModule):
 
 
     self.pipePulldown.setData(self.pipePulldownData)
+    self.pipePulldown.model().item(0).setEnabled(False)
 
 
 
@@ -423,30 +424,31 @@ class GuiPipeline(CcpnModule):
 
 
   def _selectMethod(self, selected):
-    if str(selected) == selectMethodLabel:
-      return
+
+
+
     guiPipeName = self._getSerialName(str(selected))
     self._addGuiPipe(guiPipeName, selected)
     self.pipePulldown.setIndex(0)
 
   def _getSerialName(self, guiPipeName):
-    self.currentPipelineBoxNames.append(guiPipeName)
+    self.currentGuiPipesNames.append(guiPipeName)
     count = len(self.pipelineArea.findAll()[1])
     if count == 0:
-      self.currentPipelineBoxNames = []
-    counter = collections.Counter(self.currentPipelineBoxNames)
+      self.currentGuiPipesNames = []
+    counter = collections.Counter(self.currentGuiPipesNames)
     return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
 
 
   def _addGuiPipe(self, name, selected):
     print(self._guiPipes, selected)
-    objMethod = self._guiPipes[selected]
-    if isinstance(objMethod, ):
-      position = self.pipelineSettingsParams['addPosit']
-      self.pipelineWidget = objMethod(parent=self, application=self.application, name=name, params=None, project=self.project)
-      self.pipelineArea.addDock(self.pipelineWidget, position=position)
-      autoActive = self.pipelineSettingsParams['autoActive']
-      self.pipelineWidget.label.checkBox.setChecked(autoActive)
+    for guiPipe in self.guiPipes:
+      if guiPipe.pipeName(guiPipe) == selected:
+        position = self.pipelineSettingsParams['addPosit']
+        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None, project=self.project)
+        self.pipelineArea.addDock(self.pipelineWidget, position=position)
+        autoActive = self.pipelineSettingsParams['autoActive']
+        self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
 
 

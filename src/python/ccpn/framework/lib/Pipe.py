@@ -27,7 +27,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 class Pipe(ABC):
   '''
@@ -112,7 +112,7 @@ class Pipe(ABC):
 
 
 
-class GuiPipe(PipelineBox):
+class GuiPipe(GuiPipe):
 
   widgetProperties = {
                       'CheckBox':      ('get',    'setChecked'),
@@ -128,7 +128,7 @@ class GuiPipe(PipelineBox):
 
 
   def __init__(self, parent=None, pipe=None, name=None, params=None, project=None, **kw):
-    PipelineBox.__init__(self, name=name, )
+    GuiPipe.__init__(self, name=name, )
     self.parent = parent
     self.pipeBoxName = name
     self.project = project

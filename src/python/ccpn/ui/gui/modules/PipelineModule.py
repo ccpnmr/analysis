@@ -26,6 +26,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 
 Qt = QtCore.Qt
@@ -99,29 +100,23 @@ class GuiPipeline(CcpnModule):
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
+
     self._inputData = set()
     self.guiPipes = guiPipes
-    pp  = []
-    for guiPipe in guiPipes:
-      if guiPipe.preferredMethod:
-       pp.append(guiPipe)
-    self.preferredGuiPipes = pp
-
-
-
-
-    self.currentPipelineBoxNames = []
-    self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
-                                               ('rename', 'NewPipeline'),
-                                               ('savePath', self.savingDataPath),
-                                               ('autoRun', False),('addPosit', 'bottom'),
-                                               ('autoActive', True),])
-
+    self.currentRunningPipeline = []
+    self.currentGuiPipesNames = []
     self.templates = self._getPipelineTemplates(templates)
-    # self.pipelineMethods = self._getPipelineMethods(pipelineMethods)
+
+
 
     # init the CcpnModule
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+    self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
+                                               ('rename', 'NewPipeline'),
+                                               ('savePath', self.savingDataPath),
+                                               ('autoRun', False), ('addPosit', 'bottom'),
+                                               ('autoActive', True), ])
 
     # set the graphics
     self._setIcons()
@@ -129,10 +124,8 @@ class GuiPipeline(CcpnModule):
     self._setPipelineThread()
     self._setSecondaryLayouts()
 
-    # FIXME hack to to better
-    # self.guiPipesPreferences = self._setAppSpecificMethods('AnalysisScreen')
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
-    self.currentRunningPipeline = []
+
 
     # self.interactor = PipelineInteractor(self.application)
 
@@ -143,35 +136,34 @@ class GuiPipeline(CcpnModule):
   @guiPipes.setter
   def guiPipes(self, guiPipes):
     '''Set the guiPipes to the guiPipeline
-    guiPipes = dictionary of  {pipeName: pipeObject}
+    
     '''
     if guiPipes is not None:
-      allGuiPipes = {}
+      allGuiPipes = []
       for guiPipe in guiPipes:
-        allGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+        allGuiPipes.append(guiPipe)
       self._guiPipes = allGuiPipes
     else:
-      self._guiPipes = {}
+      self._guiPipes = []
 
-  @property
-  def preferredGuiPipes(self):
-    return self._preferredGuiPipes
-
-  @preferredGuiPipes.setter
-  def preferredGuiPipes(self, preferredGuiPipes):
-    preferredGuiPipes = {}
-    if preferredGuiPipes is None:
-      for guiPipe in self.guiPipes:
-        if guiPipe is not None:
-          if guiPipe.preferredMethod:
-            preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
-    else:
-      for guiPipe in preferredGuiPipes:
-        if guiPipe is not None:
-          if guiPipe.preferredMethod:
-            preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
-
-    self._preferredGuiPipes = preferredGuiPipes
+  # @property
+  # def preferredGuiPipes(self):
+  #   return self._preferredGuiPipes
+  #
+  # @preferredGuiPipes.setter
+  # def preferredGuiPipes(self, preferredGuiPipes):
+  #   preferredGuiPipes = {}
+  #   if preferredGuiPipes is None:
+  #     for guiPipe in self.guiPipes:
+  #       if guiPipe is not None:
+  #         if guiPipe.preferredMethod:
+  #           preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+  #   else:
+  #     for guiPipe in preferredGuiPipes:
+  #       if guiPipe is not None:
+  #         if guiPipe.preferredMethod:
+  #           preferredGuiPipes[guiPipe.pipeName(guiPipe)]=guiPipe
+  #   self._preferredGuiPipes = preferredGuiPipes
 
   def _getPipelineTemplates(self, templates):
     if templates is not None:
@@ -272,13 +264,30 @@ class GuiPipeline(CcpnModule):
 
 
   def _setDataPipesPulldown(self):
+    self.pipePulldownData = [selectMethodLabel,]
+    preferredGuiPipes = ['Preferred Pipes']
+    otherGuiPipes = ['Others Pipes']
 
-    self.pipePulldownData = [k for k in sorted(self.preferredGuiPipes.keys())]
-    self.pipePulldownData.insert(0, selectMethodLabel)
+    for guiPipe in self.guiPipes:
+      if guiPipe is not None:
+        if hasattr(guiPipe, 'preferredMethod'):
+          if guiPipe.preferredMethod:
+            preferredGuiPipes.append(guiPipe.pipeName(guiPipe))
+          else:
+            otherGuiPipes.append(guiPipe.pipeName(guiPipe))
+    countPreferredGuiPipes = len(preferredGuiPipes)
+    self.pipePulldownData.extend(preferredGuiPipes)
+    self.pipePulldownData.extend(otherGuiPipes)
+
+
     self.pipePulldown.setData(self.pipePulldownData)
+
+
+
+    # self.pipePulldown.insertSeparator(countPreferredGuiPipes)
     self.pipePulldown.activated[str].connect(self._selectMethod)
 
-    self.pipePulldown.insertSeparator(2)
+
 
   def eventFilter(self, source, event):
     '''Filter to disable the wheel event in the guiPipes pulldown. Otherwise each scroll would add a guiPipe!'''
@@ -432,11 +441,12 @@ class GuiPipeline(CcpnModule):
   def _addGuiPipe(self, name, selected):
     print(self._guiPipes, selected)
     objMethod = self._guiPipes[selected]
-    position = self.pipelineSettingsParams['addPosit']
-    self.pipelineWidget = objMethod(parent=self, application=self.application, name=name, params=None, project=self.project)
-    self.pipelineArea.addDock(self.pipelineWidget, position=position)
-    autoActive = self.pipelineSettingsParams['autoActive']
-    self.pipelineWidget.label.checkBox.setChecked(autoActive)
+    if isinstance(objMethod, ):
+      position = self.pipelineSettingsParams['addPosit']
+      self.pipelineWidget = objMethod(parent=self, application=self.application, name=name, params=None, project=self.project)
+      self.pipelineArea.addDock(self.pipelineWidget, position=position)
+      autoActive = self.pipelineSettingsParams['autoActive']
+      self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
 
 

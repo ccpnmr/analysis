@@ -648,8 +648,22 @@ class Framework:
     self.project.resumeNotification()
 
   def addApplicationMenuSpec(self, spec, position=3):
+    """Add an entirely new menu at specified position"""
     self._menuSpec.insert(position, spec)
 
+  def addApplicationMenuItem(self, menuName, menuItem, position):
+    """Add a new item to an existing menu at specified position"""
+    for spec in self._menuSpec:
+      if spec[0] == menuName:
+        spec[1].insert(position, menuItem)
+        return
+
+    raise Exception('No menu with name %s' % menuName)
+
+  def addApplicationMenuItems(self, menuName, menuItems, position):
+    """Add a new items to an existing menu starting at specified position"""
+    for n, menuItem in enumerate(menuItems):
+      self.addApplicationMenuItem(menuName, menuItem, position+n)
 
   #########################################    Start setup Menus      ############################
 
@@ -821,9 +835,9 @@ class Framework:
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
-      ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
-      ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
-      (),
+      ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
+      ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
+      ###(),
       ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
                                                     ('checkable', True),
                                                     ('checked', False)
@@ -1563,36 +1577,6 @@ class Framework:
     else:
       SelectSpectrumDisplayPopup(project=self.project).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
-
-  def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None, nmrChain=None):
-    """
-    Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.
-    """
-    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
-
-    mainWindow = self.ui.mainWindow
-    #FIXME:ED - sometimes crashes
-    if not relativeTo:
-      relativeTo = mainWindow.moduleArea      # ejb
-    self.sequenceGraphModule = SequenceGraphModule(mainWindow=mainWindow, nmrChain=nmrChain)
-    mainWindow.moduleArea.addModule(self.sequenceGraphModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()\n")
-    getLogger().info("application.showSequenceGraph()")
-    return self.sequenceGraphModule
-
-  def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None, nmrAtom=None):
-    """Displays Atom Selector."""
-    from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelectorModule
-
-    mainWindow = self.ui.mainWindow
-    #FIXME:ED - sometimes crashes
-    if not relativeTo:
-      relativeTo = mainWindow.moduleArea      # ejb
-    self.atomSelectorModule = AtomSelectorModule(mainWindow=mainWindow, nmrAtom=nmrAtom)
-    mainWindow.moduleArea.addModule(self.atomSelectorModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()\n")
-    getLogger().info("application.showAtomSelector()")
-    return self.atomSelectorModule
 
   def toggleToolbar(self):
     if self.current.strip is not None:

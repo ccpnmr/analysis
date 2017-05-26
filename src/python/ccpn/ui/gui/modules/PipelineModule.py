@@ -101,13 +101,12 @@ class GuiPipeline(CcpnModule):
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
-
+    # set pipeline variables
     self._inputData = set()
     self.guiPipes = guiPipes
     self.currentRunningPipeline = []
     self.currentGuiPipesNames = []
     self.pipelineTemplates = templates
-
 
 
     # init the CcpnModule
@@ -255,10 +254,10 @@ class GuiPipeline(CcpnModule):
             preferredGuiPipes.append(guiPipe.pipeName(guiPipe))
           else:
             otherGuiPipes.append(guiPipe.pipeName(guiPipe))
-
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
+    print(self.pipePulldownData)
     self.pipePulldown.setData(self.pipePulldownData)
 
     disablePreferredPipeLabel = self.pipePulldown.getItemIndex(preferredPipeLabel)
@@ -334,13 +333,13 @@ class GuiPipeline(CcpnModule):
 
   def _addGuiPipe(self, name, selected):
     for guiPipe in self.guiPipes:
-      if guiPipe.pipeName(guiPipe) == selected:
-        position = self.pipelineSettingsParams['addPosit']
-        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,
-                                      project=self.project)
-        self.pipelineArea.addDock(self.pipelineWidget, position=position)
-        autoActive = self.pipelineSettingsParams['autoActive']
-        self.pipelineWidget.label.checkBox.setChecked(autoActive)
+      if isinstance(guiPipe, GuiPipe):
+        if guiPipe.pipeName(guiPipe) == selected:
+          position = self.pipelineSettingsParams['addPosit']
+          self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,project=self.project)
+          self.pipelineArea.addDock(self.pipelineWidget, position=position)
+          autoActive = self.pipelineSettingsParams['autoActive']
+          self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
   def runPipeline(self):
     self.currentRunningPipeline = []
@@ -351,6 +350,15 @@ class GuiPipeline(CcpnModule):
           result = guiPipe.runMethod()
           guiPipe = (guiPipe, result)
           self.currentRunningPipeline.append(guiPipe)
+
+
+  ####################################_________ others____________###########################################
+
+
+  def _getGuiPipeClass(self, name):
+    for guiPipe in self.guiPipes:
+      if guiPipe.pipeName(guiPipe) == name:
+        return guiPipe
 
   ####################################_________ Thread  SETUP ____________##############################################
   def _setPipelineThread(self):
@@ -435,7 +443,7 @@ class GuiPipeline(CcpnModule):
 
 
 
-  ####################################_________ GUI PIPELINE SETTINGS ____________####################################
+  #################################### _________ GUI PIPELINE SETTINGS ____________ ####################################
 
   def _pipelineBoxesWidgetParams(self, currentBoxesNames):
     self.savePipelineParams = []
@@ -453,8 +461,6 @@ class GuiPipeline(CcpnModule):
     self._createSettingsGroupBox()
     self._createAllSettingWidgets()
     self._addWidgetsToLayout(self.settingsWidgets, self.settingWidgetsLayout)
-    # self.settingFrame.hide()
-    # self._hideSettingWidget()
     self._setSettingsParams()
 
   def _createSettingsGroupBox(self):
@@ -471,18 +477,15 @@ class GuiPipeline(CcpnModule):
     self.pipelineReNameTextEdit = LineEdit(self, str(self.pipelineNameLabel.text()))
     self.settingsWidgets.append(self.pipelineReNameTextEdit)
     #
-
     self.inputDataLabel = Label(self, 'Input Data')
     self.settingsWidgets.append(self.inputDataLabel)
     self.inputDataList = ListWidget(self)
     self.inputDataList.setAcceptDrops(True)
-    # self.inputDataList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     color = QtGui.QColor('Red')
     header = QtGui.QListWidgetItem(DropHereLabel)
     header.setFlags(QtCore.Qt.NoItemFlags)
     header.setTextColor(color)
     self.inputDataList.addItem(header)
-
     self.settingsWidgets.append(self.inputDataList)
     self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
 
@@ -626,10 +629,10 @@ class GuiPipeline(CcpnModule):
 
 class FilterMethods(CcpnDialog):
 
-  def __init__(self, parent=None, title='Filter Methods', **kw):
+  def __init__(self, parent=None, title='Preferred Pipes', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(FilterMethods, self).__init__(parent)
-    self.pipelineModule = parent
+    self.parent = parent
     self._setMainLayout()
     self._setWidgets()
     self._addWidgetsToLayout()
@@ -642,6 +645,7 @@ class FilterMethods(CcpnDialog):
     self.resize(250, 300)
 
   def _setWidgets(self):
+
     self.selectLabel = Label(self, 'Select All')
     self.selectAllCheckBox = CheckBox(self, )
     self._setSelectionScrollArea()
@@ -653,18 +657,19 @@ class FilterMethods(CcpnDialog):
 
   def _addMethodCheckBoxes(self):
     self.allMethodCheckBoxes = []
-    for i, guiPipe in enumerate(self.pipelineModule.pipePulldownData[1:]):
-      self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe), grid=(i + 1, 0))
-      self.allMethodCheckBoxes.append(self.spectrumCheckBox)
+    for i, guiPipe in enumerate(self.parent.guiPipes):
+        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe.pipeName(guiPipe)), grid=(i + 1, 0))
+        self.allMethodCheckBoxes.append(self.spectrumCheckBox)
     self.updateMethodCheckBoxes()
     self.updateSelectAllCheckBox()
 
   def updateMethodCheckBoxes(self):
 
-    for guiPipe in self.pipelineModule.pipePulldown.texts:
-      for cb in self.allMethodCheckBoxes:
-        if cb.text() == guiPipe:
-          cb.setChecked(True)
+    for guiPipe in self.parent.guiPipes:
+      if guiPipe.preferredMethod:
+        for cb in self.allMethodCheckBoxes:
+          if cb.text() == guiPipe.pipeName(guiPipe):
+            cb.setChecked(True)
 
   def updateSelectAllCheckBox(self):
     for cb in self.allMethodCheckBoxes:
@@ -682,13 +687,18 @@ class FilterMethods(CcpnDialog):
         else:
           cb.setChecked(False)
 
-  def _getSelectedMethods(self):
-    guiPipes = [selectPipeLabel, ]
+  def _setPreferredMethods(self):
+    pipes = []
     for cb in self.allMethodCheckBoxes:
       if cb.isChecked():
-        guiPipe = cb.text()
-        guiPipes.append(guiPipe)
-    return sorted(guiPipes)
+        guiPipe =  self.parent._getGuiPipeClass(cb.text())
+        guiPipe.preferredMethod = True
+        pipes.append(guiPipe)
+      else:
+        guiPipe = self.parent._getGuiPipeClass(cb.text())
+        guiPipe.preferredMethod = False
+        pipes.append(guiPipe)
+    self.parent.guiPipes = pipes
 
   def _setSelectionScrollArea(self):
     self.scrollArea = ScrollArea(self)
@@ -703,7 +713,8 @@ class FilterMethods(CcpnDialog):
     self.mainLayout.addWidget(self.applyCancelButtons, 2, 1,)
 
   def _okButtonCallBack(self):
-    self.pipelineModule.pipePulldown.setData(self._getSelectedMethods())
+    self._setPreferredMethods()
+    self.parent._setDataPipesPulldown()
     self.accept()
 
 
@@ -737,18 +748,7 @@ class PipelineInteractor:
 
 
 
-from collections import OrderedDict
-
-pipelineFilesDirName = '/guiPipeline/'
-templates =   OrderedDict((
-                          ('Wlogsy', 'WlogsyTemplate'),
-                          ('STD', 'STDTemplate'),
-                          ('Broadening1H', 'Broadening1HTemplate'),
-                          ('t1Rho', 't1RhoTemplate'),
-                         ))
-
-
-
+#################################### _________ RUN GUI TESTING ____________ ####################################
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

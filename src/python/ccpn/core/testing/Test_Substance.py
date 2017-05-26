@@ -150,17 +150,30 @@ class Test_Substance_SpectrumLink(WrapperTesting):
   projectPath = None
 
   def test_Substance_SpectrumLink(self):
-    axisCodes = ('CO','Hn','Nh')
-    spectrum = self.project.createDummySpectrum(axisCodes)
-    self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
-    self.assertEqual(spectrum.name, 'COHnNh')
+    spectrum1 = self.project.createDummySpectrum(axisCodes=['CO','Hn','Nh'])
+    self.assertEqual(spectrum1.isotopeCodes, ('13C', '1H', '15N'))
+    self.assertEqual(spectrum1.name, 'COHnNh')
 
-    chain1 = self.project.createChain(sequence='ACDC', compoundName='hardrock', shortName='X',
+    chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='X',
                                       molType='protein')
-    substance1 = chain1.substances[0]
 
-    spectrum.referenceSubstance = substance1
-    substance2 = spectrum.referenceSubstance
+    spectrum2 = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
+    self.assertEqual(spectrum2.isotopeCodes, ('1H', '19F', '31P', '1H'))
+    self.assertEqual(spectrum2.name, 'HpFPhH')
+
+    chain2 = self.project.createChain(sequence='ACDC', compoundName='sequence2', shortName='Y',
+                                      molType='protein')
+
+    substance1 = chain1.substances[0]
+    substance2 = chain2.substances[0]
+
+    checkGetSetAttr(self, obj=spectrum1, attrib='referenceSubstance', value=substance1)
+
+    ref1 = substance1.referenceSpectra
+    self.assertEqual(ref1[0], spectrum1)
+
+    substance1.referenceSpectra = ref1
+    substance2.referenceSpectra = ref1
 
 #=========================================================================================
 # Test_Substance_SpectrumLink

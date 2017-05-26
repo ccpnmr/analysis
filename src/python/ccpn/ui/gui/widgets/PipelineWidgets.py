@@ -100,6 +100,20 @@ class PipelineDropArea(DockArea):
     self.setStyleSheet("""QSplitter{background-color: transparent;}
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
+  @property
+  def currentGuiPipes(self) -> list:
+    'return all current Pipes in area'
+    if self is not None:
+      Pipes = list(self.findAll()[1].values())
+      return Pipes
+
+  @property
+  def currentPipesNames(self) -> list:
+    'return the name of all current modules in area'
+    if self is not None:
+      pipesNames = list(self.findAll()[1].keys())
+      return pipesNames
+
   def dragEnterEvent(self, ev):
     src = ev.source()
     ev.ignore()
@@ -170,6 +184,10 @@ class PipelineDropArea(DockArea):
       for i in range(obj.count()):
         boxes.append(self.orderedBoxes(obj.widget(i)))
       return boxes
+
+  def closeAll(self):
+    for guiPipe in self.currentGuiPipes:
+      guiPipe.close()
 
 
 class PipelineBox(Dock, DockDrop):

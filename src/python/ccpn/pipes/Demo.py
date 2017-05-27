@@ -23,13 +23,28 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.Pipe import PandasPipe
+from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import GuiPipe
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
-class DemoExtension(PandasPipe):
+
+class GuiDemoExtension(GuiPipe):
+  preferredPipe = True
+  def __init__(self, parent=None, project=None, name='AlignSpectra', params=None, **kw):
+    # super(AlignSpectra, self)
+    GuiPipe.__init__(self, name=name, parent=parent, project=project,  params=params, **kw )
+    self.parent = parent
+    self.wPulldownListPulldownList = PulldownList(self, texts=['TEXT', 'BED'])
+    self.pipeLayout.addWidget(self.wPulldownListPulldownList)
+
+
+class DemoExtension(Pipe):
   '''
   Demo auto-generated gui for pipeline
   '''
   METHODNAME = 'Demo'
+  guiModule = None
+  # GuiDemoExtension
 
   from collections import OrderedDict
   # TODO: Expand dictionary spec

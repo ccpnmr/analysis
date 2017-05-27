@@ -67,7 +67,7 @@ class PluginModule(CcpnModule):
 
 
   def _populateMainWidget(self):
-    generateWidget(self.interactor.params, widget=self.mainWidget, argsDict=self._kwargs)
+    generateWidget(self.interactor.widgetsState, widget=self.mainWidget, argsDict=self._kwargs)
     self.addRunButton()
 
 

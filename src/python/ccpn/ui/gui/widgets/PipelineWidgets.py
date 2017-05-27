@@ -124,7 +124,7 @@ class PipelineDropArea(DockArea):
     """
 
     if box is None:
-      box = GuiPipe(name='New GuiPipe', **kwds)
+      box = WidgetPipe(name='New WidgetPipe', **kwds)
 
     if position is None:
       position = 'bottom'
@@ -190,15 +190,15 @@ class PipelineDropArea(DockArea):
       guiPipe.close()
 
 
-class GuiPipe(Dock, DockDrop):
+class WidgetPipe(Dock, DockDrop):
 
   def __init__(self,  name:str, **kw):
-    super(GuiPipe, self).__init__(name, self)
+    super(WidgetPipe, self).__init__(name, self)
     self.ccpnModule = False
     self.pipelineBox = True
     self.autoOrient = False
     if name is None:
-      name = 'New Pipeline Box'
+      name = 'New Pipe'
     self._updateLabel(name)
     self.dragStyle = PipelineBoxDragStyle
     self.overlay = PipelineDropAreaOverlay(self)
@@ -206,9 +206,9 @@ class GuiPipe(Dock, DockDrop):
 
   def implements(self, name=None):
     if name is None:
-      return ['GuiPipe']
+      return ['WidgetPipe']
     else:
-      return name == 'GuiPipe'
+      return name == 'WidgetPipe'
 
   def _updateLabel(self, name):
     self.label.deleteLater()  # delete original Label
@@ -269,7 +269,7 @@ class GuiPipe(Dock, DockDrop):
 
   def dragEnterEvent(self, ev):
     src = ev.source()
-    if hasattr(src, 'implements') and src.implements('GuiPipe'):
+    if hasattr(src, 'implements') and src.implements('WidgetPipe'):
       ev.accept()
     else:
       ev.ignore()

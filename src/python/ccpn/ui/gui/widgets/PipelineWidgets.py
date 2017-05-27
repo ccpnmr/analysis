@@ -205,7 +205,7 @@ class GuiPipe(Dock, DockDrop):
                             }
   preferredPipe = True
   pipeName = ''
-  
+
   def __init__(self, parent, name, params=None, project=None, **kw):
     '''
     
@@ -259,23 +259,29 @@ class GuiPipe(Dock, DockDrop):
     for key, value in self.getParams().items():
       self.pipe._updateRunArgs(key, value)
 
+  @property
+  def params(self):
+    return self._params
+
+  @params.setter
+  def params(self, params):
+    self._params = params
+
   def getParams(self):
     params = {}
-    for item in self.variables:
-      params[item] = self.getValue(item)
+    for varName, varObj in vars(self).items():
+      if varObj.__class__.__name__ in self.commonWidgetProperties.keys():
+        params[varName] = getattr(varObj, self.commonWidgetProperties[varObj.__class__.__name__][0])()
     return params
 
-  def getValue(self, variable):
-    widget = getattr(self, str(variable))
-    if widget.__class__.__name__ in GuiPipe.commonWidgetProperties.keys():
-      return getattr(widget, GuiPipe.commonWidgetProperties[widget.__class__.__name__][0])()
 
   def _setParams(self, **params):
+    print(params)
     for variableName, value in params.items():
       try:
         widget = getattr(self, str(variableName))
-        if widget.__class__.__name__ in GuiPipe.widgetProperties.keys():
-          setWidget = getattr(widget, GuiPipe.widgetProperties[widget.__class__.__name__][1])
+        if widget.__class__.__name__ in GuiPipe.commonWidgetProperties.keys():
+          setWidget = getattr(widget, GuiPipe.commonWidgetProperties[widget.__class__.__name__][1])
           setWidget(value)
       except:
         print('Impossible to restore %s value for %s. Check paramas dictionary in getWidgetParams' % (
@@ -369,6 +375,9 @@ class GuiPipe(Dock, DockDrop):
       return True
     else:
       return False
+
+
+
 
 class PipelineBoxLabel(DockLabel, VerticalLabel):
   def __init__(self, name,  *args):

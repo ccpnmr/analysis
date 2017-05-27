@@ -26,7 +26,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.framework.lib.Pipe import GuiPipe
 
 
 Qt = QtCore.Qt
@@ -126,7 +126,7 @@ class GuiPipeline(CcpnModule):
 
     # start the pipelineWorker
     self.pipelineWorker.stepIncreased.connect(self.runPipeline)
-
+    print('GUIPIPES ', self.guiPipes)
 
     # self.interactor = PipelineInteractor(self.application)
 
@@ -138,7 +138,7 @@ class GuiPipeline(CcpnModule):
   def guiPipes(self, guiPipes):
     '''
     Set the guiPipes to the guiPipeline
-    :param guiPipes:  GuiPipe class
+    :param guiPipes:  WidgetPipe class
     '''
 
     if guiPipes is not None:
@@ -249,11 +249,11 @@ class GuiPipeline(CcpnModule):
 
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
-        if hasattr(guiPipe, 'preferredMethod'):
-          if guiPipe.preferredMethod:
-            preferredGuiPipes.append(guiPipe.pipeName(guiPipe))
+        if hasattr(guiPipe, 'preferredPipe'):
+          if guiPipe.preferredPipe:
+            preferredGuiPipes.append(guiPipe.pipeName)
           else:
-            otherGuiPipes.append(guiPipe.pipeName(guiPipe))
+            otherGuiPipes.append(guiPipe.pipeName)
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
@@ -333,13 +333,13 @@ class GuiPipeline(CcpnModule):
 
   def _addGuiPipe(self, name, selected):
     for guiPipe in self.guiPipes:
-      if isinstance(guiPipe, GuiPipe):
-        if guiPipe.pipeName(guiPipe) == selected:
-          position = self.pipelineSettingsParams['addPosit']
-          self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,project=self.project)
-          self.pipelineArea.addDock(self.pipelineWidget, position=position)
-          autoActive = self.pipelineSettingsParams['autoActive']
-          self.pipelineWidget.label.checkBox.setChecked(autoActive)
+      if guiPipe.pipeName == selected:
+
+        position = self.pipelineSettingsParams['addPosit']
+        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,project=self.project)
+        self.pipelineArea.addDock(self.pipelineWidget, position=position)
+        autoActive = self.pipelineSettingsParams['autoActive']
+        self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
   def runPipeline(self):
     self.currentRunningPipeline = []
@@ -357,7 +357,7 @@ class GuiPipeline(CcpnModule):
 
   def _getGuiPipeClass(self, name):
     for guiPipe in self.guiPipes:
-      if guiPipe.pipeName(guiPipe) == name:
+      if guiPipe.pipeName == name:
         return guiPipe
 
   ####################################_________ Thread  SETUP ____________##############################################
@@ -387,8 +387,8 @@ class GuiPipeline(CcpnModule):
     for i in params:
       for key, value in i.items():
         if value[0].upper() in guiPipesNames:
-          pipelineMethod = self._guiPipes[key]
-          pipelineBox = pipelineMethod(parent=self, application=self.application, name = value[0], params = value[1])
+          guiPipe = self._guiPipes[key]
+          pipelineBox = guiPipe(parent=self, application=self.application, name = value[0], params = value[1])
           pipelineBox.setActive(value[2])
           pipelineBoxes.append(pipelineBox)
     return pipelineBoxes
@@ -658,7 +658,7 @@ class FilterMethods(CcpnDialog):
   def _addMethodCheckBoxes(self):
     self.allMethodCheckBoxes = []
     for i, guiPipe in enumerate(self.parent.guiPipes):
-        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe.pipeName(guiPipe)), grid=(i + 1, 0))
+        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe.pipeName), grid=(i + 1, 0))
         self.allMethodCheckBoxes.append(self.spectrumCheckBox)
     self.updateMethodCheckBoxes()
     self.updateSelectAllCheckBox()
@@ -666,9 +666,9 @@ class FilterMethods(CcpnDialog):
   def updateMethodCheckBoxes(self):
 
     for guiPipe in self.parent.guiPipes:
-      if guiPipe.preferredMethod:
+      if guiPipe.preferredPipe:
         for cb in self.allMethodCheckBoxes:
-          if cb.text() == guiPipe.pipeName(guiPipe):
+          if cb.text() == guiPipe.pipeName:
             cb.setChecked(True)
 
   def updateSelectAllCheckBox(self):
@@ -687,16 +687,16 @@ class FilterMethods(CcpnDialog):
         else:
           cb.setChecked(False)
 
-  def _setPreferredMethods(self):
+  def _setPreferredPipe(self):
     pipes = []
     for cb in self.allMethodCheckBoxes:
       if cb.isChecked():
         guiPipe =  self.parent._getGuiPipeClass(cb.text())
-        guiPipe.preferredMethod = True
+        guiPipe.preferredPipe = True
         pipes.append(guiPipe)
       else:
         guiPipe = self.parent._getGuiPipeClass(cb.text())
-        guiPipe.preferredMethod = False
+        guiPipe.preferredPipe = False
         pipes.append(guiPipe)
     self.parent.guiPipes = pipes
 
@@ -713,7 +713,7 @@ class FilterMethods(CcpnDialog):
     self.mainLayout.addWidget(self.applyCancelButtons, 2, 1,)
 
   def _okButtonCallBack(self):
-    self._setPreferredMethods()
+    self._setPreferredPipe()
     self.parent._setDataPipesPulldown()
     self.accept()
 
@@ -749,25 +749,34 @@ class PipelineInteractor:
 
 
 #################################### _________ RUN GUI TESTING ____________ ####################################
+class AlignSpectra(GuiPipe):
+  preferredPipe = True
+  def __init__(self, parent=None, project=None, name='AlignSpectra', params=None, **kw):
+    # super(AlignSpectra, self)
+    GuiPipe.__init__(self, name=name, parent=parent, project=project,  params=params, **kw )
+    self.parent = parent
+    l = Label(self, 'TEXT')
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
+  from ccpn.framework.lib.Pipe import GuiPipe
   app = TestApplication()
 
   win = QtGui.QMainWindow()
   from ccpn.AnalysisScreen import guiPipeline as _pm
   pipelineMethods = _pm.__all__
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  module = GuiPipeline(mainWindow=None, guiPipes = pipelineMethods)
+  pipeline = GuiPipeline(mainWindow=None, guiPipes=[AlignSpectra])
 
 
-  moduleArea.addModule(module)
+
+  moduleArea.addModule(pipeline)
 
   win.setCentralWidget(moduleArea)
   win.resize(1000, 500)
-  win.setWindowTitle('Testing %s' % module.moduleName)
+  win.setWindowTitle('Testing %s' % pipeline.moduleName)
   win.show()
 
   app.start()

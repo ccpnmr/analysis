@@ -138,7 +138,7 @@ class GuiPipeline(CcpnModule):
   def guiPipes(self, guiPipes):
     '''
     Set the guiPipes to the guiPipeline
-    :param guiPipes:  WidgetPipe class
+    :param guiPipes:  GuiPipe class
     '''
 
     if guiPipes is not None:
@@ -766,7 +766,8 @@ if __name__ == '__main__':
 
   win = QtGui.QMainWindow()
   from ccpn.AnalysisScreen import guiPipeline as _pm
-  pipelineMethods = _pm.__all__
+  # pipelineMethods = _pm.__all__
+
   moduleArea = CcpnModuleArea(mainWindow=None, )
   pipeline = GuiPipeline(mainWindow=None, guiPipes=[AlignSpectra])
 

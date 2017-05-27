@@ -769,7 +769,7 @@ if __name__ == '__main__':
   # pipelineMethods = _pm.__all__
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  pipeline = GuiPipeline(mainWindow=None, guiPipes=[AlignSpectra])
+  pipeline = GuiPipeline(mainWindow=None, )
 
 
 

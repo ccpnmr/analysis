@@ -206,7 +206,8 @@ class GuiPipe(Dock, DockDrop):
   preferredPipe = True
   pipeName = ''
 
-  def __init__(self, parent, name, params=None, project=None, **kw):
+
+  def __init__(self, parent, name, pipe=None,  project=None, **kw):
     '''
     
     :param parent: guiPipeline
@@ -224,7 +225,8 @@ class GuiPipe(Dock, DockDrop):
     
     self.inputData = []
     if self.parent is not None:
-      self.inputData = self.parent._inputData
+      if hasattr(self.parent, 'inputData'):
+        self.inputData = self.parent._inputData
       
     if name is None:
       name = 'New Pipe'
@@ -237,8 +239,9 @@ class GuiPipe(Dock, DockDrop):
     self.project = None
     if project is not None:
       self.project = project
-   
-    self.params = params
+
+
+
 
     ######  pipeLayout
 
@@ -248,44 +251,43 @@ class GuiPipe(Dock, DockDrop):
     self.layout.addWidget(self.pipeFrame)
 
     self.initialiseGui()
-    # self.pipe = pipe
+    if pipe is not None:
+      self.pipe = pipe
 
 
   def initialiseGui(self):
     '''Define this function on the new pipe file'''
     pass
 
-  def updatePipeParams(self):
-    for key, value in self.getParams().items():
-      self.pipe._updateRunArgs(key, value)
+  # def updatePipeParams(self):
+  #   for key, value in self.getParams().items():
+  #     self.pipe._updateRunArgs(key, value)
 
   @property
-  def params(self):
-    return self._params
+  def widgetsState(self):
+    return self._widgetsState
 
-  @params.setter
-  def params(self, params):
-    self._params = params
 
-  def getParams(self):
-    params = {}
+  @widgetsState.getter
+  def widgetsState(self):
+    '''return  {"variableName":"value"}  of all gui Variables  '''
+    widgetsState = {}
     for varName, varObj in vars(self).items():
       if varObj.__class__.__name__ in self.commonWidgetProperties.keys():
-        params[varName] = getattr(varObj, self.commonWidgetProperties[varObj.__class__.__name__][0])()
-    return params
+        widgetsState[varName] = getattr(varObj, self.commonWidgetProperties[varObj.__class__.__name__][0])()
+    return widgetsState
 
 
-  def _setParams(self, **params):
-    print(params)
-    for variableName, value in params.items():
+  def restoreWidgetsState(self, **widgetsState):
+    'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
+    for variableName, value in widgetsState.items():
       try:
         widget = getattr(self, str(variableName))
         if widget.__class__.__name__ in GuiPipe.commonWidgetProperties.keys():
           setWidget = getattr(widget, GuiPipe.commonWidgetProperties[widget.__class__.__name__][1])
           setWidget(value)
-      except:
-        print('Impossible to restore %s value for %s. Check paramas dictionary in getWidgetParams' % (
-        variableName, self.name()))
+      except Exception as e:
+        print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
 
   def implements(self, name=None):
     if name is None:

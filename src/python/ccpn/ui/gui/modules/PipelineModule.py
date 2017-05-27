@@ -767,9 +767,8 @@ if __name__ == '__main__':
   win = QtGui.QMainWindow()
   from ccpn.AnalysisScreen import guiPipeline as _pm
   # pipelineMethods = _pm.__all__
-
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  pipeline = GuiPipeline(mainWindow=None, )
+  pipeline = GuiPipeline(mainWindow=None, guiPipes=[AlignSpectra])
 
 
 

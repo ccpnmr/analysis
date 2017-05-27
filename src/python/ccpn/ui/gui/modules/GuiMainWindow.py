@@ -470,7 +470,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     plugin = Plugin(application=self.application)
     self.application.plugins.append(plugin)
     if plugin.guiModule is None:
-      if plugin.params is None:
+      if plugin.widgetsState is None:
         plugin.run()
         return
       else:

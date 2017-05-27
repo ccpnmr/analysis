@@ -4,7 +4,7 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
 from pyqtgraph.dockarea.Container import  SplitContainer
-
+from ccpn.ui.gui.widgets.Frame import Frame
 
 PipelineBoxDragStyle = """Dock > QWidget {border: 1px solid #78FF00; border-radius: 1px;}"""
 
@@ -22,7 +22,7 @@ PipelineBoxLabelStyle = """PipelineBoxLabel{
                                                   }"""
 
 
-class VContainer(SplitContainer):
+class _VContainer(SplitContainer):
   def __init__(self, area):
     SplitContainer.__init__(self, area, QtCore.Qt.Vertical)
 
@@ -51,7 +51,7 @@ class VContainer(SplitContainer):
     self.setCollapsible(1, False)
 
 
-class PipelineDropAreaOverlay(QtGui.QWidget):
+class _PipelineDropAreaOverlay(QtGui.QWidget):
   """Overlay widget that draws drop areas during a drag-drop operation"""
 
   def __init__(self, parent):
@@ -124,7 +124,7 @@ class PipelineDropArea(DockArea):
     """
 
     if box is None:
-      box = WidgetPipe(name='New WidgetPipe', **kwds)
+      box = GuiPipe(name='New GuiPipe', **kwds)
 
     if position is None:
       position = 'bottom'
@@ -169,7 +169,7 @@ class PipelineDropArea(DockArea):
     return box
 
   def makeContainer(self, typ):
-    new = VContainer(self)
+    new = _VContainer(self)
     new.setCollapsible(1,False)
     return new
 
@@ -190,25 +190,102 @@ class PipelineDropArea(DockArea):
       guiPipe.close()
 
 
-class WidgetPipe(Dock, DockDrop):
+class GuiPipe(Dock, DockDrop):
+  
+  commonWidgetProperties = {
+                            'CheckBox':       ('get',     'setChecked'),
+                            'DoubleSpinbox':  ('value',   'setValue'  ),
+                            'Label':          ('get',     'setText'   ),
+                            'LineEdit':       ('get',     'setText'   ),
+                            'PulldownList':   ('currentText', 'set'   ),
+                            'RadioButtons':   ('get',     'set'       ),
+                            'Slider':         ('get',     'setValue'  ),
+                            'Spinbox':        ('value',   'set'       ),
+                            'TextEditor':     ('get',     'setText'   ),
+                            }
+  preferredPipe = True
+  pipeName = ''
+  
+  def __init__(self, parent, name, params=None, project=None, **kw):
+    '''
+    
+    :param parent: guiPipeline
+    :param name: string for the new GuiPipe 
+    :param params: dict of all widgets variable names and their values
+    :param project: ccpn Project
+    :param kw: any other
+    '''
+    super(GuiPipe, self).__init__(name, self)
 
-  def __init__(self,  name:str, **kw):
-    super(WidgetPipe, self).__init__(name, self)
     self.ccpnModule = False
     self.pipelineBox = True
     self.autoOrient = False
+    self.parent = parent
+    
+    self.inputData = []
+    if self.parent is not None:
+      self.inputData = self.parent._inputData
+      
     if name is None:
       name = 'New Pipe'
+    self.pipeName = name  
     self._updateLabel(name)
-    self.dragStyle = PipelineBoxDragStyle
-    self.overlay = PipelineDropAreaOverlay(self)
 
+    self.dragStyle = PipelineBoxDragStyle
+    self.overlay = _PipelineDropAreaOverlay(self)
+    
+    self.project = None
+    if project is not None:
+      self.project = project
+   
+    self.params = params
+
+    ######  pipeLayout
+
+    self.pipeFrame = Frame(self, setLayout=False)
+    self.pipeLayout = QtGui.QGridLayout()
+    self.pipeFrame.setLayout(self.pipeLayout)
+    self.layout.addWidget(self.pipeFrame)
+
+    self.initialiseGui()
+    # self.pipe = pipe
+
+
+  def initialiseGui(self):
+    '''Define this function on the new pipe file'''
+    pass
+
+  def updatePipeParams(self):
+    for key, value in self.getParams().items():
+      self.pipe._updateRunArgs(key, value)
+
+  def getParams(self):
+    params = {}
+    for item in self.variables:
+      params[item] = self.getValue(item)
+    return params
+
+  def getValue(self, variable):
+    widget = getattr(self, str(variable))
+    if widget.__class__.__name__ in GuiPipe.commonWidgetProperties.keys():
+      return getattr(widget, GuiPipe.commonWidgetProperties[widget.__class__.__name__][0])()
+
+  def _setParams(self, **params):
+    for variableName, value in params.items():
+      try:
+        widget = getattr(self, str(variableName))
+        if widget.__class__.__name__ in GuiPipe.widgetProperties.keys():
+          setWidget = getattr(widget, GuiPipe.widgetProperties[widget.__class__.__name__][1])
+          setWidget(value)
+      except:
+        print('Impossible to restore %s value for %s. Check paramas dictionary in getWidgetParams' % (
+        variableName, self.name()))
 
   def implements(self, name=None):
     if name is None:
-      return ['WidgetPipe']
+      return ['GuiPipe']
     else:
-      return name == 'WidgetPipe'
+      return name == 'GuiPipe'
 
   def _updateLabel(self, name):
     self.label.deleteLater()  # delete original Label
@@ -269,7 +346,7 @@ class WidgetPipe(Dock, DockDrop):
 
   def dragEnterEvent(self, ev):
     src = ev.source()
-    if hasattr(src, 'implements') and src.implements('WidgetPipe'):
+    if hasattr(src, 'implements') and src.implements('GuiPipe'):
       ev.accept()
     else:
       ev.ignore()

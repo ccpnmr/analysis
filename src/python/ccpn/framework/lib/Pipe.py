@@ -27,7 +27,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from collections import OrderedDict
-from ccpn.ui.gui.widgets.PipelineWidgets import WidgetPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 class Pipe(ABC):
   '''
@@ -109,69 +109,6 @@ class Pipe(ABC):
   def _updateRunArgs(self, arg, value):
     self._kwargs[arg] = value
 
-
-
-
-class GuiPipe(WidgetPipe):
-
-  widgetProperties = {
-                      'CheckBox':      ('get',    'setChecked'),
-                      'DoubleSpinbox': ('value',  'setValue'),
-                      'Label':         ('get',    'setText'),
-                      'LineEdit':      ('get',    'setText'),
-                      'PulldownList':  ('currentText','set'),
-                      'RadioButtons':  ('get',    'set'),
-                      'Slider':        ('get',    'setValue'),
-                      'Spinbox':       ('value',  'set'),
-                      'TextEditor':    ('get',    'setText'),
-                      }
-
-  preferredPipe = True
-  pipeName = ''
-
-  def __init__(self, parent=None, project=None, name=None, params=None, **kw):
-    super(GuiPipe, self)
-    WidgetPipe.__init__(self, name=name)
-    self.pipeName = name
-    self.parent = parent
-    #   self.parent = parent
-    self.project = None
-    if project is not None:
-      self.project = project
-    self.params = params
-    self.initialiseGui()
-    # self.pipe = pipe
-
-
-  def initialiseGui(self):
-    '''Define this function on the new pipe file'''
-    pass
-
-  def updatePipeParams(self):
-    for key, value in self.getParams().items():
-      self.pipe._updateRunArgs(key, value)
-
-  def getParams(self):
-    params = {}
-    for item in self.variables:
-      params[item] = self.getValue(item)
-    return params
-
-  def getValue(self, variable):
-    widget = getattr(self, str(variable))
-    if widget.__class__.__name__ in GuiPipe.widgetProperties.keys():
-      return getattr(widget, GuiPipe.widgetProperties[widget.__class__.__name__][0])()
-
-  def _setParams(self, **params):
-    for variableName, value in params.items():
-      try:
-        widget = getattr(self, str(variableName))
-        if widget.__class__.__name__ in GuiPipe.widgetProperties.keys():
-          setWidget = getattr(widget, GuiPipe.widgetProperties[widget.__class__.__name__][1])
-          setWidget(value)
-      except:
-        print('Impossible to restore %s value for %s. Check paramas dictionary in getWidgetParams' % (
-        variableName, self.name()))
 
 
 try:

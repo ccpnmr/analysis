@@ -1,13 +1,4 @@
 
-from ccpn.framework.lib.Pipe import PandasPipe
-import pandas as pd
-
-class EmptyExtension(PandasPipe):
-  METHODNAME = 'Empty Extension'
-
-  def run(self, dataframe:pd.DataFrame) -> pd.DataFrame:
-    print('empty')
-    return dataframe
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -32,3 +23,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+
+
+from ccpn.framework.lib.Pipe import PandasPipe
+import pandas as pd
+
+class EmptyExtension(PandasPipe):
+  METHODNAME = 'Empty Extension'
+
+  def run(self, dataframe:pd.DataFrame) -> pd.DataFrame:
+    print('empty')
+    return dataframe

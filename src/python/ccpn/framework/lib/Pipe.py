@@ -73,8 +73,11 @@ class Pipe(ABC):
 
   def __init__(self, application=None):
     self._kwargs = {}
+
     self.guiModule = self.__class__.guiModule
+
     self.params = self.__class__.params
+
     self.active = False
 
     if application is not None:

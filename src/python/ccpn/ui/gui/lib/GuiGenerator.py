@@ -47,6 +47,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
       le = LineEdit(frame, grid=(0, 1))
       le.setText(param['default'])
       le.setObjectName(AUTOGEN_TAG + param['variable'])
+      setattr(widget, param['variable'], le)
       callback = partial(argsDict.__setitem__, param['variable'])
       le.textChanged.connect(callback)
       callback(le.get())
@@ -55,6 +56,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
       from ccpn.ui.gui.widgets.CheckBox import CheckBox
       cb = CheckBox(frame, checked=param['value'], grid=(0, 1))
       cb.setObjectName(AUTOGEN_TAG + param['variable'])
+      setattr(widget, param['variable'], cb)
       cb.stateChanged.connect(partial(argsDict.__setitem__, param['variable']))
       cb.setCheckState(param['default'])
       argsDict[param['variable']] = param['default']
@@ -66,6 +68,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         pdl = PulldownList(frame, texts=param['value'], grid=(0, 1))
         pdl.setObjectName(AUTOGEN_TAG + param['variable'])
         pdl.set(param.get('default', param['value'][0]))
+        setattr(widget, param['variable'], pdl)
         callback = partial(argsDict.__setitem__, param['variable'])
         pdl.setCallback(callback)
         callback(pdl.get())
@@ -75,6 +78,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
           t, b = zip(*param['value'])
           rb = RadioButtons(frame, texts=t,  grid=(0, 1), setLayout=True)
           rb.setObjectName(AUTOGEN_TAG + param['variable'])
+          setattr(widget, param['variable'], rb)
           rb.set(param['default'])
           rb.buttonGroup.buttonClicked[QtGui.QAbstractButton].connect(partial(selectedRadioButton, param=param, argsDict=argsDict))
           argsDict[param['variable']] = param['default']
@@ -88,6 +92,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
           pdl = PulldownList(frame, texts=t, objects=o, grid=(0, 1))
           pdl.setObjectName(AUTOGEN_TAG + param['variable'])
           pdl.set(param.get('default', param['value'][0]))
+          setattr(widget, param['variable'], pdl)
           callback = partial(argsDict.__setitem__, param['variable'])
           pdl.setCallback(callback)
           callback(pdl.get())
@@ -101,6 +106,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         sb.setValue(param.get('default', param['value'][0]))
         callback = partial(argsDict.__setitem__, param['variable'])
         sb.valueChanged.connect(callback)
+        setattr(widget, param['variable'], sb)
         callback(sb.value())
 
       elif isinstance(param['value'][0], float):
@@ -113,11 +119,13 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         dsb.setValue(param.get('default', param['value'][0]))
         callback = partial(argsDict.__setitem__, param['variable'])
         dsb.valueChanged.connect(callback)
+        setattr(widget, param['variable'], dsb)
         callback(dsb.value())
       else:
         raise NotImplementedError(param)
     else:
       raise NotImplementedError(param)
+
 
   return widget
 

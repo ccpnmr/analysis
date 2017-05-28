@@ -4,7 +4,38 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
 from pyqtgraph.dockarea.Container import  SplitContainer
+from ccpn.ui.gui.lib.GuiGenerator import generateWidget
+
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.Table import ObjectTable
+
+
+
+commonWidgets =           {
+                            CheckBox.__name__:       ('get',         'setChecked'),
+                            ColourDialog.__name__:   ('getColor',    'setColor'  ),
+                            DoubleSpinbox.__name__:  ('value',       'setValue'  ),
+                            Label.__name__:          ('get',         'setText'   ),
+                            LineEdit.__name__:       ('get',         'setText'   ),
+                            PulldownList.__name__:   ('currentText', 'set'       ),
+                            RadioButton.__name__:    ('get',         'set'       ),
+                            RadioButtons.__name__:   ('get',         'set'       ),
+                            Slider.__name__:         ('get',         'setValue'  ),
+                            Spinbox.__name__:        ('value',       'set'       ),
+                            TextEditor.__name__:     ('get',         'setText'   ),
+                            # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
+                          }
 
 PipelineBoxDragStyle = """Dock > QWidget {border: 1px solid #78FF00; border-radius: 1px;}"""
 
@@ -191,18 +222,7 @@ class PipelineDropArea(DockArea):
 
 
 class GuiPipe(Dock, DockDrop):
-  
-  commonWidgetProperties = {
-                            'CheckBox':       ('get',     'setChecked'),
-                            'DoubleSpinbox':  ('value',   'setValue'  ),
-                            'Label':          ('get',     'setText'   ),
-                            'LineEdit':       ('get',     'setText'   ),
-                            'PulldownList':   ('currentText', 'set'   ),
-                            'RadioButtons':   ('get',     'set'       ),
-                            'Slider':         ('get',     'setValue'  ),
-                            'Spinbox':        ('value',   'set'       ),
-                            'TextEditor':     ('get',     'setText'   ),
-                            }
+
   preferredPipe = True
   pipeName = ''
 
@@ -240,7 +260,7 @@ class GuiPipe(Dock, DockDrop):
     if project is not None:
       self.project = project
 
-
+    self._widgetsState = None
 
 
     ######  pipeLayout
@@ -267,14 +287,17 @@ class GuiPipe(Dock, DockDrop):
   def widgetsState(self):
     return self._widgetsState
 
+  # @widgetsState.setter
+  # def widgetsState(self, value):
+  #   self._widgetsState = value
 
   @widgetsState.getter
   def widgetsState(self):
     '''return  {"variableName":"value"}  of all gui Variables  '''
     widgetsState = {}
     for varName, varObj in vars(self).items():
-      if varObj.__class__.__name__ in self.commonWidgetProperties.keys():
-        widgetsState[varName] = getattr(varObj, self.commonWidgetProperties[varObj.__class__.__name__][0])()
+      if varObj.__class__.__name__ in commonWidgets.keys():
+        widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
     return widgetsState
 
 
@@ -283,8 +306,8 @@ class GuiPipe(Dock, DockDrop):
     for variableName, value in widgetsState.items():
       try:
         widget = getattr(self, str(variableName))
-        if widget.__class__.__name__ in GuiPipe.commonWidgetProperties.keys():
-          setWidget = getattr(widget, GuiPipe.commonWidgetProperties[widget.__class__.__name__][1])
+        if widget.__class__.__name__ in commonWidgets.keys():
+          setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
           setWidget(value)
       except Exception as e:
         print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
@@ -309,8 +332,8 @@ class GuiPipe(Dock, DockDrop):
       self.label.setParent(None)
 
 
-  def name(self):
-    return self.label.name
+  # def name(self):
+  #   return self.label.name
 
   def rename(self, newName):
     self.label.name = newName
@@ -378,6 +401,29 @@ class GuiPipe(Dock, DockDrop):
     else:
       return False
 
+
+class AutoGeneratedGuiPipe(GuiPipe):
+  pipeName = ''
+  params = {}
+  def __init__(self, parent, name,  pipe=None, project=None,  **kw):
+    '''
+
+    :param parent: guiPipeline
+    :param name: string for the new GuiPipe
+    :param params: dict of all widgets variable names and their values
+    :param project: ccpn Project
+    :param kw: any other
+    '''
+    GuiPipe.__init__(self, parent=parent, name=name)
+    self._kwargs = {}
+    self.pipeName = name
+
+    if self.params is not None:
+      pipelineWidget = generateWidget(self.params, widget=self,
+                                    argsDict=self._kwargs, columns=4)
+      print('@@', pipelineWidget)
+    else:
+      pipelineWidget = self
 
 
 

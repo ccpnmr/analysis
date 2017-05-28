@@ -73,7 +73,7 @@ class GuiPipeline(CcpnModule):
   className = 'GuiPipeline'
   moduleName = 'Pipeline-'
 
-  def __init__(self, mainWindow, name='', guiPipes=None, templates=None, **kw):
+  def __init__(self, mainWindow, name='', pipes=None, templates=None, **kw):
     super(GuiPipeline, self)
 
     # this guarantees to open the module as Gui testing
@@ -103,7 +103,8 @@ class GuiPipeline(CcpnModule):
 
     # set pipeline variables
     self._inputData = set()
-    self.guiPipes = guiPipes
+    self.pipes = pipes
+    self.guiPipes = self._getGuiFromPipes(self.pipes)
     self.currentRunningPipeline = []
     self.currentGuiPipesNames = []
     self.pipelineTemplates = templates
@@ -130,6 +131,35 @@ class GuiPipeline(CcpnModule):
 
     # self.interactor = PipelineInteractor(self.application)
 
+  def _getGuiFromPipes(self, pipes):
+    allGuiPipes = []
+    for pipe in pipes:
+      if pipe:
+        if pipe.guiPipe is not None:
+          allGuiPipes.append(pipe.guiPipe)
+    return allGuiPipes
+
+  @property
+  def pipes(self):
+    return self._pipes
+
+  @pipes.setter
+  def pipes(self, pipes):
+    '''
+    Set the guiPipes to the guiPipeline
+    :param guiPipes:  GuiPipe class
+    '''
+
+    if pipes is not None:
+      allPipes = []
+      for pipe in pipes:
+          allPipes.append(pipe)
+      self._pipes = allPipes
+    else:
+      self._pipes = []
+
+  #  TODO put notifier to update the pulldown when guiPipes chenage
+
   @property
   def guiPipes(self):
     return self._guiPipes
@@ -144,13 +174,10 @@ class GuiPipeline(CcpnModule):
     if guiPipes is not None:
       allGuiPipes = []
       for guiPipe in guiPipes:
-        allGuiPipes.append(guiPipe)
+         allGuiPipes.append(guiPipe)
       self._guiPipes = allGuiPipes
     else:
       self._guiPipes = []
-
-  #  TODO put notifier to update the pulldown when guiPipes chenage
-
 
   @property
   def pipelineTemplates(self):
@@ -257,7 +284,6 @@ class GuiPipeline(CcpnModule):
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
-    print(self.pipePulldownData)
     self.pipePulldown.setData(self.pipePulldownData)
 
     disablePreferredPipeLabel = self.pipePulldown.getItemIndex(preferredPipeLabel)
@@ -268,7 +294,7 @@ class GuiPipeline(CcpnModule):
 
 
     # self.pipePulldown.insertSeparator(countPreferredGuiPipes)
-    self.pipePulldown.activated[str].connect(self._selectMethod)
+    self.pipePulldown.activated[str].connect(self._selectPipe)
 
 
 
@@ -323,7 +349,7 @@ class GuiPipeline(CcpnModule):
 
   ####################################_________ GUI CallBacks ____________###########################################
 
-  def _selectMethod(self, selected):
+  def _selectPipe(self, selected):
 
     guiPipeName = self._getSerialName(str(selected))
     self._addGuiPipe(guiPipeName, selected)
@@ -336,7 +362,7 @@ class GuiPipeline(CcpnModule):
       if guiPipe.pipeName == selected:
 
         position = self.pipelineSettingsParams['addPosit']
-        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, params=None,project=self.project)
+        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, project=self.project)
         self.pipelineArea.addDock(self.pipelineWidget, position=position)
         autoActive = self.pipelineSettingsParams['autoActive']
         self.pipelineWidget.label.checkBox.setChecked(autoActive)
@@ -755,14 +781,18 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
   from ccpn.framework.lib.Pipe import GuiPipe
+  from ccpn.pipes.examples.DemoPipe import DemoPipe1, DemoPipe2
   app = TestApplication()
 
   win = QtGui.QMainWindow()
   from ccpn.AnalysisScreen import guiPipeline as _pm
   # pipelineMethods = _pm.__all__
-  moduleArea = CcpnModuleArea(mainWindow=None, )
-  pipeline = GuiPipeline(mainWindow=None, guiPipes=[])
 
+
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  pipeline = GuiPipeline(mainWindow=None, pipes=[DemoPipe1, DemoPipe2])
+  # pipeline.guiPipes = [DemoExtension]
+  # pipeline._setDataPipesPulldown()
 
 
   moduleArea.addModule(pipeline)

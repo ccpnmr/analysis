@@ -136,8 +136,11 @@ class GuiPipeline(CcpnModule):
     for pipe in pipes:
       if pipe:
         if pipe.guiPipe is not None:
-          allGuiPipes.append(pipe.guiPipe)
+          guiPipe = pipe.guiPipe
+          guiPipe.pipe = pipe
+          allGuiPipes.append(guiPipe)
     return allGuiPipes
+
 
   @property
   def pipes(self):
@@ -360,7 +363,7 @@ class GuiPipeline(CcpnModule):
   def _addGuiPipe(self, name, selected):
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
-
+        print(guiPipe.pipe)
         position = self.pipelineSettingsParams['addPosit']
         self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, project=self.project)
         self.pipelineArea.addDock(self.pipelineWidget, position=position)
@@ -780,7 +783,6 @@ class PipelineInteractor:
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-  from ccpn.framework.lib.Pipe import GuiPipe
   from ccpn.pipes.examples.DemoPipe import DemoPipe1, DemoPipe2
   app = TestApplication()
 

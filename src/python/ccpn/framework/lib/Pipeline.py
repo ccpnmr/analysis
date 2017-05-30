@@ -28,3 +28,71 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #====================================
 
+
+from abc import ABC
+from abc import abstractmethod
+
+
+
+class Pipeline(ABC):
+  '''
+  Pipeline class.
+
+  '''
+
+  guiPipeline = None
+  pipelineName = ''
+
+
+
+
+  def __init__(self, application=None, pipes=None ):
+    self._kwargs = {}
+    self.pipes = pipes
+
+
+    if application is not None:
+      self.application = application
+      self.current = self.application.current
+      self.preferences = self.application.preferences
+      self.ui = self.application.ui
+      self.project = self.application.project
+      try:
+        self.mainWindow = self.ui.mainWindow
+      except AttributeError:
+        pass
+
+
+
+  @property
+  def pipes(self):
+    return self._pipes
+
+  @pipes.setter
+  def pipes(self, pipes):
+    '''
+    Set the guiPipes to the guiPipeline
+    :param guiPipes:  GuiPipe class
+    '''
+
+    if pipes is not None:
+      allPipes = []
+      for pipe in pipes:
+          allPipes.append(pipe)
+      self._pipes = allPipes
+    else:
+      self._pipes = []
+
+
+  def runPipeline(self):
+    if len(self.pipes)>0:
+      for pipe in self.pipes:
+        if pipe is not None:
+          if pipe.isActive:
+            pipe.run()
+
+
+  def _updateRunArgs(self, arg, value):
+    self._kwargs[arg] = value
+
+

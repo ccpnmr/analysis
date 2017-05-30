@@ -32,6 +32,6 @@ import pandas as pd
 class EmptyExtension(PandasPipe):
   pipeName = 'Empty Extension'
 
-  def run(self, dataframe:pd.DataFrame) -> pd.DataFrame:
+  def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
     print('empty')
     return dataframe

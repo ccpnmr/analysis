@@ -44,7 +44,7 @@ class Pipe(ABC):
   def __init__(self, name = pipeName, application=None, ):
     self._kwargs = {}
 
-    self.active = False
+    self.isActive = False
 
     if application is not None:
       self.application = application
@@ -63,7 +63,7 @@ class Pipe(ABC):
 
 
   @abstractmethod
-  def run(self, data):
+  def runPipe(self, data):
     return data
 
 
@@ -87,7 +87,7 @@ try:
     A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe
     '''
     @abstractmethod
-    def run(self, dataframe:pd.DataFrame) -> pd.DataFrame:
+    def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
       return dataframe
 
 except ImportError:

@@ -37,7 +37,7 @@ class DemoPipe1(Pipe):
   pipeName = DemoGuiPipe.pipeName
 
 
-  def run(self, data):
+  def runPipe(self, data):
 
     print(data)
 
@@ -52,6 +52,6 @@ class DemoPipe2(Pipe):
   pipeName = DemoGuiPipe.pipeName
 
 
-  def run(self, data):
+  def runPipe(self, data):
 
     print(data)

@@ -194,7 +194,6 @@ class GuiPipeline(CcpnModule):
     else:
       self._pipes = []
 
-  #  TODO put notifier to update the pulldown when guiPipes chenage
 
   @property
   def guiPipes(self):
@@ -407,7 +406,7 @@ class GuiPipeline(CcpnModule):
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
       for guiPipe in guiPipes:
-        if guiPipe.isActive() and hasattr(guiPipe, 'runMethod'):
+        if guiPipe.isActive():
           result = guiPipe.runMethod()
           guiPipe = (guiPipe, result)
           self.currentRunningPipeline.append(guiPipe)

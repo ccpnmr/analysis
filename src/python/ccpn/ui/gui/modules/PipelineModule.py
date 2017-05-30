@@ -40,7 +40,7 @@ from collections import OrderedDict
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-
+from ccpn.framework.lib.Pipeline import Pipeline
 import pandas as pd
 from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -98,7 +98,7 @@ class PipelineWorker(QtCore.QObject):
 
 
 
-class GuiPipeline(CcpnModule):
+class GuiPipeline(CcpnModule, Pipeline):
 
   includeSettingsWidget = True
   maxSettingsState = 2
@@ -106,8 +106,15 @@ class GuiPipeline(CcpnModule):
   className = 'GuiPipeline'
   moduleName = 'Pipeline-'
 
+
+
   def __init__(self, mainWindow, name='', pipes=None, templates=None, **kw):
     super(GuiPipeline, self)
+
+
+    # print(self.inputData)
+    # self.guiPipeline = GuiPipeline
+    # self.guiPipeline.pipeline = Pipeline
 
     # this guarantees to open the module as Gui testing
     self.project = None
@@ -135,7 +142,8 @@ class GuiPipeline(CcpnModule):
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
     # set pipeline variables
-    self._inputData = set()
+    # self._inputData = set()
+
     self.pipes = pipes
     self.guiPipes = self._getGuiFromPipes(self.pipes)
     self.currentRunningPipeline = []
@@ -145,6 +153,9 @@ class GuiPipeline(CcpnModule):
 
     # init the CcpnModule
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+
+    # init the Pipeline
+    Pipeline.__init__(self, application=self.application, pipelineName=name, pipes=pipes)
 
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
@@ -159,8 +170,8 @@ class GuiPipeline(CcpnModule):
     self._setSecondaryLayouts()
 
     # start the pipelineWorker
-    self.pipelineWorker.stepIncreased.connect(self.runPipeline)
-    print('GUIPIPES ', self.guiPipes)
+    self.pipelineWorker.stepIncreased.connect(self._runPipeline)
+
 
     # self.interactor = PipelineInteractor(self.application)
 
@@ -168,10 +179,14 @@ class GuiPipeline(CcpnModule):
     allGuiPipes = []
     for pipe in pipes:
       if pipe:
-        if pipe.guiPipe is not None:
-          guiPipe = pipe.guiPipe
-          guiPipe.pipe = pipe
-          allGuiPipes.append(guiPipe)
+        try:
+          if pipe.guiPipe is not None:
+            guiPipe = pipe.guiPipe
+            guiPipe.pipe = pipe
+            allGuiPipes.append(guiPipe)
+        except:
+          # TODO handle exceptions
+          pass
     return allGuiPipes
 
 
@@ -345,8 +360,8 @@ class GuiPipeline(CcpnModule):
     NB the stop callback needs to be a lambda call
 
     '''
-    self.goButton = ButtonList(self, texts=['','',''],icons=[self.stopIcon, self.goIcon, self.goIcon,],
-                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self.runPipeline],
+    self.goButton = ButtonList(self, texts=['','',''], icons=[self.stopIcon, self.goIcon, self.goIcon,],
+                               callbacks=[lambda:self.pipelineWorker.stop(), self.pipelineWorker.task, self._runPipeline],
                                hAlign='c')
     self.goButton.buttons[0].hide()
     self.goButton.buttons[1].hide()
@@ -371,7 +386,7 @@ class GuiPipeline(CcpnModule):
   def keyPressEvent(self, KeyEvent):
     ''' Run the pipeline by pressing the enter key '''
     if KeyEvent.key() == Qt.Key_Enter:
-      self.runPipeline()
+      self._runPipeline()
 
   def _getSerialName(self, guiPipeName):
     self.currentGuiPipesNames.append(guiPipeName)
@@ -401,13 +416,13 @@ class GuiPipeline(CcpnModule):
         autoActive = self.pipelineSettingsParams['autoActive']
         self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
-  def runPipeline(self):
+  def _runPipeline(self):
     self.currentRunningPipeline = []
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
       for guiPipe in guiPipes:
         if guiPipe.isActive():
-          result = guiPipe.runMethod()
+          result = guiPipe.pipe.runPipe()
           guiPipe = (guiPipe, result)
           self.currentRunningPipeline.append(guiPipe)
 
@@ -673,15 +688,15 @@ class GuiPipeline(CcpnModule):
     dataTexts = self.inputDataList.getTexts()
     if self.project is not None:
       if len(dataTexts) == 0:
-        self._inputData.clear()
+        self.inputData.clear()
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
         if object is not None:
           if isinstance(obj, Spectrum):
-            self._inputData.update([obj])
+            self.inputData.update([obj])
           elif isinstance(obj, SpectrumGroup):
-            self._inputData.update(obj.spectra)
+            self.inputData.update(obj.spectra)
           else:
             print(obj, 'Not available.')
 

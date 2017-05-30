@@ -41,10 +41,16 @@ class Pipe(ABC):
 
 
 
-  def __init__(self, name = pipeName, application=None, ):
+  def __init__(self, pipeline, name = pipeName, application=None, ):
     self._kwargs = {}
 
     self.isActive = False
+    self.inputData = None
+
+    self.pipeline = pipeline
+    if self.pipeline is not None:
+      self.inputData = self.pipeline.inputData
+
 
     if application is not None:
       self.application = application

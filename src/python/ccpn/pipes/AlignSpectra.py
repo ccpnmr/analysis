@@ -1,6 +1,3 @@
-"""Module Documentation here
-
-"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -11,77 +8,34 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:14 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
-
-__date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
-#====================================
+#=========================================================================================
+
+
+from ccpn.framework.lib.Pipe import Pipe
+from ccpn.pipes.guiPipes.GuiAlignSpectra import GuiAlignSpectra
+
+class AlignSpectra(Pipe):
+
+  guiPipe = GuiAlignSpectra
+  pipeName = GuiAlignSpectra.pipeName
 
 
 
-class Pipeline(object):
-  '''
-  Pipeline class.
+  def runPipe(self, data):
+    print(self.pipeline.inputData)
+    print(data)
 
-  '''
-
-
-  def __init__(self, application=None, pipelineName=None, pipes=None ):
-    self._kwargs = {}
-    self.pipes = pipes
-    self.inputData = set()
-
-
-    if application is not None:
-      self.application = application
-      self.current = self.application.current
-      self.preferences = self.application.preferences
-      self.ui = self.application.ui
-      self.project = self.application.project
-      try:
-        self.mainWindow = self.ui.mainWindow
-      except AttributeError:
-        pass
-
-
-  @property
-  def pipes(self):
-    return self._pipes
-
-  @pipes.setter
-  def pipes(self, pipes):
-    '''
-    '''
-
-    if pipes is not None:
-      allPipes = []
-      for pipe in pipes:
-          allPipes.append(pipe)
-      self._pipes = allPipes
-    else:
-      self._pipes = []
-
-
-  def runPipeline(self):
-    if len(self.pipes)>0:
-      for pipe in self.pipes:
-        if pipe is not None:
-          if pipe.isActive:
-            pipe.run()
-
-
-
-  def _updateRunArgs(self, arg, value):
-    self._kwargs[arg] = value
 

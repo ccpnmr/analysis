@@ -518,13 +518,13 @@ class SideBar(QtGui.QTreeWidget, Base):
         text = item.text(0)
         if ':' in text:
 
-          mimeData = QtCore.QMimeData()
-          itemData = QtCore.QByteArray()
-          stream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-          stream.writeQVariantHash({'pids':text, 'dragAction':'copy'})    # need to get rid of these strings
+          # mimeData = QtCore.QMimeData()     # ejb - temporary fix, not working, intermittent bug
+          # itemData = QtCore.QByteArray()    # sometimes mimeData() empty in corresponding dropEvent
+          # stream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+          # stream.writeQVariantHash({'pids':text, 'dragAction':'copy'})    # need to get rid of these strings
           # mimeData.setData('dinner', data)
 
-          # itemData = json.dumps({'pids':[text]})
+          itemData = json.dumps({'pids':[text]})
           event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
 

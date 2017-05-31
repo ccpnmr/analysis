@@ -176,25 +176,30 @@ class ListWidget(QtGui.QListWidget, Base):
         links.append(str(url.toLocalFile()))
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
-
-      encodedData = event.mimeData().data(ccpnmrJsonData)
-      stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
-      eventData = stream.readQVariantHash()
-
       items = []
-      if event.source() != self: #otherwise duplicates
-        actionType = QtCore.Qt.CopyAction
-        if 'dragAction' in eventData.keys():        # put these strings somewhere else
-          if eventData['dragAction'] == 'copy':
-            actionType = QtCore.Qt.CopyAction             # ejb - changed from Move
-          elif eventData['dragAction'] == 'move':
-            actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
+      event.setDropAction(QtCore.Qt.CopyAction)
+      self.emit(QtCore.SIGNAL("dropped"), items)
+      super(ListWidget, self).dropEvent(event)
 
-        event.setDropAction(actionType)
-        self.emit(QtCore.SIGNAL("dropped"), items)
-        super(ListWidget, self).dropEvent(event)
-      else:
-        event.ignore()
+      # ejb - tried to fix transfer of CopyAction, but intermittent
+      # encodedData = event.mimeData().data(ccpnmrJsonData)
+      # stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
+      # eventData = stream.readQVariantHash()
+      #
+      # items = []
+      # if event.source() != self: #otherwise duplicates
+      #   actionType = QtCore.Qt.CopyAction
+      #   if 'dragAction' in eventData.keys():        # put these strings somewhere else
+      #     if eventData['dragAction'] == 'copy':
+      #       actionType = QtCore.Qt.CopyAction             # ejb - changed from Move
+      #     elif eventData['dragAction'] == 'move':
+      #       actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
+      #
+      #   event.setDropAction(actionType)
+      #   self.emit(QtCore.SIGNAL("dropped"), items)
+      #   super(ListWidget, self).dropEvent(event)
+      # else:
+      #   event.ignore()
 
 
 if __name__ == '__main__':

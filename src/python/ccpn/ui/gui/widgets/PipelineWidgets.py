@@ -278,8 +278,7 @@ class GuiPipe(Dock, DockDrop):
     
     self.inputData = []
     if self.parent is not None:
-      if hasattr(self.parent, 'inputData'):
-        self.inputData = self.parent._inputData
+        self.inputData = self.parent.inputData
       
     if name is None:
       name = 'New Pipe'
@@ -426,6 +425,7 @@ class GuiPipe(Dock, DockDrop):
   def setActive(self, state):
     self.label.checkBox.setChecked(state)
 
+  @property
   def isActive(self):
     checkBox = self.label.checkBox
     if checkBox.isChecked():

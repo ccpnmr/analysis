@@ -41,6 +41,8 @@ class Pipeline(object):
     self._kwargs = {}
     self.pipes = pipes
     self.inputData = set()
+    self.queue = [] # Pipes to be ran
+    self.finishedPipe = [] # Pipes already ran
 
 
     if application is not None:
@@ -74,11 +76,17 @@ class Pipeline(object):
 
 
   def runPipeline(self):
-    if len(self.pipes)>0:
+    '''Run all pipes in order '''
+    print('Running Pipeline')
+    if len(self.queue)>0:
       for pipe in self.pipes:
         if pipe is not None:
-          if pipe.isActive:
-            pipe.run()
+          pipe.runPipe(self, pipe._kwargs)
+          self.queue.remove(pipe)
+          self.finishedPipe.append(pipe)
+
+    print(' self.queue',  self.queue)
+    print(' self.self.finishedPipe', self.finishedPipe)
 
 
 

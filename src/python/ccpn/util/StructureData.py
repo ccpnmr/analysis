@@ -626,7 +626,7 @@ class EnsembleData(pd.DataFrame):
       for rows in deleteRows:
         colInd = getattr(rows, 'Index')
         # colData[str(colInd)] = dict((x, self.loc[colInd-1].get(x)) for x in self.columns)  # grab the original values
-        colData.append({str(colInd):dict((x, self.loc[colInd-1].get(x)) for x in self.columns)})
+        colData.append({str(colInd):dict((x, self.loc[colInd].get(x)) for x in self.columns)})
 
       self.drop(self[rowSelector].index, inplace=True)
       self.reset_index(drop=True, inplace=True)

@@ -76,7 +76,7 @@ class Pipeline(object):
 
 
   def runPipeline(self):
-    '''Run all pipes in order '''
+    '''Run all pipes in the specified order '''
     print('Running Pipeline')
     if len(self.queue)>0:
       for pipe in self.pipes:
@@ -87,9 +87,4 @@ class Pipeline(object):
 
     print(' self.queue',  self.queue)
     print(' self.self.finishedPipe', self.finishedPipe)
-
-
-
-  def _updateRunArgs(self, arg, value):
-    self._kwargs[arg] = value
 

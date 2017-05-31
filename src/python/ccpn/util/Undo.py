@@ -333,7 +333,7 @@ class Undo(deque):
         # undoMethod, undoData, redoMethod, redoData = self[n]
         # if redoData is None:
         #   redoMethod()
-        # else:
+        # else:, axis=1, inplace=True
         #   redoMethod(redoData)
         undoCall, redoCall = self[n]
         # if self._debug:

@@ -222,7 +222,7 @@ class TestPandasData(WrapperTesting):
     with self.assertRaisesRegexp(TypeError, 'deleteRow: Row is not an int'):  # should raise ValueError
       self.data.deleteRow('notInt')
 
-    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')    # currently no return error for non-indexed items
+    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')
     self.undo.undo()
 
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)

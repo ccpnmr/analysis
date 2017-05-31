@@ -402,8 +402,7 @@ class EnsembleData(pd.DataFrame):
       expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
-    k = self['modelNumber'].isin(expression)
-    return k
+    return self['modelNumber'].isin(expression)
 
   def _indexSelector(self, expression:typing.Union[str, int, typing.Iterable]) -> pd.Series:
     """Select index based on 'expression'
@@ -750,12 +749,12 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol')     # ejb, values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteCol', values={})     # ejb, values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
-      self.drop(colIndex, axis=1, inplace=True)
+      super().drop(colIndex, axis=1, inplace=True)
 
       if containingObject is not None:
         undo = containingObject._project._undo

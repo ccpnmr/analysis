@@ -49,11 +49,11 @@ class Pipe(ABC):
     loadedPipes.append(cls)
 
 
-  def __init__(self, pipeline, name = pipeName, application=None, ):
+  def __init__(self, name = pipeName, application=None, ):
     self._kwargs = {}
     self.inputData = None
 
-    self.pipeline = pipeline
+    self.pipeline = None
     if self.pipeline is not None:
       self.inputData = self.pipeline.inputData
 

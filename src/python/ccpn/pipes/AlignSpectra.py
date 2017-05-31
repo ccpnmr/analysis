@@ -48,8 +48,6 @@ class AlignSpectra(Pipe):
       if referenceSpectrum is not None:
         spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
 
-        print(referenceSpectrum)
-        print(spectra)
         if spectra:
           alignment._alignSpectra(referenceSpectrum, spectra)
 

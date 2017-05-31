@@ -40,5 +40,15 @@ class GuiAlignSpectra(GuiPipe):
 
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
     self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
+    self._updateWidgets()
+
+  def _updateWidgets(self):
+    self._setDataReferenceSpectrum()
+
+
+  def _setDataReferenceSpectrum(self):
+    data = list(self.inputData)
+    if len(data)>0:
+      self.referenceSpectrum.setData(texts=[sp.pid for sp in data], objects=data)
 
 

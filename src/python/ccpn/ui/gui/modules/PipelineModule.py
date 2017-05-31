@@ -417,14 +417,23 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipelineWidget.label.checkBox.setChecked(autoActive)
 
   def _runPipeline(self):
-    self.currentRunningPipeline = []
+    print('_runPipeline')
+
+    # self.currentRunningPipeline = []
+    self.queue = []
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
       for guiPipe in guiPipes:
-        if guiPipe.isActive():
-          result = guiPipe.pipe.runPipe()
-          guiPipe = (guiPipe, result)
-          self.currentRunningPipeline.append(guiPipe)
+        if guiPipe.isActive:
+          guiPipe.pipe.isActive = True
+          guiPipe.pipe._kwargs =  guiPipe.widgetsState
+          self.queue.append(guiPipe.pipe)
+
+        else:
+          guiPipe.pipe.isActive = False
+
+
+    self.runPipeline()
 
 
   ####################################_________ others____________###########################################
@@ -524,7 +533,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.savePipelineParams = []
     for guiPipeName in currentBoxesNames:
       guiPipeMethod = self.pipelineArea.docks[str(guiPipeName)]
-      state = guiPipeMethod.isActive()
+      state = guiPipeMethod.isActive
       params = guiPipeMethod.getWidgetsParams()
       newDict = {guiPipeMethod.pipeName(): (guiPipeName, params, state)}
       self.savePipelineParams.append(newDict)
@@ -606,6 +615,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     if len(self.inputDataList.getTexts())==1:
       if DropHereLabel in self.inputDataList.getTexts():
         self.inputDataList.clear()
+
 
   def settingsPipelineWidgets(self):
     if self.settingFrame.isHidden():

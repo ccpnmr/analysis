@@ -34,17 +34,23 @@ class Pipe(ABC):
 
   '''
 
+
   guiPipe = None
   autoGuiParams = None
   pipeName = ''
+  isActive = False
 
-
+  @classmethod
+  def register(cls):
+    """
+    method to register the pipe in the loaded pipes to appear in the pipeline
+    """
+    from ccpn.pipes import loadedPipes
+    loadedPipes.append(cls)
 
 
   def __init__(self, pipeline, name = pipeName, application=None, ):
     self._kwargs = {}
-
-    self.isActive = False
     self.inputData = None
 
     self.pipeline = pipeline

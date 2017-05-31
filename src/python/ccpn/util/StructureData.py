@@ -402,7 +402,8 @@ class EnsembleData(pd.DataFrame):
       expression = [int(ii) for ii in expression]       # ejb - check for the other _selectors
     elif isinstance(expression, int):
       expression = [expression,]
-    return self['modelNumber'].isin(expression)
+    k = self['modelNumber'].isin(expression)
+    return k
 
   def _indexSelector(self, expression:typing.Union[str, int, typing.Iterable]) -> pd.Series:
     """Select index based on 'expression'
@@ -592,14 +593,17 @@ class EnsembleData(pd.DataFrame):
     self.index = neworder                       # set the new index
     self.sort_index(inplace=True)                     # and re-sort the table
 
-  def deleteSelectedRows(self, selector):
+  def deleteSelectedRows(self, **kwargs):
     """Delete rows identified by selector.
+      **kwargs: All keyword-value arguments are passed to the selector function.
 
     Selector created, e.g. by self.selector)"""
 
     # TODO NBNB add echo handling,undo, notifier, index handling
 
-    selection = self.extract(selector)
+    rowSelector = self.selector(**kwargs)
+
+    selection = self.extract(rowSelector)
     if not selection.shape[0]:
       # nothing to delete
       return
@@ -608,45 +612,61 @@ class EnsembleData(pd.DataFrame):
     # NBNB index handling!
     deleteRows = selection.as_namedtuples()
 
-    self.drop(selector, inplace=True)
+    # containingObject = self._containingObject
+    # if containingObject is not None:
+    #   undo and echoing
+      # containingObject._startCommandEchoBlock('data.deleteSelectedRows')
 
-  def deleteRow(self, *args, **kwargs):
+    # try:
+    # for rows in deleteRows:
+    #   self.deleteRow(int(getattr(rows, 'Index')))
+
+    self.drop(self[rowSelector].index, inplace=True)
+    self.reset_index(drop=True, inplace=True)
+
+    # finally:
+    #   if containingObject is not None:
+    #     containingObject._endCommandEchoBlock()
+
+
+  def deleteRow(self, rowNumber):    # *args, **kwargs):
     """
     Delete a numbered row of the table.
     index must exist and be a specified row.
     An undo event is added corresponding to self._insertRow above.
-    :param index in *args:
-    :param kwargs:
-    :return:
+    :param rowNum: row to delete
     """
-    try:
-      index = int(args[0])
-    except:
-      raise ValueError('deleteRow: Row not specified')
+    # try:
+    #   index = int(args[0])
+    # except:
+    #   raise ValueError('deleteRow: Row not specified')
+    if not isinstance(rowNumber, int):
+      raise TypeError('deleteRow: Row is not an int')
 
     rowExists = False
-    if index in self.index:       # the index must exist
+    if rowNumber in self.index:       # the index must exist
       rowExists = True
     else:
       raise ValueError('deleteRow: Row does not exist')
 
+    index = rowNumber
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteRow', values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteRow')
 
     try:
       colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
 
-      super().drop(index, **kwargs)       # delete the row
-      self.reset_index(drop=True, inplace=True)     # ejb
+      self.drop(index, inplace=True)                # delete the row
+      self.reset_index(drop=True, inplace=True)     # ejb - reset the index
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertRow, self.deleteRow,
                          undoArgs=(index,), undoKwargs=colData,
-                         redoArgs=(index,), redoKwargs=kwargs)
+                         redoArgs=(index,), redoKwargs={})
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 
@@ -671,7 +691,7 @@ class EnsembleData(pd.DataFrame):
     if structureEnsemble is not None:
       structureEnsemble._finaliseAction('change')
 
-  def deleteCol(self, *args, **kwargs):
+  def deleteCol(self, columnName):    # ejb - , *args, **kwargs):
     """
     Delete a named column from the table, colIndex must exist.
     An undo event is added corresponding to self._insertCol above.
@@ -679,33 +699,36 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    try:
-      colIndex = str(args[0])
-    except:
-      raise ValueError('deleteCol: Column not specified')
+    # try:
+    #   colIndex = str(args[0])
+    # except:
+    #   raise ValueError('deleteCol: Column not specified')
+    if not isinstance(columnName, str):
+      raise TypeError('deleteCol: Column is not a string')
 
     colExists = False
-    if colIndex in self.columns:       # the index must exist
+    if columnName in self.columns:       # the index must exist
       colExists = True
     else:
       raise ValueError('deleteCol: Column does not exist.')
 
+    colIndex = columnName
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteCol')     # ejb, values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
-      super().drop(colIndex, **kwargs)
+      self.drop(colIndex, axis=1, inplace=True)
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertCol, self.deleteCol,
                          undoArgs=(colIndex,), undoKwargs=colData,
-                         redoArgs=(colIndex,), redoKwargs=kwargs)
+                         redoArgs=(colIndex,), redoKwargs={})
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 

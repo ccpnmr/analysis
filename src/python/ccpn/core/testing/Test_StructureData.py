@@ -82,7 +82,6 @@ class TestPandasData(WrapperTesting):
     self.assertRaises(ValueError, setattr, self.data, 'occupancy',  (0,0,0.1,0.99,1,1.1))
 
   def test_sorting(self):
-    # TODO youshou
     self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
                         , self.undo.maxOperations# = maxOperations
                         , self.undo.nextIndex# = 0   # points to next free slot (or first slot to redo)
@@ -206,22 +205,25 @@ class TestPandasData(WrapperTesting):
                                        atomName='HG12', nmrAtomName='HG12', nmrChainCode='#12', nmrSequenceCode='12',
                                        origIndex=5)))
 
-    self.data.deleteRow(7, inplace=True)
+    self.data.deleteRow(7)
     self.assertEqual(list(self.data['chainCode'])
                      , ['B','B','A','A','B','B','A','B','B','A','A','B','B','A','A',None,None])
-
     self.undo.undo()
     self.assertEqual(list(self.data['chainCode'])
                      , ['B','B','A','A','B','B','A','A','B','B','A','A','B','B','A','A',None,None])
-
     self.undo.redo()
     self.assertEqual(list(self.data['chainCode'])
                      , ['B','B','A','A','B','B','A','B','B','A','A','B','B','A','A',None,None])
 
-    with self.assertRaisesRegexp(ValueError, 'deleteRow: Row not specified'):  # should raise ValueError
+    with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
       self.data.deleteRow()
     with self.assertRaisesRegexp(ValueError, 'deleteRow: Row does not exist'):  # should raise ValueError
-      self.data.deleteRow(42, inplace=True)
+      self.data.deleteRow(42)
+    with self.assertRaisesRegexp(TypeError, 'deleteRow: Row is not an int'):  # should raise ValueError
+      self.data.deleteRow('notInt')
+
+    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')    # currently no return error for non-indexed items
+    self.undo.undo()
 
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
@@ -235,12 +237,14 @@ class TestPandasData(WrapperTesting):
 
     # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
     # new function deleteCol has been added to replace simple drop
-    self.data.deleteCol('z', axis=1, inplace=True)
+    self.data.deleteCol('z')
 
-    with self.assertRaisesRegexp(ValueError, 'deleteCol: Column not specified'):  # should raise ValueError
+    with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
       self.data.deleteCol()
     with self.assertRaisesRegexp(ValueError, 'deleteCol: Column does not exist'):  # should raise ValueError
-      self.data.deleteCol('notFound', axis=1, inplace=True)
+      self.data.deleteCol('notFound')
+    with self.assertRaisesRegexp(TypeError, 'deleteCol: Column is not a string'):  # should raise ValueError
+      self.data.deleteCol(42)
 
     with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as deleted
       self.assertEqual(list(self.data['z']), None)
@@ -308,7 +312,7 @@ class TestPandasData(WrapperTesting):
                  origIndex=9)
     ))
 
-    self.data.deleteCol('y', axis=1, inplace=True)
+    self.data.deleteCol('y')
     self.undo.undo()      # ejb - does not work on 'drop'
     self.undo.undo()      # ejb - does not work on 'drop'
     self.undo.redo()

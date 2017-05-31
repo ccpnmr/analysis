@@ -246,15 +246,17 @@ class Model(AbstractWrapperObject):
         # undo and echoing
         containingObject._startCommandEchoBlock('clearData')
 
-      Found = True
-      while Found:
-        Found = False                             # set to False for the next iteration
-        self.itRec = data.records()
-        for rNum, rec in enumerate(self.itRec):
-          if int(rec['modelNumber']) == self.serial:
-            data.deleteRow(rNum+1, inplace=True)          # should also be able to undo this
-            Found = True
-            break                                 # break out for the next repeat
+      # Found = True
+      # while Found:
+      #   Found = False                             # set to False for the next iteration
+      #   self.itRec = data.records()
+      #   for rNum, rec in enumerate(self.itRec):
+      #     if int(rec['modelNumber']) == self.serial:
+      #       data.deleteRow(rNum+1)          # should also be able to undo this
+      #       Found = True
+      #       break                                 # break out for the next repeat
+
+      data.deleteSelectedRows(modelNumbers=self.serial)      # ejb - test new delete, undo not done yet
 
       if containingObject is not None:
         containingObject._endCommandEchoBlock()

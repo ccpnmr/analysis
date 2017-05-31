@@ -419,7 +419,6 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _runPipeline(self):
     print('_runPipeline')
 
-    # self.currentRunningPipeline = []
     self.queue = []
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)

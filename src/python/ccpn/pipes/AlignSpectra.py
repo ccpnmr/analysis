@@ -34,8 +34,30 @@ class AlignSpectra(Pipe):
 
 
 
-  def runPipe(self, data):
-    print(self.pipeline.inputData)
-    print(data)
+  def runPipe(self, params):
+    '''
+    :param data:
+    :return:
+    '''
 
+    from ccpn.AnalysisScreen.lib.spectralProcessing.align import alignment
+    if self.project is not None:
+
+      referenceSpectrumPid = params['referenceSpectrum']
+      referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
+      if referenceSpectrum is not None:
+        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
+
+        print(referenceSpectrum)
+        print(spectra)
+        if spectra:
+          alignment._alignSpectra(referenceSpectrum, spectra)
+
+          print('finished',)
+
+
+
+
+
+AlignSpectra.register()
 

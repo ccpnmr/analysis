@@ -574,24 +574,19 @@ class EnsembleData(pd.DataFrame):
   #   else:
   #     raise TypeError("Object %s lacks 'asdict' and 'to_dict' method")
 
+  def _insertSelectedRows(self, *args, **kwargs):    # ejb
+    insertSet = kwargs['iSR']
+    for thisInsertSet in insertSet:
+      for rowInd in thisInsertSet:
+        self._insertRow(int(rowInd), **thisInsertSet[rowInd])    # re-insert the row
 
-  def _insertRow(self, *args, **kwargs):
-    """
-    Currently called by undo to re-insert a row.
-    Add the **kwargs to new element at the bottom of each column.
-    Modify the index and sort the new row into the correct position.
-    :param index in *args:
-    :param kwargs:
-    :return:
-    """
-    index = int(args[0])
-    len = self.shape[0]                         # current rows
-    for key in kwargs:
-      super().loc[len+1, key] = kwargs[key]     # force an extra row
-
-    neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
-    self.index = neworder                       # set the new index
-    self.sort_index(inplace=True)                     # and re-sort the table
+      # index = int(rowInd)
+      # key = kwargs[rowInd]
+      # self.loc[len+1, key] = kwargs[key]     # force an extra row
+      #
+      # neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
+      # self.index = neworder                       # set the new index
+      # self.sort_index(inplace=True)                     # and re-sort the table
 
   def deleteSelectedRows(self, **kwargs):
     """Delete rows identified by selector.
@@ -612,24 +607,63 @@ class EnsembleData(pd.DataFrame):
     # NBNB index handling!
     deleteRows = selection.as_namedtuples()
 
-    # containingObject = self._containingObject
-    # if containingObject is not None:
-    #   undo and echoing
-      # containingObject._startCommandEchoBlock('data.deleteSelectedRows')
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteSelectedRows')
 
     # try:
     # for rows in deleteRows:
     #   self.deleteRow(int(getattr(rows, 'Index')))
 
-    self.drop(self[rowSelector].index, inplace=True)
-    self.reset_index(drop=True, inplace=True)
+    try:
+      # colData = collections.OrderedDict()                   # start with empty list
+      # for colInd, cols in enumerate(list(rowSelector)):
+      #   if cols == True:
+      #     colData[str(colInd)] = dict((x, self.loc[colInd].get(x)) for x in self.columns)  # grab the original values
 
-    # finally:
-    #   if containingObject is not None:
-    #     containingObject._endCommandEchoBlock()
+      colData = []
+      for rows in deleteRows:
+        colInd = getattr(rows, 'Index')
+        # colData[str(colInd)] = dict((x, self.loc[colInd-1].get(x)) for x in self.columns)  # grab the original values
+        colData.append({str(colInd):dict((x, self.loc[colInd-1].get(x)) for x in self.columns)})
 
+      self.drop(self[rowSelector].index, inplace=True)
+      self.reset_index(drop=True, inplace=True)
 
-  def deleteRow(self, rowNumber):    # *args, **kwargs):
+      if containingObject is not None:
+        undo = containingObject._project._undo
+
+        if undo is not None:  # add the undo event
+          undo.newItem(self._insertSelectedRows, self.deleteSelectedRows,
+                       undoArgs=(), undoKwargs={'iSR':colData},
+                       redoArgs=(), redoKwargs=kwargs)
+
+        self._structureEnsemble._finaliseAction('change')
+
+    finally:
+        if containingObject is not None:
+          containingObject._endCommandEchoBlock()
+
+  def _insertRow(self, *args, **kwargs):    # ejb
+    """
+    Currently called by undo to re-insert a row.
+    Add the **kwargs to new element at the bottom of each column.
+    Modify the index and sort the new row into the correct position.
+    :param index in *args:
+    :param kwargs:
+    :return:
+    """
+    index = int(args[0])
+    len = self.shape[0]                         # current rows
+    for key in kwargs:
+      self.loc[len+1, key] = kwargs[key]     # force an extra row
+
+    neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
+    self.index = neworder                       # set the new index
+    self.sort_index(inplace=True)                     # and re-sort the table
+
+  def deleteRow(self, rowNumber):    # ejb - *args, **kwargs):
     """
     Delete a numbered row of the table.
     index must exist and be a specified row.
@@ -674,7 +708,7 @@ class EnsembleData(pd.DataFrame):
       if containingObject is not None:
         containingObject._endCommandEchoBlock()
 
-  def _insertCol(self, *args, **kwargs):
+  def _insertCol(self, *args, **kwargs):     # ejb
     """
     Currently called by undo to re-insert a column.
     Add the **kwargs to the column across the index.

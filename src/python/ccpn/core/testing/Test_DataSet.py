@@ -256,6 +256,8 @@ class DataTest(WrapperTesting):
     undo.redo()
 
     data1.setParameter('EnsembleData', self.data)
+    undo.undo()                                     # needs to undo the setParameter
+    undo.redo()
     self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data.__class__))
 
 

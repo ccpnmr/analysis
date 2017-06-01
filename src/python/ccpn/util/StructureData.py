@@ -573,8 +573,78 @@ class EnsembleData(pd.DataFrame):
   #   else:
   #     raise TypeError("Object %s lacks 'asdict' and 'to_dict' method")
 
+  def _insertSelectedRows(self, *args, **kwargs):    # ejb
+    insertSet = kwargs['iSR']
+    for thisInsertSet in insertSet:
+      for rowInd in thisInsertSet:
+        self._insertRow(int(rowInd), **thisInsertSet[rowInd])    # re-insert the row
 
-  def _insertRow(self, *args, **kwargs):
+      # index = int(rowInd)
+      # key = kwargs[rowInd]
+      # self.loc[len+1, key] = kwargs[key]     # force an extra row
+      #
+      # neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
+      # self.index = neworder                       # set the new index
+      # self.sort_index(inplace=True)                     # and re-sort the table
+
+  def deleteSelectedRows(self, **kwargs):
+    """Delete rows identified by selector.
+      **kwargs: All keyword-value arguments are passed to the selector function.
+
+    Selector created, e.g. by self.selector)"""
+
+    # TODO NBNB add echo handling,undo, notifier, index handling
+
+    rowSelector = self.selector(**kwargs)
+
+    selection = self.extract(rowSelector)
+    if not selection.shape[0]:
+      # nothing to delete
+      return
+
+    # To use in undo, possibly together with addRows??
+    # NBNB index handling!
+    deleteRows = selection.as_namedtuples()
+
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.deleteSelectedRows')
+
+    # try:
+    # for rows in deleteRows:
+    #   self.deleteRow(int(getattr(rows, 'Index')))
+
+    try:
+      # colData = collections.OrderedDict()                   # start with empty list
+      # for colInd, cols in enumerate(list(rowSelector)):
+      #   if cols == True:
+      #     colData[str(colInd)] = dict((x, self.loc[colInd].get(x)) for x in self.columns)  # grab the original values
+
+      colData = []
+      for rows in deleteRows:
+        colInd = getattr(rows, 'Index')
+        # colData[str(colInd)] = dict((x, self.loc[colInd-1].get(x)) for x in self.columns)  # grab the original values
+        colData.append({str(colInd):dict((x, self.loc[colInd].get(x)) for x in self.columns)})
+
+      self.drop(self[rowSelector].index, inplace=True)
+      self.reset_index(drop=True, inplace=True)
+
+      if containingObject is not None:
+        undo = containingObject._project._undo
+
+        if undo is not None:  # add the undo event
+          undo.newItem(self._insertSelectedRows, self.deleteSelectedRows,
+                       undoArgs=(), undoKwargs={'iSR':colData},
+                       redoArgs=(), redoKwargs=kwargs)
+
+        self._structureEnsemble._finaliseAction('change')
+
+    finally:
+        if containingObject is not None:
+          containingObject._endCommandEchoBlock()
+
+  def _insertRow(self, *args, **kwargs):    # ejb
     """
     Currently called by undo to re-insert a row.
     Add the **kwargs to new element at the bottom of each column.
@@ -586,67 +656,50 @@ class EnsembleData(pd.DataFrame):
     index = int(args[0])
     len = self.shape[0]                         # current rows
     for key in kwargs:
-      super().loc[len+1, key] = kwargs[key]     # force an extra row
+      self.loc[len+1, key] = kwargs[key]     # force an extra row
 
     neworder = [x for x in range(1,index)]+[x for x in range(index+1,len+2)]+[index]
     self.index = neworder                       # set the new index
     self.sort_index(inplace=True)                     # and re-sort the table
 
-  def deleteSelectedRows(self, selector):
-    """Delete rows identified by selector.
-
-    Selector created, e.g. by self.selector)"""
-
-    # TODO NBNB add echo handling,undo, notifier, index handling
-
-    selection = self.extract(selector)
-    if not selection.shape[0]:
-      # nothing to delete
-      return
-
-    # To use in undo, possibly together with addRows??
-    # NBNB index handling!
-    deleteRows = selection.as_namedtuples()
-
-    self.drop(selector, inplace=True)
-
-  def deleteRow(self, *args, **kwargs):
+  def deleteRow(self, rowNumber):    # ejb - *args, **kwargs):
     """
     Delete a numbered row of the table.
     index must exist and be a specified row.
     An undo event is added corresponding to self._insertRow above.
-    :param index in *args:
-    :param kwargs:
-    :return:
+    :param rowNum: row to delete
     """
-    try:
-      index = int(args[0])
-    except:
-      raise ValueError('deleteRow: Row not specified')
+    # try:
+    #   index = int(args[0])
+    # except:
+    #   raise ValueError('deleteRow: Row not specified')
+    if not isinstance(rowNumber, int):
+      raise TypeError('deleteRow: Row is not an int')
 
     rowExists = False
-    if index in self.index:       # the index must exist
+    if rowNumber in self.index:       # the index must exist
       rowExists = True
     else:
       raise ValueError('deleteRow: Row does not exist')
 
+    index = rowNumber
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteRow', values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteRow')
 
     try:
       colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
 
-      super().drop(index, **kwargs)       # delete the row
-      self.reset_index(drop=True, inplace=True)     # ejb
+      self.drop(index, inplace=True)                # delete the row
+      self.reset_index(drop=True, inplace=True)     # ejb - reset the index
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertRow, self.deleteRow,
                          undoArgs=(index,), undoKwargs=colData,
-                         redoArgs=(index,), redoKwargs=kwargs)
+                         redoArgs=(index,), redoKwargs={})
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 
@@ -654,7 +707,7 @@ class EnsembleData(pd.DataFrame):
       if containingObject is not None:
         containingObject._endCommandEchoBlock()
 
-  def _insertCol(self, *args, **kwargs):
+  def _insertCol(self, *args, **kwargs):     # ejb
     """
     Currently called by undo to re-insert a column.
     Add the **kwargs to the column across the index.
@@ -665,13 +718,13 @@ class EnsembleData(pd.DataFrame):
     """
     colIndex = str(args[0])       # get the index from the first arg value
     for sInd in kwargs:
-      super().loc[int(sInd), colIndex] = kwargs[sInd]
+      self.loc[int(sInd), colIndex] = kwargs[sInd]
 
     structureEnsemble = self._structureEnsemble
     if structureEnsemble is not None:
       structureEnsemble._finaliseAction('change')
 
-  def deleteCol(self, *args, **kwargs):
+  def deleteCol(self, columnName):    # ejb - , *args, **kwargs):
     """
     Delete a named column from the table, colIndex must exist.
     An undo event is added corresponding to self._insertCol above.
@@ -679,33 +732,36 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    try:
-      colIndex = str(args[0])
-    except:
-      raise ValueError('deleteCol: Column not specified')
+    # try:
+    #   colIndex = str(args[0])
+    # except:
+    #   raise ValueError('deleteCol: Column not specified')
+    if not isinstance(columnName, str):
+      raise TypeError('deleteCol: Column is not a string')
 
     colExists = False
-    if colIndex in self.columns:       # the index must exist
+    if columnName in self.columns:       # the index must exist
       colExists = True
     else:
       raise ValueError('deleteCol: Column does not exist.')
 
+    colIndex = columnName
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteCol')     # ejb, values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
-      super().drop(colIndex, **kwargs)
+      self.drop(colIndex, axis=1, inplace=True)
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertCol, self.deleteCol,
                          undoArgs=(colIndex,), undoKwargs=colData,
-                         redoArgs=(colIndex,), redoKwargs=kwargs)
+                         redoArgs=(colIndex,))
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 

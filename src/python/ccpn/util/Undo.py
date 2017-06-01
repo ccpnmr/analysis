@@ -72,7 +72,7 @@ def no_op():
   """Does nothing - for special undo situations where only one direction must act"""
   return
 
-def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
+def resetUndo(memopsRoot, maxWaypoints=99, maxOperations=10000,
               debug:bool=False):
   """Set or reset undo stack, using passed-in parameters.
   NB setting either parameter to 0 removes the undo stack."""
@@ -95,7 +95,7 @@ class Undo(deque):
      To create a waypoint use newWaypoint().
   """
 
-  def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False):
+  def __init__(self, maxWaypoints=99, maxOperations=10000, debug=False):
     """Create Undo object with maximum stack length maxUndoCount"""
 
     self.maxWaypoints = maxWaypoints
@@ -278,7 +278,7 @@ class Undo(deque):
           undoTo = val
         else:
           break
-          # pass            # ejb
+
     else:
       undoTo = max(self.nextIndex - 2, -1)
 
@@ -333,7 +333,7 @@ class Undo(deque):
         # undoMethod, undoData, redoMethod, redoData = self[n]
         # if redoData is None:
         #   redoMethod()
-        # else:
+        # else:, axis=1, inplace=True
         #   redoMethod(redoData)
         undoCall, redoCall = self[n]
         # if self._debug:

@@ -252,9 +252,11 @@ class DataTest(WrapperTesting):
     self.data['y'] = [2, 1, 2, 1, 2, 1, 2, 1] * 2
     self.data['z'] = None
     self.data['modelNumber'] = [2, 2, 2, 2, 1, 1, 1, 1] * 2
+    undo.undo()
+    undo.redo()
 
     data1.setParameter('EnsembleData', self.data)
-    undo.undo()
+    undo.undo()                                     # needs to undo the setParameter
     undo.redo()
     self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data.__class__))
 

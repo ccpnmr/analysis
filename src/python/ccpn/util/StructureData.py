@@ -724,7 +724,7 @@ class EnsembleData(pd.DataFrame):
     if structureEnsemble is not None:
       structureEnsemble._finaliseAction('change')
 
-  def deleteCol(self, *args, **kwargs):
+  def deleteCol(self, columnName):    # ejb - , *args, **kwargs):
     """
     Delete a named column from the table, colIndex must exist.
     An undo event is added corresponding to self._insertCol above.
@@ -732,33 +732,36 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    try:
-      colIndex = str(args[0])
-    except:
-      raise ValueError('deleteCol: Column not specified')
+    # try:
+    #   colIndex = str(args[0])
+    # except:
+    #   raise ValueError('deleteCol: Column not specified')
+    if not isinstance(columnName, str):
+      raise TypeError('deleteCol: Column is not a string')
 
     colExists = False
-    if colIndex in self.columns:       # the index must exist
+    if columnName in self.columns:       # the index must exist
       colExists = True
     else:
       raise ValueError('deleteCol: Column does not exist.')
 
+    colIndex = columnName
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteCol')     # ejb, values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
-      self.drop(colIndex, **kwargs)
+      self.drop(colIndex, axis=1, inplace=True)
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertCol, self.deleteCol,
                          undoArgs=(colIndex,), undoKwargs=colData,
-                         redoArgs=(colIndex,), redoKwargs=kwargs)
+                         redoArgs=(colIndex,))
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 

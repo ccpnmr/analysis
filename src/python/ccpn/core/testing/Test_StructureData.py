@@ -131,10 +131,10 @@ class TestPandasData(WrapperTesting):
 
     self.data['modelNumber'] = [2,2,2,2,1,1,1,1] * 2
 
-    # self.undo.undo()
-    # self.undo.undo()
-    # self.undo.redo()
-    # self.undo.redo()
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.redo()
+    self.undo.redo()
 
     self.data['chainCode'] = ['B','B','A','A','B','B','A','A'] * 2
     self.data['sequenceId'] = [2,1,2,1,2,1,2,1] * 2
@@ -234,8 +234,8 @@ class TestPandasData(WrapperTesting):
     with self.assertRaisesRegexp(TypeError, 'deleteRow: Row is not an int'):  # should raise ValueError
       self.data.deleteRow('notInt')
 
-    # self.data.deleteSelectedRows(index='1, 2, 6-7, 9')
-    # self.undo.undo()
+    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')
+    self.undo.undo()
 
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
@@ -249,14 +249,14 @@ class TestPandasData(WrapperTesting):
 
     # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
     # new function deleteCol has been added to replace simple drop
-    self.data.deleteCol('z', axis=1, inplace=True)
+    self.data.deleteCol('z')
 
-    # with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
-    #   self.data.deleteCol()
+    with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
+      self.data.deleteCol()
     with self.assertRaisesRegexp(ValueError, 'deleteCol: Column does not exist'):  # should raise ValueError
       self.data.deleteCol('notFound')
-    # with self.assertRaisesRegexp(TypeError, 'deleteCol: Column is not a string'):  # should raise ValueError
-    #   self.data.deleteCol(42)
+    with self.assertRaisesRegexp(TypeError, 'deleteCol: Column is not a string'):  # should raise ValueError
+      self.data.deleteCol(42)
 
     with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as deleted
       self.assertEqual(list(self.data['z']), None)
@@ -324,7 +324,7 @@ class TestPandasData(WrapperTesting):
                  origIndex=9)
     ))
 
-    self.data.deleteCol('y', axis=1, inplace=True)
+    self.data.deleteCol('y')
     self.undo.undo()      # ejb - does not work on 'drop'
     self.undo.undo()      # ejb - does not work on 'drop'
     self.undo.redo()

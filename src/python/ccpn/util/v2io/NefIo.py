@@ -792,7 +792,7 @@ def loadProject(nefFilePath, projectName=None, pdbFileType='pdb', *pdbFilePaths)
 
 
 def loadNefFile(path, memopsRoot=None, overwriteExisting=False):
-  """Load NEF file at path into memopsRoot, creting memopsRoot it not passed in"""
+  """Load NEF file at path into memopsRoot, creating memopsRoot if not passed in"""
 
   nefReader = CcpnNefReader()
   dataBlock = nefReader.getNefData(path)
@@ -3164,7 +3164,7 @@ def fetchDataUrl(memopsRoot, fullPath):
 
 if __name__ == '__main__':
   path = sys.argv[1]
-  memopsRoot = loadNefFile(path, removeExisting=True)
+  memopsRoot = loadNefFile(path, overwriteExisting=True)
   print ('@~@~1', memopsRoot.activeRepositories)
   print ('@~@~2', memopsRoot.packageLocator.findFirstRepository().url.path)
   memopsRoot.saveModified()

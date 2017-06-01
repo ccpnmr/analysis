@@ -149,31 +149,65 @@ class Test_Substance_SpectrumLink(WrapperTesting):
   """
   projectPath = None
 
+  def setUp(self):
+    with self.initialSetup():
+      self.spectrum1 = self.project.createDummySpectrum(axisCodes=['CO','Hn','Nh'])
+      self.assertEqual(self.spectrum1.isotopeCodes, ('13C', '1H', '15N'))
+      self.assertEqual(self.spectrum1.name, 'COHnNh')
+
+      self.chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='cC1',
+                                        molType='protein')
+
+      self.spectrum2 = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
+      self.assertEqual(self.spectrum2.isotopeCodes, ('1H', '19F', '31P', '1H'))
+      self.assertEqual(self.spectrum2.name, 'HpFPhH')
+
+      self.chain2 = self.project.createChain(sequence='ACDC', compoundName='sequence2', shortName='cC2',
+                                        molType='protein')
+
+      self.substance1 = self.chain1.substances[0]
+      self.substance2 = self.chain2.substances[0]
+
   def test_Substance_SpectrumLink(self):
-    spectrum1 = self.project.createDummySpectrum(axisCodes=['CO','Hn','Nh'])
-    self.assertEqual(spectrum1.isotopeCodes, ('13C', '1H', '15N'))
-    self.assertEqual(spectrum1.name, 'COHnNh')
 
-    chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='X',
-                                      molType='protein')
+    checkGetSetAttr(self, obj=self.spectrum1, attrib='referenceSubstance', value=self.substance1)
 
-    spectrum2 = self.project.createDummySpectrum(axisCodes = ['Hp','F', 'Ph', 'H'])
-    self.assertEqual(spectrum2.isotopeCodes, ('1H', '19F', '31P', '1H'))
-    self.assertEqual(spectrum2.name, 'HpFPhH')
+    ref1 = self.substance1.referenceSpectra
+    self.assertEqual(ref1[0], self.spectrum1)
 
-    chain2 = self.project.createChain(sequence='ACDC', compoundName='sequence2', shortName='Y',
-                                      molType='protein')
+    self.substance1.referenceSpectra = ref1
+    self.substance2.referenceSpectra = ref1
 
-    substance1 = chain1.substances[0]
-    substance2 = chain2.substances[0]
+    self.substance1.clearSpecificAtomLabelling()
 
-    checkGetSetAttr(self, obj=spectrum1, attrib='referenceSubstance', value=substance1)
+  def test_Substance_GetAtomLabelling(self):
+    with self.assertRaisesRegexp(ValueError, 'Atom with ID None does not exist'):
+      atomLabel = self.substance1.getSpecificAtomLabelling('X.1.ALA.CA')
+    atomLabel = self.substance1.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
-    ref1 = substance1.referenceSpectra
-    self.assertEqual(ref1[0], spectrum1)
+    with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+      atomLabel = self.substance2.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
-    substance1.referenceSpectra = ref1
-    substance2.referenceSpectra = ref1
+  def test_Substance_removeAtomLabelling(self):
+    with self.assertRaisesRegexp(ValueError, 'does not exist'):
+      atomLabel = self.substance1.removeSpecificAtomLabelling('X.1.ALA.CA')
+
+    with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+      atomLabel = self.substance2.removeSpecificAtomLabelling('cC1.1.ALA.CA')
+
+    atomLabel = self.substance1.removeSpecificAtomLabelling('cC1.1.ALA.CA')
+
+  def test_Substance_SetAtomLabelling(self):
+    with self.assertRaisesRegexp(ValueError, 'Atom with ID None does not exist'):
+      atomLabel = self.substance1.setSpecificAtomLabelling('X.1.ALA.CA', {'cC1':1.1})
+
+    with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
+      atomLabel = self.substance2.setSpecificAtomLabelling('cC1.1.ALA.CA', {'cC1':1.1})
+
+    atomLabel = self.substance1.setSpecificAtomLabelling('cC1.1.ALA.CA', {'cC1':1.1})
+
+  def test_Substance_SpecificAtomLabelling(self):
+    atomLabel = self.substance1.specificAtomLabelling
 
 #=========================================================================================
 # Test_Substance_SpectrumLink

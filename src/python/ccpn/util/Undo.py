@@ -278,7 +278,7 @@ class Undo(deque):
           undoTo = val
         else:
           break
-          # pass            # ejb
+
     else:
       undoTo = max(self.nextIndex - 2, -1)
 

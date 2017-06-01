@@ -426,7 +426,10 @@ class Substance(AbstractWrapperObject):
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
-    dd[(residueIndex, atom.name)] = isotopeLabels
+    try:
+      dd[(residueIndex, atom.name)] = isotopeLabels
+    except:
+      raise ValueError("%s not found in AtomLabelling" % residue)
 
   def removeSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']):
     """Remove specificAtomLabelling for atom designated by atomId
@@ -448,7 +451,10 @@ class Substance(AbstractWrapperObject):
 
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
-    del dd[(residueIndex, atom.name)]
+    try:
+      del dd[(residueIndex, atom.name)]
+    except:
+      raise ValueError("%s not found in AtomLabelling" % residue)
 
   def getSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']) -> typing.Dict[str,float]:
     """Get specificAtomLabelling dictionary for atom.

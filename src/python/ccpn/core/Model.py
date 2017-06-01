@@ -255,11 +255,13 @@ class Model(AbstractWrapperObject):
       #       data.deleteRow(rNum+1)          # should also be able to undo this
       #       Found = True
       #       break                                 # break out for the next repeat
+      try:
+        if 'modelNumber' in data.columns:
+          data.deleteSelectedRows(modelNumbers=self.serial)      # ejb - test new delete, undo not done yet
 
-      data.deleteSelectedRows(modelNumbers=self.serial)      # ejb - test new delete, undo not done yet
-
-      if containingObject is not None:
-        containingObject._endCommandEchoBlock()
+      finally:
+        if containingObject is not None:
+          containingObject._endCommandEchoBlock()
 
     else:
       logger.debug('StructureEnsemble %s contains no data for %s'.format(self.structureEnsemble.pid, self.pid))

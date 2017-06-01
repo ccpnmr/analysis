@@ -718,13 +718,13 @@ class EnsembleData(pd.DataFrame):
     """
     colIndex = str(args[0])       # get the index from the first arg value
     for sInd in kwargs:
-      super().loc[int(sInd), colIndex] = kwargs[sInd]
+      self.loc[int(sInd), colIndex] = kwargs[sInd]
 
     structureEnsemble = self._structureEnsemble
     if structureEnsemble is not None:
       structureEnsemble._finaliseAction('change')
 
-  def deleteCol(self, columnName):    # ejb - , *args, **kwargs):
+  def deleteCol(self, *args, **kwargs):
     """
     Delete a named column from the table, colIndex must exist.
     An undo event is added corresponding to self._insertCol above.
@@ -732,36 +732,33 @@ class EnsembleData(pd.DataFrame):
     :param kwargs:
     :return:
     """
-    # try:
-    #   colIndex = str(args[0])
-    # except:
-    #   raise ValueError('deleteCol: Column not specified')
-    if not isinstance(columnName, str):
-      raise TypeError('deleteCol: Column is not a string')
+    try:
+      colIndex = str(args[0])
+    except:
+      raise ValueError('deleteCol: Column not specified')
 
     colExists = False
-    if columnName in self.columns:       # the index must exist
+    if colIndex in self.columns:       # the index must exist
       colExists = True
     else:
       raise ValueError('deleteCol: Column does not exist.')
 
-    colIndex = columnName
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol', values={})     # ejb, values=kwargs)
+      containingObject._startCommandEchoBlock('data.deleteCol', values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
 
-      super().drop(colIndex, axis=1, inplace=True)
+      self.drop(colIndex, **kwargs)
 
       if containingObject is not None:
         undo = containingObject._project._undo
         if undo is not None:                        # add the undo event
             undo.newItem(self._insertCol, self.deleteCol,
                          undoArgs=(colIndex,), undoKwargs=colData,
-                         redoArgs=(colIndex,), redoKwargs={})
+                         redoArgs=(colIndex,), redoKwargs=kwargs)
         # assert  self._structureEnsemble is not None # given that containingObject exists
         self._structureEnsemble._finaliseAction('change')
 

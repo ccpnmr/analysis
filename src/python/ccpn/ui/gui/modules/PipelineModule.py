@@ -112,10 +112,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     super(GuiPipeline, self)
 
 
-    # print(self.inputData)
-    # self.guiPipeline = GuiPipeline
-    # self.guiPipeline.pipeline = Pipeline
-
     # this guarantees to open the module as Gui testing
     self.project = None
     self.application = None
@@ -142,8 +138,6 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
     # set pipeline variables
-    # self._inputData = set()
-
     self.pipes = pipes
     self.guiPipes = self._getGuiFromPipes(self.pipes)
     self.currentRunningPipeline = []
@@ -185,29 +179,29 @@ class GuiPipeline(CcpnModule, Pipeline):
             guiPipe.pipe = pipe
             allGuiPipes.append(guiPipe)
         except:
-          # TODO handle exceptions
+          # TODO handle exceptions if any
           pass
     return allGuiPipes
 
 
-  @property
-  def pipes(self):
-    return self._pipes
-
-  @pipes.setter
-  def pipes(self, pipes):
-    '''
-    Set the guiPipes to the guiPipeline
-    :param guiPipes:  GuiPipe class
-    '''
-
-    if pipes is not None:
-      allPipes = []
-      for pipe in pipes:
-          allPipes.append(pipe)
-      self._pipes = allPipes
-    else:
-      self._pipes = []
+  # @property
+  # def pipes(self):
+  #   return self._pipes
+  #
+  # @pipes.setter
+  # def pipes(self, pipes):
+  #   '''
+  #   Set the guiPipes to the guiPipeline
+  #   :param guiPipes:  GuiPipe class
+  #   '''
+  #
+  #   if pipes is not None:
+  #     allPipes = []
+  #     for pipe in pipes:
+  #         allPipes.append(pipe)
+  #     self._pipes = allPipes
+  #   else:
+  #     self._pipes = []
 
 
   @property
@@ -326,11 +320,10 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
-        if hasattr(guiPipe, 'preferredPipe'):
-          if guiPipe.preferredPipe:
-            preferredGuiPipes.append(guiPipe.pipeName)
-          else:
-            otherGuiPipes.append(guiPipe.pipeName)
+        if guiPipe.preferredPipe:
+          preferredGuiPipes.append(guiPipe.pipeName)
+        else:
+          otherGuiPipes.append(guiPipe.pipeName)
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
@@ -340,8 +333,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.pipePulldown.model().item(disablePreferredPipeLabel).setEnabled(False)
     disableOtherPipeLabel = self.pipePulldown.getItemIndex(otherPipeLabel)
     self.pipePulldown.model().item(disableOtherPipeLabel).setEnabled(False)
-
-
 
     # self.pipePulldown.insertSeparator(countPreferredGuiPipes)
     self.pipePulldown.activated[str].connect(self._selectPipe)
@@ -437,6 +428,10 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   ####################################_________ others____________###########################################
 
+  def _getGuiPipeClassFromClassName(self, name):
+    for guiPipe in self.guiPipes:
+      if guiPipe.__name__ == name:
+        return guiPipe
 
   def _getGuiPipeClass(self, name):
     for guiPipe in self.guiPipes:
@@ -452,9 +447,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
 
-
   ####################################_________ Saving Restoring  SETUP ____________####################################
-  def openJsonFile(self, path):
+  def _openJsonFile(self, path):
     if path is not None:
       with open(str(path), 'r') as jf:
         data = json.load(jf)
@@ -465,12 +459,14 @@ class GuiPipeline(CcpnModule, Pipeline):
                         acceptMode=FileDialog.AcceptOpen)
     return dialog.selectedFile()
 
-  def _getPipelineBoxesFromFile(self, params, guiPipesNames):
+  def _getGuiPipesFromFile(self, params, guiPipesNames):
     pipelineBoxes = []
     for i in params:
       for key, value in i.items():
         if value[0].upper() in guiPipesNames:
-          guiPipe = self._guiPipes[key]
+          print(value, 'CVALUE')
+          guiPipe = self._getGuiPipeClassFromClassName(key)
+          print(guiPipe, key)
           pipelineBox = guiPipe(parent=self, application=self.application, name = value[0], params = value[1])
           pipelineBox.setActive(value[2])
           pipelineBoxes.append(pipelineBox)
@@ -478,11 +474,12 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _openSavedPipeline(self):
     path = self._getPathFromDialogBox()
-    state, params, guiPipesNames, pipelineSettings = self.openJsonFile(path)
-    pipelineBoxes = self._getPipelineBoxesFromFile(params, guiPipesNames)
+    state, params, guiPipesNames, pipelineSettings = self._openJsonFile(path)
     self._closeAllGuiPipes()
-    for pipelineBox in pipelineBoxes:
-      self.pipelineArea.addBox(pipelineBox)
+    guiPipes = self._getGuiPipesFromFile(params, guiPipesNames)
+
+    for guiPipe in guiPipes:
+      self.pipelineArea.addBox(guiPipe)
     self.pipelineArea.restoreState(state)
     self.pipelineSettingsParams = OrderedDict(pipelineSettings)
     self._setSettingsParams()
@@ -490,13 +487,13 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [guiPipes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
     print('Saving')
-    currentBoxesNames = list(self.pipelineArea.findAll()[1].keys())
-    if len(currentBoxesNames)>0:
+    currentPipesNames = self.pipelineArea.currentPipesNames
+    if len(currentPipesNames)>0:
       self.jsonData = []
-      self.widgetsParams = self._pipelineBoxesWidgetParams(currentBoxesNames)
+      self.widgetsParams = self._pipelineBoxesWidgetParams(currentPipesNames)
       self.jsonData.append(self.pipelineArea.saveState())
       self.jsonData.append(self.widgetsParams)
-      self.jsonData.append(currentBoxesNames)
+      self.jsonData.append(currentPipesNames)
       self.jsonData.append(list(self.pipelineSettingsParams.items()))
 
       self._saveToJson()
@@ -528,13 +525,14 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   #################################### _________ GUI PIPELINE SETTINGS ____________ ####################################
 
-  def _pipelineBoxesWidgetParams(self, currentBoxesNames):
+  def _pipelineBoxesWidgetParams(self, currentGuiPipesName):
     self.savePipelineParams = []
-    for guiPipeName in currentBoxesNames:
-      guiPipeMethod = self.pipelineArea.docks[str(guiPipeName)]
-      state = guiPipeMethod.isActive
-      params = guiPipeMethod.getWidgetsParams()
-      newDict = {guiPipeMethod.pipeName(): (guiPipeName, params, state)}
+    for guiPipeName in currentGuiPipesName:
+      guiPipe = self.pipelineArea.docks[str(guiPipeName)]
+      guiPipeClassName = guiPipe.__class__.__name__
+      state = guiPipe.isActive
+      params = guiPipe.widgetsState
+      newDict = {guiPipeClassName: (guiPipeName, params, state)}
       self.savePipelineParams.append(newDict)
     return self.savePipelineParams
 
@@ -842,15 +840,12 @@ if __name__ == '__main__':
   app = TestApplication()
 
   win = QtGui.QMainWindow()
-  from ccpn.AnalysisScreen import guiPipeline as _pm
-  # pipelineMethods = _pm.__all__
+  # from ccpn.AnalysisScreen import guiPipeline as _pm
+
 
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   pipeline = GuiPipeline(mainWindow=None, pipes=[DemoPipe1, DemoPipe2])
-  # pipeline.guiPipes = [DemoExtension]
-  # pipeline._setDataPipesPulldown()
-
 
   moduleArea.addModule(pipeline)
 

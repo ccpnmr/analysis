@@ -171,6 +171,13 @@ class PipelineDropArea(DockArea):
       return Pipes
 
   @property
+  def currentPipesClassNames(self) -> list:
+    'return the name of all current modules in area'
+    if self is not None:
+      classNames = [guiPipe.__class__.__name__ for guiPipe in self.currentGuiPipes]
+      return classNames
+
+  @property
   def currentPipesNames(self) -> list:
     'return the name of all current modules in area'
     if self is not None:
@@ -259,7 +266,7 @@ class GuiPipe(Dock, DockDrop):
   pipeName = ''
   pipe = None
 
-  def __init__(self, parent, name,   project=None, **kw):
+  def __init__(self, parent, name, project=None, widgetsParams=None, **kw):
     '''
     
     :param parent: guiPipeline
@@ -293,7 +300,8 @@ class GuiPipe(Dock, DockDrop):
       self.project = project
 
     self._widgetsState = None
-
+    if widgetsParams is not None:
+      self.restoreWidgetsState(**widgetsParams)
 
     ######  pipeLayout
 

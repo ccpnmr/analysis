@@ -409,7 +409,7 @@ class Substance(AbstractWrapperObject):
     also if the other chains have a different numbering.
 
     isotopeLabels must be a dictionary of the form (e.g.) {'12C':0.32, '13C':0.68}
-    where the atom fractions add up to 1.0 and the isotope COdes cover the possibilities
+    where the atom fractions add up to 1.0 and the isotope Codes cover the possibilities
     for the atom."""
 
     if isinstance(atom, str):
@@ -424,12 +424,10 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
-    residue = atom.residue
-    residueIndex = residue.chain.residues.index(residue)
-    try:
+    if dd:
+      residue = atom.residue
+      residueIndex = residue.chain.residues.index(residue)
       dd[(residueIndex, atom.name)] = isotopeLabels
-    except:
-      raise ValueError("%s not found in AtomLabelling" % residue)
 
   def removeSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']):
     """Remove specificAtomLabelling for atom designated by atomId
@@ -449,12 +447,10 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
-    residue = atom.residue
-    residueIndex = residue.chain.residues.index(residue)
-    try:
+    if dd:
+      residue = atom.residue
+      residueIndex = residue.chain.residues.index(residue)
       del dd[(residueIndex, atom.name)]
-    except:
-      raise ValueError("%s not found in AtomLabelling" % residue)
 
   def getSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']) -> typing.Dict[str,float]:
     """Get specificAtomLabelling dictionary for atom.

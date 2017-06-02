@@ -199,12 +199,12 @@ class Test_Substance_SpectrumLink(WrapperTesting):
 
   def test_Substance_SetAtomLabelling(self):
     with self.assertRaisesRegexp(ValueError, 'Atom with ID None does not exist'):
-      atomLabel = self.substance1.setSpecificAtomLabelling('X.1.ALA.CA', {'cC1':1.1})
+      atomLabel = self.substance1.setSpecificAtomLabelling('X.1.ALA.CA', {'12C':0.32, '13C':0.68})
 
     with self.assertRaisesRegexp(ValueError, 'chain do not match the Substance'):
-      atomLabel = self.substance2.setSpecificAtomLabelling('cC1.1.ALA.CA', {'cC1':1.1})
+      atomLabel = self.substance2.setSpecificAtomLabelling('cC1.1.ALA.CA', {'12C':0.32, '13C':0.68})
 
-    atomLabel = self.substance1.setSpecificAtomLabelling('cC1.1.ALA.CA', {'cC1':1.1})
+    atomLabel = self.substance1.setSpecificAtomLabelling('cC1.1.ALA.CA', {'12C':0.32, '13C':0.68})
 
   def test_Substance_SpecificAtomLabelling(self):
     atomLabel = self.substance1.specificAtomLabelling

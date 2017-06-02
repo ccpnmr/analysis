@@ -151,6 +151,9 @@ class TestSubstance_CreationFetch(WrapperTesting):
 
 
   def test_sampleComponentsMakesNewSubstances(self):
+    """
+    Test that the new Substance initialises correctly
+    """
     self.assertEqual(len(self.project.substances), 0)
 
     sample = self.project.newSample('test sample')
@@ -161,6 +164,9 @@ class TestSubstance_CreationFetch(WrapperTesting):
 
 
   def test_newPhysicalChainMakesNewSubstances(self):
+    """
+    Test that the protein type initialises
+    """
     self.assertEqual(len(self.project.substances), 0)
 
     self.project.createChain('acd', molType='protein')
@@ -203,6 +209,9 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
 class SubstanceProperties(WrapperTesting):
 
   def test_bareSubstanceProperties(self):
+    """
+    Test that a bare Substance initiates correctly
+    """
     s = self.project.newSubstance('test substance')
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -246,6 +255,9 @@ class SubstanceProperties(WrapperTesting):
     # print(s.rename)
 
   def test_bareMoleculeSubstanceProperties(self):
+    """
+    Test that a Molecule type Substance initiates correctly
+    """
     s = self.project.newSubstance('test substance', substanceType='Molecule')
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -279,7 +291,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
 
-  @unittest.skip
+  # @unittest.skip
   def test_bareMaterialSubstanceProperties(self):
     """
     Test that a Material type Substance initiates correctly
@@ -319,7 +331,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.sequenceString)
     self.assertIsNone(s.userCode)
 
-  @unittest.skip
+  # @unittest.skip
   def test_bareCellSubstanceProperties(self):
     """
     Test that a Cell type Substance initiates correctly
@@ -358,7 +370,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
 
-  @unittest.skip
+  # @unittest.skip
   def test_bareCompositeSubstanceProperties(self):
     """
     Test that a Composite type Substance initiates correctly
@@ -405,7 +417,6 @@ class Test_MoleculeSubstance(WrapperTesting):
   """
   Test Substances of type Molecule
   """
-
   def test_MoleculeSubstanceWithSmilesProperties(self):
     """
     Test that the smiles property can be set.
@@ -429,18 +440,27 @@ class Test_MoleculeSubstance(WrapperTesting):
     self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H4')
 
   def test_MoleculeSubstanceWithLabellingProperties(self):
+    """
+    Test that the labelling property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   labelling='anything')
     self.assertEqual(s.labelling, 'anything')
 
   def test_MoleculeSubstanceWithLabellingProperties_None(self):
+    """
+    Test that the labelling property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   labelling=None)
     self.assertEqual(s.labelling, None)
 
   def test_MoleculeSubstanceWithLabellingProperties_ES(self):
+    """
+    Test that Substance can be set with labelling
+    """
     with self.assertRaisesRegexp(ValueError, 'name must be set'):
       s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
@@ -448,6 +468,10 @@ class Test_MoleculeSubstance(WrapperTesting):
     self.assertEqual(len(self.project.substances), 0)
 
   def test_MoleculeSubstanceWithLabellingProperties_Badname(self):
+    """
+    Test that the Substance set with ^badname raises an error
+    Substance is not initialised
+    """
     with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
       s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
@@ -455,6 +479,10 @@ class Test_MoleculeSubstance(WrapperTesting):
     self.assertEqual(len(self.project.substances), 0)
 
   def test_MoleculeSubstanceWithLabellingProperties_Int(self):
+    """
+    Test that the Substance set with non-string raises an error
+    Substance is not initialised
+    """
     with self.assertRaisesRegexp(TypeError, 'name must be a string'):
       s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
@@ -473,6 +501,9 @@ class Test_MoleculeSubstance(WrapperTesting):
     self.assertEqual(s.casNumber, '64-16-3')
 
   def test_MoleculeSubstanceWithUserCodeCasNumberProperties(self):
+    """
+    Test that the userCode property of Substance can be set
+    """
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
                                   userCode='test code')
@@ -791,6 +822,8 @@ class Test_PolymerSubstance(WrapperTesting):
       s = self.project.newSubstance('test substance Molecule', substanceType='Composite', labelling='different')
 
     s = self.project.newSubstance('test substance Cell', substanceType='Cell')
+    s = self.project.newSubstance('test substance Material', substanceType='Material')
+    s = self.project.newSubstance('test substance Composite', substanceType='Composite')
 
     self.assertEqual(s.pid, 'SU:test substance Cell.')
     self.assertEqual(s.longPid, 'Substance:test substance Cell.')

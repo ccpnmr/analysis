@@ -603,13 +603,14 @@ class StructureTable(ObjectTable):
       thisTable.setObjects(tuples)
 
       #FIXME:ED need to spawn a change event on the other tables - forced with changing comment
-      thisTable._clearNotifiers()
+      # thisTable._clearNotifiers()
+      #
+      # tempLabel = thisObj.comment
+      # thisObj.comment = 'SetNameForChangeEvent'
+      #
+      # thisTable._setNotifiers()
+      # thisObj.comment = tempLabel
 
-      tempLabel = thisObj.comment
-      thisObj.comment = 'SetNameForChangeEvent'
-
-      thisTable._setNotifiers()
-      thisObj.comment = tempLabel
       # thisTable.blockSignals(False)
       # thisTable.setUpdatesEnabled(True)
 

@@ -30,6 +30,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
 
 class GuiAlignSpectra(GuiPipe):
+
   preferredPipe = True
   pipeName = 'AlignSpectra'
 
@@ -37,7 +38,6 @@ class GuiAlignSpectra(GuiPipe):
     super(GuiAlignSpectra, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
     self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
     self._updateWidgets()

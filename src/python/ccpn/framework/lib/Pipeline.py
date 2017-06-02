@@ -38,6 +38,8 @@ class Pipeline(object):
 
 
   def __init__(self, application=None, pipelineName=None, pipes=None ):
+
+    self.pipelineName = pipelineName
     self._kwargs = {}
     self.pipes = pipes
     self.inputData = set()
@@ -73,6 +75,7 @@ class Pipeline(object):
       self._pipes = allPipes
     else:
       self._pipes = []
+
 
 
   def runPipeline(self):

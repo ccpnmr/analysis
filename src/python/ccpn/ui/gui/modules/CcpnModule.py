@@ -108,7 +108,7 @@ class CcpnModule(Dock):
     self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
-    self.label.show()
+    ###self.label.show()
     self.autoOrientation = False
 
     # main widget area

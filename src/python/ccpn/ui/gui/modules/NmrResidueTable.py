@@ -207,6 +207,12 @@ class NmrResidueTableModule(CcpnModule):
     self.nmrResidueTable._close()
     super(NmrResidueTableModule, self)._closeModule()
 
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
 
 class NmrResidueTable(ObjectTable):
   """

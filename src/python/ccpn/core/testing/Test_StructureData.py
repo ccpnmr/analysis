@@ -234,9 +234,6 @@ class TestPandasData(WrapperTesting):
     with self.assertRaisesRegexp(TypeError, 'deleteRow: Row is not an int'):  # should raise ValueError
       self.data.deleteRow('notInt')
 
-    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')
-    self.undo.undo()
-
     self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
     self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
     ll = ['modelNumber', 'chainCode', 'sequenceId', 'atomName']
@@ -250,6 +247,25 @@ class TestPandasData(WrapperTesting):
     # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
     # new function deleteCol has been added to replace simple drop
     self.data.deleteCol('z')
+
+    self.data.deleteSelectedRows(index='1, 2, 6-7, 9')
+    namedTuples = self.data.as_namedtuples()
+    AtomRecord = namedTuples[0].__class__
+    self.assertEquals(namedTuples[0:4], (
+      AtomRecord(Index=1, x=1.0, y=1.0, modelNumber=1, chainCode='A', sequenceId=1,
+                 atomName='HG12', nmrAtomName='HG12', nmrChainCode='#2', nmrSequenceCode='2b',
+                 origIndex=8.0),
+      AtomRecord(Index=2, x=1.0, y=1.0, modelNumber=1, chainCode='A', sequenceId=1,
+                 atomName='HG2', nmrAtomName='HG2', nmrChainCode='#2', nmrSequenceCode='2b',
+                 origIndex=16.0),
+      AtomRecord(Index=3, x=1.0, y=2.0, modelNumber=1, chainCode='A', sequenceId=2,
+                 atomName='HG2', nmrAtomName='HG2', nmrChainCode='#2', nmrSequenceCode='12',
+                 origIndex=15.0),
+      AtomRecord(Index=4, x=1.0, y=1.0, modelNumber=1, chainCode='B', sequenceId=1,
+                 atomName='HG2', nmrAtomName='HG2', nmrChainCode='#12', nmrSequenceCode='2b',
+                 origIndex=14.0)))
+
+    self.undo.undo()
 
     with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
       self.data.deleteCol()

@@ -240,6 +240,11 @@ class StructureTableModule(CcpnModule):
     self.structureTable._close()
     super(StructureTableModule, self)._closeModule()
 
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
 
 class StructureTable(ObjectTable):
   """

@@ -217,3 +217,10 @@ class NotesEditorModule(CcpnModule):
     """
     self._clearNotifiers()
     super(NotesEditorModule, self)._closeModule()
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+

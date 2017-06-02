@@ -167,6 +167,12 @@ class ChemicalShiftTableModule(CcpnModule):
     self.chemicalShiftTable._close()
     super(ChemicalShiftTableModule, self)._closeModule()
 
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
 
 class ChemicalShiftTable(ObjectTable):
   """

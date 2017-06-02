@@ -97,6 +97,12 @@ class PeakTableModule(CcpnModule):
     self.peakListTable.destroy()
     super(PeakTableModule, self)._closeModule()
 
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
 
 class PeakListTableWidget(ObjectTable):
 

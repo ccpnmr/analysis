@@ -212,7 +212,8 @@ class CcpnModule(Dock):
     if self.closeFunc:
       self.closeFunc()
 
-    self.close()
+    # self.close()
+    super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
   def dropEvent(self, *args):
     source = args[0].source()

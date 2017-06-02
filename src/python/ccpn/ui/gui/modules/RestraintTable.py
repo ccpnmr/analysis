@@ -167,6 +167,12 @@ class RestraintTableModule(CcpnModule):
     self.restraintTable._close()
     super(RestraintTableModule, self)._closeModule()
 
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
 
 class RestraintTable(ObjectTable):
   """

@@ -473,13 +473,14 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _openSavedPipeline(self):
     path = self._getPathFromDialogBox()
-    state, params, guiPipesNames, pipelineSettings = self._openJsonFile(path)
+    state, guiPipesState, pipelineSettings = self._openJsonFile(path)
     self._closeAllGuiPipes()
-    for item in guiPipesNames:
-      guiPipeName, guiPipeClassName = item
+    for item in guiPipesState:
+      guiPipeClassName, guiPipeName, widgetsState, isActive = item
       guiPipeClass = self._getGuiPipeClassFromClassName(guiPipeClassName)
       guiPipe = guiPipeClass(parent=self, application=self.application, name=guiPipeName)
-    # guiPipes = self._getGuiPipesFromFile(params, guiPipesNames)
+      guiPipe.restoreWidgetsState(**widgetsState)
+      guiPipe.setActive(isActive)
 
       self.pipelineArea.addBox(guiPipe)
 
@@ -488,16 +489,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     self._setSettingsParams()
 
   def _savePipeline(self):
-    '''jsonData = [{pipelineArea.state}, [guiPipes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
+    '''jsonData = [{pipelineArea.state}, [guiPipesState], pipelineSettingsParams]   '''
     print('Saving')
-    currentPipesNamesAndClasses = self.pipelineArea.currentPipesNamesAndClasses
-    print(currentPipesNamesAndClasses)
-    if len(currentPipesNamesAndClasses)>0:
+    guiPipesState = self.pipelineArea.guiPipesState
+    if len(guiPipesState)>0:
       self.jsonData = []
-      self.widgetsParams = {}# self._pipelineBoxesWidgetParams(currentPipesNamesAndClasses.values())
       self.jsonData.append(self.pipelineArea.saveState())
-      self.jsonData.append(self.widgetsParams)
-      self.jsonData.append(currentPipesNamesAndClasses)
+      self.jsonData.append(guiPipesState)
       self.jsonData.append(list(self.pipelineSettingsParams.items()))
 
       self._saveToJson()

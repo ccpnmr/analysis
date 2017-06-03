@@ -431,6 +431,7 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _getGuiPipeClassFromClassName(self, name):
     for guiPipe in self.guiPipes:
       if guiPipe.__name__ == name:
+        print('guiPipe.__name__ == name', name)
         return guiPipe
 
   def _getGuiPipeClass(self, name):
@@ -464,9 +465,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     for i in params:
       for key, value in i.items():
         if value[0].upper() in guiPipesNames:
-          print(value, 'CVALUE')
           guiPipe = self._getGuiPipeClassFromClassName(key)
-          print(guiPipe, key)
           pipelineBox = guiPipe(parent=self, application=self.application, name = value[0], params = value[1])
           pipelineBox.setActive(value[2])
           pipelineBoxes.append(pipelineBox)
@@ -476,10 +475,14 @@ class GuiPipeline(CcpnModule, Pipeline):
     path = self._getPathFromDialogBox()
     state, params, guiPipesNames, pipelineSettings = self._openJsonFile(path)
     self._closeAllGuiPipes()
-    guiPipes = self._getGuiPipesFromFile(params, guiPipesNames)
+    for item in guiPipesNames:
+      guiPipeName, guiPipeClassName = item
+      guiPipeClass = self._getGuiPipeClassFromClassName(guiPipeClassName)
+      guiPipe = guiPipeClass(parent=self, application=self.application, name=guiPipeName)
+    # guiPipes = self._getGuiPipesFromFile(params, guiPipesNames)
 
-    for guiPipe in guiPipes:
       self.pipelineArea.addBox(guiPipe)
+
     self.pipelineArea.restoreState(state)
     self.pipelineSettingsParams = OrderedDict(pipelineSettings)
     self._setSettingsParams()
@@ -487,13 +490,14 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [guiPipes widgets params], [currentBoxesNames], pipelineSettingsParams]   '''
     print('Saving')
-    currentPipesNames = self.pipelineArea.currentPipesNames
-    if len(currentPipesNames)>0:
+    currentPipesNamesAndClasses = self.pipelineArea.currentPipesNamesAndClasses
+    print(currentPipesNamesAndClasses)
+    if len(currentPipesNamesAndClasses)>0:
       self.jsonData = []
-      self.widgetsParams = self._pipelineBoxesWidgetParams(currentPipesNames)
+      self.widgetsParams = {}# self._pipelineBoxesWidgetParams(currentPipesNamesAndClasses.values())
       self.jsonData.append(self.pipelineArea.saveState())
       self.jsonData.append(self.widgetsParams)
-      self.jsonData.append(currentPipesNames)
+      self.jsonData.append(currentPipesNamesAndClasses)
       self.jsonData.append(list(self.pipelineSettingsParams.items()))
 
       self._saveToJson()

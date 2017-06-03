@@ -184,6 +184,17 @@ class PipelineDropArea(DockArea):
       pipesNames = list(self.findAll()[1].keys())
       return pipesNames
 
+  @property
+  def currentPipesNamesAndClasses(self):
+    d = []
+    for pipeName, guiPipe in self.findAll()[1].items():
+      d.append((pipeName, guiPipe.__class__.__name__))
+    return d
+
+
+
+
+
   def dragEnterEvent(self, ev):
     src = ev.source()
     ev.ignore()
@@ -289,7 +300,8 @@ class GuiPipe(Dock, DockDrop):
       
     if name is None:
       name = 'New Pipe'
-    self.pipeName = name  
+    self.pipeName = name
+
     self._updateLabel(name)
 
     self.dragStyle = PipelineBoxDragStyle
@@ -321,6 +333,11 @@ class GuiPipe(Dock, DockDrop):
   # def updatePipeParams(self):
   #   for key, value in self.getParams().items():
   #     self.pipe._updateRunArgs(key, value)
+
+
+
+  def name(self):
+    return self.pipeName
 
   @property
   def widgetsState(self):

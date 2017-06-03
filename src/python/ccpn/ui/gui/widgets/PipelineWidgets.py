@@ -191,6 +191,13 @@ class PipelineDropArea(DockArea):
       d.append((pipeName, guiPipe.__class__.__name__))
     return d
 
+  @property
+  def guiPipesState(self):
+    d = []
+    for pipeName, guiPipe in self.findAll()[1].items():
+      print()
+      d.append((guiPipe.__class__.__name__, pipeName, guiPipe.widgetsState, guiPipe.isActive ))
+    return d
 
 
 

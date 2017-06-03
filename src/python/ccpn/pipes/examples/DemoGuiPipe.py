@@ -39,7 +39,6 @@ class DemoGuiPipe(GuiPipe):
     # add widgets to pipeFrame using Base grid=(i,ii) or self.pipeLayout.addWidget(widgetName)
     self.demoPulldownList = PulldownList(self.pipeFrame, texts=['spectrum1', 'spectrum2'], grid=(0,0))
 
-    print('DEMO GUI: ',self.widgetsState)
 
 
 # run this file to test the gui

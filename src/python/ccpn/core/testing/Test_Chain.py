@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 from ccpn.core.lib.MoleculeLib import duplicateAtomBonds
+from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
 
 
 boundAtomsTestData = collections.OrderedDict((
@@ -187,15 +188,22 @@ boundAtomsTestData = collections.OrderedDict((
   ('B.3.CYS.SG',['CB', 'HG']),
 ))
 
-
-
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+
+
+#=========================================================================================
+# ChainTest
+#=========================================================================================
 
 class ChainTest(WrapperTesting):
 
   # Path of project to load (None for new project
   projectPath = None
-    
+
+  #=========================================================================================
+  # test_rename_chain
+  #=========================================================================================
+
   def test_rename_chain(self):
 
     chain = self.project.createChain('ACDC', shortName='A', molType='protein' )
@@ -212,6 +220,10 @@ class ChainTest(WrapperTesting):
     self.assertEqual(chain.shortName, 'B')
     self.assertEqual(nmrChain.shortName, 'B')
 
+  #=========================================================================================
+  # testBoundAtoms
+  #=========================================================================================
+
   def testBoundAtoms(self):
     project = self.project
     chaina = project.createChain('CDL', compoundName='cdl', molType='protein' )
@@ -221,6 +233,10 @@ class ChainTest(WrapperTesting):
         self.assertEquals(boundAtomsTestData.get(atom._id, []),
                            [(x.name if x.residue is atom.residue else x._id)
                             for x in atom.boundAtoms])
+
+  #=========================================================================================
+  # testCrosslinkAtoms
+  #=========================================================================================
 
   def testCrosslinkAtoms(self):
     project = self.project
@@ -254,3 +270,12 @@ class ChainTest(WrapperTesting):
     self.assertIsNone(atom3)
     self.assertIsNone(atom4)
 
+  #=========================================================================================
+  # testCrosslinkAtoms
+  #=========================================================================================
+
+  def test_Properties(self):
+    self.chain = self.project.createChain('ACDC', shortName='A', molType='protein' )
+    self.nmrChain = self.project.newNmrChain(shortName='A')
+
+    checkGetSetAttr(self, obj=self.chain, attrib='role', value='free')

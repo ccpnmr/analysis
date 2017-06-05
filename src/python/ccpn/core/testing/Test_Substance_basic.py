@@ -188,7 +188,7 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
     self.assertIs(substance, sampleComponent.substance)
 
 
-  def _test_chainTriesToUseSubstanceWithSameName(self):
+  def test_chainTriesToUseSubstanceWithSameName(self):
     self.project.newSubstance('Molecule_1')
     self.assertRaises(Exception, self.project.createChain, compoundName='Molecule_1',
                       sequence='acd', molType='protein')
@@ -821,9 +821,9 @@ class Test_PolymerSubstance(WrapperTesting):
     with self.assertRaisesRegexp(ValueError, 'clashes with substance of different type'):
       s = self.project.newSubstance('test substance Molecule', substanceType='Composite', labelling='different')
 
-    s = self.project.newSubstance('test substance Cell', substanceType='Cell')
     s = self.project.newSubstance('test substance Material', substanceType='Material')
     s = self.project.newSubstance('test substance Composite', substanceType='Composite')
+    s = self.project.newSubstance('test substance Cell', substanceType='Cell')
 
     self.assertEqual(s.pid, 'SU:test substance Cell.')
     self.assertEqual(s.longPid, 'Substance:test substance Cell.')

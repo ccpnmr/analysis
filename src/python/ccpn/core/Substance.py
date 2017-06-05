@@ -424,10 +424,10 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
-    if dd:
-      residue = atom.residue
-      residueIndex = residue.chain.residues.index(residue)
-      dd[(residueIndex, atom.name)] = isotopeLabels
+    # if dd:
+    residue = atom.residue
+    residueIndex = residue.chain.residues.index(residue)
+    dd[(residueIndex, atom.name)] = isotopeLabels
 
   def removeSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']):
     """Remove specificAtomLabelling for atom designated by atomId
@@ -447,10 +447,10 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
-    if dd:
-      residue = atom.residue
-      residueIndex = residue.chain.residues.index(residue)
-      del dd[(residueIndex, atom.name)]
+    # if dd:
+    residue = atom.residue
+    residueIndex = residue.chain.residues.index(residue)
+    del dd[(residueIndex, atom.name)]
 
   def getSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']) -> typing.Dict[str,float]:
     """Get specificAtomLabelling dictionary for atom.

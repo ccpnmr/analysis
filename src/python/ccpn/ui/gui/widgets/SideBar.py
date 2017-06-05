@@ -64,6 +64,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.util.Logging import getLogger
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -238,7 +239,8 @@ class SideBar(QtGui.QTreeWidget, Base):
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     for url in data.get('urls',[]):
-      print('SideBar._processDroppedItems>>> dropped:', url)
+      # print('SideBar._processDroppedItems>>> dropped:', url)
+      getLogger().info('SideBar._processDroppedItems>>> dropped: '+str(url))
       objects = self.project.loadData(url)
       # if objects is None or len(objects) == 0:
       #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
@@ -527,7 +529,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           itemData = json.dumps({'pids':[text]})
           event.mimeData().setData(ccpnmrJsonData, itemData)
           event.mimeData().setText(itemData)
-
+      event.accept()
 
   def _dragMoveEvent(self, event:QtGui.QMouseEvent):
     """

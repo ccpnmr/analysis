@@ -93,8 +93,10 @@ class BlankDisplay(CcpnModule):
       success = success or self._handlePid(pid)
 
     if success:
-      self.mainWindow.deleteBlankDisplay()
+      # self.mainWindow.deleteBlankDisplay()
+      self._closeModule()
       getLogger().info('application.deleteBlankDisplay()')
+      return
 
   def _handlePid(self, pid):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
@@ -138,5 +140,5 @@ class BlankDisplay(CcpnModule):
     Re-implementation of closeModule function from CcpnModule.
     """
     getLogger().info('Shortcut "ND" to open a new blank display')
-    CcpnModule._closeModule(self)
+    super(BlankDisplay, self)._closeModule()
 

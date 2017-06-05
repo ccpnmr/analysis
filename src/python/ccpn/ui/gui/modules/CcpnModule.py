@@ -212,6 +212,7 @@ class CcpnModule(Dock):
     if self.closeFunc:
       self.closeFunc()
 
+    print (self._container)
     # self.close()
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 

@@ -205,14 +205,14 @@ class Gui(Ui):
         # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
 
 
-        # blankDisplay = self.mainWindow.newBlankDisplay()
+        blankDisplay = self.mainWindow.newBlankDisplay()
         # return blankDisplay # Why a return blankDisplay?
 
          # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
-        from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-        blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
-        self.mainWindow.moduleArea.addModule(blankDisplay, position='top'
-                                             , relativeTo=self.mainWindow.moduleArea)   # ejb
+        # from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+        # blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
+        # self.mainWindow.moduleArea.addModule(blankDisplay, position='right'
+        #                                      , relativeTo=self.mainWindow.moduleArea)   # ejb
 
     finally:
       self.application._endCommandBlock()

@@ -76,6 +76,12 @@ class CcpnModuleArea(ModuleArea):
     is the stase as pyqtGraph  '''
     return [self.currentModulesDict, self.saveState()]
 
+  def switchModule(self, module1, module2):
+    """
+    switch the new module into the blankDisplay
+    """
+    pass
+
   def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.

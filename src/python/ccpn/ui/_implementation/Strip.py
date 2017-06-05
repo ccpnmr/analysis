@@ -6,13 +6,11 @@
 #=========================================================================================
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,11 +21,11 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from typing import Sequence, Tuple, List
 
 from ccpn.util import Common as commonUtil
@@ -36,7 +34,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-
+from ccpn.util.Logging import getLogger
 
 class Strip(AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
@@ -282,7 +280,10 @@ class Strip(AbstractWrapperObject):
     """
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
-    print('Strip.displaySpectrum>>> _finaliseDone', self._finaliseDone, spectrum)
+    # print('Strip.displaySpectrum>>> _finaliseDone', self._finaliseDone, spectrum)
+    getLogger().info('Strip.displaySpectrum>>> _finaliseDone '
+                      +str(self._finaliseDone)+' '
+                      +str(spectrum))
     if not self._finaliseDone: return
 
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
@@ -290,6 +291,7 @@ class Strip(AbstractWrapperObject):
     dataSource = spectrum._wrappedData
     apiStrip = self._wrappedData
     if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
+      getLogger().debug('Strip.displaySpectrum>>> spectrumView is not None')
       return
 
     displayAxisCodes = apiStrip.axisCodes
@@ -304,14 +306,17 @@ class Strip(AbstractWrapperObject):
       mapIndices = commonUtil._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
 
     if mapIndices is None:
+      getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
       return
       
     # if None in mapIndices[:2]: # make sure that x/y always mapped
     #   return
     if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
+      getLogger().debug('Strip.displaySpectrum>>> mapIndices, x/y not mapped')
       return
       
     if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
+      getLogger().debug('Strip.displaySpectrum>>> mapIndices, dimensionCount not matching')
       return
       
     # Make dimensionOrdering

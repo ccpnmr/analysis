@@ -29,13 +29,13 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
 
-class GuiAlignSpectra(GuiPipe):
+class AlignSpectraGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = 'AlignSpectra'
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(GuiAlignSpectra, self)
+    super(AlignSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))

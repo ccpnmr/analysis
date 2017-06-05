@@ -531,12 +531,25 @@ def doAxisCodesMatch(axisCodes, refAxisCodes):
   return True
 
 
-def stringifier(floatFormat=None, *fields):
+def stringifier(*fields, **options):
   """Get stringifier function, that will format an object x according to
 
   <str(x): field1=x.field1, field2=x.field2, ...>
 
   All floating point values encountered will be formatted according to floatFormat"""
+
+  # Unfortunately necessary as this package must be read from v2io
+  # and python 2 does not have keyword-only arguments
+  # What we should do is the function definition below:
+  # def stringifier(*fields, floatFormat=None):
+  if 'floatFormat' in options:
+    floatFormat = options.pop('floatFormat')
+  else:
+    floatFormat = None
+  if options:
+    raise ValueError("Unknown options: %s" % ', '.join(sorted(options.keys())))
+
+  # Proper body of function starts here
   if floatFormat is None:
     # use default formatter, avoiding continuous creation of new ones
     localFormatter = stdLocalFormatter

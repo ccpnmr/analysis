@@ -503,15 +503,22 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _saveToJson(self):
     '''Tries to catch various error in giving the saving path '''
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
-
+    pipelineName = str(self.pipelineNameLabel.text())
+    print(savingPath, '111')
     if not savingPath.endswith('.json'):
       try:
+        print(savingPath, '2222')
         if savingPath.endswith('/'):
-          savingPath += str(self.pipelineNameLabel.text()) + '.json'
+          print(savingPath, '///')
+          savingPath += pipelineName + '.json'
         else:
-          savingPath+='.json'
+          if os.path.exists(savingPath):
+            savingPath += '/'+ pipelineName + '.json'
+            print(savingPath, '$$')
+          else:
+            savingPath+='.json'
       except:
-        print('Insert a valid file path. E.g ~/pipeline.json')
+        print('Insert a valid directory path. E.g /Users/user1/Desktop/')
     self.savingDataPath = str(savingPath)
 
     try:
@@ -520,7 +527,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         fp.close()
       print('File saved in: ', self.savingDataPath)
     except:
-      print('File not saved. Insert a valid file path. E.g /yourPath/pipeline.json')
+      print('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
 
 
 
@@ -578,9 +585,9 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.autoCheckBox = CheckBox(self,)
     self.settingsWidgets.append(self.autoCheckBox)
     #
-    self.savePipelineLabel = Label(self, 'Save as')
+    self.savePipelineLabel = Label(self, 'Save in: directory path', tipText='Select path where to save your Pipeline file')
     self.settingsWidgets.append(self.savePipelineLabel)
-    self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.AnyFile)
+    self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.Directory)
     self.settingsWidgets.append(self.savePipelineLineEdit)
     #
     self.addBoxLabel = Label(self, 'Add Method On')

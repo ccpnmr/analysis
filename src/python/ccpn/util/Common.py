@@ -43,7 +43,7 @@ import sys
 import string
 import itertools
 
-from . import Path, Constants
+from . import Constants
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -111,6 +111,9 @@ def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
   Note that there are potential problems if the files we want are not
   the ones encountered first on the pythonPath
   """
+
+  # Must be imported here, as entire file must be importable from Python 2 NefIo
+  from . import Path
 
   listdir = os.listdir(dirname)
   try:

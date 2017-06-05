@@ -6,8 +6,6 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import glob
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -40,6 +38,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import importlib
 import os
 import shutil
+import glob
+
 
 dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines

@@ -24,37 +24,33 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 
-from ccpn.framework.lib.Pipe import Pipe
-from ccpn.pipes.guiPipes.AlignSpectraGuiPipe import AlignSpectraGuiPipe
+from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.pipes.guiPipes.CreateDummySpectraGuiPipe import CreateDummySpectraGuiPipe
 
-class AlignSpectra(Pipe):
+class createDummySpectraPipe(SpectraPipe):
 
-  guiPipe = AlignSpectraGuiPipe
-  pipeName = AlignSpectraGuiPipe.pipeName
+  guiPipe = CreateDummySpectraGuiPipe
+  pipeName = guiPipe.pipeName
 
 
-
-  def runPipe(self, params):
+  def runPipe(self, spectra, ):
     '''
     :param data:
-    :return:
+    :return: it copies the input data as dummy spectra. Dummy spectra can be then modified.
     '''
-
-    from ccpn.AnalysisScreen.lib.spectralProcessing.align import alignment
     if self.project is not None:
+      newDummySpectra = []
+      for spectrum in self.inputData:
 
-      referenceSpectrumPid = params['referenceSpectrum']
-      referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
-      if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
+        dummySpectrum = self.project.createDummySpectrum(('H',), spectrum.name)
+        dummySpectrum._positions = spectrum._positions
+        dummySpectrum._intensities = spectrum._intensities
+        dummySpectrum.pointCounts = spectrum.pointCounts
+        newDummySpectra.append(dummySpectrum)
 
-        if spectra:
-          alignment._alignSpectra(referenceSpectrum, spectra)
-          print('finished',)
-
-
-
+      return newDummySpectra
 
 
-AlignSpectra.register()
+
+createDummySpectraPipe.register()
 

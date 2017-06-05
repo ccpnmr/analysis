@@ -178,31 +178,17 @@ class GuiPipeline(CcpnModule, Pipeline):
             guiPipe = pipe.guiPipe
             guiPipe.pipe = pipe
             allGuiPipes.append(guiPipe)
+          else: #deal with pipes without Gui -> Creates just an empty GuiPipe
+            newEmptyPipe = GuiPipe
+            pipe.guiPipe = newEmptyPipe
+            newEmptyPipe.pipe = pipe
+            newEmptyPipe.pipeName = pipe.pipeName
+            newEmptyPipe.preferredPipe = False
+            allGuiPipes.append(newEmptyPipe)
         except:
           # TODO handle exceptions if any
           pass
     return allGuiPipes
-
-
-  # @property
-  # def pipes(self):
-  #   return self._pipes
-  #
-  # @pipes.setter
-  # def pipes(self, pipes):
-  #   '''
-  #   Set the guiPipes to the guiPipeline
-  #   :param guiPipes:  GuiPipe class
-  #   '''
-  #
-  #   if pipes is not None:
-  #     allPipes = []
-  #     for pipe in pipes:
-  #         allPipes.append(pipe)
-  #     self._pipes = allPipes
-  #   else:
-  #     self._pipes = []
-
 
   @property
   def guiPipes(self):
@@ -239,8 +225,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     else:
       self._pipelineTemplates = []
 
-      #  TODO put notifier to update the pulldown when guiPipes chenage
-
+      #  TODO put notifier to update the pulldown when guiPipes change
 
 
 
@@ -321,9 +306,9 @@ class GuiPipeline(CcpnModule, Pipeline):
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
         if guiPipe.preferredPipe:
-          preferredGuiPipes.append(guiPipe.pipeName)
+          preferredGuiPipes.append(guiPipe.pipe.pipeName)
         else:
-          otherGuiPipes.append(guiPipe.pipeName)
+          otherGuiPipes.append(guiPipe.pipe.pipeName)
     self.pipePulldownData.extend(preferredGuiPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
@@ -402,10 +387,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
         position = self.pipelineSettingsParams['addPosit']
-        self.pipelineWidget = guiPipe(parent=self, application=self.application, name=name, project=self.project)
-        self.pipelineArea.addDock(self.pipelineWidget, position=position)
+        guiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
+        self.pipelineArea.addDock(guiPipe, position=position)
         autoActive = self.pipelineSettingsParams['autoActive']
-        self.pipelineWidget.label.checkBox.setChecked(autoActive)
+        guiPipe.label.checkBox.setChecked(autoActive)
+
 
   def _runPipeline(self):
     print('_runPipeline')
@@ -504,17 +490,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     '''Tries to catch various error in giving the saving path '''
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
     pipelineName = str(self.pipelineNameLabel.text())
-    print(savingPath, '111')
     if not savingPath.endswith('.json'):
       try:
-        print(savingPath, '2222')
         if savingPath.endswith('/'):
-          print(savingPath, '///')
           savingPath += pipelineName + '.json'
         else:
           if os.path.exists(savingPath):
             savingPath += '/'+ pipelineName + '.json'
-            print(savingPath, '$$')
           else:
             savingPath+='.json'
       except:
@@ -846,6 +828,7 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
   from ccpn.pipes.examples.DemoPipe import DemoPipe1, DemoPipe2
+  from ccpn.pipes.DummySpectraPipe import createDummySpectraPipe
   app = TestApplication()
 
   win = QtGui.QMainWindow()
@@ -854,7 +837,7 @@ if __name__ == '__main__':
 
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  pipeline = GuiPipeline(mainWindow=None, pipes=[DemoPipe1, DemoPipe2])
+  pipeline = GuiPipeline(mainWindow=None, pipes=[createDummySpectraPipe, DemoPipe2])
 
   moduleArea.addModule(pipeline)
 

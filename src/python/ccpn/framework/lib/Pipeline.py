@@ -84,9 +84,10 @@ class Pipeline(object):
     if len(self.queue)>0:
       for pipe in self.pipes:
         if pipe is not None:
-          pipe.runPipe(self, pipe._kwargs)
-          self.queue.remove(pipe)
-          self.finishedPipe.append(pipe)
+          if hasattr(pipe, '_kwargs'):
+            pipe.runPipe(self, pipe._kwargs)
+            self.queue.remove(pipe)
+            self.finishedPipe.append(pipe)
 
     print(' self.queue',  self.queue)
     print(' self.self.finishedPipe', self.finishedPipe)

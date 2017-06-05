@@ -104,3 +104,13 @@ try:
 
 except ImportError:
   pass
+
+
+class SpectraPipe(Pipe):
+  '''
+      A pipe where the run method accepts a list of spectra and returns a a list of spectra
+  '''
+
+  @abstractmethod
+  def runPipe(self, spectra: list) -> list:
+    return spectra

@@ -257,8 +257,11 @@ class Model(AbstractWrapperObject):
       #       break                                 # break out for the next repeat
 
       try:
-        # if 'modelNumber' in data.columns:
-        data.deleteSelectedRows(modelNumbers=self.serial)      # ejb - test new delete, undo not done yet
+        if 'modelNumber' in data.columns:
+          # If there are no modelNumbers, we must be in the process of deleting
+          # the modelNumbers column, or some similar shenanigans.
+          # Anyway, you do not clear the data if there are none to clear. OK.
+          data.deleteSelectedRows(modelNumbers=self.serial)
 
       finally:
         if containingObject is not None:

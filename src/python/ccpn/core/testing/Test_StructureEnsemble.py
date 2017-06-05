@@ -41,12 +41,6 @@ class StructureEnsembleTesting_None(WrapperTesting):
   # setUp       initialise a newStructureEnsemble
   #=========================================================================================
 
-  def setUp(self):
-    """
-    Start with no project loaded
-    """
-    self.projectPath = None
-    super().setUp()                   # ejb - call WrapperTesting setup
 
   def _test_load_structure(self):
     self.loadData('../structures/2CPP.pdb')
@@ -144,7 +138,6 @@ class StructureEnsembleTesting_Properties(WrapperTesting):
     """
     # Path of project to load (None for new project)
     self.projectPath = None
-    super().setUp()
 
     with self.initialSetup():
       self.ensemble = self.project.newStructureEnsemble()
@@ -187,7 +180,6 @@ class StructureEnsembleTesting_Data(WrapperTesting):
     """
     # Path of project to load (None for new project)
     self.projectPath = None
-    super().setUp()
 
     with self.initialSetup():
       self.ensemble = self.project.newStructureEnsemble()
@@ -224,35 +216,34 @@ class StructureEnsembleTesting_resetModels(WrapperTesting):
     """
     # Path of project to load (None for new project)
     self.projectPath = None
-    super().setUp()           # ejb - experimenting different ways
-                              # to initialise
 
-    self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-                     ,'CB', 'HB1', ' HB2', 'HB3'
-                     ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-                     ,'CE', 'HE1', 'HE2', 'HE3'
-                     ,'CG', 'HG1', 'HG2', 'HG3'
-                     ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
-    self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-    self.testModelNumber = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
-    self.testModelNumberNew = [6]*5 + [5]*4 + [4]*8 + [3]*4 + [2]*4 + [1]*8
-    self.testElement = ['H'] * 4 + ['O'] * 4 + ['C'] * 4 + ['N'] * 21
-    self.testFuncName = ['H'
-                     ,'HB1', ' HB2', 'HB3'
-                     ,'HD11', 'HD12', 'HD13', 'HD21', 'HD22', 'HD23'
-                     ,'HE1', 'HE2', 'HE3'
-                     ,'HG1', 'HG2', 'HG3'
-                     ,'HG11', 'HG12', 'HG13', 'HG21', 'HG22', 'HG23']
+    with self.initialSetup():
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+                       ,'CB', 'HB1', ' HB2', 'HB3'
+                       ,'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+                       ,'CE', 'HE1', 'HE2', 'HE3'
+                       ,'CG', 'HG1', 'HG2', 'HG3'
+                       ,'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA']*5 + ['ALA']*4 + ['LEU']*8 + ['MET']*4 + ['THR']*4 + ['VAL']*8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumber = [1]*5 + [2]*4 + [3]*8 + [4]*4 + [5]*4 + [6]*8
+      self.testModelNumberNew = [6]*5 + [5]*4 + [4]*8 + [3]*4 + [2]*4 + [1]*8
+      self.testElement = ['H'] * 4 + ['O'] * 4 + ['C'] * 4 + ['N'] * 21
+      self.testFuncName = ['H'
+                       ,'HB1', ' HB2', 'HB3'
+                       ,'HD11', 'HD12', 'HD13', 'HD21', 'HD22', 'HD23'
+                       ,'HE1', 'HE2', 'HE3'
+                       ,'HG1', 'HG2', 'HG3'
+                       ,'HG11', 'HG12', 'HG13', 'HG21', 'HG22', 'HG23']
 
-    self.ensemble = self.project.newStructureEnsemble()
-    self.data = self.ensemble.data
-    self.data['atomName'] = self.testAtomName
-    self.data['residueName'] = self.testResidueName
-    self.data['chainCode'] = self.testChainCode
-    self.data['sequenceId'] = self.testSequenceId
-    self.data['modelNumber'] = self.testModelNumber
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
 
   #=========================================================================================
   # test_properties_structuresEnsemble_newSE

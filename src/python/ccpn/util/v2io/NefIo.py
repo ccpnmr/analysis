@@ -106,7 +106,7 @@ saveFrameReadingOrder = [
   # 'ccpn_additional_data'     # Not supported in V2
 ]
 
-# TODO: implement ccpn_restraint_list, residue variants, disulfides. Test
+# TODO: implement residue variants, disulfides. Test
 
 class _isALoop:
   # Dummy value - to be removed
@@ -401,7 +401,6 @@ nef2CcpnMap = {
     ('transfer_type',None),
     ('is_indirect',None),
   )),
-  # NB TODO boxWidths and lineWidths are NOT included.
   'nef_peak':OD((
     ('index',None),
     ('peak_id','serial'),
@@ -823,8 +822,8 @@ class CcpnNefReader:
     self.errors = []
     self.testing = testing
 
-    # Information for mappinf NmrExpPrototype dimensionos
-    self.refExpDimRefCodeMap = NmrExpPrototypeLib.refExpDimRefCodeMap()
+    # Information for mapping NmrExpPrototype dimensions
+    self.refExpDimRefCodeMap = None
 
     # Map for resolving crosslinks in NEF file
     self.frameCode2Object = {}
@@ -868,26 +867,26 @@ class CcpnNefReader:
     #
     return result
 
-  def initialiseProject(self, project, name):
+  def initialiseProject(self, memopsRoot, name):
     """Initialise Project for reading, making new top level objects to
     hold loaded data"""
     # NB These are automatically set as current on the memopsRoot
-    nmrProject = project.newNmrProject(name=name)
-    project.newMolSystem(code=name, name=name)
-    project.newNmrConstraintStore(nmrProject=nmrProject)
-    project.newAnalysisProject(name=name, nmrProject=nmrProject)
+    nmrProject = memopsRoot.newNmrProject(name=name)
+    memopsRoot.newMolSystem(code=name, name=name)
+    memopsRoot.newAnalysisProject(name=name, nmrProject=nmrProject)
+    self.refExpDimRefCodeMap = NmrExpPrototypeLib.refExpDimRefCodeMap(memopsRoot)
 
 
-  def importNewProject(self, project, dataBlock):
+  def importNewProject(self, memopsRoot, dataBlock):
     """Import entire project from dataBlock into empty Project"""
 
     t0 = time.time()
 
     self.warnings = []
 
-    self.project = project
+    self.memopsRoot = memopsRoot
     name = dataBlock.name
-    self.initialiseProject(project, name=name)
+    self.initialiseProject(memopsRoot, name=name)
 
     self.defaultChainCode = None
 
@@ -896,14 +895,14 @@ class CcpnNefReader:
     saveFrame = dataBlock.get('nef_molecular_system')
     if saveFrame:
       self.saveFrameName = 'nef_molecular_system'
-      self.load_nef_molecular_system(project, saveFrame)
+      self.load_nef_molecular_system(memopsRoot, saveFrame)
     del saveframeOrderedDict['nef_molecular_system']
 
     # Load CCPN assignments, if present, to preserve connected stretches
     saveFrame = dataBlock.get('ccpn_assignment')
     if saveFrame:
       self.saveFrameName = 'ccpn_assignment'
-      self.load_ccpn_assignment(project, saveFrame)
+      self.load_ccpn_assignment(memopsRoot, saveFrame)
       del saveframeOrderedDict['ccpn_assignment']
 
     for sf_category, saveFrames in saveframeOrderedDict.items():
@@ -915,14 +914,14 @@ class CcpnNefReader:
           print ("WARNING, unknown saveframe category", sf_category, saveFrameName)
         else:
 
-          result = importer(self, project, saveFrame)
+          result = importer(self, memopsRoot, saveFrame)
           self.frameCode2Object[saveFrameName] = result
           t2 = time.time()
     print('Loaded NEF file, time = ', t2-t0)
 
     for msg in self.warnings:
       print ('====> ', msg)
-    self.project = None
+    self.memopsRoot = None
 
   def load_nef_molecular_system(self, project, saveFrame):
     """load nef_molecular_system saveFrame"""
@@ -1153,7 +1152,7 @@ class CcpnNefReader:
     dataSetSerial = saveFrame.get('ccpn_dataset_serial', defaultSerial)
     nmrConstraintStore = project.findFirstNmrConstraintStore(serial=dataSetSerial)
     if nmrConstraintStore is None:
-      nmrConstraintStore = project.newNmrConstraintStore()
+      nmrConstraintStore = project.newNmrConstraintStore(nmrProject=project.currentNmrProject)
       resetSerial(nmrConstraintStore, dataSetSerial)
 
     if category == 'nef_distance_restraint_list':
@@ -1169,7 +1168,16 @@ class CcpnNefReader:
       restraintType = 'Rdc'
     else:
       # For now we do not support any non-standard restraint lists.
-      return None
+      # We could do Csa, JCoupling, and ChemicalShift
+      restraintType = saveFrame.get('restraint_type')
+      if restraintType == 'JCoupling':
+        itemLength = 2
+      elif restraintType in ('Csa', 'ChemicalShift'):
+        itemLength = 1
+      else:
+        # Other types are not recognised
+        return None
+      data = saveFrame.get('ccpn_restraint').data
 
     # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
@@ -1192,39 +1200,42 @@ class CcpnNefReader:
 
     defaultChainCode = self.defaultChainCode
     for row in data:
-
       # get or make restraint
       serial = row.get('restraint_id')
       restraint = restraints.get(serial)
       if restraint is None:
         # First line in restraint
-        dd = {}
+        restraintParams = {}
         val = row.get('weight')
         if val is not None:
-          dd['weight'] = val
+          restraintParams['weight'] = val
         val = row.get('ccpn_comment')
         if val is not None:
-          dd['details'] = val
+          restraintParams['details'] = val
         val = row.get('target_value')
         if val is not None:
-          dd['targetValue'] = val
+          restraintParams['targetValue'] = val
         val = row.get('target_value_uncertainty')
         if val is not None:
-          dd['error'] = val
+          restraintParams['error'] = val
         val = row.get('lower_limit')
         if val is not None:
-          dd['lowerLimit'] = val
+          restraintParams['lowerLimit'] = val
         val = row.get('upper_limit')
         if val is not None:
-          dd['upperLimit'] = val
+          restraintParams['upperLimit'] = val
         if restraintType == 'Rdc':
           val = row.get('ccpn_vector_length')
           if val is not None:
-            dd['vectorLength'] = val
-        restraint = newRestraintFunc(**dd)
-        # Must be reset after the fact, as serials cannot be passed in normally
-        resetSerial(restraint, serial)
-        restraints[serial] = restraint
+            restraintParams['vectorLength'] = val
+        if itemLength != 1:
+          restraint = newRestraintFunc(**restraintParams)
+          # Must be reset after the fact, as serials cannot be passed in normally
+          resetSerial(restraint, serial)
+          restraints[serial] = restraint
+      elif itemLength == 1:
+        raise RuntimeError("One-resonance restraint type %s, is %s has more than one item"
+                           % (restraintType, serial))
 
       # Add item
       ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
@@ -1237,13 +1248,23 @@ class CcpnNefReader:
         )
       # NB the appended resonances may be of length 2 in case of ambiguous
       # resonances like Val HG%. Therefor we need to do the product.
-      for tt in itertools.product(*fixedResonances):
-        getattr(restraint, newItemFuncName)(resonances=tt)
+      if itemLength == 1:
+        # These have no items, and have a single resonance attribute linked to the restraint
+        # They also can only ever have a single line per restraint
+        # NB if we get here restraintParams are knoown to be set
+        restraint = newRestraintFunc(resonance=fixedResonances[0][0], **restraintParams)
+        # Must be reset after the fact, as serials cannot be passed in normally
+        resetSerial(restraint, serial)
+        restraints[serial] = restraint
+      else:
+        for tt in itertools.product(*fixedResonances):
+          getattr(restraint, newItemFuncName)(resonances=tt)
     #
     return restraintList
 
   importers['nef_distance_restraint_list'] = load_nef_restraint_list
   importers['nef_rdc_restraint_list'] = load_nef_restraint_list
+  importers['ccpn_restraint_list'] = load_nef_restraint_list
 
   def load_nef_dihedral_restraint_list(self, project, saveFrame):
     """Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
@@ -1332,10 +1353,189 @@ class CcpnNefReader:
 
   importers['nef_dihedral_restraint_list'] = load_nef_dihedral_restraint_list
 
+  # # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
+  # # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
+  # DEFAULT_SPECTRUM_PARAMETERS = {
+  #   '1H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':1, },
+  #   '2H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':1, },
+  #   '3H':{'numPoints':128, 'sf':100., 'sw':1280, 'refppm':11.8, 'refpt':1, },
+  #   '13C':{'numPoints':256, 'sf':10., 'sw':2560, 'refppm':236., 'refpt':1, }
+  # }
 
-  def load_nef_nmr_spectrum(self, project, saveFrame):
+  # def createSpectrum(project:Project, spectrumName:str, spectrumParameters:dict,
+  #                          dimensionData:dict, transferData:Sequence[Tuple] = None):
+  # """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
+  #
+  # :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
+  #
+  # :params Dictionary of keyword:list parameters, with per-dimension parameters.
+  # Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
+  # A number of other dimensionData are
+  # treated specially (see below)
+  # """
+  #
+  # spectrum = project.getSpectrum(spectrumName)
+  # if spectrum is None:
+  #   # Spectrum did not already exist
+  #
+  #   dimTags = list(dimensionData.keys())
+  #
+  #   # First try to load it - we override the loaded attribute values below
+  #   # but loading gives a more complete parameter set.
+  #   spectrum = None
+  #   filePath = spectrumParameters.get('filePath')
+  #   if filePath and os.path.exists(filePath):
+  #     try:
+  #       dataType, subType, usePath = ioFormats.analyseUrl(path)
+  #       if dataType == 'Spectrum':
+  #         spectra = project.loadSpectrum(usePath, subType)
+  #         if spectra:
+  #           spectrum = spectra[0]
+  #     except:
+  #       # Deliberate - any error should be skipped
+  #       pass
+  #     if spectrum is None:
+  #       project._logger.warning("Failed to load spectrum from spectrum path %s" % filePath)
+  #     elif 'axisCodes' in dimensionData:
+  #       # set axisCodes
+  #       spectrum.axisCodes = dimensionData['axisCodes']
+  #
+  #   acquisitionAxisIndex = None
+  #   if 'is_acquisition' in dimensionData:
+  #     dimTags.remove('is_acquisition')
+  #     values = dimensionData['is_acquisition']
+  #     if values.count(True) == 1:
+  #       acquisitionAxisIndex = values.index(True)
+  #
+  #   if spectrum is None:
+  #     # Spectrum could not be loaded - now create a dummy spectrum
+  #
+  #     if 'axisCodes' in dimTags:
+  #       # We have the axisCodes, from ccpn
+  #       dimTags.remove('axisCodes')
+  #       axisCodes = dimensionData['axisCodes']
+  #
+  #     else:
+  #       if transferData is None:
+  #         raise ValueError("Function needs either axisCodes or transferData")
+  #
+  #       dimensionIds = dimensionData['dimension_id']
+  #
+  #       # axisCodes were not set - produce a serviceable set
+  #       axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
+  #                                    dimensionIds=dimensionIds,
+  #                                    acquisitionAxisIndex=acquisitionAxisIndex,
+  #                                    transferData=transferData)
+  #
+  #     # make new spectrum with default parameters
+  #     spectrum = project.createDummySpectrum(axisCodes, spectrumName,
+  #                                            chemicalShiftList=spectrumParameters.get(
+  #                                              'chemicalShiftList')
+  #                                            )
+  #     if acquisitionAxisIndex is not None:
+  #       spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
+  #
+  #     # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
+  #     # If necessary an empty PeakList is added downstream
+  #     spectrum.peakLists[0].delete()
+  #     spectrum._wrappedData.__dict__['_serialDict']['peakLists'] = 0
+  #
+  #   # (Re)set all spectrum attributes
+  #
+  #   # First per-dimension ones
+  #   dimTags.remove('dimension_id')
+  #   if 'absolute_peak_positions' in dimensionData:
+  #     # NB We are not using these. What could we do with them?
+  #     dimTags.remove('absolute_peak_positions')
+  #   if 'folding' in dimensionData:
+  #     dimTags.remove('folding')
+  #     values = [None if x == 'none' else x for x in dimensionData['folding']]
+  #     spectrum.foldingModes = values
+  #   if 'pointCounts' in dimensionData:
+  #     dimTags.remove('pointCounts')
+  #     spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
+  #     if 'totalPointCounts' in dimensionData:
+  #       dimTags.remove('totalPointCounts')
+  #       spectrum.totalPointCounts = dimensionData['totalPointCounts']
+  #     else:
+  #       spectrum.totalPointCounts = pointCounts
+  #   # Needed below:
+  #   if 'value_first_point' in dimensionData:
+  #     dimTags.remove('value_first_point')
+  #   if 'referencePoints' in dimensionData:
+  #     dimTags.remove('referencePoints')
+  #   # value_first_point = dimensionData.get('value_first_point')
+  #   # if value_first_point is not None:
+  #   #   dimensionData.pop('value_first_point')
+  #   # referencePoints = dimensionData.get('referencePoints')
+  #   # if referencePoints is not None:
+  #   #   dimensionData.pop('referencePoints')
+  #
+  #   # Remaining per-dimension values match the spectrum. Set them.
+  #   # NB we use the old (default) values where the new value is None
+  #   # - some attributes like spectralWidths do not accept None.
+  #   if 'spectrometerFrequencies' in dimTags:
+  #     # spectrometerFrequencies MUST be set before spectralWidths,
+  #     # as the spectralWidths are otherwise modified
+  #     dimTags.remove('spectrometerFrequencies')
+  #     dimTags.insert(0, 'spectrometerFrequencies')
+  #   for tag in dimTags:
+  #     vals = dimensionData[tag]
+  #     # Use old values where new ones are None
+  #     oldVals = getattr(spectrum, tag)
+  #     vals = [x if x is not None else oldVals[ii] for ii, x in enumerate(vals)]
+  #     setattr(spectrum, tag, vals)
+  #
+  #   # Set referencing.
+  #   value_first_point = dimensionData.get('value_first_point')
+  #   referencePoints = dimensionData.get('referencePoints')
+  #   if value_first_point is None:
+  #     # If reading NEF we must get value_first_point,
+  #     #  but in other uses we might be getting referencePoints, referenceValues directly
+  #     referenceValues = dimensionData.get('referenceValues')
+  #     if referenceValues and referencePoints:
+  #       spectrum.referencePoints = referencePoints
+  #       spectrum.referenceValues = referenceValues
+  #   else:
+  #     if referencePoints is None:
+  #       # not CCPN data
+  #       referenceValues = spectrum.referenceValues
+  #       for ii, val in enumerate(value_first_point):
+  #         if val is None:
+  #           value_first_point[ii] = referenceValues[ii]
+  #       spectrum.referenceValues = value_first_point
+  #       spectrum.referencePoints = [1] * len(referenceValues)
+  #     else:
+  #       points = list(spectrum.referencePoints)
+  #       values = list(spectrum.referenceValues)
+  #       sw = spectrum.spectralWidths
+  #       pointCounts = spectrum.pointCounts
+  #       for ii, refVal in enumerate(value_first_point):
+  #         refPoint = referencePoints[ii]
+  #         if refVal is not None and refPoint is not None:
+  #           # if we are here refPoint should never be None, but OK, ...
+  #           # Set reference to use refPoint
+  #           points[ii] = refPoint
+  #           refVal -= ((refPoint - 1) * sw[ii] / pointCounts[ii])
+  #           values[ii] = refVal
+  #       spectrum.referencePoints = points
+  #       spectrum.referenceValues = values
+  #
+  #   # Then spectrum-level ones
+  #   for tag, val in spectrumParameters.items():
+  #     if tag != 'dimensionCount':
+  #       # dimensionCount is handled already and not settable
+  #       setattr(spectrum, tag, val)
+  #   #
+  #   return spectrum
+  #
+  # else:
+  #   raise ValueError("Spectrum named %s already exists" % spectrumName)
 
-    nmrProject = project.currentNmrProject
+
+  def load_nef_nmr_spectrum(self, memopsRoot, saveFrame):
+
+    nmrProject = memopsRoot.currentNmrProject
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1358,7 +1558,7 @@ class CcpnNefReader:
       ('ccpn_spectrum_scale','scale'),
       ('ccpn_spectrum_comment','details'),
     ))
-    dataSourceParams = {'numDim':experimentParams['numDim']}
+    dataSourceParams = {'numDim':experimentParams['numDim'], 'dataType':'processed'}
     for key,tag in dataSourceMapping.items():
       val = saveFrame.get(key)
       if val is not None:
@@ -1423,7 +1623,7 @@ class CcpnNefReader:
 
       refExperimentName = saveFrame.get('experiment_classification')
       if refExperimentName is not None:
-        for expPrototype in project.sortedNmrExpPrototypes():
+        for expPrototype in memopsRoot.sortedNmrExpPrototypes():
           refExperiment = expPrototype.findFirstRefExperiment(name=refExperimentName)
           if refExperiment is not None:
             break
@@ -1435,12 +1635,12 @@ class CcpnNefReader:
         else:
           experimentParams['refExperiment'] = refExperiment
 
-      nmrExperiment = nmrProject.newExperiment(**experimentParams)
-      dataSource = nmrExperiment.newDataSource(**dataSourceParams)
-
       # frameCode = saveFrame.get('ccpn_sample')
       # if frameCode:
-      #   spectrumParameters['sample'] = self.frameCode2Object[frameCode]
+      #   experimentParams['sample'] = self.frameCode2Object[frameCode]
+
+      nmrExperiment = nmrProject.newExperiment(**experimentParams)
+      dataSource = nmrExperiment.newDataSource(**dataSourceParams)
 
       expDimRefParams = {}
       dataDimParams = {}
@@ -1454,12 +1654,10 @@ class CcpnNefReader:
           nmrExperiment.findFirstExpDim(dim=dim).isAcquisition = True
           acquisitionDim = dim
 
-        dataDimParams[dim] = {}
-
         dd = expDimRefParams[dim] = {}
-        val = row.get('axis_code')
+        val = isotopeCode = row.get('axis_code')
         if val:
-          dd['isotopeCodes'] = (val,)
+          dd['isotopeCodes'] = (isotopeCode,)
         val = row.get('spectrometer_frequency')
         if val:
           dd['sf'] = val
@@ -1473,14 +1671,16 @@ class CcpnNefReader:
           axisCodesRead = True
         dd['isFolded'] = (row.get('folding') == 'mirror')
 
-        dd = dataDimRefParams[dim] = {}
+        dd = dataDimParams[dim] = {}
         val = row.get('spectral_width')
         if val:
           dd['spectralWidth'] = val
+
+        dd = dataDimRefParams[dim] = {}
         val = row.get('value_first_point')
+        dd['refPoint'] = 1
         if val:
           dd['refValue'] = val
-          dd['refPoint'] = 1
 
       loop = saveFrame.get('ccpn_spectrum_dimension')
       referencePointDict = {}
@@ -1509,12 +1709,7 @@ class CcpnNefReader:
             dd['maxAliasedFreq'] = val
           val = row.get('measurement_type')
           if val:
-            dd['measurementTypes'] = val
-
-          dd = dataDimRefParams[dim]
-          val = row.get('lower_aliasing_limit')
-          if val is not None:
-            dd['minAliasedFreq'] = val
+            dd['measurementType'] = val
 
           dd = dataDimParams[dim]
           val = row.get('point_count')
@@ -1542,15 +1737,47 @@ class CcpnNefReader:
           ll.sort()
           dataStoreParams['blockSizes'] = [tt[1] for tt in ll]
 
-      # Make ExpDimRefs
-      for expDim in experiment.sortedExpDims():
-        expDim.newExpDimRef(**expDimRefParams[expDim.dim])
+      # Make Per-dimension objects
+      for expDim in nmrExperiment.sortedExpDims():
+        dim = expDim.dim
+        params = expDimRefParams[dim]
 
-      # Make DataDims and DataDimRefs
-      for dim, params in sorted(dataDimParams.items()):
-        dataDim = dataSource.newFreqDataDim(dim=dim, **params)
-        expDimRef = experiment.findFirstExpDim(dim=dim).findFirstExpDimRef()
-        dataDim.newDataDimRef(expDimRef=expDimRef, **dataDimRefParams)
+        # Set default parameters - not consistent but you need something:
+        isotopeCodes =  params.get('isotopeCodes')
+        if isotopeCodes:
+          isotopeCode = isotopeCodes[0]
+        else:
+          isotopeCode = '1H'
+          params['isotopeCodes'] = (isotopeCode,)
+        sf = params.get('sf')
+        if not sf:
+          if isotopeCode == '1H':
+            params['sf'] = sf = 100.
+          else:
+            params['sf'] = sf = 10.
+        #
+        expDim.newExpDimRef(**params)
+
+        # Make DataDims and DataDimRefs
+        params = dataDimParams[dim]
+        numPoints = params.get('numPoints')
+        if not numPoints:
+          if isotopeCode == '1H':
+            numPoints = params['numPoints'] = 1280
+          else:
+            numPoints = params['numPoints'] = 2560
+        if params.get('spectralWidth'):
+          spectralWidth = params.pop('spectralWidth')
+          params['valuePerPoint'] = spectralWidth * sf / numPoints
+        else:
+          # 10 z per point, arbitrarily
+          params['valuePerPoint'] = 10.
+
+        dataDim = dataSource.newFreqDataDim(dim=dim, expDim=nmrExperiment.findFirstExpDim(dim=dim),
+                                            isComplex=isComplexDict.get(dim, False), **params)
+
+        expDimRef = nmrExperiment.findFirstExpDim(dim=dim).findFirstExpDimRef()
+        dataDim.newDataDimRef(expDimRef=expDimRef, **dataDimRefParams[dim])
 
       # Reset referencing to use referencePoint
       for dim, refPoint in referencePointDict.items():
@@ -1565,23 +1792,32 @@ class CcpnNefReader:
       if loop:
         for row in loop.data:
           dims = [row.get(x) for x in ('dimension_1','dimension_2')]
-          xdr = [experiment.findFirstExpDim(dim=dim).findFirstExpDimRef() for dim in dims]
+          xdr = [nmrExperiment.findFirstExpDim(dim=dim).findFirstExpDimRef() for dim in dims]
           transferType = row.get('transfer_type')
           isDirect = not row.get('is_indirect')
-          experiment.newExpTransfer(expDimRefs=xdr, transferType=transferType,
+          nmrExperiment.newExpTransfer(expDimRefs=xdr, transferType=transferType,
                                     isDirect=isDirect)
           transferData.append(dims + [transferType, not isDirect])
 
       # Make data storage object
       filePath = saveFrame.get('ccpn_spectrum_file_path')
       if filePath:
-        dataStoreParams['numPoints'] = [x.numPoints for x in dataSource.sortedDataDims()]
-        dataSource.addDataStore(filePath, **dataStoreParams)
+        # create dataLocationStore
+        dataLocationStore = memopsRoot.findFirstDataLocationStore()
+        if not dataLocationStore:
+          dataLocationStore = memopsRoot.newDataLocationStore(name='default')
+          addDataStore(dataSource, filePath,
+                       numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
+                                  **dataStoreParams)
+        # dataSource.dataStore = dataLocationStore.newBlockedBinaryMatrix(
+        #   path=filePath, numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
+        #   **dataStoreParams
+        # )
 
       # Set refExpDimRef links
       if refExperiment is not None:
         if not axisCodesRead:
-          expDims = experiment.sortedExpDims()
+          expDims = nmrExperiment.sortedExpDims()
           expDimRefs = [x.findFirstExpDimRef() for x in expDims]
           if None not in expDimRefs:
             isotopeCodes = [x.isotopeCode for x in expDimRefs]
@@ -1598,12 +1834,13 @@ class CcpnNefReader:
         if axisCodesRead:
           # We have ccpn axis codes (either read or reconstructed)
           # - use them to set up refExpDim links
-          for refExpDimRef in refExperiment.sortedRefExpDimRefs():
-            name =self.refExpDimRefCodeMap[refExpDimRef]
-            for expDim in experiment.sortedExpDims():
-              expDimRef = expDim.findFirstExpDimRef(name=name)
-              if expDimRef is not None:
-                expDimRef.refExpDimRef = refExpDimRef
+          for refExpDim in refExperiment.sortedRefExpDims():
+            for refExpDimRef in refExpDim.sortedRefExpDimRefs():
+              name =self.refExpDimRefCodeMap[refExpDimRef]
+              for expDim in nmrExperiment.sortedExpDims():
+                expDimRef = expDim.findFirstExpDimRef(name=name)
+                if expDimRef is not None:
+                  expDimRef.refExpDimRef = refExpDimRef
         else:
           # try setting dimension links with heuristics
           ExperimentBasic.setRefExperiment(nmrExperiment, refExperiment)
@@ -1624,29 +1861,6 @@ class CcpnNefReader:
   #
   importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
-
-  # def adjustAxisCodes(self, spectrum, dimensionData):
-  #
-  #   pass
-  #   #print ('@~@~ CCPN data. Still TODO')
-  #
-  #   # Use data to rename axisCodes
-  #   axisCodes = spectrum.axisCodes
-  #   newCodes = list(axisCodes)
-  #   atomTypes = [commonUtil.splitIntFromChars(x)[1] for x in spectrum.isotopeCodes]
-  #   acquisitionAxisCode = spectrum.acquisitionAxisCode
-  #   if acquisitionAxisCode is not None:
-  #     acquisitionDim = axisCodes.index(acquisitionAxisCode) + 1
-  #     if acquisitionAxisCode == atomTypes[acquisitionDim - 1]:
-  #       # this axisCode needs improvement
-  #       for pair in oneBondPairs:
-  #         # First do acquisition dimension
-  #         if acquisitionDim in pair:
-  #           ll = pair.copy()
-  #           ll.remove(acquisitionDim)
-  #           otherDim = ll[0]
-  #           otherCode = axisCodes[otherDim - 1]
-  #           if otherCode == atomTypes[otherDim - 1]:
 
   def load_nef_peak(self, peakList, loop):
     """Serves to load nef_peak loop"""
@@ -1674,21 +1888,21 @@ class CcpnNefReader:
       parameters = {}
       parameters['volume'] = row.get('volume')
       parameters['height'] = row.get('height')
-      parameters['figureOfMerit'] = row.get('ccpn_figure_of_merit')
+      parameters['figOfMerit'] = row.get('ccpn_figure_of_merit')
       parameters['annotation'] = row.get('ccpn_annotation')
       parameters['details'] = row.get('ccpn_comment')
 
       # get or make peak
       peak = peaks.get(serial)
-      # TODO check if peak parameters are the same for all rows, and do something about it
-      # For now we simply use the first row that appears
+
+      # For now we simply use the first row that appears - V2 cannot handle different rows anyway
       if peak is None:
         # start of a new peak
 
         # finalise previous peak
         if result and assignedResonances:
           # There is a peak in result, and the peak has assignments to set
-          self._assignPeak(peak, assignedResonances)
+          self._assignPeak(result[-1], assignedResonances)
           del assignedResonances[:]
 
         # Make new peak
@@ -1703,15 +1917,6 @@ class CcpnNefReader:
         for ii,peakDim in enumerate(peak.sortedPeakDims()):
           peakDim.value = values[ii]
           peakDim.valueError = errors[ii]
-
-        # make new peak  multipleAttributes
-        # parameters['position'] = row._get('position')[:dimensionCount]
-        parameters['position'] = tuple(row.get(x) for x in multipleAttributes['position'])
-        parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
-        # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
-        peak = peakList.newPeak(**parameters)
-        peaks[serial] = peak
-        result.append(peak)
 
       # Add assignment
       chainCodes = tuple(row.get(x) for x in multipleAttributes['chainCodes'])
@@ -1963,10 +2168,10 @@ class CcpnNefReader:
     if atomMap.get('resonances') is None:
       # Make resonance
       resonanceGroup = residueMap['resonanceGroup']
-      resonance = self.project.currentNmrProject.newResonance(name=atomMap['name'],
-                                                              isotopeCode=isotopeCode,
-                                                              resonanceGroup=resonanceGroup,
-                                                              details=comment)
+      resonance = self.memopsRoot.currentNmrProject.newResonance(name=atomMap['name'],
+                                                                 isotopeCode=isotopeCode,
+                                                                 resonanceGroup=resonanceGroup,
+                                                                 details=comment)
       atomMap['resonances'] = [resonance]
 
       atomSets = atomMap.get('atomSets')
@@ -1977,10 +2182,10 @@ class CcpnNefReader:
         if name[-1] == '%':
           if asm.mappingType == 'ambiguous':
             # This is e.g. Lys HG%, Val CG% or Ley HG% - we need two resonances here
-            resonance2 = self.project.currentNmrProject.newResonance(name=atomMap['name'],
-                                                                    isotopeCode=isotopeCode,
-                                                                    resonanceGroup=resonanceGroup,
-                                                                    details=comment)
+            resonance2 = self.memopsRoot.currentNmrProject.newResonance(name=atomMap['name'],
+                                                                        isotopeCode=isotopeCode,
+                                                                        resonanceGroup=resonanceGroup,
+                                                                        details=comment)
             atomMap['resonances'].append(resonance2)
             AssignmentBasic.assignAtomsToRes(atomSets, resonance2, resonanceSet)
             # AssignmentBasic.assignAtomsToRes(atomSets, resonance2)
@@ -1991,7 +2196,7 @@ class CcpnNefReader:
 
   def fetchResidueMap(self, chainCode, sequenceCode, residueType=None, linkToMap=None):
     """Return _chainMapping entry (if necessary)"""
-    nmrProject = self.project.currentNmrProject
+    nmrProject = self.memopsRoot.currentNmrProject
 
     chainMapping = self._chainMapping.get(chainCode)
     if chainMapping is None:
@@ -2139,40 +2344,6 @@ class CcpnNefReader:
     template = "WARNING in saveFrame%s\n%s"
     self.warnings.append(template % (self.saveFrameName, message))
 
-
-  def fetchDataSet(self, serial=None):
-    """Fetch DataSet with given serial.
-    If input is None, use self.defaultDataSetSerial
-    If that too is None, create a new DataSet and use its serial as the default
-
-    NB when reading, all DataSets with known serials should be instantiated BEFORE calling
-    with input None"""
-
-    if serial is None:
-      serial = self.defaultDataSetSerial
-
-    if serial is None:
-      # default not set - create one
-      dataSet = self.project.newDataSet()
-      serial = dataSet.serial
-      dataSet.title = 'Data_%s' % serial
-      self.defaultDataSetSerial = serial
-      self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
-
-    else:
-      # take or create dataSet matching serial
-      dataSet = self.project.getDataSet(str(serial))
-      if dataSet is None:
-        dataSet = self.project.newDataSet()
-        dataSet.resetSerial(serial)
-        # NB former call was BROKEN!
-        # modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
-        dataSet._finaliseAction('rename')
-        dataSet.title = 'Data_%s' % serial
-
-        self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
-    #
-    return dataSet
 
 def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferData):
 
@@ -2433,19 +2604,22 @@ def addDataStore(dataSource, spectrumPath, **params):
   The values of params are given by the 'tags' tuple, below"""
 
   dirName, fileName = os.path.split(spectrumPath)
-  dataUrl = fetchDataUrl(dirName)
-  tags = ('numPoints', 'blockSizes', 'isBigEndian', 'numberType', 'headerSize', 'nByte',
-          'fileType', 'complexStoredBy')
+  dataUrl = fetchDataUrl(dataSource.root, dirName)
+  tags = ('numPoints', 'blockSizes', 'isBigEndian', 'numberType')
   attributeDict = dict((x, params.get(x)) for x in tags)
-
   blockMatrix = spectrumLib.createBlockedMatrix(dataUrl, spectrumPath, **attributeDict)
+  for tag in ('headerSize', 'nByte', 'fileType', 'complexStoredBy'):
+    val = params.get(tag)
+    if val is not None:
+      setattr(blockMatrix, tag, val)
   dataSource.dataStore = blockMatrix
 
 def fetchDataUrl(memopsRoot, fullPath):
   """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
   and existing dataUrls"""
   from memops.api.Implementation import Url
-  standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+  standardStore = (memopsRoot.findFirstDataLocationStore(name='standard')
+  or memopsRoot.newDataLocationStore(name='standard'))
   fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
   standardTags = ('insideData', 'alongsideData', 'remoteData')
   # Check standard DataUrls first
@@ -2453,9 +2627,11 @@ def fetchDataUrl(memopsRoot, fullPath):
   # Then check other existing DataUrls
   checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
   for dataUrl in checkUrls:
-    directoryPath = os.path.join(dataUrl.url.path, '')
-    if fullPath.startswith(directoryPath):
-      break
+    if dataUrl is not None:
+      print ("%s-%s-%s" % (dataUrl.name, dataUrl.url, dataUrl))
+      directoryPath = os.path.join(dataUrl.url.path, '')
+      if fullPath.startswith(directoryPath):
+        break
   else:
     # No matches found, make a new one
     dirName, path = os.path.split(fullPath)
@@ -2467,6 +2643,4 @@ def fetchDataUrl(memopsRoot, fullPath):
 if __name__ == '__main__':
   path = sys.argv[1]
   memopsRoot = loadNefFile(path, overwriteExisting=True)
-  print ('@~@~1', memopsRoot.activeRepositories)
-  print ('@~@~2', memopsRoot.packageLocator.findFirstRepository().url.path)
-  memopsRoot.saveModified()
+  memopsRoot.saveAll()

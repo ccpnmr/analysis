@@ -39,7 +39,9 @@ from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
+
 # This import initializes relative paths for QT style-sheets.  Do not remove!
+from ccpn.ui.gui.widgets import resources_rc
 
 from ccpn.util import Logging
 

@@ -163,6 +163,8 @@ class PipelineDropArea(DockArea):
     self.setStyleSheet("""QSplitter{background-color: transparent;}
                           QSplitter::handle:vertical {background-color: transparent;height: 1px;}""")
 
+    self.inputData = None
+
   @property
   def currentGuiPipes(self) -> list:
     'return all current Pipes in area'
@@ -324,12 +326,12 @@ class GuiPipe(Dock, DockDrop):
 
     ######  pipeLayout
 
+
     self.pipeFrame = Frame(self, setLayout=False)
     self.pipeLayout = QtGui.QGridLayout()
     self.pipeFrame.setLayout(self.pipeLayout)
     self.layout.addWidget(self.pipeFrame)
 
-    # self.initialiseGui()
 
 
   #

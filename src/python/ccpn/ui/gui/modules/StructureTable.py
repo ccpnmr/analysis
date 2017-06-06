@@ -41,7 +41,6 @@ from ccpn.core.StructureEnsemble import EnsembleData
 from ccpn.ui._implementation.Module import Module
 
 from ccpn.util.Logging import getLogger
-logger = getLogger()
 ALL = '<all>'
 
 class StructureTableModule(CcpnModule):
@@ -67,74 +66,74 @@ class StructureTableModule(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # # add test structure Ensembles
-    # try:
-    #   StructureTableModule.defined
-    # except:
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-    #     , 'CB', 'HB1', 'HB2', 'HB3'
-    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-    #     , 'CE', 'HE1', 'HE2', 'HE3'
-    #     , 'CG', 'HG1', 'HG2', 'HG3'
-    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.comment = ['Test'] * 33
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-    #     , 'CB', 'HB1', 'HB2', 'HB3'
-    #     , 'CE', 'HE1', 'HE2', 'HE3'
-    #     , 'CG', 'HG1', 'HG2', 'HG3'
-    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
-    #
-    #   # make a test dataset in here
-    #
-    #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
-    #
-    #   self.dataItem = self.dataSet.newData('derivedConformers')
-    #   self.dataSet.attachedObject = self.ensemble       # the newest object
-    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
-    #
-    #   StructureTableModule.defined=True
-    #   # should be a DataSet with the corresponding stuff in it
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # finally:
-    #   pass
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # add test structure Ensembles
+    try:
+      StructureTableModule.defined
+    except:
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.comment = ['Test'] * 33
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+      self.data['comment'] = self.comment
+
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+      self.data['comment'] = self.comment
+
+      self.ensemble = self.project.newStructureEnsemble()
+      self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+
+      # make a test dataset in here
+
+      self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+
+      self.dataItem = self.dataSet.newData('derivedConformers')
+      self.dataSet.attachedObject = self.ensemble       # the newest object
+      self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+
+      StructureTableModule.defined=True
+      # should be a DataSet with the corresponding stuff in it
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    finally:
+      pass
 
     # settings
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
@@ -195,9 +194,14 @@ class StructureTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget, table=self.structureTable, grid=(4, 0))
+    self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget
+                                                  , table=self.structureTable
+                                                  , grid=(4, 0)
+                                                  , hideColumns=['altLocationCode', 'element', 'occupancy'])
     self.searchWidget = ObjectTableFilter(parent=self._STwidget, table=self.structureTable, grid=(5, 0))
-    
+
+    self.displayColumnWidget._hideColumn(name='altLocationCode')
+
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
 
@@ -310,7 +314,7 @@ class StructureTable(ObjectTable):
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
                                      , callback=self._selectionPulldownCallback)
-    self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'Average']
+    self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'average']
                                   , selectedInd=1
                                   , callback=self._selectionButtonCallback
                                   , direction='h'
@@ -348,17 +352,20 @@ class StructureTable(ObjectTable):
     Manually select a StructureEnsemble from the pullDown
     """
     if structureEnsemble is None:
-      logger.warning('select: No StructureEnsemble selected')
+      getLogger().warning('select: No StructureEnsemble selected')
       raise ValueError('select: No StructureEnsemble selected')
     else:
       if not isinstance(structureEnsemble, StructureEnsemble):
-        logger.warning('select: Object is not of type StructureEnsemble')
+        getLogger().warning('select: Object is not of type StructureEnsemble')
         raise TypeError('select: Object is not of type StructureEnsemble')
       else:
         for widgetObj in self.stWidget.textList:
           if structureEnsemble.pid == widgetObj:
             self.thisObj = structureEnsemble
             self.thisDataSet = None
+            
+            # find the matching dataset if exists
+            
             self.stWidget.select(self.thisObj.pid)
 
   def displayTableForStructure(self, structureEnsemble):
@@ -377,7 +384,7 @@ class StructureTable(ObjectTable):
     #
     # if self.thisDataSet:
     #   for dt in self.thisDataSet.data:
-    #     if dt.name is 'derivedConformers':
+    #     if dt.name is 'Derived':
     #       try:
     #         self.params = dt.parameters
     #         thisFunc = self.params['backboneSelector']
@@ -386,23 +393,19 @@ class StructureTable(ObjectTable):
     #       except:
     #         pass
 
-    from ccpn.util.StructureData import averageStructure        # ejb - from TJ
-    try:
-      self._updateDataSet(averageStructure(structureEnsemble.data))
-    except:
-      info = showWarning(self.thisObj.pid+' contains no Average', '')
-      logger.warning(self.thisObj.pid+' contains no Average', '')
-      self.stButtons.setIndex(0)
+    # from ccpn.util.StructureData import averageStructure        # ejb - from TJ
+    # try:
+    #   self._updateDataSet(averageStructure(structureEnsemble.data))
+    # except:
+    #   info = showWarning(self.thisObj.pid+' contains no average', '')
+    #   getLogger().warning(self.thisObj.pid+' contains no average', '')
+    #   self.stButtons.setIndex(0)
 
     # self.stWidget.select(structureEnsemble.pid)
 
-    # # ejb - doesn't work, can't store in a DataSet
-    # if self.thisDataSet:
-    #   for dt in self.thisDataSet.data:
-    #     if dt.name is 'derivedConformers':
-    #       # self.params = dt.parameters
-    #       # self._updateDataSet(dt.parameters['Average'])
-    #       self._updateDataSet(dt.attachedObject)
+    # ejb - doesn't work, can't store in a DataSet
+    if self.thisDataSet is not None:
+      self._updateDataSet(self.thisDataSet)
 
   def _getAttachedDataSet(self, thisObj):
     """
@@ -413,20 +416,27 @@ class StructureTable(ObjectTable):
     self.thisDataSet = None
     if self._project.dataSets:
       for dd in self._project.dataSets:
-        if dd.title == thisObj.longPid:
-          for dt in self.thisDataSet.data:
-            if dt.name is 'derivedConformers':
+        if dd.title == thisObj.label:
+          for dt in dd.data:
+            if dt.name is 'Derived':
               Found=True
 
-    if not Found:
-      dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid
-      dt = dd.newData('derivedConformers')
-    self.thisDataSet = dd
+    # if not Found:
+    #   dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid
+    #   dt = dd.newData('Derived')
+    # self.thisDataSet = dd
 
-    if 'Average' not in dt.parameters:
-      from ccpn.util.StructureData import averageStructure
-      # dt.parameters['Average'] = averageStructure(item.data)
-      # dt.setParameter(name='Average', value=averageStructure(item.data))
+    if Found is True:
+      if 'average' not in dt.parameters:
+        self.thisDataSet = None
+      else:
+        self.thisDataSet = dt.parameters['average']
+    else:
+      self.thisDataSet = None
+
+      # from ccpn.util.StructureData import averageStructure
+      # dt.parameters['average'] = averageStructure(item.data)
+      # dt.setParameter(name='average', value=averageStructure(item.data))
       # dt.attachedObject = averageStructure(item.data)
       # ejb - does't work, can't store in a DataSet
 
@@ -440,11 +450,11 @@ class StructureTable(ObjectTable):
       #         self.params = dt.parameters
       #         # thisFunc = self.params['backboneSelector']
       #
-      #         if 'Average' not in self.params:
+      #         if 'average' not in self.params:
       #           from ccpn.util.StructureData import averageStructure
-      #           self.params['Average'] = averageStructure(item.data)
+      #           self.params['average'] = averageStructure(item.data)
       #
-      #         return self.params['Average']
+      #         return self.params['average']
 
     # if item:
     #   thisObj = self._project.getByPid(item)
@@ -458,11 +468,11 @@ class StructureTable(ObjectTable):
     #             self.params = dt.parameters
     #             # thisFunc = self.params['backboneSelector']
     #
-    #             if 'Average' not in self.params():
+    #             if 'average' not in self.params():
     #               from ccpn.util.StructureData import averageStructure
-    #               self.params['Average'] = averageStructure(item.data)
+    #               self.params['average'] = averageStructure(item.data)
     #
-    #             return self.params['Average']
+    #             return self.params['average']
     # else:
     #   return None
 
@@ -505,7 +515,7 @@ class StructureTable(ObjectTable):
     """
     Notifier DoubleClick action on item in table
     """
-    logger.debug('StructureTable>>>', atomRecordTuple, row, column)
+    getLogger().debug('StructureTable>>>', atomRecordTuple, row, column)
 
   def _selectionPulldownCallback(self, item):
     """
@@ -513,23 +523,23 @@ class StructureTable(ObjectTable):
     """
     self.stButtons.setIndex(0)
     self.thisObj = self._project.getByPid(item)
-    logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
+    getLogger().debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
     if self.thisObj is not None:
-      # self._getAttachedDataSet(self.thisObj)        # no DataSets yet
+      self._getAttachedDataSet(self.thisObj)        # check for a matching dataset, DS.title=SE.label
       self.displayTableForStructure(self.thisObj)
     else:
       self.clearTable()
 
   def _selectionButtonCallback(self):
     """
-    Notifier Callback for selecting Structure Ensemble or Average
+    Notifier Callback for selecting Structure Ensemble or average
     """
     item = self.stButtons.get()
-    logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
+    getLogger().debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
     if self.thisObj is not None:
       if item is 'Ensemble':
         self.displayTableForStructure(self.thisObj)
-      elif item is 'Average':
+      elif item is 'average':
         self.displayTableForDataSetStructure(self.thisObj)
     else:
       self.clearTable()
@@ -539,13 +549,13 @@ class StructureTable(ObjectTable):
     Notifier Callback for updating the table
     """
     thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the object
-    logger.debug('>updateCallback>', data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence)
+    getLogger().debug('>updateCallback>', data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence)
     if self.thisObj in thisEnsembleList:
       item = self.stButtons.get()
-      logger.debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
+      getLogger().debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
       if item is 'Ensemble':
         self.displayTableForStructure(self.thisObj)
-      elif item is 'Average':
+      elif item is 'average':
         self.displayTableForDataSetStructure(self.thisObj)
     else:
       self.clearTable()
@@ -690,11 +700,11 @@ class StructureTable(ObjectTable):
     self._clearNotifiers()
 
   # def resizeEvent(self, event):
-  #   logger.info('table.resize '+str(self.resizeCount))
+  #   getLogger().info('table.resize '+str(self.resizeCount))
   #   self.resizeCount+=1
   #   return super(StructureTable, self).resizeEvent(event)
   #
   # def paintEvent(self, event):
-  #   logger.info('table.paint '+str(self.paintCount))
+  #   getLogger().info('table.paint '+str(self.paintCount))
   #   self.paintCount+=1
   #   return super(StructureTable, self).paintEvent(event)

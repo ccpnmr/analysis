@@ -951,7 +951,7 @@ class Project(AbstractWrapperObject):
     ds = self.newDataSet(title=label)
     d = ds.newData(name='Derived')
     # TODO: Rasmus fix me!
-    # d.setParameter('average', averageStructure(ensemble))
+    d.setParameter('average', averageStructure(ensemble))
 
     return [se]
 

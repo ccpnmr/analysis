@@ -1153,29 +1153,37 @@ SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 class ColumnViewSettings(Widget):
   ''' hide show check boxes corresponding to the table columns '''
 
-  def __init__(self, table, parent=None, direction='v', **kw):
+  def __init__(self, table, parent=None, direction='v', hideColumns=None, **kw):
     Widget.__init__(self, parent, setLayout=True, **kw)
     self.direction=direction
     self.table = table
     self.checkBoxes = []
+    self.hideColumns = hideColumns or []
     self.initCheckBoxes()
     self.filterLabel =  Label(self, 'Display Columns', grid=(0,0), vAlign='b')
 
   def initCheckBoxes(self):
     columns = self.table.columns
+
     if columns:
       for i, colum in enumerate(columns):
         tipTex = 'Hide/Show %s column' % colum.heading
         if self.direction=='v':
-          cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack,  checked=True,
+          cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack
+                        , checked=True if colum.heading not in self.hideColumns else False,
                         hAlign='l',tipText= tipTex,)
         else:
-          cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack,  checked=True,
+          cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack
+                        , checked=True if colum.heading not in self.hideColumns else False,
                         hAlign='l',tipText= tipTex,)
 
         cb.setMinimumSize(cb.sizeHint()*1.3)
 
         self.checkBoxes.append(cb)
+        if colum.heading not in self.hideColumns:
+          self._showColumn(colum.heading)
+        else:
+          self._hideColumn(colum.heading)
 
 
   def checkBoxCallBack(self):

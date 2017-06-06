@@ -572,7 +572,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       # blankDisplay.close()
       blankDisplay._closeModule()
 
-  def newBlankDisplay(self, position='top', relativeTo=None):
+  def newBlankDisplay(self, position='right', relativeTo=None):
     "Adds new blank display to module area; returns BlankDisplay instance"
     blankDisplay = BlankDisplay(mainWindow=self)
     #FIXME:ED - still crashes when loading some projects

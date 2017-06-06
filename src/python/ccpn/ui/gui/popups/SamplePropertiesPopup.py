@@ -138,7 +138,8 @@ class SamplePropertiesPopup(CcpnDialog):
                                          selectedInd=1,
                                          callback=None,
                                          direction='h',
-                                         tipTexts=None)
+                                         tipTexts=None,
+                                         setLayout=True)
     if self.sample.amountUnit is not None:
       self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
 

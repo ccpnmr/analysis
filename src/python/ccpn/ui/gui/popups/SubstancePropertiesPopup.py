@@ -130,7 +130,8 @@ class SubstancePropertiesPopup(CcpnDialog):
                                                   selectedInd=1,
                                                   callback=None,
                                                   direction='h',
-                                                  tipTexts=None)
+                                                  tipTexts=None,
+                                                  setLayout=True)
 
   def _setCurrentSubstanceWidgets(self):
     self.currentSubstanceLabel = Label(self, text="Current Substances")
@@ -163,14 +164,11 @@ class SubstancePropertiesPopup(CcpnDialog):
       for referenceSpectra in self.substance.referenceSpectra:
         self.referenceSpectra.setData([referenceSpectra.pid])
 
-
-
   def _chemicalNameWidget(self):
     self.chemicalNameLabel = Label(self, text="Chemical Names")
     self.chemicalName = LineEdit(self)
     if self.substance:
       self.chemicalName.setText(SEP.join(self.substance.synonyms))
-
 
   def _smilesWidget(self):
     self.smilesLabel = Label(self, text="Smiles")
@@ -213,7 +211,6 @@ class SubstancePropertiesPopup(CcpnDialog):
     self.atomCount = LineEdit(self)
     if self.substance:
       self.atomCount.setText(str(self.substance.atomCount))
-
 
   def _bondCountWidget(self):
     self.labelBondCount = Label(self, text="Bond Count")

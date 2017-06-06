@@ -566,12 +566,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Removes blank display from main window modulearea if one is present.
     """
-    if 'Blank Display' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
+    blankList = self.moduleArea.findAll()
+    if 'Blank Display' in blankList[1]:
+      blankDisplay = blankList[1]['Blank Display']
       # blankDisplay.close()
       blankDisplay._closeModule()
 
-  def newBlankDisplay(self, position='right', relativeTo=None):
+  def newBlankDisplay(self, position='top', relativeTo=None):
     "Adds new blank display to module area; returns BlankDisplay instance"
     blankDisplay = BlankDisplay(mainWindow=self)
     #FIXME:ED - still crashes when loading some projects

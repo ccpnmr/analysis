@@ -191,10 +191,11 @@ class Gui(Ui):
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
+    thisBlank = None
     try:
       mDict = self.mainWindow.moduleArea.currentModulesDict
       if 'BlankDisplay' in mDict:
-        pass
+        thisBlank = None
         # blankDisplay = mDict['BlankDisplay']
         # blankDisplay.show()
       else:
@@ -205,7 +206,7 @@ class Gui(Ui):
         # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
 
 
-        blankDisplay = self.mainWindow.newBlankDisplay()
+        thisBlank = self.mainWindow.newBlankDisplay()
         # return blankDisplay # Why a return blankDisplay?
 
          # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
@@ -216,7 +217,7 @@ class Gui(Ui):
 
     finally:
       self.application._endCommandBlock()
-
+      return thisBlank
 
   from ccpn.core.IntegralList import IntegralList
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule

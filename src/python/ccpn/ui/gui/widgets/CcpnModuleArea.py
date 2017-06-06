@@ -151,6 +151,10 @@ class CcpnModuleArea(ModuleArea):
     module.area = self
 #    self.modules[module.getName()] = module
     # explicitly calling the CcpnModule.name() method as GuiDisplay modules have their name masked by
+
+    # ejb - I think there is a logic error here when adding a module
+    #       that leaves the blank display without a parent
+
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
     self.modules[CcpnModule.name(module)] = module
     # self.movePythonConsole()

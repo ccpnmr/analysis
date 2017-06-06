@@ -96,7 +96,6 @@ class BlankDisplay(CcpnModule):
       # self.mainWindow.deleteBlankDisplay()
       self._closeModule()
       getLogger().info('application.deleteBlankDisplay()')
-      return
 
   def _handlePid(self, pid):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"

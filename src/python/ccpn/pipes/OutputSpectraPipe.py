@@ -23,50 +23,25 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 #### GUI IMPORTS
+
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+
+
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
-from scipy import signal
-import numpy as np
-
+from ccpn.framework.lib.Pipe import SpectraPipe
+from ccpn.util.Hdf5 import convertDataToHdf5
 
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
-
-
-def _getShift(ref_x, ref_y, target_y):
-  '''
-
-  :param ref_x: X array of the reference spectra (positions)
-  :param ref_y: Y array of the reference spectra (intensities)
-  :param target_y: Y array of the target spectra (intensities)
-  :return: the shift needed to align the two spectra.
-  To align the target spectrum to its reference: add the shift to the x array.
-  E.g. target_y += shift
-
-  '''
-  return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
-
-
-def _alignSpectra(referenceSpectrum, spectra):
-
-  alignedSpectra = []
-  for sp in spectra:
-    shift = _getShift(ref_x=referenceSpectrum.positions, ref_y=referenceSpectrum.intensities, target_y=sp.intensities)
-    sp._positions = sp.positions
-    sp._positions += shift
-    alignedSpectra.append(sp)
-  return alignedSpectra
-
-
 
 
 
@@ -77,31 +52,19 @@ def _alignSpectra(referenceSpectrum, spectra):
 ########################################################################################################################
 
 
-
-
-class AlignSpectraGuiPipe(GuiPipe):
+class OutputPipelineGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'AlignSpectra'
+  pipeName = 'Output Pipeline'
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(AlignSpectraGuiPipe, self)
+    super(OutputPipelineGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
-    self._updateWidgets()
 
-  def _updateWidgets(self):
-    self._setDataReferenceSpectrum()
-
-
-  def _setDataReferenceSpectrum(self):
-    data = list(self.inputData)
-    if len(data)>0:
-      self.referenceSpectrum.setData(texts=[sp.pid for sp in data], objects=data)
-
-
+    self.saveAsHDF5CheckBox = CheckBox(self.pipeFrame, checked=True, text='Save output spectra as HDF5',  grid=(0,0))
+    self.saveAsHDF5Label = Label(self.pipeFrame, 'Saving  directory path',  grid=(0,1))
+    self.saveAsHDF5LineEdit = LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(0,2))
 
 
 
@@ -110,34 +73,44 @@ class AlignSpectraGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
+class OutputSpectraPipe(SpectraPipe):
+
+  guiPipe = OutputPipelineGuiPipe
+  pipeName = guiPipe.pipeName
 
 
-class AlignSpectra(Pipe):
-
-  guiPipe = AlignSpectraGuiPipe
-  pipeName = AlignSpectraGuiPipe.pipeName
-
-
-
-  def runPipe(self, params):
+  def runPipe(self, spectra):
     '''
     :param data:
-    :return:
+    :return: it copies the input data as dummy spectra. Dummy spectra can be then modified.
     '''
+
 
     if self.project is not None:
 
-      referenceSpectrumPid = params['referenceSpectrum']
-      referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
-      if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
+      hdf5Spectra = []
+      path = ''
+      for spectrum in spectra:
+        fullPath = str(path) + str(spectrum.name) + '.hdf5'
+        convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
 
-        if spectra:
-          _alignSpectra(referenceSpectrum, spectra)
-          print('finished')
+      # newDummySpectra = []
+      # for spectrum in self.inputData:
+      #   if spectrum is not None:
+      #     try:
+      #       dummySpectrum = self.project.createDummySpectrum(axisCodes=spectrum.axisCodes, name=spectrum.name)
+      #       dummySpectrum._positions = spectrum._positions
+      #       dummySpectrum._intensities = spectrum._intensities
+      #       dummySpectrum.pointCounts = spectrum.pointCounts
+      #       newDummySpectra.append(dummySpectrum)
+      #     except Exception as e:
+      #       print('Impossible create Dummy Spectrum for %s.' %spectrum,  e)
 
 
 
-AlignSpectra.register() # Registers the pipe in the pipeline
+      return hdf5Spectra
 
+
+
+OutputSpectraPipe.register()
 

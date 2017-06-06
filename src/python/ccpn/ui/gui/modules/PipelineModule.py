@@ -136,13 +136,9 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
       self.savingDataPath = str(self.generalPreferences.dataPath)
+      self.savingDataPath = str(self.generalPreferences.dataPath)
 
-    # set pipeline variables
-    self.pipes = pipes
-    self.guiPipes = self._getGuiFromPipes(self.pipes)
-    self.currentRunningPipeline = []
-    self.currentGuiPipesNames = []
-    self.pipelineTemplates = templates
+
 
 
     # init the CcpnModule
@@ -156,6 +152,14 @@ class GuiPipeline(CcpnModule, Pipeline):
                                                ('savePath', self.savingDataPath),
                                                ('autoRun', False), ('addPosit', 'bottom'),
                                                ('autoActive', True), ])
+
+    # set pipeline variables
+
+    # self.pipes = pipes
+    self.guiPipes = self._getGuiFromPipes(self.pipes)
+    self.currentRunningPipeline = []
+    self.currentGuiPipesNames = []
+    self.pipelineTemplates = templates
 
     # set the graphics
     self._setIcons()
@@ -303,6 +307,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     preferredGuiPipes = [preferredPipeLabel, ]
     otherGuiPipes = [otherPipeLabel, ]
 
+
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
         if guiPipe.preferredPipe:
@@ -322,7 +327,10 @@ class GuiPipeline(CcpnModule, Pipeline):
     # self.pipePulldown.insertSeparator(countPreferredGuiPipes)
     self.pipePulldown.activated[str].connect(self._selectPipe)
 
-
+  def _updatePipePulldown(self):
+    if len(self.guiPipes) != len(self.pipes):
+      self.guiPipes = self._getGuiFromPipes(self.pipes)
+    self._setDataPipesPulldown()
 
   def eventFilter(self, source, event):
     '''Filter to disable the wheel event in the guiPipes pulldown. Otherwise each scroll would add a guiPipe!'''
@@ -384,6 +392,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _addGuiPipe(self, name, selected):
+    print('$£$£', self.guiPipes, name, selected)
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
         position = self.pipelineSettingsParams['addPosit']
@@ -402,7 +411,8 @@ class GuiPipeline(CcpnModule, Pipeline):
       for guiPipe in guiPipes:
         if guiPipe.isActive:
           guiPipe.pipe.isActive = True
-          guiPipe.pipe._kwargs =  guiPipe.widgetsState
+          guiPipe.pipe._kwargs = guiPipe.widgetsState
+          print('PPP',guiPipe.pipe )
           self.queue.append(guiPipe.pipe)
 
         else:
@@ -791,33 +801,6 @@ class FilterMethods(CcpnDialog):
     self.accept()
 
 
-class PipelineInteractor:
-
-  def __init__(self, application):
-    self.project = None
-    if application is not None:
-      self.project = application.project
-      self.sources = []
-
-  @property
-  def sources(self):
-    return self.__sources
-
-  @sources.setter
-  def sources(self, value):
-    self.__sources = value
-
-  def getData(self):
-    if self.project is not None:
-      return [self.project.getByPid('SP:{}'.format(source))
-              for source in self.sources]
-    else:
-      return []
-
-  def _getDataFrame(self):
-    return pd.DataFrame([x for x in self.getData()])
-
-
 
 
 
@@ -827,17 +810,16 @@ class PipelineInteractor:
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-  from ccpn.pipes.examples.DemoPipe import DemoPipe1, DemoPipe2
-  from ccpn.pipes.DummySpectraPipe import createDummySpectraPipe
+  from ccpn.pipes.examples import pipeExamples
+
+
   app = TestApplication()
 
   win = QtGui.QMainWindow()
-  # from ccpn.AnalysisScreen import guiPipeline as _pm
-
 
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  pipeline = GuiPipeline(mainWindow=None, pipes=[createDummySpectraPipe, DemoPipe2])
+  pipeline = GuiPipeline(mainWindow=None, pipes = pipeExamples)
 
   moduleArea.addModule(pipeline)
 

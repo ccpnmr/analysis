@@ -1,4 +1,3 @@
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -12,26 +11,22 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:37 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 
+from ccpn.pipes.examples.DemoNoGUI import DemoPipe3
+from ccpn.pipes.examples.DemoWithAutoGUI import DemoPipe2
+from ccpn.pipes.examples.DemoWithGUI import DemoPipe1
 
-from ccpn.framework.lib.Pipe import PandasPipe
-import pandas as pd
 
-class EmptyExtension(PandasPipe):
-  pipeName = 'Empty Extension'
-
-  def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
-    print('empty')
-    return dataframe
+pipeExamples = [DemoPipe3, DemoPipe2, DemoPipe1]

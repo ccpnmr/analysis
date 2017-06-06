@@ -51,6 +51,8 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+
 
 from ccpn.framework.lib.Pipe import Pipe
 
@@ -60,6 +62,7 @@ commonWidgets =           {
                             DoubleSpinbox.__name__:  ('value',       'setValue'  ),
                             Label.__name__:          ('get',         'setText'   ),
                             LineEdit.__name__:       ('get',         'setText'   ),
+                            LineEditButtonDialog.__name__: ('get',   'setText'   ),
                             PulldownList.__name__:   ('currentText', 'set'       ),
                             RadioButton.__name__:    ('get',         'set'       ),
                             RadioButtons.__name__:   ('get',         'set'       ),
@@ -324,7 +327,8 @@ class GuiPipe(Dock, DockDrop):
     if widgetsParams is not None:
       self.restoreWidgetsState(**widgetsParams)
 
-    ######  pipeLayout
+      ######  pipeLayout
+
 
 
     self.pipeFrame = Frame(self, setLayout=False)
@@ -333,8 +337,12 @@ class GuiPipe(Dock, DockDrop):
     self.layout.addWidget(self.pipeFrame)
 
 
+    self._kwargs = None
+    print(self._kwargs, 'PIPE')
+    if self.pipe is not None:
+      self.pipe._kwargs = self._kwargs
 
-  #
+
   # def initialiseGui(self):
   #   '''Define this function on the new pipe file'''
   #   pass
@@ -363,6 +371,7 @@ class GuiPipe(Dock, DockDrop):
     for varName, varObj in vars(self).items():
       if varObj.__class__.__name__ in commonWidgets.keys():
         widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+    self._kwargs = widgetsState
     return widgetsState
 
 

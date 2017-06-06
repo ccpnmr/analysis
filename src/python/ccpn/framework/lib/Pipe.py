@@ -40,6 +40,7 @@ class Pipe(ABC):
   pipeName = ''
   isActive = False
 
+
   @classmethod
   def register(cls):
     """
@@ -51,24 +52,25 @@ class Pipe(ABC):
 
   def __init__(self, name = pipeName, application=None, ):
     self._kwargs = {}
-    self.inputData = None
+    self._inputData = None
 
-    self.pipeline = None
-    if self.pipeline is not None:
-      self.inputData = self.pipeline.inputData
+    self._pipeline = None
+    self._project = None
+
+    if self._pipeline is not None:
+      self._inputData = self._pipeline.inputData
 
 
     if application is not None:
-      self.application = application
-      self.current = self.application.current
-      self.preferences = self.application.preferences
-      self.ui = self.application.ui
-      self.project = self.application.project
+      self._application = application
+      self._current = self._application.current
+      self._preferences = self._application.preferences
+      self._ui = self._application.ui
+      self._project = self._application.project
       try:
-        self.mainWindow = self.ui.mainWindow
+        self._mainWindow = self._ui.mainWindow
       except AttributeError:
         pass
-      # Adding the _runMacro function here is very difficult, do we need to?
 
 
     self.customizeSetup()

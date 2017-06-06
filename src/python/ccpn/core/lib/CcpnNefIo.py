@@ -1726,7 +1726,7 @@ class CcpnNefWriter:
     spectra = sorted(spectrumGroup.spectra)
     if spectra:
       for spectrum in spectra:
-        loop.newRow(spectrum.name)
+        loop.newRow((spectrum.name,))
     else:
       del result[loopName]
     #
@@ -1749,7 +1749,7 @@ class CcpnNefWriter:
     chains = sorted(complex.chains)
     if chains:
       for chain in chains:
-        loop.newRow(chain.shortName)
+        loop.newRow((chain.shortName,))
     else:
       del result[loopName]
     #
@@ -1852,7 +1852,7 @@ class CcpnNefWriter:
       loopName = 'ccpn_internal_data'
       loop = result[loopName]
       for key, val in sorted(data.items()):
-        row = loop.newRow(key, jsonIo.dumps(val))
+        row = loop.newRow((key, jsonIo.dumps(val)))
     else:
       result = None
     #
@@ -3855,6 +3855,8 @@ def _exportToNef(path:str, skipPrefixes:Sequence[str]=()):
 
   if path.endswith('.ccpn'):
     outPath = path[:-4] + 'nef'
+  elif path.endswith('.ccpn/'):
+    outPath = path[:-5] + 'nef'
   else:
     outPath = path + '.nef'
 

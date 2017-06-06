@@ -28,6 +28,7 @@ import collections
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpn.util import Undo
 from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
@@ -77,13 +78,9 @@ class StructureEnsemble(AbstractWrapperObject):
     return self._project
 
   @property
-  def label(self) -> str:
-    """title of Model -  a line of free-form text."""
+  def name(self) -> str:
+    """Name of StructureEnsemble, part of identifier"""
     return self._wrappedData.name
-
-  @label.setter
-  def label(self, value):
-    self._wrappedData.name = value
 
   @property
   def data(self) -> EnsembleData:
@@ -139,6 +136,26 @@ class StructureEnsemble(AbstractWrapperObject):
         if modelNumber not in serial2Model:
           self.newModel(serial=modelNumber)
 
+  # Implementation functions
+  def rename(self, value: str):
+    """Rename StructureEnsemble, changing its name and Pid.
+
+    NB, the serial remains immutable."""
+
+    if not isinstance(value, str):
+      raise TypeError("StructureEnsemble name must be a string")  # ejb catch non-string
+    if not value:
+      raise ValueError("StructureEnsemble name must be set")  # ejb catch empty string
+    if Pid.altCharacter in value:
+      raise ValueError("Character %s not allowed in ccpn.StructureEnsemble.name" % Pid.altCharacter)
+    #
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    self._startCommandEchoBlock('rename', value)
+    try:
+      self._wrappedData.name = value
+    finally:
+      self._endCommandEchoBlock()
 
   # Implementation functions
   @classmethod
@@ -146,11 +163,11 @@ class StructureEnsemble(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
-def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:EnsembleData=None,
+def _newStructureEnsemble(self:Project, serial:int=None, name:str=None, data:EnsembleData=None,
                           comment:str=None) -> StructureEnsemble:
   """Create new StructureEnsemble"""
 
-  defaults = collections.OrderedDict((('serial', None), ('label', None), ('comment', None)))
+  defaults = collections.OrderedDict((('serial', None), ('name', None), ('comment', None)))
   
   nmrProject = self._wrappedData
   self._startCommandEchoBlock('newStructureEnsemble', values=locals(), defaults=defaults,
@@ -162,9 +179,10 @@ def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:En
     if serial is None:
       ll = nmrProject.root.structureEnsembles
       serial = max(x.ensembleId for x in ll) + 1 if ll else 1
-    newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(molSystem=nmrProject.molSystem,
-                                                                   ensembleId=serial,
-                                                                   details=comment)
+    params = {'molSystem':nmrProject.molSystem, 'ensembleId':serial, 'details':comment}
+    if name:
+      params['name'] = name
+    newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(**params)
     result = self._data2Obj[newApiStructureEnsemble]
     if data is None:
       result.data = EnsembleData()

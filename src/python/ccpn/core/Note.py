@@ -120,15 +120,10 @@ class Note(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, value:str):
-    """Rename Note, changing its name and Pid."""
+    """Rename Note, changing its name and Pid.
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # if not value:
-    #   raise ValueError("Note name must be set")
-    #
-    # elif Pid.altCharacter in value:
-    #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
-    #
+    NB, the serial remains immutable."""
+
     if not isinstance(value, str):
       raise TypeError("Note name must be a string")   # ejb catch non-string
     if not value:
@@ -140,33 +135,10 @@ class Note(AbstractWrapperObject):
 
     self._startCommandEchoBlock('rename', value)
     try:
-      self._wrappedData.name = value        # put this last as it calls the notifier
+      self._wrappedData.name = value
     finally:
       self._endCommandEchoBlock()
 
-  # def change(self, name:str, text:str):
-  #   """
-  #   Rename Note, changing its name and Pid.
-  #   updates all fields as a single Notifier event
-  #   """
-  #   if not isinstance(name, str):
-  #     raise TypeError("Note name must be a string")   # ejb catch non-string
-  #   elif not name:
-  #     raise ValueError("Note name must be set")       # ejb catch empty string
-  #   elif Pid.altCharacter in name:
-  #     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
-  #
-  #   if text is not None:
-  #     if not isinstance(text, str):
-  #       raise TypeError("Note name text must be a string")      # ejb catch non-string
-  #
-  #   else:
-  #     self._startCommandEchoBlock('update', name, text)
-  #     try:
-  #       self._wrappedData.name = name
-  #       self._wrappedData.text = text
-  #     finally:
-  #       self._endCommandEchoBlock()
 
   # Implementation functions
   @classmethod
@@ -180,10 +152,6 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
 
   defaults = collections.OrderedDict((('name', None), ('text', None)))
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-  # if name and Pid.altCharacter in name:
-  #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
-  #
   if not isinstance(name, str):
     raise TypeError("Note name must be a string")  # ejb catch non-string
   if not name:

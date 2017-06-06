@@ -941,12 +941,12 @@ class Project(AbstractWrapperObject):
 
     from ccpn.util.StructureData import averageStructure
     if subType == 'PDB':
-      label, ensemble = self._loadPdbStructure(path)
+      name, ensemble = self._loadPdbStructure(path)
     else:
       raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
     se = self.newStructureEnsemble()
     se.data = ensemble
-    se.label = label
+    se.name = name
 
     ds = self.newDataSet(title=label)
     d = ds.newData(name='Derived')

@@ -159,7 +159,7 @@ class StructureEnsembleTesting_Properties(WrapperTesting):
     Read the attribute, if it not populated then an error is raised.
     If no error, then test the setter by setting and then getting to check consistent.
     """
-    checkGetSetAttr(self, self.project.structureEnsembles[0], 'label', 'ValidName')
+    checkGetSetAttr(self, self.project.structureEnsembles[0], 'name', 'ValidName')
 
   def test_properties_structuresEnsemble_Comment(self):
     """

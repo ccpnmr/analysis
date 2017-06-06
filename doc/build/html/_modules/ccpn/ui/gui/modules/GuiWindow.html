@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -83,63 +82,25 @@
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
 <span class="kn">import</span> <span class="nn">typing</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">PeakLib</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">AssignmentLib</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">propagateAssignments</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.SpectrumDisplay</span> <span class="kn">import</span> <span class="n">navigateToPeakPosition</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiBlankDisplay</span> <span class="kn">import</span> <span class="n">GuiBlankDisplay</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui</span> <span class="kn">import</span> <span class="n">guiSettings</span>
 
-<div class="viewcode-block" id="GuiWindow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow">[docs]</a><span class="k">class</span> <span class="nc">GuiWindow</span><span class="p">(</span><span class="n">DropBase</span><span class="p">):</span>
+
+<span class="c1">#TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu</span>
+<span class="c1"># For readability there should be a class</span>
+<span class="c1"># _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.</span>
+<span class="c1"># The latter should all be private methods!</span>
+
+<div class="viewcode-block" id="GuiWindow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow">[docs]</a><span class="k">class</span> <span class="nc">GuiWindow</span><span class="p">():</span>
   
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    
-    <span class="n">DropBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_appBase</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">()</span>
-    <span class="c1"># self.moduleArea = DockArea()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">guiWindow</span> <span class="o">=</span> <span class="bp">self</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12000</span><span class="p">,</span> <span class="mi">8000</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-      <span class="n">blankDisplay</span> <span class="o">=</span> <span class="n">GuiBlankDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">blankDisplay</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-
-            
-<div class="viewcode-block" id="GuiWindow.deleteBlankDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.deleteBlankDisplay">[docs]</a>  <span class="k">def</span> <span class="nf">deleteBlankDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Removes blank display from main window modulearea if one is present.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="s1">&#39;Blank Display&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
-      <span class="n">blankDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Blank Display&#39;</span><span class="p">]</span>
-      <span class="n">blankDisplay</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-    <span class="c1"># if self.blankDisplay:</span>
-    <span class="c1">#   self.blankDisplay.setParent(None)</span>
-    <span class="c1">#   self.blankDisplay = None</span>
-    <span class="c1">#</span>
-<div class="viewcode-block" id="GuiWindow.loadData"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.loadData">[docs]</a>  <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens a file dialog box and loads data from selected file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load Data&#39;</span>
-    <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
-      <span class="n">paths</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="c1"># NBNB TBD I assume here that path is either a string or a list lf string paths.</span>
-    <span class="c1"># NBNB FIXME if incorrect</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
-      <span class="k">return</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
-      <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">processDropData</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;urls&#39;</span><span class="p">)</span></div>
-
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
 
   <span class="k">def</span> <span class="nf">_setShortcuts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -156,7 +117,8 @@
     <span class="c1"># QtGui.QShortcut(QtGui.QKeySequence(&quot;f, n&quot;), self, partial(navigateToNmrResidue, self._parent.project), context=context)</span>
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;f, p&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">navigateToPeakPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">project</span><span class="p">),</span>
                     <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;c, a&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">propagateAssignments</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="p">),</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;c, a&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">AssignmentLib</span><span class="o">.</span><span class="n">propagateAssignments</span><span class="p">,</span>
+                                                              <span class="n">current</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="p">),</span>
                     <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;c, z&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clearCurrentPeaks</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;t, u&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceScaleUp</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
@@ -191,7 +153,7 @@
     <span class="c1"># NBNB Moved here from Current</span>
     <span class="c1"># NBNB TODO: more general deletion</span>
 
-    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
     <span class="n">peaks</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
     <span class="k">if</span> <span class="n">peaks</span><span class="p">:</span>
       <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
@@ -199,19 +161,10 @@
       <span class="n">msg</span> <span class="o">=</span><span class="s1">&#39;Delete </span><span class="si">%s</span><span class="s1">selected peak</span><span class="si">%s</span><span class="s1">?&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="n">current</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">deleteObjects</span><span class="p">(</span><span class="o">*</span><span class="n">peaks</span><span class="p">)</span></div>
-        <span class="c1"># no longer needed - echo done from function</span>
-        <span class="c1"># for peak in peaks[:]:</span>
-        <span class="c1">#   if current.project._appBase.ui.mainWindow is not None:</span>
-        <span class="c1">#     mainWindow = current.project._appBase.ui.mainWindow</span>
-        <span class="c1">#   else:</span>
-        <span class="c1">#     mainWindow = current.project._appBase._mainWindow</span>
-        <span class="c1">#   mainWindow.pythonConsole.writeConsoleCommand(&#39;peak.delete()&#39;, peak=peak)</span>
-        <span class="c1">#   peak.delete()</span>
 
-
-
+  <span class="c1">#FIXME:WAYNE: I don&#39;t think this can be correct</span>
 <div class="viewcode-block" id="GuiWindow.getCurrentPositionAndStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.getCurrentPositionAndStrip">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentPositionAndStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
     <span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">parentObject</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
     <span class="n">cursorPosition</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span>
                       <span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
@@ -221,7 +174,6 @@
     <span class="c1"># current.position = tuple(position)</span>
     <span class="n">current</span><span class="o">.</span><span class="n">cursorPosition</span> <span class="o">=</span> <span class="n">cursorPosition</span>
     <span class="k">return</span> <span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">current</span><span class="o">.</span><span class="n">cursorPosition</span></div>
-
 
   <span class="k">def</span> <span class="nf">_getPeaksParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
@@ -237,19 +189,19 @@
       <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span> <span class="o">=</span> <span class="n">lineWidths</span>
 
 <div class="viewcode-block" id="GuiWindow.refitCurrentPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.refitCurrentPeaks">[docs]</a>  <span class="k">def</span> <span class="nf">refitCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">peaks</span><span class="p">:</span>
       <span class="k">return</span>
 
     <span class="n">project</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">project</span>
     <span class="n">undo</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
 
-    <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">newUndoPoint</span><span class="p">()</span>
     <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
 
     <span class="n">currentParams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeaksParams</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">PeakLib</span><span class="o">.</span><span class="n">refitPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
+      <span class="n">AssignmentLib</span><span class="o">.</span><span class="n">refitPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPeaksParams</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setPeaksParams</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">[</span><span class="n">peaks</span><span class="p">,</span> <span class="n">currentParams</span><span class="p">],</span>
@@ -304,14 +256,14 @@
       <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">()</span></div>
       
 <div class="viewcode-block" id="GuiWindow.newPhasingTrace"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.newPhasingTrace">[docs]</a>  <span class="k">def</span> <span class="nf">newPhasingTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
     <span class="k">if</span> <span class="n">strip</span> <span class="ow">and</span> <span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">):</span>
       <span class="n">strip</span><span class="o">.</span><span class="n">_newPhasingTrace</span><span class="p">()</span></div>
 
       
 <div class="viewcode-block" id="GuiWindow.setPhasingPivot"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.setPhasingPivot">[docs]</a>  <span class="k">def</span> <span class="nf">setPhasingPivot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
     <span class="k">if</span> <span class="n">strip</span> <span class="ow">and</span> <span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">):</span>
       <span class="n">strip</span><span class="o">.</span><span class="n">_setPhasingPivot</span><span class="p">()</span></div>
     
@@ -319,7 +271,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes all phasing traces from all strips.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
     <span class="k">if</span> <span class="n">strip</span> <span class="ow">and</span> <span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">window</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">):</span>
       <span class="n">strip</span><span class="o">.</span><span class="n">removePhasingTraces</span><span class="p">()</span></div>
 
@@ -328,8 +280,8 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets current.peaks to an empty list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># self._appBase.current.peaks = []</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">clearPeaks</span><span class="p">()</span>
+    <span class="c1"># self.application.current.peaks = []</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">clearPeaks</span><span class="p">()</span>
 
 <div class="viewcode-block" id="GuiWindow.toggleCrossHairAll"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleCrossHairAll">[docs]</a>  <span class="k">def</span> <span class="nf">toggleCrossHairAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -350,7 +302,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a mark at the current cursor position in the current strip.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
     <span class="k">if</span> <span class="n">strip</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">:</span>
       <span class="n">strip</span><span class="o">.</span><span class="n">_createMarkAtCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">)</span></div>
     
@@ -359,13 +311,33 @@
 <span class="sd">    Clears all marks in all windows for the current task.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">marks</span><span class="p">[:]:</span>
-      <span class="n">mark</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">atomLabel</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">xAxisAtomLabels</span><span class="p">:</span>
-          <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">atomLabel</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">atomLabel</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">yAxisAtomLabels</span><span class="p">:</span>
-          <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">atomLabel</span><span class="p">)</span></div>
+      <span class="n">mark</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GuiWindow.markPositions"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.markPositions">[docs]</a>  <span class="k">def</span> <span class="nf">markPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">chemicalShifts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create marks based on the axisCodes and adds annotations where appropriate.</span>
+
+<span class="sd">    :param axisCodes: The axisCodes making a mark for</span>
+<span class="sd">    :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;markPositions&#39;</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">chemicalShifts</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+
+      <span class="n">colourDict</span> <span class="o">=</span> <span class="n">guiSettings</span><span class="o">.</span><span class="n">MARK_LINE_COLOUR_DICT</span>  <span class="c1"># maps atomName --&gt; colour</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">chemicalShift</span> <span class="ow">in</span> <span class="n">chemicalShifts</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+          <span class="n">atomName</span> <span class="o">=</span> <span class="n">chemicalShift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span>
+          <span class="c1"># TODO: the below fails, for example, if nmrAtom.name = &#39;Hn&#39;, can that happen?</span>
+          <span class="n">colour</span> <span class="o">=</span> <span class="n">colourDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomName</span><span class="p">[:</span><span class="nb">min</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">atomName</span><span class="p">))])</span>
+          <span class="k">if</span> <span class="n">colour</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="n">atomName</span><span class="p">])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">])</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="GuiWindow.toggleGridAll"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleGridAll">[docs]</a>  <span class="k">def</span> <span class="nf">toggleGridAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -379,15 +351,7 @@
 <span class="sd">    toggle grid for the spectrum displays in this window.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
-      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">toggleGrid</span><span class="p">()</span></div>
-    
-  <span class="k">def</span> <span class="nf">_setCrossHairPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisPositionDict</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    # CCPN INTERNAL - called in mouseMoved method of GuiStrip</span>
-<span class="sd">    Sets crosshair position in all spectrum displays using positions specified in the axisPositionDict.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
-      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_setCrossHairPosition</span><span class="p">(</span><span class="n">axisPositionDict</span><span class="p">)</span></div>
+      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">toggleGrid</span><span class="p">()</span></div></div>
 
 </pre></div>
 
@@ -420,8 +384,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

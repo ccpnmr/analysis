@@ -67,14 +67,19 @@
                            <span class="p">])</span>
 
 <div class="viewcode-block" id="AlignSpectra"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.AlignSpectra.AlignSpectra">[docs]</a><span class="k">class</span> <span class="nc">AlignSpectra</span><span class="p">(</span><span class="n">PipelineBox</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+  <span class="n">preferredMethod</span> <span class="o">=</span> <span class="bp">True</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">AlignSpectra</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     <span class="n">PipelineBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="c1">#   self.pipelineModule = parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgets</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
@@ -85,10 +90,26 @@
     <span class="k">return</span> <span class="s1">&#39;Align Spectra&#39;</span></div>
 
 <div class="viewcode-block" id="AlignSpectra.applicationsSpecific"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.AlignSpectra.AlignSpectra.applicationsSpecific">[docs]</a>  <span class="k">def</span> <span class="nf">applicationsSpecific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;AnalysisMetabolomics&#39;</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;AnalysisScreen&#39;</span><span class="p">]</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_inputData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_inputData</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="AlignSpectra.runMethod"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.AlignSpectra.AlignSpectra.runMethod">[docs]</a>  <span class="k">def</span> <span class="nf">runMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running &#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">())</span></div>
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.spectralProcessing.align</span> <span class="kn">import</span> <span class="n">alignment</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">referenceSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumPulldown</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span>
+      <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputData</span> <span class="k">if</span> <span class="n">spectrum</span> <span class="o">!=</span> <span class="n">referenceSpectrum</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">referenceSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
+          <span class="n">alignment</span><span class="o">.</span><span class="n">_alignSpectra</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running &#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">())</span></div>
 
   <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
@@ -97,9 +118,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_createWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Reference Spectrum&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spectrumPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputData</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputData</span><span class="p">],</span><span class="n">objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_inputData</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumPulldown</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -111,7 +133,7 @@
                           <span class="p">(</span><span class="s1">&#39;spectrumPulldown&#39;</span><span class="p">,</span> <span class="n">spectrumPulldown</span><span class="p">),</span>
                           <span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-    <span class="k">return</span> <span class="n">params</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span></div>
 
 
   <span class="k">def</span> <span class="nf">_setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

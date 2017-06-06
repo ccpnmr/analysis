@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -79,24 +78,24 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">DataSource</span> <span class="k">as</span> <span class="n">ApiDataSource</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiSpectrumDisplay</span> <span class="kn">import</span> <span class="n">GuiSpectrumDisplay</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">DataSource</span> <span class="k">as</span> <span class="n">ApiDataSource</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">SpectrumView</span> <span class="k">as</span> <span class="n">ApiSpectrumView</span>
-
 
 
 <div class="viewcode-block" id="GuiStripDisplay1d"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d">[docs]</a><span class="k">class</span> <span class="nc">GuiStripDisplay1d</span><span class="p">(</span><span class="n">GuiSpectrumDisplay</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="c1"># if not apiSpectrumDisplay1d.strips:</span>
     <span class="c1">#   apiSpectrumDisplay1d.newStrip1d()</span>
 
-    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">useScrollArea</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fillToolBar</span><span class="p">()</span>
     <span class="c1"># self.addSpinSystemSideLabel()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
@@ -114,7 +113,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># NB should not be imported at top of file to avoid potential cyclic imports</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.spectrumItems</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
 
     <span class="n">viewBox</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span>
     <span class="n">activePeakItemDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePeakItemDict</span>
@@ -148,14 +147,14 @@
 <span class="sd">    Adds specific icons for 1d spectra to the spectrum utility toolbar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">spectrumUtilToolBar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span>
-    <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>
+    <span class="c1">#spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor</span>
 
-    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">_fillToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
+    <span class="c1"># GWV: removed: GuiSpectrumDisplay._fillToolBar(self)</span>
+    <span class="c1">#TODO: See Nd case on how to do this better</span>
 
     <span class="c1"># Disable add and remove strips, as they&#39;re broken</span>
-    <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])</span>
+    <span class="c1">###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])</span>
     <span class="c1"># spectrumUtilToolBar.actions()[0].setDisabled(True)</span>
 
     <span class="c1"># Why does asking for the icon size fix it?  I don&#39;t know, but it does!</span>
@@ -245,8 +244,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

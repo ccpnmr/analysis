@@ -76,11 +76,31 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="n">POSINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Infinity&#39;</span><span class="p">)</span>
 <span class="n">NEGINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-Infinity&#39;</span><span class="p">)</span>
+
+<span class="c1"># Timestamp formats</span>
+<span class="n">stdTimeFormat</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> </span><span class="si">%%</span><span class="s2">H:M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span>
+<span class="n">isoTimeFormat</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T</span><span class="si">%%</span><span class="s2">H:M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span>
+
+<span class="c1"># CCPNMR data-transfer json mimetype</span>
+<span class="n">ccpnmrJsonData</span> <span class="o">=</span> <span class="s1">&#39;ccpnmr-json&#39;</span>
+
+<span class="c1"># sequenceCode parsing expression</span>
+<span class="c1"># A sequenceCOde is combined (without whitespace) of:</span>
+<span class="c1">#   an optional integer</span>
+<span class="c1">#   an optional text field, as short as possible</span>
+<span class="c1">#   an optional field of the form +ii of -ii, where ii is an integer</span>
+<span class="c1">#</span>
+<span class="c1"># The expression below has one error:</span>
+<span class="c1"># a string of the form &#39;+12&#39; is parsed as (None, &#39;&#39;, &#39;+12&#39;}</span>
+<span class="c1"># whereas it should be interpreted as (None, &#39;+12&#39;, None), but that cannot be helped</span>
+<span class="n">sequenceCodePattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(\-?\d+)?(.*?)(\+\d+|\-\d+)?$&#39;</span><span class="p">)</span>
 
 <span class="c1"># Units allowed for amounts (e.g. Sample)</span>
 <span class="n">amountUnits</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;mole&#39;</span><span class="p">)</span>
@@ -113,6 +133,14 @@
   <span class="s1">&#39;t2&#39;</span><span class="p">:</span><span class="s1">&#39;delay&#39;</span><span class="p">,</span>
   <span class="s1">&#39;t1rho&#39;</span><span class="p">:</span><span class="s1">&#39;delay&#39;</span><span class="p">,</span>
   <span class="s1">&#39;t1zz&#39;</span><span class="p">:</span><span class="s1">&#39;delay&#39;</span>
+<span class="p">}</span>
+
+<span class="c1"># Isotope-dependent assignment tolerances (in ppm)</span>
+<span class="n">defaultAssignmentTolerance</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="n">isotope2Tolerance</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;1H&#39;</span><span class="p">:</span><span class="mf">0.02</span><span class="p">,</span>
+  <span class="s1">&#39;13C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span>
+  <span class="s1">&#39;15N&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant</span>

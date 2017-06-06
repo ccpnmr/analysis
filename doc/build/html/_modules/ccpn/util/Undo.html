@@ -121,7 +121,7 @@
   <span class="sd">&quot;&quot;&quot;Does nothing - for special undo situations where only one direction must act&quot;&quot;&quot;</span>
   <span class="k">return</span></div>
 
-<div class="viewcode-block" id="resetUndo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.resetUndo">[docs]</a><span class="k">def</span> <span class="nf">resetUndo</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">maxOperations</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+<div class="viewcode-block" id="resetUndo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.resetUndo">[docs]</a><span class="k">def</span> <span class="nf">resetUndo</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span> <span class="n">maxOperations</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
               <span class="n">debug</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Set or reset undo stack, using passed-in parameters.</span>
 <span class="sd">  NB setting either parameter to 0 removes the undo stack.&quot;&quot;&quot;</span>
@@ -144,7 +144,7 @@
 <span class="sd">     To create a waypoint use newWaypoint().</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">maxOperations</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span> <span class="n">maxOperations</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create Undo object with maximum stack length maxUndoCount&quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">maxWaypoints</span> <span class="o">=</span> <span class="n">maxWaypoints</span>
@@ -152,9 +152,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># points to next free slot (or first slot to redo)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># array of last item in each waypoint</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># Block/unblock switch - internal use only</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Blocking level - modify with increaseBlocking/decreaseBlocking only</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Blocking level - modify with increase/decreaseBlocking only</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only</span>
     <span class="k">if</span> <span class="n">maxWaypoints</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>                      <span class="c1"># DO NOT CHANGE THIS ONE</span>
     <span class="n">deque</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="c1"># Reset to True to unblank errors during undo/redo</span>
@@ -166,7 +167,7 @@
 <span class="sd">    Allows multiple external functions to set blocking without trampling each other</span>
 
 <span class="sd">    Modify with increaseBlocking/decreaseBlocking only&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="Undo.increaseBlocking"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.increaseBlocking">[docs]</a>  <span class="k">def</span> <span class="nf">increaseBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Set one more level of blocking&quot;&quot;&quot;</span>
@@ -176,6 +177,23 @@
     <span class="sd">&quot;&quot;&quot;Reduce level of blocking - when level reaches zero, undo is unblocked&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">-=</span> <span class="mi">1</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">waypointBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Undo blocking. If true (non-zero) undo setting is blocked.</span>
+<span class="sd">    Allows multiple external functions to set blocking without trampling each other</span>
+
+<span class="sd">    Modify with increaseBlocking/decreaseBlocking only&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Undo.increaseWaypointBlocking"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.increaseWaypointBlocking">[docs]</a>  <span class="k">def</span> <span class="nf">increaseWaypointBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set one more level of blocking&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Undo.decreaseWaypointBlocking"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.decreaseWaypointBlocking">[docs]</a>  <span class="k">def</span> <span class="nf">decreaseWaypointBlocking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reduce level of blocking - when level reaches zero, undo is unblocked&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 
 
@@ -187,6 +205,9 @@
     <span class="n">waypoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_waypointBlockingLevel</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span>
 
     <span class="k">elif</span> <span class="n">waypoints</span> <span class="ow">and</span> <span class="n">waypoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
@@ -302,10 +323,11 @@
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxWaypoints</span><span class="p">:</span>
       <span class="n">undoTo</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
       <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
           <span class="n">undoTo</span> <span class="o">=</span> <span class="n">val</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="k">break</span>
+
     <span class="k">else</span><span class="p">:</span>
       <span class="n">undoTo</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -360,7 +382,7 @@
         <span class="c1"># undoMethod, undoData, redoMethod, redoData = self[n]</span>
         <span class="c1"># if redoData is None:</span>
         <span class="c1">#   redoMethod()</span>
-        <span class="c1"># else:</span>
+        <span class="c1"># else:, axis=1, inplace=True</span>
         <span class="c1">#   redoMethod(redoData)</span>
         <span class="n">undoCall</span><span class="p">,</span> <span class="n">redoCall</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
         <span class="c1"># if self._debug:</span>

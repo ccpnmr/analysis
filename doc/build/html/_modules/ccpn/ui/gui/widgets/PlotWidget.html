@@ -72,7 +72,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -81,41 +81,107 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtOpenGL</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtOpenGL</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget</span> <span class="kn">import</span> <span class="n">SpectrumGroupsWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui</span> <span class="kn">import</span> <span class="n">ViewBox</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">import</span> <span class="n">ViewBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">import</span> <span class="n">CrossHair</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnGridItem</span> <span class="kn">import</span> <span class="n">CcpnGridItem</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">rightMouse</span>
 
-<div class="viewcode-block" id="PlotWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget">[docs]</a><span class="k">class</span> <span class="nc">PlotWidget</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">Colour</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">appBase</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-  <span class="c1"># def __init__(self, parent=None, appBase=None, dropCallback=None, useOpenGL=False, **kw):</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">Ruler</span> <span class="k">as</span> <span class="n">ApiRuler</span>
 
-    <span class="c1">#pg.PlotWidget.__init__(self, parent=parent, viewBox=ViewBox.ViewBox(appBase=appBase, parent=parent), axes=None, enableMenu=True)</span>
-    <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">viewBox</span><span class="o">=</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">(</span><span class="n">current</span><span class="o">=</span><span class="n">appBase</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">enableMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    <span class="n">DropBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appBase</span><span class="p">)</span>
-    <span class="c1"># DropBase.__init__(self, appBase, dropCallback)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="c1">#TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like</span>
+<span class="c1"># as it is only there and is just a small wrapper arount a pyqtgraph class</span>
+<span class="c1"># goes together with AxisTextItem (probably can be reduced to a function and included here.</span>
+<span class="c1">#TODO:WAYNE: should this inherit from Base??</span>
+<div class="viewcode-block" id="PlotWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget">[docs]</a><span class="k">class</span> <span class="nc">PlotWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showDoubleCrosshair</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="c1"># Be sure to use explicit arguments to ViewBox as the call order is different in the __init__</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span> <span class="o">=</span> <span class="n">ViewBox</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
+    <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">strip</span><span class="p">,</span>
+                                 <span class="n">viewBox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="p">,</span>
+                                 <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">enableMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">strip</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptHoverEvents</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setInteractive</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="n">enableMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enableViewBoxMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># ruler --&gt; line for that ruler</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rulerLabelDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># ruler --&gt; label for that ruler</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">xAxisAtomLabels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yAxisAtomLabels</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span> <span class="o">=</span> <span class="bp">None</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">hideButtons</span><span class="p">()</span>
-
-
 
     <span class="k">if</span> <span class="n">useOpenGL</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setViewport</span><span class="p">(</span><span class="n">QtOpenGL</span><span class="o">.</span><span class="n">QGLWidget</span><span class="p">())</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setViewportUpdateMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">FullViewportUpdate</span><span class="p">)</span>
 
+    <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_mouseMovedSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mousePositionChanged</span><span class="p">)</span>
+
+    <span class="c1">#TODO:GEERTEN: Fix with proper stylesheet</span>
+    <span class="c1"># Also used in AxisTextItem</span>
+    <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span> <span class="o">=</span> <span class="s1">&#39;#3333ff&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span> <span class="o">=</span> <span class="s1">&#39;#00ff00&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background</span><span class="p">)</span>
+    <span class="c1">#self.setForeground(self.foreground) # does not seem to have this (or typo?)</span>
+
+    <span class="c1"># axes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;top&#39;</span><span class="p">):</span>
+      <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
+      <span class="n">axisItem</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
+      <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
+      <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+
+    <span class="c1"># add grid</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">CcpnGridItem</span><span class="p">(</span><span class="n">gridColour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="c1"># Add two crosshairs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair1</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="n">showDoubleCrosshair</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlotWidget.highlightAxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes">[docs]</a>  <span class="k">def</span> <span class="nf">highlightAxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="s2">&quot;Highlight the axes on/of&quot;</span>
+    <span class="k">if</span> <span class="n">state</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
+        <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
+        <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
+        <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
+        <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotWidget.toggleGrid"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.toggleGrid">[docs]</a>  <span class="k">def</span> <span class="nf">toggleGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="s2">&quot;Toggle grid state&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span></div>
 
   <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
@@ -126,77 +192,156 @@
 <span class="sd">    Adds specified graphics object to the Graphics Scene of the PlotWidget.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
-    <span class="c1"># # self.plotItem.axes[&#39;top&#39;][&#39;item&#39;].hide()</span>
-    <span class="c1"># self.plotItem.axes[&#39;bottom&#39;][&#39;item&#39;].show()</span>
-    <span class="c1"># self.plotItem.axes[&#39;right&#39;][&#39;item&#39;].show()</span>
 
-<div class="viewcode-block" id="PlotWidget.processSpectra"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectra">[docs]</a>  <span class="k">def</span> <span class="nf">processSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pids</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Display spectra defined by list of Pid strings&quot;&quot;&quot;</span>
-    <span class="n">guiSpectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span>
-    <span class="n">displayPid</span> <span class="o">=</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">pid</span>
-    <span class="k">if</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">isGrouped</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;single spectra cannot be dropped onto grouped displays. Open another Blank Display (N,D)&#39;</span><span class="p">)</span>
+  <span class="c1"># copied from GuiStripNd!</span>
+  <span class="k">def</span> <span class="nf">_mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implemented mouse event to enable smooth panning.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">rightMouse</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+      <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_crosshairCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCode</span><span class="p">):</span>
+    <span class="c1"># determines what axisCodes are compatible as far as drawing crosshair is concerned</span>
+    <span class="c1"># TBD: the naive approach below should be improved</span>
+    <span class="k">return</span> <span class="n">axisCode</span>  <span class="c1"># if axisCode[0].isupper() else axisCode</span>
+
+  <span class="nd">@QtCore.pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_mousePositionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mouseMovedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      This is called when the mouse position is changed in some strip</span>
+<span class="sd">      It means the crosshair(s) position should be updated</span>
+<span class="sd">    :param mouseMovedDict: &#39;strip&#39;-&gt;strip and axisCode-&gt;position for each axisCode in strip</span>
+<span class="sd">    :return:  None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span>
+    <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span> <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="o">.</span><span class="n">_finaliseDone</span><span class="p">:</span> <span class="k">return</span>
+
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span>
+    <span class="n">xPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
+    <span class="n">yPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
+    <span class="c1">#print(&#39;&gt;&gt;&#39;, strip, xPos, yPos)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair1</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">)</span>
+
+    <span class="n">strip</span><span class="o">.</span><span class="n">axisPositionDict</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">xPos</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">axisPositionDict</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">yPos</span>
+
+    <span class="c1">#TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum</span>
+    <span class="n">xPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
+    <span class="n">yPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">)</span>
+
+  <span class="c1"># NBNB TODO code uses API object. REFACTOR</span>
+
+  <span class="k">def</span> <span class="nf">_addRulerLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiRuler</span><span class="p">:</span><span class="n">ApiRuler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CCPN internal</span>
+<span class="sd">       Called from GuiStrip when a ruler is created</span>
+<span class="sd">       This adds a line into the PlotWidget&quot;&quot;&quot;</span>
+
+    <span class="n">axisCode</span> <span class="o">=</span> <span class="n">apiRuler</span><span class="o">.</span><span class="n">axisCode</span> <span class="c1"># TODO: use label and unit</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">apiRuler</span><span class="o">.</span><span class="n">position</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">apiRuler</span><span class="o">.</span><span class="n">label</span>
+    <span class="k">if</span> <span class="n">apiRuler</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">colour</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>  <span class="c1"># TODO: why this restriction???</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="n">apiRuler</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">colour</span><span class="p">)</span>  <span class="c1"># TODO: this is a CCPN object, does it work to set pen=colour below</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span>
+    <span class="n">axisOrder</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span>
+
+    <span class="c1"># TODO: is the below correct (so the correct axes)?</span>
+    <span class="k">if</span> <span class="n">axisCode</span> <span class="o">==</span> <span class="n">axisOrder</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="n">angle</span> <span class="o">=</span> <span class="mi">90</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+      <span class="n">textPosition</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+      <span class="n">textAnchor</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisAtomLabels</span>
+    <span class="k">elif</span> <span class="n">axisCode</span> <span class="o">==</span> <span class="n">axisOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+      <span class="n">textPosition</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+      <span class="n">textAnchor</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAxisAtomLabels</span>
+    <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span>
 
-    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
-      <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
-      <span class="c1"># self._appBase.mainWindow.pythonConsole.writeCompoundCommand([&#39;spectrum&#39;, &#39;module&#39;],</span>
-      <span class="c1">#                            &#39;module.displaySpectrum&#39;, &#39;spectrum&#39;, [ss, displayPid])</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
+    <span class="n">line</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span><span class="p">[</span><span class="n">apiRuler</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
+    <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+      <span class="n">textItem</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">)</span>
+      <span class="n">textItem</span><span class="o">.</span><span class="n">anchor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">textAnchor</span><span class="p">)</span>
+      <span class="n">textItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="o">*</span><span class="n">textPosition</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+      <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rulerLabelDict</span><span class="p">[</span><span class="n">apiRuler</span><span class="p">]</span> <span class="o">=</span> <span class="n">textItem</span>
 
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
-      <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
-        <span class="s2">&quot;module.displaySpectrum(spectrum)&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">displayPid</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">ss</span>
-      <span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;module = ui.getByGid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">displayPid</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;module.displaySpectrum(spectrum)&quot;</span><span class="p">)</span></div>
+  <span class="k">def</span> <span class="nf">_removeRulerLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiRuler</span><span class="p">:</span><span class="n">ApiRuler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CCPN internal</span>
+<span class="sd">       Called from GuiStrip when a ruler is deleted</span>
+<span class="sd">       This removes a line into the PlotWidget&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PlotWidget.processSpectrumGroups"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectrumGroups">[docs]</a>  <span class="k">def</span> <span class="nf">processSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pids</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.</span>
-<span class="sd">    If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the</span>
-<span class="sd">    one already in.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="n">guiSpectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span>
-      <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-          <span class="n">displayedSpectrumGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                                     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">]</span>
-
-          <span class="n">spectrumGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrumGroup</span> <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span>
-                       <span class="k">if</span> <span class="n">spectrumGroup</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">displayedSpectrumGroups</span> <span class="ow">and</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-        <span class="k">else</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">guiSpectrumDisplay</span><span class="p">,</span> <span class="s1">&#39;isGrouped&#39;</span><span class="p">):</span>
-          <span class="k">if</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">isGrouped</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumGroups</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-
-              <span class="n">spectrumGroupsToolBar</span> <span class="o">=</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumGroupsToolBar</span>
-              <span class="n">spectrumGroupButton</span> <span class="o">=</span> <span class="n">SpectrumGroupsWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-              <span class="n">spectrumGroupsToolBar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">spectrumGroupButton</span><span class="p">)</span>
-              <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-                <span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SpectrumGroups cannot be displayed in a display with already spectra in it.&quot;</span>
-                  <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SpectrumGroup&#39;s spectra are added as single item in the display  &quot;</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">apiRuler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span><span class="p">:</span>
+      <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rulerLineDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">apiRuler</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">apiRuler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rulerLabelDict</span><span class="p">:</span>
+      <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rulerLabelDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">apiRuler</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="PlotWidget.processSamples"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSamples">[docs]</a>  <span class="k">def</span> <span class="nf">processSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pids</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Display sample spectra defined by list of Pid strings&quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
-      <span class="n">spectrumPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">processSpectra</span><span class="p">(</span><span class="n">spectrumPids</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+  <span class="c1"># TODO:WAYNE: Make this part of PlotWidget [done], pass axes label strings on init [??]</span>
+  <span class="k">def</span> <span class="nf">_moveAxisCodeLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CCPN internal</span>
+<span class="sd">       Called from a notifier in GuiStrip</span>
+<span class="sd">       Puts axis code labels in the correct place on the PlotWidget</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_finaliseDone</span><span class="p">:</span> <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">topRight</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisAtomLabels</span><span class="p">:</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAxisAtomLabels</span><span class="p">:</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PlotWidget.processSampleComponents"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSampleComponents">[docs]</a>  <span class="k">def</span> <span class="nf">processSampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pids</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Display sampleComponent spectrum defined by its Pid string&quot;&quot;&quot;</span>
-    <span class="n">sampleComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">processSpectra</span><span class="p">([</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span><span class="p">],</span> <span class="n">event</span><span class="p">)</span></div></div>
+  <span class="k">def</span> <span class="nf">_initTextItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;CCPN internal</span>
+<span class="sd">       Called from GuiStrip when axes are ready</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">axisOrder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span> <span class="o">=</span> <span class="n">AxisTextItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="n">axisOrder</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span> <span class="o">=</span> <span class="n">AxisTextItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="n">axisOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="AxisTextItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.AxisTextItem">[docs]</a><span class="k">class</span> <span class="nc">AxisTextItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plotWidget</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mappedDim</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span> <span class="o">=</span> <span class="n">plotWidget</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">axisCode</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mappedDim</span> <span class="o">=</span> <span class="n">mappedDim</span>
+    <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">topRight</span><span class="p">())</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setUnits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+
+  <span class="k">def</span> <span class="nf">_setAxisCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCode</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

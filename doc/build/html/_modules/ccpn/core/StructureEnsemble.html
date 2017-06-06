@@ -52,40 +52,38 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:33 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
-
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Undo</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span> <span class="k">as</span> <span class="n">ApiStructureEnsemble</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
 <div class="viewcode-block" id="StructureEnsemble"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble">[docs]</a><span class="k">class</span> <span class="nc">StructureEnsemble</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Ensemble of coordinate structures.&quot;&quot;&quot;</span>
@@ -129,13 +127,9 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;title of Model -  a line of free-form text.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Name of StructureEnsemble, part of identifier&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
-
-  <span class="nd">@label.setter</span>
-  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleData</span><span class="p">:</span>
@@ -191,6 +185,26 @@
         <span class="k">if</span> <span class="n">modelNumber</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">serial2Model</span><span class="p">:</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">modelNumber</span><span class="p">)</span></div>
 
+  <span class="c1"># Implementation functions</span>
+<div class="viewcode-block" id="StructureEnsemble.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename StructureEnsemble, changing its name and Pid.</span>
+
+<span class="sd">    NB, the serial remains immutable.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;StructureEnsemble name must be a string&quot;</span><span class="p">)</span>  <span class="c1"># ejb catch non-string</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;StructureEnsemble name must be set&quot;</span><span class="p">)</span>  <span class="c1"># ejb catch empty string</span>
+    <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.StructureEnsemble.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="c1"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
   <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
@@ -198,11 +212,11 @@
     <span class="sd">&quot;&quot;&quot;get wrappedData for all NmrConstraintStores linked to NmrProject&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">sortedStructureEnsembles</span><span class="p">()</span></div>
 
-<span class="k">def</span> <span class="nf">_newStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">EnsembleData</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_newStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">EnsembleData</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                           <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructureEnsemble</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new StructureEnsemble&quot;&quot;&quot;</span>
 
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
   
   <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
@@ -214,15 +228,18 @@
     <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">structureEnsembles</span>
       <span class="n">serial</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ensembleId</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ll</span> <span class="k">else</span> <span class="mi">1</span>
-    <span class="n">newApiStructureEnsemble</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">(</span><span class="n">molSystem</span><span class="o">=</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">molSystem</span><span class="p">,</span>
-                                                                   <span class="n">ensembleId</span><span class="o">=</span><span class="n">serial</span><span class="p">,</span>
-                                                                   <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;molSystem&#39;</span><span class="p">:</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">molSystem</span><span class="p">,</span> <span class="s1">&#39;ensembleId&#39;</span><span class="p">:</span><span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span><span class="n">comment</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+      <span class="n">params</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">newApiStructureEnsemble</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiStructureEnsemble</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">result</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">EnsembleData</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
         <span class="s2">&quot;EnsembleData successfully set on new StructureEnsemble were not echoed - too large&quot;</span><span class="p">)</span>
+      <span class="c1">#FIXME:ED - crashes without the following line, is the wrapper not instantiated?</span>
+      <span class="c1"># result.data = EnsembleData()    # ejb - no needed</span>
       <span class="n">result</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
       <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span> <span class="o">=</span> <span class="n">result</span>
       <span class="k">for</span> <span class="n">modelNumber</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>

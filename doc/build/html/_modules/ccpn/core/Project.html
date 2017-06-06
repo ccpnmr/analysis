@@ -59,18 +59,16 @@
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:32 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
-
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -356,7 +354,7 @@
     <span class="sd">&quot;&quot;&quot;undo stack for Project. Implementation attribute&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
 
-  <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">maxOperations</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span> <span class="n">maxOperations</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
                  <span class="n">debug</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset undo stack, using passed-in parameters.</span>
 <span class="sd">    NB setting either parameter to 0 removes the undo stack.&quot;&quot;&quot;</span>
@@ -369,8 +367,32 @@
     <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to add undoPoint but undo is not initialised&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>                      <span class="c1"># DO NOT CHANGE THIS ONE</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added undoPoint&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.blockWaypoints"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.blockWaypoints">[docs]</a>  <span class="k">def</span> <span class="nf">blockWaypoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Block the setting of undo waypoints,</span>
+<span class="sd">    so that command echoing (_startCommandBLock) does not set waypoints</span>
+
+<span class="sd">    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again&quot;&quot;&quot;</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to block waypoints but undo is not initialised&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseWaypointBlocking</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waypoint setting blocked&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.unblockWaypoints"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.unblockWaypoints">[docs]</a>  <span class="k">def</span> <span class="nf">unblockWaypoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Block the setting of undo waypoints,</span>
+<span class="sd">    so that command echoing (_startCommandBLock) does not set waypoints</span>
+
+<span class="sd">    NB The programmer must GUARANTEE (try: ... finally) that waypoints are unblocked again&quot;&quot;&quot;</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to unblock waypoints but undo is not initialised&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waypoint setting unblocked&quot;</span><span class="p">)</span></div>
 
 
   <span class="c1"># Should be removed:</span>
@@ -648,6 +670,9 @@
     <span class="sd">&quot;&quot;&quot;Execute accumulated notifiers and resume immediate notifier execution&quot;&quot;&quot;</span>
     <span class="k">return</span>
     <span class="c1"># TODO suspension temporarily disabled</span>
+    <span class="c1"># This was broken at one point, and we never found time to fix it</span>
+    <span class="c1"># It is a time-saving measure, allowing you to e.g. execute a</span>
+    <span class="c1"># peak-created notifier only once when creating hundreds of peaks in one operation</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notificationSuspension</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_notificationSuspension</span> <span class="o">-=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
@@ -678,10 +703,12 @@
     <span class="sd">&quot;&quot;&quot;Call startCommandBlock for wrapper object delete. Implementation only&quot;&quot;&quot;</span>
 
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">undo</span><span class="o">.</span><span class="n">blocking</span><span class="p">:</span>
-
+    <span class="k">if</span> <span class="n">undo</span><span class="p">:</span>
       <span class="c1"># set undo step</span>
-      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>                      <span class="c1"># DO NOT CHANGE TH</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseWaypointBlocking</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span><span class="p">:</span>
+
       <span class="n">getDataObj</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">allWrappedData</span><span class="p">]</span>
       <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
@@ -699,6 +726,10 @@
     <span class="sd">&quot;&quot;&quot;End block for delete command echoing</span>
 
 <span class="sd">    MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called&quot;&quot;&quot;</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="c1"># If statement should always be True, but to avoid weird behaviour in error situations we check</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -791,8 +822,9 @@
 
     <span class="n">target</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">pathToObject</span><span class="p">)(</span><span class="n">wrappedData</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;_notifyRelatedApiObject: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span>
-                                <span class="o">%</span> <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">,</span> <span class="n">pathToObject</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+    <span class="c1"># GWV: a bit too much for now; should be the highest debug level only</span>
+    <span class="c1">#self._project._logger.debug(&#39;%s: %s.%s = %s&#39;</span>
+    <span class="c1">#                            % (action, wrappedData, pathToObject, target))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
       <span class="k">pass</span>
@@ -830,7 +862,9 @@
     <span class="c1"># NB &#39;AbstractWrapperObject&#39; not currently in use (Sep 2016), but kept for future needs</span>
     <span class="n">iterator</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_context2Notifiers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">target</span><span class="p">),</span> <span class="n">OrderedDict</span><span class="p">())</span>
                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="s1">&#39;AbstractWrapperObject&#39;</span><span class="p">))</span>
-    <span class="c1"># TODO suspension temporarily disabled</span>
+    <span class="c1"># Notification suspension postpones notifications (and removes duplicates)</span>
+    <span class="c1"># It is broken and has been disabled for a long time.</span>
+    <span class="c1"># There may be some accumulated bugs when (if)it is turned back on.</span>
     <span class="k">if</span> <span class="bp">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notificationSuspension</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pendingNotifications</span>
       <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
@@ -844,45 +878,83 @@
   <span class="c1"># Library functions</span>
 
 <div class="viewcode-block" id="Project.loadData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadData">[docs]</a>  <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Load data from path, determining type first.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load data from path, determining type first.</span>
+<span class="sd">    Return None for Un-recognised or un-parsable files; return empty list for ???</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">dataType</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">usePath</span> <span class="o">=</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">analyseUrl</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># TODO: RASMUS:</span>
+    <span class="c1"># RASMUS EXPLANATION (to my successor)</span>
+    <span class="c1"># loadData does too many things: it is used for handling dropped files,</span>
+    <span class="c1"># which includes a system for deciding what actions are taken where for what file types,</span>
+    <span class="c1"># and it is called directly for loading e.g. a spectrum.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Part of the idea was that a file of type &#39;Xyz&#39; being dropped would trigger</span>
+    <span class="c1"># a call to &#39;_loadXyz&#39; if, and only if, _loadXyz was defined for the object</span>
+    <span class="c1"># in question. That allowed you to control which drops were allowed where, and what</span>
+    <span class="c1"># specific actions should be triggered.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.</span>
+    <span class="c1"># My proposal (hopefully consistent with GV&#39;s (?)) would be to use this function</span>
+    <span class="c1"># ONLY to handle drops and other files of unknown type (and likely rename it _loadData&#39;)</span>
+    <span class="c1"># and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a</span>
+    <span class="c1"># spectrum or a project (currently loadData is (too) widely used.</span>
+    <span class="c1"># Some of these functions may or may not need to be written first.</span>
+    <span class="c1"># That still leaves the question of how to handle a case where e.g. a text</span>
+    <span class="c1"># file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,</span>
+    <span class="c1"># but that must be thought out and decided.</span>
+    <span class="c1"># Anyway, this function should have a proper and consistent return type (as GV says)</span>
+    <span class="c1"># Maybe we should consider returning a dictionary rather than a list of tuples??</span>
 
     <span class="c1"># urlInfo is list of triplets of (type, subType, modifiedUrl),</span>
-
     <span class="c1"># e.g. (&#39;Spectrum&#39;, &#39;Bruker&#39;, newUrl)</span>
+    <span class="n">dataType</span><span class="p">,</span> <span class="n">subType</span><span class="p">,</span> <span class="n">usePath</span> <span class="o">=</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">analyseUrl</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1">#TODO:RASMUS: Replace prints by logger calls</span>
+    <span class="c1">#TODO:RASMUS: Fix all return types; define properly first</span>
     <span class="k">if</span> <span class="n">dataType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: file data type not recognised for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">None</span>
 
     <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Dirs&#39;</span><span class="p">:</span>
       <span class="c1"># special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.</span>
       <span class="n">paths</span> <span class="o">=</span> <span class="n">usePath</span>
+      <span class="c1">#TODO:RASMUS: Undefined return type</span>
       <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">usePath</span><span class="p">):</span>
       <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: no file found at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">usePath</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">[]</span>
+
     <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Text&#39;</span><span class="p">:</span>
       <span class="c1"># Special case - you return the text instead of a list of Pids</span>
+      <span class="c1"># GWV: Can&#39;t do this!! -&gt; have to return a list of tuples: [(dataType, pid or data)]</span>
+      <span class="c1"># need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!</span>
+      <span class="c1">#TODO:RASMUS: return type is not a list</span>
       <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">usePath</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Macro&#39;</span> <span class="ow">and</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">PYTHON</span><span class="p">:</span>
+      <span class="c1"># GWV: Can&#39;t do this: have to call the routine with a flag: autoExecute=True</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">runMacro</span><span class="p">(</span><span class="n">usePath</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Project&#39;</span> <span class="ow">and</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">CCPNTARFILE</span><span class="p">:</span>
       <span class="n">projectPath</span><span class="p">,</span> <span class="n">temporaryDirectory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_unpackCcpnTarfile</span><span class="p">(</span><span class="n">usePath</span><span class="p">)</span>
       <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">CCPN</span><span class="p">)</span>
+      <span class="c1">#TODO:RASMUS: use python tmpdir or V3 calss</span>
+      <span class="c1"># NBNB _unpackCcpnTarfile *does* use the Python tempfile module</span>
       <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_temporaryDirectory</span> <span class="o">=</span> <span class="n">temporaryDirectory</span>
       <span class="k">return</span> <span class="p">[</span><span class="n">project</span><span class="p">]</span>
 
     <span class="k">else</span><span class="p">:</span>
-
+      <span class="c1"># No idea what is going on here</span>
+      <span class="c1">#TODO: use a dictionary to define</span>
       <span class="n">funcname</span> <span class="o">=</span> <span class="s1">&#39;_load&#39;</span> <span class="o">+</span> <span class="n">dataType</span>
       <span class="k">if</span> <span class="n">funcname</span> <span class="o">==</span> <span class="s1">&#39;_loadProject&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)]</span>
 
       <span class="k">elif</span> <span class="n">funcname</span> <span class="o">==</span> <span class="s1">&#39;_loadSpectrum&#39;</span><span class="p">:</span>
-        <span class="c1"># NBNB TBD FIXME check if loadSpectrum should start with underscore</span>
+        <span class="c1"># NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore</span>
         <span class="c1"># (NB referred to elsewhere</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadSpectrum</span><span class="p">(</span><span class="n">usePath</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
 
@@ -892,7 +964,7 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping: project has no function </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">funcname</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">None</span></div>
+    <span class="k">return</span> <span class="p">[]</span></div>
 
   <span class="c1"># Data loaders and dispatchers</span>
   <span class="k">def</span> <span class="nf">_loadSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -910,20 +982,38 @@
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">chains</span>
 
-  <span class="k">def</span> <span class="nf">_loadStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Load Structure ensemble(s) from file into Wrapper project&quot;&quot;&quot;</span>
 
-    <span class="c1"># NBNB TODO FIXME The loader should be replaced with one that uses the current model</span>
-    <span class="c1"># Meanwhile this should make the old loader work</span>
-    <span class="kn">from</span> <span class="nn">ccpnmodel.v_3_0_2.upgrade</span> <span class="kn">import</span> <span class="n">upgradeToPandasData</span>
+  <span class="k">def</span> <span class="nf">_loadStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load Structure ensemble(s) from file into Wrapper project</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">if</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">PDB</span><span class="p">:</span>
-      <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="n">pdbIo</span><span class="o">.</span><span class="n">loadStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">molSystem</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-      <span class="n">upgradeToPandasData</span><span class="p">(</span><span class="n">apiEnsemble</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">averageStructure</span>
+    <span class="k">if</span> <span class="n">subType</span> <span class="o">==</span> <span class="s1">&#39;PDB&#39;</span><span class="p">:</span>
+      <span class="n">name</span><span class="p">,</span> <span class="n">ensemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadPdbStructure</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Structure file type </span><span class="si">%s</span><span class="s2"> is not recognised&quot;</span> <span class="o">%</span> <span class="n">subType</span><span class="p">)</span>
-    <span class="c1">#</span>
-    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiEnsemble</span><span class="p">]]</span>
+      <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;{} type structures cannot be loaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subType</span><span class="p">))</span>
+    <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">()</span>
+    <span class="n">se</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ensemble</span>
+    <span class="n">se</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">newData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Derived&#39;</span><span class="p">)</span>
+    <span class="c1"># TODO: Rasmus fix me!</span>
+    <span class="c1"># d.setParameter(&#39;average&#39;, averageStructure(ensemble))</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">se</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_loadPdbStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="n">ensemble</span> <span class="o">=</span> <span class="n">EnsembleData</span><span class="o">.</span><span class="n">from_pdb</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">label</span><span class="p">,</span> <span class="n">ensemble</span>
 
 <div class="viewcode-block" id="Project.loadProject"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadProject">[docs]</a>  <span class="k">def</span> <span class="nf">loadProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Project&quot;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load project from file into application and return the new project&quot;&quot;&quot;</span>
@@ -937,14 +1027,14 @@
 <div class="viewcode-block" id="Project.loadSpectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadSpectrum">[docs]</a>  <span class="k">def</span> <span class="nf">loadSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load spectrum from file into application&quot;&quot;&quot;</span>
 
-    <span class="c1"># NBNB TBD FIXME check for rename</span>
+    <span class="c1"># #TODO:RASMUS FIXME check for rename</span>
 
     <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">loadDataSource</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">subType</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiDataSource</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiDataSource</span><span class="p">]</span>
-      <span class="n">spectrum</span><span class="o">.</span><span class="n">resetAssignmentTolerances</span><span class="p">()</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">defaultAssignmentTolerances</span>
       <span class="k">return</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">]</span></div>
 
   <span class="k">def</span> <span class="nf">_loadLookupFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="p">):</span>

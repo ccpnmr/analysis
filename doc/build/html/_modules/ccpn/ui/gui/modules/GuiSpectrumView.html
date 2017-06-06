@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,7 +81,6 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Colour</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.Base</span> <span class="kn">import</span> <span class="n">Base</span> <span class="k">as</span> <span class="n">GuiBase</span>
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
 
@@ -95,7 +93,7 @@
                                                                    <span class="s1">&#39;maxAliasedFrequency&#39;</span><span class="p">,</span>
                                                                    <span class="s1">&#39;dataDim&#39;</span><span class="p">))</span>
 
-<div class="viewcode-block" id="GuiSpectrumView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumView</span><span class="p">(</span><span class="n">GuiBase</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+<div class="viewcode-block" id="GuiSpectrumView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
 
   <span class="c1">#def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -106,7 +104,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">())</span>
-    <span class="n">GuiBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">dataSource</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsToolBar</span> <span class="o">=</span> <span class="bp">None</span>
@@ -134,13 +131,22 @@
     <span class="c1">##for strip in self.strips:</span>
     <span class="c1">##  strip.addSpectrum(self)</span>
 
+  <span class="c1"># To write your own graphics item, you first create a subclass of QGraphicsItem, and</span>
+  <span class="c1"># then start by implementing its two pure virtual public functions:</span>
+  <span class="c1"># boundingRect(), which returns an estimate of the area painted by the item,</span>
+  <span class="c1"># and paint(), which implements the actual painting. For example:</span>
+
+  <span class="c1"># mandatory function to override for QGraphicsItem</span>
+  <span class="c1"># Implemented in GuiSpectrumViewNd or GuiSpectrumView1d</span>
 <div class="viewcode-block" id="GuiSpectrumView.paint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.paint">[docs]</a>  <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-
     <span class="k">pass</span></div>
-    
-<div class="viewcode-block" id="GuiSpectrumView.boundingRect"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.boundingRect">[docs]</a>  <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># seems necessary to have</span>
 
-    <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>  <span class="c1"># TBD: remove hardwiring</span></div>
+  <span class="c1"># mandatory function to override for QGraphicsItem</span>
+<div class="viewcode-block" id="GuiSpectrumView.boundingRect"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.boundingRect">[docs]</a>  <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># seems necessary to have</span>
+    <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>  <span class="c1"># TBD: remove hardwiring</span></div>
+                                          <span class="c1"># Earlier versions too large value (~1400,1000);</span>
+    <span class="c1"># i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears</span>
+    <span class="c1"># to give less flicker in Scrolled Strips.</span>
 
   <span class="c1"># override of Qt setVisible</span>
 <div class="viewcode-block" id="GuiSpectrumView.setVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.setVisible">[docs]</a>  <span class="k">def</span> <span class="nf">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">):</span>
@@ -271,7 +277,7 @@
       <span class="n">widget</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
       <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
       <span class="k">if</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">is1D</span><span class="p">:</span>
-        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
       <span class="n">widget</span><span class="o">.</span><span class="n">spectrumView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
@@ -325,8 +331,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

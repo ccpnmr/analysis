@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../index.html" />
     <link rel="up" title="ccpn.util package" href="ccpn.util.html" />
-    <link rel="next" title="CCPN" href="../ccpnmodel/modules.html" />
+    <link rel="next" title="ccpn.util.v2io package" href="ccpn.util.v2io.html" />
     <link rel="prev" title="ccpn.util package" href="ccpn.util.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../ccpnmodel/modules.html" title="CCPN"
+          <a href="ccpn.util.v2io.html" title="ccpn.util.v2io package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="ccpn.util.html" title="ccpn.util package"
@@ -58,20 +58,38 @@
             
   <div class="section" id="module-ccpn.util.nef">
 <span id="ccpn-util-nef-package"></span><h1>ccpn.util.nef package<a class="headerlink" href="#module-ccpn.util.nef" title="Permalink to this headline">¶</a></h1>
-<p>Module Documentation here</p>
+<p>Star, Cif, and NEF I/O.</p>
+<p>Files are converted to and from a tree of nested objects (essentially enhanced, ordered dictionaries)</p>
+<p>The GenericStarParser.py will work for any valid Star file; see this file
+for the precise reading and writing behaviour. Parsing comes in several modes, depending on how
+strictly the STAR standard is enforced.</p>
+<p>NmrStar and NEF files have a more restricted syntax, with all items and loops contained within
+saveframes, and with saveframe and loop tags beginning with a prefix matching the saveframe and loop
+category. The StarIo.py code is used for these files; it converts the output of the GenericStarParser
+into a simpler object tree that makes use of these restrictions, strips mandatory tag prefixes,
+and converts strings to numerical values with some limited heuristics.</p>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="ccpn-util-nef-ccpn-module">
+<h2>ccpn.util.nef.Ccpn module<a class="headerlink" href="#ccpn-util-nef-ccpn-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="ccpn-util-nef-cingccpn-module">
+<h2>ccpn.util.nef.CingCcpn module<a class="headerlink" href="#ccpn-util-nef-cingccpn-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-ccpn.util.nef.GenericStarParser">
 <span id="ccpn-util-nef-genericstarparser-module"></span><h2>ccpn.util.nef.GenericStarParser module<a class="headerlink" href="#module-ccpn.util.nef.GenericStarParser" title="Permalink to this headline">¶</a></h2>
-<p>Star-type file parser, agnostic between cif, mmcif, star, nef, etc.
-Returns a nested data structure that matches the file,
+<p>Star-type file parser, agnostic between cif, mmcif, star, nef, etc.</p>
+<p>Returns a nested data structure that matches the file,
 with DataExtent, DataBlock, SaveFrame, and Loop objects.
 Additional support for distinguishing between None, True, False, and int/float values
 and the strings that match their representations.</p>
+<p>For behaviour better suited to NmrStar and NEf see ./StarIo.py</p>
 <p>Usage:</p>
-<p>parse(text, mode) to parse a text representation</p>
+<p>parse(text, mode) to parse a text representation to nested objects</p>
 <p>parseFile(fileName, mode) to load and parse a file</p>
+<p>starObject.toString() will convert any object in the object structure,
+complete with contents, to a string that can then be written to file.</p>
 <div class="section" id="reading-behaviour">
 <h3>Reading behaviour<a class="headerlink" href="#reading-behaviour" title="Permalink to this headline">¶</a></h3>
 <p>follows the specification in
@@ -104,7 +122,7 @@ exist and both correspond to the same loop object.</p>
 <p>Items are entered as a string key - string value pair.</p>
 <p>All tags are preserved &#8216;as is&#8217; (i.e. without stripping leading &#8216;_&#8217;, &#8216;<a href="#id5"><span class="problematic" id="id6">data_</span></a>&#8216;, or &#8216;<a href="#id7"><span class="problematic" id="id8">save_</span></a>&#8216;),
 basically to avoid the theoretical risk that a SaveFrame name might clash with
-an item name or loop column, or a DataBLock with a Global. Duplicate tags raise an error.</p>
+an item name or loop column, or a DataBlock with a Global. Duplicate tags raise an error.</p>
 <p>Quoted values are returned as str,
 whereas unquoted values are returned as a str subtype UnquotedValue(str)
 This allows later distinction between null, unknown, saveframe_reference and the
@@ -158,8 +176,9 @@ DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</p>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.DataBlock.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = ''</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.toString" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent=''</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.toString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert DataBlock to string, for writing</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -170,14 +189,14 @@ DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</p>
 <p>Top level container for general STAR object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.DataExtent.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = ''</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent.toString" title="Permalink to this definition">¶</a></dt>
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent=''</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent.toString" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">GeneralStarParser</code><span class="sig-paren">(</span><em>text: str</em>, <em>enforceSaveFrameStop: bool = True</em>, <em>enforceLoopStop: bool = False</em>, <em>padIncompleteLoops: bool = False</em>, <em>allowSquareBracketStrings=False</em>, <em>lowerCaseTags=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">GeneralStarParser</code><span class="sig-paren">(</span><em>text</em>, <em>enforceSaveFrameStop=True</em>, <em>enforceLoopStop=False</em>, <em>padIncompleteLoops=False</em>, <em>allowSquareBracketStrings=False</em>, <em>lowerCaseTags=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Parser for text corresponding to a STAR file with one or more data blocks,
 producing a nested object structure matching the file (see module documentation for details:</p>
@@ -218,7 +237,7 @@ producing a nested object structure matching the file (see module documentation 
 
 <dl class="class">
 <dt id="ccpn.util.nef.GenericStarParser.Loop">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">Loop</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>columns: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">Loop</code><span class="sig-paren">(</span><em>name=None</em>, <em>columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Loop for general STAR object tree
 Attributes are:</p>
@@ -229,25 +248,26 @@ Attributes are:</p>
 </ul>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.addColumn">
-<code class="descname">addColumn</code><span class="sig-paren">(</span><em>value: str</em>, <em>extendData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.addColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.addColumn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">addColumn</code><span class="sig-paren">(</span><em>columnName</em>, <em>paddingValue=DataExtent([]</em>, <em>name=Root)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.addColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.addColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new column to loop. if paddingValue is set, including to None, rows with None</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.columns">
 <code class="descname">columns</code><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>list</em>, <em>immutable</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Column names</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.newRow">
-<code class="descname">newRow</code><span class="sig-paren">(</span><em>values=None</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.LoopRow<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.newRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.newRow" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newRow</code><span class="sig-paren">(</span><em>values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.newRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.newRow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add new row, initialised from values</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.removeColumn">
-<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>value: str</em>, <em>removeData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.removeColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.removeColumn" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>columnName</em>, <em>removeData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.removeColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.removeColumn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove column from loop. Will NOT work properly if called during parsing.</p>
 </dd></dl>
 
@@ -258,7 +278,7 @@ Column names</p>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.Loop.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = '   '</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.toString" title="Permalink to this definition">¶</a></dt>
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent='   '</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.toString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stringifier function for loop.</p>
 <p>Accepts (subtypes of) Loop with data as sequence of rows,
 where rows can be tuples, lists, or OrderedDicts.
@@ -280,7 +300,7 @@ In all cases the values must be in the order given by the columns attribute</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">
-<code class="descname">addItem</code><span class="sig-paren">(</span><em>tag: str</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addItem</code><span class="sig-paren">(</span><em>tag</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -297,8 +317,9 @@ In all cases the values must be in the order given by the columns attribute</p>
 
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.SaveFrame.toString">
-<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = '   '</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.toString" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent='   '</em>, <em>separator='  '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.toString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert SaveFrame to string, for writing</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -309,7 +330,7 @@ In all cases the values must be in the order given by the columns attribute</p>
 <p>DataBlock or SaveFrame containing items and loops</p>
 <dl class="method">
 <dt id="ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues">
-<code class="descname">multiColumnValues</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues" title="Permalink to this definition">¶</a></dt>
+<code class="descname">multiColumnValues</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues" title="Permalink to this definition">¶</a></dt>
 <dd><p>get tuple of orderedDict of values for columns.
 Will work whether columns are in a loop or single values
 If columns match a single loop or nothing, return the loop data.
@@ -337,13 +358,13 @@ STAR special values (like null,  unknown, ...) are only recognised if unquoted s
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.extractMatchingNameSequence">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">extractMatchingNameSequence</code><span class="sig-paren">(</span><em>name: str</em>, <em>matchNames: list</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#extractMatchingNameSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">extractMatchingNameSequence</code><span class="sig-paren">(</span><em>name</em>, <em>matchNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#extractMatchingNameSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get list of matchNames matching &#8216;name_1&#8217;, &#8216;name_2&#8217;, ..., in order.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.parse">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.DataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse STAR text string &#8216;text&#8217;.
 Standard settings allow skipping &#8216;<a href="#id13"><span class="problematic" id="id14">stop_</span></a>&#8216; tags and strings starting with &#8216;[&#8216; or &#8216;]&#8217;,
 but require &#8216;<a href="#id15"><span class="problematic" id="id16">save_</span></a>&#8216; termination of SaveFrames and throw an error if the number of loop
@@ -355,8 +376,8 @@ is like standard except that strings starting with &#8216;[&#8216; and &#8216;]&
 
 <dl class="function">
 <dt id="ccpn.util.nef.GenericStarParser.parseFile">
-<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parseFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.DataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parseFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>load generic STAR file</p>
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parseFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parseFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>load generic STAR file and parse the contents</p>
 </dd></dl>
 
 <dl class="function">
@@ -469,7 +490,34 @@ _nef_item.description</p>
 </div>
 <div class="section" id="module-ccpn.util.nef.StarIo">
 <span id="ccpn-util-nef-stario-module"></span><h2>ccpn.util.nef.StarIo module<a class="headerlink" href="#module-ccpn.util.nef.StarIo" title="Permalink to this headline">¶</a></h2>
-<p>I/O for NEF and NmrStar formats</p>
+<p>I/O for NEF and NmrStar formats.</p>
+<p>The functions to use are</p>
+<p>and other STAR variants satisfying the following requirements:</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li>all plain tags in a saveframe start with a common prefix;</li>
+</ul>
+<p>for NEF files this must be the &#8216;&lt;sf_category&gt;&#8217; followed by &#8216;.&#8217;,
+and the framecode value must start with the &#8216;&lt;sf_category&gt;&#8217; followed by underscore.</p>
+<ul class="simple">
+<li>All loop column names start with &#8216;&lt;loopcategory&gt;.&#8217;</li>
+<li>loopcategories share a namespace with tags within a saveframe</li>
+<li>DataBlocks can contain only saveframes.</li>
+<li>For NEF files the</li>
+</ul>
+</div></blockquote>
+<p>Use the functions parseNmrStar, parseNef, parseNmrStarFile, parseNefFile</p>
+<blockquote>
+<div><p>The &#8216;File&#8217; functions take a file name and pass the file contents to corresponding parser.</p>
+<dl class="docutils">
+<dt>The &#8216;NmrStar&#8217; functions will read any Star file that satisfies the constraints above, while</dt>
+<dd>the &#8216;Nef&#8217; functions will also enforce the NEF=-specific constraints above</dd>
+</dl>
+</div></blockquote>
+<p>On reading tag prefixes (&#8216;_&#8217;, &#8216;<a href="#id21"><span class="problematic" id="id22">save_</span></a>&#8216;, &#8216;<a href="#id23"><span class="problematic" id="id24">data_</span></a>&#8216; are stripped,
+as are the parts of tags before the first &#8216;.&#8217;</p>
+</div></blockquote>
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock">
 <em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrDataBlock</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock" title="Permalink to this definition">¶</a></dt>
@@ -477,13 +525,13 @@ _nef_item.description</p>
 <p>DataBlock (OrderedDict)for NMRSTAR/NEF object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">
-<code class="descname">addSaveFrame</code><span class="sig-paren">(</span><em>saveFrame: ccpn.util.nef.StarIo.NmrSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addSaveFrame</code><span class="sig-paren">(</span><em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add existing NmrSaveFrame to the DataBlock</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">
-<code class="descname">newSaveFrame</code><span class="sig-paren">(</span><em>name: str</em>, <em>category: str</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.newSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSaveFrame</code><span class="sig-paren">(</span><em>name</em>, <em>category</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.newSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make new NmrSaveFrame and add it to the DataBlock</p>
 </dd></dl>
 
@@ -498,7 +546,7 @@ _nef_item.description</p>
 
 <dl class="class">
 <dt id="ccpn.util.nef.StarIo.NmrLoop">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoop</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>columns: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoop</code><span class="sig-paren">(</span><em>name=None</em>, <em>columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.Loop" title="ccpn.util.nef.GenericStarParser.Loop"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.Loop</span></code></a></p>
 <p>Loop for NMRSTAR/NEF object tree</p>
 <p>The contents, self.data is a list of OrderedDicts matching the column names.
@@ -507,14 +555,14 @@ break - use the newRow function.</p>
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarIo.NmrLoop.category">
 <code class="descname">category</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.category" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Loop category tag - synonym for name (unlike the case of SaveFrame)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarIo.NmrLoop.tagPrefix">
 <code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.tagPrefix" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Prefix to use before item tags on output</p>
 </dd></dl>
 
@@ -533,14 +581,14 @@ Prefix to use before item tags on output</p>
 <p>SaveFrame (OrderedDict)for NMRSTAR/NEF object tree</p>
 <dl class="method">
 <dt id="ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">
-<code class="descname">newLoop</code><span class="sig-paren">(</span><em>name</em>, <em>columns</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrLoop<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame.newLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newLoop</code><span class="sig-paren">(</span><em>name</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame.newLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make new NmrLoop and add it to the NmrSaveFrame</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix">
 <code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>immutable</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Prefix to use before item tags on output</p>
 </dd></dl>
 
@@ -554,31 +602,33 @@ Prefix to use before item tags on output</p>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNef">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNef</code><span class="sig-paren">(</span><em>text: str</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNef" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNef</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>load NEF from string</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNefFile">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNefFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em>, <em>wrapInDataBlock: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNefFile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNefFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em>, <em>wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNefFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>parse NEF from file</p>
+<p>if wrapInDataBlock missing DataBlock start will be provided</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNmrStar">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStar</code><span class="sig-paren">(</span><em>text: str</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStar" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStar</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStar" title="Permalink to this definition">¶</a></dt>
 <dd><p>load NMRSTAR file</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.parseNmrStarFile">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStarFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em>, <em>wrapInDataBlock: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStarFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStarFile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStarFile</code><span class="sig-paren">(</span><em>fileName</em>, <em>mode='standard'</em>, <em>wrapInDataBlock=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStarFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStarFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>parse NMRSTAR from file</p>
+<p>if wrapInDataBlock missing DataBlock start will be provided</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.nef.StarIo.splitNefSequence">
-<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">splitNefSequence</code><span class="sig-paren">(</span><em>rows: Sequence[dict]</em><span class="sig-paren">)</span> &rarr; List[List[dict]]<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#splitNefSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.splitNefSequence" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">splitNefSequence</code><span class="sig-paren">(</span><em>rows</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#splitNefSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.splitNefSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split a sequence of nef_sequence dicts assumed to belong to the same chain
 into a list of lists of sequentially linked stretches following the NEF rules</p>
 <p>Note that missing linkings are treated as &#8216;middle&#8217; and missing start/end tags
@@ -596,9 +646,8 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
 <span id="ccpn-util-nef-startokeniser-module"></span><h2>ccpn.util.nef.StarTokeniser module<a class="headerlink" href="#module-ccpn.util.nef.StarTokeniser" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken">
-<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">StarToken</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">StarToken</code><span class="sig-paren">(</span><em>type</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
-<p>StarToken named tuple (with fields &#8216;type&#8217;, &#8216;value&#8217;) returned by the STAR token iterator</p>
 <dl class="attribute">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken.type">
 <code class="descname">type</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.type" title="Permalink to this definition">¶</a></dt>
@@ -632,6 +681,8 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
   <ul>
 <li><a class="reference internal" href="#">ccpn.util.nef package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#ccpn-util-nef-ccpn-module">ccpn.util.nef.Ccpn module</a></li>
+<li><a class="reference internal" href="#ccpn-util-nef-cingccpn-module">ccpn.util.nef.CingCcpn module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.nef.GenericStarParser">ccpn.util.nef.GenericStarParser module</a><ul>
 <li><a class="reference internal" href="#reading-behaviour">Reading behaviour</a></li>
 <li><a class="reference internal" href="#writing-behaviour">Writing behaviour</a></li>
@@ -648,8 +699,8 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
   <p class="topless"><a href="ccpn.util.html"
                         title="previous chapter">ccpn.util package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../ccpnmodel/modules.html"
-                        title="next chapter">CCPN</a></p>
+  <p class="topless"><a href="ccpn.util.v2io.html"
+                        title="next chapter">ccpn.util.v2io package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -681,7 +732,7 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../ccpnmodel/modules.html" title="CCPN"
+          <a href="ccpn.util.v2io.html" title="ccpn.util.v2io package"
              >next</a> |</li>
         <li class="right" >
           <a href="ccpn.util.html" title="ccpn.util package"

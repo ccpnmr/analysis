@@ -14,6 +14,7 @@ Subpackages
     ccpn.AnalysisAssign
     ccpn.AnalysisMetabolomics
     ccpn.AnalysisScreen
+    ccpn.AnalysisStructure
     ccpn.core
     ccpn.framework
     ccpn.ui

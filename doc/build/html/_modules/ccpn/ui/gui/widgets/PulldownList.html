@@ -47,7 +47,8 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.widgets.PulldownList</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PulldownList widget</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -82,9 +83,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 
-<span class="c1"># TBD: Cascading categories, prob via Menu</span>
-
 <span class="n">NULL</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="PulldownList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList">[docs]</a><span class="k">class</span> <span class="nc">PulldownList</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
@@ -103,15 +103,6 @@
 
     <span class="n">PulldownList</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">icons</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
-<span class="c1">#    self.setStyleSheet(&quot;&quot;&quot;QCombobox { padding: 0;}</span>
-<span class="c1">#                          QCombobox QAbstractItemView::item {</span>
-<span class="c1">#                           padding-top: 2px;</span>
-<span class="c1">#                           padding-bottom: 2px;</span>
-<span class="c1">#                           }</span>
-<span class="c1">#                          &quot;&quot;&quot;)</span>
-<span class="c1">#    self.setMinimumWidth(100)</span>
-<span class="c1">#    self.setMinimumHeight(18)</span>
-<span class="c1">#    self.view().setMinimumHeight(18*3)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    PulldownList {</span>
 <span class="s2">      padding-top: 3px;</span>
@@ -155,7 +146,7 @@
 
 <div class="viewcode-block" id="PulldownList.setSelected"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.setSelected">[docs]</a>  <span class="k">def</span> <span class="nf">setSelected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">doCallback</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ccpn.ui.gui.widgets.PulldownList.setSelected is depecated use; .select()&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ccpn.ui.gui.widgets.PulldownList.setSelected is deprecated use; .select()&quot;</span><span class="p">)</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
@@ -169,31 +160,31 @@
 
 <div class="viewcode-block" id="PulldownList.getSelected"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.getSelected">[docs]</a>  <span class="k">def</span> <span class="nf">getSelected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
   
-    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getSelected is depecated use; .currentData()&quot;)</span>
+    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getSelected is deprecated use; .currentData()&quot;)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentData</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PulldownList.getObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.getObject">[docs]</a>  <span class="k">def</span> <span class="nf">getObject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getObject is depecated use; .currentObject()&quot;)</span>
+    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getObject is deprecated use; .currentObject()&quot;)</span>
     
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PulldownList.getText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.getText">[docs]</a>  <span class="k">def</span> <span class="nf">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getText is depecated use; .currentText()&quot;)</span>
+    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getText is deprecated use; .currentText()&quot;)</span>
    
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PulldownList.getSelectedIndex"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.getSelectedIndex">[docs]</a>  <span class="k">def</span> <span class="nf">getSelectedIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is depecated use; .currentIndex()&quot;)</span>
+    <span class="c1"># print(&quot;ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is deprecated use; .currentIndex()&quot;)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PulldownList.setup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownList.PulldownList.setup">[docs]</a>  <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ccpn.ui.gui.widgets.PulldownList.setup is depecated use; .setData&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ccpn.ui.gui.widgets.PulldownList.setup is deprecated use; .setData&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span></div>
  
@@ -289,26 +280,55 @@
       <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
 
+
+
+
+
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
   <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
   
   <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
 
-  <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span><span class="s1">&#39;Float&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+  <span class="n">texts</span> <span class="o">=</span>   <span class="p">[</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span><span class="s1">&#39;Float&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
   <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Green&#39;</span><span class="p">]</span>
   <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#008000&#39;</span><span class="p">)]</span>
 
   <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
 
-  <span class="n">popup</span> <span class="o">=</span> <span class="n">BasePopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test PulldownList&#39;</span><span class="p">)</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">setSize</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">callback2</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback2&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+
+  <span class="n">popup</span> <span class="o">=</span> <span class="n">CcpnDialog</span><span class="p">(</span><span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;Test PulldownList&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="c1">#popup.setSize(250,50)</span>
+  <span class="n">policyDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+    <span class="n">hPolicy</span> <span class="o">=</span> <span class="s1">&#39;expanding&#39;</span><span class="p">,</span>
+  <span class="p">)</span>
+  <span class="n">policyDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+   <span class="c1"># hAlign=&#39;left&#39;,</span>
+  <span class="p">)</span>
+  <span class="c1">#policyDict = dict(</span>
+  <span class="c1">#   hAlign=&#39;left&#39;,</span>
+  <span class="c1"># )</span>
+  <span class="c1">#policyDict = {}</span>
+
   <span class="n">pulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">popup</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">texts</span><span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="n">icons</span><span class="p">,</span>
-                              <span class="n">objects</span><span class="o">=</span><span class="n">objects</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+                              <span class="n">objects</span><span class="o">=</span><span class="n">objects</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">policyDict</span>
+                              <span class="p">)</span>
+  <span class="n">pulldownList</span><span class="o">.</span><span class="n">insertSeparator</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
   <span class="n">pulldownList</span><span class="o">.</span><span class="n">clearEditText</span><span class="p">()</span>
+
+
+  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
   <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+
 
 </pre></div>
 

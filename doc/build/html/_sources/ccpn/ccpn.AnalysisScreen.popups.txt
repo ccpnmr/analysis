@@ -9,14 +9,6 @@ ccpn.AnalysisScreen.popups package
 Submodules
 ----------
 
-ccpn.AnalysisScreen.popups.LookupSetupPopup module
---------------------------------------------------
-
-.. automodule:: ccpn.AnalysisScreen.popups.LookupSetupPopup
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisScreen.popups.MixtureGenerationPopup module
 --------------------------------------------------------
 

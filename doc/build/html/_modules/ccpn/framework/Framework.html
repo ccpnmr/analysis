@@ -59,7 +59,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-11 15:24:25 +0100 (Tue, April 11, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -90,25 +90,28 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.AttrDict</span> <span class="kn">import</span> <span class="n">AttrDict</span>
-<span class="kn">from</span> <span class="nn">ccpn.framework</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">uniquify</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.framework</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.Current</span> <span class="kn">import</span> <span class="n">Current</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">languages</span><span class="p">,</span> <span class="n">defaultLanguage</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">translator</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.misc</span> <span class="kn">import</span> <span class="n">_checked</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui</span> <span class="kn">import</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">defaultInterface</span>
-<span class="kn">from</span> <span class="nn">ccpn.framework.Current</span> <span class="kn">import</span> <span class="n">Current</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.MacroEditor</span> <span class="kn">import</span> <span class="n">MacroEditor</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Window</span> <span class="kn">import</span> <span class="n">MODULE_DICT</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">uniquify</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+
 <span class="n">_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
 
 <span class="n">componentNames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Screening&#39;</span><span class="p">,</span> <span class="s1">&#39;Structure&#39;</span><span class="p">)</span>
@@ -191,6 +194,9 @@
                                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Use dark colour scheme&#39;</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nologging&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;nologging&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Do not log information to a file&#39;</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--debug&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;debug&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set logging level to debug&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--debug1&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;debug&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set logging level to debug1 (=debug)&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--debug2&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;debug2&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set logging level to debug2&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--debug3&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;debug3&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Set logging level to debug3&#39;</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;projectPath&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Project path&#39;</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">parser</span></div>
@@ -202,6 +208,8 @@
   <span class="n">interface</span> <span class="o">=</span> <span class="s1">&#39;NoUi&#39;</span>
   <span class="n">nologging</span> <span class="o">=</span> <span class="bp">True</span>
   <span class="n">debug</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">debug2</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">debug3</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">skipUserPreferences</span> <span class="o">=</span> <span class="bp">True</span>
   <span class="n">projectPath</span> <span class="o">=</span> <span class="bp">None</span>
 
@@ -275,7 +283,14 @@
     <span class="c1"># self.setupComponents(args)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">useFileLogger</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">nologging</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">debug</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">debug3</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">DEBUG3</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">debug2</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">DEBUG2</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span>      <span class="o">=</span> <span class="bp">None</span>
 
@@ -394,6 +409,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_mainWindow&#39;</span><span class="p">):</span>
+      <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;framework._initialiseProject&#39;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span><span class="p">)</span>
 
       <span class="c1"># Get the mainWindow out of the application top level once it&#39;s been transferred to ui</span>
@@ -415,6 +431,8 @@
       <span class="kn">from</span> <span class="nn">ccpn.ui.gui.Gui</span> <span class="kn">import</span> <span class="n">Gui</span>
       <span class="n">ui</span> <span class="o">=</span> <span class="n">Gui</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
       <span class="n">ui</span><span class="o">.</span><span class="n">qtApp</span><span class="o">.</span><span class="n">_ccpnApplication</span> <span class="o">=</span> <span class="bp">self</span>
+      <span class="c1"># ui.mainWindow is None upon initialization: gets filled later</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ui</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.ui.Ui</span> <span class="kn">import</span> <span class="n">NoUi</span>
       <span class="n">ui</span> <span class="o">=</span> <span class="n">NoUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -519,7 +537,7 @@
 
     <span class="c1"># Initialise displays</span>
     <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">windows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span> <span class="c1"># there is exactly one window</span>
-      <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_resetRemoveStripAction</span><span class="p">()</span>
+      <span class="k">pass</span>  <span class="c1"># GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()</span>
 
     <span class="c1"># Initialise strips</span>
     <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
@@ -528,12 +546,6 @@
       <span class="c1"># if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:</span>
       <span class="c1">#   strip.setZWidgets()</span>
 
-    <span class="c1"># Initialise Rulers</span>
-    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">apiMark</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedMarks</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">apiRuler</span> <span class="ow">in</span> <span class="n">apiMark</span><span class="o">.</span><span class="n">sortedRulers</span><span class="p">():</span>
-          <span class="n">GuiStrip</span><span class="o">.</span><span class="n">_rulerCreated</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiRuler</span><span class="p">)</span>
-
     <span class="c1"># Initialise SpectrumViews</span>
     <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
@@ -541,8 +553,12 @@
           <span class="n">spectrumView</span><span class="o">.</span><span class="n">_createdSpectrumView</span><span class="p">()</span>
           <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
             <span class="n">strip</span><span class="o">.</span><span class="n">showPeaks</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_initLayout</span><span class="p">()</span></div>
-    <span class="c1"># self._restoreLayout()</span>
+    <span class="c1"># add blank Display</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">currentModulesNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">newBlankDisplay</span><span class="p">()</span></div>
+    <span class="c1"># FIXME: LM. Restore Layout</span>
+    <span class="c1"># Restore Layout currently unstable. Unexpected bugs from pyqtgraph conteiners. Needs a better refactoring</span>
+    <span class="c1"># self._initLayout()</span>
 
   <span class="k">def</span> <span class="nf">_initLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -567,7 +583,7 @@
       <span class="sd">&quot;&quot;&quot;function internal to _initLayout&quot;&quot;&quot;</span>
       <span class="n">contentToRemove</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
-         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
           <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dock&#39;</span><span class="p">:</span>
               <span class="n">key</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -577,6 +593,7 @@
                 <span class="k">else</span><span class="p">:</span>
                   <span class="n">keysSeen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                   <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MODULE_DICT</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                  <span class="k">print</span><span class="p">(</span><span class="s1">&#39;FrameWork._initLayout&gt;&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
                   <span class="n">func</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">_analyseContents</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
@@ -587,10 +604,12 @@
     <span class="c1"># ===</span>
     <span class="c1"># start of the actual method code</span>
     <span class="c1"># ===</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;layouts&#39;</span><span class="p">,</span> <span class="s1">&#39;layout.yaml&#39;</span><span class="p">)):</span>
+    <span class="n">yamlPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;layouts&#39;</span><span class="p">,</span> <span class="s1">&#39;layout.yaml&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">yamlPath</span><span class="p">):</span>
+      <span class="c1">#print(&#39;FrameWork._initLayout&gt;&#39;, yamlPath)</span>
       <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;layouts&#39;</span><span class="p">,</span> <span class="s1">&#39;layout.yaml&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-          <span class="n">names</span><span class="p">,</span> <span class="n">layout</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yamlPath</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+          <span class="n">layout</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">typ</span><span class="p">,</span> <span class="n">contents</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">layout</span><span class="p">[</span><span class="s1">&#39;main&#39;</span><span class="p">]</span>  <span class="c1"># main window</span>
         <span class="n">_analyseContents</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
@@ -609,7 +628,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
       <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="c1"># for now just ignore restore failures</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Layout restore failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Layout restore failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">currentModulesNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">newBlankDisplay</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Framework.getByPid"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.getByPid">[docs]</a>  <span class="k">def</span> <span class="nf">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span></div>
@@ -634,10 +656,12 @@
 <span class="sd">       peak=peakOrPid)&quot;&quot;&quot;</span>
 
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">undo</span><span class="o">.</span><span class="n">blocking</span><span class="p">:</span>
-
+    <span class="k">if</span> <span class="n">undo</span><span class="p">:</span>
       <span class="c1"># set undo step</span>
-      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>     <span class="c1"># DO NOT CHANGE</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseWaypointBlocking</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span><span class="p">:</span>
+
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">suspendNotification</span><span class="p">()</span>
 
       <span class="c1"># Get list of command strings</span>
@@ -652,16 +676,20 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">echoCommands</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;startCommandBlock. command=</span><span class="si">%s</span><span class="s1">, echoBlocking=</span><span class="si">%s</span><span class="s1">, undo.blocking=</span><span class="si">%s</span><span class="s1">&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;command=</span><span class="si">%s</span><span class="s1">, echoBlocking=</span><span class="si">%s</span><span class="s1">, undo.blocking=</span><span class="si">%s</span><span class="s1">&#39;</span>
                                <span class="o">%</span> <span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span><span class="p">,</span> <span class="n">undo</span><span class="o">.</span><span class="n">blocking</span><span class="p">))</span>
 
 
+  <span class="c1">#TODO:TJ: Why is this a private method; it is and should be used all over the code?</span>
   <span class="k">def</span> <span class="nf">_endCommandBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;End block for command echoing,</span>
 
 <span class="sd">    MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called&quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;endCommandBlock. echoBlocking=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;echoBlocking=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span><span class="p">)</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="c1"># If statement should always be True, but to avoid weird behaviour in error situations we check</span>
@@ -669,8 +697,22 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">resumeNotification</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Framework.addApplicationMenuSpec"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.addApplicationMenuSpec">[docs]</a>  <span class="k">def</span> <span class="nf">addApplicationMenuSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add an entirely new menu at specified position&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Framework.addApplicationMenuItem"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.addApplicationMenuItem">[docs]</a>  <span class="k">def</span> <span class="nf">addApplicationMenuItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menuName</span><span class="p">,</span> <span class="n">menuItem</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a new item to an existing menu at specified position&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">menuName</span><span class="p">:</span>
+        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">menuItem</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No menu with name </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">menuName</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Framework.addApplicationMenuItems"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.addApplicationMenuItems">[docs]</a>  <span class="k">def</span> <span class="nf">addApplicationMenuItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menuName</span><span class="p">,</span> <span class="n">menuItems</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a new items to an existing menu starting at specified position&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">menuItem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">menuItems</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuItem</span><span class="p">(</span><span class="n">menuName</span><span class="p">,</span> <span class="n">menuItem</span><span class="p">,</span> <span class="n">position</span><span class="o">+</span><span class="n">n</span><span class="p">)</span></div>
 
   <span class="c1">#########################################    Start setup Menus      ############################</span>
 
@@ -838,12 +880,13 @@
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Chemical Shift Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showChemicalShiftTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;ct&#39;</span><span class="p">)]),</span>
       <span class="p">(</span><span class="s2">&quot;NmrResidue Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showNmrResidueTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;nt&#39;</span><span class="p">)]),</span>
+      <span class="c1"># (&quot;Structure Table&quot;, self.showStructureTable, [(&#39;shortcut&#39;, &#39;st&#39;)]),</span>
       <span class="p">(</span><span class="s2">&quot;Peak Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPeakTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;lt&#39;</span><span class="p">)]),</span>
       <span class="p">(</span><span class="s2">&quot;Restraint Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showRestraintTable</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span><span class="p">)]),</span>
       <span class="p">(),</span>
-      <span class="p">(</span><span class="s2">&quot;Sequence Graph&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSequenceGraph</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sg&#39;</span><span class="p">)]),</span>
-      <span class="p">(</span><span class="s2">&quot;Atom Selector&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showAtomSelector</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;as&#39;</span><span class="p">)]),</span>
-      <span class="p">(),</span>
+      <span class="c1">###(&quot;Sequence Graph&quot;, self.showSequenceGraph, [(&#39;shortcut&#39;, &#39;sg&#39;)]),</span>
+      <span class="c1">###(&quot;Atom Selector&quot;, self.showAtomSelector, [(&#39;shortcut&#39;, &#39;as&#39;)]),</span>
+      <span class="c1">###(),</span>
       <span class="p">(</span><span class="s2">&quot;Show Sequence&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleSequenceModule</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;sq&#39;</span><span class="p">),</span>
                                                     <span class="p">(</span><span class="s1">&#39;checkable&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
                                                     <span class="p">(</span><span class="s1">&#39;checked&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
@@ -853,6 +896,8 @@
                    <span class="p">(</span><span class="s2">&quot;Show/Hide Phasing Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pc&#39;</span><span class="p">)]),</span>
                    <span class="p">(</span><span class="s2">&quot;Reset Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resetZoom</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;rz&#39;</span><span class="p">)])</span>
                   <span class="p">)),</span>
+      <span class="p">(),</span>
+      <span class="p">(</span><span class="s2">&quot;Notes Table&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showNotesEditor</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)]),</span>
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Python Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">),</span>
                                               <span class="p">(</span><span class="s1">&#39;checkable&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
@@ -905,9 +950,6 @@
   <span class="c1">###################################################################################################################</span>
   <span class="c1">## MENU callbacks:  Project</span>
   <span class="c1">###################################################################################################################</span>
-
-
-
 
 <div class="viewcode-block" id="Framework.createNewProject"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.createNewProject">[docs]</a>  <span class="k">def</span> <span class="nf">createNewProject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">okToContinue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_queryCloseProject</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;New Project&#39;</span><span class="p">,</span>
@@ -1007,6 +1049,9 @@
       <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Load Data&#39;</span>
 
     <span class="k">if</span> <span class="n">paths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1">#TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)</span>
+      <span class="c1"># NBNB TBD I assume here that path is either a string or a list lf string paths.</span>
+      <span class="c1"># NBNB #FIXME if incorrect</span>
       <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
                           <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
       <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
@@ -1017,7 +1062,8 @@
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
       <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">processDropData</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;urls&#39;</span><span class="p">)</span></div>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">_saveLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
@@ -1028,28 +1074,30 @@
       <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">layoutPath</span><span class="p">)</span>
     <span class="kn">import</span> <span class="nn">yaml</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">layoutPath</span><span class="p">,</span> <span class="s2">&quot;layout.yaml&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
-      <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">currentModulesDict</span><span class="p">,</span> <span class="n">layout</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+      <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
       <span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-
-  <span class="k">def</span> <span class="nf">_restoreLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="kn">import</span> <span class="nn">yaml</span><span class="o">,</span> <span class="nn">os</span>
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;layouts&#39;</span><span class="p">,</span> <span class="s1">&#39;layout.yaml&#39;</span><span class="p">)):</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;layouts&#39;</span><span class="p">,</span> <span class="s1">&#39;layout.yaml&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-          <span class="n">modulesDict</span><span class="p">,</span> <span class="n">layoutState</span> <span class="o">=</span>  <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="kn">import</span> <span class="nn">ccpn.ui.gui.modules</span> <span class="kn">as</span> <span class="nn">gm</span>
-        <span class="n">ccpnModules</span> <span class="o">=</span> <span class="n">gm</span><span class="o">.</span><span class="n">importCcpnModules</span><span class="p">(</span><span class="n">modulesDict</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ccpnModule</span> <span class="ow">in</span> <span class="n">ccpnModules</span><span class="p">:</span>
-          <span class="n">newModule</span> <span class="o">=</span> <span class="n">ccpnModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">newModule</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">layoutState</span><span class="p">)</span>
-
-      <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># for now just ignore restore failures</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Layout restore failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+  <span class="c1"># GWV while refactoring: This routine seems not to be called</span>
+  <span class="c1">#TODO:TJ: Confirm and delete</span>
+  <span class="c1"># def _restoreLayout(self):</span>
+  <span class="c1">#   import yaml, os</span>
+  <span class="c1">#   if os.path.exists(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)):</span>
+  <span class="c1">#     try:</span>
+  <span class="c1">#       with open(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)) as f:</span>
+  <span class="c1">#         modulesDict, layoutState =  yaml.load(f)</span>
+  <span class="c1">#</span>
+  <span class="c1">#       import ccpn.ui.gui.modules as gm</span>
+  <span class="c1">#       ccpnModules = gm.importCcpnModules(modulesDict)</span>
+  <span class="c1">#       for ccpnModule in ccpnModules:</span>
+  <span class="c1">#         #FIXME: is this correct?</span>
+  <span class="c1">#         newModule = ccpnModule(self.ui.gui.mainWindow)</span>
+  <span class="c1">#         self.ui.mainWindow.moduleArea.addModule(newModule)</span>
+  <span class="c1">#</span>
+  <span class="c1">#       self.ui.mainWindow.moduleArea.restoreState(layoutState)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     except Exception as e:</span>
+  <span class="c1">#       # for now just ignore restore failures</span>
+  <span class="c1">#       getLogger().warning(&quot;Layout restore failed: %s&quot; % e)</span>
 
   <span class="c1">#</span>
   <span class="c1"># def _openCcpnModule(self, ccpnModules, **kwargs):</span>
@@ -1070,7 +1118,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_updateWindowTitle</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">getMenuAction</span><span class="p">(</span><span class="s1">&#39;Project-&gt;Archive&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_updateRecentFiles</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_fillRecentProjectsMenu</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_saveLayout</span><span class="p">()</span>
 
       <span class="c1"># saveIconPath = os.path.join(Path.getPathToImport(&#39;ccpn.ui.gui.widgets&#39;), &#39;icons&#39;, &#39;save.png&#39;)</span>
@@ -1091,13 +1139,39 @@
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveProject</span><span class="p">(</span><span class="n">newPath</span><span class="o">=</span><span class="n">newPath</span><span class="p">,</span> <span class="n">createFallback</span><span class="o">=</span><span class="n">createFallback</span><span class="p">,</span>
                                <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">)</span></div>
 
+  <span class="c1"># GWV: This routine should not be used as it calls the graphics mainWindow routine</span>
+  <span class="c1"># Instead: The graphics part now calls _getRecentFiles</span>
+  <span class="c1">#</span>
+  <span class="c1"># def _updateRecentFiles(self, oldPath=None):</span>
+  <span class="c1">#   project = self.project</span>
+  <span class="c1">#   path = project.path</span>
+  <span class="c1">#   recentFiles = self.preferences.recentFiles</span>
+  <span class="c1">#   mainWindow = self.ui.mainWindow or self._mainWindow</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if not hasattr(project._wrappedData.root, &#39;_temporaryDirectory&#39;):</span>
+  <span class="c1">#     if path in recentFiles:</span>
+  <span class="c1">#       recentFiles.remove(path)</span>
+  <span class="c1">#     elif oldPath in recentFiles:</span>
+  <span class="c1">#       recentFiles.remove(oldPath)</span>
+  <span class="c1">#     elif len(recentFiles) &gt;= 10:</span>
+  <span class="c1">#       recentFiles.pop()</span>
+  <span class="c1">#     recentFiles.insert(0, path)</span>
+  <span class="c1">#   recentFiles = uniquify(recentFiles)</span>
+  <span class="c1">#   mainWindow._fillRecentProjectsMenu()</span>
+  <span class="c1">#   self.preferences.recentFiles = recentFiles</span>
 
-  <span class="k">def</span> <span class="nf">_updateRecentFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_getRecentFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPath</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get and return a list of recent files, setting reference to</span>
+<span class="sd">       self as first element, unless it is a temp project</span>
+<span class="sd">       update the preferences with the new list</span>
+<span class="sd">       </span>
+<span class="sd">       CCPN INTERNAL: called by MainWindow</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span>
     <span class="n">recentFiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentFiles</span>
-    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span>
 
+    <span class="c1">#TODO:RASMUS: replace by new function on project: isTemporary()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;_temporaryDirectory&#39;</span><span class="p">):</span>
       <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recentFiles</span><span class="p">:</span>
         <span class="n">recentFiles</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -1107,9 +1181,8 @@
         <span class="n">recentFiles</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
       <span class="n">recentFiles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
     <span class="n">recentFiles</span> <span class="o">=</span> <span class="n">uniquify</span><span class="p">(</span><span class="n">recentFiles</span><span class="p">)</span>
-    <span class="n">mainWindow</span><span class="o">.</span><span class="n">_fillRecentProjectsMenu</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentFiles</span> <span class="o">=</span> <span class="n">recentFiles</span>
-
+    <span class="k">return</span> <span class="n">recentFiles</span>
 
 <div class="viewcode-block" id="Framework.saveProjectAs"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.saveProjectAs">[docs]</a>  <span class="k">def</span> <span class="nf">saveProjectAs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Opens save Project as dialog box and saves project to path specified in the file dialog.&quot;&quot;&quot;</span>
@@ -1121,12 +1194,13 @@
       <span class="n">successful</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveProject</span><span class="p">(</span><span class="n">newPath</span><span class="o">=</span><span class="n">newProjectPath</span><span class="p">,</span> <span class="n">createFallback</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="n">successful</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Saving project to </span><span class="si">%s</span><span class="s2"> aborted&quot;</span> <span class="o">%</span> <span class="n">newProjectPath</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Saving project to </span><span class="si">%s</span><span class="s2"> aborted&quot;</span> <span class="o">%</span> <span class="n">newProjectPath</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">successful</span> <span class="o">=</span> <span class="bp">False</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Project not saved - no valid destination selected&quot;</span><span class="p">)</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Project not saved - no valid destination selected&quot;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateRecentFiles</span><span class="p">(</span><span class="n">oldPath</span><span class="o">=</span><span class="n">oldPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_getRecentFiles</span><span class="p">(</span><span class="n">oldPath</span><span class="o">=</span><span class="n">oldPath</span><span class="p">)</span> <span class="c1"># this will also update the list</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_fillRecentProjectsMenu</span><span class="p">()</span>  <span class="c1"># Update the menu</span>
 
     <span class="k">return</span> <span class="n">successful</span></div>
 
@@ -1256,26 +1330,34 @@
       <span class="k">try</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
       <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Preferences not saved: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Preferences not saved: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
         <span class="k">return</span>
 
     <span class="n">prefFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prefPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">,</span> <span class="n">prefFile</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">))</span>
     <span class="n">prefFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+    <span class="c1"># reply = MessageDialog.showMulti(&quot;Quit Program&quot;, &quot;Do you want to save changes before quitting?&quot;,</span>
+    <span class="c1">#                                 [&#39;Save and Quit&#39;, &#39;Quit without Saving&#39;, &#39;Cancel&#39;],</span>
+    <span class="c1">#                                 colourScheme=self.ui.mainWindow.colourScheme)</span>
     <span class="n">reply</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showMulti</span><span class="p">(</span><span class="s2">&quot;Quit Program&quot;</span><span class="p">,</span> <span class="s2">&quot;Do you want to save changes before quitting?&quot;</span><span class="p">,</span>
-                                    <span class="p">[</span><span class="s1">&#39;Save and Quit&#39;</span><span class="p">,</span> <span class="s1">&#39;Quit without Saving&#39;</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">],</span>
-                                    <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+                                    <span class="p">[</span><span class="s1">&#39;Save and Quit&#39;</span><span class="p">,</span> <span class="s1">&#39;Quit without Saving&#39;</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">])</span>   <span class="c1"># ejb</span>
     <span class="k">if</span> <span class="n">reply</span> <span class="o">==</span> <span class="s1">&#39;Save and Quit&#39;</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
       <span class="n">prefFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prefPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
       <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">,</span> <span class="n">prefFile</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">))</span>
       <span class="n">prefFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveProject</span><span class="p">()</span>
-      <span class="c1"># Close and clean up project</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_closeProject</span><span class="p">()</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+      <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveProject</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">success</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c1"># Close and clean up project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closeProject</span><span class="p">()</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="p">:</span>                             <span class="c1"># ejb - don&#39;t close the project</span>
+          <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+
     <span class="k">elif</span> <span class="n">reply</span> <span class="o">==</span> <span class="s1">&#39;Quit without Saving&#39;</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
         <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
@@ -1316,39 +1398,52 @@
   <span class="c1">###################################################################################################################</span>
 
 <div class="viewcode-block" id="Framework.showSpectrumGroupsPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showSpectrumGroupsPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showSpectrumGroupsPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumGroupEditor</span> <span class="kn">import</span> <span class="n">SpectrumGroupEditor</span>
-    <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">editorMode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project has no Specta. Spectrum groups cannot be displayed&#39;</span><span class="p">)</span>
+      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project contains no spectra.&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectrum groups cannot be displayed&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumGroupEditor</span> <span class="kn">import</span> <span class="n">SpectrumGroupEditor</span>
+      <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">editorMode</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Framework.showProjectionPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showProjectionPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showProjectionPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project has no Specta. Make Projection Popup cannot be displayed&#39;</span><span class="p">)</span>
       <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project contains no spectra.&#39;</span><span class="p">,</span> <span class="s1">&#39;Make Projection Popup cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumProjectionPopup</span> <span class="kn">import</span> <span class="n">SpectrumProjectionPopup</span>
-    <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumProjectionPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumProjectionPopup</span> <span class="kn">import</span> <span class="n">SpectrumProjectionPopup</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumProjectionPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Framework.showExperimentTypePopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showExperimentTypePopup">[docs]</a>  <span class="k">def</span> <span class="nf">showExperimentTypePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays experiment type popup.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.ExperimentTypePopup</span> <span class="kn">import</span> <span class="n">ExperimentTypePopup</span>
-    <span class="n">popup</span> <span class="o">=</span> <span class="n">ExperimentTypePopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Experiment Type Selection: Project has no Specta.&#39;</span><span class="p">)</span>
+      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Experiment Type Selection&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no Spectra.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.ExperimentTypePopup</span> <span class="kn">import</span> <span class="n">ExperimentTypePopup</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">ExperimentTypePopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Framework.showPeakPickPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showPeakPickPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showPeakPickPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays Peak Picking Popup.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.PeakFind</span> <span class="kn">import</span> <span class="n">PeakFindPopup</span>
-    <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakFindPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">)</span>
-    <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Peak Picking: Project has no Specta.&#39;</span><span class="p">)</span>
+      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Peak Picking&#39;</span><span class="p">,</span> <span class="s1">&#39;Project has no Spectra.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.PeakFind</span> <span class="kn">import</span> <span class="n">PeakFindPopup</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakFindPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Framework.showCopyPeakListPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showCopyPeakListPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showCopyPeakListPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Project has no Peak Lists. Peak Lists cannot be copied&#39;</span><span class="p">)</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Project has no Peak Lists. Peak Lists cannot be copied&#39;</span><span class="p">)</span>
       <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project has no Peak Lists.&#39;</span><span class="p">,</span> <span class="s1">&#39;Peak Lists cannot be copied&#39;</span><span class="p">)</span>
       <span class="k">return</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1366,7 +1461,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CreateSequence</span> <span class="kn">import</span> <span class="n">CreateSequence</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showMoleculePopup()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showMoleculePopup()&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showMoleculePopup()&quot;</span><span class="p">)</span>
     <span class="n">popup</span> <span class="o">=</span> <span class="n">CreateSequence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
@@ -1378,7 +1473,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">showSequenceModule</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.toggleSequenceModule()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.toggleSequenceModule()&quot;</span><span class="p">)</span></div>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.toggleSequenceModule()&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Framework.showSequenceModule"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showSequenceModule">[docs]</a>  <span class="k">def</span> <span class="nf">showSequenceModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -1387,9 +1482,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.SequenceModule</span> <span class="kn">import</span> <span class="n">SequenceModule</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span> <span class="o">=</span> <span class="n">SequenceModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span><span class="p">,</span>
-                                            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span> <span class="o">=</span> <span class="n">SequenceModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span><span class="p">,</span>
+                                    <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequenceModule</span></div>
 
 
@@ -1406,8 +1502,8 @@
 <div class="viewcode-block" id="Framework.showRefChemicalShifts"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showRefChemicalShifts">[docs]</a>  <span class="k">def</span> <span class="nf">showRefChemicalShifts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Displays Reference Chemical Shifts module.&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ReferenceChemicalShifts</span> <span class="kn">import</span> <span class="n">ReferenceChemicalShifts</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">refChemShifts</span> <span class="o">=</span> <span class="n">ReferenceChemicalShifts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">refChemShifts</span> <span class="o">=</span> <span class="n">ReferenceChemicalShifts</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refChemShifts</span><span class="p">)</span></div>
 
   <span class="c1">###################################################################################################################</span>
   <span class="c1">## MENU callbacks:  VIEW</span>
@@ -1427,61 +1523,101 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">__blankDisplay</span> <span class="o">=</span> <span class="n">value</span>
 
 
-<div class="viewcode-block" id="Framework.showChemicalShiftTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showChemicalShiftTable">[docs]</a>  <span class="k">def</span> <span class="nf">showChemicalShiftTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Framework.showChemicalShiftTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showChemicalShiftTable">[docs]</a>  <span class="k">def</span> <span class="nf">showChemicalShiftTable</span><span class="p">(</span><span class="bp">self</span>
+                             <span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span>
+                             <span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span>
+                             <span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays Chemical Shift table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project has no Chemical Shift Lists.&#39;</span><span class="p">,</span> <span class="s1">&#39;Chemical Shift Table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ChemicalShiftTable</span> <span class="kn">import</span> <span class="n">ChemicalShiftTable</span>
-    <span class="n">chemicalShiftTable</span> <span class="o">=</span> <span class="n">ChemicalShiftTable</span><span class="p">(</span><span class="n">chemicalShiftLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">chemicalShiftTable</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showChemicalShiftTable()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showChemicalShiftTable()&quot;</span><span class="p">)</span></div>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ChemicalShiftTable</span> <span class="kn">import</span> <span class="n">ChemicalShiftTableModule</span>
 
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="c1">#FIXME:ED - sometimes crashes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
+      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTableModule</span> <span class="o">=</span> <span class="n">ChemicalShiftTableModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="n">chemicalShiftList</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showChemicalShiftTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showChemicalShiftTable()&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTableModule</span></div>
 
-<div class="viewcode-block" id="Framework.showNmrResidueTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showNmrResidueTable">[docs]</a>  <span class="k">def</span> <span class="nf">showNmrResidueTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Framework.showNmrResidueTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showNmrResidueTable">[docs]</a>  <span class="k">def</span> <span class="nf">showNmrResidueTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Displays Nmr Residue Table&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.NmrResidueTable</span> <span class="kn">import</span> <span class="n">NmrResidueTableModule</span>
-    <span class="n">nmrResidueTableModule</span> <span class="o">=</span> <span class="n">NmrResidueTableModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="c1">#nmrResidueTableModule = CcpnModule(name=&#39;Nmr Residue Table&#39;)</span>
-    <span class="c1">#nmrResidueTableModule.layout.addWidget(nmrResidueTable)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">nmrResidueTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showNmrResidueTable()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showNmrResidueTable()&quot;</span><span class="p">)</span></div>
 
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="c1">#FIXME:ED - sometimes crashes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
+      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableModule</span> <span class="o">=</span> <span class="n">NmrResidueTableModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="n">nmrChain</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showNmrResidueTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showNmrResidueTable()&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTableModule</span></div>
 
-<div class="viewcode-block" id="Framework.showPeakTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showPeakTable">[docs]</a>  <span class="k">def</span> <span class="nf">showPeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedList</span><span class="p">:</span><span class="n">PeakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="c1"># def showStructureTable(self, position=&#39;bottom&#39;, relativeTo=None, structureEnsemble=None):</span>
+  <span class="c1">#   &quot;&quot;&quot;Displays Structure Table&quot;&quot;&quot;</span>
+  <span class="c1">#   from ccpn.ui.gui.modules.StructureTable import StructureTableModule</span>
+  <span class="c1">#</span>
+  <span class="c1">#   mainWindow = self.ui.mainWindow</span>
+  <span class="c1">#   #FIXME:ED - sometimes crashes</span>
+  <span class="c1">#   if not relativeTo:</span>
+  <span class="c1">#     relativeTo = mainWindow.moduleArea      # ejb</span>
+  <span class="c1">#   self.structureTableModule = StructureTableModule(mainWindow=mainWindow</span>
+  <span class="c1">#                                               , structureEnsemble=structureEnsemble)</span>
+  <span class="c1">#   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   mainWindow.pythonConsole.writeConsoleCommand(&quot;application.showStructureTable()\n&quot;)</span>
+  <span class="c1">#   logger.info(&quot;application.showStructureTable()&quot;)</span>
+  <span class="c1">#   return self.structureTableModule</span>
+  <span class="c1">#</span>
+<div class="viewcode-block" id="Framework.showPeakTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showPeakTable">[docs]</a>  <span class="k">def</span> <span class="nf">showPeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="p">:</span><span class="n">PeakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays Peak table on left of main window with specified list selected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PeakTable</span> <span class="kn">import</span> <span class="n">PeakTable</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Project has no Peak Lists. Peak table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project has no Peak Lists.&#39;</span><span class="p">,</span> <span class="s1">&#39;Peak table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span> <span class="o">=</span> <span class="n">PeakTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">selectedList</span><span class="o">=</span><span class="n">selectedList</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showPeakTable()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showPeakTable()&quot;</span><span class="p">)</span></div>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PeakTable</span> <span class="kn">import</span> <span class="n">PeakTableModule</span>
 
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="c1">#FIXME:ED - sometimes crashes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
+      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTableModule</span> <span class="o">=</span> <span class="n">PeakTableModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="n">peakList</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showPeakTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showPeakTable()&quot;</span><span class="p">)</span>
+    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">peakTableModule</span></div>
 
-<div class="viewcode-block" id="Framework.showRestraintTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showRestraintTable">[docs]</a>  <span class="k">def</span> <span class="nf">showRestraintTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedList</span><span class="p">:</span><span class="n">PeakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Framework.showRestraintTable"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showRestraintTable">[docs]</a>  <span class="k">def</span> <span class="nf">showRestraintTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintList</span><span class="p">:</span><span class="n">PeakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays Peak table on left of main window with specified list selected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.RestraintTable</span> <span class="kn">import</span> <span class="n">RestraintTable</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Project has no Restraint Lists. Restraint table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Project has no Restraint Lists.&#39;</span><span class="p">,</span> <span class="s1">&#39;Restraint table cannot be displayed&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-    <span class="n">restraintTable</span> <span class="o">=</span> <span class="n">RestraintTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">selectedList</span><span class="o">=</span><span class="n">selectedList</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">restraintTable</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showRestraintTable()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showRestraintTable()&quot;</span><span class="p">)</span></div>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.RestraintTable</span> <span class="kn">import</span> <span class="n">RestraintTableModule</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="c1">#FIXME:ED - sometimes crashes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
+      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">restraintTableModule</span> <span class="o">=</span> <span class="n">RestraintTableModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">restraintList</span><span class="o">=</span><span class="n">restraintList</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showRestraintTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showRestraintTable()&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraintTableModule</span></div>
 
+<div class="viewcode-block" id="Framework.showNotesEditor"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showNotesEditor">[docs]</a>  <span class="k">def</span> <span class="nf">showNotesEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays Notes Editing Table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.NotesEditor</span> <span class="kn">import</span> <span class="n">NotesEditorModule</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+
+    <span class="c1">#FIXME:ED - sometimes crashes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
+      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">notesEditorModule</span> <span class="o">=</span> <span class="n">NotesEditorModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notesEditorModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showNotesEditorTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showNotesEditorTable()&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">notesEditorModule</span></div>
 
 <div class="viewcode-block" id="Framework.showPrintSpectrumDisplayPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showPrintSpectrumDisplayPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showPrintSpectrumDisplayPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.PrintSpectrumPopup</span> <span class="kn">import</span> <span class="n">SelectSpectrumDisplayPopup</span> <span class="c1">#,PrintSpectrumDisplayPopup</span>
@@ -1490,37 +1626,6 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">SelectSpectrumDisplayPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
       <span class="c1"># PrintSpectrumDisplayPopup(project=self.project).exec_()</span>
-
-
-<div class="viewcode-block" id="Framework.showSequenceGraph"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showSequenceGraph">[docs]</a>  <span class="k">def</span> <span class="nf">showSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.SequenceGraph</span> <span class="kn">import</span> <span class="n">SequenceGraph</span>
-
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">):</span>
-      <span class="k">return</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">SequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showSequenceGraph()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showSequenceGraph()&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span></div>
-
-<div class="viewcode-block" id="Framework.showAtomSelector"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showAtomSelector">[docs]</a>  <span class="k">def</span> <span class="nf">showAtomSelector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Displays Atom Selector.&quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.AtomSelector</span> <span class="kn">import</span> <span class="n">AtomSelector</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">atomSelector</span> <span class="o">=</span> <span class="n">AtomSelector</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSelector</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showAtomSelector()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showAtomSelector()&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomSelector</span></div>
 
 <div class="viewcode-block" id="Framework.toggleToolbar"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.toggleToolbar">[docs]</a>  <span class="k">def</span> <span class="nf">toggleToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1555,17 +1660,21 @@
 <span class="sd">    Toggles whether python console is displayed at bottom of the main window.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="s1">&#39;Python Console&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+
+    <span class="k">if</span> <span class="s1">&#39;Python Console&#39;</span> <span class="ow">in</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+        <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
+      <span class="c1">#TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);</span>
+      <span class="c1"># initialise in GuiMainWindow on __init__; set appropriate Menu callbacks</span>
+      <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PythonConsoleModule</span> <span class="kn">import</span> <span class="n">PythonConsoleModule</span>
       <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findMenuAction</span><span class="p">(</span><span class="s1">&#39;View&#39;</span><span class="p">,</span> <span class="s1">&#39;Python Console&#39;</span><span class="p">)</span>
       <span class="n">closeFunc</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">trigger</span> <span class="k">if</span> <span class="n">action</span> <span class="k">else</span> <span class="bp">None</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="n">CcpnModule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Python Console&#39;</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="n">closeFunc</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
+      <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="n">PythonConsoleModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="n">closeFunc</span><span class="p">)</span>
+      <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
 
 
   <span class="c1">#################################################################################################</span>
@@ -1576,37 +1685,53 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays macro editor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Macro Editor&quot;</span><span class="p">)</span></div>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
+    <span class="c1"># mainWindow.pythonConsole.writeConsoleCommand(&quot;application.showMacroEditor()&quot;)</span>
+    <span class="c1"># getLogger().info(&quot;application.showMacroEditor()&quot;)</span>
 
 <div class="viewcode-block" id="Framework.newMacroFromConsole"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.newMacroFromConsole">[docs]</a>  <span class="k">def</span> <span class="nf">newMacroFromConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays macro editor with contents of python console inside.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Macro Editor&quot;</span><span class="p">)</span>
-    <span class="n">editor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span></div>
+    <span class="c1"># editor = MacroEditor(self.ui.mainWindow.moduleArea, self, &quot;Macro Editor&quot;)</span>
+    <span class="c1">#FIXME:ED - haven&#39;t checked this properly</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.newMacroFromLog"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.newMacroFromLog">[docs]</a>  <span class="k">def</span> <span class="nf">newMacroFromLog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays macro editor with contents of the log.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Macro Editor&quot;</span><span class="p">)</span>
-    <span class="n">l</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">logPath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="c1"># editor = MacroEditor(self.ui.mainWindow.moduleArea, self, &quot;Macro Editor&quot;)</span>
+    <span class="c1">#FIXME:ED - haven&#39;t checked this properly</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">)</span>
+
+    <span class="n">l</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">logPath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
     <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">l</span><span class="p">])</span>
-    <span class="n">editor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Framework.startMacroRecord"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.startMacroRecord">[docs]</a>  <span class="k">def</span> <span class="nf">startMacroRecord</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays macro editor with additional buttons for recording a macro.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">macroEditor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Macro Editor&quot;</span><span class="p">,</span> <span class="n">showRecordButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">showRecordButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">editor</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span></div>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Framework.defineUserShortcuts"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.defineUserShortcuts">[docs]</a>  <span class="k">def</span> <span class="nf">defineUserShortcuts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ShortcutModule</span> <span class="kn">import</span> <span class="n">ShortcutModule</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">shortcutModule</span> <span class="o">=</span> <span class="n">ShortcutModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span></div>
+    <span class="c1"># self.shortcutModule = ShortcutModule(self.ui.mainWindow)</span>
+    <span class="n">ShortcutModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>   <span class="c1"># ejb</span></div>
 
 <div class="viewcode-block" id="Framework.runMacro"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.runMacro">[docs]</a>  <span class="k">def</span> <span class="nf">runMacro</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">macroFile</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1647,7 +1772,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_systemOpen</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnWebView</span> <span class="kn">import</span> <span class="n">CcpnWebView</span>
-      <span class="n">newModule</span> <span class="o">=</span> <span class="n">CcpnModule</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+      <span class="n">newModule</span> <span class="o">=</span> <span class="n">CcpnModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
       <span class="n">view</span> <span class="o">=</span> <span class="n">CcpnWebView</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
       <span class="n">newModule</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">newModule</span><span class="p">)</span>

@@ -91,80 +91,63 @@
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.ui.gui.lib.PeakAssignment">
-<span id="ccpn-ui-gui-lib-peakassignment-module"></span><h2>ccpn.ui.gui.lib.PeakAssignment module<a class="headerlink" href="#module-ccpn.ui.gui.lib.PeakAssignment" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.filterIntraResidual">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">filterIntraResidual</code><span class="sig-paren">(</span><em>nmrAtomsForDimensions: List[ccpn.core.NmrAtom.NmrAtom]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#filterIntraResidual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.filterIntraResidual" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a N-list of lists of nmrAtoms, where N
-is the number of peak dimensions and only returns
-those which belong to residues that show up in
-at least to of the dimensions (This is the behaviour
-in v2, if I am correct).</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.getAssignmentToleranceForPeakDimension">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">getAssignmentToleranceForPeakDimension</code><span class="sig-paren">(</span><em>peak: ccpn.core.Peak.Peak</em>, <em>dim: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#getAssignmentToleranceForPeakDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.getAssignmentToleranceForPeakDimension" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="module-ccpn.ui.gui.lib.GuiNotifier">
+<span id="ccpn-ui-gui-lib-guinotifier-module"></span><h2>ccpn.ui.gui.lib.GuiNotifier module<a class="headerlink" href="#module-ccpn.ui.gui.lib.GuiNotifier" title="Permalink to this headline">¶</a></h2>
+<p>Notifier extensions for Gui objects, wrapping it into a class that also acts as the called 
+function, displatching the &#8216;user&#8217; callback if required.
+The Notifier can be defined relative to any valid V3 Widget
+object as it first checks if the triggered signature is valid.</p>
+<p>The callback function is passed a callback dictionary with relevant info (see
+docstring of Notifier class. This idea was copied from the Traitlets package.</p>
+<p>Very similar (and if fact based upon) the Notifier Class for core objects,
+but separate to keep graphics code isolated</p>
+<p>April 2017: First design by Geerten Vuister</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.lib.GuiNotifier.GuiNotifier">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.lib.GuiNotifier.</code><code class="descname">GuiNotifier</code><span class="sig-paren">(</span><em>theObject: Any, triggers: list, targetName: list, callback: Callable[..., str], *args, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiNotifier.html#GuiNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<blockquote>
+<div>GuiNotifier class:</div></blockquote>
+<p>triggers callback function with signature:  callback(callbackDict [, <a href="#id1"><span class="problematic" id="id2">*</span></a>args] [, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs])</p>
+<dl class="docutils">
+<dt>Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtGui.QWidget and </dt>
+<dd><blockquote class="first">
+<div>be droppable</div></blockquote>
+<p class="last">trigger, notifier,        targetName: optional dropTargets to filter for
+event, isCcpnJson,        before callback (None to skip, defined in DropBase)
+[dropTargets]</p>
+</dd>
+</dl>
+<p>dropTargets: keywords defining type of dropped objects: currently implemented: &#8216;urls&#8217;, &#8216;text&#8217;, &#8216;pids&#8217;</p>
+<p>Implemention:</p>
+<blockquote>
+<div>The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
+defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
+Note that this dict also contains a reference to the GuiNotifier object itself; this way it can be used 
+to pass-on additional implementation specfic information to the callback function.</div></blockquote>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.DROPEVENT">
+<code class="descname">DROPEVENT</code><em class="property"> = 'dropEvent'</em><a class="headerlink" href="#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.DROPEVENT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.intersectionOfAll">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">intersectionOfAll</code><span class="sig-paren">(</span><em>sets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#intersectionOfAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.intersectionOfAll" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.setDebug">
+<code class="descname">setDebug</code><span class="sig-paren">(</span><em>flag: bool</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiNotifier.html#GuiNotifier.setDebug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.setDebug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set debug output on/off</p>
+</dd></dl>
 
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForDimensionOfPeaks">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">matchingNmrAtomsForDimensionOfPeaks</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], dim: int, nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#matchingNmrAtomsForDimensionOfPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForDimensionOfPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds out which nmrAtom can be assigned to a specific
-dimension of all the peaks, the N dimension for instance.
-Only returns those nmrAtoms that can be assigned to this
-dimension of all the selected peaks.</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.unRegister">
+<code class="descname">unRegister</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiNotifier.html#GuiNotifier.unRegister"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.unRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>unregister the notifiers</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeakDimension">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">matchingNmrAtomsForPeakDimension</code><span class="sig-paren">(</span><em>peak: ccpn.core.Peak.Peak, dim: int, nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#matchingNmrAtomsForPeakDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeakDimension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Just finds the nmrAtoms that fit a dimension of one peak.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeaks">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">matchingNmrAtomsForPeaks</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#matchingNmrAtomsForPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a set of nmrAtoms that fit to the dimensions of the
-peaks. This function does the actual calculation and does
-not involve filtering like in nmrAtoms_for_peaks, where
-more filters can be specified in the future.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.nmrAtomsForPeaks">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">nmrAtomsForPeaks</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], intraResidual: bool = False, doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#nmrAtomsForPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.nmrAtomsForPeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a set of nmrAtoms that fit to the dimensions of the
-peaks.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.peaksAreOnLine">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">peaksAreOnLine</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], dim: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#peaksAreOnLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.peaksAreOnLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns True when multiple peaks are located
-on a line in the given dimensions.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.sameAxisCodes">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">sameAxisCodes</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], dim: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#sameAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.sameAxisCodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether all peaks have the same axisCode
-for in the given dimension.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.PeakAssignment.withinTolerance">
-<code class="descclassname">ccpn.ui.gui.lib.PeakAssignment.</code><code class="descname">withinTolerance</code><span class="sig-paren">(</span><em>nmrAtom: ccpn.core.NmrAtom.NmrAtom</em>, <em>position: float</em>, <em>shiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em>, <em>tolerance: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/PeakAssignment.html#withinTolerance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.PeakAssignment.withinTolerance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decides whether the shift of the nmrAtom is
-within the tolerance to be assigned to the
-peak dimension.</p>
+<dt id="ccpn.ui.gui.lib.GuiNotifier.skip">
+<code class="descclassname">ccpn.ui.gui.lib.GuiNotifier.</code><code class="descname">skip</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/GuiNotifier.html#skip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.GuiNotifier.skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do nothing</p>
 </dd></dl>
 
 </div>
@@ -177,16 +160,6 @@ peak dimension.</p>
 <dd><p>Takes a Peak or an NmrResidue, not both, a set of axisCodes, and a PeakListView.
 Derives positions for picking and feeds them into a PeakList wrapper function that
 performs the picking.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.ui.gui.lib.Qt">
-<span id="ccpn-ui-gui-lib-qt-module"></span><h2>ccpn.ui.gui.lib.Qt module<a class="headerlink" href="#module-ccpn.ui.gui.lib.Qt" title="Permalink to this headline">¶</a></h2>
-<p>Qt related utility functions</p>
-<dl class="function">
-<dt id="ccpn.ui.gui.lib.Qt.interpretEvent">
-<code class="descclassname">ccpn.ui.gui.lib.Qt.</code><code class="descname">interpretEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Qt.html#interpretEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Qt.interpretEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpret drop event and return (type, data)</p>
 </dd></dl>
 
 </div>
@@ -204,7 +177,7 @@ performs the picking.</p>
 
 <dl class="function">
 <dt id="ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakPosition">
-<code class="descclassname">ccpn.ui.gui.lib.SpectrumDisplay.</code><code class="descname">navigateToPeakPosition</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>peak: ccpn.core.Peak.Peak = None</em>, <em>selectedDisplays: List[ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay] = None</em>, <em>strip: ccpn.ui.gui.modules.GuiStrip.GuiStrip=None = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/SpectrumDisplay.html#navigateToPeakPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakPosition" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.ui.gui.lib.SpectrumDisplay.</code><code class="descname">navigateToPeakPosition</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>peak: ccpn.core.Peak.Peak = None</em>, <em>selectedDisplays: List[ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay] = None</em>, <em>strip: ccpn.ui.gui.modules.GuiStrip.GuiStrip = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/SpectrumDisplay.html#navigateToPeakPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakPosition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
 to the positions specified by the peak.</p>
 </dd></dl>
@@ -229,9 +202,32 @@ This was not used then. Maybe it should be?</p>
 
 <dl class="function">
 <dt id="ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip">
-<code class="descclassname">ccpn.ui.gui.lib.Strip.</code><code class="descname">navigateToNmrAtomsInStrip</code><span class="sig-paren">(</span><em>strip: ccpn.ui.gui.modules.GuiStrip.GuiStrip, nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], widths=None, markPositions: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Strip.html#navigateToNmrAtomsInStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.ui.gui.lib.Strip.</code><code class="descname">navigateToNmrAtomsInStrip</code><span class="sig-paren">(</span><em>strip: ccpn.ui.gui.modules.GuiStrip.GuiStrip, nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], widths=None, markPositions: bool = False, setNmrResidueLabel=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Strip.html#navigateToNmrAtomsInStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
 and spectrum displays to the positions specified by the peak.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.Strip.navigateToNmrResidueInDisplay">
+<code class="descclassname">ccpn.ui.gui.lib.Strip.</code><code class="descname">navigateToNmrResidueInDisplay</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>display</em>, <em>stripIndex=0</em>, <em>widths=None</em>, <em>showSequentialResidues=False</em>, <em>markPositions=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Strip.html#navigateToNmrResidueInDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Strip.navigateToNmrResidueInDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in
+strips[stripIndex-1] and strips[stripIndex+1]
+return list of strips</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nmrResidue</strong> &#8211; </li>
+<li><strong>display</strong> &#8211; </li>
+<li><strong>showSequentialResidues</strong> &#8211; boolean selecting if sequential strips are displayed</li>
+<li><strong>markPositions</strong> &#8211; boolean selecting if marks are displayed</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:return list of strips</p>
 </dd></dl>
 
 <dl class="function">
@@ -245,11 +241,80 @@ to the positions in the displayed axis order of the strip.</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.lib.Window">
 <span id="ccpn-ui-gui-lib-window-module"></span><h2>ccpn.ui.gui.lib.Window module<a class="headerlink" href="#module-ccpn.ui.gui.lib.Window" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.ui.gui.lib.mouseEvents">
+<span id="ccpn-ui-gui-lib-mouseevents-module"></span><h2>ccpn.ui.gui.lib.mouseEvents module<a class="headerlink" href="#module-ccpn.ui.gui.lib.mouseEvents" title="Permalink to this headline">¶</a></h2>
+<p>various mouse event functions</p>
 <dl class="function">
-<dt id="ccpn.ui.gui.lib.Window.markPositions">
-<code class="descclassname">ccpn.ui.gui.lib.Window.</code><code class="descname">markPositions</code><span class="sig-paren">(</span><em>project</em>, <em>axisCodes</em>, <em>atomPositions</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/Window.html#markPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.Window.markPositions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.</p>
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlLeftMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlLeftMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlLeftMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlLeftMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlMiddleMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlMiddleMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlMiddleMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlMiddleMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlRightMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlRightMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlRightMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlRightMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlShiftLeftMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlShiftLeftMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlShiftLeftMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlShiftLeftMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlShiftMiddleMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlShiftMiddleMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlShiftMiddleMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlShiftMiddleMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.controlShiftRightMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">controlShiftRightMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#controlShiftRightMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.controlShiftRightMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.doDebug">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">doDebug</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#doDebug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.doDebug" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.getMouseEventDict">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">getMouseEventDict</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#getMouseEventDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.getMouseEventDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dict with the status of each mouseEvent as boolean</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.leftMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">leftMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#leftMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.leftMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.middleMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">middleMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#middleMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.middleMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.rightMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">rightMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#rightMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.rightMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.shiftLeftMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">shiftLeftMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#shiftLeftMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.shiftLeftMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.shiftMiddleMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">shiftMiddleMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#shiftMiddleMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.shiftMiddleMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.lib.mouseEvents.shiftRightMouse">
+<code class="descclassname">ccpn.ui.gui.lib.mouseEvents.</code><code class="descname">shiftRightMouse</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/lib/mouseEvents.html#shiftRightMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.lib.mouseEvents.shiftRightMouse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 </div>
@@ -266,12 +331,12 @@ to the positions in the displayed axis order of the strip.</p>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiGenerator">ccpn.ui.gui.lib.GuiGenerator module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.PeakAssignment">ccpn.ui.gui.lib.PeakAssignment module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.GuiNotifier">ccpn.ui.gui.lib.GuiNotifier module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.PeakList">ccpn.ui.gui.lib.PeakList module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.Qt">ccpn.ui.gui.lib.Qt module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.SpectrumDisplay">ccpn.ui.gui.lib.SpectrumDisplay module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.Strip">ccpn.ui.gui.lib.Strip module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.lib.Window">ccpn.ui.gui.lib.Window module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.lib.mouseEvents">ccpn.ui.gui.lib.mouseEvents module</a></li>
 </ul>
 </li>
 </ul>

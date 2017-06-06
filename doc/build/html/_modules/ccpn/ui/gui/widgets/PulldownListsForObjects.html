@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.PulldownListsForObjects &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.PulldownListsForObjects</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generate PulldownListCompoundWidget for project objects; </span>
+<span class="sd">set callback&#39;s on creation, deletion and rename</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">PulldownListCompoundWidget</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+
+
+<div class="viewcode-block" id="getPids"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.getPids">[docs]</a><span class="k">def</span> <span class="nf">getPids</span><span class="p">(</span><span class="n">fromObject</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span>
+    <span class="s2">&quot;Get a list of pids fromObject.attributeName or None on error&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fromObject</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span> <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fromObject</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">)]</span></div>
+
+
+<span class="k">class</span> <span class="nc">_Pulldown</span><span class="p">(</span><span class="n">PulldownListCompoundWidget</span><span class="p">):</span>
+
+    <span class="c1"># need to subclass this</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span>
+                  <span class="n">showBorder</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">labelText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">showSelectName</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects</span>
+<span class="sd">        in project; not to be used directly, used as a base class for the specific classes for </span>
+<span class="sd">        the different V3 objects</span>
+<span class="sd">      </span>
+<span class="sd">    </span>
+<span class="sd">        :param parent: parent widget</span>
+<span class="sd">        :param showBorder: flag to display the border of Frame (True, False)</span>
+<span class="sd">        :param orientation: flag to determine the orientation of the labelText relative to the pulldown widget.</span>
+<span class="sd">                            Allowed values: &#39;left&#39;, &#39;right&#39;, &#39;top&#39;, &#39;bottom&#39;</span>
+<span class="sd">        :param minimumWidths: tuple of two values specifying the minimum width of the Label and Pulldown widget, respectively</span>
+<span class="sd">        :param labelText: (optional) text for the Label</span>
+<span class="sd">        :param texts: (optional) iterable generating text values for the Pulldown</span>
+<span class="sd">        :param callback: (optional) callback for the Pulldown</span>
+<span class="sd">        :param default: (optional) initially selected element of the Pulldown (text or index)</span>
+<span class="sd">        :param kwds: (optional) keyword, value pairs for the gridding of Frame</span>
+<span class="sd">      </span>
+<span class="sd">        :return: PulldownListCompoundWidget instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">labelText</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">labelText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span>
+
+        <span class="k">if</span> <span class="n">minimumWidths</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">minimumWidths</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">150</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">showSelectName</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">textList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;Select&gt;&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">getPids</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span> <span class="c1"># ejb</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">textList</span> <span class="o">=</span> <span class="n">getPids</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span>  <span class="c1"># ejb</span>
+
+        <span class="n">PulldownListCompoundWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="n">showBorder</span><span class="p">,</span>
+                                            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="n">minimumWidths</span><span class="p">,</span>
+                                            <span class="n">labelText</span><span class="o">=</span><span class="n">labelText</span><span class="p">,</span>
+                                            <span class="n">texts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">textList</span><span class="p">,</span>
+                                            <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="c1"># add a notifier to update the pulldown list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updatePulldownList</span><span class="p">(</span><span class="n">project</span>
+                                <span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">]</span>
+                                <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
+                                <span class="p">,</span> <span class="n">getPids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;PulldownListCompoundWidget for &quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
+
+
+<div class="viewcode-block" id="NmrChainPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown">[docs]</a><span class="k">class</span> <span class="nc">NmrChainPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;NmrChain&#39;</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;nmrChains&#39;</span></div>
+
+
+<div class="viewcode-block" id="StructurePulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown">[docs]</a><span class="k">class</span> <span class="nc">StructurePulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;StructureEnsemble&#39;</span>
+  <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;structureEnsembles&#39;</span></div>
+
+
+<div class="viewcode-block" id="NotesPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown">[docs]</a><span class="k">class</span> <span class="nc">NotesPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Note&#39;</span>
+  <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;notes&#39;</span></div>
+
+
+<div class="viewcode-block" id="RestraintsPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown">[docs]</a><span class="k">class</span> <span class="nc">RestraintsPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;RestraintList&#39;</span>
+  <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;restraintLists&#39;</span></div>
+
+
+<div class="viewcode-block" id="ChemicalShiftListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftListPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;ChemicalShiftList&#39;</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;chemicalShiftLists&#39;</span></div>
+
+
+<div class="viewcode-block" id="PeakListPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown">[docs]</a><span class="k">class</span> <span class="nc">PeakListPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PeakList&#39;</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;peakLists&#39;</span></div>
+
+
+<div class="viewcode-block" id="SpectrumPulldown"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown">[docs]</a><span class="k">class</span> <span class="nc">SpectrumPulldown</span><span class="p">(</span><span class="n">_Pulldown</span><span class="p">):</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Spectrum&#39;</span>
+    <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

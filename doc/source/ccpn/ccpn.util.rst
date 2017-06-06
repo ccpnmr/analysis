@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
 
     ccpn.util.nef
+    ccpn.util.v2io
 
 Submodules
 ----------

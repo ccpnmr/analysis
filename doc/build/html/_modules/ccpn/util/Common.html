@@ -48,13 +48,16 @@
             
   <h1>Source code for ccpn.util.Common</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Miscellaneous common utilities</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># NB must be Python 2.7 and 3.x compatible</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
@@ -80,21 +83,16 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 <span class="sd">&quot;&quot;&quot;Common utilities</span>
-
-<span class="sd">NB Must conform to Python 2.1. Imported in ObjectDomain.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">typing</span>
-<span class="c1"># import collections</span>
 <span class="kn">import</span> <span class="nn">string</span>
-<span class="c1"># from functools import total_ordering</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Constants</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreLibConstants</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Constants</span>
 
 <span class="c1"># Max value used for random integer. Set to be expressible as a signed 32-bit integer.</span>
 <span class="n">maxRandomInt</span> <span class="o">=</span>  <span class="mi">2000000000</span>
@@ -134,7 +132,7 @@
   <span class="k">return</span> <span class="n">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validFileNamePartChars</span><span class="p">,</span>
                                    <span class="n">defaultFileNameChar</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="incrementName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.incrementName">[docs]</a><span class="k">def</span> <span class="nf">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="incrementName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.incrementName">[docs]</a><span class="k">def</span> <span class="nf">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Add &#39;_1&#39; to name or change suffix &#39;_n&#39; to &#39;_(n+1) &quot;&quot;&quot;</span>
   <span class="n">ll</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -162,6 +160,9 @@
 <span class="sd">  Note that there are potential problems if the files we want are not</span>
 <span class="sd">  the ones encountered first on the pythonPath</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Must be imported here, as entire file must be importable from Python 2 NefIo</span>
+  <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Path</span>
 
   <span class="n">listdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
@@ -198,7 +199,7 @@
         <span class="nb">__import__</span><span class="p">(</span><span class="n">modname</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">[</span><span class="n">ff</span><span class="p">])</span>
       <span class="k">except</span><span class="p">:</span>
         <span class="c1"># We want log output, not an Exception in all cases here</span>
-        <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+        <span class="kn">from</span> <span class="nn">.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Import failed for </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">modname</span><span class="p">,</span><span class="n">ff</span><span class="p">))</span>
 
   <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">listdir2</span><span class="p">:</span>
@@ -217,7 +218,7 @@
 
   <span class="c1"># sequenceCodePattern = re.compile(&#39;(\d+)?(.*?)(\+\d+|\-\d+)?$&#39;)</span>
 
-  <span class="n">tt</span> <span class="o">=</span> <span class="n">coreLibConstants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+  <span class="n">tt</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
 
   <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
     <span class="c1"># special case: entire string matches offset modifier and is misread</span>
@@ -229,7 +230,7 @@
       <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>      <span class="c1"># None or an integer</span>
     <span class="p">)</span></div>
 
-<div class="viewcode-block" id="splitIntFromChars"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.splitIntFromChars">[docs]</a><span class="k">def</span> <span class="nf">splitIntFromChars</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="splitIntFromChars"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.splitIntFromChars">[docs]</a><span class="k">def</span> <span class="nf">splitIntFromChars</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;convert a string with a leading integer optionally followed by characters</span>
 <span class="sd">  into an (integer,string) tuple&quot;&quot;&quot;</span>
 
@@ -248,7 +249,7 @@
 
   <span class="k">return</span> <span class="n">number</span><span class="p">,</span><span class="n">chars</span></div>
 
-<div class="viewcode-block" id="dictionaryProduct"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.dictionaryProduct">[docs]</a><span class="k">def</span> <span class="nf">dictionaryProduct</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">dict2</span><span class="p">:</span><span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="dictionaryProduct"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.dictionaryProduct">[docs]</a><span class="k">def</span> <span class="nf">dictionaryProduct</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary&quot;&quot;&quot;</span>
   <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="k">for</span> <span class="n">key1</span><span class="p">,</span><span class="n">val1</span> <span class="ow">in</span> <span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -257,13 +258,13 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get list of unique elements in sequence, in order of first appearance&quot;&quot;&quot;</span>
   <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
   <span class="n">seen_add</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span>
   <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sequence</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_add</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="isClose"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isClose">[docs]</a><span class="k">def</span> <span class="nf">isClose</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">relTolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">absTolerance</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="isClose"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isClose">[docs]</a><span class="k">def</span> <span class="nf">isClose</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">relTolerance</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">absTolerance</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Are a and b identical within reasonable floating point tolerance?</span>
 <span class="sd">  Uses sum of relative (relTolerance) and absolute (absTolerance) difference</span>
 
@@ -291,14 +292,14 @@
 <span class="c1">#   #</span>
 <span class="c1">#   return data</span>
 
-<div class="viewcode-block" id="stringToIdentifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringToIdentifier">[docs]</a><span class="k">def</span> <span class="nf">stringToIdentifier</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Convert string to identifier, replacing non-alphanumeric values by underscore&quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">value</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span></div>
+<span class="c1"># def stringToIdentifier(value):</span>
+<span class="c1">#   &quot;&quot;&quot;Convert string to identifier, replacing non-alphanumeric values by underscore&quot;&quot;&quot;</span>
+<span class="c1">#   if value.isidentifier():</span>
+<span class="c1">#     return value</span>
+<span class="c1">#   else:</span>
+<span class="c1">#     return &#39;&#39;.join(x if x.isalnum() else &#39;_&#39; for x in value)</span>
 
-<div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">():</span>
   <span class="sd">&quot;&quot;&quot;Get iso-formtted timestamp&quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
 
@@ -309,7 +310,7 @@
   <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxRandomInt</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get standard isotope code matching atom name or axisCode string</span>
 
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -331,7 +332,7 @@
   <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopeCode</span><span class="p">:</span>
     <span class="k">return</span> <span class="bp">None</span>
 
@@ -348,7 +349,7 @@
   <span class="c1">#   return None</span>
 
 
-<div class="viewcode-block" id="name2ElementSymbol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2ElementSymbol">[docs]</a><span class="k">def</span> <span class="nf">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="name2ElementSymbol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2ElementSymbol">[docs]</a><span class="k">def</span> <span class="nf">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get standard element symbol matching name or axisCode</span>
 
 <span class="sd">  NB, the first letter takes precedence, so e.g. &#39;CD&#39; returns &#39;C&#39; (carbon)</span>
@@ -383,7 +384,7 @@
   <span class="c1"># return result</span>
 
 
-<div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Convert isotope specifier string to most probable isotope code - defaulting to &#39;1H&#39;</span>
 
 <span class="sd">  This function is intended for external format isotope specifications, *not* for</span>
@@ -418,7 +419,7 @@
   <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="axisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMatch</span><span class="p">(</span><span class="n">axisCode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="axisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMatch</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get refAxisCode that best matches axisCode &quot;&quot;&quot;</span>
   <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">indx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_axisCodeMapIndices</span><span class="p">([</span><span class="n">axisCode</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">)):</span>
     <span class="k">if</span> <span class="n">indx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -428,7 +429,7 @@
     <span class="k">return</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="axisCodeMapping"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMapping">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMapping</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="axisCodeMapping"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMapping">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMapping</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;get {axisCode:refAxisCode} mapping dictionary</span>
 <span class="sd">  all axisCodes must match, or dictionary will be empty</span>
 <span class="sd">  NB a series of single-letter axisCodes (e.g. &#39;N&#39;, &#39;HCN&#39;) can be passed in as a string&quot;&quot;&quot;</span>
@@ -442,8 +443,7 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="reorder"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.reorder">[docs]</a><span class="k">def</span> <span class="nf">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="reorder"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.reorder">[docs]</a><span class="k">def</span> <span class="nf">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;reorder values in axisCode order to refAxisCode order, by matching axisCodes</span>
 
 <span class="sd">  NB, the result will be the length of refAxisCodes, with additional Nones inserted</span>
@@ -458,7 +458,7 @@
   <span class="k">return</span> <span class="n">result</span></div>
 
 
-<span class="k">def</span> <span class="nf">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]</span>
 <span class="sd">  all axisCodes must match, but result can contain None if refAxisCodes is longer</span>
 <span class="sd">  if axisCodes contain duplicates, you will get one of possible matches&quot;&quot;&quot;</span>
@@ -533,7 +533,7 @@
   <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="axisCodesCompare"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodesCompare">[docs]</a><span class="k">def</span> <span class="nf">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">code2</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="axisCodesCompare"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodesCompare">[docs]</a><span class="k">def</span> <span class="nf">axisCodesCompare</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">code2</span><span class="p">,</span> <span class="n">mismatch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Score code, code2 for matching. Score is length of common prefix, or &#39;mismatch&#39; if None&quot;&quot;&quot;</span>
 
   <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">code2</span> <span class="ow">or</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -568,7 +568,7 @@
   <span class="k">return</span> <span class="n">score</span></div>
 
 
-<div class="viewcode-block" id="doAxisCodesMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.doAxisCodesMatch">[docs]</a><span class="k">def</span> <span class="nf">doAxisCodesMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="doAxisCodesMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.doAxisCodesMatch">[docs]</a><span class="k">def</span> <span class="nf">doAxisCodesMatch</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Return True if axisCodes match refAxisCodes else False&quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refAxisCodes</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">False</span>
@@ -580,12 +580,25 @@
   <span class="k">return</span> <span class="bp">True</span></div>
 
 
-<div class="viewcode-block" id="stringifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringifier">[docs]</a><span class="k">def</span> <span class="nf">stringifier</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">,</span> <span class="n">floatFormat</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">object</span><span class="p">],</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="stringifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringifier">[docs]</a><span class="k">def</span> <span class="nf">stringifier</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get stringifier function, that will format an object x according to</span>
 
 <span class="sd">  &lt;str(x): field1=x.field1, field2=x.field2, ...&gt;</span>
 
 <span class="sd">  All floating point values encountered will be formatted according to floatFormat&quot;&quot;&quot;</span>
+
+  <span class="c1"># Unfortunately necessary as this package must be read from v2io</span>
+  <span class="c1"># and python 2 does not have keyword-only arguments</span>
+  <span class="c1"># What we should do is the function definition below:</span>
+  <span class="c1"># def stringifier(*fields, floatFormat=None):</span>
+  <span class="k">if</span> <span class="s1">&#39;floatFormat&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+    <span class="n">floatFormat</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;floatFormat&#39;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">floatFormat</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown options: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+
+  <span class="c1"># Proper body of function starts here</span>
   <span class="k">if</span> <span class="n">floatFormat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="c1"># use default formatter, avoiding continuous creation of new ones</span>
     <span class="n">localFormatter</span> <span class="o">=</span> <span class="n">stdLocalFormatter</span>
@@ -607,8 +620,8 @@
 
 <div class="viewcode-block" id="LocalFormatter"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter">[docs]</a><span class="k">class</span> <span class="nc">LocalFormatter</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Overrides the string formatter to change the float formatting&quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideFloatFormat</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;.6g&#39;</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideFloatFormat</span><span class="o">=</span><span class="s1">&#39;.6g&#39;</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">LocalFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span> <span class="o">=</span> <span class="n">overrideFloatFormat</span>
 
 <div class="viewcode-block" id="LocalFormatter.convert_field"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter.convert_field">[docs]</a>  <span class="k">def</span> <span class="nf">convert_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">conversion</span><span class="p">):</span>
@@ -633,7 +646,12 @@
     <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">ascii</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">ascii</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+          <span class="c1"># Likely we are in Python 2.</span>
+          <span class="c1"># As ascii behaves like Python 2 repr, this should be the correct workaround</span>
+          <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown conversion specifier {0!s}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">))</span></div></div>
 
 <span class="n">stdLocalFormatter</span> <span class="o">=</span> <span class="n">LocalFormatter</span><span class="p">()</span>

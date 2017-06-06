@@ -1775,7 +1775,7 @@
     <span class="n">spectra</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">((</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
     <span class="c1">#</span>
@@ -1798,7 +1798,7 @@
     <span class="n">chains</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">complex</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">chains</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains</span><span class="p">:</span>
-        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>
+        <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">((</span><span class="n">chain</span><span class="o">.</span><span class="n">shortName</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
     <span class="c1">#</span>
@@ -1872,8 +1872,9 @@
       <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">notes</span><span class="p">):</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">note</span><span class="p">))</span>
         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">serial</span>
-        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">created</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">coreConstants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
-        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;last_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">lastModified</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">coreConstants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">created</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;last_modified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">lastModified</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+          <span class="n">Constants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="c1">#</span>
@@ -1891,7 +1892,7 @@
       <span class="n">dd</span> <span class="o">=</span> <span class="n">pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-          <span class="n">internalData</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ccpnInternalData</span>
+          <span class="n">internalData</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_ccpnInternalData</span>
           <span class="k">if</span> <span class="n">internalData</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">longPid</span><span class="p">]</span> <span class="o">=</span> <span class="n">internalData</span>
 
@@ -1900,7 +1901,7 @@
       <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_internal_data&#39;</span>
       <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
       <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-        <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">jsonIo</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">jsonIo</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="c1">#</span>
@@ -3355,11 +3356,11 @@
       <span class="n">apiNote</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">_wrappedData</span>
       <span class="n">created</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
-        <span class="n">apiNote</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
+        <span class="n">apiNote</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">created</span><span class="p">,</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
       <span class="n">lastModified</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;last_modified&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">lastModified</span><span class="p">:</span>
         <span class="n">apiNote</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;lastModified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">lastModified</span><span class="p">,</span>
-                                                             <span class="n">coreConstants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
+                                                             <span class="n">Constants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
       <span class="n">serial</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
@@ -3380,7 +3381,7 @@
     <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">pid</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-      <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">ccpnInternalData</span> <span class="o">=</span> <span class="n">jsonIo</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+      <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">_ccpnInternalData</span> <span class="o">=</span> <span class="n">jsonIo</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
   <span class="c1">#</span>
   <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_additional_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_additional_data</span>
 
@@ -3903,6 +3904,8 @@
 
   <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.ccpn&#39;</span><span class="p">):</span>
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;nef&#39;</span>
+  <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.ccpn/&#39;</span><span class="p">):</span>
+    <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;nef&#39;</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.nef&#39;</span>
 
@@ -4056,7 +4059,7 @@
   <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(path)</span>
   <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">nefpath</span><span class="p">)</span>
+  <span class="c1"># _testNefIo(nefpath)</span>
   <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(nefpath, skipPrefixes=(&#39;ccpn&#39;,))</span>
   <span class="c1"># print(_extractVariantsTable(path))</span>

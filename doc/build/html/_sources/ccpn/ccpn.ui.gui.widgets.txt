@@ -33,14 +33,6 @@ ccpn.ui.gui.widgets.Arrow module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.widgets.AxisTextItem module
----------------------------------------
-
-.. automodule:: ccpn.ui.gui.widgets.AxisTextItem
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.widgets.BarGraph module
 -----------------------------------
 
@@ -97,6 +89,14 @@ ccpn.ui.gui.widgets.CcpnGridItem module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.CcpnModuleArea module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CcpnModuleArea
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.CcpnWebView module
 --------------------------------------
 
@@ -117,6 +117,14 @@ ccpn.ui.gui.widgets.ColourDialog module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.ColourDialog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.CompoundBaseWidget module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CompoundBaseWidget
     :members:
     :undoc-members:
     :show-inheritance:
@@ -173,6 +181,14 @@ ccpn.ui.gui.widgets.DoubleSpinbox module
 ----------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.DoubleSpinbox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.DropBase module
+-----------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.DropBase
     :members:
     :undoc-members:
     :show-inheritance:
@@ -297,14 +313,6 @@ ccpn.ui.gui.widgets.MessageDialog module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.widgets.ModuleArea module
--------------------------------------
-
-.. automodule:: ccpn.ui.gui.widgets.ModuleArea
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.widgets.PhasingFrame module
 ---------------------------------------
 
@@ -341,6 +349,14 @@ ccpn.ui.gui.widgets.PulldownList module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.PulldownList
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.PulldownListsForObjects module
+--------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.PulldownListsForObjects
     :members:
     :undoc-members:
     :show-inheritance:
@@ -385,10 +401,18 @@ ccpn.ui.gui.widgets.Slider module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget module
-------------------------------------------------------
+ccpn.ui.gui.widgets.Spacer module
+---------------------------------
 
-.. automodule:: ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget
+.. automodule:: ccpn.ui.gui.widgets.Spacer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.SpectrumGroupToolBar module
+-----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.SpectrumGroupToolBar
     :members:
     :undoc-members:
     :show-inheritance:
@@ -405,14 +429,6 @@ ccpn.ui.gui.widgets.SpectrumWidget module
 -----------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.SpectrumWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.widgets.SpinSystemLabel module
-------------------------------------------
-
-.. automodule:: ccpn.ui.gui.widgets.SpinSystemLabel
     :members:
     :undoc-members:
     :show-inheritance:
@@ -457,6 +473,14 @@ ccpn.ui.gui.widgets.TableModel module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.TestModule module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.TestModule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.TextEditor module
 -------------------------------------
 
@@ -485,6 +509,14 @@ ccpn.ui.gui.widgets.VerticalLabel module
 ----------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.VerticalLabel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.ViewBox module
+----------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.ViewBox
     :members:
     :undoc-members:
     :show-inheritance:

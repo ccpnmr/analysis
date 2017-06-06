@@ -76,7 +76,6 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Entry</span> <span class="kn">import</span> <span class="n">FloatEntry</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
@@ -90,7 +89,7 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">includeDirection</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">returnCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
 
-    <span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">returnCallback</span> <span class="o">=</span> <span class="n">returnCallback</span> <span class="k">if</span> <span class="n">returnCallback</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">doCallback</span>
@@ -100,31 +99,42 @@
       <span class="s1">&#39;startVal&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">180</span><span class="p">,</span>
       <span class="s1">&#39;endVal&#39;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>
       <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="s1">&#39;step&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+      <span class="s1">&#39;bigStep&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span>
       <span class="c1">#&#39;showNumber&#39;: True,</span>
-      <span class="s1">&#39;tickInterval&#39;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
+      <span class="s1">&#39;tickInterval&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+      <span class="s1">&#39;spinbox&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%4d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sliderDict</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
     
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label0</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label0</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">phLabel0</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phLabel0</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">35</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">slider0</span> <span class="o">=</span> <span class="n">Slider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setPh0</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="o">**</span><span class="n">sliderDict</span><span class="p">)</span>
-    
+    <span class="bp">self</span><span class="o">.</span><span class="n">slider0</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
     <span class="n">sliderDict</span> <span class="o">=</span> <span class="p">{</span>
       <span class="s1">&#39;startVal&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">360</span><span class="p">,</span>
       <span class="s1">&#39;endVal&#39;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>
       <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="s1">&#39;step&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
       <span class="c1">#&#39;showNumber&#39;: True,</span>
-      <span class="s1">&#39;tickInterval&#39;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
+      <span class="s1">&#39;tickInterval&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%4d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sliderDict</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
     
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;ph1&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;ph1&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label1</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">phLabel1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phLabel1</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">35</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">slider1</span> <span class="o">=</span> <span class="n">Slider</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">setPh1</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="o">**</span><span class="n">sliderDict</span><span class="p">)</span>
-    
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;piv&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">slider1</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">PivotLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;pivot&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">PivotLabel</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">35</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pivotEntry</span> <span class="o">=</span> <span class="n">FloatEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnCallback</span><span class="p">(),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pivotEntry</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pivotEntry</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">includeDirection</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">directionList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">directionTexts</span><span class="p">,</span>
@@ -152,6 +162,7 @@
 
   <span class="kn">import</span> <span class="nn">os</span>
   <span class="kn">import</span> <span class="nn">sys</span>
+  <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
 
   <span class="k">def</span> <span class="nf">myCallback</span><span class="p">(</span><span class="n">ph0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">,</span> <span class="n">pivot</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
     <span class="k">print</span><span class="p">(</span><span class="n">ph0</span><span class="p">,</span> <span class="n">ph1</span><span class="p">,</span> <span class="n">pivot</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>

@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,7 +47,9 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.modules.PeakAssigner</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module to assign peaks</span>
+<span class="sd">Responds to current.peaks</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -86,10 +87,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnSorting</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">ATOM_NAMES</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.PeakAssignment</span> <span class="kn">import</span> <span class="p">(</span><span class="n">nmrAtomsForPeaks</span><span class="p">,</span>
-                                                      <span class="n">peaksAreOnLine</span><span class="p">,</span>
-                                                      <span class="n">sameAxisCodes</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">ATOM_NAMES</span><span class="p">,</span> <span class="n">nmrAtomsForPeaks</span><span class="p">,</span> <span class="n">peaksAreOnLine</span><span class="p">,</span> <span class="n">sameAxisCodes</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
@@ -112,15 +110,19 @@
   <span class="c1"># overide in specific module implementations</span>
   <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
-  <span class="n">settingsOnTop</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PeakAssigner&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span>  <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Peak Assigner&quot;</span><span class="p">):</span>
 
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Peak Assigner&quot;</span><span class="p">)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="c1"># inherited from CcpnModule:</span>
-    <span class="c1"># self.application, self.current, self.project, self.mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="c1"># Derive application, project, and current from mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">listWidgets</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">objectTables</span> <span class="o">=</span> <span class="p">[]</span>
@@ -154,7 +156,7 @@
 
     <span class="c1"># Main content widgets</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Peak:&#39;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectionFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="s1">&#39;noFrame&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectionFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">showBorder</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fShape</span><span class="o">=</span><span class="s1">&#39;noFrame&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selectionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selectionLayout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selectionLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -582,7 +584,7 @@
 <span class="sd">    Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateInterface</span><span class="p">,</span> <span class="s1">&#39;peaks&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PeakAssigner</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NotOnLine"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakAssigner.NotOnLine">[docs]</a><span class="k">class</span> <span class="nc">NotOnLine</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
@@ -629,8 +631,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

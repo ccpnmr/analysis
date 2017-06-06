@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -67,7 +66,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon1 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Ed Brooksbank $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -75,69 +74,204 @@
 
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">NotesPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Note</span> <span class="kn">import</span> <span class="n">Note</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="NotesEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NotesEditor.NotesEditor">[docs]</a><span class="k">class</span> <span class="nc">NotesEditor</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">CcpnModule</span><span class="p">):</span>
+<div class="viewcode-block" id="NotesEditorModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NotesEditor.NotesEditorModule">[docs]</a><span class="k">class</span> <span class="nc">NotesEditorModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  This class implements the module for editing the NotesList.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
+  <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Notes Editor&#39;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">widget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="n">note</span>
-    <span class="n">widgetLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">widgetLayout</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Note name&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">note</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Save&#39;</span><span class="p">,</span> <span class="s1">&#39;Cancel&#39;</span><span class="p">],</span>
-                                <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveNote</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reject</span><span class="p">])</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">processText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processText</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;NotesEditorModule&#39;</span>
+  <span class="n">attributeName</span> <span class="o">=</span> <span class="s1">&#39;notes&#39;</span>         <span class="c1"># self.project.notes</span>
 
-  <span class="k">def</span> <span class="nf">_setNoteName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Notes Editor&#39;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets the name of the note based on the text in the Note name text box.</span>
+<span class="sd">    Initialise the widgets for the module.</span>
+<span class="sd">    :param mainWindow: required</span>
+<span class="sd">    :param name: optional</span>
+<span class="sd">    :param note: leave as None to let window handle item selection</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newNote</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_saveNote</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Derive application, project, and current from mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
+                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
+                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noWidget</span> <span class="o">=</span> <span class="n">NotesPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span>
+                                   <span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
+                                   <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+                                   <span class="p">,</span> <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span>
+                                   <span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
+                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
+                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1">#~~~~~~~~~~ define noteWidget box to contain man editing</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Note name&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;centre&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
+                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
+                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Apply&#39;</span><span class="p">,</span> <span class="s1">&#39;Delete&#39;</span><span class="p">]</span>
+                                <span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyNote</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deleteNote</span><span class="p">]</span>
+                                <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">*</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="c1">#~~~~~~~~~~ end of noteWidget box</span>
+
+    <span class="c1"># this spacer is expanding, will fill the space when the textbox is invisible</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
+                         <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span>
+                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_noteNotifier</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setNotifiers</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">note</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectNote</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NotesEditorModule.selectNote"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NotesEditor.NotesEditorModule.selectNote">[docs]</a>  <span class="k">def</span> <span class="nf">selectNote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Saves the text in the textbox to the note object.</span>
+<span class="sd">    Manually select a Note from the pullDown</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">newText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setNoteName</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">newText</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">note</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: No Note selected&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;select: No Note selected&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">Note</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type Note&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type Note&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">noWidget</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">note</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="n">note</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">noWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_setNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set a Notifier to call when a note is created/deleted/renamed/changed</span>
+<span class="sd">    rename calls on name</span>
+<span class="sd">    change calls on any other attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_noteNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+                                  <span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">RENAME</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">]</span>
+                                  <span class="p">,</span> <span class="n">Note</span><span class="o">.</span><span class="n">__name__</span>
+                                  <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateCallback</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_clearNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    clean up the notifiers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noteNotifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_noteNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_applyNote</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by clicking the apply button in the module.</span>
+<span class="sd">    Temporarily disable notifiers, and define commandEchoBlock so all changes</span>
+<span class="sd">    are treated as a single undo/redo event</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span>             <span class="c1"># disable the notifier while updating object other</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">:</span>                     <span class="c1"># calls _updateCallBack during _applyNote</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+      <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyNote&#39;</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>          <span class="c1"># ejb - order doesn&#39;t matter inside the commandEchoBlock</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">noWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setNotifiers</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Closes the note editor ignoring all changes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_processText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newNote</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">overlay</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+  <span class="k">def</span> <span class="nf">_selectionPulldownCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Notifier Callback for selecting Note from the pull down menu</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_updateCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Notifier callback for updating module when a Note is create/delete/rename/change</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thisNoteList</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">THEOBJECT</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributeName</span><span class="p">)</span>   <span class="c1"># get the notesList</span>
+    <span class="n">modifiedNote</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">OBJECT</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="ow">in</span> <span class="n">thisNoteList</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the Note widgets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noWidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit1</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noteWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_deleteNote</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete the current note with the delete button</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">note</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CCPN-INTERNAL: used to close the module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">NotesEditorModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+
+<div class="viewcode-block" id="NotesEditorModule.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.NotesEditor.NotesEditorModule.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Close the table from the commandline</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div></div>
 
 </pre></div>
 
@@ -170,8 +304,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -47,26 +47,28 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.popups.SampleComponentPropertiesPopup</h1><div class="highlight"><pre>
-<span></span><span class="c1">#=========================================================================================</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module Documentation here</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: luca $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Luca Mureddu $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -79,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showInfo</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
 
 
 <span class="n">TYPECOMPONENT</span> <span class="o">=</span>  <span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">,</span> <span class="s1">&#39;Compound&#39;</span><span class="p">,</span> <span class="s1">&#39;Solvent&#39;</span><span class="p">,</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="s1">&#39;Target&#39;</span><span class="p">,</span> <span class="s1">&#39;Inhibitor &#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">]</span>
@@ -86,10 +89,14 @@
 <span class="n">Labelling</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">,</span><span class="s1">&#39;Type_New&#39;</span><span class="p">,</span> <span class="s1">&#39;15N&#39;</span><span class="p">,</span> <span class="s1">&#39;15N,13C&#39;</span><span class="p">,</span> <span class="s1">&#39;15N,13C,2H&#39;</span><span class="p">,</span> <span class="s1">&#39;ILV&#39;</span><span class="p">,</span><span class="s1">&#39;ILVA&#39;</span><span class="p">,</span><span class="s1">&#39;ILVAT&#39;</span><span class="p">,</span> <span class="s1">&#39;SAIL&#39;</span><span class="p">,</span> <span class="s1">&#39;1,3-13C- and 2-13C-Glycerol&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="EditSampleComponentPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SampleComponentPropertiesPopup.EditSampleComponentPopup">[docs]</a><span class="k">class</span> <span class="nc">EditSampleComponentPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+<span class="c1"># class EditSampleComponentPopup(QtGui.QDialog):</span>
+<div class="viewcode-block" id="EditSampleComponentPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SampleComponentPropertiesPopup.EditSampleComponentPopup">[docs]</a><span class="k">class</span> <span class="nc">EditSampleComponentPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span>
+               <span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">newSampleComponent</span><span class="o">=</span><span class="bp">False</span>
+               <span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Edit Sample Component&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="c1"># super(EditSampleComponentPopup, self).__init__(parent)</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">newSampleComponent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">EditSampleComponentPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span> <span class="o">=</span> <span class="n">newSampleComponent</span>
@@ -341,13 +348,16 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_createNewComponent</span><span class="p">()</span>
-    <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createNewComponent</span><span class="p">()</span>
+      <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span>

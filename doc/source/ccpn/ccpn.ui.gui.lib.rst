@@ -24,10 +24,10 @@ ccpn.ui.gui.lib.GuiGenerator module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.lib.PeakAssignment module
--------------------------------------
+ccpn.ui.gui.lib.GuiNotifier module
+----------------------------------
 
-.. automodule:: ccpn.ui.gui.lib.PeakAssignment
+.. automodule:: ccpn.ui.gui.lib.GuiNotifier
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,14 +36,6 @@ ccpn.ui.gui.lib.PeakList module
 -------------------------------
 
 .. automodule:: ccpn.ui.gui.lib.PeakList
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.lib.Qt module
--------------------------
-
-.. automodule:: ccpn.ui.gui.lib.Qt
     :members:
     :undoc-members:
     :show-inheritance:
@@ -68,6 +60,14 @@ ccpn.ui.gui.lib.Window module
 -----------------------------
 
 .. automodule:: ccpn.ui.gui.lib.Window
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.lib.mouseEvents module
+----------------------------------
+
+.. automodule:: ccpn.ui.gui.lib.mouseEvents
     :members:
     :undoc-members:
     :show-inheritance:

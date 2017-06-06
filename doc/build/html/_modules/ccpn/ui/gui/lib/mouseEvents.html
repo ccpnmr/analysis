@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.lib.mouseEvents &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.lib.mouseEvents</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">various mouse event functions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.Point</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<div class="viewcode-block" id="doDebug"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.doDebug">[docs]</a><span class="k">def</span> <span class="nf">doDebug</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+  <span class="k">if</span> <span class="bp">False</span><span class="p">:</span> <span class="c1">#cannot get the regular debugger to work and likely do not want this on during production anyway</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="controlShiftLeftMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlShiftLeftMouse">[docs]</a><span class="k">def</span> <span class="nf">controlShiftLeftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-shift-left-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>     <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;DEBUG mouse: Control-shift-left-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="controlLeftMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlLeftMouse">[docs]</a><span class="k">def</span> <span class="nf">controlLeftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-left-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> \
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Control-left-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="shiftLeftMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.shiftLeftMouse">[docs]</a><span class="k">def</span> <span class="nf">shiftLeftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for shift-left-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Shift-left-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="leftMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.leftMouse">[docs]</a><span class="k">def</span> <span class="nf">leftMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for left-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> \
+            <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+            <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Left-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="controlShiftRightMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlShiftRightMouse">[docs]</a><span class="k">def</span> <span class="nf">controlShiftRightMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-shift-right-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>     <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Control-shift-right-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="controlRightMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlRightMouse">[docs]</a><span class="k">def</span> <span class="nf">controlRightMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-right-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> \
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Control-right-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="shiftRightMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.shiftRightMouse">[docs]</a><span class="k">def</span> <span class="nf">shiftRightMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for shift-right-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Shift-right-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="rightMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.rightMouse">[docs]</a><span class="k">def</span> <span class="nf">rightMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for right-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Right-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="controlShiftMiddleMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlShiftMiddleMouse">[docs]</a><span class="k">def</span> <span class="nf">controlShiftMiddleMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-shift-middle-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>      <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">)</span> \
+            <span class="ow">and</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span>\
+            <span class="ow">and</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Control-shift-middle-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="controlMiddleMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.controlMiddleMouse">[docs]</a><span class="k">def</span> <span class="nf">controlMiddleMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for control(cmd)-middle-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">)</span> \
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">control</span><span class="p">)</span>\
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Control-middle-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="shiftMiddleMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.shiftMiddleMouse">[docs]</a><span class="k">def</span> <span class="nf">shiftMiddleMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for shift-middle-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span>\
+           <span class="ow">and</span>     <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Shift-middle-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="middleMouse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.middleMouse">[docs]</a><span class="k">def</span> <span class="nf">middleMouse</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># Return True for middle-Mouse event</span>
+  <span class="n">control</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span>
+  <span class="n">shift</span>   <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span>         <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">control</span><span class="p">)</span> \
+           <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">doDebug</span><span class="p">(</span><span class="s1">&#39;Middle-Mouse event at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="getMouseEventDict"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.mouseEvents.getMouseEventDict">[docs]</a><span class="k">def</span> <span class="nf">getMouseEventDict</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Return a dict with the status of each mouseEvent as boolean</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">mouseDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;leftMouse&#39;</span><span class="p">,</span> <span class="n">leftMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;shiftLeftMouse&#39;</span><span class="p">,</span> <span class="n">shiftLeftMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlLeftMouse&#39;</span><span class="p">,</span> <span class="n">controlLeftMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlShiftLeftMouse&#39;</span><span class="p">,</span> <span class="n">controlShiftLeftMouse</span><span class="p">),</span>
+
+    <span class="p">(</span><span class="s1">&#39;middleMouse&#39;</span><span class="p">,</span> <span class="n">middleMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;shiftMiddleMouse&#39;</span><span class="p">,</span> <span class="n">shiftMiddleMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlMiddleMouse&#39;</span><span class="p">,</span> <span class="n">controlMiddleMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlShiftMiddleMouse&#39;</span><span class="p">,</span> <span class="n">controlShiftMiddleMouse</span><span class="p">),</span>
+
+    <span class="p">(</span><span class="s1">&#39;rightMouse&#39;</span><span class="p">,</span> <span class="n">rightMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;shiftRightMouse&#39;</span><span class="p">,</span> <span class="n">shiftRightMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlRightMouse&#39;</span><span class="p">,</span> <span class="n">controlRightMouse</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;controlShiftRightMouse&#39;</span><span class="p">,</span> <span class="n">controlShiftRightMouse</span><span class="p">),</span>
+  <span class="p">]:</span>
+    <span class="n">mouseDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">mouseDict</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

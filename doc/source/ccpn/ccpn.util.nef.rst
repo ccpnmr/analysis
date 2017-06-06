@@ -9,6 +9,22 @@ ccpn.util.nef package
 Submodules
 ----------
 
+ccpn.util.nef.Ccpn module
+-------------------------
+
+.. automodule:: ccpn.util.nef.Ccpn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.nef.CingCcpn module
+-----------------------------
+
+.. automodule:: ccpn.util.nef.CingCcpn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.nef.GenericStarParser module
 --------------------------------------
 

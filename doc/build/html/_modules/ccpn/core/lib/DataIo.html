@@ -613,9 +613,7 @@
           <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">newNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomName</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="o">=</span><span class="n">isotopeCode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
           <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomName</span><span class="p">)</span>
-        <span class="n">dd</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">ccpnInternalData</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dd</span><span class="p">:</span>
-          <span class="n">dd</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">ccpnInternalData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_ccpnInternalData</span>
         <span class="c1"># NB when the same NmrAtom appears twice we get the ambiguity code</span>
         <span class="c1"># and original name from the LAST occurrence</span>
         <span class="n">dd</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">:</span><span class="n">ambiguityCode</span><span class="p">,</span> <span class="s1">&#39;originalName&#39;</span><span class="p">:</span><span class="n">atomName</span><span class="p">})</span>
@@ -684,7 +682,7 @@
                                          <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="convertBmrbAmbiguousAtoms"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.convertBmrbAmbiguousAtoms">[docs]</a><span class="k">def</span> <span class="nf">convertBmrbAmbiguousAtoms</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Convert NmrAtoms with na.ccpnInternalData[&#39;ambiguityCode&#39;] 2 or 3</span>
+  <span class="sd">&quot;&quot;&quot;Convert NmrAtoms with na._ccpnInternalData[&#39;ambiguityCode&#39;] 2 or 3</span>
 <span class="sd">  to the &#39;xy&#39; convention.</span>
 <span class="sd">  Names are of form &#39;Nabi&#39;  or &#39;Nabi%&#39; or &#39;NAbi*&#39; where &#39;N&#39; is a one-letter nucleus code.</span>
 <span class="sd">  &#39;ab&#39; is any string that is not an integer or &#39;@&#39; followed by an integer</span>
@@ -714,11 +712,7 @@
     <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span>
 
-      <span class="n">dd2</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">ccpnInternalData</span>
-      <span class="k">if</span> <span class="n">dd2</span><span class="p">:</span>
-        <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">dd2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">ambiguityCode</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
         <span class="c1"># interresidue ambiguity</span>
@@ -747,20 +741,6 @@
             <span class="n">newName</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;x&#39;</span>
           <span class="c1"># NB, if the name is already taken we get a nameclash</span>
           <span class="n">nmrAtom</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">newName</span><span class="p">)</span>
-
-      <span class="c1"># elif name.endswith(&#39;&quot;&#39;):</span>
-      <span class="c1">#   # Should not happen, but it looks like &quot; can be used instead of &#39;&#39;        dd2 = nmrAtom.ccpnInternalData</span>
-      <span class="c1">#   dd2 = nmrAtom.ccpnInternalData</span>
-      <span class="c1">#   if dd2:</span>
-      <span class="c1">#     xx = dd2.get(&#39;ambiguityCode&#39;)</span>
-      <span class="c1">#     if xx in (&#39;2&#39;,&#39;3&#39;):</span>
-      <span class="c1">#       # Ambiguous = set the name</span>
-      <span class="c1">#       newName = name[:-1] + &#39;y&#39;</span>
-      <span class="c1">#       # NB, if the name is already taken we get a nameclash</span>
-      <span class="c1">#       print (&#39;@~@~newName&#39;, newName)</span>
-      <span class="c1">#       nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)</span>
-      <span class="c1">#       nmrAtom.ccpnInternalData[&#39;originalName&#39;] = name</span>
-
 
       <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;123&#39;</span><span class="p">:</span>
@@ -801,12 +781,10 @@
 
           <span class="n">na</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
           <span class="k">if</span> <span class="n">na</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">dd2</span> <span class="o">=</span> <span class="n">na</span><span class="o">.</span><span class="n">ccpnInternalData</span>
-            <span class="k">if</span> <span class="n">dd2</span><span class="p">:</span>
-              <span class="n">xx</span> <span class="o">=</span> <span class="n">dd2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">)</span>
-              <span class="k">if</span> <span class="n">xx</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-                <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">xx</span>
-                <span class="k">break</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">na</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ambiguityCode&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xx</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+              <span class="n">ambiguityCode</span> <span class="o">=</span> <span class="n">xx</span>
+              <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">ll2</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">del</span> <span class="n">ll2</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
@@ -841,11 +819,11 @@
 <div class="viewcode-block" id="remapRestraintItems"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.remapRestraintItems">[docs]</a><span class="k">def</span> <span class="nf">remapRestraintItems</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Remap restraintItems from original names to massaged names</span>
 
-<span class="sd">  - relies on NmrAtom.ccpnInternalData[&#39;originalName&#39;] being set&quot;&quot;&quot;</span>
+<span class="sd">  - relies on NmrAtom._ccpnInternalData[&#39;originalName&#39;] being set&quot;&quot;&quot;</span>
   <span class="n">remap</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
     <span class="n">atomId</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_id</span>
-    <span class="n">originalName</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;originalName&#39;</span><span class="p">)</span>
+    <span class="n">originalName</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;originalName&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">originalName</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">atomId</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">atomId</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;XY&#39;</span><span class="p">:</span>

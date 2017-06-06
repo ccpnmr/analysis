@@ -47,17 +47,24 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.nef.GenericStarParser</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Star-type file parser, agnostic between cif, mmcif, star, nef, etc.</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Star-type file parser, agnostic between cif, mmcif, star, nef, etc.</span>
+
 <span class="sd">Returns a nested data structure that matches the file,</span>
 <span class="sd">with DataExtent, DataBlock, SaveFrame, and Loop objects.</span>
 <span class="sd">Additional support for distinguishing between None, True, False, and int/float values</span>
 <span class="sd">and the strings that match their representations.</span>
 
+<span class="sd">For behaviour better suited to NmrStar and NEf see ./StarIo.py</span>
+
 <span class="sd">Usage:</span>
 
-<span class="sd">parse(text, mode) to parse a text representation</span>
+<span class="sd">parse(text, mode) to parse a text representation to nested objects</span>
 
 <span class="sd">parseFile(fileName, mode) to load and parse a file</span>
+
+<span class="sd">starObject.toString() will convert any object in the object structure,</span>
+<span class="sd">complete with contents, to a string that can then be written to file.</span>
 
 
 <span class="sd">Reading behaviour</span>
@@ -97,7 +104,7 @@
 
 <span class="sd">All tags are preserved &#39;as is&#39; (i.e. without stripping leading &#39;_&#39;, &#39;data_&#39;, or &#39;save_&#39;),</span>
 <span class="sd">basically to avoid the theoretical risk that a SaveFrame name might clash with</span>
-<span class="sd">an item name or loop column, or a DataBLock with a Global. Duplicate tags raise an error.</span>
+<span class="sd">an item name or loop column, or a DataBlock with a Global. Duplicate tags raise an error.</span>
 
 <span class="sd">Quoted values are returned as str,</span>
 <span class="sd">whereas unquoted values are returned as a str subtype UnquotedValue(str)</span>
@@ -143,17 +150,23 @@
 <span class="sd">DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># NB must be Python 2.7 and 3.x compatible</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
@@ -163,8 +176,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
-
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Rasmus Fogh $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -174,7 +186,12 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="c1"># Python 3</span>
+  <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+<span class="k">except</span><span class="p">:</span>
+  <span class="c1"># python 2.7</span>
+  <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">izip_longest</span> <span class="k">as</span> <span class="n">zip_longest</span>
 <span class="kn">from</span> <span class="nn">.StarTokeniser</span> <span class="kn">import</span> <span class="n">getTokenIterator</span>
 
 <span class="kn">from</span> <span class="nn">.StarTokeniser</span> <span class="kn">import</span> <span class="n">TOKEN_MULTILINE</span>
@@ -263,8 +280,8 @@
   <span class="k">return</span> <span class="n">GeneralStarParser</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="parseFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parseFile">[docs]</a><span class="k">def</span> <span class="nf">parseFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;load generic STAR file&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parseFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.parseFile">[docs]</a><span class="k">def</span> <span class="nf">parseFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;load generic STAR file and parse the contents&quot;&quot;&quot;</span>
 
   <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
   <span class="k">return</span> <span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div>
@@ -300,7 +317,7 @@
   <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">, name=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">tt</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NamedOrderedDict.addItem"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">[docs]</a>  <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedOrderedDict.addItem"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">[docs]</a>  <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: duplicate key name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -309,7 +326,7 @@
 <div class="viewcode-block" id="StarContainer"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.StarContainer">[docs]</a><span class="k">class</span> <span class="nc">StarContainer</span><span class="p">(</span><span class="n">NamedOrderedDict</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;DataBlock or SaveFrame containing items and loops&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="StarContainer.multiColumnValues"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues">[docs]</a>  <span class="k">def</span> <span class="nf">multiColumnValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="StarContainer.multiColumnValues"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues">[docs]</a>  <span class="k">def</span> <span class="nf">multiColumnValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;get tuple of orderedDict of values for columns.</span>
 <span class="sd">    Will work whether columns are in a loop or single values</span>
 <span class="sd">    If columns match a single loop or nothing, return the loop data.</span>
@@ -332,8 +349,8 @@
       <span class="c1"># No column matches a loop. return a single dict</span>
       <span class="k">return</span> <span class="p">(</span><span class="n">valueDict</span><span class="p">,)</span></div>
 
-  <span class="k">def</span>  <span class="nf">_contentToString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns content of either DataBlock or SaveFrame&quot;&quot;&quot;</span>
+  <span class="k">def</span>  <span class="nf">_contentToString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns content of either DataBlock or SaveFrame as a string&quot;&quot;&quot;</span>
 
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -370,14 +387,18 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Root&#39;</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">DataExtent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DataExtent.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataExtent.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="DataExtent.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataExtent.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
     <span class="n">blockSeparator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n\n\n</span><span class="s1">&#39;</span>
     <span class="k">return</span> <span class="n">blockSeparator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">toString</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div></div>
 
-<span class="c1"># We insert these afterwards as we want the functions at the top of the file</span>
-<span class="c1"># but can only annotate after DataExtent is created</span>
-<span class="n">parse</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataExtent</span>
-<span class="n">parseFile</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataExtent</span>
+<span class="c1"># An object that cannot appear inside a Star file. Used as sentinel</span>
+<span class="n">sentinel</span> <span class="o">=</span> <span class="n">DataExtent</span><span class="p">()</span>
+
+<span class="c1"># # Not Python 2 compatible</span>
+<span class="c1"># # We insert these afterwards as we want the functions at the top of the file</span>
+<span class="c1"># # but can only annotate after DataExtent is created</span>
+<span class="c1"># parse.__annotations__[&#39;return&#39;] = DataExtent</span>
+<span class="c1"># parseFile.__annotations__[&#39;return&#39;] = DataExtent</span>
 
 <div class="viewcode-block" id="DataBlock"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataBlock">[docs]</a><span class="k">class</span> <span class="nc">DataBlock</span><span class="p">(</span><span class="n">StarContainer</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;DataBlock for general STAR object tree&quot;&quot;&quot;</span>
@@ -387,7 +408,8 @@
   <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
 
 
-<div class="viewcode-block" id="DataBlock.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataBlock.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="DataBlock.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.DataBlock.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert DataBlock to string, for writing&quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data_&#39;</span><span class="p">):</span>
@@ -404,8 +426,8 @@
   <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
 
 
-<div class="viewcode-block" id="SaveFrame.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.SaveFrame.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-
+<div class="viewcode-block" id="SaveFrame.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.SaveFrame.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert SaveFrame to string, for writing&quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;save_&#39;</span><span class="p">):</span>
@@ -417,7 +439,7 @@
 <div class="viewcode-block" id="LoopRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.LoopRow">[docs]</a><span class="k">class</span> <span class="nc">LoopRow</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Loop row - OrderedDict with additional functionality&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns value of attribute &#39;name&#39;, or None if attribute is not defined</span>
 
 <span class="sd">    Will treat a series of attributes &#39;foo_1&#39;, &#39;foo_2&#39;, &#39;foo_3&#39;, etc. as a single</span>
@@ -430,7 +452,7 @@
     <span class="c1">#</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sets attribute &#39;name&#39; to value</span>
 
 <span class="sd">    Will treat a series of attributes &#39;foo_1&#39;, &#39;foo_2&#39;, &#39;foo_3&#39;, etc. as a single</span>
@@ -466,7 +488,7 @@
   <span class="c1"># Can be set in subclass instances.</span>
   <span class="n">tagPrefix</span> <span class="o">=</span> <span class="bp">None</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -481,11 +503,11 @@
     <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">columns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Column names&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Loop.newRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.newRow">[docs]</a>  <span class="k">def</span> <span class="nf">newRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoopRow</span><span class="p">:</span>
+<div class="viewcode-block" id="Loop.newRow"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.newRow">[docs]</a>  <span class="k">def</span> <span class="nf">newRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add new row, initialised from values&quot;&quot;&quot;</span>
 
     <span class="c1"># Use internal attribute for speed, columns do not change</span>
@@ -509,64 +531,37 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">row</span></div>
 
-  <span class="c1"># def _addValue(self, value:str):</span>
-  <span class="c1">#   &quot;&quot;&quot;Put value in next free slot in current row</span>
-  <span class="c1">#   Add new row if necessary&quot;&quot;&quot;</span>
-  <span class="c1">#   data = self.data</span>
-  <span class="c1">#</span>
-  <span class="c1">#   index = self._columnIndex</span>
-  <span class="c1">#   if index == 0:</span>
-  <span class="c1">#     row = self.newRow()</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     row = data[-1]</span>
-  <span class="c1">#</span>
-  <span class="c1">#   row[self._columns[index]] = value</span>
-  <span class="c1">#</span>
-  <span class="c1">#   index += 1</span>
-  <span class="c1">#   if index &gt;= self._columnCount:</span>
-  <span class="c1">#     self._columnIndex = 0</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     self._columnIndex = index</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # if data and None in data[-1].values():</span>
-  <span class="c1">#   #   row = data[-1]</span>
-  <span class="c1">#   #   index = list(row.values()).index(None)</span>
-  <span class="c1">#   # else:</span>
-  <span class="c1">#   #   row = self.newRow()</span>
-  <span class="c1">#   #   index = 0</span>
-  <span class="c1">#   # #</span>
-  <span class="c1">#   # row[self._columns[index]] = value</span>
-
-<div class="viewcode-block" id="Loop.addColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.addColumn">[docs]</a>  <span class="k">def</span> <span class="nf">addColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">extendData</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Loop.addColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.addColumn">[docs]</a>  <span class="k">def</span> <span class="nf">addColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">,</span> <span class="n">paddingValue</span><span class="o">=</span><span class="n">sentinel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add new column to loop. if paddingValue is set, including to None, rows with None&quot;&quot;&quot;</span>
     <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: duplicate column name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">columnName</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: duplicate column name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">))</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">extendData</span><span class="p">:</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-          <span class="n">row</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-      <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">paddingValue</span> <span class="ow">is</span> <span class="n">sentinel</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Cannot add columns when loop contains data&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">columnName</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">columnName</span><span class="p">]</span> <span class="o">=</span> <span class="n">paddingValue</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+      <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">columnName</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Loop.removeColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.removeColumn">[docs]</a>  <span class="k">def</span> <span class="nf">removeColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Loop.removeColumn"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.removeColumn">[docs]</a>  <span class="k">def</span> <span class="nf">removeColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove column from loop. Will NOT work properly if called during parsing.&quot;&quot;&quot;</span>
     <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: column named </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">columnName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: column named </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">))</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">removeData</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-          <span class="k">del</span> <span class="n">row</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+          <span class="k">del</span> <span class="n">row</span><span class="p">[</span><span class="n">columnName</span><span class="p">]</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">columnName</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Cannot remove columns when loop contains data&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+      <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">columnName</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Loop.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="Loop.toString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.Loop.toString">[docs]</a>  <span class="k">def</span> <span class="nf">toString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">_defaultIndent</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">_defaultSeparator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Stringifier function for loop.</span>
 
 <span class="sd">    Accepts (subtypes of) Loop with data as sequence of rows,</span>
@@ -729,8 +724,8 @@
 
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">enforceSaveFrameStop</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enforceLoopStop</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-               <span class="n">padIncompleteLoops</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">allowSquareBracketStrings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lowerCaseTags</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">enforceSaveFrameStop</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">enforceLoopStop</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">padIncompleteLoops</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">allowSquareBracketStrings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lowerCaseTags</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">enforceSaveFrameStop</span> <span class="o">=</span> <span class="n">enforceSaveFrameStop</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">enforceLoopStop</span> <span class="o">=</span> <span class="n">enforceLoopStop</span>
@@ -793,38 +788,6 @@
       <span class="c1"># empty loops appear here. We allow them, but that could change</span>
       <span class="k">pass</span>
 
-  <span class="c1"># def _closeLoop(self, value):</span>
-  <span class="c1">#   loop = self.stack[-1]</span>
-  <span class="c1">#   if not isinstance(loop, Loop):</span>
-  <span class="c1">#     raise StarSyntaxError(self._errorMessage(&quot;Loop stop_ %s outside loop&quot; % value, value))</span>
-  <span class="c1">#</span>
-  <span class="c1">#   data = loop.data</span>
-  <span class="c1">#   if not loop._columns:</span>
-  <span class="c1">#     raise StarSyntaxError(self._errorMessage(&quot; loop lacks column names&quot; , value))</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if data:</span>
-  <span class="c1">#     row = data[-1]</span>
-  <span class="c1">#     if None in row.values():</span>
-  <span class="c1">#       missingValueCount = len([x for x in row.values() if x is None])</span>
-  <span class="c1">#       if self.padIncompleteLoops:</span>
-  <span class="c1">#         print(&quot;WARNING Token %s: %s in %s is missing %s values. Last row was: %s&quot;</span>
-  <span class="c1">#               % (self.counter, loop, self.stack[-2], missingValueCount, data[-1]))</span>
-  <span class="c1">#         # for row in data:</span>
-  <span class="c1">#         #   print( &#39; - &#39;, *row)</span>
-  <span class="c1">#         for key,val in row.items():</span>
-  <span class="c1">#           if val is None:</span>
-  <span class="c1">#             row[key] = NULLSTRING</span>
-  <span class="c1">#       else:</span>
-  <span class="c1">#         raise StarSyntaxError(</span>
-  <span class="c1">#           self._errorMessage(&quot;loop %s is missing %s values&quot; % (loop, missingValueCount), value)</span>
-  <span class="c1">#         )</span>
-  <span class="c1">#</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     # empty loops appear here. We allow them, but that could change</span>
-  <span class="c1">#     pass</span>
-  <span class="c1">#</span>
-  <span class="c1">#   self.stack.pop()</span>
-
   <span class="k">def</span> <span class="nf">_addLoopField</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
     <span class="n">stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span>
@@ -846,11 +809,11 @@
       <span class="n">loop</span><span class="o">.</span><span class="n">addColumn</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
       <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_processComment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_processComment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="c1"># Comments are ignored</span>
-   <span class="k">return</span>
+    <span class="k">return</span>
 
-  <span class="k">def</span> <span class="nf">_processGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_processGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalsCounter</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;global_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalsCounter</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">globalsCounter</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -859,7 +822,7 @@
       <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;global_&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_processDataBlock</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_processDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_processDataBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
     <span class="n">stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span>
 
@@ -897,7 +860,7 @@
       <span class="k">raise</span> <span class="n">StarSyntaxError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s2">&quot;Parser error at token </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
 
-  <span class="k">def</span> <span class="nf">_closeSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_closeSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
     <span class="n">stack</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">stack</span>
 
@@ -930,7 +893,7 @@
       <span class="k">if</span> <span class="n">lowerValue</span> <span class="o">==</span> <span class="s1">&#39;save_&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">StarSyntaxError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39; found out of context&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
-  <span class="k">def</span> <span class="nf">_openSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_openSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
     <span class="n">stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span>
 
@@ -944,34 +907,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="s2">&quot;saveframe start out of context: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
       <span class="p">)</span>
 
-  <span class="c1"># def _openLoop(self, value:str):</span>
-  <span class="c1">#</span>
-  <span class="c1">#   stack = self.stack</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Terminate open elements</span>
-  <span class="c1">#   if isinstance(stack[-1], Loop):</span>
-  <span class="c1">#     if not stack[-1].data:</span>
-  <span class="c1">#       # NB, nested loops are not supported</span>
-  <span class="c1">#       raise StarSyntaxError(</span>
-  <span class="c1">#         self._errorMessage(&quot;Loop terminated by %s instead of stop_&quot; % value, value)</span>
-  <span class="c1">#       )</span>
-  <span class="c1">#     elif self.enforceLoopStop:</span>
-  <span class="c1">#       raise StarSyntaxError(</span>
-  <span class="c1">#         self._errorMessage(&quot;Loop terminated by %s instead of stop_&quot;%  value, value)</span>
-  <span class="c1">#       )</span>
-  <span class="c1">#     else:</span>
-  <span class="c1">#       # Close loop and pop it off the stack</span>
-  <span class="c1">#       self._closeLoop(value)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   if isinstance(stack[-1], (SaveFrame, DataBlock)):</span>
-  <span class="c1">#     # NB Loop naming and adding to container is done when first column name is read</span>
-  <span class="c1">#     stack.append(Loop(name=&#39;loop_&#39;))</span>
-  <span class="c1">#     stack.ppend(list())</span>
-  <span class="c1">#</span>
-  <span class="c1">#   else:</span>
-  <span class="c1">#     raise StarSyntaxError(self._errorMessage(&quot;loop_ out of context&quot;, value))</span>
-
-  <span class="k">def</span> <span class="nf">_openLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_openLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
     <span class="n">stack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span>
 
@@ -1062,9 +998,6 @@
       <span class="k">for</span> <span class="n">tk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokeniser</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">typ</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">tk</span>
-        <span class="c1"># typ = tk.type</span>
-        <span class="c1"># value = tk.value</span>
-
 
         <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">unquotedValueTags</span><span class="p">:</span>
           <span class="n">value</span> <span class="o">=</span> <span class="n">UnquotedValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -1095,41 +1028,6 @@
           <span class="k">else</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-        <span class="c1"># # Start with most common tags:</span>
-        <span class="c1"># if typ in unquotedValueTags:</span>
-        <span class="c1">#   value = UnquotedValue(value)</span>
-        <span class="c1">#   self.processValue(value)</span>
-        <span class="c1">#</span>
-        <span class="c1"># elif typ in quotedValueTags:</span>
-        <span class="c1">#   self.processValue(value)</span>
-        <span class="c1">#</span>
-        <span class="c1"># elif typ == TOKEN_DATA_NAME:</span>
-        <span class="c1">#   self.processDataName(value)</span>
-        <span class="c1">#</span>
-        <span class="c1"># elif typ == TOKEN_LOOP:</span>
-        <span class="c1">#   self._openLoop(value)</span>
-        <span class="c1"># elif typ == TOKEN_LOOP_STOP:</span>
-        <span class="c1">#     self._closeLoop(value)</span>
-        <span class="c1"># elif typ == TOKEN_SAVE_FRAME:</span>
-        <span class="c1">#   # save_ string</span>
-        <span class="c1">#   self._closeSaveFrame(value)</span>
-        <span class="c1">#   if value.lower() != &#39;save_&#39;:</span>
-        <span class="c1">#     self._openSaveFrame(value)</span>
-        <span class="c1"># elif typ == TOKEN_COMMENT:</span>
-        <span class="c1">#   self._processComment(value)</span>
-        <span class="c1"># elif typ == TOKEN_GLOBAL:</span>
-        <span class="c1">#   self._processGlobal(value)</span>
-        <span class="c1"># elif typ == TOKEN_DATA_BLOCK:</span>
-        <span class="c1">#   self._processDataBlock(value)</span>
-        <span class="c1"># elif typ in (TOKEN_BAD_CONSTRUCT, TOKEN_BAD_TOKEN):</span>
-        <span class="c1">#   self._processBadToken(value, typ)</span>
-        <span class="c1"># elif typ == TOKEN_SQUARE_BRACKET:</span>
-        <span class="c1">#   if self.allowSquareBracketStrings:</span>
-        <span class="c1">#     self.processValue(UnquotedValue(value))</span>
-        <span class="c1">#   else:</span>
-        <span class="c1">#     self._processBadToken(value, typ)</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#   raise StarSyntaxError(&quot;Unknown token type: %s&quot; % typ)</span>
 
       <span class="c1"># End of data - clean up stack</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
@@ -1182,7 +1080,7 @@
     <span class="k">return</span> <span class="n">template</span> <span class="o">%</span> <span class="p">(</span><span class="n">tags</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">tags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span><span class="c1">#</span></div>
 
 
-<div class="viewcode-block" id="extractMatchingNameSequence"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence">[docs]</a><span class="k">def</span> <span class="nf">extractMatchingNameSequence</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">matchNames</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="extractMatchingNameSequence"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence">[docs]</a><span class="k">def</span> <span class="nf">extractMatchingNameSequence</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">matchNames</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Get list of matchNames matching &#39;name_1&#39;, &#39;name_2&#39;, ..., in order.&quot;&quot;&quot;</span>
 
   <span class="n">ll</span> <span class="o">=</span><span class="p">[]</span>

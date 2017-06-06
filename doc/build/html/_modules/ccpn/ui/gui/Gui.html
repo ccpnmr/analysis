@@ -79,6 +79,8 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
@@ -86,10 +88,17 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.Ui</span> <span class="kn">import</span> <span class="n">Ui</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.RegisterPopup</span> <span class="kn">import</span> <span class="n">RegisterPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">Application</span>
-
-
 <span class="c1"># This import initializes relative paths for QT style-sheets.  Do not remove!</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">resources_rc</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+
+<div class="viewcode-block" id="qtMessageHandler"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.qtMessageHandler">[docs]</a><span class="k">def</span> <span class="nf">qtMessageHandler</span><span class="p">(</span><span class="o">*</span><span class="n">errors</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;QT error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span></div>
+
+<span class="c1"># un/suppress messages</span>
+<span class="n">QtCore</span><span class="o">.</span><span class="n">qInstallMsgHandler</span><span class="p">(</span><span class="n">qtMessageHandler</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="Gui"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.Gui">[docs]</a><span class="k">class</span> <span class="nc">Gui</span><span class="p">(</span><span class="n">Ui</span><span class="p">):</span>
 
@@ -99,9 +108,7 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
     
     <span class="n">Ui</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">_initQtApp</span><span class="p">()</span>
-
 
   <span class="k">def</span> <span class="nf">_initQtApp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># On the Mac (at least) it does not matter what you set the applicationName to be,</span>
@@ -138,7 +145,7 @@
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumView&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">GuiSpectrumView</span><span class="o">.</span><span class="n">_createdSpectrumView</span><span class="p">)</span>
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumView&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="n">GuiSpectrumView</span><span class="o">.</span><span class="n">_spectrumViewHasChanged</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.spectrumItems</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakListView&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span>
                              <span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">_createdPeakListView</span><span class="p">)</span>
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakListView&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span>
@@ -149,10 +156,6 @@
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrAtom&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">_updateAssignmentsNmrAtom</span><span class="p">)</span>
 
     <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;Peak&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">_refreshPeakPosition</span><span class="p">)</span>
-
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">SpinSystemLabel</span>
-    <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">SpinSystemLabel</span><span class="o">.</span><span class="n">_renameNmrResidueForGraphics</span><span class="p">)</span>
-
 
     <span class="c1"># API notifiers - see functions for comments on why this is done this way</span>
     <span class="n">project</span><span class="o">.</span><span class="n">_registerApiNotifier</span><span class="p">(</span><span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">_upDateAssignmentsPeakDimContrib</span><span class="p">,</span>
@@ -181,22 +184,17 @@
 
 <div class="viewcode-block" id="Gui.start"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.Gui.start">[docs]</a>  <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-    <span class="c1"># show splash screen</span>
-    <span class="c1"># GWV comment out to speed up loading and reduce memory footprint</span>
-    <span class="c1">#splash = SplashScreen()</span>
-    <span class="c1">#self.qtApp.processEvents()  # needed directly after splashScreen show to show something</span>
-    <span class="c1">#splash.close()</span>
-    <span class="c1">#splash.finish(self.mainWindow)</span>
-
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_fillMacrosMenu</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_updateRestoreArchiveMenu</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">setUserShortcuts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">setUserShortcuts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">experimentClassifications</span> <span class="o">=</span> <span class="n">getExperimentClassifications</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Gui interface is ready</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">qtApp</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">qtApp</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
 
   <span class="k">def</span> <span class="nf">_showRegisterPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Display registration popup&quot;&quot;&quot;</span>
@@ -219,12 +217,10 @@
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">namespace</span><span class="p">[</span><span class="s1">&#39;current&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
     <span class="k">return</span> <span class="n">mainWindow</span>
 
-
 <div class="viewcode-block" id="Gui.echoCommands"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.Gui.echoCommands">[docs]</a>  <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger</span>
 <span class="sd">    and store them in internal list for perusal</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">console</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
 
@@ -232,29 +228,39 @@
       <span class="n">console</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
       <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
 
-
+  <span class="c1">#TODO:RASMUS: should discuss how application should deal with it</span>
 <div class="viewcode-block" id="Gui.getByGid"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.Gui.getByGid">[docs]</a>  <span class="k">def</span> <span class="nf">getByGid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span></div>
 
-
+  <span class="c1">#TODO: this should be made failsafe</span>
 <div class="viewcode-block" id="Gui.addBlankDisplay"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.Gui.addBlankDisplay">[docs]</a>  <span class="k">def</span> <span class="nf">addBlankDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="n">logParametersString</span> <span class="o">=</span> <span class="s2">&quot;position={position}, relativeTo={relativeTo}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
       <span class="n">position</span><span class="o">=</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">position</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">position</span><span class="p">,</span>
       <span class="n">relativeTo</span><span class="o">=</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">relativeTo</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">relativeTo</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.ui.addBlankDisplay({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logParametersString</span><span class="p">))</span>
-
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiBlankDisplay</span> <span class="kn">import</span> <span class="n">GuiBlankDisplay</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="s1">&#39;Blank Display&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
-        <span class="n">blankDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Blank Display&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">blankDisplay</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-          <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">blankDisplay</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+      <span class="n">mDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">currentModulesDict</span>
+      <span class="k">if</span> <span class="s1">&#39;BlankDisplay&#39;</span> <span class="ow">in</span> <span class="n">mDict</span><span class="p">:</span>
+        <span class="k">pass</span>
+        <span class="c1"># blankDisplay = mDict[&#39;BlankDisplay&#39;]</span>
+        <span class="c1"># blankDisplay.show()</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">blankDisplay</span> <span class="o">=</span> <span class="n">GuiBlankDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">blankDisplay</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">blankDisplay</span>
+        <span class="c1"># LM 28/04/17</span>
+        <span class="c1"># This is not called anymore when a spectrum display is opened.</span>
+        <span class="c1"># For some reason is impossible to open a new blank display. Must be some conflict with function name across</span>
+        <span class="c1"># Gui/Framework/GuiMainwindow/mainMindow for the addBlankDisplay() function.</span>
+        <span class="c1"># The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.</span>
+
+
+        <span class="c1"># blankDisplay = self.mainWindow.newBlankDisplay()</span>
+        <span class="c1"># return blankDisplay # Why a return blankDisplay?</span>
+
+         <span class="c1"># Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.BlankDisplay</span> <span class="kn">import</span> <span class="n">BlankDisplay</span>
+        <span class="n">blankDisplay</span> <span class="o">=</span> <span class="n">BlankDisplay</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">blankDisplay</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span>
+                                             <span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>   <span class="c1"># ejb</span>
+
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
@@ -298,28 +304,51 @@
     <span class="c1">#     self.application._endCommandBlock()</span>
 
 
-<span class="c1">########################################################</span>
-<span class="c1">#</span>
-<span class="c1">#  Wrapper notifier functions</span>
-
-
 
 <span class="c1">#######################################################################################</span>
 <span class="c1">#</span>
 <span class="c1">#  Ui classes that map ccpn.ui._implementation</span>
 <span class="c1">#</span>
+<span class="c1">#######################################################################################</span>
+
+<span class="c1">#TODO:RASMUS move to individual files containing the wrapped class and Gui-class</span>
+<span class="c1"># Any Factory function to _implementation or abstractWrapper</span>
+
 
 <span class="c1">## Window class</span>
 <span class="n">coreClass</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;Window&#39;</span><span class="p">]</span>
 
+<span class="c1">#TODO:RASMUS move to individual files containing the wrapped class and Gui-class</span>
+<span class="c1"># Any Factory function to _implementation or abstractWrapper</span>
+<span class="c1">#</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiMainWindow</span> <span class="kn">import</span> <span class="n">GuiMainWindow</span> <span class="k">as</span> <span class="n">_GuiMainWindow</span>
 <div class="viewcode-block" id="MainWindow"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.MainWindow">[docs]</a><span class="k">class</span> <span class="nc">MainWindow</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiMainWindow</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;GUI main window, corresponds to OS window&quot;&quot;&quot;</span>
+
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiWindow&#39;</span><span class="p">):</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-    <span class="n">_GuiMainWindow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; project: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">project</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; project._appBase: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">)</span>
+
+    <span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="n">_GuiMainWindow</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span> <span class="o">=</span> <span class="n">application</span><span class="p">)</span>
+
+    <span class="c1"># patches for now:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_mainWindow</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; project._mainWindow: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">project</span><span class="o">.</span><span class="n">_mainWindow</span><span class="p">)</span>
+
+    <span class="n">application</span><span class="o">.</span><span class="n">_mainWindow</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; application from QtCore..: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">application</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; application.project: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>  <span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; application._mainWindow: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">application</span><span class="o">.</span><span class="n">_mainWindow</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;MainWindow&gt;&gt; application.ui.mainWindow: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span></div>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiWindow</span> <span class="kn">import</span> <span class="n">GuiWindow</span> <span class="k">as</span> <span class="n">_GuiWindow</span>
+<span class="c1">#TODO:RASMUS: copy from MainWindow</span>
 <div class="viewcode-block" id="SideWindow"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.SideWindow">[docs]</a><span class="k">class</span> <span class="nc">SideWindow</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiWindow</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;GUI side window, corresponds to OS window&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiWindow&#39;</span><span class="p">):</span>
@@ -344,23 +373,62 @@
 <span class="n">Mark</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;Mark&#39;</span><span class="p">]</span>
 
 
+<span class="c1">#TODO:RASMUS move to individual files containing the wrapped class and Gui-class</span>
+<span class="c1"># Any Factory function to _implementation or abstractWrapper</span>
+<span class="c1"># Also Rename</span>
+<span class="c1"># SpectrumDisplay1d.py; contains SpectrumDisplay1d (formerly StripDisplay1d) and</span>
+<span class="c1">#                       GuiStripDisplay</span>
+<span class="c1"># SpectrumDisplayNd.py: likeWise</span>
+
+
 <span class="c1">## SpectrumDisplay class</span>
 <span class="n">coreClass</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;SpectrumDisplay&#39;</span><span class="p">]</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStripDisplay1d</span> <span class="kn">import</span> <span class="n">GuiStripDisplay1d</span> <span class="k">as</span> <span class="n">_GuiStripDisplay1d</span>
+<span class="c1">#TODO:RASMUS: also change for this class as done for the Nd variant below; this involves</span>
+<span class="c1">#chaning the init signature of the GuiStripDisplay1d and passing the parameters along to</span>
+<span class="c1"># GuiSpectrumDisplay</span>
+
 <div class="viewcode-block" id="StripDisplay1d"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.StripDisplay1d">[docs]</a><span class="k">class</span> <span class="nc">StripDisplay1d</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiStripDisplay1d</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;1D bound display&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiBoundDisplay&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;StripDisplay1d&gt;&gt; project: </span><span class="si">%s</span><span class="s1">, project._appBase: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">))</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-    <span class="n">_GuiStripDisplay1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="c1"># hack for now</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+
+    <span class="n">_GuiStripDisplay1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;right&#39;</span>
+                                                        <span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
+
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStripDisplayNd</span> <span class="kn">import</span> <span class="n">GuiStripDisplayNd</span> <span class="k">as</span> <span class="n">_GuiStripDisplayNd</span>
-<div class="viewcode-block" id="StripDisplayNd"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.StripDisplayNd">[docs]</a><span class="k">class</span> <span class="nc">StripDisplayNd</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiStripDisplayNd</span><span class="p">):</span>
+<span class="c1">#TODO:RASMUS Need to check on the consequences of hiding name from the wrapper</span>
+<span class="c1"># NB: GWV had to comment out the name property to make it work</span>
+<span class="c1"># conflicts existed between the &#39;name&#39; and &#39;window&#39; attributes of the two classes</span>
+<span class="c1"># the pyqtgraph decendents need name(), GuiStripNd had &#39;window&#39;, but that could be replaced with</span>
+<span class="c1"># mainWindow throughout</span>
+
+<div class="viewcode-block" id="SpectrumDisplayNd"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.SpectrumDisplayNd">[docs]</a><span class="k">class</span> <span class="nc">SpectrumDisplayNd</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiStripDisplayNd</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;ND bound display&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiBoundDisplay&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;SpectrumDisplayNd&gt;&gt; project: </span><span class="si">%s</span><span class="s1">, project._appBase: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">))</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-    <span class="n">_GuiStripDisplayNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="c1"># hack for now;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+
+    <span class="n">_GuiStripDisplayNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+                                <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;right&#39;</span>
+                                                        <span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span></div>
+<span class="c1">#old name</span>
+<span class="n">StripDisplayNd</span> <span class="o">=</span> <span class="n">SpectrumDisplayNd</span>
 
 <span class="k">def</span> <span class="nf">_factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">coreClass</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;create SpectrumDisplay, dispatching to subtype depending on wrappedData&quot;&quot;&quot;</span>
@@ -368,8 +436,8 @@
     <span class="k">return</span> <span class="n">StripDisplay1d</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">StripDisplayNd</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-
 <span class="n">Gui</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="p">[</span><span class="n">coreClass</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">_factoryFunction</span>
+
 
 <span class="c1">## Strip class</span>
 <span class="n">coreClass</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;Strip&#39;</span><span class="p">]</span>
@@ -378,16 +446,35 @@
   <span class="sd">&quot;&quot;&quot;1D strip&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiBoundStrip&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
+
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-    <span class="n">_GuiStrip1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="c1"># hack : Postpone SpectrumLoading and PlotWidget stuff until later</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseDone</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Strip1d&gt;&gt; spectrumDisplay: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+    <span class="n">_GuiStrip1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+    <span class="n">stripIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span></div>
+
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStripNd</span> <span class="kn">import</span> <span class="n">GuiStripNd</span> <span class="k">as</span> <span class="n">_GuiStripNd</span>
 <div class="viewcode-block" id="StripNd"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.Gui.StripNd">[docs]</a><span class="k">class</span> <span class="nc">StripNd</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiStripNd</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;ND strip &quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiBoundStrip&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
+
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
-    <span class="n">_GuiStripNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="c1"># hack : Postpone SpectrumLoading and PlotWidget stuff until later</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseDone</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;StripNd&gt;&gt; spectrumDisplay: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+    <span class="n">_GuiStripNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">)</span>
+
+    <span class="c1"># cannot add the Frame until fully done</span>
+    <span class="n">stripIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedStrips</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">)</span></div>
 
 <span class="k">def</span> <span class="nf">_factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">coreClass</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;create SpectrumDisplay, dispatching to subtype depending on wrappedData&quot;&quot;&quot;</span>
@@ -403,7 +490,9 @@
 <span class="c1">## Axis class - put in namespace for documentation</span>
 <span class="n">Axis</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;Axis&#39;</span><span class="p">]</span>
 
-
+<span class="c1"># TODO:RASMUS move to individual files containing the wrapped class and Gui-class</span>
+<span class="c1"># Any Factory function to _implementation or abstractWrapper</span>
+<span class="c1">#</span>
 <span class="c1">## SpectrumView class</span>
 <span class="n">coreClass</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;SpectrumView&#39;</span><span class="p">]</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiSpectrumView1d</span> <span class="kn">import</span> <span class="n">GuiSpectrumView1d</span> <span class="k">as</span> <span class="n">_GuiSpectrumView1d</span>
@@ -412,7 +501,14 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiStripSpectrumView&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+
+    <span class="c1"># hack for now</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;SpectrumView1d&gt;&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
     <span class="n">_GuiSpectrumView1d</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiSpectrumViewNd</span> <span class="kn">import</span> <span class="n">GuiSpectrumViewNd</span> <span class="k">as</span> <span class="n">_GuiSpectrumViewNd</span>
 <span class="k">class</span> <span class="nc">_SpectrumViewNd</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiSpectrumViewNd</span><span class="p">):</span>
@@ -420,6 +516,12 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiStripSpectrumView&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+
+    <span class="c1"># hack for now</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+
+    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;SpectrumViewNd&gt;&gt; </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">))</span>
     <span class="n">_GuiSpectrumViewNd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">coreClass</span><span class="p">:</span>
@@ -433,14 +535,20 @@
 
 <span class="n">Gui</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="p">[</span><span class="n">coreClass</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">_factoryFunction</span>
 
+<span class="c1"># TODO:RASMUS move to individual files containing the wrapped class and Gui-class</span>
+<span class="c1"># Any Factory function to _implementation or abstractWrapper</span>
+<span class="c1">#</span>
 <span class="c1">## PeakListView class</span>
 <span class="n">coreClass</span> <span class="o">=</span> <span class="n">_coreClassMap</span><span class="p">[</span><span class="s1">&#39;PeakListView&#39;</span><span class="p">]</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.spectrumItems.GuiPeakListView</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span> <span class="k">as</span> <span class="n">_GuiPeakListView</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiPeakListView</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span> <span class="k">as</span> <span class="n">_GuiPeakListView</span>
 <span class="k">class</span> <span class="nc">_PeakListView</span><span class="p">(</span><span class="n">coreClass</span><span class="p">,</span> <span class="n">_GuiPeakListView</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Peak List View for 1D or nD PeakList&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="s1">&#39;ApiStripPeakListView&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Local override init for Qt subclass&quot;&quot;&quot;</span>
     <span class="n">AbstractWrapperObject</span><span class="o">.</span> <span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+    <span class="c1"># hack for now</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
     <span class="n">_GuiPeakListView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <span class="n">Gui</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="p">[</span><span class="n">coreClass</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">_PeakListView</span>

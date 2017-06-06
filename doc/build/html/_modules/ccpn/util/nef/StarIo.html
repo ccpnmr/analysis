@@ -47,9 +47,41 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.nef.StarIo</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;I/O for NEF and NmrStar formats</span>
+<span></span><span class="sd">&quot;&quot;&quot;I/O for NEF and NmrStar formats.</span>
 
+<span class="sd">The functions to use are</span>
+
+<span class="sd">and other STAR variants satisfying the following requirements:</span>
+
+<span class="sd">      - all plain tags in a saveframe start with a common prefix;</span>
+<span class="sd">      for NEF files this must be the &#39;&lt;sf_category&gt;&#39; followed by &#39;.&#39;,</span>
+<span class="sd">      and the framecode value must start with the &#39;&lt;sf_category&gt;&#39; followed by underscore.</span>
+
+<span class="sd">      - All loop column names start with &#39;&lt;loopcategory&gt;.&#39;</span>
+
+<span class="sd">      - loopcategories share a namespace with tags within a saveframe</span>
+
+<span class="sd">      - DataBlocks can contain only saveframes.</span>
+
+<span class="sd">      - For NEF files the</span>
+
+<span class="sd">  Use the functions parseNmrStar, parseNef, parseNmrStarFile, parseNefFile</span>
+
+<span class="sd">   The &#39;File&#39; functions take a file name and pass the file contents to corresponding parser.</span>
+
+<span class="sd">   The &#39;NmrStar&#39; functions will read any Star file that satisfies the constraints above, while</span>
+<span class="sd">    the &#39;Nef&#39; functions will also enforce the NEF=-specific constraints above</span>
+
+
+<span class="sd">  On reading tag prefixes (&#39;_&#39;, &#39;save_&#39;, &#39;data_&#39; are stripped,</span>
+<span class="sd">  as are the parts of tags before the first &#39;.&#39;</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
@@ -79,19 +111,12 @@
 
 <span class="c1"># NB Assumes that file was parsed with lowercaseTags = True</span>
 
-<span class="c1"># Constraints on class hierarchy:</span>
-<span class="c1"># - all plain tags in a saveframe start with the &#39;&lt;sf_category&gt;.&#39;</span>
-<span class="c1"># - ALl loop column names start with &#39;&lt;loopcategory&gt;.&#39;</span>
-<span class="c1"># - loopcategories share a namespace with tags within a saveframe</span>
-<span class="c1"># - DataBlocks can contain only saveframes.</span>
-<span class="c1"># - tag prefixes (&#39;_&#39;, &#39;save_&#39;, &#39;data_&#39; are stripped</span>
 
 
 <span class="c1"># TODO NBNB some longer variable names;</span>
 
 <span class="kn">import</span> <span class="nn">keyword</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">typing</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">GenericStarParser</span>
 <span class="n">NULLSTRING</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">NULLSTRING</span>
@@ -100,57 +125,15 @@
 <span class="n">UNKNOWNSTRING</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">UNKNOWNSTRING</span>
 <span class="n">UnquotedValue</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">UnquotedValue</span>
 
-<span class="c1"># # Translations from internal values to framecode-compatible strings</span>
-<span class="c1"># replacementCharacter = &#39;`&#39;</span>
-<span class="c1"># _translationDict = {</span>
-<span class="c1">#   &#39;#&#39;:&#39;?&#39;, &#39;&quot;&#39;:&#39;?&#39;, &quot;&#39;&quot;:&#39;?&#39;</span>
-<span class="c1"># }</span>
-<span class="c1"># for indx in range(128):</span>
-<span class="c1">#   char = chr(indx)</span>
-<span class="c1">#   if char.isspace:</span>
-<span class="c1">#     # replace space characters with &#39;_&#39;</span>
-<span class="c1">#     _translationDict[char] = &#39;_&#39;</span>
-<span class="c1">#   elif not char.isprintable():</span>
-<span class="c1">#     _translationDict[char] = &#39;?&#39;</span>
-<span class="c1"># for index in range(128,256):</span>
-<span class="c1">#   _translationDict[chr(indx)] =</span>
-<span class="c1"># strToFramecode = str.maketrans(_translationDict)</span>
-
-<span class="c1"># Make to-=ascii mapping at byte level&#39;</span>
-<span class="c1"># Space and unprintable characters map to &#39;_&#39;</span>
-<span class="c1"># Characters outside the ascii range and #&#39;&quot; map to &#39;?&#39;</span>
-<span class="c1">#</span>
-<span class="c1"># NBNB this could be done better (more readable) with custom mappings</span>
-<span class="c1">#</span>
-<span class="n">_replaceSpaceWithByte</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
-<span class="n">_replaceWithByte</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
-<span class="n">_b2</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">):</span>
-  <span class="n">_char</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">_char</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
-    <span class="n">_b2</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">_replaceSpaceWithByte</span>
-  <span class="k">elif</span> <span class="ow">not</span> <span class="n">_char</span><span class="o">.</span><span class="n">isprintable</span><span class="p">():</span>
-    <span class="n">_b2</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">_replaceSpaceWithByte</span>
-<span class="k">for</span> <span class="n">_char</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">):</span>
-  <span class="n">_b2</span><span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">_char</span><span class="p">)]</span> <span class="o">=</span> <span class="n">_replaceWithByte</span>
-<span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span><span class="mi">256</span><span class="p">):</span>
-  <span class="n">_b2</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">_replaceWithByte</span>
-<span class="n">latin_1_to_framecode_translator</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">)),</span> <span class="n">_b2</span><span class="p">)</span>
+<span class="c1"># Make target string (translator) for mapping, to work in Python 2 and 3 both</span>
+<span class="c1"># Unprintable characters map to &#39;_&#39;, bytes above 128 map to &#39;?&#39;</span>
+<span class="n">ll</span> <span class="o">=</span> <span class="mi">33</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">128</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;?&#39;</span><span class="p">]</span>
+<span class="c1"># &quot;&#39;# (double quote, single quote, and pound sign) map to &#39;?&#39;</span>
+<span class="n">ll</span><span class="p">[</span><span class="mi">34</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="o">=</span>  <span class="n">ll</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+<span class="n">latin_1_to_framecode_translator</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="string2FramecodeString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.string2FramecodeString">[docs]</a><span class="k">def</span> <span class="nf">string2FramecodeString</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-
-  <span class="c1"># Get 8-bit bytes, replacing values &gt;255 with ord(&#39;?&#39;)</span>
-  <span class="n">bts</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span>
-
-  <span class="c1"># Translate bytes, using preset translator</span>
-  <span class="n">bts2</span> <span class="o">=</span> <span class="n">bts</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">latin_1_to_framecode_translator</span><span class="p">)</span>
-
-  <span class="c1"># convert back to string - all bytes are ascii, so no errors can occur</span>
-  <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">bts2</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="parseNmrStar"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStar">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStar</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parseNmrStar"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStar">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStar</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;load NMRSTAR file&quot;&quot;&quot;</span>
   <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
   <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">)</span>
@@ -159,7 +142,7 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="parseNef"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNef">[docs]</a><span class="k">def</span> <span class="nf">parseNef</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="parseNef"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNef">[docs]</a><span class="k">def</span> <span class="nf">parseNef</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;load NEF from string&quot;&quot;&quot;</span>
 
   <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
@@ -169,8 +152,10 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="parseNmrStarFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStarFile">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStarFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;parse NMRSTAR from file&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parseNmrStarFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNmrStarFile">[docs]</a><span class="k">def</span> <span class="nf">parseNmrStarFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;parse NMRSTAR from file</span>
+
+<span class="sd">  if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
   <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
   <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
     <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
@@ -181,15 +166,31 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="parseNefFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNefFile">[docs]</a><span class="k">def</span> <span class="nf">parseNefFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;parse NEF from file&quot;&quot;&quot;</span>
-  <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
-  <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-  <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;nef&#39;</span><span class="p">)</span>
-  <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
+<div class="viewcode-block" id="parseNefFile"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.parseNefFile">[docs]</a><span class="k">def</span> <span class="nf">parseNefFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">wrapInDataBlock</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;parse NEF from file</span>
+
+<span class="sd">  if wrapInDataBlock missing DataBlock start will be provided&quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span> <span class="k">as</span> <span class="n">inFile</span><span class="p">:</span>          <span class="c1"># ejb - fix not closing file correctly</span>
+    <span class="c1"># text = open(fileName).read()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">inFile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">wrapInDataBlock</span> <span class="ow">and</span> <span class="s1">&#39;save_&#39;</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+      <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;data_dummy </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">text</span>
+    <span class="n">dataExtent</span> <span class="o">=</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">_StarDataConverter</span><span class="p">(</span><span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;nef&#39;</span><span class="p">)</span>
+    <span class="n">converter</span><span class="o">.</span><span class="n">preValidate</span><span class="p">()</span>
+
   <span class="n">result</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="string2FramecodeString"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.string2FramecodeString">[docs]</a><span class="k">def</span> <span class="nf">string2FramecodeString</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+  <span class="c1"># Replace code points outside latin-1 range (more than one byte)  with &#39;?&#39;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin_1&#39;</span><span class="p">)</span>
+
+  <span class="c1"># Translate string, using preset translator</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">latin_1_to_framecode_translator</span><span class="p">)</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
@@ -200,12 +201,12 @@
   <span class="sd">&quot;&quot;&quot;Top level container (OrderedDict) for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
   <span class="k">pass</span></div>
 
-<span class="c1"># We insert these afterwards as we want the functions at the top of the file</span>
-<span class="c1"># but can only annotate after DataExtent is created</span>
-<span class="n">parseNef</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NmrDataExtent</span>
-<span class="n">parseNefFile</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NmrDataExtent</span>
-<span class="n">parseNmrStar</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NmrDataExtent</span>
-<span class="n">parseNmrStarFile</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NmrDataExtent</span>
+<span class="c1"># # We insert these afterwards as we want the functions at the top of the file</span>
+<span class="c1"># # but can only annotate after DataExtent is created</span>
+<span class="c1"># parseNef.__annotations__[&#39;return&#39;] = NmrDataExtent</span>
+<span class="c1"># parseNefFile.__annotations__[&#39;return&#39;] = NmrDataExtent</span>
+<span class="c1"># parseNmrStar.__annotations__[&#39;return&#39;] = NmrDataExtent</span>
+<span class="c1"># parseNmrStarFile.__annotations__[&#39;return&#39;] = NmrDataExtent</span>
 
 <div class="viewcode-block" id="NmrLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrLoop">[docs]</a><span class="k">class</span> <span class="nc">NmrLoop</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">Loop</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Loop for NMRSTAR/NEF object tree</span>
@@ -215,12 +216,12 @@
 <span class="sd">  break - use the newRow function.&quot;&quot;&quot;</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Loop category tag - synonym for name (unlike the case of SaveFrame)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
@@ -232,11 +233,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">category</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">tagPrefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Prefix to use before item tags on output&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s1">&#39;_</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span>
 
-<div class="viewcode-block" id="NmrSaveFrame.newLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">[docs]</a>  <span class="k">def</span> <span class="nf">newLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrLoop</span><span class="p">:</span>
+<div class="viewcode-block" id="NmrSaveFrame.newLoop"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">[docs]</a>  <span class="k">def</span> <span class="nf">newLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make new NmrLoop and add it to the NmrSaveFrame&quot;&quot;&quot;</span>
     <span class="n">loop</span> <span class="o">=</span> <span class="n">NmrLoop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
@@ -245,7 +246,7 @@
 <div class="viewcode-block" id="NmrDataBlock"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock">[docs]</a><span class="k">class</span> <span class="nc">NmrDataBlock</span><span class="p">(</span><span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataBlock</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;DataBlock (OrderedDict)for NMRSTAR/NEF object tree&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="NmrDataBlock.newSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">newSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrSaveFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="NmrDataBlock.newSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">newSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make new NmrSaveFrame and add it to the DataBlock&quot;&quot;&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">string2FramecodeString</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">saveFrame</span> <span class="o">=</span> <span class="n">NmrSaveFrame</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
@@ -254,7 +255,7 @@
     <span class="n">saveFrame</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">saveFrame</span></div>
 
-<div class="viewcode-block" id="NmrDataBlock.addSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">addSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrDataBlock.addSaveFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">[docs]</a>  <span class="k">def</span> <span class="nf">addSaveFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add existing NmrSaveFrame to the DataBlock&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">],</span> <span class="n">saveFrame</span><span class="p">)</span></div></div>
 
@@ -271,7 +272,7 @@
 
   <span class="n">validFileTypes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;nef&#39;</span><span class="p">,</span> <span class="s1">&#39;star&#39;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataExtent</span><span class="p">:</span> <span class="n">GenericStarParser</span><span class="o">.</span><span class="n">DataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;star&#39;</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataExtent</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="s1">&#39;star&#39;</span><span class="p">,</span>
                <span class="n">specification</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">convertColumnNames</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
     <span class="c1"># Set option settings</span>
@@ -495,14 +496,15 @@
       <span class="n">tag</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[</span><span class="n">lenPrefix</span><span class="p">:]</span>
 
       <span class="c1"># Check for valid field names</span>
-      <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tag</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertColumnNames</span><span class="p">:</span>
-          <span class="c1"># make the name valid</span>
           <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">)</span>
-          <span class="k">while</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+          <span class="k">while</span> <span class="n">tag</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
             <span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 1: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid column name 2: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;column name (as modified) clashes with Python keyword: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ss</span><span class="p">)</span>
@@ -547,7 +549,7 @@
       <span class="c1"># SaveFrame reference</span>
       <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_code&#39;</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_code&#39;</span><span class="p">,</span> <span class="s1">&#39;_name&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;_code_&#39;</span> <span class="ow">in</span> <span class="n">tag</span> <span class="ow">or</span> <span class="s1">&#39;_name_&#39;</span> <span class="ow">in</span> <span class="n">tag</span><span class="p">):</span>
         <span class="c1"># HACK - tags ending in &#39;_code&#39; or &#39;_name&#39; are assumed to be string type</span>
         <span class="c1"># This takes care of e.g. &#39;sequence_code&#39;</span>
         <span class="c1"># that often might evaluate to a number otherwise</span>
@@ -571,7 +573,7 @@
     <span class="k">raise</span> <span class="n">StarValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errorMessage</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="splitNefSequence"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.splitNefSequence">[docs]</a><span class="k">def</span> <span class="nf">splitNefSequence</span><span class="p">(</span><span class="n">rows</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+<div class="viewcode-block" id="splitNefSequence"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarIo.splitNefSequence">[docs]</a><span class="k">def</span> <span class="nf">splitNefSequence</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Split a sequence of nef_sequence dicts assumed to belong to the same chain</span>
 <span class="sd">  into a list of lists of sequentially linked stretches following the NEF rules</span>
 

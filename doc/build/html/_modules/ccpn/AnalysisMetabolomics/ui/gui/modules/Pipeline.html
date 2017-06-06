@@ -81,18 +81,19 @@
 
 <div class="viewcode-block" id="GuiPipeline"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.Pipeline.GuiPipeline">[docs]</a><span class="k">class</span> <span class="nc">GuiPipeline</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pipelineMethods</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">GuiPipeline</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+
     <span class="n">nameCount</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;runPipeline&#39;</span><span class="p">):</span>
         <span class="n">nameCount</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Pipeline-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameCount</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
@@ -107,7 +108,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPipelineTemplates</span><span class="p">(</span><span class="n">templates</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pipelineMethods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPipelineMethods</span><span class="p">()</span>
 
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_setIcons</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>

@@ -49,18 +49,19 @@
   <h1>Source code for ccpn.ui.gui.widgets.BarGraph</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-<span class="kn">import</span>  <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.Point</span> <span class="kn">import</span> <span class="n">Point</span>
-<span class="kn">import</span> <span class="nn">ccpn.ui.gui.ViewBox</span> <span class="kn">as</span> <span class="nn">spectrumViewbox</span>
+
+<span class="kn">import</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">as</span> <span class="nn">spectrumViewbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CustomExportDialog</span> <span class="kn">import</span> <span class="n">CustomExportDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+
 <span class="n">current</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="n">labelsColor</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
 <span class="n">selectedLabelColor</span> <span class="o">=</span> <span class="s1">&#39;g&#39;</span>
 
-
+<span class="c1">#TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed</span>
 
 <div class="viewcode-block" id="BarGraph"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.BarGraph.BarGraph">[docs]</a><span class="k">class</span> <span class="nc">BarGraph</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">BarGraphItem</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">viewBox</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">xValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>

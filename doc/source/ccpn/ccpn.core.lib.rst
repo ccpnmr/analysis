@@ -65,10 +65,10 @@ ccpn.core.lib.MoleculeLib module
     :undoc-members:
     :show-inheritance:
 
-ccpn.core.lib.PeakLib module
-----------------------------
+ccpn.core.lib.Notifiers module
+------------------------------
 
-.. automodule:: ccpn.core.lib.PeakLib
+.. automodule:: ccpn.core.lib.Notifiers
     :members:
     :undoc-members:
     :show-inheritance:
@@ -109,6 +109,14 @@ ccpn.core.lib.Util module
 -------------------------
 
 .. automodule:: ccpn.core.lib.Util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.peakUtils module
+------------------------------
+
+.. automodule:: ccpn.core.lib.peakUtils
     :members:
     :undoc-members:
     :show-inheritance:

@@ -25,6 +25,14 @@ ccpn.AnalysisScreen.guiPipeline.AlignToReference module
     :undoc-members:
     :show-inheritance:
 
+ccpn.AnalysisScreen.guiPipeline.BaselineCorrection module
+---------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.guiPipeline.BaselineCorrection
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.AnalysisScreen.guiPipeline.Bin module
 ------------------------------------------
 
@@ -57,10 +65,10 @@ ccpn.AnalysisScreen.guiPipeline.ExcludeSignalFreeRegions module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisScreen.guiPipeline.MatchPeaksToReference module
-------------------------------------------------------------
+ccpn.AnalysisScreen.guiPipeline.HitFinder module
+------------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.guiPipeline.MatchPeaksToReference
+.. automodule:: ccpn.AnalysisScreen.guiPipeline.HitFinder
     :members:
     :undoc-members:
     :show-inheritance:

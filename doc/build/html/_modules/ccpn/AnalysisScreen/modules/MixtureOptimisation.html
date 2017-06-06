@@ -59,11 +59,12 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 
 
-<div class="viewcode-block" id="SimulatedAnnealingWidgets"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureOptimisation.SimulatedAnnealingWidgets">[docs]</a><span class="k">class</span> <span class="nc">SimulatedAnnealingWidgets</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">):</span>
+<div class="viewcode-block" id="SimulatedAnnealingWidgets"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureOptimisation.SimulatedAnnealingWidgets">[docs]</a><span class="k">class</span> <span class="nc">SimulatedAnnealingWidgets</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialTemp</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">finalTemp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stepTemp</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">constantTemp</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">coolingMethod</span><span class="o">=</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
@@ -154,12 +155,12 @@
 
   <span class="sd">&#39;&#39;&#39;Creates a module to analyse the mixtures&#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">virtualSamples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mixtureAnalysisModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mixture Optimisation&#39;</span><span class="p">,</span> <span class="n">virtualSamples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mixtureAnalysisModule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MixtureOptimisation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mixture Optimisation&#39;</span><span class="p">)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span>  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mixtureAnalysisModule</span> <span class="o">=</span> <span class="n">mixtureAnalysisModule</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span> <span class="o">=</span> <span class="n">minimalDistance</span>
@@ -167,7 +168,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span> <span class="o">=</span> <span class="n">virtualSamples</span>
 
     <span class="c1">######## ======== Set Main Layout ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -189,7 +190,8 @@
                                    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_recalculateMixtures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyNewMixtures</span><span class="p">],</span>
                                    <span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
                                    <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
-                                   <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+                                   <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">,</span>
+                                   <span class="n">hAlign</span><span class="o">=</span> <span class="s1">&#39;c&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">buttonsFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panelButtons</span><span class="p">)</span>
     <span class="c1"># self._disableButtons()</span>
 
@@ -201,7 +203,7 @@
 
 
   <span class="k">def</span> <span class="nf">_setTabOtherOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tab2Frame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tab2Frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tab2Layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tab2Frame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tab2Layout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tab2Frame</span><span class="p">,</span> <span class="s1">&#39;Others&#39;</span><span class="p">)</span>

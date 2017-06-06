@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,48 +54,49 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:39 +0100 (Fri, April 07, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten/CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
-
-
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">BoundDisplay</span> <span class="k">as</span> <span class="n">ApiBoundDisplay</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
-
 <span class="kn">import</span> <span class="nn">typing</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiSpectrumDisplay</span> <span class="kn">import</span> <span class="n">GuiSpectrumDisplay</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.spectrumItems</span> <span class="kn">import</span> <span class="n">GuiPeakListView</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">BoundDisplay</span> <span class="k">as</span> <span class="n">ApiBoundDisplay</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span><span class="p">,</span> <span class="n">showInfo</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <div class="viewcode-block" id="GuiStripDisplayNd"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd">[docs]</a><span class="k">class</span> <span class="nc">GuiStripDisplayNd</span><span class="p">(</span><span class="n">GuiSpectrumDisplay</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    spectrum display object for Nd spectra</span>
+
+<span class="sd">    :param mainWindow: MainWindow instance</span>
+<span class="sd">    :param name: Title-bar name for the Module</span>
+
+<span class="sd">    This module inherits attributes from the SpectralDisplay wrapper class (see GuiSpectrumDislay)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># below are so we can reuse PeakItems and only create them as needed</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">activePeakItemDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># maps peakListView to apiPeak to peakItem for peaks which are being displayed</span>
@@ -104,75 +104,64 @@
     <span class="c1"># TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)</span>
     <span class="c1">###self.inactivePeakItems = set() # contains unused peakItems</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">inactivePeakItemDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># maps peakListView to apiPeak to set of peaks which are not being displayed</span>
-    
-    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">useScrollArea</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="c1"># .mainWindow, .current and .application are set by GuiSpectrumDisplay</span>
+    <span class="c1"># .project is set by the wrapper</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">isGrouped</span> <span class="o">=</span> <span class="bp">False</span>
     
-    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumActionDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># apiDataSource --&gt; toolbar action (i.e. button)</span>
+    <span class="c1">#TODO: have SpectrumToolbar own and maintain this</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumActionDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># apiDataSource --&gt; toolbar action (i.e. button); used in SpectrumToolBar</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_fillToolBar</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-
-<div class="viewcode-block" id="GuiStripDisplayNd.addStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addStrip">[docs]</a>  <span class="k">def</span> <span class="nf">addStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GuiStripNd&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a new strip by duplicating the first strip in the display.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">newStrip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
-    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
-        <span class="s2">&quot;strip.clone()&quot;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;strip = ui.getByGid(&#39;</span><span class="si">%s</span><span class="s2">&#39;)</span><span class="se">\n</span><span class="s2">strip.clone()&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">newStrip</span></div>
-
-<div class="viewcode-block" id="GuiStripDisplayNd.showSpinSystemLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showSpinSystemLabel">[docs]</a>  <span class="k">def</span> <span class="nf">showSpinSystemLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;NBNB do we still need this?&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemSideLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="GuiStripDisplayNd.hideSpinSystemLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.hideSpinSystemLabel">[docs]</a>  <span class="k">def</span> <span class="nf">hideSpinSystemLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;NBNB do we still need this?&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">hideSystemSideLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+    <span class="c1">#self.setAcceptDrops(True)</span>
 
   <span class="k">def</span> <span class="nf">_fillToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds specific icons for Nd spectra to the spectrum utility toolbar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">GuiSpectrumDisplay</span><span class="o">.</span><span class="n">_fillToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    
-    <span class="n">spectrumUtilToolBar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span>
-    
-    <span class="n">plusOneAction</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;+1&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addContourLevel</span><span class="p">)</span>
-    <span class="n">plusOneIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/contour-add&#39;</span><span class="p">)</span>
-    <span class="n">plusOneAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">plusOneIcon</span><span class="p">)</span>
-    <span class="n">plusOneAction</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Add One Level&#39;</span><span class="p">)</span>
-    <span class="n">minusOneAction</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;+1&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeContourLevel</span><span class="p">)</span>
-    <span class="n">minusOneIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/contour-remove&#39;</span><span class="p">)</span>
-    <span class="n">minusOneAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">minusOneIcon</span><span class="p">)</span>
-    <span class="n">minusOneAction</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Remove One Level &#39;</span><span class="p">)</span>
-    <span class="n">upBy2Action</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;*1.4&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">raiseContourBase</span><span class="p">)</span>
-    <span class="n">upBy2Icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/contour-base-up&#39;</span><span class="p">)</span>
-    <span class="n">upBy2Action</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">upBy2Icon</span><span class="p">)</span>
-    <span class="n">upBy2Action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Raise Contour Base Level&#39;</span><span class="p">)</span>
-    <span class="n">downBy2Action</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;/1.4&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerContourBase</span><span class="p">)</span>
-    <span class="n">downBy2Icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/contour-base-down&#39;</span><span class="p">)</span>
-    <span class="n">downBy2Action</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">downBy2Icon</span><span class="p">)</span>
-    <span class="n">downBy2Action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Lower Contour Base Level&#39;</span><span class="p">)</span>
-    <span class="n">storeZoomAction</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Store Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storeZoom</span><span class="p">)</span>
-    <span class="n">storeZoomIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/zoom-store&#39;</span><span class="p">)</span>
-    <span class="n">storeZoomAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">storeZoomIcon</span><span class="p">)</span>
-    <span class="n">storeZoomAction</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Store Zoom&#39;</span><span class="p">)</span>
-    <span class="n">restoreZoomAction</span> <span class="o">=</span> <span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Restore Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restoreZoom</span><span class="p">)</span>
-    <span class="n">restoreZoomIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/zoom-restore&#39;</span><span class="p">)</span>
-    <span class="n">restoreZoomAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">restoreZoomIcon</span><span class="p">)</span>
-    <span class="n">restoreZoomAction</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s1">&#39;Restore Zoom&#39;</span><span class="p">)</span>
+    <span class="n">tb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span>
+    <span class="c1"># bit of a hack: save all the action in a dict to ba able to access later</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumUtilActions</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">toolBarItemsForBoth</span> <span class="o">=</span> <span class="p">[</span>
+     <span class="c1">#  action name     icon                    tooltip                     active     callback</span>
+      <span class="p">(</span><span class="s1">&#39;Add Strip&#39;</span><span class="p">,</span>    <span class="s1">&#39;icons/plus&#39;</span><span class="p">,</span>           <span class="s1">&#39;Duplicate the rightmost strip&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addStrip</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;Remove Strip&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/minus&#39;</span><span class="p">,</span>          <span class="s1">&#39;Remove the current strip&#39;</span><span class="p">,</span>  <span class="bp">True</span><span class="p">,</span>    <span class="bp">self</span><span class="o">.</span><span class="n">removeCurrentStrip</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">toolBarItemsForNd</span> <span class="o">=</span> <span class="p">[</span>
+     <span class="c1">#  action name     icon                    tooltip                     active     callback</span>
+      <span class="p">(</span><span class="s1">&#39;+1&#39;</span><span class="p">,</span>           <span class="s1">&#39;icons/contour-add&#39;</span><span class="p">,</span>    <span class="s1">&#39;Add one contour level&#39;</span><span class="p">,</span>     <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">addContourLevel</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;-1&#39;</span><span class="p">,</span>           <span class="s1">&#39;icons/contour-remove&#39;</span><span class="p">,</span> <span class="s1">&#39;Remove one contour level&#39;</span><span class="p">,</span>  <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">removeContourLevel</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;*1.4&#39;</span><span class="p">,</span>         <span class="s1">&#39;icons/contour-base-up&#39;</span><span class="p">,</span><span class="s1">&#39;Raise Contour Base Level&#39;</span><span class="p">,</span>  <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">raiseContourBase</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;/1.4&#39;</span><span class="p">,</span>         <span class="s1">&#39;icons/contour-base-down&#39;</span><span class="p">,</span><span class="s1">&#39;Lower Contour Base Level&#39;</span><span class="p">,</span>  <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">lowerContourBase</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;Store Zoom&#39;</span><span class="p">,</span>   <span class="s1">&#39;icons/zoom-store&#39;</span><span class="p">,</span>     <span class="s1">&#39;Store Zoom&#39;</span><span class="p">,</span>                <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_storeZoom</span><span class="p">),</span>
+      <span class="p">(</span><span class="s1">&#39;Restore Zoom&#39;</span><span class="p">,</span> <span class="s1">&#39;icons/zoom-restore&#39;</span><span class="p">,</span>   <span class="s1">&#39;Restore Zoom&#39;</span><span class="p">,</span>              <span class="bp">True</span><span class="p">,</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_restoreZoom</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">aName</span><span class="p">,</span> <span class="n">icon</span><span class="p">,</span> <span class="n">tooltip</span><span class="p">,</span> <span class="n">active</span><span class="p">,</span> <span class="n">callback</span> <span class="ow">in</span> <span class="n">toolBarItemsForBoth</span> <span class="o">+</span> <span class="n">toolBarItemsForNd</span><span class="p">:</span>
+      <span class="n">action</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">aName</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">icon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">ic</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_spectrumUtilActions</span><span class="p">[</span><span class="n">aName</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
 
 <div class="viewcode-block" id="GuiStripDisplayNd.raiseContourBase"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.raiseContourBase">[docs]</a>  <span class="k">def</span> <span class="nf">raiseContourBase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increases contour base level for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Raise Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Raise Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
@@ -197,22 +186,31 @@
           <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="o">*=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourFactor</span>
 
         <span class="n">spectrumView</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
+
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">)</span></div>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GuiStripDisplayNd.lowerContourBase"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.lowerContourBase">[docs]</a>  <span class="k">def</span> <span class="nf">lowerContourBase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decreases contour base level for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Lower Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Lower Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
@@ -237,22 +235,31 @@
           <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="o">/=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourFactor</span>
 
         <span class="n">spectrumView</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
+
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">)</span></div>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourBase = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GuiStripDisplayNd.addContourLevel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addContourLevel">[docs]</a>  <span class="k">def</span> <span class="nf">addContourLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increases number of contours by 1 for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Add Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Add Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
@@ -274,22 +281,30 @@
           <span class="c1"># Display has custom contour count - change that one only</span>
           <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourCount</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">)</span></div>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GuiStripDisplayNd.removeContourLevel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.removeContourLevel">[docs]</a>  <span class="k">def</span> <span class="nf">removeContourLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decreases number of contours by 1 for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Remove Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Remove Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
+                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
@@ -315,19 +330,16 @@
           <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">:</span>
             <span class="n">spectrumView</span><span class="o">.</span><span class="n">negativeContourCount</span> <span class="o">-=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
         <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
         <span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">)</span></div>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.positiveContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourCount</span><span class="p">)</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrum.negativeContourCount = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourCount</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="GuiStripDisplayNd.showPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showPeaks">[docs]</a>  <span class="k">def</span> <span class="nf">showPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakListView</span><span class="p">:</span><span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">GuiPeakListView</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">]):</span>
+<div class="viewcode-block" id="GuiStripDisplayNd.showPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showPeaks">[docs]</a>  <span class="k">def</span> <span class="nf">showPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakListView</span><span class="p">:</span> <span class="n">GuiPeakListView</span><span class="o">.</span><span class="n">GuiPeakListView</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Displays specified peaks in all strips of the display using peakListView</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -401,8 +413,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

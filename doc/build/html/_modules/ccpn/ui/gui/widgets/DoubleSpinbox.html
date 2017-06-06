@@ -72,39 +72,96 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 
+
 <div class="viewcode-block" id="DoubleSpinbox"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox">[docs]</a><span class="k">class</span> <span class="nc">DoubleSpinbox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="c1"># To be done more rigeriously later</span>
+  <span class="n">_styleSheet</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">  DoubleSpinbox {</span>
+<span class="s2">    background-color: #f7ffff;</span>
+<span class="s2">    color: #122043;</span>
+<span class="s2">    margin: 0px 0px 0px 0px;</span>
+<span class="s2">    padding: 2px 2px 2px 2px;</span>
+<span class="s2">    border: 1px solid #182548;</span>
+<span class="s2">  }</span>
+
+<span class="s2">  DoubleSpinbox::hover {</span>
+<span class="s2">    background-color: #e4e15b;</span>
+<span class="s2">  } </span>
+<span class="s2">  &quot;&quot;&quot;</span>
+  <span class="n">defaultMinimumSizes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">decimals</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From the QTdocumentation </span>
+<span class="sd">    Constructs a spin box with a step value of 1.0 and a precision of 2 decimal places.</span>
+<span class="sd">    Change the default 0.0 minimum value to -sys.float_info.max</span>
+<span class="sd">    Change the default 99.99  maximum value to sys.float_info.max      </span>
+<span class="sd">    The value is default set to 0.00. </span>
+<span class="sd">    </span>
+<span class="sd">    The spin box has the given parent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="nb">max</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">isSelected</span> <span class="o">=</span> <span class="bp">False</span>
 
+    <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">decimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="n">decimals</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">showButtons</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setButtonSymbols</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractSpinBox</span><span class="o">.</span><span class="n">NoButtons</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultMinimumSizes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultMinimumSizes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_styleSheet</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DoubleSpinbox.setSelected"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setSelected">[docs]</a>  <span class="k">def</span> <span class="nf">setSelected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">isSelected</span> <span class="o">=</span> <span class="bp">True</span></div>
 
 <div class="viewcode-block" id="DoubleSpinbox.focusInEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.focusInEvent">[docs]</a>  <span class="k">def</span> <span class="nf">focusInEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QFocusEvent</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">()</span></div></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DoubleSpinbox.setCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setCallback">[docs]</a>  <span class="k">def</span> <span class="nf">setCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+    <span class="s2">&quot;Sets callback; disconnects if callback=None&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s1">&#39;valueChanged(double)&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">callback</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;valueChanged(double)&quot;</span><span class="p">),</span> <span class="n">callback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span></div></div>
 </pre></div>
 
           </div>

@@ -141,16 +141,6 @@ for <code class="xref py py-func docutils literal"><span class="pre">mkPen</span
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.ui.gui.widgets.AxisTextItem">
-<span id="ccpn-ui-gui-widgets-axistextitem-module"></span><h2>ccpn.ui.gui.widgets.AxisTextItem module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.AxisTextItem" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
-<dl class="class">
-<dt id="ccpn.ui.gui.widgets.AxisTextItem.AxisTextItem">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.AxisTextItem.</code><code class="descname">AxisTextItem</code><span class="sig-paren">(</span><em>plotWidget</em>, <em>orientation</em>, <em>axisCode=None</em>, <em>units=None</em>, <em>mappedDim=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/AxisTextItem.html#AxisTextItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.AxisTextItem.AxisTextItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.TextItem.TextItem</span></code></p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-ccpn.ui.gui.widgets.BarGraph">
 <span id="ccpn-ui-gui-widgets-bargraph-module"></span><h2>ccpn.ui.gui.widgets.BarGraph module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.BarGraph" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -287,7 +277,7 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
 <dl class="attribute">
 <dt id="ccpn.ui.gui.widgets.BarGraph.nmrResidue.sequenceCode">
-<code class="descname">sequenceCode</code><em class="property"> = 183</em><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.nmrResidue.sequenceCode" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sequenceCode</code><em class="property"> = 181</em><a class="headerlink" href="#ccpn.ui.gui.widgets.BarGraph.nmrResidue.sequenceCode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -295,11 +285,26 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.Base">
 <span id="ccpn-ui-gui-widgets-base-module"></span><h2>ccpn.ui.gui.widgets.Base module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Base" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>Base class for gridding, optionally setting up size policies and layout,
+optionally inserting itself into parent using keyword, grid, gridspan, hAlign, vAlign</p>
+<p>The proper way for adding widgets explicitly is:
+widget.getLayout().addWidget(row, col, [rowspan, [colspan])</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Base.Base">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Base.</code><code class="descname">Base</code><span class="sig-paren">(</span><em>tipText=None</em>, <em>grid=(None</em>, <em>None)</em>, <em>gridSpan=(1</em>, <em>1)</em>, <em>stretch=(0</em>, <em>0)</em>, <em>hAlign=None</em>, <em>vAlign=None</em>, <em>hPolicy=None</em>, <em>vPolicy=None</em>, <em>fShape=None</em>, <em>fShadow=None</em>, <em>bgColor=None</em>, <em>fgColor=None</em>, <em>isFloatWidget=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Base.</code><code class="descname">Base</code><span class="sig-paren">(</span><em>isFloatWidget=False</em>, <em>tipText=None</em>, <em>bgColor=None</em>, <em>fgColor=None</em>, <em>setLayout=False</em>, <em>hPolicy=None</em>, <em>vPolicy=None</em>, <em>margins=(0</em>, <em>0</em>, <em>0</em>, <em>0)</em>, <em>spacing=(0</em>, <em>0)</em>, <em>grid=(None</em>, <em>None)</em>, <em>gridSpan=(1</em>, <em>1)</em>, <em>stretch=(0</em>, <em>0)</em>, <em>hAlign=None</em>, <em>vAlign=None</em>, <em>acceptDrops=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.DropBase.DropBase" title="ccpn.ui.gui.widgets.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.DropBase.DropBase</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Base.Base.getLayout">
+<code class="descname">getLayout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base.getLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base.getLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the layout of self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Base.Base.setGridLayout">
+<code class="descname">setGridLayout</code><span class="sig-paren">(</span><em>margins=(0</em>, <em>0</em>, <em>0</em>, <em>0)</em>, <em>spacing=(0</em>, <em>0)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Base.html#Base.setGridLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Base.Base.setGridLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a QGridlayout to self</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -330,15 +335,22 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.Button">
 <span id="ccpn-ui-gui-widgets-button-module"></span><h2>ccpn.ui.gui.widgets.Button module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Button" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>This module implements the Button class</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Button.Button">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Button.</code><code class="descname">Button</code><span class="sig-paren">(</span><em>parent</em>, <em>text=''</em>, <em>callback=None</em>, <em>icon=None</em>, <em>toggle=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Button.html#Button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Button.Button" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Button.</code><code class="descname">Button</code><span class="sig-paren">(</span><em>parent=None</em>, <em>text=''</em>, <em>callback=None</em>, <em>icon=None</em>, <em>toggle=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Button.html#Button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Button.Button" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QPushButton</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Button.Button.getText">
+<code class="descname">getText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Button.html#Button.getText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Button.Button.getText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the text of the button</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Button.Button.setCallback">
 <code class="descname">setCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Button.html#Button.setCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Button.Button.setCallback" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sets callback; disconnects if callback=None</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Button.Button.setSelected">
@@ -348,7 +360,8 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Button.Button.setText">
 <code class="descname">setText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Button.html#Button.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Button.Button.setText" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the text of the button, applying the translator first</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -420,6 +433,91 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 <code class="descname">viewRangeChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnGridItem.html#CcpnGridItem.viewRangeChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.viewRangeChanged" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.viewTransformChanged">
+<code class="descname">viewTransformChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnGridItem.html#CcpnGridItem.viewTransformChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.viewTransformChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.CcpnModuleArea">
+<span id="ccpn-ui-gui-widgets-ccpnmodulearea-module"></span><h2>ccpn.ui.gui.widgets.CcpnModuleArea module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.CcpnModuleArea" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CcpnModuleArea.</code><code class="descname">CcpnModuleArea</code><span class="sig-paren">(</span><em>mainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.dockarea.DockArea.DockArea</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addModule">
+<code class="descname">addModule</code><span class="sig-paren">(</span><em>module</em>, <em>position=None</em>, <em>relativeTo=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.addModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>With these settings the user can close all the modules from the label &#8216;close module&#8217; or pop up and
+when re-add a new module it makes sure there is a container available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.apoptose">
+<code class="descname">apoptose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.apoptose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.apoptose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.buildFromState">
+<code class="descname">buildFromState</code><span class="sig-paren">(</span><em>state</em>, <em>docks</em>, <em>root</em>, <em>depth=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.buildFromState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.buildFromState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.checkPythonConsole">
+<code class="descname">checkPythonConsole</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.checkPythonConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.checkPythonConsole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.childState">
+<code class="descname">childState</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.childState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.childState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModules">
+<code class="descname">currentModules</code><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModules" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>list</em>, <em>immutable</em> - 
+return all current modules in area</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModulesDict">
+<code class="descname">currentModulesDict</code><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModulesDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+returns {Class name : Name } of currently opened Modules. Used in restoring Layout</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModulesNames">
+<code class="descname">currentModulesNames</code><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.currentModulesNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>list</em>, <em>immutable</em> - 
+return the name of all current modules in area</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.layoutState">
+<code class="descname">layoutState</code><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.layoutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Returns a list in which the first argument is the current modules dict (see method) and the second argument 
+is the stase as pyqtGraph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.restoreState">
+<code class="descname">restoreState</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.restoreState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.restoreState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore Dock configuration as generated by saveState.</p>
+<p>Note that this function does not create any Docks&#8211;it will only 
+restore the arrangement of an existing set of Docks.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.saveState">
+<code class="descname">saveState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CcpnModuleArea.html#CcpnModuleArea.saveState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.saveState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a serialized (storable) representation of the state of
+all Docks in this DockArea.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -434,10 +532,10 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.CheckBox">
 <span id="ccpn-ui-gui-widgets-checkbox-module"></span><h2>ccpn.ui.gui.widgets.CheckBox module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.CheckBox" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>CheckBox widget</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.CheckBox.CheckBox">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CheckBox.</code><code class="descname">CheckBox</code><span class="sig-paren">(</span><em>parent</em>, <em>checked=False</em>, <em>text=''</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CheckBox.html#CheckBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CheckBox.CheckBox" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CheckBox.</code><code class="descname">CheckBox</code><span class="sig-paren">(</span><em>parent=None</em>, <em>checked=False</em>, <em>text=''</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CheckBox.html#CheckBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CheckBox.CheckBox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QCheckBox</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.CheckBox.CheckBox.get">
@@ -485,6 +583,79 @@ drag events. Same as spectrum Display. Check Spectrum Display View Box for more 
 <dt id="ccpn.ui.gui.widgets.ColourDialog.inverseGrey">
 <code class="descclassname">ccpn.ui.gui.widgets.ColourDialog.</code><code class="descname">inverseGrey</code><span class="sig-paren">(</span><em>colour</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ColourDialog.html#inverseGrey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ColourDialog.inverseGrey" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.CompoundBaseWidget">
+<span id="ccpn-ui-gui-widgets-compoundbasewidget-module"></span><h2>ccpn.ui.gui.widgets.CompoundBaseWidget module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.CompoundBaseWidget" title="Permalink to this headline">¶</a></h2>
+<p>Base class for compound widgets</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundBaseWidget.</code><code class="descname">CompoundBaseWidget</code><span class="sig-paren">(</span><em>parent</em>, <em>layoutDict</em>, <em>orientation</em>, <em>showBorder</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
+<p>Base widget for Compound classes; inherits from Frame (and hence Base)
+Implements the addNotifier and deleteNotifiers methods</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addNotifier">
+<code class="descname">addNotifier</code><span class="sig-paren">(</span><em>notifier</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.addNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addNotifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a notifer to the widget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addObjectNotifier">
+<code class="descname">addObjectNotifier</code><span class="sig-paren">(</span><em>theObject</em>, <em>triggers</em>, <em>targetName</em>, <em>func</em>, <em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.addObjectNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.addObjectNotifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add and store a notifier with widget;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theObject</strong> &#8211; A valid V3 core or current object</li>
+<li><strong>triggers</strong> &#8211; any of the triggers, as defined in Notifier class</li>
+<li><strong>targetName</strong> &#8211; a valid target for theObject, as defined in the Notifier class</li>
+<li><strong>func</strong> &#8211; callback function on triggering</li>
+<li><strong>args</strong> &#8211; optional arguments to func</li>
+<li><strong>kwds</strong> &#8211; optional keyword arguments to func</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Notifier instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.deleteNotifiers">
+<code class="descname">deleteNotifiers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.deleteNotifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.deleteNotifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all notifiers associated with the widget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeigths">
+<code class="descname">setFixedHeigths</code><span class="sig-paren">(</span><em>fixedHeights</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setFixedHeigths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedHeigths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set fixed heights of widgets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedWidths">
+<code class="descname">setFixedWidths</code><span class="sig-paren">(</span><em>fixedWidths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setFixedWidths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setFixedWidths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximumWidths of widgets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMaximumWidths">
+<code class="descname">setMaximumWidths</code><span class="sig-paren">(</span><em>maximumWidths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setMaximumWidths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMaximumWidths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximumWidths of widgets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths">
+<code class="descname">setMinimumWidths</code><span class="sig-paren">(</span><em>minimumWidths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundBaseWidget.html#CompoundBaseWidget.setMinimumWidths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget.setMinimumWidths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set minimumwidths of widgets</p>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.CompoundView">
@@ -862,7 +1033,7 @@ Credits to Tim Stevens, University of Cambridge December 2010-2012</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.CompoundView.CompoundView">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundView.</code><code class="descname">CompoundView</code><span class="sig-paren">(</span><em>parent</em>, <em>smiles=None</em>, <em>variant=None</em>, <em>preferences=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundView.html#CompoundView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundView.CompoundView" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundView.</code><code class="descname">CompoundView</code><span class="sig-paren">(</span><em>parent=None</em>, <em>smiles=None</em>, <em>variant=None</em>, <em>preferences=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundView.html#CompoundView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundView.CompoundView" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsView</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.CompoundView.CompoundView.addGraphicsItems">
@@ -1400,6 +1571,36 @@ Both must be 3-dimensional vectors.</p>
 <div class="section" id="module-ccpn.ui.gui.widgets.CompoundWidgets">
 <span id="ccpn-ui-gui-widgets-compoundwidgets-module"></span><h2>ccpn.ui.gui.widgets.CompoundWidgets module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.CompoundWidgets" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">CheckBoxCompoundWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=''</em>, <em>text=''</em>, <em>callback=None</em>, <em>checked=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#CheckBoxCompoundWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget" title="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget</span></code></a></p>
+<p>Compound class comprising a Label and a CheckBox, combined in a CompoundBaseWidget (i.e. a Frame)</p>
+<blockquote>
+<div><p>orientation       widget layout
+&#8212;&#8212;&#8212;&#8212;      &#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;    
+left:             Label       CheckBox</p>
+<p>right:            CheckBox    Label</p>
+<dl class="docutils">
+<dt>top:              Label</dt>
+<dd>CheckBox</dd>
+<dt>bottom:           CheckBox       </dt>
+<dd>Label</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.isChecked">
+<code class="descname">isChecked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#CheckBoxCompoundWidget.isChecked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.isChecked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience: Return whether checkBox is checked</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.layoutDict">
+<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.CheckBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.ColourSelectionWidget">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">ColourSelectionWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>labelName=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ColourSelectionWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ColourSelectionWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
@@ -1412,6 +1613,42 @@ Both must be 3-dimensional vectors.</p>
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.ColourSelectionWidget.setColour">
 <code class="descname">setColour</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ColourSelectionWidget.setColour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ColourSelectionWidget.setColour" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">DoubleSpinBoxCompoundWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=''</em>, <em>value=None</em>, <em>range=(None</em>, <em>None)</em>, <em>step=None</em>, <em>showButtons=True</em>, <em>decimals=None</em>, <em>callback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#DoubleSpinBoxCompoundWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget" title="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget</span></code></a></p>
+<p>Compound class comprising a Label and a DoubleSpinBox, combined in a CompoundBaseWidget (i.e. a Frame)</p>
+<blockquote>
+<div><p>orientation       widget layout
+&#8212;&#8212;&#8212;&#8212;      &#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;    
+left:             Label          DoubleSpinBox</p>
+<p>right:            DoubleSpinBox  Label</p>
+<dl class="docutils">
+<dt>top:              Label</dt>
+<dd>DoubleSpinBox</dd>
+<dt>bottom:           DoubleSpinBox       </dt>
+<dd>Label</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.getValue">
+<code class="descname">getValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#DoubleSpinBoxCompoundWidget.getValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.getValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>get the value from the DoubleSpinBox</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.layoutDict">
+<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>value: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#DoubleSpinBoxCompoundWidget.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.DoubleSpinBoxCompoundWidget.setValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the value from the DoubleSpinBox</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1438,8 +1675,131 @@ Both must be 3-dimensional vectors.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">ListCompoundWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=''</em>, <em>texts=None</em>, <em>callback=None</em>, <em>defaults=None</em>, <em>uniqueList=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget" title="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget</span></code></a></p>
+<p>Compound class comprising a Label, a PulldownList, and a ListWidget, combined in a 
+CompoundBaseWidget (i.e.a Frame)</p>
+<dl class="docutils">
+<dt>NB: can also be used as only a Label and a ListWidget by hiding the Pulldown:</dt>
+<dd><blockquote class="first">
+<div>myWidget.showPulldownList(False)</div></blockquote>
+<p>orientation       widget layout
+&#8212;&#8212;&#8212;&#8212;      &#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;    
+left:             Label       PullDown</p>
+<blockquote>
+<div>ListWidget</div></blockquote>
+<dl class="docutils">
+<dt>centreLeft:                   PullDown         </dt>
+<dd>Label       ListWidget</dd>
+<dt>right:            PullDown    Label   </dt>
+<dd>ListWidget</dd>
+<dt>centreRight:      PullDown       </dt>
+<dd>ListWidget  Label</dd>
+<dt>top:              Label</dt>
+<dd>PullDown       
+ListWidget</dd>
+<dt>bottom:           PullDown       </dt>
+<dd>ListWidget
+Label</dd>
+</dl>
+<p class="last">horizontal:       Label       PullDown  ListWidget</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.addPulldownItem">
+<code class="descname">addPulldownItem</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.addPulldownItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.addPulldownItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>convenience: add pulldown item (text or index) to list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.addText">
+<code class="descname">addText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.addText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.addText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience: Add text to listWidget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.getTexts">
+<code class="descname">getTexts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.getTexts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.getTexts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience: Return list of texts in listWidget</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.layoutDict">
+<code class="descname">layoutDict</code><em class="property"> = {'centreRight': [(1, 1), (0, 0), (1, 0)], 'top': [(0, 0), (1, 0), (2, 0)], 'horizontal': [(0, 0), (0, 1), (0, 2)], 'right': [(0, 1), (0, 0), (1, 0)], 'bottom': [(2, 0), (0, 0), (1, 0)], 'left': [(0, 0), (0, 1), (1, 1)], 'centreLeft': [(1, 0), (0, 1), (1, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.showPulldownList">
+<code class="descname">showPulldownList</code><span class="sig-paren">(</span><em>show</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#ListCompoundWidget.showPulldownList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.ListCompoundWidget.showPulldownList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">PulldownListCompoundWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>maximumWidths=None</em>, <em>fixedWidths=None</em>, <em>labelText=''</em>, <em>texts=None</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#PulldownListCompoundWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget" title="ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.CompoundBaseWidget.CompoundBaseWidget</span></code></a></p>
+<p>Compound class comprising a Label and a PulldownList, combined in a CompoundBaseWidget (i.e. a Frame)</p>
+<blockquote>
+<div><p>orientation       widget layout
+&#8212;&#8212;&#8212;&#8212;      &#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;    
+left:             Label       PullDown</p>
+<p>right:            PullDown    Label</p>
+<dl class="docutils">
+<dt>top:              Label</dt>
+<dd>PullDown</dd>
+<dt>bottom:           PullDown       </dt>
+<dd>Label</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.getText">
+<code class="descname">getText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#PulldownListCompoundWidget.getText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.getText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience: Return selected text in Pulldown</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.layoutDict">
+<code class="descname">layoutDict</code><em class="property"> = {'bottom': [(1, 0), (0, 0)], 'right': [(0, 1), (0, 0)], 'top': [(0, 0), (1, 0)], 'left': [(0, 0), (0, 1)]}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.layoutDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.select">
+<code class="descname">select</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#PulldownListCompoundWidget.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience: Set item in Pulldown; works with text or item</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.updatePulldownList">
+<code class="descname">updatePulldownList</code><span class="sig-paren">(</span><em>theObject</em>, <em>triggers</em>, <em>targetName</em>, <em>func</em>, <em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#PulldownListCompoundWidget.updatePulldownList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.PulldownListCompoundWidget.updatePulldownList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a notifier to update the pulldown list by calling func(theObj, <a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwds)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>theObject</strong> &#8211; A valid V3 core or current object</li>
+<li><strong>triggers</strong> &#8211; any of the triggers, as defined in Notifier class</li>
+<li><strong>targetName</strong> &#8211; a valid target for theObject, as defined in the Notifier class</li>
+<li><strong>func</strong> &#8211; func(theObject, <a href="#id5"><span class="problematic" id="id6">*</span></a>args, <a href="#id7"><span class="problematic" id="id8">**</span></a>kwds) should return a list with the new pulldown elements</li>
+<li><strong>args</strong> &#8211; optional arguments to func</li>
+<li><strong>kwds</strong> &#8211; optional keyword arguments to func</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Notifier instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.CompoundWidgets.SelectorWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">SelectorWidget</code><span class="sig-paren">(</span><em>parent</em>, <em>label</em>, <em>data=None</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#SelectorWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.SelectorWidget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.CompoundWidgets.</code><code class="descname">SelectorWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>label=''</em>, <em>data=None</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/CompoundWidgets.html#SelectorWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.CompoundWidgets.SelectorWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 </dd></dl>
 
@@ -1558,17 +1918,93 @@ Both must be 3-dimensional vectors.</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.DoubleSpinbox.</code><code class="descname">DoubleSpinbox</code><span class="sig-paren">(</span><em>parent</em>, <em>value=None</em>, <em>min=None</em>, <em>max=None</em>, <em>showButtons=True</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DoubleSpinbox.html#DoubleSpinbox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.DoubleSpinbox.</code><code class="descname">DoubleSpinbox</code><span class="sig-paren">(</span><em>parent</em>, <em>value=None</em>, <em>min=None</em>, <em>max=None</em>, <em>step=None</em>, <em>showButtons=True</em>, <em>decimals=None</em>, <em>callback=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DoubleSpinbox.html#DoubleSpinbox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDoubleSpinBox</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.defaultMinimumSizes">
+<code class="descname">defaultMinimumSizes</code><em class="property"> = (0, 20)</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.defaultMinimumSizes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.focusInEvent">
 <code class="descname">focusInEvent</code><span class="sig-paren">(</span><em>QFocusEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DoubleSpinbox.html#DoubleSpinbox.focusInEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.focusInEvent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setCallback">
+<code class="descname">setCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DoubleSpinbox.html#DoubleSpinbox.setCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setCallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets callback; disconnects if callback=None</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setSelected">
 <code class="descname">setSelected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DoubleSpinbox.html#DoubleSpinbox.setSelected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DoubleSpinbox.DoubleSpinbox.setSelected" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.DropBase">
+<span id="ccpn-ui-gui-widgets-dropbase-module"></span><h2>ccpn.ui.gui.widgets.DropBase module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.DropBase" title="Permalink to this headline">¶</a></h2>
+<p>Define routines for a dropable widget
+This module is subclassed by widgets.Base and should not be used directly</p>
+<p>GWV April-2017: Drived from an earlier version of DropBase</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.DropBase.</code><code class="descname">DropBase</code><span class="sig-paren">(</span><em>acceptDrops</em>, <em>*args</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DropBase.html#DropBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to implement drop and drag
+Callback signature on drop: dropEventCallback(dataDict)</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.IDS">
+<code class="descname">IDS</code><em class="property"> = 'ids'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.IDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.JSONDATA">
+<code class="descname">JSONDATA</code><em class="property"> = 'ccpnmr-json'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.JSONDATA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.PIDS">
+<code class="descname">PIDS</code><em class="property"> = 'pids'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.PIDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.TEXT">
+<code class="descname">TEXT</code><em class="property"> = 'text'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.TEXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.URLS">
+<code class="descname">URLS</code><em class="property"> = 'urls'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.URLS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.dragEnterEvent">
+<code class="descname">dragEnterEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DropBase.html#DropBase.dragEnterEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.dragEnterEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.dropEvent">
+<code class="descname">dropEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DropBase.html#DropBase.dropEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.dropEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Catch dropEvent and dispatch to processing callback
+&#8216;Native&#8217; treatment of CcpnModule instances</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.parseEvent">
+<code class="descname">parseEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DropBase.html#DropBase.parseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.parseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpret drop event; extract urls, text or JSONDATA dicts 
+convert PIDS to Pid object&#8217;s
+return a dict with (type, data) key, value pairs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.DropBase.DropBase.setDropEventCallback">
+<code class="descname">setDropEventCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/DropBase.html#DropBase.setDropEventCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.DropBase.DropBase.setDropEventCallback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the callback function for drop event</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1760,6 +2196,12 @@ Both must be 3-dimensional vectors.</p>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.FileDialog.</code><code class="descname">LineEditButtonDialog</code><span class="sig-paren">(</span><em>parent</em>, <em>textDialog=None</em>, <em>textLineEdit=None</em>, <em>fileMode=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/FileDialog.html#LineEditButtonDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.FilteringPulldownList">
 <span id="ccpn-ui-gui-widgets-filteringpulldownlist-module"></span><h2>ccpn.ui.gui.widgets.FilteringPulldownList module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.FilteringPulldownList" title="Permalink to this headline">¶</a></h2>
@@ -1786,9 +2228,14 @@ Both must be 3-dimensional vectors.</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.Frame">
 <span id="ccpn-ui-gui-widgets-frame-module"></span><h2>ccpn.ui.gui.widgets.Frame module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Frame" title="Permalink to this headline">¶</a></h2>
-<p>Frame(QtGui.QFrame, Base)</p>
-<blockquote>
-<div><p>From: <a class="reference external" href="http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details">http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details</a></p>
+<p>This module implemented a Frame and a ScrollableFrame</p>
+<dl class="docutils">
+<dt>Frame(parent=None, showBorder=False, fShape=None, fShadow=None, <a href="#id9"><span class="problematic" id="id10">**</span></a>kwds)</dt>
+<dd>NB: Until now: fShape and fShadow do not seem to alter the appearance on OSX</dd>
+<dt>ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,</dt>
+<dd><blockquote class="first">
+<div>minimumSizes=(50,50), scrollBarPolicies=(&#8216;asNeeded&#8217;,&#8217;asNeeded&#8217;), <a href="#id11"><span class="problematic" id="id12">**</span></a>kwds)</div></blockquote>
+<p>From: <a class="reference external" href="http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details">http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details</a></p>
 <p>The QFrame class is the base class of widgets that can have a frame. More...</p>
 <p>Inherits QWidget.</p>
 <p>Inherited by QAbstractScrollArea, QLabel, QLCDNumber, QSplitter, QStackedWidget and QToolBox.</p>
@@ -1797,7 +2244,7 @@ Both must be 3-dimensional vectors.</p>
 enum Shape { NoFrame, Box, Panel, WinPanel, ..., StyledPanel }
 enum StyleMask { Shadow_Mask, Shape_Mask }
 Methods</p>
-<p>__init__ (self, QWidget parent = None, Qt.WindowFlags flags = 0)
+<p class="last">__init__ (self, QWidget parent = None, Qt.WindowFlags flags = 0)
 changeEvent (self, QEvent)
 drawFrame (self, QPainter)
 bool event (self, QEvent e)
@@ -1816,11 +2263,61 @@ setFrameStyle (self, int)
 setLineWidth (self, int)
 setMidLineWidth (self, int)
 QSize sizeHint (self)</p>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Frame.Frame">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Frame.</code><code class="descname">Frame</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#Frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.Frame" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Frame.</code><code class="descname">Frame</code><span class="sig-paren">(</span><em>parent=None</em>, <em>showBorder=False</em>, <em>fShape=None</em>, <em>fShadow=None</em>, <em>setLayout=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#Frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.Frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QFrame</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.Frame.Frame.FRAME_DICT">
+<code class="descname">FRAME_DICT</code><em class="property"> = {'box': 1, 'plain': 16, 'sunken': 48, 'raised': 32, 'hLine': 4, 'styledPanel': 6, 'noFrame': 0, 'panel': 2, 'vLine': 5}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.Frame.FRAME_DICT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Frame.</code><code class="descname">ScrollableFrame</code><span class="sig-paren">(</span><em>parent=None</em>, <em>setLayout=False</em>, <em>showBorder=False</em>, <em>fShape=None</em>, <em>fShadow=None</em>, <em>minimumSizes=(50</em>, <em>50)</em>, <em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Frame.Frame" title="ccpn.ui.gui.widgets.Frame.Frame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Frame.Frame</span></code></a></p>
+<p>A scrollable frame</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame.getScrollArea">
+<code class="descname">getScrollArea</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame.getScrollArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame.getScrollArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scrollbar widget; for external usage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame.setScrollBarPolicies">
+<code class="descname">setScrollBarPolicies</code><span class="sig-paren">(</span><em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame.setScrollBarPolicies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame.setScrollBarPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the scrolbar policy: always, never, asNeeded</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame2">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Frame.</code><code class="descname">ScrollableFrame2</code><span class="sig-paren">(</span><em>parent=None</em>, <em>setLayout=False</em>, <em>showBorder=False</em>, <em>fShape=None</em>, <em>fShadow=None</em>, <em>minimumSizes=(50</em>, <em>50)</em>, <em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<p>A scrollable frame</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getFrame">
+<code class="descname">getFrame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame2.getFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the frame widget; for external usage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getScrollArea">
+<code class="descname">getScrollArea</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame2.getScrollArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.getScrollArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scrollbar widget; for external usage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Frame.ScrollableFrame2.setScrollBarPolicies">
+<code class="descname">setScrollBarPolicies</code><span class="sig-paren">(</span><em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Frame.html#ScrollableFrame2.setScrollBarPolicies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Frame.ScrollableFrame2.setScrollBarPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the scrolbar policy: always, never, asNeeded</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1870,7 +2367,7 @@ QSize sizeHint (self)</p>
 <span id="ccpn-ui-gui-widgets-ipythonconsole-module"></span><h2>ccpn.ui.gui.widgets.IpythonConsole module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.IpythonConsole" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.IpythonConsole.</code><code class="descname">IpythonConsole</code><span class="sig-paren">(</span><em>parent=None</em>, <em>namespace=None</em>, <em>mainWindow=None</em>, <em>historyFile=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/IpythonConsole.html#IpythonConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.IpythonConsole.</code><code class="descname">IpythonConsole</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>namespace=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/IpythonConsole.html#IpythonConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.IpythonConsole.IpythonConsole.setProject">
@@ -1899,7 +2396,7 @@ peak=peakOrPid)</dd>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Label.Label">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Label.</code><code class="descname">Label</code><span class="sig-paren">(</span><em>parent, text='', textColour=None, textSize=12, bold=False, margins=[2, 1, 2, 1], **kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#Label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.Label" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Label.</code><code class="descname">Label</code><span class="sig-paren">(</span><em>parent=None, text='', textColour=None, textSize=12, bold=False, margins=[2, 1, 2, 1], **kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Label.html#Label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Label.Label" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QLabel</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Label.Label.get">
@@ -1920,6 +2417,22 @@ peak=peakOrPid)</dd>
 <span id="ccpn-ui-gui-widgets-lineedit-module"></span><h2>ccpn.ui.gui.widgets.LineEdit module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.LineEdit" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.LineEdit.FloatLineEdit">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.LineEdit.</code><code class="descname">FloatLineEdit</code><span class="sig-paren">(</span><em>parent</em>, <em>text=''</em>, <em>textColor=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LineEdit.html#FloatLineEdit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LineEdit.FloatLineEdit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.LineEdit.LineEdit" title="ccpn.ui.gui.widgets.LineEdit.LineEdit"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.LineEdit.LineEdit</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LineEdit.FloatLineEdit.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LineEdit.html#FloatLineEdit.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LineEdit.FloatLineEdit.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.LineEdit.FloatLineEdit.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>text=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LineEdit.html#FloatLineEdit.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LineEdit.FloatLineEdit.set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.LineEdit.LineEdit">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.LineEdit.</code><code class="descname">LineEdit</code><span class="sig-paren">(</span><em>parent</em>, <em>text=''</em>, <em>textColor=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/LineEdit.html#LineEdit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.LineEdit.LineEdit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QLineEdit</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
@@ -1938,9 +2451,10 @@ peak=peakOrPid)</dd>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.ListWidget">
 <span id="ccpn-ui-gui-widgets-listwidget-module"></span><h2>ccpn.ui.gui.widgets.ListWidget module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.ListWidget" title="Permalink to this headline">¶</a></h2>
+<p>List widget</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.ListWidget.ListWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ListWidget.</code><code class="descname">ListWidget</code><span class="sig-paren">(</span><em>parent</em>, <em>objects=None</em>, <em>callback=None</em>, <em>rightMouseCallback=None</em>, <em>contextMenu=True</em>, <em>multiSelect=True</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ListWidget.html#ListWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ListWidget.ListWidget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ListWidget.</code><code class="descname">ListWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>objects=None</em>, <em>callback=None</em>, <em>rightMouseCallback=None</em>, <em>contextMenu=True</em>, <em>multiSelect=True</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ListWidget.html#ListWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ListWidget.ListWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QListWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.ListWidget.ListWidget.contextCallback">
@@ -1975,6 +2489,11 @@ peak=peakOrPid)</dd>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.ListWidget.ListWidget.getSelectedObjects">
 <code class="descname">getSelectedObjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ListWidget.html#ListWidget.getSelectedObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ListWidget.ListWidget.getSelectedObjects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ListWidget.ListWidget.getTexts">
+<code class="descname">getTexts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ListWidget.html#ListWidget.getTexts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ListWidget.ListWidget.getTexts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2015,13 +2534,25 @@ peak=peakOrPid)</dd>
 <span id="ccpn-ui-gui-widgets-mainwindow-module"></span><h2>ccpn.ui.gui.widgets.MainWindow module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.MainWindow" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.MainWindow.DockWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.MainWindow.</code><code class="descname">DockWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>title=''</em>, <em>widget=None</em>, <em>floating=False</em>, <em>allowedAreas=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MainWindow.html#DockWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.DockWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDockWidget</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.MainWindow.DockWidget.AREA_DICT">
+<code class="descname">AREA_DICT</code><em class="property"> = {'bottom': 1, 'right': 2, 'top': 4, 'left': 1}</em><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.DockWidget.AREA_DICT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.MainWindow.MainWindow">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.MainWindow.</code><code class="descname">MainWindow</code><span class="sig-paren">(</span><em>parent=None</em>, <em>title=''</em>, <em>location=None</em>, <em>hide=False</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MainWindow.html#MainWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.MainWindow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QMainWindow</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.MainWindow.MainWindow.setSize">
-<code class="descname">setSize</code><span class="sig-paren">(</span><em>w</em>, <em>h</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MainWindow.html#MainWindow.setSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.MainWindow.setSize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">setSize</code><span class="sig-paren">(</span><em>width</em>, <em>height</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MainWindow.html#MainWindow.setSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MainWindow.MainWindow.setSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the width and height of the Mainwindow</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2054,6 +2585,7 @@ peak=peakOrPid)</dd>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.MessageDialog">
 <span id="ccpn-ui-gui-widgets-messagedialog-module"></span><h2>ccpn.ui.gui.widgets.MessageDialog module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.MessageDialog" title="Permalink to this headline">¶</a></h2>
+<p>This file contains the routines for message dialogues</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.MessageDialog.MessageDialog">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.MessageDialog.</code><code class="descname">MessageDialog</code><span class="sig-paren">(</span><em>title</em>, <em>basicText</em>, <em>message</em>, <em>icon=1</em>, <em>iconPath=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MessageDialog.html#MessageDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MessageDialog.MessageDialog" title="Permalink to this definition">¶</a></dt>
@@ -2107,53 +2639,6 @@ Using the &#8216;multiline&#8217; to emulate the windowTitle, as on Mac the wind
 <dt id="ccpn.ui.gui.widgets.MessageDialog.showYesNo">
 <code class="descclassname">ccpn.ui.gui.widgets.MessageDialog.</code><code class="descname">showYesNo</code><span class="sig-paren">(</span><em>title</em>, <em>message</em>, <em>parent=None</em>, <em>colourScheme=None</em>, <em>iconPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/MessageDialog.html#showYesNo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.MessageDialog.showYesNo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.ui.gui.widgets.ModuleArea">
-<span id="ccpn-ui-gui-widgets-modulearea-module"></span><h2>ccpn.ui.gui.widgets.ModuleArea module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.ModuleArea" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ModuleArea.</code><code class="descname">CcpnModuleArea</code><span class="sig-paren">(</span><em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ModuleArea.html#CcpnModuleArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.dockarea.DockArea.DockArea</span></code></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.addModule">
-<code class="descname">addModule</code><span class="sig-paren">(</span><em>module=None</em>, <em>position=None</em>, <em>relativeTo=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ModuleArea.html#CcpnModuleArea.addModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.addModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>With these settings the user can close all the modules from the label &#8216;close module&#8217; or pop up and
-when re-add a new module it makes sure there is a container available.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.apoptose">
-<code class="descname">apoptose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ModuleArea.html#CcpnModuleArea.apoptose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.apoptose" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.checkPythonConsole">
-<code class="descname">checkPythonConsole</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ModuleArea.html#CcpnModuleArea.checkPythonConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.checkPythonConsole" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModules">
-<code class="descname">currentModules</code><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModules" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>list</em>, <em>immutable</em> - 
-return all current modules in area</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModulesDict">
-<code class="descname">currentModulesDict</code><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModulesDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>immutable</em> - 
-returns {Class name : Name } of currently opened Modules. Used in restoring Layout</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModulesNames">
-<code class="descname">currentModulesNames</code><a class="headerlink" href="#ccpn.ui.gui.widgets.ModuleArea.CcpnModuleArea.currentModulesNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>list</em>, <em>immutable</em> - 
-return the name of all current modules in area</p>
-</dd></dl>
-
-</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.PhasingFrame">
@@ -2374,9 +2859,18 @@ when re-add a new box it makes sure there is a container available.</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.PlaneToolbar">
 <span id="ccpn-ui-gui-widgets-planetoolbar-module"></span><h2>ccpn.ui.gui.widgets.PlaneToolbar module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.PlaneToolbar" title="Permalink to this headline">¶</a></h2>
+<p>This module defines a specific Toolbar class for the strip display 
+The NmrResidueLabel allows drag and drop of the ids displayed in them</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlaneToolbar.</code><code class="descname">PlaneSelectorWidget</code><span class="sig-paren">(</span><em>qtParent</em>, <em>strip</em>, <em>axis</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlaneToolbar.html#PlaneSelectorWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<p>This widget contains the buttons and entry boxes for selection of the plane</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PlaneToolbar.PlaneToolbar">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlaneToolbar.</code><code class="descname">PlaneToolbar</code><span class="sig-paren">(</span><em>strip</em>, <em>callbacks</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlaneToolbar.html#PlaneToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlaneToolbar.PlaneToolbar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlaneToolbar.</code><code class="descname">PlaneToolbar</code><span class="sig-paren">(</span><em>qtParent</em>, <em>strip</em>, <em>callbacks</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlaneToolbar.html#PlaneToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlaneToolbar.PlaneToolbar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.ToolBar.ToolBar" title="ccpn.ui.gui.widgets.ToolBar.ToolBar"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.ToolBar.ToolBar</span></code></a></p>
 </dd></dl>
 
@@ -2385,9 +2879,15 @@ when re-add a new box it makes sure there is a container available.</p>
 <span id="ccpn-ui-gui-widgets-plotwidget-module"></span><h2>ccpn.ui.gui.widgets.PlotWidget module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.PlotWidget" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
 <dl class="class">
+<dt id="ccpn.ui.gui.widgets.PlotWidget.AxisTextItem">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlotWidget.</code><code class="descname">AxisTextItem</code><span class="sig-paren">(</span><em>plotWidget</em>, <em>orientation</em>, <em>axisCode=None</em>, <em>units=None</em>, <em>mappedDim=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#AxisTextItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.AxisTextItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.TextItem.TextItem</span></code></p>
+</dd></dl>
+
+<dl class="class">
 <dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlotWidget.</code><code class="descname">PlotWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>appBase=None</em>, <em>useOpenGL=False</em>, <em>strip=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.widgets.PlotWidget.PlotWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PlotWidget.</code><code class="descname">PlotWidget</code><span class="sig-paren">(</span><em>strip</em>, <em>useOpenGL=False</em>, <em>showDoubleCrosshair=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.widgets.PlotWidget.PlotWidget</span></code></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.addItem">
 <code class="descname">addItem</code><span class="sig-paren">(</span><em>item: PyQt4.QtGui.QGraphicsObject</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.addItem" title="Permalink to this definition">¶</a></dt>
@@ -2395,29 +2895,15 @@ when re-add a new box it makes sure there is a container available.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSampleComponents">
-<code class="descname">processSampleComponents</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.processSampleComponents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSampleComponents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display sampleComponent spectrum defined by its Pid string</p>
+<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes">
+<code class="descname">highlightAxes</code><span class="sig-paren">(</span><em>state=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.highlightAxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Highlight the axes on/of</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSamples">
-<code class="descname">processSamples</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.processSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSamples" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display sample spectra defined by list of Pid strings</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectra">
-<code class="descname">processSpectra</code><span class="sig-paren">(</span><em>pids: Sequence[str], event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.processSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display spectra defined by list of Pid strings</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectrumGroups">
-<code class="descname">processSpectrumGroups</code><span class="sig-paren">(</span><em>pids: Sequence[str], event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.processSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.processSpectrumGroups" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots spectrumGroups in a grouped display if not already plotted and create its button on spectrumGroups toolBar.
-If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
-one already in.</p>
+<dt id="ccpn.ui.gui.widgets.PlotWidget.PlotWidget.toggleGrid">
+<code class="descname">toggleGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PlotWidget.html#PlotWidget.toggleGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.toggleGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggle grid state</p>
 </dd></dl>
 
 </dd></dl>
@@ -2425,7 +2911,7 @@ one already in.</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.PulldownList">
 <span id="ccpn-ui-gui-widgets-pulldownlist-module"></span><h2>ccpn.ui.gui.widgets.PulldownList module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.PulldownList" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>PulldownList widget</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.PulldownList.PulldownList">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownList.</code><code class="descname">PulldownList</code><span class="sig-paren">(</span><em>parent</em>, <em>texts=None</em>, <em>objects=None</em>, <em>icons=None</em>, <em>callback=None</em>, <em>index=0</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownList.html#PulldownList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownList.PulldownList" title="Permalink to this definition">¶</a></dt>
@@ -2533,6 +3019,129 @@ one already in.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.widgets.PulldownListsForObjects">
+<span id="ccpn-ui-gui-widgets-pulldownlistsforobjects-module"></span><h2>ccpn.ui.gui.widgets.PulldownListsForObjects module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.PulldownListsForObjects" title="Permalink to this headline">¶</a></h2>
+<p>Generate PulldownListCompoundWidget for project objects; 
+set callback&#8217;s on creation, deletion and rename</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">ChemicalShiftListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#ChemicalShiftListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'chemicalShiftLists'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.className">
+<code class="descname">className</code><em class="property"> = 'ChemicalShiftList'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.ChemicalShiftListPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NmrChainPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NmrChainPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'nmrChains'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.className">
+<code class="descname">className</code><em class="property"> = 'NmrChain'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NmrChainPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">NotesPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#NotesPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'notes'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown.className">
+<code class="descname">className</code><em class="property"> = 'Note'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.NotesPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">PeakListPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#PeakListPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'peakLists'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.className">
+<code class="descname">className</code><em class="property"> = 'PeakList'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.PeakListPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">RestraintsPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#RestraintsPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'restraintLists'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown.className">
+<code class="descname">className</code><em class="property"> = 'RestraintList'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.RestraintsPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">SpectrumPulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#SpectrumPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'spectra'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.className">
+<code class="descname">className</code><em class="property"> = 'Spectrum'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.SpectrumPulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">StructurePulldown</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>showBorder=False</em>, <em>orientation='left'</em>, <em>minimumWidths=None</em>, <em>labelText=None</em>, <em>showSelectName=False</em>, <em>callback=None</em>, <em>default=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#StructurePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.PulldownListsForObjects._Pulldown</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown.attributeName">
+<code class="descname">attributeName</code><em class="property"> = 'structureEnsembles'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown.attributeName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown.className">
+<code class="descname">className</code><em class="property"> = 'StructureEnsemble'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.StructurePulldown.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.widgets.PulldownListsForObjects.getPids">
+<code class="descclassname">ccpn.ui.gui.widgets.PulldownListsForObjects.</code><code class="descname">getPids</code><span class="sig-paren">(</span><em>fromObject</em>, <em>attributeName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/PulldownListsForObjects.html#getPids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.PulldownListsForObjects.getPids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of pids fromObject.attributeName or None on error</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.widgets.RadioButton">
 <span id="ccpn-ui-gui-widgets-radiobutton-module"></span><h2>ccpn.ui.gui.widgets.RadioButton module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.RadioButton" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -2596,8 +3205,20 @@ one already in.</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.ScrollArea.ScrollArea">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ScrollArea.</code><code class="descname">ScrollArea</code><span class="sig-paren">(</span><em>parent</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ScrollArea.html#ScrollArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ScrollArea.ScrollArea" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ScrollArea.</code><code class="descname">ScrollArea</code><span class="sig-paren">(</span><em>parent</em>, <em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em>, <em>setLayout=True</em>, <em>minimumSizes=(50</em>, <em>50)</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ScrollArea.html#ScrollArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ScrollArea.ScrollArea" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QScrollArea</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ScrollArea.ScrollArea.setMinimumSizes">
+<code class="descname">setMinimumSizes</code><span class="sig-paren">(</span><em>minimumSizes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ScrollArea.html#ScrollArea.setMinimumSizes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ScrollArea.ScrollArea.setMinimumSizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set (minimumWidth, minimumHeight)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ScrollArea.ScrollArea.setScrollBarPolicies">
+<code class="descname">setScrollBarPolicies</code><span class="sig-paren">(</span><em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ScrollArea.html#ScrollArea.setScrollBarPolicies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ScrollArea.ScrollArea.setScrollBarPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the scrolbar policy: always, never, asNeeded</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -2606,8 +3227,8 @@ one already in.</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.SideBar.SideBar">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SideBar.</code><code class="descname">SideBar</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SideBar.html#SideBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SideBar.SideBar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QTreeWidget</span></code></p>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SideBar.</code><code class="descname">SideBar</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SideBar.html#SideBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SideBar.SideBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QTreeWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.SideBar.SideBar.fillSideBar">
 <code class="descname">fillSideBar</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SideBar.html#SideBar.fillSideBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SideBar.SideBar.fillSideBar" title="Permalink to this definition">¶</a></dt>
@@ -2699,48 +3320,29 @@ one already in.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget">
-<span id="ccpn-ui-gui-widgets-spectrumgroupstoolbarwidget-module"></span><h2>ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ccpn.ui.gui.widgets.Spacer">
+<span id="ccpn-ui-gui-widgets-spacer-module"></span><h2>ccpn.ui.gui.widgets.Spacer module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Spacer" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
 <dl class="class">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsToolBar">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.</code><code class="descname">SpectrumGroupsToolBar</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>strip=None</em>, <em>spectrumGroupPid=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsToolBar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QToolBar</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dt id="ccpn.ui.gui.widgets.Spacer.Spacer">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Spacer.</code><code class="descname">Spacer</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Spacer.html#Spacer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Spacer.Spacer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QSpacerItem</span></code></p>
+<p>Widget used to put spaces into modules and popups.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.SpectrumGroupToolBar">
+<span id="ccpn-ui-gui-widgets-spectrumgrouptoolbar-module"></span><h2>ccpn.ui.gui.widgets.SpectrumGroupToolBar module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.SpectrumGroupToolBar" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
 <dl class="class">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.</code><code class="descname">SpectrumGroupsWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>strip=None</em>, <em>spectrumGroupPid=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code></p>
+<dt id="ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpectrumGroupToolBar.</code><code class="descname">SpectrumGroupToolBar</code><span class="sig-paren">(</span><em>parent=None</em>, <em>spectrumDisplay=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupToolBar.html#SpectrumGroupToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.ToolBar.ToolBar" title="ccpn.ui.gui.widgets.ToolBar.ToolBar"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.ToolBar.ToolBar</span></code></a></p>
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.deleteSpectrumGroup">
-<code class="descname">deleteSpectrumGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.deleteSpectrumGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.deleteSpectrumGroup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.hidePeakLists">
-<code class="descname">hidePeakLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.hidePeakLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.hidePeakLists" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.onContextMenu">
-<code class="descname">onContextMenu</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.onContextMenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.onContextMenu" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.showHidePeakListView">
-<code class="descname">showHidePeakListView</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.showHidePeakListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.showHidePeakListView" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.showPeakList">
-<code class="descname">showPeakList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.showPeakList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.showPeakList" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.toggleSpectrumGroups">
-<code class="descname">toggleSpectrumGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupsToolBarWidget.html#SpectrumGroupsWidget.toggleSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget.SpectrumGroupsWidget.toggleSpectrumGroups" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar.mousePressEvent">
+<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumGroupToolBar.html#SpectrumGroupToolBar.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumGroupToolBar.SpectrumGroupToolBar.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2750,7 +3352,7 @@ one already in.</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpectrumToolBar.</code><code class="descname">SpectrumToolBar</code><span class="sig-paren">(</span><em>parent</em>, <em>widget=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumToolBar.html#SpectrumToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpectrumToolBar.</code><code class="descname">SpectrumToolBar</code><span class="sig-paren">(</span><em>parent=None</em>, <em>widget=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumToolBar.html#SpectrumToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.ToolBar.ToolBar" title="ccpn.ui.gui.widgets.ToolBar.ToolBar"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.ToolBar.ToolBar</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.mousePressEvent">
@@ -2782,22 +3384,6 @@ one already in.</p>
 <dt id="ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseMoved">
 <code class="descname">mouseMoved</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpectrumWidget.html#SpectrumWidget.mouseMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseMoved" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.ui.gui.widgets.SpinSystemLabel">
-<span id="ccpn-ui-gui-widgets-spinsystemlabel-module"></span><h2>ccpn.ui.gui.widgets.SpinSystemLabel module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.SpinSystemLabel" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.SpinSystemLabel.</code><code class="descname">SpinSystemLabel</code><span class="sig-paren">(</span><em>parent</em>, <em>text</em>, <em>appBase</em>, <em>strip=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpinSystemLabel.html#SpinSystemLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Label.Label" title="ccpn.ui.gui.widgets.Label.Label"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Label.Label</span></code></a></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel.processStrips">
-<code class="descname">processStrips</code><span class="sig-paren">(</span><em>pids: Sequence[str], event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/SpinSystemLabel.html#SpinSystemLabel.processStrips"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel.processStrips" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a sequence of pids and if the correspond to strip pids, a new strip is created in the correct
-direction specified in the sequence and the data of the source strip is displayed in the new strip.</p>
-</dd></dl>
 
 </dd></dl>
 
@@ -2865,14 +3451,34 @@ direction specified in the sequence and the data of the source strip is displaye
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.Table">
 <span id="ccpn-ui-gui-widgets-table-module"></span><h2>ccpn.ui.gui.widgets.Table module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Table" title="Permalink to this headline">¶</a></h2>
+<p>Basic Usage:</p>
+<blockquote>
+<div><p>define a list of Column(columnName, func, tipText=tipText) objects, 
+where func obtains the value for the object displayed in a row and</p>
+<blockquote>
+<div>tipText is optional;</div></blockquote>
+<p>e.g. Column(&#8216;index&#8217;, lambda row: row.index, tipText=&#8217;index of the row&#8217;)</p>
+<p>define a list of objects (or empty):
+objectList = list(myObjects) if myObjects is not None else []</p>
+<p>define optional actionCallback and/or selectionCallback functions</p>
+<dl class="docutils">
+<dt>ObjectTable(parent=parent, columns=columnList, objects=objectList, </dt>
+<dd>actionCallback=actionCallback, selectionCallback=selectionCallback,
+....)</dd>
+</dl>
+<p>use setObjects(objects) method to set objects
+use show() to show
+use clearTable() to clear the table</p>
+</div></blockquote>
 <p>Inherited from QTableView (<a class="reference external" href="http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html">http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html</a>)</p>
 <p>QTableView Class Reference
-[QtGui module]</p>
-<p>The QTableView class provides a default model/view implementation of a table view. More...</p>
-<p>Inherits QAbstractItemView.</p>
-<p>Inherited by QTableWidget.</p>
+[QtGui module]
+The QTableView class provides a default model/view implementation of a table view. More...
+Inherits QAbstractItemView.
+Inherited by QTableWidget.</p>
 <p>Methods</p>
-<p>__init__ (self, QWidget parent = None)
+<blockquote>
+<div>__init__ (self, QWidget parent = None)
 clearSpans (self)
 int columnAt (self, int x)
 columnCountChanged (self, int oldCount, int newCount)
@@ -2944,7 +3550,7 @@ verticalScrollbarAction (self, int action)
 QStyleOptionViewItem viewOptions (self)
 QRect visualRect (self, QModelIndex index)
 QRegion visualRegionForSelection (self, QItemSelection selection)
-bool wordWrap (self)</p>
+bool wordWrap (self)</div></blockquote>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Table.Column">
 <em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Table.</code><code class="descname">Column</code><span class="sig-paren">(</span><em>heading</em>, <em>getValue</em>, <em>getEditValue=None</em>, <em>setEditValue=None</em>, <em>editClass=None</em>, <em>editArgs=None</em>, <em>editKw=None</em>, <em>tipText=None</em>, <em>getColor=None</em>, <em>getIcon=None</em>, <em>stretch=False</em>, <em>format=None</em>, <em>editDecimals=None</em>, <em>editStep=None</em>, <em>alignment=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#Column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.Column" title="Permalink to this definition">¶</a></dt>
@@ -2957,6 +3563,28 @@ bool wordWrap (self)</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.Column.orderFunc">
 <code class="descname">orderFunc</code><span class="sig-paren">(</span><em>objA</em>, <em>objB</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#Column.orderFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.Column.orderFunc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.Table.ColumnViewSettings">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Table.</code><code class="descname">ColumnViewSettings</code><span class="sig-paren">(</span><em>table</em>, <em>parent=None</em>, <em>direction='v'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ColumnViewSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ColumnViewSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<p>hide show check boxes corresponding to the table columns</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ColumnViewSettings.checkBoxCallBack">
+<code class="descname">checkBoxCallBack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ColumnViewSettings.checkBoxCallBack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ColumnViewSettings.checkBoxCallBack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ColumnViewSettings.initCheckBoxes">
+<code class="descname">initCheckBoxes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ColumnViewSettings.initCheckBoxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ColumnViewSettings.initCheckBoxes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ColumnViewSettings.updateWidgets">
+<code class="descname">updateWidgets</code><span class="sig-paren">(</span><em>table</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ColumnViewSettings.updateWidgets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ColumnViewSettings.updateWidgets" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2986,6 +3614,12 @@ bool wordWrap (self)</p>
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTable.clearSelection">
 <code class="descname">clearSelection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.clearSelection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.clearSelection" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ObjectTable.clearTable">
+<code class="descname">clearTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.clearTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.clearTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove all objects from the table</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTable.closeEvent">
@@ -3043,6 +3677,11 @@ bool wordWrap (self)</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ObjectTable.getColumnInt">
+<code class="descname">getColumnInt</code><span class="sig-paren">(</span><em>columnName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.getColumnInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.getColumnInt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentIndex">
 <code class="descname">getCurrentIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.getCurrentIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentIndex" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3080,11 +3719,6 @@ bool wordWrap (self)</p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTable.hideFilter">
 <code class="descname">hideFilter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.hideFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.hideFilter" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.Table.ObjectTable.openSearchPopup">
-<code class="descname">openSearchPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTable.openSearchPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTable.openSearchPopup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3194,26 +3828,11 @@ bool wordWrap (self)</p>
 
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Table.</code><code class="descname">ObjectTableFilter</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></code></p>
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.applyFilter">
-<code class="descname">applyFilter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.applyFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.applyFilter" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.closePopup">
-<code class="descname">closePopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.closePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.closePopup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Table.</code><code class="descname">ObjectTableFilter</code><span class="sig-paren">(</span><em>table</em>, <em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.findOnTable">
 <code class="descname">findOnTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.findOnTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.findOnTable" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.hideNotFoundMsg">
-<code class="descname">hideNotFoundMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.hideNotFoundMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.hideNotFoundMsg" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -3222,13 +3841,23 @@ bool wordWrap (self)</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.searchMatches">
+<code class="descname">searchMatches</code><span class="sig-paren">(</span><em>objCol</em>, <em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.searchMatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.searchMatches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.setColumnOptions">
+<code class="descname">setColumnOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.setColumnOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.setColumnOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.setFilteredObjects">
 <code class="descname">setFilteredObjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.setFilteredObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.setFilteredObjects" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.showNotFoundMsg">
-<code class="descname">showNotFoundMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.showNotFoundMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.showNotFoundMsg" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.ui.gui.widgets.Table.ObjectTableFilter.updateWidgets">
+<code class="descname">updateWidgets</code><span class="sig-paren">(</span><em>table</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Table.html#ObjectTableFilter.updateWidgets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Table.ObjectTableFilter.updateWidgets" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3442,6 +4071,36 @@ bool wordWrap (self)</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.ui.gui.widgets.TestModule">
+<span id="ccpn-ui-gui-widgets-testmodule-module"></span><h2>ccpn.ui.gui.widgets.TestModule module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.TestModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.TestModule.MyModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.TestModule.</code><code class="descname">MyModule</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/TestModule.html#MyModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.TestModule.MyModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>This is example of CCPN module Usage. See below how to run it alone for graphical testing purposes.</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.TestModule.MyModule.className">
+<code class="descname">className</code><em class="property"> = 'MyModule'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.TestModule.MyModule.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.TestModule.MyModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.widgets.TestModule.MyModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.TestModule.MyModule.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.widgets.TestModule.MyModule.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.widgets.TestModule.MyModule.settingsPosition">
+<code class="descname">settingsPosition</code><em class="property"> = 'top'</em><a class="headerlink" href="#ccpn.ui.gui.widgets.TestModule.MyModule.settingsPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.ui.gui.widgets.TextEditor">
 <span id="ccpn-ui-gui-widgets-texteditor-module"></span><h2>ccpn.ui.gui.widgets.TextEditor module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.TextEditor" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -3462,7 +4121,7 @@ bool wordWrap (self)</p>
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.ToolBar.ToolBar">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ToolBar.</code><code class="descname">ToolBar</code><span class="sig-paren">(</span><em>parent</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ToolBar.html#ToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ToolBar.ToolBar" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ToolBar.</code><code class="descname">ToolBar</code><span class="sig-paren">(</span><em>parent</em>, <em>iconSizes=(None</em>, <em>None)</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ToolBar.html#ToolBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ToolBar.ToolBar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QToolBar</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 </dd></dl>
 
@@ -3494,6 +4153,104 @@ bool wordWrap (self)</p>
 <code class="descname">setText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/VerticalLabel.html#VerticalLabel.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.VerticalLabel.VerticalLabel.setText" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.widgets.ViewBox">
+<span id="ccpn-ui-gui-widgets-viewbox-module"></span><h2>ccpn.ui.gui.widgets.ViewBox module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.ViewBox" title="Permalink to this headline">¶</a></h2>
+<p>By Functionality:</p>
+<dl class="docutils">
+<dt>Zoom and pan:</dt>
+<dd>Left-drag:                          pans the spectrum.
+Middle-drag:                        draws a zooming box and zooms the viewbox.
+shift-left-drag:                    draws a zooming box and zooms the viewbox.
+shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+shift-right-drag:                   draws a zooming box and zooms the viewbox.
+Two successive shift-right-clicks:  define zoombox
+control-right click:                reset the zoom</dd>
+<dt>Peaks:</dt>
+<dd><p class="first">Left-click:                         select peak near cursor in a spectrum display, deselecting others
+Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
+Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.</p>
+<p class="last">Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
+Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.</p>
+</dd>
+<dt>Others:</dt>
+<dd>Right-click:                        raises the context menu.</dd>
+</dl>
+<p>By Mouse button:</p>
+<blockquote>
+<div><p>Left-click:                         select peak near cursor in a spectrum display, deselecting others
+Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
+Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection</p>
+<p>Left-drag:                          pans the spectrum.
+shift-left-drag:                    draws a zooming box and zooms the viewbox.
+Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
+Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.</p>
+<p>Middle-drag:                        draws a zooming box and zooms the viewbox.
+shift-middle-drag:                  draws a zooming box and zooms the viewbox.</p>
+<p>Right-click:                        raises the context menu.
+control-right click:                reset the zoom
+Two successive shift-right-clicks:  define zoombox</p>
+<p>shift-right-drag:                   draws a zooming box and zooms the viewbox.</p>
+</div></blockquote>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ViewBox.</code><code class="descname">CrossHair</code><span class="sig-paren">(</span><em>plotWidget</em>, <em>position=Point(0.000000</em>, <em>0.000000)</em>, <em>show=True</em>, <em>rgb=None</em>, <em>colour=None</em>, <em>moveable=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>class to implement a cross-hair</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.hide">
+<code class="descname">hide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.hide" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.isVisible">
+<code class="descname">isVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.isVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.isVisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.setHline">
+<code class="descname">setHline</code><span class="sig-paren">(</span><em>yPos: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.setHline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.setHline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set horizontal  in world xPos coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.setPointPosition">
+<code class="descname">setPointPosition</code><span class="sig-paren">(</span><em>position: PyQt4.QtCore.QPointF</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.setPointPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.setPointPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set position in Point syntax</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.setPosition">
+<code class="descname">setPosition</code><span class="sig-paren">(</span><em>xPos: float</em>, <em>yPos: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.setPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.setPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set position in world xPos, yPos coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.setVline">
+<code class="descname">setVline</code><span class="sig-paren">(</span><em>xPos: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.setVline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.setVline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set vertical line in world xPos coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.show">
+<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.ViewBox.CrossHair.toggle">
+<code class="descname">toggle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#CrossHair.toggle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.CrossHair.toggle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.ViewBox.ViewBox">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.ViewBox.</code><code class="descname">ViewBox</code><span class="sig-paren">(</span><em>strip</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/ViewBox.html#ViewBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.ViewBox.ViewBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.ViewBox.ViewBox.ViewBox</span></code></p>
+<p>Base-class to implement mouse and drag events in PlotWidget.py;
+it will inherit the same parent as PlotWidget</p>
 </dd></dl>
 
 </div>
@@ -3561,10 +4318,40 @@ bool wordWrap (self)</p>
 </div>
 <div class="section" id="module-ccpn.ui.gui.widgets.Widget">
 <span id="ccpn-ui-gui-widgets-widget-module"></span><h2>ccpn.ui.gui.widgets.Widget module<a class="headerlink" href="#module-ccpn.ui.gui.widgets.Widget" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>The module implements widget and scrollable widget class</p>
+<p>Widget(parent=None, setLayout=False, <a href="#id13"><span class="problematic" id="id14">**</span></a>kwds)</p>
+<dl class="docutils">
+<dt>ScrollableWidget(parent=None, setLayout=False,</dt>
+<dd>minimumSizes=(50,50), scrollBarPolicies=(&#8216;asNeeded&#8217;,&#8217;asNeeded&#8217;), <a href="#id15"><span class="problematic" id="id16">**</span></a>kwds)</dd>
+</dl>
+<dl class="class">
+<dt id="ccpn.ui.gui.widgets.Widget.ScrollableWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Widget.</code><code class="descname">ScrollableWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>setLayout=False</em>, <em>minimumSizes=(50</em>, <em>50)</em>, <em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#ScrollableWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.ScrollableWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<p>A scrollable Widget</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Widget.ScrollableWidget.getScrollArea">
+<code class="descname">getScrollArea</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#ScrollableWidget.getScrollArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.ScrollableWidget.getScrollArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>return scroll area (for external usage)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Widget.ScrollableWidget.setMinimumSizes">
+<code class="descname">setMinimumSizes</code><span class="sig-paren">(</span><em>minimumSizes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#ScrollableWidget.setMinimumSizes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.ScrollableWidget.setMinimumSizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set (minimumWidth, minimumHeight)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.widgets.Widget.ScrollableWidget.setScrollBarPolicies">
+<code class="descname">setScrollBarPolicies</code><span class="sig-paren">(</span><em>scrollBarPolicies=('asNeeded'</em>, <em>'asNeeded')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#ScrollableWidget.setScrollBarPolicies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.ScrollableWidget.setScrollBarPolicies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the scrolbar policy: always, never, asNeeded</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="ccpn.ui.gui.widgets.Widget.Widget">
-<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Widget.</code><code class="descname">Widget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>border=None</em>, <em>colourScheme=None</em>, <em>setLayout=False</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#Widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.Widget" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.widgets.Widget.</code><code class="descname">Widget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>setLayout=False</em>, <em>acceptDrops=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/widgets/Widget.html#Widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.widgets.Widget.Widget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 </dd></dl>
 
@@ -3597,7 +4384,6 @@ bool wordWrap (self)</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Action">ccpn.ui.gui.widgets.Action module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Application">ccpn.ui.gui.widgets.Application module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Arrow">ccpn.ui.gui.widgets.Arrow module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.AxisTextItem">ccpn.ui.gui.widgets.AxisTextItem module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.BarGraph">ccpn.ui.gui.widgets.BarGraph module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Base">ccpn.ui.gui.widgets.Base module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.BasePopup">ccpn.ui.gui.widgets.BasePopup module</a></li>
@@ -3605,9 +4391,11 @@ bool wordWrap (self)</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ButtonList">ccpn.ui.gui.widgets.ButtonList module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CallbackTimer">ccpn.ui.gui.widgets.CallbackTimer module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CcpnGridItem">ccpn.ui.gui.widgets.CcpnGridItem module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CcpnModuleArea">ccpn.ui.gui.widgets.CcpnModuleArea module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CcpnWebView">ccpn.ui.gui.widgets.CcpnWebView module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CheckBox">ccpn.ui.gui.widgets.CheckBox module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ColourDialog">ccpn.ui.gui.widgets.ColourDialog module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CompoundBaseWidget">ccpn.ui.gui.widgets.CompoundBaseWidget module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CompoundView">ccpn.ui.gui.widgets.CompoundView module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.CompoundWidgets">ccpn.ui.gui.widgets.CompoundWidgets module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Console">ccpn.ui.gui.widgets.Console module</a></li>
@@ -3615,6 +4403,7 @@ bool wordWrap (self)</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.DateTime">ccpn.ui.gui.widgets.DateTime module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Dock">ccpn.ui.gui.widgets.Dock module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.DoubleSpinbox">ccpn.ui.gui.widgets.DoubleSpinbox module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.DropBase">ccpn.ui.gui.widgets.DropBase module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Entry">ccpn.ui.gui.widgets.Entry module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.FileDialog">ccpn.ui.gui.widgets.FileDialog module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.FilteringPulldownList">ccpn.ui.gui.widgets.FilteringPulldownList module</a></li>
@@ -3630,30 +4419,32 @@ bool wordWrap (self)</p>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.MainWindow">ccpn.ui.gui.widgets.MainWindow module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Menu">ccpn.ui.gui.widgets.Menu module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.MessageDialog">ccpn.ui.gui.widgets.MessageDialog module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ModuleArea">ccpn.ui.gui.widgets.ModuleArea module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PhasingFrame">ccpn.ui.gui.widgets.PhasingFrame module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PipelineWidgets">ccpn.ui.gui.widgets.PipelineWidgets module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PlaneToolbar">ccpn.ui.gui.widgets.PlaneToolbar module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PlotWidget">ccpn.ui.gui.widgets.PlotWidget module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PulldownList">ccpn.ui.gui.widgets.PulldownList module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.PulldownListsForObjects">ccpn.ui.gui.widgets.PulldownListsForObjects module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.RadioButton">ccpn.ui.gui.widgets.RadioButton module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.RadioButtons">ccpn.ui.gui.widgets.RadioButtons module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ScrollArea">ccpn.ui.gui.widgets.ScrollArea module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SideBar">ccpn.ui.gui.widgets.SideBar module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Slider">ccpn.ui.gui.widgets.Slider module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget">ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Spacer">ccpn.ui.gui.widgets.Spacer module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SpectrumGroupToolBar">ccpn.ui.gui.widgets.SpectrumGroupToolBar module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SpectrumToolBar">ccpn.ui.gui.widgets.SpectrumToolBar module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SpectrumWidget">ccpn.ui.gui.widgets.SpectrumWidget module</a></li>
-<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SpinSystemLabel">ccpn.ui.gui.widgets.SpinSystemLabel module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Spinbox">ccpn.ui.gui.widgets.Spinbox module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.SplashScreen">ccpn.ui.gui.widgets.SplashScreen module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Splitter">ccpn.ui.gui.widgets.Splitter module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Table">ccpn.ui.gui.widgets.Table module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.TableModel">ccpn.ui.gui.widgets.TableModel module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.TestModule">ccpn.ui.gui.widgets.TestModule module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.TextEditor">ccpn.ui.gui.widgets.TextEditor module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ToolBar">ccpn.ui.gui.widgets.ToolBar module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ToolButton">ccpn.ui.gui.widgets.ToolButton module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.VerticalLabel">ccpn.ui.gui.widgets.VerticalLabel module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.ViewBox">ccpn.ui.gui.widgets.ViewBox module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.WebBrowser">ccpn.ui.gui.widgets.WebBrowser module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.WebView">ccpn.ui.gui.widgets.WebView module</a></li>
 <li><a class="reference internal" href="#module-ccpn.ui.gui.widgets.Widget">ccpn.ui.gui.widgets.Widget module</a></li>

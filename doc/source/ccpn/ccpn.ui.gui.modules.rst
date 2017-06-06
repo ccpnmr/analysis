@@ -6,15 +6,16 @@ ccpn.ui.gui.modules package
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-
-    ccpn.ui.gui.modules.spectrumItems
-
 Submodules
 ----------
+
+ccpn.ui.gui.modules.BlankDisplay module
+---------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.BlankDisplay
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 ccpn.ui.gui.modules.CcpnModule module
 -------------------------------------
@@ -56,22 +57,6 @@ ccpn.ui.gui.modules.CreateSequence module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.DataPlottingModule module
----------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.DataPlottingModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiBlankDisplay module
-------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiBlankDisplay
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.modules.GuiMainWindow module
 ----------------------------------------
 
@@ -80,10 +65,10 @@ ccpn.ui.gui.modules.GuiMainWindow module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.GuiModule module
-------------------------------------
+ccpn.ui.gui.modules.GuiPeakListView module
+------------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.GuiModule
+.. automodule:: ccpn.ui.gui.modules.GuiPeakListView
     :members:
     :undoc-members:
     :show-inheritance:
@@ -248,6 +233,14 @@ ccpn.ui.gui.modules.PluginModule module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.modules.PythonConsoleModule module
+----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.PythonConsoleModule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.modules.ReferenceChemicalShifts module
 --------------------------------------------------
 
@@ -288,10 +281,10 @@ ccpn.ui.gui.modules.ShortcutModule module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.peakUtils module
-------------------------------------
+ccpn.ui.gui.modules.StructureTable module
+-----------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.peakUtils
+.. automodule:: ccpn.ui.gui.modules.StructureTable
     :members:
     :undoc-members:
     :show-inheritance:

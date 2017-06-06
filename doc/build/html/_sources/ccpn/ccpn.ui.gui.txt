@@ -19,34 +19,10 @@ Subpackages
 Submodules
 ----------
 
-ccpn.ui.gui.Base module
------------------------
-
-.. automodule:: ccpn.ui.gui.Base
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.DropBase module
----------------------------
-
-.. automodule:: ccpn.ui.gui.DropBase
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.Gui module
 ----------------------
 
 .. automodule:: ccpn.ui.gui.Gui
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.ViewBox module
---------------------------
-
-.. automodule:: ccpn.ui.gui.ViewBox
     :members:
     :undoc-members:
     :show-inheritance:

@@ -81,10 +81,12 @@
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.MixtureOptimisation</span> <span class="kn">import</span> <span class="n">MixtureOptimisation</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundView</span> <span class="kn">import</span> <span class="n">CompoundView</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
@@ -94,35 +96,47 @@
 <span class="n">green</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Green&#39;</span><span class="p">)</span>
 <span class="n">red</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>
 <span class="n">yellow</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+<span class="n">DefaultMinimalDistance</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="c1">#ppm</span>
 
 <div class="viewcode-block" id="MixtureAnalysis"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureAnalysis.MixtureAnalysis">[docs]</a><span class="k">class</span> <span class="nc">MixtureAnalysis</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-
   <span class="sd">&#39;&#39;&#39;Creates a module to analyse the mixtures&#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">MixtureAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mixture Analysis&#39;</span><span class="p">)</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;MixtureAnalysis&#39;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mixture Analysis&#39;</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MixtureAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1">#This allows opening the popup for graphical tests</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
 
 
     <span class="bp">self</span><span class="o">.</span><span class="n">listOfSample</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">minimalDistance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">minimalDistance</span> <span class="o">=</span> <span class="n">DefaultMinimalDistance</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span> <span class="o">=</span> <span class="n">minimalDistance</span>
+
     <span class="c1">######## ======== Icons ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/configure&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exportIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/export&#39;</span><span class="p">)</span>
 
     <span class="c1">######## ======== Set Main Layout ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1">######## ======== Set Secondary Layout ====== ########</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
@@ -139,7 +153,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="p">)</span>
 
     <span class="c1">######## ======== Create 1thTab with peak Table and Molecule view  ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span><span class="p">,</span> <span class="s1">&#39;Components peaks&#39;</span><span class="p">)</span>
@@ -147,40 +161,45 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1">######## ========  Create 2ndTab with multiple Molecule view ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span><span class="p">,</span> <span class="s1">&#39;Components structure&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tableComponentPeaks</span><span class="p">()</span>
 
     <span class="c1">######## ========  Create 3thTab with Components Info ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfoLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfoLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span><span class="p">,</span> <span class="s1">&#39;Components Info&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_widgetsTabComponentsInfo</span><span class="p">()</span>
 
     <span class="c1">######## ========  Create 4thTab Mixtures Management ====== ########</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span><span class="p">,</span> <span class="s1">&#39;Mixtures Management&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_mixtureManagementWidgets</span><span class="p">()</span>
 
-    <span class="c1">######## ========  registerNotify ====== ########</span>
-    <span class="c1"># self.current = project._appBase.current</span>
-    <span class="c1"># self.current.registerNotify(self._findSelectedPeaks, &#39;peaks&#39;)</span>
-    <span class="c1"># self._findSelectedPeaks(peaks=None)</span>
 
-
+<div class="viewcode-block" id="MixtureAnalysis.setMinimalDistanceForNewMixtures"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureAnalysis.MixtureAnalysis.setMinimalDistanceForNewMixtures">[docs]</a>  <span class="k">def</span> <span class="nf">setMinimalDistanceForNewMixtures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span> <span class="o">=</span> <span class="n">value</span></div>
 
   <span class="k">def</span> <span class="nf">_getVirtualSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Returns spectra mixtures (virtual samples) across all project sample &#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span><span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;overlaps&#39;</span><span class="p">):</span>
+              <span class="n">sample</span><span class="o">.</span><span class="n">overlaps</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">):</span>
+              <span class="n">sample</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">):</span>
+              <span class="n">sampleComponent</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span>
 
 
@@ -195,9 +214,11 @@
                <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Score&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">score</span><span class="p">)),</span>
               <span class="p">]</span>
 
+
     <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tableSelection</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+
       <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="p">)</span>
 
@@ -228,53 +249,43 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
 
-  <span class="c1"># def _selectPeak(self, row:int=None, col:int=None, obj:object=None):</span>
-  <span class="c1">#   &#39;&#39;&#39; this callback  &#39;&#39;&#39;</span>
-  <span class="c1">#   self.selectedTablePeaks = self.peakTable.getSelectedObjects()</span>
-  <span class="c1">#   for peak in self.selectedTablePeaks:</span>
-  <span class="c1">#     if peak.isSelected:</span>
-  <span class="c1">#       print(self.project._appBase.current.peaks, &#39;currents&#39;)</span>
-  <span class="c1">#       # self.project._appBase.current.clearPeaks()</span>
-  <span class="c1">#     else:</span>
-  <span class="c1">#       peak.isSelected = True</span>
-  <span class="c1">#       self.current.peak = peak</span>
-
-  <span class="k">def</span> <span class="nf">_findSelectedPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; this callback, registered with a notifier, allows to select a peak either on the table, compoundView or</span>
-<span class="sd">    guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display &#39;&#39;&#39;</span>
-    <span class="c1"># self.peakTable.clearSelection()</span>
-    <span class="n">selectedPeaks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-      <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObject</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
-              <span class="n">selectedPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">selectedPeaks</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">,</span> <span class="s1">&#39;selected peaks&#39;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObjects</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">)</span>
-
-      <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">atomObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">atomViews</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;H1&#39;</span><span class="p">:</span>
-          <span class="n">atomObject</span><span class="o">.</span><span class="n">select</span><span class="p">()</span>
+  <span class="c1"># def _findSelectedPeaks(self, peaks:None):</span>
+  <span class="c1">#   &#39;&#39;&#39; this callback, registered with a notifier, allows to select a peak either on the table, compoundView or</span>
+  <span class="c1">#   guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display &#39;&#39;&#39;</span>
+  <span class="c1">#   # self.peakTable.clearSelection()</span>
+  <span class="c1">#   selectedPeaks = []</span>
+  <span class="c1">#   if self.project.strips:</span>
+  <span class="c1">#     currentDisplayed = self.project.strips[0]</span>
+  <span class="c1">#     if self.current.peaks:</span>
+  <span class="c1">#       self.currentPeaks = self.current.peaks</span>
+  <span class="c1">#       if self.peakTable.objects:</span>
+  <span class="c1">#         for peak in self.currentPeaks:</span>
+  <span class="c1">#           if peak in self.peakTable.objects:</span>
+  <span class="c1">#             self.peakTable.setCurrentObject(peak)</span>
+  <span class="c1">#             selectedPeaks.append(peak)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if selectedPeaks:</span>
+  <span class="c1">#     print(selectedPeaks, &#39;selected peaks&#39;)</span>
+  <span class="c1">#     self.peakTable.setCurrentObjects(selectedPeaks)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     for atom, atomObject in self.compoundView.atomViews.items():</span>
+  <span class="c1">#       if atom.name == &#39;H1&#39;:</span>
+  <span class="c1">#         atomObject.select()</span>
 
   <span class="k">def</span> <span class="nf">_createButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; This creates buttons according with how many spectra are inside the mixture. &#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="c1">#,toggle=True)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleComponentButton</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">))</span>
-      <span class="c1"># self.componentButton.setChecked(False)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="c1">#,toggle=True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleComponentButton</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">))</span>
+        <span class="c1"># self.componentButton.setChecked(False)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">)</span>
 
 
 
@@ -290,27 +301,19 @@
         <span class="k">if</span> <span class="n">item</span> <span class="o">!=</span> <span class="n">componentButton</span><span class="p">:</span>
           <span class="n">buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #2a3358&quot;</span><span class="p">)</span>
-        <span class="n">pressedButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #020F31&quot;</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">item</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043&quot;</span><span class="p">)</span>
-        <span class="n">pressedButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #bd8413&quot;</span><span class="p">)</span>
-
     <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">peakListObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListObjects</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
-
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
-          <span class="n">smiles</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
-          <span class="k">if</span> <span class="n">smiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span>  <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
+            <span class="n">smiles</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
+            <span class="k">if</span> <span class="n">smiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span>  <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
 
 
   <span class="sd">&#39;&#39;&#39; ######## ======== Second Tab properties (Multiple Compound View ====== ########   &#39;&#39;&#39;</span>
@@ -320,15 +323,15 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_clearTabMoleculeView</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
-      <span class="n">chemicalName</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">synonyms</span><span class="p">))</span>
+      <span class="k">if</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">chemicalName</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">synonyms</span><span class="p">))</span>
 
-      <span class="n">smiles</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">smiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span> <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
+        <span class="k">if</span> <span class="n">smiles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span> <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
 
 
   <span class="k">def</span> <span class="nf">_clearTabMoleculeView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
@@ -423,9 +426,10 @@
       <span class="n">header</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
       <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
-        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Single Score = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># spectrum = sampleComponent.substance.referenceSpectra[0]</span>
+          <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Single Score = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
 
         <span class="c1">#   self.leftListWidget.addItem(item)</span>
@@ -727,12 +731,13 @@
     <span class="sd">&#39;&#39;&#39; displays all the spectra present in a mixture &#39;&#39;&#39;</span>
     <span class="n">currentDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clearDisplayView</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">currentDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">currentDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">currentDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+          <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">currentDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_navigateToPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; for a given peak, it navigates to the peak position on the display  &#39;&#39;&#39;</span>
@@ -807,8 +812,8 @@
     <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Mixtures&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_openOptimisationModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">mixtureOptimisation</span> <span class="o">=</span> <span class="n">MixtureOptimisation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">virtualSamples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">(),</span>
-                          <span class="n">mixtureAnalysisModule</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">mixtureOptimisation</span> <span class="o">=</span> <span class="n">MixtureOptimisation</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">virtualSamples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">(),</span>
+                          <span class="n">mixtureAnalysisModule</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">,)</span>
 
     <span class="n">mixtureOptimisationModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">mixtureOptimisation</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
 
@@ -819,6 +824,28 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Mixture&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">]})</span>
 
     <span class="k">return</span> <span class="n">df</span></div></div>
+
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
+
+  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+
+  <span class="n">win</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+
+  <span class="n">moduleArea</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="p">)</span>
+  <span class="n">module</span> <span class="o">=</span> <span class="n">MixtureAnalysis</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+  <span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+  <span class="n">win</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">moduleArea</span><span class="p">)</span>
+  <span class="n">win</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+  <span class="n">win</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Testing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="o">.</span><span class="n">moduleName</span><span class="p">)</span>
+  <span class="n">win</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
 </pre></div>
 
           </div>

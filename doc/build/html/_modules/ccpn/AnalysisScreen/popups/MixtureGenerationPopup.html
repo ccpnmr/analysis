@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Slider</span> <span class="kn">import</span> <span class="n">SliderSpinBox</span>
@@ -88,21 +89,27 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 
 
-<div class="viewcode-block" id="MixtureGenerationPopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.MixtureGenerationPopup.MixtureGenerationPopup">[docs]</a><span class="k">class</span> <span class="nc">MixtureGenerationPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">MixtureGenerationPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+<div class="viewcode-block" id="MixtureGenerationPopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.MixtureGenerationPopup.MixtureGenerationPopup">[docs]</a><span class="k">class</span> <span class="nc">MixtureGenerationPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Mixture Generation Setup&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1">#This allows opening the popup for graphical tests</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span> <span class="o">=</span> <span class="n">ExcludeRegions</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span> <span class="o">=</span> <span class="n">ExcludeRegions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingParams</span> <span class="o">=</span> <span class="p">[</span><span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;initialTemp&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;finalTemp&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;max steps&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
                                     <span class="p">(</span><span class="s1">&#39;temp constant&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cooling method&#39;</span><span class="p">,</span> <span class="s1">&#39;Linear&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])]</span>
 
@@ -121,16 +128,15 @@
   <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Mixture Generation Setup&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_setTabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetupLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetupLayout</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span><span class="p">)</span>
 
@@ -143,7 +149,7 @@
                                        <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Perform&#39;</span><span class="p">],</span>
                                        <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genereteMixture</span><span class="p">],</span>
                                        <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
-                                       <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                                       <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_addWidgetsToMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -155,40 +161,43 @@
     <span class="n">mode</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select number of Mixtures&#39;</span><span class="p">,</span><span class="s1">&#39;Select number of components&#39;</span><span class="p">]</span>
 
     <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethodLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Calculation method&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span> <span class="n">methods</span><span class="p">,</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethodLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;Calculation method&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span> <span class="n">methods</span><span class="p">,</span>
                                                <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                                                <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSAoptionWidgets</span><span class="p">,</span>
                                                <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                          <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
                                                <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;SA settings&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSAsettings</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span><span class="p">)</span>
+    <span class="c1"># #</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;SA settings&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSAsettings</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
 
     <span class="c1">#</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select mode&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
                                                <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                                                <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_modeSelection</span><span class="p">,</span>
                                                <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                               <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
                                                <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">numberLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select number&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">numberSlider</span> <span class="o">=</span> <span class="n">SliderSpinBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSlider</span> <span class="o">=</span> <span class="n">SliderSpinBox</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                                      <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
 
     <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">distanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Minimal distance between peaks&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">distanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Minimal distance between peaks&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setSuffix</span><span class="p">(</span><span class="s2">&quot; ppm&quot;</span><span class="p">)</span>
-
     <span class="c1">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select SpectrumGroup&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># #</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select SpectrumGroup&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
     <span class="c1">#</span>
     <span class="c1"># self.replaceLabel = Label(self, text=&quot;Replace current mixtures&quot;)</span>
@@ -334,15 +343,16 @@
   <span class="k">def</span> <span class="nf">_populatePullDownSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select An Option&#39;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;All Spectra&#39;</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
-         <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s1">&#39;SG:H&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;SG:H&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;All Spectra&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">)</span>
+      <span class="k">if</span> <span class="s1">&#39;SG:H&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;SG:H&#39;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPerformButtonStatus</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPerformButtonStatus</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_getPullDownSelectionSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
@@ -420,14 +430,14 @@
 
   <span class="k">def</span> <span class="nf">_openMixtureAnalysisModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
-    <span class="n">mixtureAnalysis</span> <span class="o">=</span> <span class="n">MixtureAnalysis</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">mixtureAnalysis</span> <span class="o">=</span> <span class="n">MixtureAnalysis</span><span class="p">(</span><span class="n">minimalDistance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
     <span class="n">mixtureAnalysisModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">mixtureAnalysis</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
 
     <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="s1">&#39;MixtureDisplay&#39;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">neighbor</span><span class="o">=</span><span class="n">mixtureAnalysisModule</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">guiWindow</span><span class="o">.</span><span class="n">deleteBlankDisplay</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">neighbor</span><span class="o">=</span><span class="n">mixtureAnalysisModule</span><span class="p">)</span>
+    <span class="c1"># self.moduleArea.guiWindow.deleteBlankDisplay()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
 
     <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -475,15 +485,15 @@
 
 
 
-    <span class="c1"># DARK</span>
-    <span class="c1"># QDialog</span>
-    <span class="c1"># QPushButton:!enabled</span>
-    <span class="c1"># {</span>
-    <span class="c1">#   color:  # 122043;</span>
-    <span class="c1">#     background - color:  # 7F7F7F;</span>
-    <span class="c1"># padding: 2</span>
-    <span class="c1"># px;</span>
-    <span class="c1"># }</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+
+  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+  <span class="n">popup</span> <span class="o">=</span> <span class="n">MixtureGenerationPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

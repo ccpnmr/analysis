@@ -47,7 +47,13 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.widgets.PlaneToolbar</h1><div class="highlight"><pre>
-<span></span><span class="c1">#=========================================================================================</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines a specific Toolbar class for the strip display </span>
+<span class="sd">The NmrResidueLabel allows drag and drop of the ids displayed in them</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
@@ -77,34 +83,123 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SpinSystemLabel</span> <span class="kn">import</span> <span class="n">SpinSystemLabel</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.mouseEvents</span> <span class="kn">import</span> <span class="n">getMouseEventDict</span>
 
 
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 
+
+<span class="k">class</span> <span class="nc">_StripLabel</span><span class="p">(</span><span class="n">Label</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Specific Label to be used in Strip displays</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">dragKey</span><span class="o">=</span><span class="n">DropBase</span><span class="o">.</span><span class="n">TEXT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+    <span class="n">Label</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The text of the label can be dragged; it will be passed on in the dict under key dragKey</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dragKey</span> <span class="o">=</span> <span class="n">dragKey</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mousePressEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dragMoveEvent</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragMoveEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1">#self.setDragEnabled(True) # not possile for Label</span>
+
+    <span class="c1"># disable any drop event callback&#39;s until explicitly defined later</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDropEventCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Required function to enable dragging and dropping within the sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object</span>
+<span class="sd">    containing its id and a modifier key to encode the direction to drop the strip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
+    <span class="c1"># create the dataDict</span>
+    <span class="n">dataDict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dragKey</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()}</span>
+    <span class="c1"># update the dataDict with all mouseEvents</span>
+    <span class="n">dataDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">getMouseEventDict</span><span class="p">(</span><span class="n">event</span><span class="p">))</span>
+    <span class="c1"># convert into json</span>
+    <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dataDict</span><span class="p">)</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">DropBase</span><span class="o">.</span><span class="n">JSONDATA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
+    <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
+    <span class="n">drag</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
+    <span class="c1"># if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:</span>
+    <span class="c1">#     pass</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   self.show()</span>
+
+
+<span class="c1">#TODO:GEERTEN: complete this and replace</span>
+<div class="viewcode-block" id="PlaneSelectorWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneSelectorWidget">[docs]</a><span class="k">class</span> <span class="nc">PlaneSelectorWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  This widget contains the buttons and entry boxes for selection of the plane</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qtParent</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="s2">&quot;Setup the buttons and callbacks for axis&quot;</span>
+
+    <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">qtParent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">strip</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+
+    <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">;</span> <span class="n">height</span><span class="o">=</span><span class="mi">20</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+                                      <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_previousPlane</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                                 <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_spinBoxChanged</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spinBox</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span>
+                                  <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nextPlane</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                                           <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_planeCountChanged</span>
+                                           <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">planeCountSpinBox</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_previousPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;clicked previous&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_nextPlane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;clicked previous&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_spinBoxChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;spinBox chnaged to:&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_planeCountChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;planeCount changed to:&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="PlaneToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneToolbar">[docs]</a><span class="k">class</span> <span class="nc">PlaneToolbar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
+  <span class="c1">#TODO: undocumented and needs refactoring ;</span>
+  <span class="c1"># GWV: Does not work as a Widget!?</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qtParent</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">ToolBar</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">qtParent</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
 
-    <span class="n">ToolBar</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">stripFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span> <span class="o">=</span> <span class="n">SpinSystemLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span>
-                                      <span class="n">appBase</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_appBase</span><span class="p">,</span>
-                                      <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-                                 <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
-    <span class="c1"># self.spinSystemLabel.dropEvent = self.dropCallback</span>
-    <span class="c1"># self.spinSystemLabel.setText(&quot;Spin systems shown here&quot;)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="p">)</span>
-    <span class="c1"># self.spinSystemLabel.pid = self.pid</span>
-    <span class="c1"># print(self.pid)lo</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">planeLabels</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">planeCounts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>

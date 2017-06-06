@@ -17,6 +17,14 @@ ccpn.ui.gui.popups.AboutPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.ChemicalShiftListPopup module
+------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ChemicalShiftListPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.CopyPeakListPopup module
 -------------------------------------------
 
@@ -29,6 +37,14 @@ ccpn.ui.gui.popups.DataSetPopup module
 --------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.DataSetPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.Dialog module
+--------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.Dialog
     :members:
     :undoc-members:
     :show-inheritance:
@@ -77,6 +93,14 @@ ccpn.ui.gui.popups.NmrResiduePopup module
 -----------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.NmrResiduePopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.NotesPopup module
+------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.NotesPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -197,6 +221,14 @@ ccpn.ui.gui.popups.SpectrumPropertiesPopup module
 -------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.SpectrumPropertiesPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.StructurePopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.StructurePopup
     :members:
     :undoc-members:
     :show-inheritance:

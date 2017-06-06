@@ -98,6 +98,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Url</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 
 <span class="n">LOG_FILE_TEXT</span> <span class="o">=</span> <span class="s1">&#39;Log file&#39;</span>
 <span class="n">PROJECT_DIR_TEXT</span> <span class="o">=</span> <span class="s1">&#39;Project directory&#39;</span>
@@ -106,42 +107,43 @@
 
 <span class="c1"># code below has to be synchronised with code in SCRIPT_URL</span>
 
-<div class="viewcode-block" id="FeedbackPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.FeedbackPopup.FeedbackPopup">[docs]</a><span class="k">class</span> <span class="nc">FeedbackPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+<div class="viewcode-block" id="FeedbackPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.FeedbackPopup.FeedbackPopup">[docs]</a><span class="k">class</span> <span class="nc">FeedbackPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+<span class="c1"># class FeedbackPopup(QtGui.QDialog):</span>
+  <span class="c1"># parent mandatory and that needs to have attribute application</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Feedback Form&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="c1"># QtGui.QDialog.__init__(self, parent=parent)</span>
+    <span class="c1"># self.setWindowTitle(title)</span>
 
-  <span class="c1"># parent mandatory and that needs to have attributes _appBase and colourScheme</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Feedback Form&#39;</span><span class="p">):</span>
-     
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>
 
-    <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># frame = Frame(self, setLayout=True)   # ejb - change frame to self below, strange</span>
 
     <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;For bug reports please submit precise information, including any error message left on the console&#39;</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;organisation&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">):</span>
       <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Include: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">includeFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Include: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">includeFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">includeLogBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">includeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">LOG_FILE_TEXT</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">includeProjectBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">includeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">PROJECT_DIR_TEXT</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Feedback: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Feedback: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Submit&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_submitFeedback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Submit&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_submitFeedback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximumWidth</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumHeight</span><span class="p">())</span>
 
   <span class="k">def</span> <span class="nf">_submitFeedback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    
     <span class="n">includeLog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeLogBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
     <span class="n">includeProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeProjectBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
     <span class="n">feedback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -149,12 +151,12 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">feedback</span><span class="p">:</span>
       <span class="k">return</span>
       
-    <span class="n">appBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">application</span>
     
     <span class="k">if</span> <span class="n">includeProject</span><span class="p">:</span>
       <span class="c1"># cannot use tempfile because that always hands back open object and tarfile needs actual path</span>
       <span class="n">filePrefix</span> <span class="o">=</span> <span class="s1">&#39;feedback</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">)</span>
-      <span class="n">project</span> <span class="o">=</span> <span class="n">appBase</span><span class="o">.</span><span class="n">project</span>
+      <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
       <span class="n">projectPath</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span>
       <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
       <span class="n">filePrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filePrefix</span><span class="p">)</span>
@@ -168,13 +170,13 @@
       <span class="n">fileName</span> <span class="o">=</span> <span class="bp">None</span>
       
     <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">appBase</span><span class="o">.</span><span class="n">applicationVersion</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span>
     
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;feedback&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feedback</span>
     
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;organisation&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">):</span>
       <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
-      
+
     <span class="k">if</span> <span class="n">fileName</span><span class="p">:</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">Url</span><span class="o">.</span><span class="n">uploadFile</span><span class="p">(</span><span class="n">SCRIPT_URL</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -190,12 +192,24 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Failure&#39;</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Problem submitting feedback&#39;</span>
-      
-    <span class="n">info</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span>
-          <span class="n">msg</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
       
     <span class="c1">#print(response)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+
+  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+  <span class="n">popup</span> <span class="o">=</span> <span class="n">FeedbackPopup</span><span class="p">()</span>
+
+  <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+  <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+
 
 </pre></div>
 

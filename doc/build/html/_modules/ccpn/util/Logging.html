@@ -80,9 +80,14 @@
 
 
 <span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">DEBUG1</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>  <span class="c1"># = 10</span>
+<span class="n">DEBUG2</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">DEBUG3</span> <span class="o">=</span> <span class="mi">8</span>
 
 <span class="n">defaultLogLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
 <span class="c1"># defaultLogLevel = logging.DEBUG</span>
@@ -115,10 +120,15 @@
 
   <span class="k">return</span> <span class="n">logger</span></div>
 
+<span class="k">def</span> <span class="nf">_debug2</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="createLogger"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Logging.createLogger">[docs]</a><span class="k">def</span> <span class="nf">createLogger</span><span class="p">(</span><span class="n">loggerName</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_debug3</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="createLogger"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Logging.createLogger">[docs]</a><span class="k">def</span> <span class="nf">createLogger</span><span class="p">(</span><span class="n">loggerName</span><span class="p">,</span> <span class="n">memopsRoot</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span>
                  <span class="n">removeOldLogsDays</span><span class="o">=</span><span class="n">MAX_LOG_FILE_DAYS</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Return a (unique) logger for this project and with given programName, if any.</span>
+  <span class="sd">&quot;&quot;&quot;Return a (unique) logger for this memopsRoot and with given programName, if any.</span>
 <span class="sd">     Puts log output into a log file but also optionally can have output go to</span>
 <span class="sd">     another, specified, stream (e.g. a console)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -127,8 +137,9 @@
 
   <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="s1">&#39;for now mode must be &quot;a&quot; or &quot;w&quot;&#39;</span>
 
+  <span class="c1">#TODO: remove Api calls</span>
   <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
-  <span class="n">repositoryPath</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">getRepositoryPath</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span><span class="p">)</span>
+  <span class="n">repositoryPath</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">getRepositoryPath</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span><span class="p">)</span>
   <span class="n">logDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
 
   <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
@@ -169,6 +180,13 @@
     <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
     <span class="n">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
+  <span class="n">logger</span><span class="o">.</span><span class="n">debug1</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug</span>
+  <span class="n">logger</span><span class="o">.</span><span class="n">debug2</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug2</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+  <span class="n">logger</span><span class="o">.</span><span class="n">debug3</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_debug3</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+
+  <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG2</span><span class="p">,</span> <span class="s1">&#39;DEBUG2&#39;</span><span class="p">)</span>
+  <span class="n">logging</span><span class="o">.</span><span class="n">addLevelName</span><span class="p">(</span><span class="n">DEBUG3</span><span class="p">,</span> <span class="s1">&#39;DEBUG3&#39;</span><span class="p">)</span>
+
   <span class="k">return</span> <span class="n">logger</span></div>
 
 <span class="k">def</span> <span class="nf">_setupHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
@@ -177,8 +195,8 @@
   <span class="c1"># handler = logging.StreamHandler(stream)</span>
   <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
-  <span class="c1">#format = &#39;%(levelname)s:%(module)s:%(funcName)s:%(asctime)s:%(message)s&#39;</span>
-  <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="s1">:</span><span class="si">%(module)s</span><span class="s1">:</span><span class="si">%(funcName)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+  <span class="c1">#format = &#39;%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s&#39;</span>
+  <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(levelname)-7s</span><span class="s1">: </span><span class="si">%(module)s</span><span class="s1">.</span><span class="si">%(funcName)s</span><span class="s1"> : </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
   <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format</span><span class="p">)</span>
   <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 

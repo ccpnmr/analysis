@@ -63,6 +63,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.util.nef.html">ccpn.util.nef package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#ccpn-util-nef-ccpn-module">ccpn.util.nef.Ccpn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#ccpn-util-nef-cingccpn-module">ccpn.util.nef.CingCcpn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.GenericStarParser">ccpn.util.nef.GenericStarParser module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ccpn.util.nef.html#reading-behaviour">Reading behaviour</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ccpn.util.nef.html#writing-behaviour">Writing behaviour</a></li>
@@ -71,6 +73,12 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.Specification">ccpn.util.nef.Specification module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.StarIo">ccpn.util.nef.StarIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.StarTokeniser">ccpn.util.nef.StarTokeniser module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ccpn.util.v2io.html">ccpn.util.v2io package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.v2io.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.v2io.html#module-ccpn.util.v2io.Constants">ccpn.util.v2io.Constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.v2io.html#ccpn-util-v2io-nefio-module">ccpn.util.v2io.NefIo module</a></li>
 </ul>
 </li>
 </ul>
@@ -161,7 +169,7 @@ location of the repository.</p>
 <p>Miscellaneous common utilities</p>
 <dl class="class">
 <dt id="ccpn.util.Common.LocalFormatter">
-<em class="property">class </em><code class="descclassname">ccpn.util.Common.</code><code class="descname">LocalFormatter</code><span class="sig-paren">(</span><em>overrideFloatFormat: str = '.6g'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#LocalFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.LocalFormatter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.Common.</code><code class="descname">LocalFormatter</code><span class="sig-paren">(</span><em>overrideFloatFormat='.6g'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#LocalFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.LocalFormatter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">string.Formatter</span></code></p>
 <p>Overrides the string formatter to change the float formatting</p>
 <dl class="method">
@@ -173,7 +181,7 @@ location of the repository.</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.axisCodeMapping">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMapping</code><span class="sig-paren">(</span><em>axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMapping" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMapping</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>refAxisCodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>get {axisCode:refAxisCode} mapping dictionary
 all axisCodes must match, or dictionary will be empty
 NB a series of single-letter axisCodes (e.g. &#8216;N&#8217;, &#8216;HCN&#8217;) can be passed in as a string</p>
@@ -181,19 +189,19 @@ NB a series of single-letter axisCodes (e.g. &#8216;N&#8217;, &#8216;HCN&#8217;)
 
 <dl class="function">
 <dt id="ccpn.util.Common.axisCodeMatch">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMatch</code><span class="sig-paren">(</span><em>axisCode: str, refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMatch" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMatch</code><span class="sig-paren">(</span><em>axisCode</em>, <em>refAxisCodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get refAxisCode that best matches axisCode</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.axisCodesCompare">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodesCompare</code><span class="sig-paren">(</span><em>code: str</em>, <em>code2: str</em>, <em>mismatch: int = 0</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodesCompare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodesCompare" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodesCompare</code><span class="sig-paren">(</span><em>code</em>, <em>code2</em>, <em>mismatch=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodesCompare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodesCompare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Score code, code2 for matching. Score is length of common prefix, or &#8216;mismatch&#8217; if None</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.checkIsotope">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">checkIsotope</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#checkIsotope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.checkIsotope" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">checkIsotope</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#checkIsotope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.checkIsotope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert isotope specifier string to most probable isotope code - defaulting to &#8216;1H&#8217;</p>
 <p>This function is intended for external format isotope specifications, <em>not</em> for
 axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
@@ -206,13 +214,13 @@ axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.dictionaryProduct">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">dictionaryProduct</code><span class="sig-paren">(</span><em>dict1: dict</em>, <em>dict2: dict</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/util/Common.html#dictionaryProduct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.dictionaryProduct" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">dictionaryProduct</code><span class="sig-paren">(</span><em>dict1</em>, <em>dict2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#dictionaryProduct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.dictionaryProduct" title="Permalink to this definition">¶</a></dt>
 <dd><p>multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.doAxisCodesMatch">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">doAxisCodesMatch</code><span class="sig-paren">(</span><em>axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Common.html#doAxisCodesMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.doAxisCodesMatch" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">doAxisCodesMatch</code><span class="sig-paren">(</span><em>axisCodes</em>, <em>refAxisCodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#doAxisCodesMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.doAxisCodesMatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return True if axisCodes match refAxisCodes else False</p>
 </dd></dl>
 
@@ -224,7 +232,7 @@ axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.getTimeStamp">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">getTimeStamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#getTimeStamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.getTimeStamp" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">getTimeStamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#getTimeStamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.getTimeStamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get iso-formtted timestamp</p>
 </dd></dl>
 
@@ -236,13 +244,13 @@ axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.incrementName">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">incrementName</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#incrementName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.incrementName" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">incrementName</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#incrementName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.incrementName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add &#8216;_1&#8217; to name or change suffix &#8216;_n&#8217; to &#8216;_(n+1)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.isClose">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">isClose</code><span class="sig-paren">(</span><em>a: float</em>, <em>b: float</em>, <em>relTolerance: float = 1e-05</em>, <em>absTolerance=1e-08</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Common.html#isClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isClose" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">isClose</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>relTolerance=1e-05</em>, <em>absTolerance=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#isClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isClose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Are a and b identical within reasonable floating point tolerance?
 Uses sum of relative (relTolerance) and absolute (absTolerance) difference</p>
 <p>Inspired by numpy.isclose()</p>
@@ -255,12 +263,12 @@ Uses sum of relative (relTolerance) and absolute (absTolerance) difference</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.isotopeCode2Nucleus">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">isotopeCode2Nucleus</code><span class="sig-paren">(</span><em>isotopeCode: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#isotopeCode2Nucleus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isotopeCode2Nucleus" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">isotopeCode2Nucleus</code><span class="sig-paren">(</span><em>isotopeCode=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#isotopeCode2Nucleus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isotopeCode2Nucleus" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.name2ElementSymbol">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2ElementSymbol</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2ElementSymbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2ElementSymbol" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2ElementSymbol</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#name2ElementSymbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2ElementSymbol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get standard element symbol matching name or axisCode</p>
 <p>NB, the first letter takes precedence, so e.g. &#8216;CD&#8217; returns &#8216;C&#8217; (carbon)
 rather than &#8216;CD&#8217; (Cadmium)</p>
@@ -268,7 +276,7 @@ rather than &#8216;CD&#8217; (Cadmium)</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.name2IsotopeCode">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2IsotopeCode</code><span class="sig-paren">(</span><em>name: str = None</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2IsotopeCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2IsotopeCode" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2IsotopeCode</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#name2IsotopeCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2IsotopeCode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get standard isotope code matching atom name or axisCode string</p>
 </dd></dl>
 
@@ -295,7 +303,7 @@ the ones encountered first on the pythonPath</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.reorder">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">reorder</code><span class="sig-paren">(</span><em>values: Sequence[T_co], axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/Common.html#reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.reorder" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">reorder</code><span class="sig-paren">(</span><em>values</em>, <em>axisCodes</em>, <em>refAxisCodes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.reorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>reorder values in axisCode order to refAxisCode order, by matching axisCodes</p>
 <p>NB, the result will be the length of refAxisCodes, with additional Nones inserted
 if this is longer than the values.</p>
@@ -304,20 +312,14 @@ if this is longer than the values.</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.splitIntFromChars">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">splitIntFromChars</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#splitIntFromChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.splitIntFromChars" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">splitIntFromChars</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#splitIntFromChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.splitIntFromChars" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string with a leading integer optionally followed by characters
 into an (integer,string) tuple</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.util.Common.stringToIdentifier">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">stringToIdentifier</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#stringToIdentifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.stringToIdentifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert string to identifier, replacing non-alphanumeric values by underscore</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="ccpn.util.Common.stringifier">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">stringifier</code><span class="sig-paren">(</span><em>*fields</em>, <em>*</em>, <em>floatFormat: str = None</em><span class="sig-paren">)</span> &rarr; Callable[[object], str]<a class="reference internal" href="../_modules/ccpn/util/Common.html#stringifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.stringifier" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">stringifier</code><span class="sig-paren">(</span><em>*fields</em>, <em>**options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#stringifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.stringifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get stringifier function, that will format an object x according to</p>
 <p>&lt;str(x): field1=x.field1, field2=x.field2, ...&gt;</p>
 <p>All floating point values encountered will be formatted according to floatFormat</p>
@@ -325,7 +327,7 @@ into an (integer,string) tuple</p>
 
 <dl class="function">
 <dt id="ccpn.util.Common.uniquify">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">uniquify</code><span class="sig-paren">(</span><em>sequence: Sequence[T_co]</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/Common.html#uniquify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.uniquify" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">uniquify</code><span class="sig-paren">(</span><em>sequence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#uniquify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.uniquify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get list of unique elements in sequence, in order of first appearance</p>
 </dd></dl>
 
@@ -512,8 +514,8 @@ function that supports the same signature (like copy()) can be used.</p>
 <p>CCPN logger handling</p>
 <dl class="function">
 <dt id="ccpn.util.Logging.createLogger">
-<code class="descclassname">ccpn.util.Logging.</code><code class="descname">createLogger</code><span class="sig-paren">(</span><em>loggerName</em>, <em>project</em>, <em>stream=None</em>, <em>level=None</em>, <em>mode='a'</em>, <em>removeOldLogsDays=7</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Logging.html#createLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Logging.createLogger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a (unique) logger for this project and with given programName, if any.
+<code class="descclassname">ccpn.util.Logging.</code><code class="descname">createLogger</code><span class="sig-paren">(</span><em>loggerName</em>, <em>memopsRoot</em>, <em>stream=None</em>, <em>level=None</em>, <em>mode='a'</em>, <em>removeOldLogsDays=7</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Logging.html#createLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Logging.createLogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a (unique) logger for this memopsRoot and with given programName, if any.
 Puts log output into a log file but also optionally can have output go to
 another, specified, stream (e.g. a console)</p>
 </dd></dl>
@@ -988,8 +990,8 @@ and you cannot add new columns with data that match only part of the existing ro
 <dl class="method">
 <dt id="ccpn.util.StructureData.EnsembleData.addRow">
 <code class="descname">addRow</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.addRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.addRow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add row with values matching kwargs, setting index to next available index</p>
-<p>See setValues for details</p>
+<dd><p>Add row with values matching kwargs, setting index to next available index
+See setValues for details</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1032,6 +1034,49 @@ uses custom sort <em>for all strings</em> so that e.g. &#8216;&#64;3&#8217; come
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.util.StructureData.EnsembleData.deleteCol">
+<code class="descname">deleteCol</code><span class="sig-paren">(</span><em>columnName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteCol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteCol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a named column from the table, the columnName must be a string and exist in the table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>columnName</strong> &#8211; name of the column</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.StructureData.EnsembleData.deleteRow">
+<code class="descname">deleteRow</code><span class="sig-paren">(</span><em>rowNumber</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a numbered row of the table.
+Row must be an integer and exist in the table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rowNumber</strong> &#8211; row to delete</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.StructureData.EnsembleData.deleteSelectedRows">
+<code class="descname">deleteSelectedRows</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.deleteSelectedRows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.deleteSelectedRows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete rows identified by selector.
+For example (index=&#8216;1, 2, 6-7, 9&#8217;)</p>
+<blockquote>
+<div>(modelNumbers=&#8216;1, 2&#8217;) or
+(residueNames=&#8217;LEU, THR&#8217;)</div></blockquote>
+<p>In the cases of the reserved columns, the name may need to be plural for deletion</p>
+<p>e.g. above, the column headed modelNumberm ay be accessed as &#8216;modelNumbers&#8217;</p>
+<p><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: All keyword-value arguments are passed to the selector function.</p>
+<p>Selector created, e.g. by self.selector)</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.util.StructureData.EnsembleData.extract">
 <code class="descname">extract</code><span class="sig-paren">(</span><em>selector: pandas.core.series.Series = None</em>, <em>*columnNames: str</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.util.StructureData.EnsembleData<a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.extract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts a copy of a subset of atoms from the EnsembleData</p>
@@ -1041,10 +1086,10 @@ uses custom sort <em>for all strings</em> so that e.g. &#8216;&#64;3&#8217; come
 <dt>selector</dt>
  <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given, the keyword arguments are passed on to the selector
 function and used to make a selector to use.</dd>
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>columnNames: All positional arguments indicate the columns to extract.</dt>
+<dt><a href="#id3"><span class="problematic" id="id4">*</span></a>columnNames: All positional arguments indicate the columns to extract.</dt>
 <dd>If there are no columnNames, all columns are extracted.</dd>
 </dl>
-<p><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: ALl keyword-value arguments are passed to the selector function.</p>
+<p><a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: All keyword-value arguments are passed to the selector function.</p>
 </div></blockquote>
 <p>Returns a new EnsembleData</p>
 </dd></dl>
@@ -1052,7 +1097,7 @@ function and used to make a selector to use.</dd>
 <dl class="classmethod">
 <dt id="ccpn.util.StructureData.EnsembleData.from_pdb">
 <em class="property">classmethod </em><code class="descname">from_pdb</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.from_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.from_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an EnsembleData from a Pandas DataFrame representing a pdb file</p>
+<dd><p>Create an EnsembleData from a pdb file.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1083,7 +1128,7 @@ Val: Both Cg&#8217;s and attached protons</dd>
 
 <dl class="method">
 <dt id="ccpn.util.StructureData.EnsembleData.reset_index">
-<code class="descname">reset_index</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.reset_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.reset_index" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reset_index</code><span class="sig-paren">(</span><em>*args</em>, <em>*</em>, <em>inplace=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/StructureData.html#EnsembleData.reset_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.EnsembleData.reset_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>reset_index - overridden to generate index starting at one.</p>
 </dd></dl>
 
@@ -1118,6 +1163,12 @@ matching row</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.StructureData.averageStructure">
+<code class="descclassname">ccpn.util.StructureData.</code><code class="descname">averageStructure</code><span class="sig-paren">(</span><em>ensemble: ccpn.util.StructureData.EnsembleData</em><span class="sig-paren">)</span> &rarr; ccpn.util.StructureData.EnsembleData<a class="reference internal" href="../_modules/ccpn/util/StructureData.html#averageStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.StructureData.averageStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the average structure from all the models in an EnsembleData object.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1290,7 +1341,7 @@ zz component of tensor</p>
 <p>General undo handle supporting undo/redo stack</p>
 <dl class="class">
 <dt id="ccpn.util.Undo.Undo">
-<em class="property">class </em><code class="descclassname">ccpn.util.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=99</em>, <em>maxOperations=10000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.deque</span></code></p>
 <p>Implementation of an undo and redo stack, with possibility of waypoints.
 A waypoint is the level at which an undo happens, and each of them could
@@ -1330,8 +1381,20 @@ Allows multiple external functions to set blocking without trampling each other<
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.util.Undo.Undo.decreaseWaypointBlocking">
+<code class="descname">decreaseWaypointBlocking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.decreaseWaypointBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.decreaseWaypointBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce level of blocking - when level reaches zero, undo is unblocked</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.util.Undo.Undo.increaseBlocking">
 <code class="descname">increaseBlocking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.increaseBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.increaseBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set one more level of blocking</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Undo.Undo.increaseWaypointBlocking">
+<code class="descname">increaseWaypointBlocking</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.increaseWaypointBlocking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.increaseWaypointBlocking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set one more level of blocking</p>
 </dd></dl>
 
@@ -1361,6 +1424,15 @@ Allows multiple external functions to set blocking without trampling each other<
 <p>For now errors are handled by printing a warning and clearing the undo object</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.util.Undo.Undo.waypointBlocking">
+<code class="descname">waypointBlocking</code><a class="headerlink" href="#ccpn.util.Undo.Undo.waypointBlocking" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Undo blocking. If true (non-zero) undo setting is blocked.
+Allows multiple external functions to set blocking without trampling each other</p>
+<p>Modify with increaseBlocking/decreaseBlocking only</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
@@ -1371,7 +1443,7 @@ Allows multiple external functions to set blocking without trampling each other<
 
 <dl class="function">
 <dt id="ccpn.util.Undo.resetUndo">
-<code class="descclassname">ccpn.util.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=99</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set or reset undo stack, using passed-in parameters.
 NB setting either parameter to 0 removes the undo stack.</p>
 </dd></dl>

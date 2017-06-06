@@ -83,7 +83,6 @@
 
 <div class="viewcode-block" id="CcpnGridItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem">[docs]</a><span class="k">class</span> <span class="nc">CcpnGridItem</span><span class="p">(</span><span class="n">UIGraphicsItem</span><span class="p">):</span>
 
-
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gridColour</span><span class="p">):</span>
         <span class="n">UIGraphicsItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="o">=</span> <span class="bp">None</span>
@@ -93,13 +92,14 @@
         <span class="n">UIGraphicsItem</span><span class="o">.</span><span class="n">viewRangeChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="o">=</span> <span class="bp">None</span></div>
 
-<div class="viewcode-block" id="CcpnGridItem.paint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+<div class="viewcode-block" id="CcpnGridItem.viewTransformChanged"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.viewTransformChanged">[docs]</a>    <span class="k">def</span> <span class="nf">viewTransformChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>                 <span class="c1"># ejb - causes a redraw when new strip added</span>
+        <span class="n">UIGraphicsItem</span><span class="o">.</span><span class="n">viewTransformChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="o">=</span> <span class="bp">None</span></div>
 
+<div class="viewcode-block" id="CcpnGridItem.paint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">generatePicture</span><span class="p">()</span>
         <span class="n">p</span><span class="o">.</span><span class="n">drawPicture</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">picture</span><span class="p">)</span></div>
-
-
 
 <div class="viewcode-block" id="CcpnGridItem.generatePicture"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnGridItem.CcpnGridItem.generatePicture">[docs]</a>    <span class="k">def</span> <span class="nf">generatePicture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">picture</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPicture</span><span class="p">()</span>
@@ -130,7 +130,7 @@
             <span class="n">nl</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span>
 
             <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>  <span class="c1">## Draw grid for both axes</span>
-                <span class="n">ppl</span> <span class="o">=</span> <span class="n">dim</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">/</span> <span class="n">nl</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span>
+                <span class="n">ppl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">dim</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">/</span> <span class="n">nl</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="p">)</span>                      <span class="c1"># ejb</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">3.</span><span class="o">*</span><span class="p">(</span><span class="n">ppl</span><span class="o">-</span><span class="mi">3</span><span class="p">),</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">==</span> <span class="s1">&#39;#f7ffff&#39;</span><span class="p">:</span>
                   <span class="n">linePen</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">247</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>

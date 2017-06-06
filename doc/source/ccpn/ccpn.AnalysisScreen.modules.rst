@@ -9,14 +9,6 @@ ccpn.AnalysisScreen.modules package
 Submodules
 ----------
 
-ccpn.AnalysisScreen.modules.Display1DWidget module
---------------------------------------------------
-
-.. automodule:: ccpn.AnalysisScreen.modules.Display1DWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisScreen.modules.MixtureAnalysis module
 --------------------------------------------------
 

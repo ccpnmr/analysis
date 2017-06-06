@@ -47,7 +47,9 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.lib.SpectrumDisplay</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span></span><span class="c1">#TODO:GEERTEN: Move to other places, like SpectrumDisplay or Strip</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
@@ -56,7 +58,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">navigateToNmrAtomsInStrip</span>
 
 <div class="viewcode-block" id="navigateToPeakPosition"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.SpectrumDisplay.navigateToPeakPosition">[docs]</a><span class="k">def</span> <span class="nf">navigateToPeakPosition</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">peak</span><span class="p">:</span><span class="n">Peak</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-   <span class="n">selectedDisplays</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">GuiSpectrumDisplay</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="p">:</span><span class="s1">&#39;GuiStrip&#39;</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+   <span class="n">selectedDisplays</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">GuiSpectrumDisplay</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="p">:</span><span class="n">GuiStrip</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays</span>
 <span class="sd">  to the positions specified by the peak.</span>

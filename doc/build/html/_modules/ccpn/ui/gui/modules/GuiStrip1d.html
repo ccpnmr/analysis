@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -86,9 +85,70 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 
 <div class="viewcode-block" id="GuiStrip1d"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d">[docs]</a><span class="k">class</span> <span class="nc">GuiStrip1d</span><span class="p">(</span><span class="n">GuiStrip</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Main Strip for 1d spectra object</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">GuiStrip</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="sd">  This module inherits the following attributes from the Strip wrapper class:</span>
+
+<span class="sd">  serial          serial number of Strip, used in Pid and to identify the Strip</span>
+<span class="sd">                    :return &lt;str&gt;</span>
+<span class="sd">  axisCodes         Fixed string Axis codes in original display order</span>
+<span class="sd">                      :return &lt;tuple&gt;:(X, Y, Z1, Z2, ...)</span>
+<span class="sd">  axisOrder         String Axis codes in display order, determine axis display order</span>
+<span class="sd">                      axisOrder = &lt;sequence&gt;:(X, Y, Z1, Z2, ...)</span>
+<span class="sd">                      :return &lt;tuple&gt;:(X, Y, Z1, Z2, ...)</span>
+<span class="sd">  positions         Axis centre positions, in display order</span>
+<span class="sd">                      positions = &lt;Tuple&gt;</span>
+<span class="sd">                      :return &lt;Tuple&gt;:(&lt;float&gt;, ...)</span>
+<span class="sd">  widths            Axis display widths, in display order</span>
+<span class="sd">                      widths = &lt;Tuple&gt;</span>
+<span class="sd">                      :return &lt;Tuple&gt;:(&lt;float&gt;, ...)</span>
+<span class="sd">  units             Axis units, in display order</span>
+<span class="sd">                      :return &lt;Tuple&gt;</span>
+<span class="sd">  spectra           List of the spectra attached to the strip</span>
+<span class="sd">                    (whether display is currently turned on or not)</span>
+<span class="sd">                      :return &lt;Tuple&gt;:(&lt;Spectrum&gt;, ...)</span>
+
+<span class="sd">  delete            Delete a strip</span>
+<span class="sd">  clone             Create new strip that duplicates this one, appending it at the end</span>
+<span class="sd">  moveTo            Move strip to index newIndex in orderedStrips</span>
+<span class="sd">                      moveTo(newIndex:int)</span>
+<span class="sd">                        :param newIndex:&lt;int&gt; new index position</span>
+<span class="sd">  resetAxisOrder    Reset display to original axis order</span>
+<span class="sd">  findAxis          Find axis</span>
+<span class="sd">                      findAxis(axisCode)</span>
+<span class="sd">                        :param axisCode:</span>
+<span class="sd">                        :return axis</span>
+<span class="sd">  displaySpectrum   Display additional spectrum on strip, with spectrum axes ordered according to axisOrder</span>
+<span class="sd">                      displaySpectrum(spectrum:Spectrum, axisOrder:Sequence=()</span>
+<span class="sd">                        :param spectrum:&lt;Spectrum&gt; additional spectrum to display</span>
+<span class="sd">                        :param axisOrder:&lt;Sequence&gt;=() new axis ordering</span>
+<span class="sd">  peakIsInPlane     Return whether the peak is in currently displayed planes for strip</span>
+<span class="sd">                      peakIsInPlane(peak:Peak)</span>
+<span class="sd">                        :param peak:&lt;Peak&gt; peak of interest</span>
+<span class="sd">                        :return &lt;bool&gt;</span>
+<span class="sd">  peakIsInFlankingPlane   Return whether the peak is in planes flanking currently displayed planes for strip</span>
+<span class="sd">                            peakIsInFlankingPlane(peak:Peak)</span>
+<span class="sd">                              :param peak:&lt;Peak&gt; peak of interest</span>
+<span class="sd">                              :return &lt;bool&gt;</span>
+<span class="sd">  peakPickPosition  Pick peak at position for all spectra currently displayed in strip</span>
+<span class="sd">                      peakPickPosition(position:List[float])</span>
+<span class="sd">                        :param position:&lt;List&gt; coordinates to test</span>
+<span class="sd">                        :return &lt;Tuple&gt;:(&lt;Peak&gt;, ...)</span>
+<span class="sd">  peakPickRegion    Peak pick all spectra currently displayed in strip in selectedRegion</span>
+<span class="sd">                      selectedRegion:List[List[float])</span>
+<span class="sd">                        :param selectedRegion:&lt;List&gt;  of &lt;List&gt; of coordinates to test</span>
+<span class="sd">                        :return &lt;Tuple&gt;:(&lt;Peak&gt;, ...)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialise Nd spectra object</span>
+
+<span class="sd">    :param spectrumDisplay Main spectrum display Module object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">GuiStrip</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumDisplay</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">invertX</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gridShown</span> <span class="o">=</span> <span class="bp">True</span>
@@ -98,16 +158,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spectrumIndex</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakItems</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># below causes a problem because wrapper not ready yet at this point</span>
-    <span class="c1">#for spectrumView in self.spectrumViews:</span>
-    <span class="c1">#  spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],</span>
-    <span class="c1">#                        spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,</span>
-    <span class="c1">#                        strip=self)</span>
-
-
-  <span class="c1"># def _printToFile(self, printer):</span>
-  <span class="c1">#   self.showExportDialog()</span>
-    <span class="c1"># raise Exception(&#39;1D printing not enabled yet&#39;)</span>
     
   <span class="k">def</span> <span class="nf">_get1dContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Menu</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -136,7 +186,6 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">gridAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridAction</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-    <span class="c1"># self.contextMenu.addItem(&quot;Print&quot;, callback=self.raisePrintMenu)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Print to File...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showExportDialog</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">navigateToMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s1">&#39;Navigate To&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span>
@@ -160,29 +209,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">childrenBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">()</span>
     <span class="n">x1</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">childrenBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
-    <span class="n">padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">stripRegionPadding</span>
+    <span class="n">padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">stripRegionPadding</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">setXRange</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">)</span></div>
 
-  <span class="c1"># def showPeaks(self, peakList:PeakList, peaks=None):</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   Displays peaks in specified peaklist in the strip.</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   if not peaks:</span>
-  <span class="c1">#     peaks = peakList.peaks</span>
-  <span class="c1">#</span>
-  <span class="c1">#   peakListView = self._findPeakListView(peakList)</span>
-  <span class="c1">#   if not peakListView:</span>
-  <span class="c1">#     return</span>
-  <span class="c1">#</span>
-  <span class="c1">#   peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]</span>
-  <span class="c1">#   self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)</span>
-
-  <span class="c1"># def hidePeaks(self, peakList:PeakList):</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   Hides peaks in specified peaklist from strip.</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   peakListView = self._findPeakListView(peakList)</span>
-  <span class="c1">#   peakListView.setVisible(False)</span>
 
   <span class="k">def</span> <span class="nf">_findPeakListView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">):</span>
 
@@ -230,8 +259,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

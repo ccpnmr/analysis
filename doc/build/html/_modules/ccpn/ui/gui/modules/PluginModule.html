@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -102,14 +101,14 @@
 
 <div class="viewcode-block" id="PluginModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PluginModule.PluginModule">[docs]</a><span class="k">class</span> <span class="nc">PluginModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interactor</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interactor</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span> <span class="o">=</span> <span class="n">interactor</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">interactor</span><span class="o">.</span><span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">interactor</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">interactor</span><span class="o">.</span><span class="n">PLUGINNAME</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_populateMainWidget</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">interactor</span><span class="o">.</span><span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -170,6 +169,10 @@
     <span class="n">pgDockArea</span> <span class="o">=</span> <span class="n">DockArea</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">pgDockArea</span><span class="p">)</span>
 
+    <span class="c1"># layout = QtGui.QGridLayout()      # ejb</span>
+    <span class="c1"># layout.setContentsMargins(15,15,15,15)</span>
+    <span class="c1"># self.qtMainWindow.setLayout(layout)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">pgDock</span> <span class="o">=</span> <span class="n">Dock</span><span class="p">(</span><span class="s2">&quot;Dock&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
     <span class="n">pgDockArea</span><span class="o">.</span><span class="n">addDock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pgDock</span><span class="p">)</span>
 
@@ -183,10 +186,13 @@
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
   <span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="kn">import</span> <span class="n">Mock</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CcpnModuleArea</span> <span class="kn">import</span> <span class="n">CcpnModuleArea</span>
 
   <span class="n">qtTestHarness</span> <span class="o">=</span> <span class="n">TestQt</span><span class="p">()</span>
 
   <span class="n">application</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+  <span class="c1"># application = TestApplication()</span>
   <span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;light&#39;</span>  <span class="c1"># HACK!!!</span>
   <span class="n">qtTestHarness</span><span class="o">.</span><span class="n">qtApp</span><span class="o">.</span><span class="n">_ccpnApplication</span> <span class="o">=</span> <span class="n">application</span>
 
@@ -325,8 +331,26 @@
     <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Run clicked, &#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
   <span class="n">interactor</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">run</span>
 
-  <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">PluginModule</span><span class="p">(</span><span class="n">interactor</span><span class="p">)</span>
+  <span class="n">qtTestHarness</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="n">CcpnModuleArea</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">qtTestHarness</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="p">)</span>
+  <span class="c1"># print(&#39;GuiMainWindow.moduleArea: layout:&#39;, qtTestHarness.qtMainWindow.moduleArea.layout)  ## pyqtgraph object</span>
+  <span class="c1"># qtTestHarness.qtMainWindow.moduleArea.setGeometry(0, 0, 1000, 800)</span>
+  <span class="c1"># qtTestHarness.qtMainWindow.setCentralWidget(qtTestHarness.qtMainWindow.moduleArea)</span>
+
+  <span class="c1"># pluginModule = PluginModule(interactor)       # ejb - original line</span>
+
+  <span class="c1"># pluginModule = PluginModule(interactor=interactor</span>
+  <span class="c1">#                             , application=application</span>
+  <span class="c1">#                             , mainWindow=application.mainWindow)</span>
+
+  <span class="n">pluginModule</span> <span class="o">=</span> <span class="n">PluginModule</span><span class="p">(</span><span class="n">interactor</span><span class="o">=</span><span class="n">interactor</span>
+                              <span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="n">application</span>
+                              <span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">qtTestHarness</span><span class="o">.</span><span class="n">qtMainWindow</span><span class="p">)</span>
   <span class="n">qtTestHarness</span><span class="o">.</span><span class="n">showWidget</span><span class="p">(</span><span class="n">pluginModule</span><span class="p">)</span>
+
+  <span class="c1"># pluginModule.show()</span>
+  <span class="c1"># pluginModule.raise_()</span>
+
+  <span class="c1"># application.start()</span>
 </pre></div>
 
           </div>
@@ -358,8 +382,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

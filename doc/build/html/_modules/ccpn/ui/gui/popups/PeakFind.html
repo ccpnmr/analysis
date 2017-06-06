@@ -88,12 +88,16 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
 
 
-<div class="viewcode-block" id="PeakFindPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PeakFind.PeakFindPopup">[docs]</a><span class="k">class</span> <span class="nc">PeakFindPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="PeakFindPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PeakFind.PeakFindPopup">[docs]</a><span class="k">class</span> <span class="nc">PeakFindPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+<span class="c1"># class PeakFindPopup(QtGui.QDialog, Base):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">PeakFindPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="c1"># super(PeakFindPopup, self).__init__(parent)</span>
+    <span class="c1"># Base.__init__(self, **kw)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;PeakList: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectPeakList</span><span class="p">)</span>
@@ -120,8 +124,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">checkBox3</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateContents</span><span class="p">()</span>
 
-
-
     <span class="bp">self</span><span class="o">.</span><span class="n">buttonBox</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Find Peaks&#39;</span><span class="p">],</span>
                                 <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pickPeaks</span><span class="p">])</span>
 
@@ -130,25 +132,29 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateContents</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_pickPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">peakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span>
-    <span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">()]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minPositionBoxes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxPositionBoxes</span><span class="p">)]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_pickPeaks&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">peakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span>
+      <span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">()]</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minPositionBoxes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxPositionBoxes</span><span class="p">)]</span>
 
 
-    <span class="n">doPos</span><span class="o">=</span><span class="bp">True</span>
-    <span class="n">doNeg</span><span class="o">=</span><span class="bp">True</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBox1</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-      <span class="c1"># Positive only</span>
-      <span class="n">doNeg</span><span class="o">=</span><span class="bp">False</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBox2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-      <span class="c1"># negative only</span>
-      <span class="n">doPos</span><span class="o">=</span><span class="bp">False</span>
-    <span class="c1"># Checking the third box turns the others off and sets both. Hence default</span>
-    <span class="n">peakList</span><span class="o">.</span><span class="n">pickPeaksNd</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">doPos</span><span class="o">=</span><span class="n">doPos</span><span class="p">,</span> <span class="n">doNeg</span><span class="o">=</span><span class="n">doNeg</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
+      <span class="n">doPos</span><span class="o">=</span><span class="bp">True</span>
+      <span class="n">doNeg</span><span class="o">=</span><span class="bp">True</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBox1</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="c1"># Positive only</span>
+        <span class="n">doNeg</span><span class="o">=</span><span class="bp">False</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBox2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="c1"># negative only</span>
+        <span class="n">doPos</span><span class="o">=</span><span class="bp">False</span>
+      <span class="c1"># Checking the third box turns the others off and sets both. Hence default</span>
+      <span class="n">peakList</span><span class="o">.</span><span class="n">pickPeaksNd</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">doPos</span><span class="o">=</span><span class="n">doPos</span><span class="p">,</span> <span class="n">doNeg</span><span class="o">=</span><span class="n">doNeg</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-      <span class="n">strip</span><span class="o">.</span><span class="n">showPeaks</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">showPeaks</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_updateContents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 

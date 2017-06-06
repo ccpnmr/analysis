@@ -47,9 +47,17 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.nef.StarTokeniser</h1><div class="highlight"><pre>
-<span></span><span class="c1">#=========================================================================================</span>
+<span></span><span class="c1"># encoding: utf-8</span>
+
+<span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
                <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
@@ -154,14 +162,6 @@
 <span class="c1"># Compiled form of _REGEX</span>
 <span class="n">_star_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">_REGEX</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span>
 
-<span class="c1"># # Names of token types in order matching the group numbers returned from _REGEX</span>
-<span class="c1"># # NB must be kept synchronised with _REGEX</span>
-<span class="c1"># _DESCRIPTIVE_TOKEN_TYPES = [</span>
-<span class="c1">#         &quot;&quot;, &quot;MULTILINE&quot;, &quot;COMMENT&quot;, &quot;GLOBAL&quot;, &quot;SAVE_FRAME&quot;, &quot;SAVE_FRAME_REF&quot;,</span>
-<span class="c1">#         &quot;LOOP_STOP&quot;, &quot;DATA_BLOCK&quot;, &quot;LOOP&quot;, &quot;BAD_CONSTRUCT&quot;, &quot;DATA_NAME&quot;, &quot;SQUOTE_STRING&quot;,</span>
-<span class="c1">#         &quot;DQUOTE_STRING&quot;, &quot;NULL&quot;, &quot;UNKNOWN&quot;, &quot;SQUARE_BRACKET&quot;, &quot;STRING&quot;, &quot;BAD_TOKEN&quot; ]</span>
-
-
 <span class="c1"># Token types. NB numbers must be synced to regex - these are used directly!!!</span>
 <span class="n">TOKEN_MULTILINE</span>        <span class="o">=</span> <span class="mi">1</span>
 <span class="n">TOKEN_COMMENT</span>          <span class="o">=</span> <span class="mi">2</span>
@@ -184,13 +184,14 @@
 <span class="c1"># Rasmus Fogh, CCPN project 5/2/2016</span>
 <span class="c1"># # Modified Tokeniser to</span>
 <span class="c1"># - use namedtuples instead of custom objects</span>
-<span class="c1"># - to use descriptive token types instead of integer codes. LATER UNDONE</span>
 <span class="c1"># - to use a string input instead of a memory map (which gave string/byte conflict errors)</span>
 <span class="c1"># - to wrap the regex iterator without a wrapping class.</span>
 
 <span class="c1">#</span>
 <span class="n">StarToken</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;StarToken&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">))</span>
-<span class="n">StarToken</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;StarToken named tuple (with fields &#39;type&#39;, &#39;value&#39;) returned by the STAR token iterator&quot;</span>
+<span class="c1"># Removed for Python 2 compatibility:</span>
+<span class="c1"># StarToken.__doc__ = &quot;StarToken named tuple (with fields &#39;type&#39;, &#39;value&#39;)&quot;</span>
+<span class="c1"># &quot;returned by the STAR token iterator&quot;</span>
 
 <div class="viewcode-block" id="getTokenIterator"><a class="viewcode-back" href="../../../../ccpn/ccpn.util.nef.html#ccpn.util.nef.StarTokeniser.getTokenIterator">[docs]</a><span class="k">def</span> <span class="nf">getTokenIterator</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Iterator that returns an iterator over all STAR tokens in a generic STAR file&quot;&quot;&quot;</span>

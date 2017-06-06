@@ -48,27 +48,6 @@
             
   <h1>Source code for ccpn.AnalysisScreen.modules.ScreeningSettings</h1><div class="highlight"><pre>
 <span></span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PipelineModule</span> <span class="kn">import</span> <span class="n">GuiPipeline</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="c1"># from ccpn.AnalysisMetabolomics import GuiPipeLine as gp</span>
-
-
-<span class="n">pipelineFilesDirName</span> <span class="o">=</span> <span class="s1">&#39;/guiPipeline/&#39;</span>
-<span class="n">templates</span> <span class="o">=</span>   <span class="n">OrderedDict</span><span class="p">((</span>
-                          <span class="p">(</span><span class="s1">&#39;Wlogsy&#39;</span><span class="p">,</span> <span class="s1">&#39;WlogsyTemplate&#39;</span><span class="p">),</span>
-                          <span class="p">(</span><span class="s1">&#39;STD&#39;</span><span class="p">,</span> <span class="s1">&#39;STDTemplate&#39;</span><span class="p">),</span>
-                          <span class="p">(</span><span class="s1">&#39;Broadening1H&#39;</span><span class="p">,</span> <span class="s1">&#39;Broadening1HTemplate&#39;</span><span class="p">),</span>
-                          <span class="p">(</span><span class="s1">&#39;t1Rho&#39;</span><span class="p">,</span> <span class="s1">&#39;t1RhoTemplate&#39;</span><span class="p">),</span>
-                         <span class="p">))</span>
-
-
-<div class="viewcode-block" id="initialiseScreeningPipelineModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.ScreeningSettings.initialiseScreeningPipelineModule">[docs]</a><span class="k">def</span> <span class="nf">initialiseScreeningPipelineModule</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,):</span>
-  <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen</span> <span class="kn">import</span> <span class="n">guiPipeline</span> <span class="k">as</span> <span class="n">_pm</span>
-  <span class="n">pipelineMethods</span> <span class="o">=</span> <span class="n">_pm</span><span class="o">.</span><span class="n">__all__</span>
-  <span class="n">guiPipeline</span><span class="o">=</span> <span class="n">GuiPipeline</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="n">application</span><span class="p">,</span> <span class="n">pipelineMethods</span><span class="o">=</span><span class="n">pipelineMethods</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="n">templates</span><span class="p">)</span>
-  <span class="n">mainWindow</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-  <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">guiPipeline</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
@@ -93,6 +72,29 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
+
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PipelineModule</span> <span class="kn">import</span> <span class="n">GuiPipeline</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c1"># from ccpn.AnalysisMetabolomics import GuiPipeLine as gp</span>
+
+
+<span class="n">pipelineFilesDirName</span> <span class="o">=</span> <span class="s1">&#39;/guiPipeline/&#39;</span>
+<span class="n">templates</span> <span class="o">=</span>   <span class="n">OrderedDict</span><span class="p">((</span>
+                          <span class="p">(</span><span class="s1">&#39;Wlogsy&#39;</span><span class="p">,</span> <span class="s1">&#39;WlogsyTemplate&#39;</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;STD&#39;</span><span class="p">,</span> <span class="s1">&#39;STDTemplate&#39;</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;Broadening1H&#39;</span><span class="p">,</span> <span class="s1">&#39;Broadening1HTemplate&#39;</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;t1Rho&#39;</span><span class="p">,</span> <span class="s1">&#39;t1RhoTemplate&#39;</span><span class="p">),</span>
+                         <span class="p">))</span>
+
+
+<div class="viewcode-block" id="initialiseScreeningPipelineModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.ScreeningSettings.initialiseScreeningPipelineModule">[docs]</a><span class="k">def</span> <span class="nf">initialiseScreeningPipelineModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="p">):</span>
+  <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen</span> <span class="kn">import</span> <span class="n">guiPipeline</span> <span class="k">as</span> <span class="n">_pm</span>
+  <span class="n">pipelineMethods</span> <span class="o">=</span> <span class="n">_pm</span><span class="o">.</span><span class="n">__all__</span>
+  <span class="n">guiPipeline</span><span class="o">=</span> <span class="n">GuiPipeline</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">pipelineMethods</span><span class="o">=</span><span class="n">pipelineMethods</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="n">templates</span><span class="p">)</span>
+  <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">guiPipeline</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

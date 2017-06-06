@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -103,6 +102,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">GuiSpectrumView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span>
 
@@ -256,7 +257,7 @@
     <span class="c1">#v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">pixelViewBox0</span> <span class="o">+</span> <span class="p">(</span><span class="n">pixelViewBox1</span><span class="o">-</span><span class="n">pixelViewBox0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">p</span> <span class="o">%</span> <span class="n">xNumPoints</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xMinFrequency</span><span class="p">,</span> <span class="n">xMaxFrequency</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span> <span class="o">-</span> <span class="n">yintensity0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">yintensity1</span> <span class="o">-</span> <span class="n">yintensity0</span><span class="p">)</span>
   
-    <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#e4e15b&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span> <span class="k">else</span> <span class="s1">&#39;#000000&#39;</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#e4e15b&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span> <span class="k">else</span> <span class="s1">&#39;#000000&#39;</span>
     <span class="n">hTrace</span><span class="o">.</span><span class="n">setPen</span><span class="p">({</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="n">colour</span><span class="p">})</span>
     <span class="n">hTrace</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
       
@@ -314,8 +315,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

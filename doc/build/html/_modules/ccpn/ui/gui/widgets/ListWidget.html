@@ -47,15 +47,49 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.widgets.ListWidget</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">List widget</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ccpnmrJsonData</span>
 
 <div class="viewcode-block" id="ListWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget">[docs]</a><span class="k">class</span> <span class="nc">ListWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rightMouseCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="c1"># To be done more rigeriously later</span>
+  <span class="n">_styleSheet</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">  QListWidget {background-color: #f7ffff; </span>
+<span class="s2">               color: #122043; </span>
+<span class="s2">               font-weight: normal;</span>
+<span class="s2">               margin: 0px 0px 0px 0px;</span>
+<span class="s2">               padding: 2px 2px 2px 2px;</span>
+<span class="s2">               border: 1px solid #182548;</span>
+<span class="s2">               }</span>
+<span class="s2">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rightMouseCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
@@ -79,6 +113,8 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">SingleSelection</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">contextMenuItem</span> <span class="o">=</span> <span class="s1">&#39;Delete&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_styleSheet</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ListWidget.contextCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.contextCallback">[docs]</a>  <span class="k">def</span> <span class="nf">contextCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
@@ -104,6 +140,7 @@
 <div class="viewcode-block" id="ListWidget.getObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getObjects">[docs]</a>  <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="ListWidget.getSelectedObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getSelectedObjects">[docs]</a>  <span class="k">def</span> <span class="nf">getSelectedObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">indexes</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
@@ -112,6 +149,12 @@
       <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">objects</span></div>
+
+<div class="viewcode-block" id="ListWidget.getTexts"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getTexts">[docs]</a>  <span class="k">def</span> <span class="nf">getTexts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+      <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="ListWidget.selectObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.selectObject">[docs]</a>  <span class="k">def</span> <span class="nf">selectObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
@@ -126,7 +169,6 @@
 
 <div class="viewcode-block" id="ListWidget.removeItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.removeItem">[docs]</a>  <span class="k">def</span> <span class="nf">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">takeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentRow</span><span class="p">())</span></div>
-
 
 <div class="viewcode-block" id="ListWidget.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_mouse_button</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span>
@@ -144,15 +186,22 @@
 <span class="sd">    Raise the context menu</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContextMenu</span><span class="p">()</span>
-    <span class="n">menu</span><span class="o">.</span><span class="n">popup</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">())</span></div>
+    <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
+      <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+      <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ListWidget.getContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.getContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">getContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># FIXME this context menu must be more generic and editable</span>
     <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightMouseCallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">contextMenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">removeItem</span><span class="p">)</span>
+      <span class="n">contextMenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;Delete All&quot;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteAll</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">contextMenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">contextCallback</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">contextMenu</span></div>
+
+  <span class="k">def</span> <span class="nf">_deleteAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ListWidget.dragEnterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.ListWidget.ListWidget.dragEnterEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
@@ -177,9 +226,65 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="n">links</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="n">items</span><span class="p">)</span>
       <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div></div>
+
+      <span class="c1"># ejb - tried to fix transfer of CopyAction, but intermittent</span>
+      <span class="c1"># encodedData = event.mimeData().data(ccpnmrJsonData)</span>
+      <span class="c1"># stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)</span>
+      <span class="c1"># eventData = stream.readQVariantHash()</span>
+      <span class="c1">#</span>
+      <span class="c1"># items = []</span>
+      <span class="c1"># if event.source() != self: #otherwise duplicates</span>
+      <span class="c1">#   actionType = QtCore.Qt.CopyAction</span>
+      <span class="c1">#   if &#39;dragAction&#39; in eventData.keys():        # put these strings somewhere else</span>
+      <span class="c1">#     if eventData[&#39;dragAction&#39;] == &#39;copy&#39;:</span>
+      <span class="c1">#       actionType = QtCore.Qt.CopyAction             # ejb - changed from Move</span>
+      <span class="c1">#     elif eventData[&#39;dragAction&#39;] == &#39;move&#39;:</span>
+      <span class="c1">#       actionType = QtCore.Qt.MoveAction             # ejb - changed from Move</span>
+      <span class="c1">#</span>
+      <span class="c1">#   event.setDropAction(actionType)</span>
+      <span class="c1">#   self.emit(QtCore.SIGNAL(&quot;dropped&quot;), items)</span>
+      <span class="c1">#   super(ListWidget, self).dropEvent(event)</span>
+      <span class="c1"># else:</span>
+      <span class="c1">#   event.ignore()</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+
+  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+
+  <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span> <span class="s1">&#39;Float&#39;</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span><span class="p">,</span> <span class="s1">&#39;icon&#39;</span><span class="p">]</span>
+  <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Green&#39;</span><span class="p">]</span>
+  <span class="n">icons</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Icon</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#008000&#39;</span><span class="p">)]</span>
+
+  <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">callback2</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;callback2&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+
+  <span class="n">popup</span> <span class="o">=</span> <span class="n">BasePopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test PulldownList&#39;</span><span class="p">)</span>
+
+  <span class="c1"># policyDict = dict(</span>
+  <span class="c1">#   vAlign=&#39;top&#39;,</span>
+  <span class="c1">#   hPolicy=&#39;expanding&#39;,</span>
+  <span class="c1"># )</span>
+  <span class="c1"># policyDict = dict(</span>
+  <span class="c1">#   vAlign=&#39;top&#39;,</span>
+  <span class="c1">#   # hAlign=&#39;left&#39;,</span>
+  <span class="c1"># )</span>
+  <span class="c1"># policyDict = dict(</span>
+  <span class="c1">#   hAlign=&#39;left&#39;,</span>
+  <span class="c1"># )</span>
+  <span class="n">policyDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

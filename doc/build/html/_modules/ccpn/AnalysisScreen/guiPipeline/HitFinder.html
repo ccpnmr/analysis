@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.guiPipeline.HitFinder &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.guiPipeline.HitFinder</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">PipelineBox</span><span class="p">,</span> <span class="n">PipelineDropArea</span>
+
+
+<span class="n">WidgetSetters</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+                            <span class="p">(</span><span class="s1">&#39;CheckBox&#39;</span><span class="p">,</span>      <span class="s1">&#39;setChecked&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;PulldownList&#39;</span><span class="p">,</span>  <span class="s1">&#39;set&#39;</span>       <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;LineEdit&#39;</span><span class="p">,</span>      <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Label&#39;</span><span class="p">,</span>         <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;DoubleSpinbox&#39;</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Spinbox&#39;</span><span class="p">,</span>       <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Slider&#39;</span><span class="p">,</span>        <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;RadioButtons&#39;</span><span class="p">,</span>  <span class="s1">&#39;setIndex&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;TextEditor&#39;</span><span class="p">,</span>    <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                           <span class="p">])</span>
+
+<div class="viewcode-block" id="HitFinder"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.HitFinder.HitFinder">[docs]</a><span class="k">class</span> <span class="nc">HitFinder</span><span class="p">(</span><span class="n">PipelineBox</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">HitFinder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">PipelineBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">saveIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/save&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_setParams</span><span class="p">()</span>
+
+<div class="viewcode-block" id="HitFinder.methodName"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.HitFinder.HitFinder.methodName">[docs]</a>  <span class="k">def</span> <span class="nf">methodName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;Hit Finder&#39;</span></div>
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select experiment Type&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                            <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;STD&#39;</span><span class="p">,</span> <span class="s1">&#39;WLogsy&#39;</span><span class="p">,</span> <span class="s1">&#39;1H&#39;</span><span class="p">],</span>
+                                            <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                            <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Minimum Distance between two peaks (ppm)&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="mf">0.005</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLineEdit</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">showHitModuleLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Show Hit Module&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">showHitModuleCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeRadioButtons</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLabel</span> <span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLineEdit</span> <span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showHitModuleLabel</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showHitModuleCheckBox</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HitFinder.getWidgetsParams"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.HitFinder.HitFinder.getWidgetsParams">[docs]</a>  <span class="k">def</span> <span class="nf">getWidgetsParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">minimumDistanceLineEdit</span>  <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">experimentTypeRadioButtons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeRadioButtons</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()</span>
+    <span class="n">showHitModuleCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">showHitModuleCheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+                          <span class="p">(</span><span class="s1">&#39;minimumDistanceLineEdit&#39;</span><span class="p">,</span> <span class="n">minimumDistanceLineEdit</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;experimentTypeRadioButtons&#39;</span><span class="p">,</span> <span class="n">experimentTypeRadioButtons</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;showHitModuleCheckBox&#39;</span><span class="p">,</span> <span class="n">showHitModuleCheckBox</span><span class="p">),</span>
+                          <span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="HitFinder.runMethod"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.HitFinder.HitFinder.runMethod">[docs]</a>  <span class="k">def</span> <span class="nf">runMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running &#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">methodName</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_matchPosition</span><span class="p">()</span></div>
+    <span class="c1"># if self.showHitModuleCheckBox.isChecked():</span>
+    <span class="c1">#   self._showHitsModule()</span>
+
+
+<div class="viewcode-block" id="HitFinder.applicationsSpecific"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.HitFinder.HitFinder.applicationsSpecific">[docs]</a>  <span class="k">def</span> <span class="nf">applicationsSpecific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;AnalysisScreen&#39;</span><span class="p">,]</span></div>
+
+  <span class="k">def</span> <span class="nf">_setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">widgetName</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">widgetName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">WidgetSetters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+          <span class="n">setWidget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">WidgetSetters</span><span class="p">[</span><span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">])</span>
+          <span class="n">setWidget</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Value not set for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">. Insert it on the &quot;WidgetSetters&quot; dictionary &#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()))</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Impossible to restore </span><span class="si">%s</span><span class="s1"> value for </span><span class="si">%s</span><span class="s1">. Check paramas dictionary in getWidgetParams&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">widgetName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()))</span>
+
+  <span class="k">def</span> <span class="nf">_matchPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentTypeRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;STD&#39;</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.Screening</span> <span class="kn">import</span> <span class="n">matchSTDToReference</span>
+      <span class="n">matchSTDToReference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimumDistanceLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+
+
+
+  <span class="k">def</span> <span class="nf">_stdEfficency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">matchedPositions</span><span class="p">):</span>
+
+    <span class="n">efficiency</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">matchedPositions</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">onResPeak</span> <span class="ow">in</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">offResPeak</span> <span class="ow">in</span> <span class="n">spectrumOffResonancePeaks</span><span class="p">:</span>
+          <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mf">0.001</span> <span class="ow">and</span> <span class="n">offResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
+            <span class="n">differenceHeight</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+            <span class="n">fullValue</span> <span class="o">=</span> <span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">))</span><span class="o">/</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">fullValue</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;.01&#39;</span><span class="p">),</span> <span class="n">rounding</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">ROUND_DOWN</span><span class="p">)</span>
+            <span class="n">efficiency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">efficiency</span>
+
+  <span class="k">def</span> <span class="nf">_showHitsModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.ShowScreeningHits</span> <span class="kn">import</span> <span class="n">ShowScreeningHits</span>
+      <span class="n">showScreeningHits</span> <span class="o">=</span> <span class="n">ShowScreeningHits</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
+      <span class="n">showScreeningHitsModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">showScreeningHits</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+      <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">neighbor</span><span class="o">=</span><span class="n">showScreeningHitsModule</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">guiWindow</span><span class="o">.</span><span class="n">deleteBlankDisplay</span><span class="p">()</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
+
+      <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">currentDisplayed</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+        <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

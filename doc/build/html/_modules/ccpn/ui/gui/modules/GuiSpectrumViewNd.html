@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../../../../../index.html" />
-    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,8 +37,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,8 +54,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
@@ -65,18 +63,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Wayne Boucher $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-11 15:15:27 +0100 (Tue, April 11, 2017) $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-05-24 16:28:35 +0100 (Wed, May 24, 2017) $&quot;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
-
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -103,16 +101,18 @@
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Notifiers</span>
 
-<span class="k">def</span> <span class="nf">_getLevels</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
-  
+<span class="c1">#TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels</span>
+<span class="c1"># attributes</span>
+<span class="k">def</span> <span class="nf">_getLevels</span><span class="p">(</span><span class="n">count</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">:</span>
+  <span class="s2">&quot;return a list with contour levels&quot;</span>
   <span class="n">levels</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
     <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">base</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
       <span class="n">levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">factor</span> <span class="o">*</span> <span class="n">levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
-
   <span class="k">return</span> <span class="n">levels</span>
-       
+
+
 <div class="viewcode-block" id="GuiSpectrumViewNd"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumViewNd</span><span class="p">(</span><span class="n">GuiSpectrumView</span><span class="p">):</span>
   
   <span class="c1">###PeakListItemClass = PeakListNdItem</span>
@@ -163,6 +163,9 @@
 
     <span class="c1">#self.contourDisplayIndexDict = {} # (xDim, yDim) -&gt; level -&gt; display list index</span>
 
+    <span class="c1"># have to have this set before _setupBorderItem called</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+
     <span class="c1"># have to setup border item before superclass constructor called because latter calls</span>
     <span class="c1"># setVisible and that in turn expects there to be a border item</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setupBorderItem</span><span class="p">()</span>
@@ -182,17 +185,17 @@
 <span class="sd">    for func in (&#39;setPositiveContourColour&#39;, &#39;setSliceColour&#39;):</span>
 <span class="sd">      Notifiers.registerNotify(self.changedSpectrumColour, &#39;ccp.nmr.Nmr.DataSource&#39;, func)</span>
 <span class="sd">&quot;&quot;&quot;</span>        
-    <span class="c1"># for strip in self.strips:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrumItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_setupTrace</span><span class="p">()</span>
 
   <span class="c1"># override of Qt setVisible</span>
+
 <div class="viewcode-block" id="GuiSpectrumViewNd.setVisible"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.setVisible">[docs]</a>  <span class="k">def</span> <span class="nf">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">):</span>
     <span class="n">GuiSpectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span></div>
-    
+
   <span class="k">def</span> <span class="nf">_setupBorderItem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">spectrumLimits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumLimits</span>
     <span class="n">displayIndices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
@@ -217,24 +220,14 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">colour</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DotLine</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="p">)</span>
 
-    <span class="c1"># when below is called, self._appBase is not yet set up so use self._project._appBase</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span><span class="p">)</span>
         
   <span class="k">def</span> <span class="nf">_setBorderItemHidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span>
-  
-  <span class="k">def</span> <span class="nf">_addSpectrumItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="c1">###self.visibilityAction.toggled.connect(self.setVisible) # does this ever get set twice??</span>
-        
-  <span class="k">def</span> <span class="nf">_removeSpectrumItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">borderItem</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span>
+          
   <span class="k">def</span> <span class="nf">_setupTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
     <span class="bp">self</span><span class="o">.</span><span class="n">hTrace</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotDataItem</span><span class="p">()</span>
@@ -665,9 +658,9 @@
     <span class="k">except</span> <span class="n">GLError</span><span class="p">:</span>  <span class="c1"># invalid framebuffer operation</span>
       <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="GuiSpectrumViewNd.boundingRect"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.boundingRect">[docs]</a>  <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># seems necessary to have</span>
-      
-    <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="o">-</span><span class="mi">2000</span><span class="p">,</span> <span class="o">-</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>  <span class="c1"># TBD: remove hardwiring</span></div>
+  <span class="c1"># def boundingRect(self):  # seems necessary to have</span>
+  <span class="c1">#</span>
+  <span class="c1">#   return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TODO: remove hardwiring</span>
   
   <span class="c1">##### functions not to be used externally #####</span>
   <span class="c1"># NBNB TBD internal functions should start with UNDERSCORE!</span>
@@ -1149,8 +1142,7 @@
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

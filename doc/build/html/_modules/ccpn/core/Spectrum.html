@@ -119,6 +119,7 @@
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
@@ -775,6 +776,7 @@
 
   <span class="nd">@axisCodes.setter</span>
   <span class="k">def</span> <span class="nf">axisCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="c1"># TODO axisCodes shold be unique, but I am not sure this is enforced</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setExpDimRefAttribute</span><span class="p">(</span><span class="s1">&#39;axisCode&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -878,6 +880,21 @@
   <span class="nd">@assignmentTolerances.setter</span>
   <span class="k">def</span> <span class="nf">assignmentTolerances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setDataDimRefAttribute</span><span class="p">(</span><span class="s1">&#39;assignmentTolerance&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">defaultAssignmentTolerances</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Default assignment tolerances, per dimension.</span>
+
+<span class="sd">    NB for Fid or Sampled dimensions value will be None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tolerances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionCount</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">dimensionType</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensionTypes</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">dimensionType</span> <span class="o">==</span> <span class="s1">&#39;Frequency&#39;</span><span class="p">:</span>
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotope2Tolerance</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                                    <span class="n">Constants</span><span class="o">.</span><span class="n">defaultAssignmentTolerance</span><span class="p">)</span>
+        <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">tolerances</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">spectralWidths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
@@ -1081,29 +1098,6 @@
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedExperiments</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">sortedDataSources</span><span class="p">())</span>
 
   <span class="c1"># Library functions</span>
-
-<div class="viewcode-block" id="Spectrum.resetAssignmentTolerances"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum.resetAssignmentTolerances">[docs]</a>  <span class="k">def</span> <span class="nf">resetAssignmentTolerances</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Reset assignment tolerances to default values&quot;&quot;&quot;</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;resetAssignmentTolerances&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="n">tolerances</span> <span class="o">=</span> <span class="p">[[]]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensionCount</span>
-      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;1H&#39;</span><span class="p">:</span>
-          <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
-          <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">tolerance</span>
-        <span class="k">elif</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">:</span>
-          <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
-          <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">tolerance</span>
-        <span class="k">elif</span> <span class="n">isotopeCode</span><span class="p">:</span>
-          <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
-          <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">tolerance</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-
-      <span class="bp">self</span><span class="o">.</span><span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="n">tolerances</span>
-    <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Spectrum.getPositionValue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum.getPositionValue">[docs]</a>  <span class="k">def</span> <span class="nf">getPositionValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
 

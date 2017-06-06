@@ -224,7 +224,10 @@
 
             <span class="n">merit</span> <span class="o">=</span> <span class="n">_stdEfficiency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">stdPosition</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-              <span class="n">newHit</span><span class="o">.</span><span class="n">meritCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">merit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span></div>
+              <span class="n">newHit</span><span class="o">.</span><span class="n">meritCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">merit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span>
+
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;New Hit found&quot;</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_loadSpectrumDifference</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">SGname</span><span class="o">=</span><span class="s1">&#39;SG:STD&#39;</span><span class="p">):</span>

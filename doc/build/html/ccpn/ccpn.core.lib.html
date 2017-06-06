@@ -90,6 +90,16 @@ of a match peakList based on matching axis codes.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.filterIntraResidual">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">filterIntraResidual</code><span class="sig-paren">(</span><em>nmrAtomsForDimensions: List[ccpn.core.NmrAtom.NmrAtom]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#filterIntraResidual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.filterIntraResidual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a N-list of lists of nmrAtoms, where N
+is the number of peak dimensions and only returns
+those which belong to residues that show up in
+at least to of the dimensions (This is the behaviour
+in v2, if I am correct).</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.findClosePeaks">
 <code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">findClosePeaks</code><span class="sig-paren">(</span><em>peak</em>, <em>matchPeakList</em>, <em>tolerance=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#findClosePeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.findClosePeaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes an input peak and finds all peaks in the matchPeakList that are close in space to the
@@ -133,6 +143,21 @@ predictions.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.matchingNmrAtomsForPeakDimension">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">matchingNmrAtomsForPeakDimension</code><span class="sig-paren">(</span><em>peak: ccpn.core.Peak.Peak, dim: int, nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#matchingNmrAtomsForPeakDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.matchingNmrAtomsForPeakDimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just finds the nmrAtoms that fit a dimension of one peak.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.matchingNmrAtomsForPeaks">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">matchingNmrAtomsForPeaks</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#matchingNmrAtomsForPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.matchingNmrAtomsForPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a set of nmrAtoms that fit to the dimensions of the
+peaks. This function does the actual calculation and does
+not involve filtering like in nmrAtoms_for_peaks, where
+more filters can be specified in the future.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.nmrAtomPairsByDimensionTransfer">
 <code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">nmrAtomPairsByDimensionTransfer</code><span class="sig-paren">(</span><em>peakLists: Sequence[ccpn.core.PeakList.PeakList]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#nmrAtomPairsByDimensionTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.nmrAtomPairsByDimensionTransfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>From one or more peakLists belonging to the same spectrum,
@@ -144,10 +169,44 @@ they are in the dimension order.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.nmrAtomsForPeaks">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">nmrAtomsForPeaks</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], nmrAtoms: List[ccpn.core.NmrAtom.NmrAtom], intraResidual: bool = False, doubleTolerance: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#nmrAtomsForPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.nmrAtomsForPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a set of nmrAtoms that fit to the dimensions of the
+peaks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.peaksAreOnLine">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">peaksAreOnLine</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], dim: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#peaksAreOnLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.peaksAreOnLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True when multiple peaks are located
+on a line in the given dimensions.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.propagateAssignments">
 <code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">propagateAssignments</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak] = None</em>, <em>referencePeak: ccpn.core.Peak.Peak = None</em>, <em>current: object = None</em>, <em>tolerances: List[float] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#propagateAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.propagateAssignments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
 peaks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.refitPeaks">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">refitPeaks</code><span class="sig-paren">(</span><em>peaks: Sequence[ccpn.core.Peak.Peak], method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#refitPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.refitPeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.sameAxisCodes">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">sameAxisCodes</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak], dim: int</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#sameAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.sameAxisCodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether all peaks have the same axisCode
+for in the given dimension.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.AssignmentLib.withinTolerance">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">withinTolerance</code><span class="sig-paren">(</span><em>nmrAtom: ccpn.core.NmrAtom.NmrAtom</em>, <em>position: float</em>, <em>shiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em>, <em>tolerance: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#withinTolerance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.withinTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decides whether the shift of the nmrAtom is
+within the tolerance to be assigned to the
+peak dimension.</p>
 </dd></dl>
 
 </div>
@@ -182,7 +241,7 @@ with input None</p>
 
 <dl class="attribute">
 <dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers">
-<code class="descname">importers</code><em class="property"> = {'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x7f8726ea30d0&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x7f8726ea3400&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x7f8726e9fd90&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x7f8726e9fea0&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x7f8726ea3048&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f8726e9f0d0&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x7f8726ea3158&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f8726e9f158&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x7f8726e9bf28&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x7f8726e9bd08&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x7f8726ea32f0&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x7f8726e9ff28&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x7f8726ea3488&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f8726e9f158&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f8726e9f0d0&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x7f8726e9fd08&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f8726e9f158&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x7f8726e9be18&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x7f8726ea31e0&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x7f8726e9fe18&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f8726e9f0d0&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x7f8726e9f620&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x7f8726e9f048&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f8726e9f158&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x7f8726e9f1e0&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x7f8726ea3510&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x7f8726e9bd90&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x7f8726ea3268&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f8726e9f0d0&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x7f8726ea3378&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x7f8726e9bc80&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">importers</code><em class="property"> = {'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fc8a715e8c8&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fc8a715e950&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x7fc8a718e7b8&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x7fc8a718eae8&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x7fc8a718ea60&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x7fc8a718ebf8&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fc8a715e950&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x7fc8a715e6a8&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fc8a715e8c8&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x7fc8a718e9d8&gt;, 'ccpn_complex': &lt;function CcpnNefReader.load_ccpn_complex at 0x7fc8a718e840&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x7fc8a715e7b8&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x7fc8a718e950&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fc8a715e950&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x7fc8a715ee18&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x7fc8a715e620&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fc8a715e8c8&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x7fc8a718ed08&gt;, 'ccpn_assignment': &lt;function CcpnNefReader.load_ccpn_assignment at 0x7fc8a718eb70&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x7fc8a718e598&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fc8a715e8c8&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fc8a715e950&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x7fc8a718e730&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x7fc8a715e840&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x7fc8a718e620&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x7fc8a718e6a8&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x7fc8a715e510&gt;, 'ccpn_complex_chain': &lt;function CcpnNefReader.load_ccpn_complex_chain at 0x7fc8a718e8c8&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x7fc8a715e9d8&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x7fc8a715e598&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x7fc8a718ec80&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -627,7 +686,7 @@ non-XH3 groups.</p>
 <dl class="function">
 <dt id="ccpn.core.lib.DataIo.convertBmrbAmbiguousAtoms">
 <code class="descclassname">ccpn.core.lib.DataIo.</code><code class="descname">convertBmrbAmbiguousAtoms</code><span class="sig-paren">(</span><em>nmrChain</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/DataIo.html#convertBmrbAmbiguousAtoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.DataIo.convertBmrbAmbiguousAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert NmrAtoms with na.ccpnInternalData[&#8216;ambiguityCode&#8217;] 2 or 3
+<dd><p>Convert NmrAtoms with na._ccpnInternalData[&#8216;ambiguityCode&#8217;] 2 or 3
 to the &#8216;xy&#8217; convention.
 Names are of form &#8216;Nabi&#8217;  or &#8216;Nabi%&#8217; or &#8216;NAbi*&#8217; where &#8216;N&#8217; is a one-letter nucleus code.
 &#8216;ab&#8217; is any string that is not an integer or &#8216;&#64;&#8217; followed by an integer
@@ -755,7 +814,7 @@ as a dictionary of {&#8216;ABC:(valuex, valuey, valuez)} from nmrpipr input scri
 <code class="descclassname">ccpn.core.lib.DataIo.</code><code class="descname">remapRestraintItems</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/DataIo.html#remapRestraintItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.DataIo.remapRestraintItems" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remap restraintItems from original names to massaged names</p>
 <ul class="simple">
-<li>relies on NmrAtom.ccpnInternalData[&#8216;originalName&#8217;] being set</li>
+<li>relies on NmrAtom._ccpnInternalData[&#8216;originalName&#8217;] being set</li>
 </ul>
 </dd></dl>
 
@@ -929,13 +988,136 @@ for some offset.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.core.lib.PeakLib">
-<span id="ccpn-core-lib-peaklib-module"></span><h2>ccpn.core.lib.PeakLib module<a class="headerlink" href="#module-ccpn.core.lib.PeakLib" title="Permalink to this headline">¶</a></h2>
-<p>Peak-related functions and utiliities</p>
-<dl class="function">
-<dt id="ccpn.core.lib.PeakLib.refitPeaks">
-<code class="descclassname">ccpn.core.lib.PeakLib.</code><code class="descname">refitPeaks</code><span class="sig-paren">(</span><em>peaks: Sequence[ccpn.core.Peak.Peak], method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/PeakLib.html#refitPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.PeakLib.refitPeaks" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="module-ccpn.core.lib.Notifiers">
+<span id="ccpn-core-lib-notifiers-module"></span><h2>ccpn.core.lib.Notifiers module<a class="headerlink" href="#module-ccpn.core.lib.Notifiers" title="Permalink to this headline">¶</a></h2>
+<p>Notifier extensions, wrapping it into a class that also acts as the called 
+function, displatching the &#8216;user&#8217; callback if required.
+The Notifier can be defined relative to any valid V3 core object and the current
+object as it first checks if the triggered signature is valid.
+The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature,
+preventing unnecessary code duplication.</p>
+<p>The callback function is passed a callback dictionary with relevant info (see
+docstring of Notifier class. This idea was copied from the Traitlets package.</p>
+<p>April 2017: First design by Geerten Vuister</p>
+<dl class="class">
+<dt id="ccpn.core.lib.Notifiers.Notifier">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.Notifiers.</code><code class="descname">Notifier</code><span class="sig-paren">(</span><em>theObject: Any, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#Notifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Notifier class:</p>
+<p>triggers callback function with signature:  callback(callbackDict [, <a href="#id1"><span class="problematic" id="id2">*</span></a>args] [, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs])</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Notifier.CREATE    className             theObject, object,        targetName: valid child className of theObject</dt>
+<dd>targetName, trigger       (any for project instances)
+notifier</dd>
+<dt>Notifier.DELETE    className or None     theObject, object,        targetName: valid child className of theObject</dt>
+<dd>targetName, trigger       (any for project instances)
+notifier                  targetName==None: monitor theObject itself</dd>
+<dt>Notifier.RENAME    className or None     theObject, object         targetName: valid child className of theObject</dt>
+<dd>targetName, oldPid,       (any for project instances)
+trigger                   targetName==None: monitor theObject itself</dd>
+<dt>Notifier.CHANGE    className or None     theObject, object         targetName: valid child className of theObject</dt>
+<dd>targetName,               (any for project instances)
+trigger, notifier         targetName==None: monitor theObject itself</dd>
+<dt>Notifier.MONITOR   attributeName         theObject,targetName      targetName: valid attribute name of theObject</dt>
+<dd>value, previousValue,     NB: should only be used in isolation; i.e. not
+trigger, notifier         combined with other triggers</dd>
+<dt>Notifier.CURRENT   attributeName         theObject,targetName      theObject should be current object</dt>
+<dd><p class="first">value, previousValue,     targetName: valid attribute name of current
+trigger, notifier         NB: should only be used in isolation; i.e. not</p>
+<blockquote class="last">
+<div>combined with other triggers</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+<p>Implemention:</p>
+<blockquote>
+<div>Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
+TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
+which can be triggered by all classes (see Table).
+The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
+defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
+Note that this dict also contains a reference to the Notifier object itself; this way it can be used 
+to pass-on additional implementation specfic information to the callback function.</div></blockquote>
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.CHANGE">
+<code class="descname">CHANGE</code><em class="property"> = 'change'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.CHANGE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.CREATE">
+<code class="descname">CREATE</code><em class="property"> = 'create'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.CURRENT">
+<code class="descname">CURRENT</code><em class="property"> = 'current'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.CURRENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.DELETE">
+<code class="descname">DELETE</code><em class="property"> = 'delete'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.DELETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.GETPID">
+<code class="descname">GETPID</code><em class="property"> = 'pid'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.GETPID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.MONITOR">
+<code class="descname">MONITOR</code><em class="property"> = 'monitor'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.MONITOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.NOTIFIER">
+<code class="descname">NOTIFIER</code><em class="property"> = 'notifier'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.NOTIFIER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.OBJECT">
+<code class="descname">OBJECT</code><em class="property"> = 'object'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.OBJECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.OLDPID">
+<code class="descname">OLDPID</code><em class="property"> = 'oldPid'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.OLDPID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.RENAME">
+<code class="descname">RENAME</code><em class="property"> = 'rename'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.RENAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.THEOBJECT">
+<code class="descname">THEOBJECT</code><em class="property"> = 'theObject'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.THEOBJECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Notifiers.Notifier.TRIGGER">
+<code class="descname">TRIGGER</code><em class="property"> = 'trigger'</em><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.TRIGGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Notifiers.Notifier.setDebug">
+<code class="descname">setDebug</code><span class="sig-paren">(</span><em>flag: bool</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#Notifier.setDebug"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.setDebug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set debug output on/off</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Notifiers.Notifier.unRegister">
+<code class="descname">unRegister</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#Notifier.unRegister"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.Notifier.unRegister" title="Permalink to this definition">¶</a></dt>
+<dd><p>unregister the notifiers</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Notifiers.skip">
+<code class="descclassname">ccpn.core.lib.Notifiers.</code><code class="descname">skip</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Notifiers.html#skip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Notifiers.skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do nothing</p>
+</dd></dl>
 
 </div>
 <div class="section" id="ccpn-core-lib-pid-module">
@@ -1231,6 +1413,13 @@ Sometimes-equivalent atom groups (rotating aromatic rings) count as equivalent</
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.core.lib.Util.callList">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">callList</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#callList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.callList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper to give the call stack for then current function
+Add callList=None, callStr=None to the parameter list for the function</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.core.lib.Util.commandParameterString">
 <code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">commandParameterString</code><span class="sig-paren">(</span><em>*params</em>, <em>*</em>, <em>values: dict = None</em>, <em>defaults: dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#commandParameterString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.commandParameterString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make  parameter string to insert into function call string.</p>
@@ -1267,6 +1456,24 @@ Unrecognised strings are returned unchanged</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.core.lib.peakUtils">
+<span id="ccpn-core-lib-peakutils-module"></span><h2>ccpn.core.lib.peakUtils module<a class="headerlink" href="#module-ccpn.core.lib.peakUtils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getPeakAnnotation">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakAnnotation</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakAnnotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getPeakLinewidth">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakLinewidth</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakLinewidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakLinewidth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.peakUtils.getPeakPosition">
+<code class="descclassname">ccpn.core.lib.peakUtils.</code><code class="descname">getPeakPosition</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>unit='ppm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/peakUtils.html#getPeakPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.peakUtils.getPeakPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 </div>
 
 
@@ -1286,12 +1493,13 @@ Unrecognised strings are returned unchanged</p>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.LabellingLib">ccpn.core.lib.LabellingLib module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.lib.PeakLib">ccpn.core.lib.PeakLib module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Notifiers">ccpn.core.lib.Notifiers module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-pid-module">ccpn.core.lib.Pid module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.peakUtils">ccpn.core.lib.peakUtils module</a></li>
 </ul>
 </li>
 </ul>

@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 
-''' example of how create  a list of dicts for autogenerate widgets.  
+''' example of how create  a list of dicts for autogenerating GuiPipe widgets.  
 
 
 params = [{'variable': 'param1',

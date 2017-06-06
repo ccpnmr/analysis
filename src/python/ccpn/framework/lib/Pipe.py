@@ -35,7 +35,7 @@ class Pipe(ABC):
   '''
 
 
-  guiPipe = None
+  guiPipe = None #Only the class. it will be init later on the GuiPipeline
   autoGuiParams = None
   pipeName = ''
   isActive = False
@@ -50,25 +50,25 @@ class Pipe(ABC):
     loadedPipes.append(cls)
 
 
-  def __init__(self, name = pipeName, application=None, ):
+  def __init__(self, application=None):
     self._kwargs = {}
-    self._inputData = None
+    self.inputData = None
 
-    self._pipeline = None
-    self._project = None
+    self.pipeline = None
+    self.project = None
 
-    if self._pipeline is not None:
-      self._inputData = self._pipeline.inputData
+    if self.pipeline is not None:
+      self.inputData = self.pipeline.inputData
 
 
     if application is not None:
-      self._application = application
-      self._current = self._application.current
-      self._preferences = self._application.preferences
-      self._ui = self._application.ui
-      self._project = self._application.project
+      self.application = application
+      self.current = self.application.current
+      self.preferences = self.application.preferences
+      self.ui = self.application.ui
+      self.project = self.application.project
       try:
-        self._mainWindow = self._ui.mainWindow
+        self.mainWindow = self.ui.mainWindow
       except AttributeError:
         pass
 
@@ -114,5 +114,5 @@ class SpectraPipe(Pipe):
   '''
 
   @abstractmethod
-  def runPipe(self, spectra: list) -> list:
+  def runPipe(self, spectra):
     return spectra

@@ -41,7 +41,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
     except TypeError:  # Compatability between our layout and PyQt's layout()
       widget.layout.addWidget(frame, row, column)
     l = Label(frame, param.get('label', param['variable']), grid=(0, 0))
-    l.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+    l.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if isinstance(param['value'], str):
       from ccpn.ui.gui.widgets.LineEdit import LineEdit
       le = LineEdit(frame, grid=(0, 1))

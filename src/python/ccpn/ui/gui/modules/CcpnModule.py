@@ -232,6 +232,7 @@ class CcpnModuleLabel(DockLabel):
 
   labelSize = 16
 
+  # TODO:GEERTEN remove colours from here
   # defined here, as the updateStyle routine is called from the
   # DockLabel instanciation; changed later on
   backgroundColour = '#555D85'

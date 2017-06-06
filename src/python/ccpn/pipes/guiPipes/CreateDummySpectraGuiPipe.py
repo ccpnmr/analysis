@@ -46,12 +46,14 @@ class CreateDummySpectraGuiPipe(GuiPipe):
     self.useAsnewInputDataCheckBox = CheckBox(self.pipeFrame, checked=False, text='Use as new input data',  grid=(rowCount,0))
     rowCount += 1
 
-    self.overWriteSameFile = CheckBox(self.pipeFrame, checked=False, text='OverWrite Same File',  grid=(rowCount,0))
+    self.overWriteSameFile = CheckBox(self.pipeFrame, checked=True, text='Overwrite',  grid=(rowCount,0))
     rowCount += 1
 
     self.saveAsHDF5CheckBox = CheckBox(self.pipeFrame, checked=False, text='Save spectra as HDF5',  grid=(rowCount,0))
     self.saveAsHDF5Label = Label(self.pipeFrame, 'Saving  directory path',  grid=(rowCount,1))
     self.saveAsHDF5LineEdit = LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(rowCount,2))
+
+
 
 
 # run this file to test the gui

@@ -33,6 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 class Pipeline(object):
   '''
   Pipeline class.
+  To run insert the pipes in the queue.
 
   '''
 
@@ -41,10 +42,15 @@ class Pipeline(object):
 
     self.pipelineName = pipelineName
     self._kwargs = {}
-    self.pipes = pipes
+
+    if pipes is not None:
+      self.pipes = [cls() for cls in pipes]
+    else:
+      self.pipes = []
+
     self.inputData = set()
     self.queue = [] # Pipes to be ran
-    self.finishedPipe = [] # Pipes already ran
+    # self.finishedPipe = [] # Pipes already ran
 
 
     if application is not None:
@@ -82,12 +88,10 @@ class Pipeline(object):
     '''Run all pipes in the specified order '''
     print('Running Pipeline')
     if len(self.queue)>0:
-      for pipe in self.pipes:
+      for pipe in self.queue:
         if pipe is not None:
-            pipe.runPipe(pipe, pipe._kwargs)
+            pipe.runPipe(pipe._kwargs)
             self.queue.remove(pipe)
-            self.finishedPipe.append(pipe)
 
     print(' self.queue',  self.queue)
-    print(' self.self.finishedPipe', self.finishedPipe)
 

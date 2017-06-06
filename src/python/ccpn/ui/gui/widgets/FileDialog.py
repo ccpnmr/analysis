@@ -139,6 +139,12 @@ class LineEditButtonDialog(QtGui.QWidget, Base):
     if selectedFile:
       self.lineEdit.setText(str(selectedFile))
 
+  def get(self):
+    return self.lineEdit.text()
+
+  def setText(self, text):
+    self.lineEdit.setText(str(text))
+
 
 
 

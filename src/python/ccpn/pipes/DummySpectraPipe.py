@@ -38,6 +38,10 @@ class createDummySpectraPipe(SpectraPipe):
     :param data:
     :return: it copies the input data as dummy spectra. Dummy spectra can be then modified.
     '''
+    for i in dir(self):
+       print(i)
+
+
     if self.project is not None:
       newDummySpectra = []
       for spectrum in self.inputData:

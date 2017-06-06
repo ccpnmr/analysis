@@ -1,3 +1,8 @@
+"""
+
+"""
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -29,10 +34,10 @@ from abc import abstractmethod
 
 
 class Pipe(ABC):
-  '''
+  """
   Pipeline step base class.
 
-  '''
+  """
 
 
   guiPipe = None #Only the class. it will be init later on the GuiPipeline

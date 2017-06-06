@@ -155,6 +155,7 @@ class _PipelineDropAreaOverlay(QtGui.QWidget):
     p = QtGui.QPainter(self)
     rgn = self.rect()
 
+    #TODO:LUCA insert stylesheet
     p.setBrush(QtGui.QBrush(QtGui.QColor(120, 255, 0, 50)))
     p.setPen(QtGui.QPen(QtGui.QColor(123, 245, 150), 3))
     p.drawRect(rgn)
@@ -331,11 +332,14 @@ class GuiPipe(Dock, DockDrop):
 
 
 
-    self.pipeFrame = Frame(self, setLayout=False)
-    self.pipeLayout = QtGui.QGridLayout()
-    self.pipeFrame.setLayout(self.pipeLayout)
-    self.layout.addWidget(self.pipeFrame)
+    # self.pipeFrame = Frame(self, setLayout=False)
+    # self.pipeLayout = QtGui.QGridLayout()
+    # self.pipeFrame.setLayout(self.pipeLayout)
+    # self.layout.addWidget(self.pipeFrame)
 
+    self.pipeFrame = Frame(self, setLayout=True)
+    self.pipeLayout = self.pipeFrame.getLayout()
+    self.pipeLayout.addWidget(self.pipeFrame)
 
     self._kwargs = None
     print(self._kwargs, 'PIPE')

@@ -4006,6 +4006,15 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
 
 
 if __name__ == '__main__':
+  # Explanation:
+  # _exportToNef will read a project from path and export the corresponding NEF file
+  # skipPrefixes=('ccpn' ,) means 'remove all ccpn-specific tags from teh output';
+  # efault is to leave them in. Note that path may also be a NEF file,
+  # which will then be imported and re-exported
+  #
+  # testNefIo will read a NEF file and re-export it (qith a .out.nef suffix),
+  # producing a V3 project on disk as a byproduct if the original is a V2 project.
+
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)

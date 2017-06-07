@@ -946,11 +946,10 @@ class Project(AbstractWrapperObject):
       raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
     se = self.newStructureEnsemble()
     se.data = ensemble
-    se.name = name
+    se.rename(name)
 
-    ds = self.newDataSet(title=label)
+    ds = self.newDataSet(title=name)
     d = ds.newData(name='Derived')
-    # TODO: Rasmus fix me!
     d.setParameter('average', averageStructure(ensemble))
 
     return [se]

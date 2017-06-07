@@ -336,6 +336,9 @@ class StructureTable(ObjectTable):
     self._updateSilence = False
     self._setNotifiers()
 
+    if len(self.stButtons.radioButtons) > 0:
+      self.stButtons.radioButtons[1].setEnabled(False)
+
     if structureEnsemble is not None:
       self._selectStructureEnsemble(structureEnsemble)
 
@@ -363,7 +366,8 @@ class StructureTable(ObjectTable):
           if structureEnsemble.pid == widgetObj:
             self.thisObj = structureEnsemble
             self.thisDataSet = None
-            
+            if len(self.stButtons.radioButtons) > 0:
+              self.stButtons.radioButtons[1].setEnabled(False)
             # find the matching dataset if exists
             
             self.stWidget.select(self.thisObj.pid)
@@ -411,28 +415,35 @@ class StructureTable(ObjectTable):
     """
     Get the DataSet object attached to this StructureEnsemble
     """
-    Found=False
-    dd = dt = None
-    self.thisDataSet = None
-    if self._project.dataSets:
-      for dd in self._project.dataSets:
-        if dd.title == thisObj.label:
-          for dt in dd.data:
-            if dt.name is 'Derived':
-              Found=True
-
-    # if not Found:
-    #   dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid
-    #   dt = dd.newData('Derived')
-    # self.thisDataSet = dd
-
-    if Found is True:
-      if 'average' not in dt.parameters:
-        self.thisDataSet = None
-      else:
-        self.thisDataSet = dt.parameters['average']
-    else:
+    if len(self.stButtons.radioButtons) > 0:
+      self.stButtons.radioButtons[1].setEnabled(False)
+    try:
+      Found=False
+      dd = dt = None
       self.thisDataSet = None
+      if self._project.dataSets:
+        for dd in self._project.dataSets:
+          if dd.title == thisObj.name:
+            for dt in dd.data:
+              if dt.name is 'Derived':
+                Found=True
+
+      # if not Found:
+      #   dd = self._project.newDataSet(thisObj.longPid)  # title - should be ensemble name/title/longPid
+      #   dt = dd.newData('Derived')
+      # self.thisDataSet = dd
+
+      if Found is True:
+        if 'average' not in dt.parameters:
+          self.thisDataSet = None
+        else:
+          self.thisDataSet = dt.parameters['average']
+          if len(self.stButtons.radioButtons) > 0:
+            self.stButtons.radioButtons[1].setEnabled(True)
+      else:
+        self.thisDataSet = None
+    except:
+      self.thisDatSet = None
 
       # from ccpn.util.StructureData import averageStructure
       # dt.parameters['average'] = averageStructure(item.data)

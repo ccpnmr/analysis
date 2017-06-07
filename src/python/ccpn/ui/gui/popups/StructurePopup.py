@@ -40,7 +40,7 @@ class StructurePopup(CcpnDialog):
 
     self.structure = structure
     self.structureLabel = Label(self, "Structure Name: "+self.structure.pid, grid=(0, 0))
-    self.structureText = LineEdit(self, self.structure.label, grid=(0, 1))
+    self.structureText = LineEdit(self, self.structure.name, grid=(0, 1))
     ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _okButton(self):
@@ -48,7 +48,7 @@ class StructurePopup(CcpnDialog):
     When ok button pressed: update StructureEnsemble and exit
     """
     newName = self.structureText.text()
-    if str(newName) != self.structure.label:
-      self.structure.label = newName
+    if str(newName) != self.structure.name:
+      self.structure.rename(newName)
     self.accept()
 

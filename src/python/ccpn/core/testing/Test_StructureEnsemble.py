@@ -40,7 +40,6 @@ class StructureEnsembleTesting_None(WrapperTesting):
   # setUp       initialise a newStructureEnsemble
   #=========================================================================================
 
-
   def _test_load_structure(self):
     self.loadData('../structures/2CPP.pdb')
     ensemble = self.project.structureEnsembles[0]
@@ -73,7 +72,7 @@ class StructureEnsembleTesting_None(WrapperTesting):
 # StructureEnsembleTesting    Loaded project
 #=========================================================================================
 
-class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
+class StructureEnsembleTesting_Project(WrapperTesting):
 
   #=========================================================================================
   # setUp       initialise a newStructureEnsemble
@@ -87,7 +86,7 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
     super().setUp()                   # ejb - call WrapperTesting setup to load project
 
 
-  def _test_haveEnsemble(self):
+  def test_haveEnsemble(self):
     # assert len(self.project.structureEnsembles) > 0
     #
     self.assertGreater(len(self.project.structureEnsembles), 0)
@@ -105,7 +104,7 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
     self.assertEquals(data.shape, (29680, 17))
 
 
-  def _test_getModels(self):
+  def test_getModels(self):
     models = self.project.structureEnsembles[0].models
     # assert len(models) > 0
     # assert len(models) == 20
@@ -113,7 +112,7 @@ class skip2:  #StructureEnsembleTesting_Project(WrapperTesting):
     self.assertGreater(len(models), 0)
     self.assertEquals(len(models), 20)
 
-  def _test_coords(self):
+  def test_coords(self):
     data = self.project.structureEnsembles[0].data
     self.assertEquals(data.shape, (29680, 17))
 
@@ -145,31 +144,32 @@ class StructureEnsembleTesting_Properties(WrapperTesting):
   # test_properties_structuresEnsemble
   #=========================================================================================
 
-  def _test_properties_structuresEnsemble_Serial(self):
+  def test_properties_structuresEnsemble_Serial(self):
     """
     Test that structureEnsemble attribute .serial is populated.
     Read the attribute, if it not populated then an error is raised.
     """
     self.assertEqual(self.project.structureEnsembles[0].serial, 1)
 
-  def _test_properties_structuresEnsemble_Label(self):
+  def test_properties_structuresEnsemble_name(self):
     """
     Test that structureEnsemble attribute .label is populated.
     Read the attribute, if it not populated then an error is raised.
     If no error, then test the setter by setting and then getting to check consistent.
     """
-    checkGetSetAttr(self, self.project.structureEnsembles[0], 'name', 'ValidName')
+    # checkGetSetAttr(self, self.project.structureEnsembles[0], 'name', 'ValidName')
 
-  def _test_properties_structuresEnsemble_Comment(self):
+    self.assertEquals(self.project.structureEnsembles[0].name, 'Structure')
+    self.project.structureEnsembles[0].rename('validName')
+    self.assertEquals(self.project.structureEnsembles[0].name, 'validName')
+
+  def test_properties_structuresEnsemble_Comment(self):
     """
     Test that structureEnsemble attribute .comment is populated.
     """
     checkGetSetAttr(self, self.project.structureEnsembles[0], 'comment', 'ValidComment')
 
-  def test_noop(self):
-    pass
 
-@unittest.skip
 class StructureEnsembleTesting_Data(WrapperTesting):
 
   #=========================================================================================

@@ -847,8 +847,11 @@ class CcpnNefWriter:
       # NBNB TBD reconsider whether we want the spec summary or something else
       self.specification = Specification.getCcpnSpecification(specificationFile)
 
-    self.programName = programName or project._appBase.applicationName
-    self.programVersion = programVersion or project._appBase.applicationVersion
+    if hasattr(project, '_appBase'):
+      programName = programName or project._appBase.applicationName
+      programVersion = programVersion or project._appBase.applicationVersion
+    self.programName = programName or 'CcpnNefWriter'
+    self.programVersion = programVersion
     self.ccpn2SaveFrameName = {}
 
   def exportObjects(self, expandSelection:bool=True,

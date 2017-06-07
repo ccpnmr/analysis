@@ -410,9 +410,10 @@ class GuiStrip(Frame):
 
     yRange = list(self.viewBox.viewRange()[1])
     for strip in self.spectrumDisplay.strips:
-      stripYRange = list(self.viewBox.viewRange()[1])
-      if _widthsChangedEnough(stripYRange, yRange):
-        strip.viewBox.setYRange(*yRange, padding=0)
+      if strip is not self:
+        stripYRange = list(strip.viewBox.viewRange()[1])
+        if _widthsChangedEnough(stripYRange, yRange):
+          strip.viewBox.setYRange(*yRange, padding=0)
 
   def _toggleCrossHair(self):
     " Toggles whether crosshair is visible"

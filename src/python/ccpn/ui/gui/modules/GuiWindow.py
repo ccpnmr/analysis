@@ -113,9 +113,15 @@ class GuiWindow():
       if MessageDialog.showYesNo(title, msg, parent):
         current.project.deleteObjects(*peaks)
 
-  #FIXME:WAYNE: I don't think this can be correct
   def getCurrentPositionAndStrip(self):
     current = self.application.current
+    """
+    # this function is called as a shortcut macro ("w1") but
+    # with the code commented out that is pretty pointless.
+    # current.strip and current.cursorPosition are now set by
+    # clicking on a position in the strip so this commented
+    # out code is no longer useful, and this function might
+    # be more generally useful, so leave the brief version
     current.strip = current.viewBox.parentObject().parent
     cursorPosition = (current.viewBox.position.x(),
                       current.viewBox.position.y())
@@ -124,6 +130,7 @@ class GuiWindow():
     #     position.append(axis.position)
     # current.position = tuple(position)
     current.cursorPosition = cursorPosition
+    """
     return current.strip, current.cursorPosition
 
   def _getPeaksParams(self, peaks):

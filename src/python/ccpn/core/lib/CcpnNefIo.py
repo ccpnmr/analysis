@@ -2292,12 +2292,22 @@ class CcpnNefReader:
         if loop:
           for row in loop.data:
             chainCode = row['chain_code']
+
+            # ejb - if the element is . in the file, then it is loaded as None which can't be indexed
+            # have temporarily put a test in here, but don't think it work
+            # if chainCode is not None:
+
             nmrResidues = assignmentData.get(chainCode, OD())
             assignmentData[chainCode] = nmrResidues
             nmrResidues[(row['sequence_code'], row['residue_name'])] = None
 
       # Create objects with reserved names
       for chainCode in sorted(assignmentData):
+
+        # ejb - a quick test, cahinCode is None and not a string
+        #       can either try:except it here, or trap it in the loop above
+        # try:
+
         if chainCode[0] in '@#' and chainCode[1:].isdigit():
           # reserved name - make chain
           try:
@@ -2305,6 +2315,9 @@ class CcpnNefReader:
           except ValueError:
             # Could not be done, probably because we have NmrChain '@1'. Leave for later
             pass
+
+        # except:         # ejb
+        #   pass
 
       for chainCode, nmrResidues in sorted(assignmentData.items()):
 

@@ -787,6 +787,8 @@ class Framework:
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
+      ("Export NEF", self.exportNEF, [('shortcut', 'ex')]),
+      (),
       ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       (),
@@ -1080,6 +1082,24 @@ class Framework:
 
     return successful
 
+
+  def exportNEF(self, path=None, nefPath=None):
+    #TODO:ED fix this temporary routine
+    """
+    Export the current project as a Nef file
+    Temporary routine because I don't know how else to do it yet
+    """
+    from ccpn.core._implementation import Io as coreIo
+    from ccpn.core.lib import CcpnNefIo
+
+    dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF File",
+                        acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                        directory=nefPath, filter='*.nef')
+    nefPath = dialog.selectedFile()+'/'
+    if not nefPath:
+      return
+
+    CcpnNefIo.saveNefProject(self.project, nefPath)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

@@ -79,6 +79,11 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
 
+# Current NEF versio (as string
+currentNefVersion = '1.1'
+# Lowest version that this reader can reae (may not be teh same, as float:
+minimumNefVersion = 1.1
+
 #  - saveframe category names in reading order
 # The order is significant, because setting of crosslinks relies on the order frames are read
 # Frames are read in correct order regardless of how they are in the file
@@ -1138,7 +1143,7 @@ class CcpnNefWriter:
 
     # NBNB TBD FIXME add proper values for format version from specification file
     result['format_name'] = 'nmr_exchange_format'
-    result['format_version'] = '1.1'
+    result['format_version'] = currentNefVersion
     # format_version=None
     result['coordinate_file_name'] = coordinateFileName
     if headObject.className == 'Project':
@@ -2074,6 +2079,28 @@ class CcpnNefReader:
 
     # Other data are read in here at the end of the load
     self.mainDataSetSerial = saveFrame.get('ccpn_dataset_serial')
+
+    # TODO this is a quick hack - should be improved and extended
+
+    formatName = saveFrame.get('format_name')
+    formatVersion = saveFrame.get('format_version')
+    if formatName == 'nmr_exchange_format':
+      if formatVersion:
+        try:
+          version = float(formatVersion)
+        except ValueError:
+          raise ValueError("Illegal version string %s for nmr_exchange_format"
+                           % formatVersion)
+        else:
+          if version < minimumNefVersion:
+            raise ValueError("Unsupported nef file version %s; minimum version is %s"
+                             % (formatVersion, minimumNefVersion))
+      else:
+        project._logger.warning("NEF file format version missing: Reading may fail.")
+
+    else:
+      project._logger.warning("NEF file format name '%s', not recognised. Reading may fail."
+                              % formatName)
 
     return None
 
@@ -4034,5 +4061,5 @@ if __name__ == '__main__':
   # nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
   nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

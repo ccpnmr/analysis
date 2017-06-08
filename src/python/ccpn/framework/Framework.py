@@ -1099,7 +1099,7 @@ class Framework:
     if not nefPath:
       return
 
-    CcpnNefIo.saveNefProject(self.project, nefPath)
+    CcpnNefIo.saveNefProject(self.project, nefPath, overwriteExisting=True)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

@@ -83,6 +83,8 @@ class Pipeline(object):
       self._pipes = []
 
 
+  def _updateRunArgs(self, arg, value):
+    self._kwargs[arg] = value
 
   def runPipeline(self):
     '''Run all pipes in the specified order '''
@@ -92,6 +94,7 @@ class Pipeline(object):
       for pipe in self.queue:
         if pipe is not None:
             pipe.inputData = self.inputData
+            pipe.pipeline = self
 
             pipe.runPipe(pipe._kwargs)
             self.queue.remove(pipe)

@@ -111,14 +111,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
     super(PeakPicker1DGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.plotWidget = None
-    if self.parent.application is not None:
-      self.current = self.parent.application.current
-      self.strip = self.current.strip
-      if self.strip is not None:
-        self.plotWidget = self.strip.plotWidget
-
-
 
     gridRow = 0
     self.pickNegativeLabel = Label(self.pipeFrame, text='Pick negative peaks', grid=(gridRow, 0))
@@ -131,7 +123,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
                                                selectedInd=0,
                                                callback=self._noiseLevelCallBack,
                                                tipTexts=None,
-                                               setLayout=True,
                                                grid=(gridRow, 1))
 
     gridRow += 1

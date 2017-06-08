@@ -96,8 +96,11 @@ class ExcludeRegionsGuiPipe(GuiPipe):
           if item:
             w = item.widget()
             if w:
+              if isinstance(w,TargetButtonSpinBoxes):
+                w._turnOffPositionPicking()
               w.deleteLater()
         self.count -= 1
+
 
 
 ########################################################################################################################
@@ -112,15 +115,21 @@ class ExcludeRegionsPipe(Pipe):
   guiPipe = ExcludeRegionsGuiPipe
   pipeName = guiPipe.pipeName
 
-
+  excludeRegions = {'excludeRegions': [[],[]]}
 
   def runPipe(self, params):
     '''
     :param data:
     :return:
     '''
+    regions = []
+    for i in self._kwargs.values():
+      if isinstance(i, list):
+        regions.append(i)
 
-    print(self._kwargs,)
+    self.excludeRegions = {'excludeRegions': regions}
+    self.pipeline._kwargs.update(self.excludeRegions)
+    print('PPPPP',self.pipeline._kwargs)
 
 
 

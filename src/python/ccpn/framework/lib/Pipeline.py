@@ -89,7 +89,7 @@ class Pipeline(object):
   def runPipeline(self):
     '''Run all pipes in the specified order '''
     print('Running Pipeline', self.inputData)
-
+    self._kwargs = {}
     if len(self.queue)>0:
       for pipe in self.queue:
         if pipe is not None:
@@ -98,6 +98,7 @@ class Pipeline(object):
 
             pipe.runPipe(pipe._kwargs)
             self.queue.remove(pipe)
+    print('Ran', self._kwargs)
 
     print(' self.queue',  self.queue)
 

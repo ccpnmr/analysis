@@ -582,6 +582,17 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.Directory)
     self.settingsWidgets.append(self.savePipelineLineEdit)
     #
+
+    #
+    self.selectDisplayLabel = Label(self, 'Select output Display',
+                                   tipText='Select display to show the pipeline output')
+    self.settingsWidgets.append(self.selectDisplayLabel)
+    self.selectDisplay = PulldownList(self, texts = ['Select'])
+    if self.mainWindow is not None:
+      self.selectDisplay.setData(texts = ['Select'] + [display.pid for display in self.mainWindow.spectrumDisplays])
+    self.settingsWidgets.append(self.selectDisplay)
+
+    #
     self.addBoxLabel = Label(self, 'Add Method On')
     self.settingsWidgets.append(self.addBoxLabel)
     self.addBoxPosition = RadioButtons(self,texts=['top', 'bottom'], selectedInd=0,direction='h')
@@ -694,9 +705,9 @@ class GuiPipeline(CcpnModule, Pipeline):
   def setDataSelection(self):
 
     dataTexts = self.inputDataList.getTexts()
+    self.inputData.clear()
     if self.project is not None:
       if len(dataTexts) == 0:
-        self.inputData.clear()
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)

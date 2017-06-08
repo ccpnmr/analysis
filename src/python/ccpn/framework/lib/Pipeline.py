@@ -86,10 +86,13 @@ class Pipeline(object):
 
   def runPipeline(self):
     '''Run all pipes in the specified order '''
-    print('Running Pipeline')
+    print('Running Pipeline', self.inputData)
+
     if len(self.queue)>0:
       for pipe in self.queue:
         if pipe is not None:
+            pipe.inputData = self.inputData
+
             pipe.runPipe(pipe._kwargs)
             self.queue.remove(pipe)
 

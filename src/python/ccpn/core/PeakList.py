@@ -286,11 +286,11 @@ class PeakList(AbstractWrapperObject):
 
 
   def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', ignoredRegions=None,
-                          noiseThreshold=None, negativePeaks=True):
+                          positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True):
     """
     Pick 1D peaks form data in  self.spectrum
     """
-    defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)))
+    defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('positiveNoiseThreshold', None)))
 
     self._startCommandEchoBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     ll = []
@@ -302,8 +302,12 @@ class PeakList(AbstractWrapperObject):
       # data = spectrum._apiDataSource.get1dSpectrumData()
       data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
-      if noiseThreshold == 0 or noiseThreshold is None:
-        noiseThreshold = spectrum.estimateNoise()*5
+      if positiveNoiseThreshold == 0 or positiveNoiseThreshold is None:
+        positiveNoiseThreshold = spectrum.estimateNoise() * 5
+
+      if negativeNoiseThreshold == 0 or negativeNoiseThreshold is None:
+        negativeNoiseThreshold = -spectrum.estimateNoise() * 5
+
       masks = []
       for region in ignoredRegions:
         mask = (ppmValues > region[0]) | (ppmValues < region[1])
@@ -311,10 +315,10 @@ class PeakList(AbstractWrapperObject):
       fullmask = [all(mask) for mask in zip(*masks)]
       newArray2 = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((fullmask, fullmask))))
 
-      if (newArray2.size == 0) or (data.max() < noiseThreshold):
+      if (newArray2.size == 0) or (data.max() < positiveNoiseThreshold):
         return peaks
 
-      posBoolsVal = newArray2[1] > noiseThreshold
+      posBoolsVal = newArray2[1] > positiveNoiseThreshold
       maxFilter = maximum_filter(newArray2[1], size=size, mode=mode)
       boolsMax = newArray2[1] == maxFilter
       boolsPeak = posBoolsVal & boolsMax
@@ -323,7 +327,7 @@ class PeakList(AbstractWrapperObject):
       if negativePeaks:
         minFilter = minimum_filter(data[1], size=size, mode=mode)
         boolsMin = newArray2[1] == minFilter
-        negBoolsVal = newArray2[1] < -noiseThreshold
+        negBoolsVal = newArray2[1] < negativeNoiseThreshold
         negBoolsPeak = negBoolsVal & boolsMin
         indicesMin = argwhere(negBoolsPeak)
         indices = numpy.append(indices, indicesMin)

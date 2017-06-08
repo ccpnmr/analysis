@@ -72,9 +72,10 @@ class ExcludeRegions(Widget,Base):
                      'Toulene-d8 & water': [0,0, 7.18,6.98, 2.19,2.09, 2.50,2.40, 5.10,5.00],
                      'Trifluoroethanol-d3 & water':[0,0, 5.12,5.02, 3.98,3.88],
                      'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
-                     'water': [0,0, 5, 4.5]}
+                     'Water': [0,0, 5, 4.5]}
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
+    self.pulldownSolvents.select('Water')
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
@@ -87,7 +88,7 @@ class ExcludeRegions(Widget,Base):
     self.excludedRegions = []
     self.excludedSolvents = []
     self.comboBoxes = []
-
+    self._addRegions('Water') #default
 
   def _addRegions(self, pressed):
     '''   '''

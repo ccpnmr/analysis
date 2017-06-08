@@ -360,7 +360,7 @@ class PickPeak1DPopup(CcpnDialog):
     noiseThreshold = self._getNoiseThreshold()
     for spectrum in spectra:
       spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, ignoredRegions=ignoredRegions,
-                                                noiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
+                                                positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()
 
 

@@ -383,7 +383,10 @@ class GuiPipe(Dock, DockDrop):
     widgetsState = {}
     for varName, varObj in vars(self).items():
       if varObj.__class__.__name__ in commonWidgets.keys():
-        widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        try:  # try because widgets can be dinamically deleted
+          widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        except Exception as e:
+          print('Error',e)
     self._kwargs = widgetsState
     return widgetsState
 

@@ -25,18 +25,24 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import Pipe
+from functools import partial
+import copy
 
+defaultParams = {
+
+                 }
 
 
 ########################################################################################################################
@@ -54,64 +60,36 @@ from ccpn.framework.lib.Pipe import Pipe
 class ExcludeRegionsGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Exclude Regions'
+  pipeName = 'Exclude Solvent Regions'
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.addRemoveLabel = Label(self.pipeFrame, text="Add Region", grid=(0, 0))
-    self.addRemoveLabel.isProtected = True
-    self.addRemoveButtons = ButtonList(self.pipeFrame, texts=["+", "-"], callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
-    self.addRemoveButtons.isProtected = True
-    self.count = 1
+
+    self.excludeRegionsWidget = ExcludeRegions(self)
+    self.pipeLayout.addWidget(self.excludeRegionsWidget)
+
+    print(self.excludeRegionsWidget._getExcludedRegions())
+
+  ############       Gui Callbacks      ###########
 
 
-    self.excludeRegion1Label = Label(self.pipeFrame, text="Select Region "+str(self.count), grid=(self.count , 0))
-    self.excludeRegion1 = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
-                                                grid=(self.count , 1))
+  def _getRegions(self):
+    params = self.excludeRegionsWidget.getSolventsAndValues()
 
-    self.count += 1
+    return params
 
-  def _addRegion(self):
-    self.excludeRegionLabel = Label(self.pipeFrame, text="Select Region " + str(self.count), grid=(self.count, 0))
-    w = setattr(self, 'region'+str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
-                                                grid=(self.count , 1)))
-
-    self.count+=1
-
-  def _deleteRegions(self):
-    '''   '''
-    positions = []
-    for row in range(self.count):
-      a = (row, 0)
-      b = (row, 1)
-      positions.append(a)
-      positions.append(b)
-    if (len(positions))>1:
-      positions = positions[2:]
+  def _setParams(self):
+    originalSolvents = copy.deepcopy(self.excludeRegionsWidget.solvents)
+    for solvent in sorted(self.params.keys()):
       try:
-        last = positions[-1]
-        pen = positions[-2]
-        toDelete = [self.pipeFrame.getLayout().itemAtPosition(last),
-                    self.pipeFrame.getLayout().itemAtPosition(pen)]
-        for i in toDelete:
-          if i:
-            w = i.widget()
-            if w:
-              w.deleteLAter()
+        self.excludeRegionsWidget.solvents = self.params
+        self.excludeRegionsWidget._addRegions(solvent)
       except:
         pass
-
-    # for position in positions:
-    #
-    #   item = self.pipeFrame.getLayout().itemAtPosition(*position)
-    #   if item:
-    #     w = item.widget()
-    #     if w:
-    #       if not hasattr(w, 'isProtected'):
-    #         w.deleteLater()
+    self.excludeRegionsWidget.solvents = originalSolvents
 
 
 ########################################################################################################################
@@ -134,7 +112,7 @@ class ExcludeRegionsPipe(Pipe):
     :return:
     '''
 
-    print(self._kwargs,)
+    print('Not implemented yet')
 
 
 

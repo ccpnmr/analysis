@@ -65,6 +65,7 @@ def _pickPeaks(spectra, **Kwargs):
   else:
     maximumFilterMode = defaultParams['maximumFilterMode']
 
+
   if 'noiseLevelMode' in Kwargs:
     noiseLevelMode = Kwargs['noiseLevelMode']
     if noiseLevelMode == 'Manual':
@@ -116,21 +117,21 @@ class PeakPicker1DGuiPipe(GuiPipe):
     self.pickNegativeLabel = Label(self.pipeFrame, text='Pick negative peaks', grid=(gridRow, 0))
     self.pickNegative = CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1))
 
-    gridRow += 1
-    self.noiseLevelLabel = Label(self.pipeFrame, text='Noise Level Threshold', grid=(gridRow, 0))
-    self.noiseLevelMode = RadioButtons(self.pipeFrame,
-                                               texts=['Estimated', 'Manual'],
-                                               selectedInd=0,
-                                               callback=self._noiseLevelCallBack,
-                                               tipTexts=None,
-                                               grid=(gridRow, 1))
-
-    gridRow += 1
-
-    self.manualNoiseLabel = Label(self.pipeFrame, text="Manual Noise threshold", grid=(gridRow, 0))
-    self.noiseRegions = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(gridRow, 1))
-    self.manualNoiseLabel.hide()
-    self.noiseRegions.hide()
+    # gridRow += 1
+    # self.noiseLevelLabel = Label(self.pipeFrame, text='Noise Level Threshold', grid=(gridRow, 0))
+    # self.noiseLevelMode = RadioButtons(self.pipeFrame,
+    #                                            texts=['Estimated', 'Manual'],
+    #                                            selectedInd=0,
+    #                                            callback=self._noiseLevelCallBack,
+    #                                            tipTexts=None,
+    #                                            grid=(gridRow, 1))
+    #
+    # gridRow += 1
+    #
+    # self.manualNoiseLabel = Label(self.pipeFrame, text="Manual Noise threshold", grid=(gridRow, 0))
+    # self.noiseRegions = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(gridRow, 1))
+    # self.manualNoiseLabel.hide()
+    # self.noiseRegions.hide()
 
     gridRow += 1
     self.maximumFilterSize = Label(self.pipeFrame, text="Select Maximum Filter Size", grid=(gridRow, 0))
@@ -146,18 +147,18 @@ class PeakPicker1DGuiPipe(GuiPipe):
 
 
 
-
-  ############       Gui Callbacks      ###########
-
-  def _noiseLevelCallBack(self):
-    selected = self.noiseLevelMode.get()
-    if selected == 'Estimated':
-      self.noiseRegions.hide()
-      self.manualNoiseLabel.hide()
-
-    else:
-      self.noiseRegions.show()
-    self.manualNoiseLabel.show()
+  #
+  # ############       Gui Callbacks      ###########
+  #
+  # def _noiseLevelCallBack(self):
+  #   selected = self.noiseLevelMode.get()
+  #   if selected == 'Estimated':
+  #     self.noiseRegions.hide()
+  #     self.manualNoiseLabel.hide()
+  #
+  #   else:
+  #     self.noiseRegions.show()
+  #   self.manualNoiseLabel.show()
 
 
 
@@ -183,9 +184,34 @@ class PeakPicker1DPipe(Pipe):
     '''
     print(self.inputData,)
     if self.inputData is not None:
-      result = _pickPeaks(self.inputData, **params)
+      if 'maximumFilterSize' in self._kwargs:
+        maximumFilterSize = self._kwargs['maximumFilterSize']
+      else:
+        maximumFilterSize = defaultParams['maximumFilterSize']
 
+      if 'maximumFilterMode' in self._kwargs:
+        maximumFilterMode = self._kwargs['maximumFilterMode']
+      else:
+        maximumFilterMode = defaultParams['maximumFilterMode']
 
+      try:
+        if 'noiseThreshold' in self.pipeline._kwargs:
+          positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
+          negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
+      except:
+        positiveNoiseThreshold = None
+        negativeNoiseThreshold = None
+
+      if 'pickNegative' in self._kwargs:
+        pickNegative = self._kwargs['pickNegative']
+      else:
+        pickNegative = defaultParams['pickNegative']
+
+      for spectrum in self.inputData:
+        spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
+                                                  positiveNoiseThreshold=positiveNoiseThreshold,
+                                                  negativeNoiseThreshold=negativeNoiseThreshold,
+                                                  negativePeaks=pickNegative)
 
 
 PeakPicker1DPipe.register() # Registers the pipe in the pipeline

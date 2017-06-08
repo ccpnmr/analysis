@@ -38,12 +38,12 @@ class Spinbox(QtGui.QSpinBox, Base):
   def __init__(self, parent, value=None, min=None, max=None, showButtons=True, **kw):
 
     QtGui.QSpinBox.__init__(self, parent)
-    if value is not None:
-      self.setValue(value)
     if min is not None:
       self.setMinimum(min)
     if max is not None:
       self.setMaximum(max)
+    if value is not None: #set Value only after you set min and max
+      self.setValue(value)
     Base.__init__(self, **kw)
 
     if showButtons is False:

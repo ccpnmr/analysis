@@ -1,8 +1,6 @@
-"""
+"""Module Documentation here
 
 """
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -13,57 +11,46 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:36 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-04-07 11:41:14 +0100 (Fri, April 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Luca Mureddu $"
+
+__date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
-#=========================================================================================
-
-from abc import ABC
-from abc import abstractmethod
+#====================================
 
 
 
-class Pipe(ABC):
-  """
-  Pipeline step base class.
+class Pipeline(object):
+  '''
+  Pipeline class.
+  To run insert the pipes in the queue.
 
-  """
-
-
-  guiPipe = None #Only the class. it will be init later on the GuiPipeline
-  autoGuiParams = None
-  pipeName = ''
-  isActive = False
+  '''
 
 
-  @classmethod
-  def register(cls):
-    """
-    method to register the pipe in the loaded pipes to appear in the pipeline
-    """
-    from ccpn.pipes import loadedPipes
-    loadedPipes.append(cls)
+  def __init__(self, application=None, pipelineName=None, pipes=None ):
 
-
-  def __init__(self, application=None):
+    self.pipelineName = pipelineName
     self._kwargs = {}
-    self.inputData = None
 
-    self.pipeline = None
-    self.project = None
+    if pipes is not None:
+      self.pipes = [cls() for cls in pipes]
+    else:
+      self.pipes = []
 
-    if self.pipeline is not None:
-      self.inputData = self.pipeline.inputData
+    self.inputData = set()
+    self.queue = [] # Pipes to be ran
+    # self.finishedPipe = [] # Pipes already ran
 
 
     if application is not None:
@@ -78,46 +65,33 @@ class Pipe(ABC):
         pass
 
 
-    self.customizeSetup()
+  @property
+  def pipes(self):
+    return self._pipes
 
-
-  @abstractmethod
-  def runPipe(self, data):
-    return data
-
-
-  def customizeSetup(self):
+  @pipes.setter
+  def pipes(self, pipes):
     '''
-    Override this method to customize the UI auto-generation attributes
     '''
-    pass
+
+    if pipes is not None:
+      allPipes = []
+      for pipe in pipes:
+          allPipes.append(pipe)
+      self._pipes = allPipes
+    else:
+      self._pipes = []
 
 
-  def _updateRunArgs(self, arg, value):
-    self._kwargs[arg] = value
 
+  def runPipeline(self):
+    '''Run all pipes in the specified order '''
+    print('Running Pipeline')
+    if len(self.queue)>0:
+      for pipe in self.queue:
+        if pipe is not None:
+            pipe.runPipe(pipe._kwargs)
+            self.queue.remove(pipe)
 
+    print(' self.queue',  self.queue)
 
-try:
-
-  import pandas as pd
-  class PandasPipe(Pipe):
-    '''
-    A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe
-    '''
-    @abstractmethod
-    def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
-      return dataframe
-
-except ImportError:
-  pass
-
-
-class SpectraPipe(Pipe):
-  '''
-      A pipe where the run method accepts a list of spectra and returns a a list of spectra
-  '''
-
-  @abstractmethod
-  def runPipe(self, spectra):
-    return spectra

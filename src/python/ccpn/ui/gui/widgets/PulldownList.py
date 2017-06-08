@@ -127,6 +127,12 @@ class PulldownList(QtGui.QComboBox, Base):
    
     return self.currentText()
 
+  def getItemIndex(self, text):
+    for i in range(self.count()):
+      if self.itemText(i) == text:
+        return i
+
+
   def getSelectedIndex(self):
     
     # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is deprecated use; .currentIndex()")
@@ -139,7 +145,7 @@ class PulldownList(QtGui.QComboBox, Base):
 
     return self.currentIndex()
  
-  def setData(self, texts=None, objects=None, index=None, icons=None):
+  def setData(self, texts=None, objects=None, index=None, icons=None, clear=True):
 
     texts = texts or []
     objects = objects or []
@@ -163,15 +169,15 @@ class PulldownList(QtGui.QComboBox, Base):
         
     else:
       icons = [None] * n
-    
-    self.clear()
+    if clear:
+      self.clear()
     for i, text in enumerate(texts):
       self.addItem(text, objects[i], icons[i])
     
-    if index is not None:  
+    if index is not None:
       self.setCurrentIndex(index)
 
-  def addItem(self, text, object=NULL, icon=None):
+  def addItem(self, text, object=NULL, icon=None, ):
     
     if icon:
       QtGui.QComboBox.addItem(self, Icon(icon), text)
@@ -181,7 +187,7 @@ class PulldownList(QtGui.QComboBox, Base):
     if object is NULL:
       object = text
     
-    self.texts.append(text)  
+    self.texts.append(text)
     self.objects.append(object)
 
   def setItemText(self, index, text):

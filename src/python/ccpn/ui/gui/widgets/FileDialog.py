@@ -105,11 +105,12 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Widget import Widget
 from os.path import expanduser
 
-class LineEditButtonDialog(QtGui.QWidget, Base):
+class LineEditButtonDialog(Widget, Base):
   def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, **kw):
-    QtGui.QWidget.__init__(self, parent)
+    Widget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
     self.openPathIcon = Icon('icons/directory')
 
@@ -138,6 +139,12 @@ class LineEditButtonDialog(QtGui.QWidget, Base):
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:
       self.lineEdit.setText(str(selectedFile))
+
+  def get(self):
+    return self.lineEdit.text()
+
+  def setText(self, text):
+    self.lineEdit.setText(str(text))
 
 
 

@@ -52,23 +52,28 @@ from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.Widget import Widget
 
 
 from ccpn.framework.lib.Pipe import Pipe
+from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 
 commonWidgets =           {
-                            CheckBox.__name__:       ('get',         'setChecked'),
-                            ColourDialog.__name__:   ('getColor',    'setColor'  ),
-                            DoubleSpinbox.__name__:  ('value',       'setValue'  ),
-                            Label.__name__:          ('get',         'setText'   ),
-                            LineEdit.__name__:       ('get',         'setText'   ),
-                            LineEditButtonDialog.__name__: ('get',   'setText'   ),
-                            PulldownList.__name__:   ('currentText', 'set'       ),
-                            RadioButton.__name__:    ('get',         'set'       ),
-                            RadioButtons.__name__:   ('get',         'set'       ),
-                            Slider.__name__:         ('get',         'setValue'  ),
-                            Spinbox.__name__:        ('value',       'set'       ),
-                            TextEditor.__name__:     ('get',         'setText'   ),
+                            CheckBox.__name__:              ('get',         'setChecked'),
+                            ColourDialog.__name__:          ('getColor',    'setColor'  ),
+                            DoubleSpinbox.__name__:         ('value',       'setValue'  ),
+                            Label.__name__:                 ('get',         'setText'   ),
+                            LineEdit.__name__:              ('get',         'setText'   ),
+                            LineEditButtonDialog.__name__:  ('get',         'setText'   ),
+                            PulldownList.__name__:          ('currentText', 'set'       ),
+                            RadioButton.__name__:           ('get',         'set'       ),
+                            RadioButtons.__name__:          ('get',         'set'       ),
+                            Slider.__name__:                ('get',         'setValue'  ),
+                            Spinbox.__name__:               ('value',       'set'       ),
+                            TextEditor.__name__:            ('get',         'setText'   ),
+                            TargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
+
+
                             # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
                           }
 
@@ -117,11 +122,11 @@ class _VContainer(SplitContainer):
     self.setCollapsible(1, False)
 
 
-class _PipelineDropAreaOverlay(QtGui.QWidget):
+class _PipelineDropAreaOverlay(Widget):
   """Overlay widget that draws drop areas during a drag-drop operation"""
 
   def __init__(self, parent):
-    QtGui.QWidget.__init__(self, parent)
+    Widget.__init__(self, parent)
     self.dropArea = None
     self.hide()
     self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
@@ -324,22 +329,26 @@ class GuiPipe(Dock, DockDrop):
     if project is not None:
       self.project = project
 
+    if self.parent is not None:
+      try:
+        self.application = self.parent.application
+        self.current = self.application.current
+      except:
+        pass
+
     self._widgetsState = None
     if widgetsParams is not None:
       self.restoreWidgetsState(**widgetsParams)
 
-      ######  pipeLayout
+    ######  pipeLayout
+    self.pipeFrame = Frame(self, setLayout=False)
+    self.pipeLayout = QtGui.QGridLayout()
+    self.pipeFrame.setLayout(self.pipeLayout)
+    self.layout.addWidget(self.pipeFrame)
 
-
-
-    # self.pipeFrame = Frame(self, setLayout=False)
-    # self.pipeLayout = QtGui.QGridLayout()
-    # self.pipeFrame.setLayout(self.pipeLayout)
-    # self.layout.addWidget(self.pipeFrame)
-
-    self.pipeFrame = Frame(self, setLayout=True)
-    self.pipeLayout = self.pipeFrame.getLayout()
-    self.pipeLayout.addWidget(self.pipeFrame)
+    # self.pipeFrame = Frame(self, setLayout=True)
+    # self.pipeLayout = self.pipeFrame.getLayout()
+    # self.pipeLayout.addWidget(self.pipeFrame)
 
     self._kwargs = None
     print(self._kwargs, 'PIPE')

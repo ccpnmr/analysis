@@ -412,7 +412,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         if guiPipe.isActive:
           guiPipe.pipe.isActive = True
           guiPipe.pipe._kwargs = guiPipe.widgetsState
-          print('PPP',guiPipe.pipe )
           self.queue.append(guiPipe.pipe)
 
         else:

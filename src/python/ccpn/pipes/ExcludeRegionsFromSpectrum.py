@@ -85,33 +85,19 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     '''   '''
     positions = []
     for row in range(self.count):
-      a = (row, 0)
-      b = (row, 1)
-      positions.append(a)
-      positions.append(b)
+      positions.append((row, 0))
+      positions.append((row, 1))
     if (len(positions))>1:
       positions = positions[2:]
-      try:
-        last = positions[-1]
-        pen = positions[-2]
-        toDelete = [self.pipeFrame.getLayout().itemAtPosition(last),
-                    self.pipeFrame.getLayout().itemAtPosition(pen)]
-        for i in toDelete:
-          if i:
-            w = i.widget()
+      if len(positions)>1:
+        positions = positions[-2:]
+        for position in positions:
+          item = self.pipeFrame.getLayout().itemAtPosition(*position)
+          if item:
+            w = item.widget()
             if w:
-              w.deleteLAter()
-      except:
-        pass
-
-    # for position in positions:
-    #
-    #   item = self.pipeFrame.getLayout().itemAtPosition(*position)
-    #   if item:
-    #     w = item.widget()
-    #     if w:
-    #       if not hasattr(w, 'isProtected'):
-    #         w.deleteLater()
+              w.deleteLater()
+        self.count -= 1
 
 
 ########################################################################################################################

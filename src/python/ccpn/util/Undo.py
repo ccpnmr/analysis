@@ -4,13 +4,11 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -21,7 +19,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -72,7 +69,7 @@ def no_op():
   """Does nothing - for special undo situations where only one direction must act"""
   return
 
-def resetUndo(memopsRoot, maxWaypoints=99, maxOperations=10000,
+def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
               debug:bool=False):
   """Set or reset undo stack, using passed-in parameters.
   NB setting either parameter to 0 removes the undo stack."""
@@ -95,7 +92,7 @@ class Undo(deque):
      To create a waypoint use newWaypoint().
   """
 
-  def __init__(self, maxWaypoints=99, maxOperations=10000, debug=False):
+  def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False):
     """Create Undo object with maximum stack length maxUndoCount"""
 
     self.maxWaypoints = maxWaypoints
@@ -158,11 +155,15 @@ class Undo(deque):
     if self.nextIndex < 1:
       return
 
-    elif self._blockingLevel > 0 or self._waypointBlockingLevel > 0:
+    elif self._blocked or self._blockingLevel > 0 or self._waypointBlockingLevel > 0:   # ejb - added self._blocked 9/6/17
       return
 
-    elif waypoints and waypoints[-1] == self.nextIndex -1:
-      return
+    elif waypoints and waypoints[-1] == self.nextIndex -1:  # don't need to add a new waypoint
+      return                                                # if is the same as the last one
+
+    waypoints.append(self.nextIndex-1)        # add the new waypoint to the end
+
+    # if the list is too big then cull the first item
 
     if len(waypoints) > self.maxWaypoints:
       nRemove = waypoints[0]
@@ -172,7 +173,10 @@ class Undo(deque):
       del waypoints[0]
       for ii, junk in enumerate(waypoints):
         waypoints[ii] -= nRemove
-    waypoints.append(self.nextIndex-1)
+
+      # need to remove waypoints from the left that are negative
+      # while waypoints and waypoints[0]<0:
+      #   del waypoints[0]
 
     # waypoints.append(self.nextIndex-1)
 

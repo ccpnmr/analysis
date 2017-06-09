@@ -171,6 +171,8 @@ class TestPandasData(WrapperTesting):
 
     ll = ['modelNumber', 'chainCode', 'sequenceId']
     self.data.ccpnSort(*ll)
+    self.undo.undo()
+    self.undo.redo()
 
     # ejb - [2:] because of the inserted rows being sorted to the head of the list
 
@@ -234,15 +236,26 @@ class TestPandasData(WrapperTesting):
     with self.assertRaisesRegexp(TypeError, 'deleteRow: Row is not an int'):  # should raise ValueError
       self.data.deleteRow('notInt')
 
-    self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.999)
-    self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.999)
+    self.data.setValues(5,chainCode='B', sequenceId=-1, x=0.995)
+    self.data.setValues(10,chainCode='B', sequenceId=-1, x=0.99)
     ll = ['modelNumber', 'chainCode', 'sequenceId', 'atomName']
     self.data.ccpnSort(*ll)
+    self.undo.undo()
+    self.undo.redo()
 
     self.assertEquals(list(self.data['origIndex']),
                       [17, 18, 8, 16, 15, 5, 6, 14, 13, 4, 12, 3, 11, 2, 10, 1, 9])
     self.data.setValues(1, x=1.0, y=1.0)
     self.data.setValues(2, x=1.0, y=1.0)
+
+    self.undo.undo()        # ejb
+    self.undo.undo()        # ejb
+    self.undo.undo()        # ejb
+    self.undo.undo()        # ejb
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
 
     # self.data.drop('z', axis=1, inplace=True)      # ejb - does not work on 'drop'
     # new function deleteCol has been added to replace simple drop
@@ -265,7 +278,11 @@ class TestPandasData(WrapperTesting):
                  atomName='HG2', nmrAtomName='HG2', nmrChainCode='#12', nmrSequenceCode='2b',
                  origIndex=14.0)))
 
-    self.undo.undo()
+    self.undo.undo()            # recover deleted rows index='1, 2, 6-7, 9'
+    self.undo.undo()            # recover column 'z'
+    self.undo.redo()            # delete column 'z' again
+    self.undo.redo()            # delete index='1, 2, 6-7, 9' again
+    self.undo.undo()            # recover deleted rows index='1, 2, 6-7, 9' again
 
     with self.assertRaisesRegexp(TypeError, 'required positional argument'):  # should raise ValueError
       self.data.deleteCol()
@@ -276,10 +293,10 @@ class TestPandasData(WrapperTesting):
 
     with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as deleted
       self.assertEqual(list(self.data['z']), None)
-    self.undo.undo()
+    self.undo.undo()                                  # recover 'z' as nans
 
     self.assertEqual(str(list(self.data['z'])), str([nan]*17))    # back again as list of nan
-    self.undo.redo()
+    self.undo.redo()                                  # delete 'z' again
 
     with self.assertRaisesRegexp(KeyError, 'z'):      # should raise KeyError as re-deleted
       self.assertEqual(list(self.data['z']), None)
@@ -302,7 +319,7 @@ class TestPandasData(WrapperTesting):
       AtomRecord(Index=5, x=1.0, y=2.0, modelNumber=1, chainCode='A', sequenceId=2,
                  atomName='HG2', nmrAtomName='HG2', nmrChainCode='#2', nmrSequenceCode='12',
                  origIndex=15),
-      AtomRecord(Index=6, x=0.999, y=2.0, modelNumber=1, chainCode='B', sequenceId=-1,
+      AtomRecord(Index=6, x=0.995, y=2.0, modelNumber=1, chainCode='B', sequenceId=-1,
                  atomName='HG12', nmrAtomName='HG12', nmrChainCode='#12', nmrSequenceCode='12',
                  origIndex=5),
       AtomRecord(Index=7, x=1.0, y=1.0, modelNumber=1, chainCode='B', sequenceId=1,
@@ -323,7 +340,7 @@ class TestPandasData(WrapperTesting):
       AtomRecord(Index=12, x=2.0, y=2.0, modelNumber=2, chainCode='A', sequenceId=2,
                  atomName='HG12', nmrAtomName='HG12', nmrChainCode='@2', nmrSequenceCode='12',
                  origIndex=3),
-      AtomRecord(Index=13, x=0.999, y=2.0, modelNumber=2, chainCode='B', sequenceId=-1,
+      AtomRecord(Index=13, x=0.99, y=2.0, modelNumber=2, chainCode='B', sequenceId=-1,
                  atomName='HG2', nmrAtomName='HG2', nmrChainCode='@2', nmrSequenceCode='12',
                  origIndex=11),
       AtomRecord(Index=14, x=2.0, y=1.0, modelNumber=2, chainCode='B', sequenceId=1,
@@ -341,8 +358,12 @@ class TestPandasData(WrapperTesting):
     ))
 
     self.data.deleteCol('y')
-    self.undo.undo()      # ejb - does not work on 'drop'
-    self.undo.undo()      # ejb - does not work on 'drop'
+    self.undo.undo()      # recover 'y'
+    self.undo.undo()      # recover
+    self.undo.undo()      # recover
+    self.undo.undo()      # recover
+    self.undo.redo()
+    self.undo.redo()
     self.undo.redo()
     self.undo.redo()
 

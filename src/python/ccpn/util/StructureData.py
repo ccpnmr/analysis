@@ -658,8 +658,8 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       undo = containingObject._project._undo      # check that this is valid
-      undo.increaseBlocking()
-
+      undo.increaseBlocking()                     # not sure that this is needed here
+                                                  # I think it is all handled by undo
     try:
       colIndex = str(args[0])       # get the index from the first arg value
       for sInd in kwargs:
@@ -756,7 +756,14 @@ class EnsembleData(pd.DataFrame):
           raise ValueError("setValues cannot create a new row, "
                            "unless accessor is the next free integer index")
 
-      oldKw = dict((x, self[x]) for x in kwargs)    # store the original values
+      if kwargs:
+        # ejb - only get those values that have the correct index
+
+        sl = self.loc[index]
+        # nt = sl._asdict()
+        oldKw = dict((x, sl[x]) for x in kwargs)
+      else:
+        oldKw = dict((x, self[x]) for x in kwargs)    # get everything, as no kwargs specified
 
     elif isinstance(accessor, EnsembleData):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
@@ -937,6 +944,14 @@ class EnsembleData(pd.DataFrame):
 
   ### Property type checking
 
+  def _ccpnUnSort(self, oldIndex):
+    """Custom Unsort: revert the table to its presorted state"""
+    self.index = oldIndex
+    self.sort_index(inplace=True)
+    self.reset_index(drop=True, inplace=True)  # use the correct reset_index
+
+    pass
+
   def ccpnSort(self, *columns:str):
     """Custom sort. Sorts mixed-type columns by type, sorting None and NaN at the start
 
@@ -960,11 +975,35 @@ class EnsembleData(pd.DataFrame):
     reordered = list(tt[-1] for tt in sorted(zip(*cols), key=sortKey))
     ll = list((prev, new + 1) for new,prev in enumerate(reordered))
     newIndex = list(tt[1] for tt in sorted(ll))
-    self.index = newIndex
-    self.sort_index(inplace=True)
 
-    # reset index to one-origin successive integers
-    self.index = range(1, len(reordered) + 1)
+    containingObject = self._containingObject
+    if containingObject is not None:
+      # undo and echoing
+      containingObject._startCommandEchoBlock('data.ccpnSort', columns)
+      undo = containingObject._project._undo      # ejb
+      undo.increaseBlocking()       # ejb
+
+    try:
+      # do the sort here
+
+      self.index = newIndex
+      self.sort_index(inplace=True)
+
+      # reset index to one-origin successive integers
+      # self.index = range(1, len(reordered) + 1)   # old indexing
+      self.reset_index(drop=True, inplace=True)     # use the correct reset_index
+
+    finally:
+      if containingObject is not None:
+        undo.decreaseBlocking()  # ejb
+        containingObject._endCommandEchoBlock()
+
+    if containingObject is not None:
+      undo = containingObject._project._undo
+      if undo is not None:
+        # set up undo functions
+        undo.newItem(self._ccpnUnSort, self.ccpnSort,
+                     undoArgs=(reordered,), redoArgs=columns)
 
     structureEnsemble = self._structureEnsemble
     if structureEnsemble is not None:

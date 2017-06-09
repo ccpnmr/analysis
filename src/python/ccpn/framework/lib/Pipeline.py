@@ -77,6 +77,7 @@ class Pipeline(object):
     if pipes is not None:
       allPipes = []
       for pipe in pipes:
+          pipe.pipeline = self
           allPipes.append(pipe)
       self._pipes = allPipes
     else:
@@ -94,11 +95,8 @@ class Pipeline(object):
       for pipe in self.queue:
         if pipe is not None:
             pipe.inputData = self.inputData
-            pipe.pipeline = self
-
             pipe.runPipe(pipe._kwargs)
-            self.queue.remove(pipe)
+            # self.queue.remove(pipe)
     print('Ran', self._kwargs)
-
     print(' self.queue',  self.queue)
 

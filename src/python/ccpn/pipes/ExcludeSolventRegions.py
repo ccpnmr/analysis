@@ -59,7 +59,7 @@ defaultParams = {
 
 class ExcludeRegionsGuiPipe(GuiPipe):
 
-  preferredPipe = True
+  preferredPipe = False
   pipeName = 'Exclude Solvent Regions'
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
@@ -118,6 +118,6 @@ class ExcludeRegionsPipe(Pipe):
 
 
 
-ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
+# ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
 
 

@@ -285,18 +285,19 @@ class PeakList(AbstractWrapperObject):
     return peaks
 
 
-  def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', ignoredRegions=None,
+  def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', excludeRegions=None,
                           positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True):
     """
     Pick 1D peaks form data in  self.spectrum
     """
-    defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('positiveNoiseThreshold', None)))
+    defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('excludeRegions', None), ('positiveNoiseThreshold', None)))
 
     self._startCommandEchoBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     ll = []
     try:
-      if ignoredRegions is None:
-        ignoredRegions = [[-20.1,-19.1]]
+      if excludeRegions is None:
+        excludeRegions = [[-20.1, -19.1]]
+      excludeRegions = [sorted(pair, reverse=True) for pair in excludeRegions]
       peaks = []
       spectrum = self.spectrum
       # data = spectrum._apiDataSource.get1dSpectrumData()
@@ -309,7 +310,7 @@ class PeakList(AbstractWrapperObject):
         negativeNoiseThreshold = -spectrum.estimateNoise() * 5
 
       masks = []
-      for region in ignoredRegions:
+      for region in excludeRegions:
         mask = (ppmValues > region[0]) | (ppmValues < region[1])
         masks.append(mask)
       fullmask = [all(mask) for mask in zip(*masks)]

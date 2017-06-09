@@ -39,60 +39,12 @@ import pyqtgraph as pg
 from ccpn.framework.lib.Pipe import Pipe
 from functools import partial
 
-defaultParams = {
-                  'noiseRegions': [0.0, 0.0],
-                  'maximumFilterSize': 5,
-                  'maximumFilterMode': 'wrap',
-                  'noiseLevelMode': 'Estimated',
-                  'pickNegative': True
-                }
+
 
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
-def _pickPeaks(spectra, **Kwargs):
-
-
-  if 'maximumFilterSize' in Kwargs:
-    maximumFilterSize = Kwargs['maximumFilterSize']
-  else:
-    maximumFilterSize = defaultParams['maximumFilterSize']
-
-  if 'maximumFilterMode' in Kwargs:
-    maximumFilterMode = Kwargs['maximumFilterMode']
-  else:
-    maximumFilterMode = defaultParams['maximumFilterMode']
-
-
-  if 'noiseLevelMode' in Kwargs:
-    noiseLevelMode = Kwargs['noiseLevelMode']
-    if noiseLevelMode == 'Manual':
-      if 'noiseRegions' in Kwargs:
-        noiseRegions = Kwargs['noiseRegions']
-        if len(noiseRegions)>0:
-          positiveNoiseThreshold = max(noiseRegions)
-          negativeNoiseThreshold = min(noiseRegions)
-
-    else:
-      positiveNoiseThreshold = None
-      negativeNoiseThreshold = None
-
-  if 'pickNegative' in Kwargs:
-    pickNegative = Kwargs['pickNegative']
-  else:
-    pickNegative = defaultParams['pickNegative']
-
-
-
-  for spectrum in spectra:
-    spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
-                                              positiveNoiseThreshold= positiveNoiseThreshold,
-                                              negativeNoiseThreshold = negativeNoiseThreshold,
-                                              negativePeaks=pickNegative)
-
-
 
 
 
@@ -117,21 +69,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
     self.pickNegativeLabel = Label(self.pipeFrame, text='Pick negative peaks', grid=(gridRow, 0))
     self.pickNegative = CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1))
 
-    # gridRow += 1
-    # self.noiseLevelLabel = Label(self.pipeFrame, text='Noise Level Threshold', grid=(gridRow, 0))
-    # self.noiseLevelMode = RadioButtons(self.pipeFrame,
-    #                                            texts=['Estimated', 'Manual'],
-    #                                            selectedInd=0,
-    #                                            callback=self._noiseLevelCallBack,
-    #                                            tipTexts=None,
-    #                                            grid=(gridRow, 1))
-    #
-    # gridRow += 1
-    #
-    # self.manualNoiseLabel = Label(self.pipeFrame, text="Manual Noise threshold", grid=(gridRow, 0))
-    # self.noiseRegions = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(gridRow, 1))
-    # self.manualNoiseLabel.hide()
-    # self.noiseRegions.hide()
 
     gridRow += 1
     self.maximumFilterSize = Label(self.pipeFrame, text="Select Maximum Filter Size", grid=(gridRow, 0))
@@ -143,22 +80,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
     modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
     self.maximumFilterMode = Label(self.pipeFrame, text="Select Maximum Filter Mode", grid=(gridRow, 0))
     self.maximumFilterMode = PulldownList(self.pipeFrame, texts=modes, grid=(gridRow, 1))
-
-
-
-
-  #
-  # ############       Gui Callbacks      ###########
-  #
-  # def _noiseLevelCallBack(self):
-  #   selected = self.noiseLevelMode.get()
-  #   if selected == 'Estimated':
-  #     self.noiseRegions.hide()
-  #     self.manualNoiseLabel.hide()
-  #
-  #   else:
-  #     self.noiseRegions.show()
-  #   self.manualNoiseLabel.show()
 
 
 
@@ -175,42 +96,59 @@ class PeakPicker1DPipe(Pipe):
   guiPipe = PeakPicker1DGuiPipe
   pipeName = PeakPicker1DGuiPipe.pipeName
 
-
+  defaultParams = {'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
+                   'noiseRegions': [0.0, 0.0],
+                   'maximumFilterSize': 5,
+                   'maximumFilterMode': 'wrap',
+                   'noiseLevelMode': 'Estimated',
+                   'pickNegative': True
+                   }
 
   def runPipe(self, params):
     '''
     :param data:
     :return:
     '''
-    print(self.inputData,)
     if self.inputData is not None:
       if 'maximumFilterSize' in self._kwargs:
         maximumFilterSize = self._kwargs['maximumFilterSize']
       else:
-        maximumFilterSize = defaultParams['maximumFilterSize']
+        maximumFilterSize = self.defaultParams['maximumFilterSize']
 
       if 'maximumFilterMode' in self._kwargs:
         maximumFilterMode = self._kwargs['maximumFilterMode']
       else:
-        maximumFilterMode = defaultParams['maximumFilterMode']
+        maximumFilterMode = self.defaultParams['maximumFilterMode']
 
       try:
         if 'noiseThreshold' in self.pipeline._kwargs:
           positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
           negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
+        else:
+          positiveNoiseThreshold = max(self.defaultParams['noiseThreshold'])
+          negativeNoiseThreshold = min(self.defaultParams['noiseThreshold'])
       except:
         positiveNoiseThreshold = None
         negativeNoiseThreshold = None
 
+      try:
+        if 'excludeRegions' in self.pipeline._kwargs:
+          excludeRegions = self.pipeline._kwargs['excludeRegions']
+        else:
+          excludeRegions = self.defaultParams['excludeRegions']
+      except:
+        excludeRegions = None
+
       if 'pickNegative' in self._kwargs:
         pickNegative = self._kwargs['pickNegative']
       else:
-        pickNegative = defaultParams['pickNegative']
+        pickNegative = self.defaultParams['pickNegative']
 
       for spectrum in self.inputData:
         spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
                                                   positiveNoiseThreshold=positiveNoiseThreshold,
                                                   negativeNoiseThreshold=negativeNoiseThreshold,
+                                                  excludeRegions= excludeRegions,
                                                   negativePeaks=pickNegative)
 
 

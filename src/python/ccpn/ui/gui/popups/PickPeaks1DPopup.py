@@ -360,7 +360,7 @@ class PickPeak1DPopup(CcpnDialog):
     ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
     noiseThreshold = self._getNoiseThreshold()
     for spectrum in spectra:
-      spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, ignoredRegions=ignoredRegions,
+      spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
                                                 positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()
 

@@ -74,6 +74,8 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
     self.count += 1
 
+  ############       Gui Callbacks      ###########
+
   def _addRegion(self):
     self.excludeRegionLabel = Label(self.pipeFrame, text="Select Region " + str(self.count), grid=(self.count, 0))
     w = setattr(self, 'region'+str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
@@ -129,7 +131,6 @@ class ExcludeRegionsPipe(Pipe):
 
     self.excludeRegions = {'excludeRegions': regions}
     self.pipeline._kwargs.update(self.excludeRegions)
-    print('PPPPP',self.pipeline._kwargs)
 
 
 

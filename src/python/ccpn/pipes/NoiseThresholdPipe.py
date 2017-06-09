@@ -77,8 +77,11 @@ class NoiseThresholdPipe(Pipe):
 
   def runPipe(self, params):
     '''
-    :param data:
-    :return:
+
+    For Now this pipe is a special case because it doesn't return a new inputData for the next pipe, but set
+    _kwargs in the pipeline and will be available for the next pipes they might need more then once.
+    If this is run twice, the pipeline will use only the last set.
+
     '''
 
     self.pipeline._kwargs.update(self._kwargs)

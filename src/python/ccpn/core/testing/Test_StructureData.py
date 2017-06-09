@@ -206,12 +206,21 @@ class TestPandasData(WrapperTesting):
     self.data.sort_values('origIndex', inplace=True)
     self.data.index = self.data['origIndex']
 
+    # ejb - CANNOT UNDO PAST THIS POINT AS NOT USING CCPNSORT
+    #       ONLY CCPN OPERATIONS CAN BE PERFORMED ON PANDAS DATAFRAMES
+    #       IF THE INTEGRITY OF THE UNDO LIST IS TO BE PRESERVED
+
     ll = ['nmrChainCode', 'nmrSequenceCode', 'nmrAtomName']
     self.data.ccpnSort(*ll)
     self.assertEquals(list(self.data['origIndex']),
                       [17, 18, 16, 8, 15, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1])
-    self.data.sort_values('origIndex', inplace=True)
-    self.data.index = self.data['origIndex']
+
+    # self.data.sort_values('origIndex', inplace=True)
+    # self.data.index = self.data['origIndex']
+    self.data.ccpnSort('origIndex')                   # same as the above 2 lines
+
+    self.undo.undo()
+    self.undo.redo()
 
     namedTuple = self.data.as_namedtuples()[4]
     AtomRecord = namedTuple.__class__
@@ -248,10 +257,19 @@ class TestPandasData(WrapperTesting):
     self.data.setValues(1, x=1.0, y=1.0)
     self.data.setValues(2, x=1.0, y=1.0)
 
-    self.undo.undo()        # ejb
-    self.undo.undo()        # ejb
-    self.undo.undo()        # ejb
-    self.undo.undo()        # ejb
+    self.undo.undo()        # Can undo 7 points to the self.data.sort_values
+    self.undo.undo()        # but not any further as this is not supported by Ccpn
+    self.undo.undo()
+    self.undo.undo()
+
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+
     self.undo.redo()
     self.undo.redo()
     self.undo.redo()

@@ -36,6 +36,19 @@ import numpy as np
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 
 ########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+PipeName = 'Calculate Peak Areas'
+
+ExcludeRegions = 'excludeRegions'
+ReferencePeakList = 'referencePeakList'
+NoiseThreshold = 'noiseThreshold'
+NegativePeaks =  'negativePeaks'
+MinimalLineWidth =  'minimalLineWidth'
+
+########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
@@ -52,7 +65,7 @@ from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 class CalculateAreaGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Calculate Peak Areas'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(CalculateAreaGuiPipe, self)
@@ -60,7 +73,7 @@ class CalculateAreaGuiPipe(GuiPipe):
     self.parent = parent
 
     self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(0, 0))
-    self.referencePeakList= PulldownList(self.pipeFrame, grid=(0, 1))
+    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, grid=(0, 1)))
     self._updateWidgets()
 
   def _updateWidgets(self):
@@ -88,14 +101,14 @@ class CalculateAreaGuiPipe(GuiPipe):
 class CalculateAreaPipe(SpectraPipe):
 
   guiPipe = CalculateAreaGuiPipe
-  pipeName = guiPipe.pipeName
+  pipeName = PipeName
 
   _kwargs =       {
-                   'referencePeakList' : 'pid',
-                   'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
-                   'noiseRegions': [0.0, 0.0],
-                   'negative': False,
-                   'minimalLineWidth' : 0.01,
+                    ReferencePeakList : 'peakList.pid',
+                    ExcludeRegions: [[0.0, 0.0], [0.0, 0.0]],
+                    NoiseThreshold: [0.0, 0.0],
+                    NegativePeaks: False,
+                    MinimalLineWidth: 0.01,
                    }
 
 
@@ -105,18 +118,18 @@ class CalculateAreaPipe(SpectraPipe):
     :return:
     '''
 
-    if 'noiseThreshold' in self.pipeline._kwargs:
-      positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
+    if NoiseThreshold in self.pipeline._kwargs:
+      positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
     else:
-      positiveNoiseThreshold = max(self._kwargs['noiseThreshold'])
+      positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
-    if 'minimalLineWidth' in self.pipeline._kwargs:
-      minimalLineWidth = self.pipeline._kwargs['minimalLineWidth']
+    if MinimalLineWidth in self.pipeline._kwargs:
+      minimalLineWidth = self.pipeline._kwargs[MinimalLineWidth]
     else:
-      minimalLineWidth = self._kwargs['minimalLineWidth']
+      minimalLineWidth = self._kwargs[MinimalLineWidth]
 
     for spectrum in spectra:
-      referencePeakListPid = self._kwargs['referencePeakList']
+      referencePeakListPid = self._kwargs[ReferencePeakList]
       referencePeakList = self.project.getByPid(referencePeakListPid)
 
       if referencePeakList is not None:

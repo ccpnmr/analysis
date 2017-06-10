@@ -40,6 +40,15 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 
 
 ########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+PipeName = 'Output Pipeline'
+SaveAsHDF5path = 'saveAsHDF5path'
+
+
+########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
@@ -56,7 +65,7 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 class OutputPipelineGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Output Pipeline'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(OutputPipelineGuiPipe, self)
@@ -65,7 +74,8 @@ class OutputPipelineGuiPipe(GuiPipe):
 
     self.saveAsHDF5CheckBox = CheckBox(self.pipeFrame, checked=True, text='Save output spectra as HDF5',  grid=(0,0))
     self.saveAsHDF5Label = Label(self.pipeFrame, 'Saving  directory path',  grid=(0,1))
-    self.saveAsHDF5LineEdit = LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(0,2))
+    setattr(self, SaveAsHDF5path,
+            LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(0,2)))
 
 
 
@@ -77,7 +87,7 @@ class OutputPipelineGuiPipe(GuiPipe):
 class OutputSpectraPipe(SpectraPipe):
 
   guiPipe = OutputPipelineGuiPipe
-  pipeName = guiPipe.pipeName
+  pipeName = PipeName
 
 
   def runPipe(self, spectra):

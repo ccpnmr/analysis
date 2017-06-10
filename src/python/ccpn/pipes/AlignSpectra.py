@@ -35,6 +35,13 @@ from scipy import signal
 import numpy as np
 
 
+########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+ReferenceSpectrum = 'referenceSpectrum'
+PipeName = 'AlignSpectra'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -82,14 +89,15 @@ def _alignSpectra(referenceSpectrum, spectra):
 class AlignSpectraGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'AlignSpectra'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(AlignSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
+    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame,  grid=(0,1)) )
+
     self._updateWidgets()
 
   def _updateWidgets(self):
@@ -115,10 +123,10 @@ class AlignSpectraGuiPipe(GuiPipe):
 class AlignSpectra(SpectraPipe):
 
   guiPipe = AlignSpectraGuiPipe
-  pipeName = AlignSpectraGuiPipe.pipeName
+  pipeName = PipeName
 
   _kwargs  =   {
-                 'referenceSpectrum': ''
+               ReferenceSpectrum: 'spectrum.pid'
                }
 
 
@@ -129,7 +137,7 @@ class AlignSpectra(SpectraPipe):
     :return: aligned spectra
     '''
     if self.project is not None:
-      referenceSpectrumPid = self._kwargs['referenceSpectrum']
+      referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
       referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
       if referenceSpectrum is not None:
         spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]

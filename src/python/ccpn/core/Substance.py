@@ -424,7 +424,8 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
-    # if dd:
+    if dd is None:
+      dd = self._ccpnInternalData['_specificAtomLabelling'] = {}
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
     dd[(residueIndex, atom.name)] = isotopeLabels
@@ -447,10 +448,17 @@ class Substance(AbstractWrapperObject):
 
     dd = self._ccpnInternalData.get('_specificAtomLabelling')
 
+    if dd is None:
+      raise ValueError("Cannot remove - no atom labelling data present.")
+
     # if dd:
     residue = atom.residue
     residueIndex = residue.chain.residues.index(residue)
-    del dd[(residueIndex, atom.name)]
+    tt = (residueIndex, atom.name)
+    if tt in dd:
+      del dd[(residueIndex, atom.name)]
+    else:
+      raise ValueError("Cannot remove - no atom labelling data for %s." % atom.longPid)
 
   def getSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']) -> typing.Dict[str,float]:
     """Get specificAtomLabelling dictionary for atom.

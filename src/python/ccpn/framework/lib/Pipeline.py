@@ -96,7 +96,7 @@ class Pipeline(object):
       for pipe in self.queue:
         if pipe is not None:
             pipe.inputData = self.inputData
-            result = pipe.runPipe(pipe._kwargs)
+            result = pipe.runPipe(self.inputData)
             self.inputData = result
             # self.queue.remove(pipe)
 

@@ -62,16 +62,12 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.parent = parent
 
     self.addRemoveLabel = Label(self.pipeFrame, text="Add Region", grid=(0, 0))
-    self.addRemoveLabel.isProtected = True
     self.addRemoveButtons = ButtonList(self.pipeFrame, texts=["+", "-"], callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
-    self.addRemoveButtons.isProtected = True
     self.count = 1
-
 
     self.excludeRegion1Label = Label(self.pipeFrame, text="Select Region "+str(self.count), grid=(self.count , 0))
     self.excludeRegion1 = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
                                                 grid=(self.count , 1))
-
     self.count += 1
 
   ############       Gui Callbacks      ###########
@@ -84,7 +80,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.count+=1
 
   def _deleteRegions(self):
-    '''   '''
+    '''  delete the widget from layout. '''
     positions = []
     for row in range(self.count):
       positions.append((row, 0))

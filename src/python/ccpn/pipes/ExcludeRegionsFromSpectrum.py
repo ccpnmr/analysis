@@ -37,7 +37,14 @@ from ccpn.ui.gui.widgets.Label import Label
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 
+########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
 
+PipeName = 'Exclude Regions'
+Region = 'region'
+ExcludeRegions = 'excludeRegions'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -54,7 +61,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 class ExcludeRegionsGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Exclude Regions'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(ExcludeRegionsGuiPipe, self)
@@ -66,16 +73,16 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.count = 1
 
     self.excludeRegion1Label = Label(self.pipeFrame, text="Select Region "+str(self.count), grid=(self.count , 0))
-    self.excludeRegion1 = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
-                                                grid=(self.count , 1))
+    setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                                    orientation='v', grid=(self.count, 1)))
     self.count += 1
 
   ############       Gui Callbacks      ###########
 
   def _addRegion(self):
     self.excludeRegionLabel = Label(self.pipeFrame, text="Select Region " + str(self.count), grid=(self.count, 0))
-    w = setattr(self, 'region'+str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='v',
-                                                grid=(self.count , 1)))
+    setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                                  orientation='v', grid=(self.count , 1)))
 
     self.count+=1
 
@@ -111,10 +118,10 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 class ExcludeRegionsPipe(SpectraPipe):
 
   guiPipe = ExcludeRegionsGuiPipe
-  pipeName = guiPipe.pipeName
+  pipeName = PipeName
 
   _kwargs = {
-             'excludeRegions': [[],[]]
+              ExcludeRegions: [[],[]]
              }
 
 
@@ -129,7 +136,7 @@ class ExcludeRegionsPipe(SpectraPipe):
         if len(i) == 2:
           regions.append(i)
 
-    self._kwargs = {'excludeRegions': regions}
+    self._kwargs = {ExcludeRegions: regions}
     self.pipeline._kwargs.update(self._kwargs)
 
     return spectra

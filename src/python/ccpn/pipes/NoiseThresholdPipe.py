@@ -34,6 +34,17 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 
 
 ########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+PipeName = 'Noise Threshold'
+NoiseThreshold = 'noiseThreshold'
+
+
+
+
+########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
@@ -48,7 +59,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 class NoiseThresholdGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Noise Threshold'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(NoiseThresholdGuiPipe, self)
@@ -56,7 +67,8 @@ class NoiseThresholdGuiPipe(GuiPipe):
     self.parent = parent
 
     self.noiseThresholdLabel = Label(self.pipeFrame, text="Select Noise threshold", grid=(0, 0))
-    self.noiseThreshold = TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1))
+    setattr(self, NoiseThreshold,
+            TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
 
 
 
@@ -71,10 +83,10 @@ class NoiseThresholdGuiPipe(GuiPipe):
 class NoiseThresholdPipe(SpectraPipe):
 
   guiPipe = NoiseThresholdGuiPipe
-  pipeName = guiPipe.pipeName
+  pipeName = PipeName
 
   _kwargs = {
-              'noiseThreshold': [0,0]
+             NoiseThreshold: [0,0]
             }
 
   def runPipe(self, spectra):

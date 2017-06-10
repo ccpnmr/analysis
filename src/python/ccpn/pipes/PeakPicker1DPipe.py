@@ -35,6 +35,20 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.framework.lib.Pipe import SpectraPipe
 
 
+########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+PipeName =  'Peak Picker 1D'
+
+ExcludeRegions = 'excludeRegions'
+NoiseThreshold = 'noiseThreshold'
+NegativePeaks =  'negativePeaks'
+MaximumFilterSize =  'maximumFilterSize'
+MaximumFilterMode =  'maximumFilterMode'
+MinimalLineWidth =  'minimalLineWidth'
+Modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -52,7 +66,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 class PeakPicker1DGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'Peak Picker 1D'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(PeakPicker1DGuiPipe, self)
@@ -61,19 +75,16 @@ class PeakPicker1DGuiPipe(GuiPipe):
 
     gridRow = 0
     self.pickNegativeLabel = Label(self.pipeFrame, text='Pick negative peaks', grid=(gridRow, 0))
-    self.pickNegative = CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1))
+    setattr(self, NegativePeaks,CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1)))
 
 
     gridRow += 1
     self.maximumFilterSize = Label(self.pipeFrame, text="Select Maximum Filter Size", grid=(gridRow, 0))
-    self.maximumFilterSize = Spinbox(self.pipeFrame, grid=(gridRow, 1))
-    self.maximumFilterSize.setValue(5)
-    self.maximumFilterSize.setMaximum(15)
-
+    setattr(self, MaximumFilterSize, Spinbox(self.pipeFrame, value=5, max=15, grid=(gridRow, 1)))
     gridRow += 1
-    modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
+
     self.maximumFilterMode = Label(self.pipeFrame, text="Select Maximum Filter Mode", grid=(gridRow, 0))
-    self.maximumFilterMode = PulldownList(self.pipeFrame, texts=modes, grid=(gridRow, 1))
+    setattr(self, MaximumFilterMode, PulldownList(self.pipeFrame, texts=Modes, grid=(gridRow, 1)))
 
 
 
@@ -88,56 +99,47 @@ class PeakPicker1DGuiPipe(GuiPipe):
 class PeakPicker1DPipe(SpectraPipe):
 
   guiPipe = PeakPicker1DGuiPipe
-  pipeName = PeakPicker1DGuiPipe.pipeName
+  pipeName = PipeName
 
   _kwargs =   {
-               'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
-               'noiseRegions': [0.0, 0.0],
-               'maximumFilterSize': 5,
-               'maximumFilterMode': 'wrap',
-               'noiseLevelMode': 'Estimated',
-               'pickNegative': True
+               ExcludeRegions: [[0.0, 0.0], [0.0, 0.0]],
+               NoiseThreshold: [0.0, 0.0],
+               MaximumFilterSize: 5,
+               MaximumFilterMode: Modes[0],
+               NegativePeaks: True
               }
 
-  def runPipe(self, params):
+  def runPipe(self, spectra):
     '''
     :param data:
     :return:
     '''
-    if self.inputData is not None:
-      if 'maximumFilterSize' in self._kwargs:
-        maximumFilterSize = self._kwargs['maximumFilterSize']
-      else:
-        maximumFilterSize = self._kwargs['maximumFilterSize']
 
-      if 'maximumFilterMode' in self._kwargs:
-        maximumFilterMode = self._kwargs['maximumFilterMode']
-      else:
-        maximumFilterMode = self._kwargs['maximumFilterMode']
+    maximumFilterSize = self._kwargs[MaximumFilterSize]
+    maximumFilterMode = self._kwargs[MaximumFilterMode]
+    negativePeaks = self._kwargs[NegativePeaks]
 
-      if 'noiseThreshold' in self.pipeline._kwargs:
-        positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
-        negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
-      else:
-        positiveNoiseThreshold = max(self._kwargs['noiseThreshold'])
-        negativeNoiseThreshold = min(self._kwargs['noiseThreshold'])
+    if NoiseThreshold in self.pipeline._kwargs:
+      positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
+      negativeNoiseThreshold = min(self.pipeline._kwargs[NoiseThreshold])
+    else:
+      positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+      negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
 
-      if 'excludeRegions' in self.pipeline._kwargs:
-        excludeRegions = self.pipeline._kwargs['excludeRegions']
-      else:
-        excludeRegions = self._kwargs['excludeRegions']
+    if ExcludeRegions in self.pipeline._kwargs:
+      excludeRegions = self.pipeline._kwargs[ExcludeRegions]
+    else:
+      excludeRegions = self._kwargs[ExcludeRegions]
 
-      if 'pickNegative' in self._kwargs:
-        pickNegative = self._kwargs['pickNegative']
-      else:
-        pickNegative = self._kwargs['pickNegative']
+    for spectrum in self.inputData:
+      spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
+                                                positiveNoiseThreshold=positiveNoiseThreshold,
+                                                negativeNoiseThreshold=negativeNoiseThreshold,
+                                                excludeRegions= excludeRegions,
+                                                negativePeaks=negativePeaks)
 
-      for spectrum in self.inputData:
-        spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
-                                                  positiveNoiseThreshold=positiveNoiseThreshold,
-                                                  negativeNoiseThreshold=negativeNoiseThreshold,
-                                                  excludeRegions= excludeRegions,
-                                                  negativePeaks=pickNegative)
+    return spectra
+
 
 
 PeakPicker1DPipe.register() # Registers the pipe in the pipeline

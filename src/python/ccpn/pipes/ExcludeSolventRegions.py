@@ -27,10 +27,19 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions as ER
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
+
+
+########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+PipeName = 'Exclude Solvent Regions'
+ExcludeRegions = 'excludeRegions'
 
 
 ########################################################################################################################
@@ -48,13 +57,13 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 class ExcludeRegionsGuiPipe(GuiPipe):
 
   preferredPipe = False
-  pipeName = 'Exclude Solvent Regions'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.excludeRegions = ExcludeRegions(self)
+    setattr(self, ExcludeRegions , ER(self))
     self.pipeLayout.addWidget(self.excludeRegions)
 
 
@@ -70,9 +79,9 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 class ExcludeRegionsPipe(SpectraPipe):
 
   guiPipe = ExcludeRegionsGuiPipe
-  pipeName = guiPipe.pipeName
+  pipeName =PipeName
   _kwargs = {
-            'excludeRegions': [[], []]
+            ExcludeRegions: [[], []]
             }
 
   def runPipe(self, spectra):

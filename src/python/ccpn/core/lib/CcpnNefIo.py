@@ -1550,7 +1550,7 @@ class CcpnNefWriter:
         try:
           data[neftag] = attrgetter(attrstring)(spectrum)
         except AttributeError:
-          sys.stderr.write("Could not get %s from Spectrum %s\n" % (attrstring, spectrum))
+          self.project._logger.debug("Could not get %s from Spectrum %s\n" % (attrstring, spectrum))
 
     aliasingLimits = spectrum.aliasingLimits
     for ii in range(spectrum.dimensionCount):
@@ -1928,7 +1928,7 @@ class CcpnNefWriter:
             # The dotted navigation expression can not always be followed
             # as is the case e.g. for (PeakList.)spectrum._wrappedData.dataStore.headerSize'
             # where the dataStore is sometimes None
-            sys.stderr.write("Could not get %s from %s\n" % (itemvalue, wrapperObj))
+            self.project._logger.debug("Could not get %s from %s\n" % (itemvalue, wrapperObj))
         else:
           # This is a loop
           assert itemvalue == _isALoop, "Invalid item specifier in Nef2CcpnMap: %s" % (itemvalue,)

@@ -33,41 +33,11 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.framework.lib.Pipe import Pipe
 from scipy import signal
 import numpy as np
-
-
+from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
-
-
-def _getShift(ref_x, ref_y, target_y):
-  '''
-
-  :param ref_x: X array of the reference spectra (positions)
-  :param ref_y: Y array of the reference spectra (intensities)
-  :param target_y: Y array of the target spectra (intensities)
-  :return: the shift needed to align the two spectra.
-  To align the target spectrum to its reference: add the shift to the x array.
-  E.g. target_y += shift
-
-  '''
-  return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
-
-
-def _alignSpectra(referenceSpectrum, spectra):
-
-  alignedSpectra = []
-  for sp in spectra:
-    shift = _getShift(ref_x=referenceSpectrum.positions, ref_y=referenceSpectrum.intensities, target_y=sp.intensities)
-    sp._positions = sp.positions
-    sp._positions += shift
-    alignedSpectra.append(sp)
-  return alignedSpectra
-
-
-
 
 
 
@@ -79,28 +49,31 @@ def _alignSpectra(referenceSpectrum, spectra):
 
 
 
-class AlignSpectraGuiPipe(GuiPipe):
+class CalculateAreaGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'AlignSpectra'
+  pipeName = 'Calculate Peak Areas'
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(AlignSpectraGuiPipe, self)
+    super(CalculateAreaGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
+
+    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(0, 0))
+    self.referencePeakList= PulldownList(self.pipeFrame, grid=(0, 1))
     self._updateWidgets()
 
   def _updateWidgets(self):
     self._setDataReferenceSpectrum()
 
-
   def _setDataReferenceSpectrum(self):
     data = list(self.inputData)
-    if len(data)>0:
-      self.referenceSpectrum.setData(texts=[sp.pid for sp in data], objects=data)
-
+    if len(data) > 0:
+      for spectrum in data:
+        if spectrum is not None:
+          if spectrum.peakLists:
+            pls = spectrum.peakLists
+            self.referencePeakList.setData(texts=[pl.pid for pl in pls], objects=pls)
 
 
 
@@ -112,11 +85,15 @@ class AlignSpectraGuiPipe(GuiPipe):
 
 
 
-class AlignSpectra(Pipe):
+class CalculateAreaPipe(Pipe):
 
-  guiPipe = AlignSpectraGuiPipe
-  pipeName = AlignSpectraGuiPipe.pipeName
+  guiPipe = CalculateAreaGuiPipe
+  pipeName = guiPipe.pipeName
 
+  defaultParams = {'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
+                   'noiseRegions': [0.0, 0.0],
+                   'negative': False
+                   }
 
 
   def runPipe(self, params):
@@ -124,20 +101,35 @@ class AlignSpectra(Pipe):
     :param data:
     :return:
     '''
+
     print(self.project)
-    if self.project is not None:
+    try:
+      if 'noiseThreshold' in self.pipeline._kwargs:
+        positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
+        negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
+      else:
+        positiveNoiseThreshold = max(self.defaultParams['noiseThreshold'])
+        negativeNoiseThreshold = min(self.defaultParams['noiseThreshold'])
+    except:
+      positiveNoiseThreshold = None
+      negativeNoiseThreshold = None
 
-      referenceSpectrumPid = params['referenceSpectrum']
-      referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
-      if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
-
-        if spectra:
-          _alignSpectra(referenceSpectrum, spectra)
-          print('finished')
+    for spectrum in self.inputData:
+      # _addAreaValuesToPeaks(spectrum, spectrum.peakLists[0], noiseThreshold=positiveNoiseThreshold, minimalLineWidth = 0.01)
 
 
 
-AlignSpectra.register() # Registers the pipe in the pipeline
+      if 'referencePeakList' in self._kwargs:
+        referencePeakListPid = self._kwargs['referencePeakList']
+
+        referencePeakList = self.project.getByPid(referencePeakListPid)
+        if referencePeakList is not None:
+          if referencePeakList.peaks:
+            _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = 0.01)
+          else:
+            print('Error. No peaks found.' )
+
+
+CalculateAreaPipe.register() # Registers the pipe in the pipeline
 
 

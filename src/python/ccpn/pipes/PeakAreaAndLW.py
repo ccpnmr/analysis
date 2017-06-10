@@ -90,7 +90,8 @@ class CalculateAreaPipe(SpectraPipe):
   guiPipe = CalculateAreaGuiPipe
   pipeName = guiPipe.pipeName
 
-  _kwargs =       {'referencePeakList' : 'pid',
+  _kwargs =       {
+                   'referencePeakList' : 'pid',
                    'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
                    'noiseRegions': [0.0, 0.0],
                    'negative': False,
@@ -106,10 +107,8 @@ class CalculateAreaPipe(SpectraPipe):
 
     if 'noiseThreshold' in self.pipeline._kwargs:
       positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
-      negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
     else:
       positiveNoiseThreshold = max(self._kwargs['noiseThreshold'])
-      negativeNoiseThreshold = min(self._kwargs['noiseThreshold'])
 
     if 'minimalLineWidth' in self.pipeline._kwargs:
       minimalLineWidth = self.pipeline._kwargs['minimalLineWidth']
@@ -124,7 +123,7 @@ class CalculateAreaPipe(SpectraPipe):
           if referencePeakList.peaks:
             _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:
-            print('Error. No peaks found.' )
+            print('Error. No peaks to assign volume found. Pick the peaks first' )
 
     return spectra
 

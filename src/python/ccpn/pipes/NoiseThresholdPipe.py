@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import SpectraPipe
 
 
 ########################################################################################################################
@@ -68,25 +68,25 @@ class NoiseThresholdGuiPipe(GuiPipe):
 
 
 
-class NoiseThresholdPipe(Pipe):
+class NoiseThresholdPipe(SpectraPipe):
 
   guiPipe = NoiseThresholdGuiPipe
   pipeName = guiPipe.pipeName
 
 
 
-  def runPipe(self, params):
+  def runPipe(self, spectra):
     '''
 
     For Now this pipe is a special case because it doesn't return a new inputData for the next pipe, but set
     _kwargs in the pipeline and will be available for the next pipes they might need more then once.
     If this is run twice, the pipeline will use only the last set.
-
+    Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
 
     self.pipeline._kwargs.update(self._kwargs)
 
-
+    return spectra
 
 
 

@@ -177,7 +177,6 @@ class TargetButtonSpinBoxes(Widget, Base):
     '''
     :return: positions displayed on the boxes
     '''
-    print(self.spinBoxes)
     if len(self.spinBoxes)>0:
       return [sb.value() for sb in self.spinBoxes]
     else:

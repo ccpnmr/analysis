@@ -27,18 +27,12 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
-import pyqtgraph as pg
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
-from functools import partial
-
+from ccpn.framework.lib.Pipe import SpectraPipe
 
 
 
@@ -91,18 +85,19 @@ class PeakPicker1DGuiPipe(GuiPipe):
 
 
 
-class PeakPicker1DPipe(Pipe):
+class PeakPicker1DPipe(SpectraPipe):
 
   guiPipe = PeakPicker1DGuiPipe
   pipeName = PeakPicker1DGuiPipe.pipeName
 
-  defaultParams = {'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
-                   'noiseRegions': [0.0, 0.0],
-                   'maximumFilterSize': 5,
-                   'maximumFilterMode': 'wrap',
-                   'noiseLevelMode': 'Estimated',
-                   'pickNegative': True
-                   }
+  _kwargs =   {
+               'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
+               'noiseRegions': [0.0, 0.0],
+               'maximumFilterSize': 5,
+               'maximumFilterMode': 'wrap',
+               'noiseLevelMode': 'Estimated',
+               'pickNegative': True
+              }
 
   def runPipe(self, params):
     '''
@@ -113,36 +108,29 @@ class PeakPicker1DPipe(Pipe):
       if 'maximumFilterSize' in self._kwargs:
         maximumFilterSize = self._kwargs['maximumFilterSize']
       else:
-        maximumFilterSize = self.defaultParams['maximumFilterSize']
+        maximumFilterSize = self._kwargs['maximumFilterSize']
 
       if 'maximumFilterMode' in self._kwargs:
         maximumFilterMode = self._kwargs['maximumFilterMode']
       else:
-        maximumFilterMode = self.defaultParams['maximumFilterMode']
+        maximumFilterMode = self._kwargs['maximumFilterMode']
 
-      try:
-        if 'noiseThreshold' in self.pipeline._kwargs:
-          positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
-          negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
-        else:
-          positiveNoiseThreshold = max(self.defaultParams['noiseThreshold'])
-          negativeNoiseThreshold = min(self.defaultParams['noiseThreshold'])
-      except:
-        positiveNoiseThreshold = None
-        negativeNoiseThreshold = None
+      if 'noiseThreshold' in self.pipeline._kwargs:
+        positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
+        negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
+      else:
+        positiveNoiseThreshold = max(self._kwargs['noiseThreshold'])
+        negativeNoiseThreshold = min(self._kwargs['noiseThreshold'])
 
-      try:
-        if 'excludeRegions' in self.pipeline._kwargs:
-          excludeRegions = self.pipeline._kwargs['excludeRegions']
-        else:
-          excludeRegions = self.defaultParams['excludeRegions']
-      except:
-        excludeRegions = None
+      if 'excludeRegions' in self.pipeline._kwargs:
+        excludeRegions = self.pipeline._kwargs['excludeRegions']
+      else:
+        excludeRegions = self._kwargs['excludeRegions']
 
       if 'pickNegative' in self._kwargs:
         pickNegative = self._kwargs['pickNegative']
       else:
-        pickNegative = self.defaultParams['pickNegative']
+        pickNegative = self._kwargs['pickNegative']
 
       for spectrum in self.inputData:
         spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,

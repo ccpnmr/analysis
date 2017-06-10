@@ -73,7 +73,9 @@ class NoiseThresholdPipe(SpectraPipe):
   guiPipe = NoiseThresholdGuiPipe
   pipeName = guiPipe.pipeName
 
-
+  _kwargs = {
+              'noiseThreshold': [0,0]
+            }
 
   def runPipe(self, spectra):
     '''

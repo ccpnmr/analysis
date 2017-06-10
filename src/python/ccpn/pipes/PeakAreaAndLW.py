@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
@@ -85,49 +85,48 @@ class CalculateAreaGuiPipe(GuiPipe):
 
 
 
-class CalculateAreaPipe(Pipe):
+class CalculateAreaPipe(SpectraPipe):
 
   guiPipe = CalculateAreaGuiPipe
   pipeName = guiPipe.pipeName
 
-  defaultParams = {'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
+  _kwargs =       {'referencePeakList' : 'pid',
+                   'excludeRegions': [[0.0, 0.0], [0.0, 0.0]],
                    'noiseRegions': [0.0, 0.0],
-                   'negative': False
+                   'negative': False,
+                   'minimalLineWidth' : 0.01,
                    }
 
 
-  def runPipe(self, params):
+  def runPipe(self, spectra):
     '''
     :param data:
     :return:
     '''
 
-    print(self.project)
-    try:
-      if 'noiseThreshold' in self.pipeline._kwargs:
-        positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
-        negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
-      else:
-        positiveNoiseThreshold = max(self.defaultParams['noiseThreshold'])
-        negativeNoiseThreshold = min(self.defaultParams['noiseThreshold'])
-    except:
-      positiveNoiseThreshold = None
-      negativeNoiseThreshold = None
+    if 'noiseThreshold' in self.pipeline._kwargs:
+      positiveNoiseThreshold = max(self.pipeline._kwargs['noiseThreshold'])
+      negativeNoiseThreshold = min(self.pipeline._kwargs['noiseThreshold'])
+    else:
+      positiveNoiseThreshold = max(self._kwargs['noiseThreshold'])
+      negativeNoiseThreshold = min(self._kwargs['noiseThreshold'])
 
-    for spectrum in self.inputData:
-      # _addAreaValuesToPeaks(spectrum, spectrum.peakLists[0], noiseThreshold=positiveNoiseThreshold, minimalLineWidth = 0.01)
+    if 'minimalLineWidth' in self.pipeline._kwargs:
+      minimalLineWidth = self.pipeline._kwargs['minimalLineWidth']
+    else:
+      minimalLineWidth = self._kwargs['minimalLineWidth']
 
+    for spectrum in spectra:
+      referencePeakListPid = self._kwargs['referencePeakList']
+      referencePeakList = self.project.getByPid(referencePeakListPid)
 
-
-      if 'referencePeakList' in self._kwargs:
-        referencePeakListPid = self._kwargs['referencePeakList']
-
-        referencePeakList = self.project.getByPid(referencePeakListPid)
-        if referencePeakList is not None:
+      if referencePeakList is not None:
           if referencePeakList.peaks:
-            _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = 0.01)
+            _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:
             print('Error. No peaks found.' )
+
+    return spectra
 
 
 CalculateAreaPipe.register() # Registers the pipe in the pipeline

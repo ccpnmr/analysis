@@ -51,6 +51,7 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
+# TODO: all the pipe!
 
 class OutputPipelineGuiPipe(GuiPipe):
 
@@ -112,5 +113,5 @@ class OutputSpectraPipe(SpectraPipe):
 
 
 
-OutputSpectraPipe.register()
+# OutputSpectraPipe.register()
 

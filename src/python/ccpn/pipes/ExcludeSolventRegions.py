@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 #### NON GUI IMPORTS
@@ -44,6 +45,7 @@ import copy
 ########################################################################################################################
 
 
+# FIXME Broken Pipe on _kwargs!!
 
 class ExcludeRegionsGuiPipe(GuiPipe):
 
@@ -56,25 +58,17 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.parent = parent
     self.excludeRegionsWidget = ExcludeRegions(self)
     self.pipeLayout.addWidget(self.excludeRegionsWidget)
-
+    self.button = Button(None, 'Refresh', callback=self._setRegions)
+    self.pipeLayout.addWidget(self.button)
 
   ############       Gui Callbacks      ###########
 
 
-  def _getRegions(self):
-    params = self.excludeRegionsWidget.getSolventsAndValues()
+  def _setRegions(self):
+    params = self.excludeRegionsWidget._getExcludedRegions()
+    if params is not None:
+        self.pipe._updateRunArgs( 'excludeRegions', params)
 
-    return params
-
-  def _setParams(self):
-    originalSolvents = copy.deepcopy(self.excludeRegionsWidget.solvents)
-    for solvent in sorted(self.params.keys()):
-      try:
-        self.excludeRegionsWidget.solvents = self.params
-        self.excludeRegionsWidget._addRegions(solvent)
-      except:
-        pass
-    self.excludeRegionsWidget.solvents = originalSolvents
 
 
 ########################################################################################################################
@@ -88,20 +82,17 @@ class ExcludeRegionsPipe(SpectraPipe):
 
   guiPipe = ExcludeRegionsGuiPipe
   pipeName = guiPipe.pipeName
-  _kwargs = ExcludeRegions.solvents
-  print(_kwargs)
 
   def runPipe(self, spectra):
     '''
     :return:
     '''
 
-    print(self._kwargs, 'Not implemented yet')
+    print('This pipe has not been implemented yet. Use ExcludeRegionsFromSpectrum instead.')
+    return spectra
 
 
 
-
-
-ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
+# ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
 
 

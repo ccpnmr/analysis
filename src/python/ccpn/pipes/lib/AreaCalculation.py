@@ -133,7 +133,7 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
 
   # TODO excludeRegions
   x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-  if noiseThreshold is None:
+  if noiseThreshold is None or 0.0:
     intersectingLine = None
   else:
     intersectingLine = [noiseThreshold] * len(x)

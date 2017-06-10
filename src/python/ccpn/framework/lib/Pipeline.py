@@ -43,10 +43,7 @@ class Pipeline(object):
     self.pipelineName = pipelineName
     self._kwargs = {}
 
-    if pipes is not None:
-      self.pipes = [cls() for cls in pipes]
-    else:
-      self.pipes = []
+
 
     self.inputData = set()
     self.queue = [] # Pipes to be ran
@@ -64,6 +61,10 @@ class Pipeline(object):
       except AttributeError:
         pass
 
+    if pipes is not None:
+      self.pipes = [cls(application=application) for cls in pipes]
+    else:
+      self.pipes = []
 
   @property
   def pipes(self):
@@ -95,8 +96,8 @@ class Pipeline(object):
       for pipe in self.queue:
         if pipe is not None:
             pipe.inputData = self.inputData
-            pipe.runPipe(pipe._kwargs)
+            result = pipe.runPipe(pipe._kwargs)
+            self.inputData = result
             # self.queue.remove(pipe)
-    print('Ran', self._kwargs)
-    print(' self.queue',  self.queue)
+
 

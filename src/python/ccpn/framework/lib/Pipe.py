@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from abc import ABC
 from abc import abstractmethod
-
+from typing import List
 
 
 class Pipe(ABC):
@@ -115,9 +115,9 @@ except ImportError:
 
 class SpectraPipe(Pipe):
   '''
-      A pipe where the run method accepts a list of spectra and returns a a list of spectra
+      A pipe where the run method accepts a list of spectra and returns a list of spectra
   '''
 
   @abstractmethod
-  def runPipe(self, spectra):
+  def runPipe(self, spectra) -> List['Spectrum']:
     return spectra

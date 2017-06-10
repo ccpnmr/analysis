@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
 
@@ -112,29 +112,30 @@ class AlignSpectraGuiPipe(GuiPipe):
 
 
 
-class AlignSpectra(Pipe):
+class AlignSpectra(SpectraPipe):
 
   guiPipe = AlignSpectraGuiPipe
   pipeName = AlignSpectraGuiPipe.pipeName
 
+  _kwargs  =   {
+                 'referenceSpectrum': ''
+               }
 
 
-  def runPipe(self, params):
+
+  def runPipe(self, spectra):
     '''
-    :param data:
-    :return:
+    :param spectra: inputData
+    :return: aligned spectra
     '''
-    print(self.project)
     if self.project is not None:
-
-      referenceSpectrumPid = params['referenceSpectrum']
+      referenceSpectrumPid = self._kwargs['referenceSpectrum']
       referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
       if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
-
+        spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
         if spectra:
-          _alignSpectra(referenceSpectrum, spectra)
-          print('finished')
+          return _alignSpectra(referenceSpectrum, spectra)
+
 
 
 

@@ -392,7 +392,6 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _addGuiPipe(self, name, selected):
-    print('$£$£', self.guiPipes, name, selected)
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
         position = self.pipelineSettingsParams['addPosit']

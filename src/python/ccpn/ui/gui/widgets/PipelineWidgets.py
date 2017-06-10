@@ -53,6 +53,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 
 from ccpn.framework.lib.Pipe import Pipe
@@ -72,6 +73,7 @@ commonWidgets =           {
                             Spinbox.__name__:               ('value',       'set'       ),
                             TextEditor.__name__:            ('get',         'setText'   ),
                             TargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
+                            ExcludeRegions.__name__:        ('_getExcludedRegions', '_set' ),
 
 
                             # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs

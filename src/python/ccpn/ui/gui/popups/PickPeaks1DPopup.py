@@ -156,6 +156,17 @@ class ExcludeRegions(Widget,Base):
     if len(excludedRegions)>0:
       return [item for sublist in excludedRegions for item in sublist]
 
+  def _set(self):
+    pass
+    # import  copy
+    # originalSolvents = copy.deepcopy(self.solvents)
+    # for solvent in sorted(self.params.keys()):
+    #   try:
+    #     self.solvents = self.params
+    #     self._addRegions(solvent)
+    #   except:
+    #     pass
+    # self.solvents = originalSolvents
 
   def _chunks(self, l, n):
     """Yield successive n-sized chunks from list. Needed this format!"""

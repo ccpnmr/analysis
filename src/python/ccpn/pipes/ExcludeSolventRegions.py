@@ -31,21 +31,19 @@ from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-import copy
 
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
+## NONE
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
 
-# FIXME Broken Pipe on _kwargs!!
 
 class ExcludeRegionsGuiPipe(GuiPipe):
 
@@ -56,18 +54,9 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.excludeRegionsWidget = ExcludeRegions(self)
-    self.pipeLayout.addWidget(self.excludeRegionsWidget)
-    self.button = Button(None, 'Refresh', callback=self._setRegions)
-    self.pipeLayout.addWidget(self.button)
+    self.excludeRegions = ExcludeRegions(self)
+    self.pipeLayout.addWidget(self.excludeRegions)
 
-  ############       Gui Callbacks      ###########
-
-
-  def _setRegions(self):
-    params = self.excludeRegionsWidget._getExcludedRegions()
-    if params is not None:
-        self.pipe._updateRunArgs( 'excludeRegions', params)
 
 
 
@@ -82,17 +71,23 @@ class ExcludeRegionsPipe(SpectraPipe):
 
   guiPipe = ExcludeRegionsGuiPipe
   pipeName = guiPipe.pipeName
+  _kwargs = {
+            'excludeRegions': [[], []]
+            }
 
   def runPipe(self, spectra):
     '''
-    :return:
+    :get excluded region of the spectrum and add to the pipeline kwargs.
+    Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
 
-    print('This pipe has not been implemented yet. Use ExcludeRegionsFromSpectrum instead.')
+    self.pipeline._kwargs.update(self._kwargs)
     return spectra
 
 
 
-# ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
+
+
+ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
 
 

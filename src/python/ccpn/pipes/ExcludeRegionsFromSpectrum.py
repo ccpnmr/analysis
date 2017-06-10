@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import SpectraPipe
 
 
 
@@ -112,26 +112,31 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
 
 
-class ExcludeRegionsPipe(Pipe):
+class ExcludeRegionsPipe(SpectraPipe):
 
   guiPipe = ExcludeRegionsGuiPipe
   pipeName = guiPipe.pipeName
 
-  excludeRegions = {'excludeRegions': [[],[]]}
+  _kwargs = {
+             'excludeRegions': [[],[]]
+             }
 
-  def runPipe(self, params):
+
+  def runPipe(self, spectra):
     '''
-    :param data:
-    :return:
+    get excluded region of the spectrum and add to the pipeline kwargs.
+    Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
     regions = []
     for i in self._kwargs.values():
       if isinstance(i, list):
-        regions.append(i)
+        if len(i) == 2:
+          regions.append(i)
 
-    self.excludeRegions = {'excludeRegions': regions}
-    self.pipeline._kwargs.update(self.excludeRegions)
+    self._kwargs = {'excludeRegions': regions}
+    self.pipeline._kwargs.update(self._kwargs)
 
+    return spectra
 
 
 

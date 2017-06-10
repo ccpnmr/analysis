@@ -173,7 +173,7 @@ class Integral(AbstractWrapperObject):
       else:
         value = peakDim.value
         halfWidth = abs(0.5 * (peakDim.boxWidth or 0) * dataDimRef.valuePerPoint)
-      result.append(value - halfWidth, value + halfWidth)
+      result.append((value - halfWidth, value + halfWidth))
     #
     return result
 

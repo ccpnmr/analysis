@@ -2291,11 +2291,8 @@ class CcpnNefReader:
         loop = saveFrame.get('nef_chemical_shift')
         if loop:
           for row in loop.data:
-            chainCode = row['chain_code']
-
-            # ejb - if the element is . in the file, then it is loaded as None which can't be indexed
-            # have temporarily put a test in here, but don't think it work
-            # if chainCode is not None:
+            # NB the self.defaultChainCode guards against chainCode being None
+            chainCode = row['chain_code'] or self.defaultChainCode
 
             nmrResidues = assignmentData.get(chainCode, OD())
             assignmentData[chainCode] = nmrResidues
@@ -2304,10 +2301,6 @@ class CcpnNefReader:
       # Create objects with reserved names
       for chainCode in sorted(assignmentData):
 
-        # ejb - a quick test, cahinCode is None and not a string
-        #       can either try:except it here, or trap it in the loop above
-        # try:
-
         if chainCode[0] in '@#' and chainCode[1:].isdigit():
           # reserved name - make chain
           try:
@@ -2315,9 +2308,6 @@ class CcpnNefReader:
           except ValueError:
             # Could not be done, probably because we have NmrChain '@1'. Leave for later
             pass
-
-        # except:         # ejb
-        #   pass
 
       for chainCode, nmrResidues in sorted(assignmentData.items()):
 
@@ -2975,7 +2965,8 @@ class CcpnNefReader:
         result.append(peak)
 
       # Add assignment
-      chainCodes = tuple(row.get(x) for x in multipleAttributes['chainCodes'])
+      # NB the self.defaultChainCode or converts code None to the default chain code
+      chainCodes = tuple(row.get(x) or self.defaultChainCode for x in multipleAttributes['chainCodes'])
       sequenceCodes = tuple(row.get(x) for x in multipleAttributes['sequenceCodes'])
       residueTypes = tuple(row.get(x) for x in multipleAttributes['residueTypes'])
       atomNames = tuple(row.get(x) for x in multipleAttributes['atomNames'])
@@ -3308,6 +3299,7 @@ class CcpnNefReader:
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
     for row in saveFrame[nmrResidueLoopName].data:
       parameters = self._parametersFromLoopRow(row, map2)
+      # NB chainCode None is not possible here (for ccpn data)
       chainCode =  row['chain_code']
       nmrChain = nmrChains[chainCode]
       nmrResidue = nmrChain.newNmrResidue(**parameters)
@@ -3447,7 +3439,7 @@ class CcpnNefReader:
     """Get NmrChain, correcting for possible errors"""
 
     if chainCode is None:
-        chainCode = coreConstants.defaultNmrChainCode
+        chainCode = self.defaultNmrChainCode
     newChainCode = chainCode
     while True:
       try:
@@ -3460,6 +3452,8 @@ class CcpnNefReader:
 
   def produceNmrResidue(self, chainCode:str=None, sequenceCode:str=None, residueType:str=None):
     """Get NmrResidue, correcting for possible errors"""
+
+    chainCode = chainCode or self.defaultChainCode
 
     inputTuple = (chainCode, sequenceCode, residueType)
     result = self._nmrResidueMap.get(inputTuple)
@@ -4066,5 +4060,5 @@ if __name__ == '__main__':
   # nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
   nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

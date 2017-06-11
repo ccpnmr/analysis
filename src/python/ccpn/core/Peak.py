@@ -335,8 +335,8 @@ class Peak(AbstractWrapperObject):
         if atom is not None:
           resonance = atom._wrappedData
           if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
-            raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
-                             % (ii+1, isotopeCodes[ii]))
+            raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
+                             % (atom, resonance.isotopeCode, ii+1, isotopeCodes[ii]))
 
           ll[ii] = resonance
 

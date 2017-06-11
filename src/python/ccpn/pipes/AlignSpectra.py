@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
@@ -107,7 +107,7 @@ class AlignSpectraGuiPipe(GuiPipe):
   def _setDataReferenceSpectrum(self):
     data = list(self.inputData)
     if len(data)>0:
-      self.referenceSpectrum.setData(texts=[sp.pid for sp in data], objects=data)
+      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data)
 
 
 

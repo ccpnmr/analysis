@@ -171,7 +171,10 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.pipelineWorker.stepIncreased.connect(self._runPipeline)
 
 
-    # self.interactor = PipelineInteractor(self.application)
+    # set notifier
+    self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputData)
+
+
 
   def _getGuiFromPipes(self, pipes):
     allGuiPipes = []
@@ -420,7 +423,25 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.runPipeline()
 
 
+
+  def _closeModule(self):
+    """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    self._unregisterNotifier()
+    super(GuiPipeline, self)._closeModule()
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
+
   ####################################_________ others____________###########################################
+
+  def _unregisterNotifier(self):
+    "Cleanup of Notifierers"
+    if self._inputDataDeletedNotifier:
+      self._inputDataDeletedNotifier.unRegister()
 
   def _getGuiPipeClassFromClassName(self, name):
     for guiPipe in self.guiPipes:
@@ -709,6 +730,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
+        print(obj)
         if object is not None:
           if isinstance(obj, Spectrum):
             self.inputData.update([obj])
@@ -717,7 +739,19 @@ class GuiPipeline(CcpnModule, Pipeline):
           else:
             print(obj, 'Not available.')
 
+  def _updateInputData(self, data):
+    ''
+    dataTexts = self.inputDataList.getTexts()
+    sp =  data['object']
+    item = sp.pid
+    self.inputDataList.clearSelection()
+    self.inputDataList.select(item)
+    self.inputDataList.removeItem()
+    self.setDataSelection()
 
+
+
+    # self.setDataSelection()
 
 class FilterMethods(CcpnDialog):
 

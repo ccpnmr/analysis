@@ -44,10 +44,10 @@ class PeakUndoTest(CoreTesting):
     dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
     
-    project._undo = Undo()
-    project.newUndoPoint()
+    project._undo = undo = Undo()
+    undo.newWaypoint()
     peak = peakList.newPeak()
-    project._undo.undo()
+    undo.undo()
     assert len(peakList.peaks) == 0, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
   def test_new_peak_undo_redo(self):
@@ -57,12 +57,12 @@ class PeakUndoTest(CoreTesting):
     experiment = nmrProject.findFirstExperiment(name='HSQC')
     dataSource = experiment.findFirstDataSource(name='HSQC-115')
     peakList = dataSource.newPeakList()
-    
-    project._undo = Undo()
-    project.newUndoPoint()
+
+    project._undo = undo = Undo()
+    undo.newWaypoint()
     peak = peakList.newPeak()
-    project._undo.undo()
-    project._undo.redo()
+    undo.undo()
+    undo.redo()
     assert len(peakList.peaks) == 1, 'len(peakList.peaks) = %d' % len(peakList.peaks)
     
  

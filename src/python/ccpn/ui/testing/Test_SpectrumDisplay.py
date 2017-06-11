@@ -50,7 +50,7 @@ class ParameterTest(WrapperTesting):
     undo.redo()
 
     dd = {'pid':'GD:user.View.HN', 'axisCodes':('H', 'N'), 'units':('ppm', 'ppm'),
-          'stripDirection':'Y', 'is1D':False, 'name':'HN'}
+          'stripDirection':'Y', 'is1D':False, 'title':'HN'}
 
     for tag, val in dd.items():
       self.assertEqual(val, getattr(display, tag))

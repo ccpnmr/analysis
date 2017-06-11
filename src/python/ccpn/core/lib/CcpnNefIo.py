@@ -3900,6 +3900,8 @@ def _exportToNef(path:str, skipPrefixes:Sequence[str]=()):
     outPath = path[:-4] + 'nef'
   elif path.endswith('.ccpn/'):
     outPath = path[:-5] + 'nef'
+  elif path.endswith('/'):
+    outPath = path[:-1] + '.nef'
   else:
     outPath = path + '.nef'
 
@@ -4051,11 +4053,11 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
 if __name__ == '__main__':
   # Explanation:
   # _exportToNef will read a project from path and export the corresponding NEF file
-  # skipPrefixes=('ccpn' ,) means 'remove all ccpn-specific tags from teh output';
-  # efault is to leave them in. Note that path may also be a NEF file,
+  # skipPrefixes=('ccpn' ,) means 'remove all ccpn-specific tags from the output';
+  # default is to leave them in. Note that path may also be a NEF file,
   # which will then be imported and re-exported
   #
-  # testNefIo will read a NEF file and re-export it (qith a .out.nef suffix),
+  # testNefIo will read a NEF file and re-export it (with a .out.nef suffix),
   # producing a V3 project on disk as a byproduct if the original is a V2 project.
 
   path = sys.argv[1]
@@ -4064,5 +4066,5 @@ if __name__ == '__main__':
   # nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
   nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

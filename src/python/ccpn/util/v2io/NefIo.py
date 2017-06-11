@@ -964,7 +964,7 @@ class CcpnNefReader:
       comment = rows[0].get('ccpn_chain_comment')
 
       for row in rows:
-        # NB these will be dealt with as unknown resodies later, which is what we want
+        # NB these will be dealt with as unknown residues later, which is what we want
         if row.get('linking') == 'dummy':
           row['residue_name'] = 'dummy.' + row['residue_name']
       sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
@@ -1602,7 +1602,7 @@ class CcpnNefReader:
       # So that multiple peakLists all go to one Spectrum
       if spectrumName.endswith(ss):
         spectrumName = spectrumName[:-len(ss)]
-      dataSourceParams['name'] = spectrumName
+    dataSourceParams['name'] = spectrumName
 
     for experiment in nmrProject.sortedExperiments():
       dataSource = experiment.findFirstDataSource(name=spectrumName)
@@ -1684,9 +1684,9 @@ class CcpnNefReader:
 
       loop = saveFrame.get('ccpn_spectrum_dimension')
       referencePointDict = {}
+      isComplexDict = {}
+      blockSizesDict = {}
       if loop:
-        isComplexDict = {}
-        blockSizesDict = {}
         for row in loop.data:
           dim = row['dimension_id']
 
@@ -1718,6 +1718,8 @@ class CcpnNefReader:
           val = row.get('total_point_count')
           if val:
             dd['numPointsOrig'] = val
+          else:
+            dd['numPointsOrig'] = dd['numPoints']
           val = row.get('point_offset')
           if val is not None:
             dd['pointOffset'] = val
@@ -1766,6 +1768,7 @@ class CcpnNefReader:
             numPoints = params['numPoints'] = 1280
           else:
             numPoints = params['numPoints'] = 2560
+        params['numPointsOrig'] =  params['numPoints']
         if params.get('spectralWidth'):
           spectralWidth = params.pop('spectralWidth')
           params['valuePerPoint'] = spectralWidth * sf / numPoints
@@ -1820,7 +1823,8 @@ class CcpnNefReader:
           expDims = nmrExperiment.sortedExpDims()
           expDimRefs = [x.findFirstExpDimRef() for x in expDims]
           if None not in expDimRefs:
-            isotopeCodes = [x.isotopeCode for x in expDimRefs]
+            isotopeCodes = [x.isotopeCodes[0] if  x.isotopeCodes else 'unknown'
+                            for x in expDimRefs]
             dimensionIds = [x.dim for x in expDims]
             acquisitionAxisIndex = (None if acquisitionDim is None
                                     else dimensionIds.index(acquisitionDim))
@@ -1888,9 +1892,11 @@ class CcpnNefReader:
       parameters = {}
       parameters['volume'] = row.get('volume')
       parameters['height'] = row.get('height')
-      parameters['figOfMerit'] = row.get('ccpn_figure_of_merit')
       parameters['annotation'] = row.get('ccpn_annotation')
-      parameters['details'] = row.get('ccpn_comment')
+      parameters['details'] = row.get('ccpn_comment')#
+      val = row.get('ccpn_figure_of_merit')
+      if val is not None:
+        parameters['figOfMerit'] = val
 
       # get or make peak
       peak = peaks.get(serial)
@@ -2150,12 +2156,27 @@ class CcpnNefReader:
   # importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
 
   def fetchAtomMap(self, chainCode, sequenceCode, name, isotopeCode=None, comment=None):
+
+
+    # TODO HACK: names like HBX, HBY should not really be supported, but temporarily...
+    # There is test data with upper case instead of the correct (HBx, HBy),
+    # and for now we want that to pass
+    modifyNameEndings = {'X':'x', 'Y':'y', 'X%':'x%', 'Y%':'y%'}
+    if name:
+      for tag, val in modifyNameEndings.items():
+        if name.endswith(tag):
+          name = name[:-len(tag)] + val
+          break
+    else:
+      raise ValueError("AtomName must be given")
+
     # First do non-offset residues, to make sure main residue maps are ready
+    if isotopeCode is None:
+      isotopeCode = commonUtil.name2IsotopeCode(name) or 'unknown'
     residueMap = self.fetchResidueMap(chainCode, sequenceCode)
     atomMappings = residueMap['atomMappings']
     atomMap = atomMappings.get(name)
-    if isotopeCode is None:
-      isotopeCode = commonUtil.name2IsotopeCode(name) or 'unknown'
+
     if atomMap is None:
       # we have no preceding map. Make one, but we clearly can have only simple atoms,
       # with no atomSets or provision for prochirals etc.
@@ -2253,7 +2274,7 @@ class CcpnNefReader:
       chainCode = row['chain_code']
       isConnected = row['is_connected']
       if chainCode in self._chainMapping:
-        # NB This assumes that the chainMapping is set for MolSYstem chains,
+        # NB This assumes that the chainMapping is set for MolSystem chains,
         # and not for any other chains
         nmrChainTypes[chainCode] = 'assigned'
       else:
@@ -2643,4 +2664,4 @@ def fetchDataUrl(memopsRoot, fullPath):
 if __name__ == '__main__':
   path = sys.argv[1]
   memopsRoot = loadNefFile(path, overwriteExisting=True)
-  memopsRoot.saveAll()
+  memopsRoot.saveModified()

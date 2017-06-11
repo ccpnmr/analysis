@@ -172,7 +172,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
     # set notifier
-    self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputData)
+    if self.project is not None:
+      self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputData)
 
 
 

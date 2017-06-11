@@ -906,6 +906,9 @@ class CcpnNefReader:
       del saveframeOrderedDict['ccpn_assignment']
 
     for sf_category, saveFrames in saveframeOrderedDict.items():
+      if sf_category == 'nef_nmr_meta_data':
+        # We are doing nothiing with it, but we do not want a warning
+        continue
       for saveFrame in saveFrames:
         saveFrameName = self.saveFrameName = saveFrame.name
 
@@ -1869,8 +1872,6 @@ class CcpnNefReader:
   def load_nef_peak(self, peakList, loop):
     """Serves to load nef_peak loop"""
 
-    result = []
-
     dimensionCount = peakList.dataSource.numDim
     # Get name map for per-dimension attributes
     max = dimensionCount + 1
@@ -1883,8 +1884,15 @@ class CcpnNefReader:
       'atomNames':tuple('atom_name_%s' % ii for ii in range(1, max)),
     }
 
+
+    result = []
     peaks = {}
     assignedResonances = []
+
+    dataDimRefMap = {}
+    for dataDim in peakList.dataSource.dataDims:
+      # Add dataDimRef link
+      dataDimRefMap[dataDim.dim] = dataDim.findFirstDataDimRef()
 
     for row in loop.data:
 
@@ -1923,6 +1931,8 @@ class CcpnNefReader:
         for ii,peakDim in enumerate(peak.sortedPeakDims()):
           peakDim.value = values[ii]
           peakDim.valueError = errors[ii]
+          # add dataDimRef
+          peakDim.dataDimRef = dataDimRefMap.get(peakDim.dim)
 
       # Add assignment
       chainCodes = tuple(row.get(x) for x in multipleAttributes['chainCodes'])
@@ -1941,8 +1951,8 @@ class CcpnNefReader:
           foundAssignment = True
           # Necessary to first create ResonanceGroup, if it does not exist:
           dummy = self.fetchResidueMap(tt[0] or self.defaultChainCode, tt[1], tt[2])
-          resonances = self.fetchAtomMap(tt[0] or self.defaultChainCode, tt[1], tt[3])
-          resonancesPerDimension.append(resonances)
+          atomMap = self.fetchAtomMap(tt[0] or self.defaultChainCode, tt[1], tt[3])
+          resonancesPerDimension.append(atomMap['resonances'])
         else:
           # partial and unusable assignment
           self.warning("Uninterpretable Peak assignment for peak %s: %s. Set to None"
@@ -1974,16 +1984,15 @@ class CcpnNefReader:
         for ii, resonances in enumerate(resonancesPerDimension):
           peakDim = peakDims[ii]
           for resonance in resonances:
+            # We set the small tolerance to prevent the program from merging
+            # resonances (unless they really are identical)
+            # and aoid generation of defalut tolerances (which breaks without an application)
             AssignmentBasic.assignResToDim(peakDim, resonance, doWarning=False,
-                                           peakContribs=peakContribs)
+                                           peakContribs=peakContribs,
+                                           tolerance=1.0e-6)
 
   def load_nef_peak_restraint_links(self, project, saveFrame):
     """load nef_peak_restraint_links saveFrame"""
-
-    ('nmr_spectrum_id',None),
-    ('peak_id',None),
-    ('restraint_list_id',None),
-    ('restraint_id',None),
 
     links = {}
 

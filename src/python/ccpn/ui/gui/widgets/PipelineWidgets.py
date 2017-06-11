@@ -327,6 +327,7 @@ class GuiPipe(Dock, DockDrop):
     self.inputData = []
     if self.parent is not None:
         self.inputData = self.parent.inputData
+        self.spectrumGroups = self.parent.spectrumGroups
       
     if name is None:
       name = 'New Pipe'

@@ -725,6 +725,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     dataTexts = self.inputDataList.getTexts()
     self.inputData.clear()
+    self.spectrumGroups.clear()
     if self.project is not None:
       if len(dataTexts) == 0:
         return
@@ -736,6 +737,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.inputData.update([obj])
           elif isinstance(obj, SpectrumGroup):
             self.inputData.update(obj.spectra)
+            self.spectrumGroups.update([obj])
           else:
             print(obj, 'Not available.')
 

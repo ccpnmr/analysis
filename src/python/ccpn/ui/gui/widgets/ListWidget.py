@@ -101,6 +101,18 @@ class ListWidget(QtGui.QListWidget, Base):
         objects.append(obj)
     return objects
 
+
+  def select(self, name):
+    for index in range(self.count()):
+      item = self.item(index)
+      if item.text() == name:
+        self.setCurrentItem(item)
+
+  def clearSelection(self):
+    for i in range(self.count()):
+      item = self.item(i)
+      self.setItemSelected(item, False)
+
   def getTexts(self):
     items = []
     for index in range(self.count()):
@@ -177,9 +189,10 @@ class ListWidget(QtGui.QListWidget, Base):
       self.emit(QtCore.SIGNAL("dropped"), links)
     else:
       items = []
-      event.setDropAction(QtCore.Qt.CopyAction)
-      self.emit(QtCore.SIGNAL("dropped"), items)
-      super(ListWidget, self).dropEvent(event)
+      if event.source() != self:  # otherwise duplicates
+        event.setDropAction(QtCore.Qt.CopyAction)
+        self.emit(QtCore.SIGNAL("dropped"), items)
+        super(ListWidget, self).dropEvent(event)
 
       # ejb - tried to fix transfer of CopyAction, but intermittent
       # encodedData = event.mimeData().data(ccpnmrJsonData)

@@ -79,6 +79,18 @@ commonWidgets =           {
                             # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
                           }
 
+
+def _getWidgetByAtt(cls, name):
+  '''
+
+  :param cls: the class where the widget lives
+  :param name: widget variable name
+  :return: widget obj
+  '''
+  w  = getattr(cls, name)
+  if w is not None:
+    return w
+
 PipelineBoxDragStyle = """Dock > QWidget {border: 1px solid #78FF00; border-radius: 1px;}"""
 
 PipelineBoxLabelStyle = """PipelineBoxLabel{
@@ -211,8 +223,6 @@ class PipelineDropArea(DockArea):
       print()
       d.append((guiPipe.__class__.__name__, pipeName, guiPipe.widgetsState, guiPipe.isActive ))
     return d
-
-
 
 
   def dragEnterEvent(self, ev):

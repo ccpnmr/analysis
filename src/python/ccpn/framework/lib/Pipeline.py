@@ -46,6 +46,7 @@ class Pipeline(object):
 
 
     self.inputData = set()
+    self.spectrumGroups = set()
     self.queue = [] # Pipes to be ran
     # self.finishedPipe = [] # Pipes already ran
 
@@ -96,6 +97,7 @@ class Pipeline(object):
       for pipe in self.queue:
         if pipe is not None:
             pipe.inputData = self.inputData
+            pipe.spectrumGroups = self.spectrumGroups
             result = pipe.runPipe(self.inputData)
             self.inputData = result
             # self.queue.remove(pipe)

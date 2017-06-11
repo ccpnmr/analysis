@@ -58,13 +58,13 @@ class Pipe(ABC):
   def __init__(self, application=None):
     self._kwargs = {}
     self.inputData = None
-
+    self.spectrumGroups = None
     self.pipeline = None
     self.project = None
 
     if self.pipeline is not None:
       self.inputData = self.pipeline.inputData
-
+      self.spectrumGroups = self.pipeline.spectrumGroups
 
     if application is not None:
       self.application = application

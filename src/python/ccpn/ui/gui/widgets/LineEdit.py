@@ -33,9 +33,15 @@ from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 
+TextAligment = {
+                'c': QtCore.Qt.AlignHCenter,
+                'l': QtCore.Qt.AlignLeft,
+                'r': QtCore.Qt.AlignRight
+                }
+
 class LineEdit(QtGui.QLineEdit, Base):
 
-  def __init__(self, parent, text='', textColor=None, **kw):
+  def __init__(self, parent, text='', textAligment='c', textColor=None, **kw):
 
     #text = translator.translate(text)
 
@@ -45,7 +51,7 @@ class LineEdit(QtGui.QLineEdit, Base):
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
-    self.setAlignment(QtCore.Qt.AlignHCenter)
+    self.setAlignment(TextAligment[textAligment])
     self.setMinimumWidth(100)
     self.setFixedHeight(25)
 

@@ -50,6 +50,8 @@ MaximumFilterMode =  'maximumFilterMode'
 MinimalLineWidth =  'minimalLineWidth'
 Modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
 
+DefaultNoiseThreshold = [0.0, 0.0]
+DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -102,8 +104,8 @@ class PeakPicker1DPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs =   {
-               ExcludeRegions: [[0.0, 0.0], [0.0, 0.0]],
-               NoiseThreshold: [0.0, 0.0],
+               ExcludeRegions: DefaultExcludeRegions,
+               NoiseThreshold: DefaultNoiseThreshold,
                MaximumFilterSize: 5,
                MaximumFilterMode: Modes[0],
                NegativePeaks: True
@@ -114,7 +116,7 @@ class PeakPicker1DPipe(SpectraPipe):
     :param data:
     :return:
     '''
-
+    print(self._kwargs)
     maximumFilterSize = self._kwargs[MaximumFilterSize]
     maximumFilterMode = self._kwargs[MaximumFilterMode]
     negativePeaks = self._kwargs[NegativePeaks]
@@ -123,12 +125,14 @@ class PeakPicker1DPipe(SpectraPipe):
       positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
       negativeNoiseThreshold = min(self.pipeline._kwargs[NoiseThreshold])
     else:
+      self._kwargs.update({ NoiseThreshold: DefaultNoiseThreshold})
       positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
       negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
 
     if ExcludeRegions in self.pipeline._kwargs:
       excludeRegions = self.pipeline._kwargs[ExcludeRegions]
     else:
+      self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
       excludeRegions = self._kwargs[ExcludeRegions]
 
     for spectrum in self.inputData:

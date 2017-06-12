@@ -56,7 +56,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 
 commonWidgets =           {
@@ -325,9 +325,9 @@ class GuiPipe(Dock, DockDrop):
     self.parent = parent
     
     self.inputData = []
-    if self.parent is not None:
-        self.inputData = self.parent.inputData
-        self.spectrumGroups = self.parent.spectrumGroups
+    if isinstance(self.parent, Pipeline):
+      self.inputData = self.parent.inputData
+      self.spectrumGroups = self.parent.spectrumGroups
       
     if name is None:
       name = 'New Pipe'

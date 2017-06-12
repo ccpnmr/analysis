@@ -102,4 +102,6 @@ class Pipeline(object):
             self.inputData = result
             # self.queue.remove(pipe)
 
+    return self.inputData
+
 

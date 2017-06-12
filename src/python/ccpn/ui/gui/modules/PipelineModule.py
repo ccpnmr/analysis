@@ -582,6 +582,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataLabel = Label(self, 'Input Data')
     self.settingsWidgets.append(self.inputDataLabel)
     self.inputDataList = ListWidget(self)
+    self.inputDataList.setMaximumHeight(200)
     self.inputDataList.setAcceptDrops(True)
     color = QtGui.QColor('Red')
     header = QtGui.QListWidgetItem(DropHereLabel)

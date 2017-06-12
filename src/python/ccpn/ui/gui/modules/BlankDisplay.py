@@ -94,6 +94,7 @@ class BlankDisplay(CcpnModule):
 
     if success:
       # self.mainWindow.deleteBlankDisplay()
+      self.hide()                               # ejb - cheat because it won't disappear
       self._closeModule()
       getLogger().info('application.deleteBlankDisplay()')
 

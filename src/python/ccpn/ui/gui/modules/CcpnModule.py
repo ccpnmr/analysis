@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 settingsWidgetPositions = {
                            'top':    {'settings':(0,0), 'widget':(1,0)},
@@ -212,8 +213,7 @@ class CcpnModule(Dock):
     if self.closeFunc:
       self.closeFunc()
 
-    print (self._container)
-    # self.close()
+    getLogger().debug('Closing %s' % str(self.container()))
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
   def dropEvent(self, *args):

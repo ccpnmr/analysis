@@ -149,10 +149,7 @@ class GuiStrip(Frame):
     self.axisPositionDict = {}  # axisCode --> position
 
     self._initRulers()
-    
-    self.mousePixel = None
-    self.mousePosition = None
-    
+
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
     self.hPhasingPivot.setVisible(False)
     self.plotWidget.addItem(self.hPhasingPivot)
@@ -307,7 +304,7 @@ class GuiStrip(Frame):
     
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
-    position = self.mousePosition[0] if direction == 0 else self.mousePosition[1]
+    position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
     phasingFrame.pivotEntry.set(position)
     self._updatePivot()
       

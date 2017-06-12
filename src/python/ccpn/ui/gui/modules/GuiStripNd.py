@@ -180,8 +180,8 @@ class GuiStripNd(GuiStrip):
        # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
       (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
       (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      None,                                 ''),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      None,                                 ''),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      None,                                 'hTraceAction'),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      None,                                 'vTraceAction'),
       (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
 
       (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
@@ -211,7 +211,8 @@ class GuiStripNd(GuiStrip):
         action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
         tempMethod.__doc__=''
         tempMethod.__name__=attrib
-        setattr(self, tempMethod.__name__, action)                # add to self
+        setattr(self, tempMethod.__name__, action)
+        # add to self
 
       elif aType == tType.actn:
         # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
@@ -293,11 +294,15 @@ class GuiStripNd(GuiStrip):
 
   def _updateTraces(self):
 
-    if self.mousePosition:
+    cursorPosition = self.current.cursorPosition
+    if cursorPosition:
+      position = QtCore.QPointF(cursorPosition[0], cursorPosition[1])
+      pixel = self.viewBox.mapViewToScene(position)
+      cursorPixel = (pixel.x(), pixel.y())
       updateHTrace = self.hTraceAction.isChecked()
       updateVTrace = self.vTraceAction.isChecked()
       for spectrumView in self.spectrumViews:
-        spectrumView._updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
+        spectrumView._updateTrace(cursorPosition, cursorPixel, updateHTrace, updateVTrace)
 
   def toggleHorizontalTrace(self):
     """

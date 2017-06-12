@@ -169,7 +169,7 @@ class GuiNotifier(object):
     # DROPEVENT
     if trigger == GuiNotifier.DROPEVENT:
       if self._debug:
-        logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s: data=%s' % \
+        logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s, %s: data=%s' % \
                      (self._index, self._theObject, notifier, self._callback, data)
                     )
       # optionally filter for targetName

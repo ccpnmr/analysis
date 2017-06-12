@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
-from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 
 class GuiSpectrumDisplay(CcpnModule):
@@ -135,7 +135,7 @@ class GuiSpectrumDisplay(CcpnModule):
                           So for now add option below to have it turned off (False) or on (True).
     """
 
-    Logging.getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
+    getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
@@ -201,7 +201,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     self.stripFrame.setAcceptDrops(True)
     self.droppedNotifier = GuiNotifier(self.stripFrame,
-                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self._processDroppedItems)
 
     # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
@@ -217,8 +217,18 @@ class GuiSpectrumDisplay(CcpnModule):
     
     CCPN INTERNAL: Also called from GuiStrip
     """
-    for ii, pid in enumerate(data.get('pids',[])):
-      Logging.getLogger().debug('GuiSpectrumDisplay._processDroppedItems>>> dropped:', pid)
+    for url in data.get('urls',[]):
+      getLogger().debug('dropped: %s' % url)
+      objects = self.project.loadData(url)
+
+      if objects is not None:
+        for obj in objects:
+          if isinstance(obj, Spectrum):
+            self._handlePid(obj.pid)  # pass the object as its pid so we use
+                                      # the same method used to process the pids
+
+    for pid in data.get('pids',[]):
+      getLogger().debug('dropped:', pid)
       self._handlePid(pid)
 
   def _handlePid(self, pid):
@@ -264,7 +274,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     if horizontal not in SCROLLBAR_POLICY_DICT or \
        vertical not in SCROLLBAR_POLICY_DICT:
-      Logging.getLogger().warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
+      getLogger().warning('Invalid scrollbar policy (%s, %s)' %(horizontal, vertical))
     self.stripFrame.setScrollBarPolicies((horizontal, vertical))
 
   def _updatePivot(self):
@@ -365,7 +375,7 @@ class GuiSpectrumDisplay(CcpnModule):
     newStrip = self.strips[stripIndex].clone()
     mainWindow = self.mainWindow
     mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
-    Logging.getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
+    getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
                      % (self.pid, stripIndex))
     return newStrip
 

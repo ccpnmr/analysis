@@ -174,7 +174,7 @@ class GuiStrip(Frame):
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
     self._droppedNotifier = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDroppedItems)
 
     self.show()

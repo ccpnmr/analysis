@@ -92,6 +92,8 @@ def _getMultiplet(peaks, limitA, limitB):
       multiplet.append((peak))
   if len(multiplet) > 0:
     return multiplet
+  else:
+    return []
 
 
 def _calculateCenterOfMass(multiplet):

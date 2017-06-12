@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -47,6 +48,11 @@ ReferencePeakList = 'referencePeakList'
 NoiseThreshold = 'noiseThreshold'
 NegativePeaks =  'negativePeaks'
 MinimalLineWidth =  'minimalLineWidth'
+
+DefaultMinimalLineWidth =  0.01
+DefaultReferencePeakList =  0
+DefaultNoiseThreshold = [0.0, 0.0]
+DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -72,8 +78,12 @@ class CalculateAreaGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(0, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, grid=(0, 1)))
+    row = 0
+    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
+    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(DefaultReferencePeakList),], grid=(row, 1)))
+    row += 1
+    self.peakListLabel = Label(self.pipeFrame, 'Minimal LineWidth', grid=(row, 0))
+    setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
     self._updateWidgets()
 
   def _updateWidgets(self):
@@ -86,7 +96,7 @@ class CalculateAreaGuiPipe(GuiPipe):
         if spectrum is not None:
           if spectrum.peakLists:
             pls = spectrum.peakLists
-            self.referencePeakList.setData(texts=[pl.pid for pl in pls], objects=pls)
+            self.referencePeakList.setData(texts=[str(n) for n in range(len(pls))])
 
 
 
@@ -104,11 +114,11 @@ class CalculateAreaPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs =       {
-                    ReferencePeakList : 'peakList.pid',
-                    ExcludeRegions: [[0.0, 0.0], [0.0, 0.0]],
-                    NoiseThreshold: [0.0, 0.0],
+                    ReferencePeakList : DefaultReferencePeakList,
+                    ExcludeRegions: DefaultExcludeRegions,
+                    NoiseThreshold: DefaultNoiseThreshold,
                     NegativePeaks: False,
-                    MinimalLineWidth: 0.01,
+                    MinimalLineWidth: DefaultMinimalLineWidth,
                    }
 
 
@@ -121,16 +131,14 @@ class CalculateAreaPipe(SpectraPipe):
     if NoiseThreshold in self.pipeline._kwargs:
       positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
     else:
+      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
       positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
-    if MinimalLineWidth in self.pipeline._kwargs:
-      minimalLineWidth = self.pipeline._kwargs[MinimalLineWidth]
-    else:
-      minimalLineWidth = self._kwargs[MinimalLineWidth]
+    minimalLineWidth = self._kwargs[MinimalLineWidth]
+    nPeakList = int(self._kwargs[ReferencePeakList])
 
     for spectrum in spectra:
-      referencePeakListPid = self._kwargs[ReferencePeakList]
-      referencePeakList = self.project.getByPid(referencePeakListPid)
+      referencePeakList = spectrum.peakLists[nPeakList]
 
       if referencePeakList is not None:
           if referencePeakList.peaks:

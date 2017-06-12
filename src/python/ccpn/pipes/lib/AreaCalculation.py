@@ -87,6 +87,7 @@ def _getMultiplet(peaks, limitA, limitB):
   '''
   multiplet = []
   for peak in peaks:
+    print(peaks)
     matchedPosition = _matchingPosition(np.array(peak.position), limitA, limitB)
     if matchedPosition:
       multiplet.append((peak))
@@ -133,6 +134,7 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
 
    '''
 
+  print(spectrum.name, peakList.pid, noiseThreshold, minimalLineWidth)
   # TODO excludeRegions
   x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
   if noiseThreshold is None or 0.0:
@@ -161,10 +163,15 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
       centerOfMass = _calculateCenterOfMass(multiplet)
       # calculate new intensity for multiplet ( if single peak stays the same)
       height = _getMultipletIntensity(multiplet)
-      # create a new Peak object
-      peaks.append(newPeakList.newPeak(height= height, position = (centerOfMass,),
-                                       volume= float(integral),lineWidths= (lineWidth,),
-                                       )
-                   )
+      if centerOfMass and  height is not None:
+        # create a new Peak object
+        spectrum.project.suspendNotification()
+        try:
+          peaks.append(newPeakList.newPeak(height= height, position = (centerOfMass,),
+                                           volume= float(integral),lineWidths= (lineWidth,),
+                                           )
+                       )
 
-      integrals.append(integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],]))
+          integrals.append(integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],]))
+        finally:
+          spectrum.project.resumeNotification()

@@ -171,7 +171,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.pipelineWorker.stepIncreased.connect(self._runPipeline)
 
 
-    # self.interactor = PipelineInteractor(self.application)
+    # set notifier
+    if self.project is not None:
+      self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputData)
+
+
 
   def _getGuiFromPipes(self, pipes):
     allGuiPipes = []
@@ -352,6 +356,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.goButton.setStyleSheet(transparentStyle)
     self.goAreaLayout.addWidget(self.goButton, )
     self.goAreaLayout.addStretch(1)
+    self.goButton.setEnabled(False)
 
   def _addPipelineDropArea(self):
     self.pipelineArea = PipelineDropArea()
@@ -392,7 +397,6 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _addGuiPipe(self, name, selected):
-    print('$£$£', self.guiPipes, name, selected)
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
         position = self.pipelineSettingsParams['addPosit']
@@ -403,26 +407,43 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _runPipeline(self):
-    print('_runPipeline')
 
     self.queue = []
-    if len(self.pipelineArea.findAll()[1]) > 0:
-      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-      for guiPipe in guiPipes:
-        if guiPipe.isActive:
-          guiPipe.pipe.isActive = True
-          guiPipe.pipe._kwargs = guiPipe.widgetsState
-          print('PPP',guiPipe.pipe )
-          self.queue.append(guiPipe.pipe)
+    if self.inputData:
+      if len(self.pipelineArea.findAll()[1]) > 0:
+        guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+        for guiPipe in guiPipes:
+          if guiPipe.isActive:
+            guiPipe.pipe.isActive = True
+            guiPipe.pipe._kwargs = guiPipe.widgetsState
+            self.queue.append(guiPipe.pipe)
 
-        else:
-          guiPipe.pipe.isActive = False
+          else:
+            guiPipe.pipe.isActive = False
 
 
-    self.runPipeline()
+      self.runPipeline()
+
+
+
+  def _closeModule(self):
+    """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    self._unregisterNotifier()
+    super(GuiPipeline, self)._closeModule()
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
 
 
   ####################################_________ others____________###########################################
+
+  def _unregisterNotifier(self):
+    "Cleanup of Notifierers"
+    if self._inputDataDeletedNotifier:
+      self._inputDataDeletedNotifier.unRegister()
 
   def _getGuiPipeClassFromClassName(self, name):
     for guiPipe in self.guiPipes:
@@ -552,6 +573,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.settingFrame.setLayout(self.settingWidgetsLayout)
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
 
+  def _getInputDataHeaderLabel(self):
+    color = QtGui.QColor('Red')
+    header = QtGui.QListWidgetItem(DropHereLabel)
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(color)
+    return header
+
   def _createAllSettingWidgets(self):
     #
     self.pipelineReNameLabel = Label(self, 'Name')
@@ -562,12 +590,10 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataLabel = Label(self, 'Input Data')
     self.settingsWidgets.append(self.inputDataLabel)
     self.inputDataList = ListWidget(self)
+    self.inputDataList.setMaximumHeight(200)
     self.inputDataList.setAcceptDrops(True)
-    color = QtGui.QColor('Red')
-    header = QtGui.QListWidgetItem(DropHereLabel)
-    header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(color)
-    self.inputDataList.addItem(header)
+
+    self.inputDataList.addItem(self._getInputDataHeaderLabel())
     self.settingsWidgets.append(self.inputDataList)
     self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
 
@@ -581,6 +607,17 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.settingsWidgets.append(self.savePipelineLabel)
     self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.Directory)
     self.settingsWidgets.append(self.savePipelineLineEdit)
+    #
+
+    #
+    self.selectDisplayLabel = Label(self, 'Select output Display',
+                                   tipText='Select display to show the pipeline output')
+    self.settingsWidgets.append(self.selectDisplayLabel)
+    self.selectDisplay = PulldownList(self, texts = ['Select'])
+    if self.mainWindow is not None:
+      self.selectDisplay.setData(texts = ['Select'] + [display.pid for display in self.mainWindow.spectrumDisplays])
+    self.settingsWidgets.append(self.selectDisplay)
+
     #
     self.addBoxLabel = Label(self, 'Add Method On')
     self.settingsWidgets.append(self.addBoxLabel)
@@ -613,6 +650,16 @@ class GuiPipeline(CcpnModule, Pipeline):
     if len(self.inputDataList.getTexts())==1:
       if DropHereLabel in self.inputDataList.getTexts():
         self.inputDataList.clear()
+        self.goButton.setEnabled(True)
+
+
+
+  def _updateInputDataWidgets(self):
+    'update the gui pipe widget if the input data has changed'
+    if len(self.pipelineArea.findAll()[1]) > 0:
+      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+      for guiPipe in guiPipes:
+        guiPipe._updateInputDataWidgets()
 
 
   def settingsPipelineWidgets(self):
@@ -655,6 +702,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self._updateSettingsParams()
     self._setSettingsParams()
     self.setDataSelection()
+    self._updateInputDataWidgets()
     # self._hideSettingWidget()
 
   def _cancelSettingsCallBack(self):
@@ -694,9 +742,12 @@ class GuiPipeline(CcpnModule, Pipeline):
   def setDataSelection(self):
 
     dataTexts = self.inputDataList.getTexts()
+    self.inputData.clear()
+    self.spectrumGroups.clear()
     if self.project is not None:
       if len(dataTexts) == 0:
-        self.inputData.clear()
+        self.goButton.setEnabled(False)
+        self.inputDataList.addItem(self._getInputDataHeaderLabel())
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
@@ -705,10 +756,23 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.inputData.update([obj])
           elif isinstance(obj, SpectrumGroup):
             self.inputData.update(obj.spectra)
+            self.spectrumGroups.update([obj])
           else:
             print(obj, 'Not available.')
 
+  def _updateInputData(self, data):
+    ''
+    dataTexts = self.inputDataList.getTexts()
+    sp =  data['object']
+    item = sp.pid
+    self.inputDataList.clearSelection()
+    self.inputDataList.select(item)
+    self.inputDataList.removeItem()
+    self.setDataSelection()
 
+
+
+    # self.setDataSelection()
 
 class FilterMethods(CcpnDialog):
 

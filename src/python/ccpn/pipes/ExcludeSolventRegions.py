@@ -23,20 +23,14 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
+
 #### GUI IMPORTS
-
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from PyQt4 import QtGui
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-
-
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions as ER
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.util.Hdf5 import convertDataToHdf5
 
 
 ########################################################################################################################
@@ -44,38 +38,34 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Output Pipeline'
-SaveAsHDF5path = 'saveAsHDF5path'
+PipeName = 'Exclude Solvent Regions'
+ExcludeRegions = 'excludeRegions'
 
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
-
-
+## NONE
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
-# TODO: all the pipe!
 
-class OutputPipelineGuiPipe(GuiPipe):
 
-  preferredPipe = True
+class ExcludeRegionsGuiPipe(GuiPipe):
+
+  preferredPipe = False
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(OutputPipelineGuiPipe, self)
+    super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+    setattr(self, ExcludeRegions , ER(self))
+    self.pipeLayout.addWidget(self.excludeRegions)
 
-    self.saveAsHDF5CheckBox = CheckBox(self.pipeFrame, checked=True, text='Save output spectra as HDF5',  grid=(0,0))
-    self.saveAsHDF5Label = Label(self.pipeFrame, 'Saving  directory path',  grid=(0,1))
-    setattr(self, SaveAsHDF5path,
-            LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(0,2)))
 
 
 
@@ -84,44 +74,29 @@ class OutputPipelineGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-class OutputSpectraPipe(SpectraPipe):
 
-  guiPipe = OutputPipelineGuiPipe
-  pipeName = PipeName
 
+class ExcludeRegionsPipe(SpectraPipe):
+
+  guiPipe = ExcludeRegionsGuiPipe
+  pipeName =PipeName
+  _kwargs = {
+            ExcludeRegions: [[], []]
+            }
 
   def runPipe(self, spectra):
     '''
-    :param data:
-    :return: it copies the input data as dummy spectra. Dummy spectra can be then modified.
+    :get excluded region of the spectrum and add to the pipeline kwargs.
+    Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
 
-
-    if self.project is not None:
-
-      hdf5Spectra = []
-      path = ''
-      for spectrum in spectra:
-        fullPath = str(path) + str(spectrum.name) + '.hdf5'
-        convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
-
-      # newDummySpectra = []
-      # for spectrum in self.inputData:
-      #   if spectrum is not None:
-      #     try:
-      #       dummySpectrum = self.project.createDummySpectrum(axisCodes=spectrum.axisCodes, name=spectrum.name)
-      #       dummySpectrum._positions = spectrum._positions
-      #       dummySpectrum._intensities = spectrum._intensities
-      #       dummySpectrum.pointCounts = spectrum.pointCounts
-      #       newDummySpectra.append(dummySpectrum)
-      #     except Exception as e:
-      #       print('Impossible create Dummy Spectrum for %s.' %spectrum,  e)
+    self.pipeline._kwargs.update(self._kwargs)
+    return spectra
 
 
 
-      return hdf5Spectra
 
 
+ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
 
-# OutputSpectraPipe.register()
 

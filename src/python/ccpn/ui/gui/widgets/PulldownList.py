@@ -40,7 +40,19 @@ NULL = object()
 class PulldownList(QtGui.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
-               icons=None, callback=None, index=0, **kw):
+               icons=None, callback=None, index=0, headerText=None, headerEnabled=False, **kw):
+    '''
+
+    :param parent:
+    :param texts:
+    :param objects:
+    :param icons:
+    :param callback:
+    :param index:
+    :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
+    :param headerEnabled: True to be selectable, False to disable and be grayed out
+    :param kw:
+    '''
 
     QtGui.QComboBox.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -49,10 +61,12 @@ class PulldownList(QtGui.QComboBox, Base):
     self.object = None
     self.texts = []
     self.objects = []
+    self.headerText = headerText
+    self.headerEnabled = headerEnabled
     
     # self.setIconSize(QtCore.QSize(22,22))
 
-    PulldownList.setData(self, texts, objects, index, icons)
+    PulldownList.setData(self, texts, objects, index, icons, headerText=headerText, headerEnabled=headerEnabled)
     self.setCallback(callback)
     self.setStyleSheet("""
     PulldownList {
@@ -144,8 +158,21 @@ class PulldownList(QtGui.QComboBox, Base):
     print("ccpn.ui.gui.widgets.PulldownList.setup is deprecated use; .setData")
 
     return self.currentIndex()
- 
-  def setData(self, texts=None, objects=None, index=None, icons=None, clear=True):
+
+  def _clear(self):
+    if self.headerText is not None:
+      self.clear()
+      self._addHeaderLabel(self.headerText, self.headerEnabled)
+    else:
+      self.clear()
+
+  def _addHeaderLabel(self, headerText, headerEnabled):
+    self.addItem(headerText)
+    headerIndex = self.getItemIndex(headerText)
+    headerItem = self.model().item(headerIndex)
+    headerItem.setEnabled(headerEnabled)
+
+  def setData(self, texts=None, objects=None, index=None, icons=None, clear=True,  headerText=None, headerEnabled=False):
 
     texts = texts or []
     objects = objects or []
@@ -155,7 +182,6 @@ class PulldownList(QtGui.QComboBox, Base):
     self.icons = []
     
     n = len(texts)
-    
     if objects:
       msg = 'len(texts) = %d, len(objects) = %d'
       assert n == len(objects), msg % (n, len(objects))
@@ -171,6 +197,10 @@ class PulldownList(QtGui.QComboBox, Base):
       icons = [None] * n
     if clear:
       self.clear()
+
+    if headerText:
+      self._addHeaderLabel(headerText, headerEnabled)
+
     for i, text in enumerate(texts):
       self.addItem(text, objects[i], icons[i])
     
@@ -275,7 +305,7 @@ if __name__ == '__main__':
   #policyDict = {}
 
   pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
-                              objects=objects, callback=callback, grid=(0,0), **policyDict
+                              objects=objects, callback=callback, addHeader=True, grid=(0,0), **policyDict
                               )
   pulldownList.insertSeparator(2)
   pulldownList.clearEditText()

@@ -43,12 +43,10 @@ class Pipeline(object):
     self.pipelineName = pipelineName
     self._kwargs = {}
 
-    if pipes is not None:
-      self.pipes = [cls() for cls in pipes]
-    else:
-      self.pipes = []
+
 
     self.inputData = set()
+    self.spectrumGroups = set()
     self.queue = [] # Pipes to be ran
     # self.finishedPipe = [] # Pipes already ran
 
@@ -64,6 +62,10 @@ class Pipeline(object):
       except AttributeError:
         pass
 
+    if pipes is not None:
+      self.pipes = [cls(application=application) for cls in pipes]
+    else:
+      self.pipes = []
 
   @property
   def pipes(self):
@@ -77,21 +79,29 @@ class Pipeline(object):
     if pipes is not None:
       allPipes = []
       for pipe in pipes:
+          pipe.pipeline = self
           allPipes.append(pipe)
       self._pipes = allPipes
     else:
       self._pipes = []
 
 
+  def _updateRunArgs(self, arg, value):
+    self._kwargs[arg] = value
 
   def runPipeline(self):
     '''Run all pipes in the specified order '''
-    print('Running Pipeline')
+    print('Running Pipeline', self.inputData)
+    self._kwargs = {}
     if len(self.queue)>0:
       for pipe in self.queue:
         if pipe is not None:
-            pipe.runPipe(pipe._kwargs)
-            self.queue.remove(pipe)
+            pipe.inputData = self.inputData
+            pipe.spectrumGroups = self.spectrumGroups
+            result = pipe.runPipe(self.inputData)
+            self.inputData = result
+            # self.queue.remove(pipe)
 
-    print(' self.queue',  self.queue)
+    return self.inputData
+
 

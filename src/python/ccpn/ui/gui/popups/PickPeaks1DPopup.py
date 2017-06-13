@@ -48,33 +48,36 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 class ExcludeRegions(Widget,Base):
   '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+
+  solvents = {'Acetic Acid-d4': [0, 0, 2.14, 2.0, 11.75, 11.65],
+              'Acetone-d6 & Water': [0, 0, 2.15, 2.0, 2.90, 2.80],
+              'Acetonitrile-d3 & water': [0, 0, 2.20, 1.94],
+              'Benzene-d6 & water': [0, 0, 0.60, 0.50, 7.25, 7.15],
+              'Chloroform-d': [0, 0, 1.60, 1.50, 7.35, 7.25],
+              'Deuterium Oxide': [0, 0, 4.75, 4.65],
+              'Dichloromethane-d2 & water': [0, 0, 1.60, 1.50, 5.42, 5.32],
+              'Dimethyl Sulfoxide-d6': [0, 0, 2.60, 2.50, 3.40, 3.30],
+              'Dimethylformamide-d7 & water': [0, 0, 8.11, 8.01, 2.99, 2.91, 2.83, 2.73, 3.60, 3.50],
+              'p-Dioxane-d8 & water': [0, 0, 2.60, 2.50, 3.63, 3.50],
+              'Tetrachloromethane-d2 & water': [0, 0, 1.70, 1.60, 6.10, 6.00],
+              'Ethanol-d6 & water': [0, 0, 1.21, 1.11, 3.66, 3.56, 5.40, 5.29],
+              'Methanol-d4': [0, 0, 3.40, 3.30, 4.90, 4.80],
+              'Pyridine-d5 & water': [0, 0, 8.74, 8.84, 7.68, 7.58, 7.32, 7.22, 5.10, 5.00],
+              'Trifluoroacetic acid-d': [0, 0, 11.60, 11.50],
+              'Tetrahydrofuran-d8 & water': [0, 0, 3.68, 3.58, 2.60, 2.50, 1.83, 1.73],
+              'New regions': [0, 0, 0.2, 0.1],
+              'Toulene-d8 & water': [0, 0, 7.18, 6.98, 2.19, 2.09, 2.50, 2.40, 5.10, 5.00],
+              'Trifluoroethanol-d3 & water': [0, 0, 5.12, 5.02, 3.98, 3.88],
+              'Carbon Tetrachloride & water ': [0, 0, 1.20, 1.10],
+              'Water': [0, 0, 5, 4.5]}
+
   def __init__(self, parent=None,**kw):
     Widget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
 
-    self.solvents = {'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
-                     'Acetone-d6 & Water': [0,0, 2.15,2.0, 2.90, 2.80],
-                     'Acetonitrile-d3 & water': [0,0, 2.20,1.94],
-                     'Benzene-d6 & water': [0,0, 0.60,0.50, 7.25,7.15],
-                     'Chloroform-d': [0,0, 1.60,1.50, 7.35,7.25],
-                     'Deuterium Oxide': [0,0, 4.75,4.65],
-                     'Dichloromethane-d2 & water': [0,0, 1.60,1.50, 5.42,5.32],
-                     'Dimethyl Sulfoxide-d6': [0,0, 2.60,2.50, 3.40,3.30],
-                     'Dimethylformamide-d7 & water': [0,0, 8.11,8.01, 2.99,2.91, 2.83,2.73, 3.60,3.50],
-                     'p-Dioxane-d8 & water':[0,0, 2.60,2.50, 3.63,3.50 ],
-                     'Tetrachloromethane-d2 & water': [0,0, 1.70,1.60, 6.10,6.00],
-                     'Ethanol-d6 & water': [0,0, 1.21,1.11, 3.66,3.56, 5.40,5.29],
-                     'Methanol-d4': [0,0, 3.40,3.30, 4.90,4.80],
-                     'Pyridine-d5 & water': [0,0, 8.74,8.84, 7.68,7.58, 7.32,7.22, 5.10,5.00],
-                     'Trifluoroacetic acid-d': [0,0, 11.60,11.50],
-                     'Tetrahydrofuran-d8 & water': [0,0, 3.68,3.58, 2.60,2.50, 1.83,1.73],
-                     'New regions': [0,0, 0.2, 0.1],
-                     'Toulene-d8 & water': [0,0, 7.18,6.98, 2.19,2.09, 2.50,2.40, 5.10,5.00],
-                     'Trifluoroethanol-d3 & water':[0,0, 5.12,5.02, 3.98,3.88],
-                     'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
-                     'water': [0,0, 5, 4.5]}
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
+    self.pulldownSolvents.select('Water')
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
@@ -87,7 +90,7 @@ class ExcludeRegions(Widget,Base):
     self.excludedRegions = []
     self.excludedSolvents = []
     self.comboBoxes = []
-
+    self._addRegions('Water') #default
 
   def _addRegions(self, pressed):
     '''   '''
@@ -153,6 +156,17 @@ class ExcludeRegions(Widget,Base):
     if len(excludedRegions)>0:
       return [item for sublist in excludedRegions for item in sublist]
 
+  def _set(self):
+    pass
+    # import  copy
+    # originalSolvents = copy.deepcopy(self.solvents)
+    # for solvent in sorted(self.params.keys()):
+    #   try:
+    #     self.solvents = self.params
+    #     self._addRegions(solvent)
+    #   except:
+    #     pass
+    # self.solvents = originalSolvents
 
   def _chunks(self, l, n):
     """Yield successive n-sized chunks from list. Needed this format!"""
@@ -359,8 +373,8 @@ class PickPeak1DPopup(CcpnDialog):
     ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
     noiseThreshold = self._getNoiseThreshold()
     for spectrum in spectra:
-      spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, ignoredRegions=ignoredRegions,
-                                                noiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
+      spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
+                                                positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()
 
 

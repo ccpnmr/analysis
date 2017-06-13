@@ -1,6 +1,3 @@
-"""Module Documentation here
-
-"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -11,69 +8,36 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:06 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+
+import pyqtgraph as pg
 from PyQt4 import QtGui, QtCore
+from pyqtgraph.graphicsItems.FillBetweenItem import FillBetweenItem
 
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.framework.Translation import translator
 
-TextAligment = {
-                'c': QtCore.Qt.AlignHCenter,
-                'l': QtCore.Qt.AlignLeft,
-                'r': QtCore.Qt.AlignRight
-                }
 
-class LineEdit(QtGui.QLineEdit, Base):
 
-  def __init__(self, parent, text='', textAligment='c', textColor=None, **kw):
+class FillBetweenRegions(FillBetweenItem):
+  """
+  GraphicsItem filling the space between two PlotDataItems.
+  """
 
-    #text = translator.translate(text)
+  def __init__(self, curve1, curve2, brush = None, **kw):
 
-    QtGui.QLineEdit.__init__(self, text, parent)
-    Base.__init__(self, **kw)
+    FillBetweenItem.__init__(self, curve1=curve1, curve2=curve2, brush=brush)
 
-    if textColor:
-      self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
-    self.setAlignment(TextAligment[textAligment])
-    self.setMinimumWidth(100)
-    self.setFixedHeight(25)
-
-  def get(self):
-
-    return self.text()
-
-  def set(self, text=''):
-
-    #text = translator.translate(text)
-    self.setText(text)
-
-class FloatLineEdit(LineEdit):
-
-  def get(self):
-
-    result = LineEdit.get(self)
-    if result:
-      return float(result)
-    else:
-      return None
-
-  def set(self, text=''):
-
-    LineEdit.set(str(text))

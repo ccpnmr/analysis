@@ -32,7 +32,67 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
+from typing import List
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+import numpy as np
+from scipy.integrate import trapz
+
+
+def _estimateNoiseLevel(x, y, factor=3):
+  '''
+  :param x,y:  spectrum.positions, spectrum.intensities
+  :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
+  :return: float of estimated noise threshold
+  '''
+
+  data = np.array([x, y])
+  dataStd = np.std(data)
+  data = np.array(data, np.float32)
+  data = data.clip(-dataStd, dataStd)
+  value = factor * np.std(data)
+  return value
+
+
+def _createIntersectingLine(x, y):
+  '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
+  return [_estimateNoiseLevel(x, y)] * len(x)
+
+
+def _getIntersectionPoints(x, y, line):
+  '''
+  :param line: x points of line to intersect y points
+  :return: list of intersecting points
+  '''
+  z = y - line
+  dx = x[1:] - x[:-1]
+  cross = np.sign(z[:-1] * z[1:])
+
+  x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
+  negatives = np.where(cross < 0)
+  points = x_intersect[negatives]
+
+  return points
+
+
+def _pairIntersectionPoints(intersectionPoints):
+  """ Yield successive pair chunks from list of intersectionPoints """
+  for i in range(0, len(intersectionPoints), 2):
+    pair = intersectionPoints[i:i + 2]
+    if len(pair) == 2:
+      yield pair
+
+
+def _getPeaksLimits(x, y, intersectingLine=None):
+  '''Get the limits of each peak of the spectrum given an intersecting line. If
+   intersectingLine is None, it is calculated by the STD of the spectrum'''
+  if intersectingLine is  None:
+    intersectingLine = _createIntersectingLine(x, y)
+  limits = _getIntersectionPoints(x, y, intersectingLine)
+  limitsPairs = list(_pairIntersectionPoints(limits))
+  return limitsPairs
+
+
+
 
 
 class IntegralList(AbstractWrapperObject):
@@ -136,6 +196,38 @@ class IntegralList(AbstractWrapperObject):
     """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
     return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Integral']
 
+  # Library functions
+
+  def automaticIntegral1D(self, minimalLineWidth=0.01, noiseThreshold=None,) -> List['Integral']:
+    '''
+    minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
+    noiseThreshold: value used to calculate the intersectingLine to get the peak limits
+    '''
+    # TODO: add excludeRegions option. Calculate Negative peak integral.
+    self._project.suspendNotification()
+    try:
+      spectrum = self.spectrum
+      x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+      if noiseThreshold is None:
+        intersectingLine = None
+      else:
+        intersectingLine = [noiseThreshold] * len(x)
+      limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+
+      integrals = []
+
+      for i in limitsPairs:
+        lineWidth = abs(i[0] - i[1])
+        if lineWidth > minimalLineWidth:
+          index01 = np.where((x <= i[0]) & (x >= i[1]))
+          integral = trapz(index01)
+          integrals.append(self.newIntegral(value= float(integral), limits=[[min(i), max(i)],]))
+
+    finally:
+      self._project.resumeNotification()
+
+    return integrals
+
 # Connections to parents:
 
 def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
@@ -177,6 +269,19 @@ def _factoryFunction(project:Project, wrappedData:ApiPeakList) -> AbstractWrappe
 IntegralList._factoryFunction = staticmethod(_factoryFunction)
 PeakList._factoryFunction = staticmethod(_factoryFunction)
 
+
+
+
+
+
+
+
+
+
+
 # Notifiers:
 
 # NB API level notifiers are (and must be) in PeakList instead
+
+
+

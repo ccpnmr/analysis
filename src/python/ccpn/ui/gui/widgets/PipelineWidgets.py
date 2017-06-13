@@ -53,9 +53,10 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 
 
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 
 commonWidgets =           {
@@ -72,10 +73,23 @@ commonWidgets =           {
                             Spinbox.__name__:               ('value',       'set'       ),
                             TextEditor.__name__:            ('get',         'setText'   ),
                             TargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
+                            ExcludeRegions.__name__:        ('_getExcludedRegions', '_set' ),
 
 
                             # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
                           }
+
+
+def _getWidgetByAtt(cls, name):
+  '''
+
+  :param cls: the class where the widget lives
+  :param name: widget variable name
+  :return: widget obj
+  '''
+  w  = getattr(cls, name)
+  if w is not None:
+    return w
 
 PipelineBoxDragStyle = """Dock > QWidget {border: 1px solid #78FF00; border-radius: 1px;}"""
 
@@ -211,8 +225,6 @@ class PipelineDropArea(DockArea):
     return d
 
 
-
-
   def dragEnterEvent(self, ev):
     src = ev.source()
     ev.ignore()
@@ -313,8 +325,9 @@ class GuiPipe(Dock, DockDrop):
     self.parent = parent
     
     self.inputData = []
-    if self.parent is not None:
-        self.inputData = self.parent.inputData
+    if isinstance(self.parent, Pipeline):
+      self.inputData = self.parent.inputData
+      self.spectrumGroups = self.parent.spectrumGroups
       
     if name is None:
       name = 'New Pipe'
@@ -383,7 +396,10 @@ class GuiPipe(Dock, DockDrop):
     widgetsState = {}
     for varName, varObj in vars(self).items():
       if varObj.__class__.__name__ in commonWidgets.keys():
-        widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        try:  # try because widgets can be dinamically deleted
+          widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        except Exception as e:
+          print('Error',e)
     self._kwargs = widgetsState
     return widgetsState
 
@@ -398,6 +414,12 @@ class GuiPipe(Dock, DockDrop):
           setWidget(value)
       except Exception as e:
         print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
+
+  def _updateInputDataWidgets(self):
+    '''
+    Override this method to update the widgets that are fed by input data
+    '''
+    pass
 
   def implements(self, name=None):
     if name is None:

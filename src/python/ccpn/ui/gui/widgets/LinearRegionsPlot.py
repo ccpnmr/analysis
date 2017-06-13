@@ -32,7 +32,7 @@ from os.path import expanduser
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.FillBetweenRegions import FillBetweenRegions
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -177,8 +177,10 @@ class TargetButtonSpinBoxes(Widget, Base):
     '''
     :return: positions displayed on the boxes
     '''
-
-    return [sb.value() for sb in self.spinBoxes]
+    if len(self.spinBoxes)>0:
+      return [sb.value() for sb in self.spinBoxes]
+    else:
+      return [0,0]
 
   def setValues(self, values):
 
@@ -196,11 +198,26 @@ if __name__ == '__main__':
   cw = Widget(parent=popup, setLayout=True, grid=(0, 0))
   pw3 = pg.PlotWidget()
   cw.getLayout().addWidget(pw3)
+
+
   curve = pw3.plot(np.random.normal(size=100) * 1e0, clickable=True)
+  y1 = [1]*100
+  # curve1 = pw3.plot(-np.random.normal(size=100) * 1e0, clickable=True)
+  # curve1 = pw3.plot(y1, clickable=True)
+  d = curve.yData - y1
+  curveD = pw3.plot(d, clickable=True)
+  brush = (100, 100, 255)
+
+
+  fills = [FillBetweenRegions(curveD,curve, brush=brush) ]
+  for f in fills:
+    pw3.addItem(f)
   curve.curve.setClickable(True)
   curve.setPen('w')  ## white pen
-  curve.setShadowPen(pg.mkPen((70, 70, 30), width=6, cosmetic=True))
-
+  # curve.setShadowPen(pg.mkPen((70, 70, 30), width=6, cosmetic=True))
+  # brush = (100, 100, 255)
+  # curve.setFillBrush(brush)
+  # curve.setFillLevel(-2)
 
   w = TargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30],  step=0.02, orientation='h', grid=(1,0) )
 

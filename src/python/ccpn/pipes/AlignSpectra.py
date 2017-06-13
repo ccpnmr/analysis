@@ -25,16 +25,23 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
-from ccpn.framework.lib.Pipe import Pipe
+from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
 
 
+########################################################################################################################
+###   Attributes:
+###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
+########################################################################################################################
+
+ReferenceSpectrum = 'referenceSpectrum'
+PipeName = 'AlignSpectra'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -82,25 +89,28 @@ def _alignSpectra(referenceSpectrum, spectra):
 class AlignSpectraGuiPipe(GuiPipe):
 
   preferredPipe = True
-  pipeName = 'AlignSpectra'
+  pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
     super(AlignSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    self.referenceSpectrum = PulldownList(self.pipeFrame,  grid=(0,1))
-    self._updateWidgets()
+    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame,  grid=(0,1)) )
 
-  def _updateWidgets(self):
+    self._updateInputDataWidgets()
+
+  def _updateInputDataWidgets(self):
     self._setDataReferenceSpectrum()
 
 
   def _setDataReferenceSpectrum(self):
     data = list(self.inputData)
     if len(data)>0:
-      self.referenceSpectrum.setData(texts=[sp.pid for sp in data], objects=data)
+      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data)
 
+    else:
+      _getWidgetByAtt(self, ReferenceSpectrum).clear()
 
 
 
@@ -112,29 +122,30 @@ class AlignSpectraGuiPipe(GuiPipe):
 
 
 
-class AlignSpectra(Pipe):
+class AlignSpectra(SpectraPipe):
 
   guiPipe = AlignSpectraGuiPipe
-  pipeName = AlignSpectraGuiPipe.pipeName
+  pipeName = PipeName
+
+  _kwargs  =   {
+               ReferenceSpectrum: 'spectrum.pid'
+               }
 
 
 
-  def runPipe(self, params):
+  def runPipe(self, spectra):
     '''
-    :param data:
-    :return:
+    :param spectra: inputData
+    :return: aligned spectra
     '''
-
     if self.project is not None:
-
-      referenceSpectrumPid = params['referenceSpectrum']
+      referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
       referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
       if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in self.inputData if spectrum != referenceSpectrum]
-
+        spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
         if spectra:
-          _alignSpectra(referenceSpectrum, spectra)
-          print('finished')
+          return _alignSpectra(referenceSpectrum, spectra)
+
 
 
 

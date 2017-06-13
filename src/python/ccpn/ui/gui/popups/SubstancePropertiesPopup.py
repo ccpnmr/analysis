@@ -131,7 +131,7 @@ class SubstancePropertiesPopup(CcpnDialog):
                                                   callback=None,
                                                   direction='h',
                                                   tipTexts=None,
-                                                  setLayout=True)
+                                                  )
 
   def _setCurrentSubstanceWidgets(self):
     self.currentSubstanceLabel = Label(self, text="Current Substances")

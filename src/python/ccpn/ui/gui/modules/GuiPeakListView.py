@@ -331,9 +331,10 @@ class Peak1d(QtGui.QGraphicsItem):
     # xPpm = peak.position[dataDims[0].dimensionIndex]
     xAxisIndex = peakListView.spectrumView._displayOrderSpectrumDimensionIndices[0]
     xPpm = peak.position[xAxisIndex]
-    self.setPos(xPpm, peak.height or 0)
-    self.annotation.setupPeakAnnotation(self)
-    peakListView.peakItems[self.peak] = self
+    if xPpm and peak.height is not None:
+      self.setPos(xPpm, peak.height or 0)
+      self.annotation.setupPeakAnnotation(self)
+      peakListView.peakItems[self.peak] = self
 
   def mousePressEvent(self, event):
     self.press = True

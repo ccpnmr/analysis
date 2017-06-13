@@ -81,6 +81,11 @@ class Pipe(ABC):
     self.customizeSetup()
 
 
+  def _getSpectrumGroup(self, pid):
+    if self.project is not None:
+      return self.project.getByPid(pid)
+
+
   @abstractmethod
   def runPipe(self, data):
     return data

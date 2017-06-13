@@ -751,7 +751,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)
-        print(obj)
         if object is not None:
           if isinstance(obj, Spectrum):
             self.inputData.update([obj])

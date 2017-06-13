@@ -102,6 +102,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Increases contour base level for all spectra visible in the display.
     """
+
+    """ wb: no good reason to insist on current strip being in this display
     try:
       if not self.current.strip:
         showWarning('Raise Contour Base', 'No strip selected')
@@ -112,6 +114,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         return
     except:
       return
+"""
 
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
@@ -151,6 +154,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Decreases contour base level for all spectra visible in the display.
     """
+
+    """ wb: no good reason to insist on current strip being in this display
     try:
       if not self.current.strip:
         showWarning('Lower Contour Base', 'No strip selected')
@@ -161,6 +166,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         return
     except:
       return
+"""
 
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
@@ -200,6 +206,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Increases number of contours by 1 for all spectra visible in the display.
     """
+
+    """ wb: no good reason to insist on current strip being in this display
     try:
       if not self.current.strip:
         showWarning('Add Contour Level', 'No strip selected')
@@ -210,6 +218,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         return
     except:
       return
+"""
 
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
@@ -245,6 +254,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Decreases number of contours by 1 for all spectra visible in the display.
     """
+
+    """ wb: no good reason to insist on current strip being in this display
     try:
       if not self.current.strip:
         showWarning('Remove Contour Level', 'No strip selected')
@@ -255,7 +266,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         return
     except:
       return
-
+"""
+    
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
         spectrum = spectrumView.spectrum

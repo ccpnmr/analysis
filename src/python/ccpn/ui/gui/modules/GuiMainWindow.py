@@ -564,7 +564,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   # that moduleArea handles this: self.moduleArea.deleteModule(blankDisplay)
   def deleteBlankDisplay(self):
     """
-    Removes blank display from main window modulearea if one is present.
+    Removes blank display from main window module area if one is present.
     """
     blankList = self.moduleArea.findAll()
     if 'Blank Display' in blankList[1]:
@@ -575,6 +575,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def newBlankDisplay(self, position='right', relativeTo=None):
     "Adds new blank display to module area; returns BlankDisplay instance"
     blankDisplay = BlankDisplay(mainWindow=self)
+
+    # blankDisplay = BlankDisplay.instance(mainWindow=self)     # ejb - failed test with a singleton
     #FIXME:ED - still crashes when loading some projects
     if not relativeTo:
       relativeTo = self.moduleArea     # ejb

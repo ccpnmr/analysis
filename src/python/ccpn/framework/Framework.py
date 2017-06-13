@@ -506,7 +506,10 @@ class Framework:
             strip.showPeaks(peakList)
     # add blank Display
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
-      self.ui.mainWindow.newBlankDisplay()
+      # self.ui.mainWindow.newBlankDisplay()
+
+      self.addBlankDisplay()
+
     # FIXME: LM. Restore Layout
     # Restore Layout currently unstable. Unexpected bugs from pyqtgraph conteiners. Needs a better refactoring
     # self._initLayout()
@@ -1481,18 +1484,35 @@ class Framework:
   ###################################################################################################################
 
   def addBlankDisplay(self, position='right', relativeTo=None):
-    self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
+    # self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
+
+    mainWindow = self.ui.mainWindow
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb - use same technique as below
+
+    from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+    blankDisplay = BlankDisplay(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
+
+    # if not BlankDisplay.isInstance():
+    #   blankDisplay = BlankDisplay.instance(mainWindow=mainWindow)
+    #   mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
+    # else:
+    #   BlankDisplay.showInstance()
 
   # Property to issue deprecation warning, remove when value removed
-  @property
-  def blankDisplay(self):
-    from warnings import warn
-    warn('{}.{} is deprecated.'.format(__class__, __name__), category=DeprecationWarning)
-    return self.__blankDisplay
-  @blankDisplay.setter
-  def blankDisplay(self, value):
-    self.__blankDisplay = value
 
+  # ejb - temp removed 12/6/17
+
+  # @property
+  # def blankDisplay(self):
+  #   from warnings import warn
+  #   warn('{}.{} is deprecated.'.format(__class__, __name__), category=DeprecationWarning)
+  #   return self.__blankDisplay
+  # @blankDisplay.setter
+  # def blankDisplay(self, value):
+  #   self.__blankDisplay = value
+  #
 
   def showChemicalShiftTable(self
                              , position:str='bottom'

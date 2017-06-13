@@ -35,12 +35,24 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 
 NULL = object()
-SelectHeaderLabel = '-- Select Item --'
+
 
 class PulldownList(QtGui.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
-               icons=None, callback=None, index=0, headerText=None, headerEnabled=True, **kw):
+               icons=None, callback=None, index=0, headerText=None, headerEnabled=False, **kw):
+    '''
+
+    :param parent:
+    :param texts:
+    :param objects:
+    :param icons:
+    :param callback:
+    :param index:
+    :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
+    :param headerEnabled: True to be selectable, False to disable and be grayed out
+    :param kw:
+    '''
 
     QtGui.QComboBox.__init__(self, parent)
     Base.__init__(self, **kw)

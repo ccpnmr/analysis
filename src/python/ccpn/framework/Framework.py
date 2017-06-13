@@ -1092,10 +1092,9 @@ class Framework:
     Export the current project as a Nef file
     Temporary routine because I don't know how else to do it yet
     """
-    from ccpn.core._implementation import Io as coreIo
     from ccpn.core.lib import CcpnNefIo
 
-    dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF File",
+    dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF Directory",
                         acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
                         directory=nefPath, filter='*.nef')
     nefPath = dialog.selectedFile()+'/'

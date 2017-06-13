@@ -103,7 +103,8 @@ class BlankDisplay(CcpnModule):
     success = False
     obj = self.project.getByPid(pid)
     if obj is not None and isinstance(obj, Spectrum):
-      self._createSpectrumDisplay(obj)
+      spectrumDisplay = self._createSpectrumDisplay(obj)
+      self.current.strip = spectrumDisplay.strips[0]
       success = True
     elif obj is not None and isinstance(obj, SpectrumGroup):
       self._handleSpectrumGroup(obj)
@@ -111,7 +112,8 @@ class BlankDisplay(CcpnModule):
     return success
 
   def _createSpectrumDisplay(self, spectrum):
-    self.mainWindow.createSpectrumDisplay(spectrum)
+    spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrum)
+
     # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
     # This routine can then be ommitted and the call above replaced by the one remaining line
     self.mainWindow.pythonConsole.writeConsoleCommand(
@@ -119,6 +121,8 @@ class BlankDisplay(CcpnModule):
     self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
     getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
     getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+    return spectrumDisplay
 
   def _handleSpectrumGroup(self, spectrumGroup):
     '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.

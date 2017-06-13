@@ -217,6 +217,8 @@ class GuiSpectrumDisplay(CcpnModule):
     
     CCPN INTERNAL: Also called from GuiStrip
     """
+    theObject = data.get('theObject')
+
     for url in data.get('urls',[]):
       getLogger().debug('dropped: %s' % url)
       objects = self.project.loadData(url)
@@ -224,14 +226,14 @@ class GuiSpectrumDisplay(CcpnModule):
       if objects is not None:
         for obj in objects:
           if isinstance(obj, Spectrum):
-            self._handlePid(obj.pid)  # pass the object as its pid so we use
+            self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
                                       # the same method used to process the pids
 
     for pid in data.get('pids',[]):
       getLogger().debug('dropped:', pid)
-      self._handlePid(pid)
+      self._handlePid(pid, theObject)
 
-  def _handlePid(self, pid):
+  def _handlePid(self, pid, strip=None):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
     success = False
     obj = self.project.getByPid(pid)
@@ -240,6 +242,10 @@ class GuiSpectrumDisplay(CcpnModule):
         showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays. Open a new Blank Display (N,D)')
         return success
       self.displaySpectrum(obj)
+      if strip in self.strips:
+        self.current.strip = strip
+      elif self.current.strip not in self.strips:
+        self.current.strip = self.strips[0]
       success = True
     elif obj is not None and isinstance(obj, PeakList):
       self._handlePeakList(obj)
@@ -267,6 +273,8 @@ class GuiSpectrumDisplay(CcpnModule):
     self.spectrumGroupToolBar._addAction(spectrumGroup)
     for spectrum in spectrumGroup.spectra:
       self.displaySpectrum(spectrum)
+    if self.current.strip not in self.strips:
+      self.current.strip = self.strips[0]
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
     "Set the scrolbar policies; convenience to expose to the user"

@@ -653,6 +653,15 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.goButton.setEnabled(True)
 
 
+
+  def _updateInputDataWidgets(self):
+    'update the gui pipe widget if the input data has changed'
+    if len(self.pipelineArea.findAll()[1]) > 0:
+      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+      for guiPipe in guiPipes:
+        guiPipe._updateInputDataWidgets()
+
+
   def settingsPipelineWidgets(self):
     if self.settingFrame.isHidden():
       self._showSettingWidget()
@@ -693,6 +702,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self._updateSettingsParams()
     self._setSettingsParams()
     self.setDataSelection()
+    self._updateInputDataWidgets()
     # self._hideSettingWidget()
 
   def _cancelSettingsCallBack(self):

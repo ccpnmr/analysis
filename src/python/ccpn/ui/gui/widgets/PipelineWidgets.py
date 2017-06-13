@@ -415,6 +415,12 @@ class GuiPipe(Dock, DockDrop):
       except Exception as e:
         print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
 
+  def _updateInputDataWidgets(self):
+    '''
+    Override this method to update the widgets that are fed by input data
+    '''
+    pass
+
   def implements(self, name=None):
     if name is None:
       return ['GuiPipe']

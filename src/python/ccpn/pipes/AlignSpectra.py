@@ -98,9 +98,9 @@ class AlignSpectraGuiPipe(GuiPipe):
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
     setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame,  grid=(0,1)) )
 
-    self._updateWidgets()
+    self._updateInputDataWidgets()
 
-  def _updateWidgets(self):
+  def _updateInputDataWidgets(self):
     self._setDataReferenceSpectrum()
 
 
@@ -109,6 +109,8 @@ class AlignSpectraGuiPipe(GuiPipe):
     if len(data)>0:
       _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data)
 
+    else:
+      _getWidgetByAtt(self, ReferenceSpectrum).clear()
 
 
 

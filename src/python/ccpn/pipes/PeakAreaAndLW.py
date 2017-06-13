@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -84,9 +84,9 @@ class CalculateAreaGuiPipe(GuiPipe):
     row += 1
     self.peakListLabel = Label(self.pipeFrame, 'Minimal LineWidth', grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
-    self._updateWidgets()
+    self._updateInputDataWidgets()
 
-  def _updateWidgets(self):
+  def _updateInputDataWidgets(self):
     self._setDataReferenceSpectrum()
 
   def _setDataReferenceSpectrum(self):
@@ -96,7 +96,9 @@ class CalculateAreaGuiPipe(GuiPipe):
         if spectrum is not None:
           if spectrum.peakLists:
             pls = spectrum.peakLists
-            self.referencePeakList.setData(texts=[str(n) for n in range(len(pls))])
+            _getWidgetByAtt(self, ReferencePeakList).setData(texts=[str(n) for n in range(len(pls))])
+    else:
+      _getWidgetByAtt(self, ReferencePeakList).clear()
 
 
 

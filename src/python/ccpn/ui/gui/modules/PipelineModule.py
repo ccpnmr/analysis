@@ -356,6 +356,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.goButton.setStyleSheet(transparentStyle)
     self.goAreaLayout.addWidget(self.goButton, )
     self.goAreaLayout.addStretch(1)
+    self.goButton.setEnabled(False)
 
   def _addPipelineDropArea(self):
     self.pipelineArea = PipelineDropArea()
@@ -406,22 +407,22 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _runPipeline(self):
-    print('_runPipeline')
 
     self.queue = []
-    if len(self.pipelineArea.findAll()[1]) > 0:
-      guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-      for guiPipe in guiPipes:
-        if guiPipe.isActive:
-          guiPipe.pipe.isActive = True
-          guiPipe.pipe._kwargs = guiPipe.widgetsState
-          self.queue.append(guiPipe.pipe)
+    if self.inputData:
+      if len(self.pipelineArea.findAll()[1]) > 0:
+        guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
+        for guiPipe in guiPipes:
+          if guiPipe.isActive:
+            guiPipe.pipe.isActive = True
+            guiPipe.pipe._kwargs = guiPipe.widgetsState
+            self.queue.append(guiPipe.pipe)
 
-        else:
-          guiPipe.pipe.isActive = False
+          else:
+            guiPipe.pipe.isActive = False
 
 
-    self.runPipeline()
+      self.runPipeline()
 
 
 
@@ -572,6 +573,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.settingFrame.setLayout(self.settingWidgetsLayout)
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
 
+  def _getInputDataHeaderLabel(self):
+    color = QtGui.QColor('Red')
+    header = QtGui.QListWidgetItem(DropHereLabel)
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(color)
+    return header
+
   def _createAllSettingWidgets(self):
     #
     self.pipelineReNameLabel = Label(self, 'Name')
@@ -584,11 +592,8 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList = ListWidget(self)
     self.inputDataList.setMaximumHeight(200)
     self.inputDataList.setAcceptDrops(True)
-    color = QtGui.QColor('Red')
-    header = QtGui.QListWidgetItem(DropHereLabel)
-    header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(color)
-    self.inputDataList.addItem(header)
+
+    self.inputDataList.addItem(self._getInputDataHeaderLabel())
     self.settingsWidgets.append(self.inputDataList)
     self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
 
@@ -645,6 +650,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     if len(self.inputDataList.getTexts())==1:
       if DropHereLabel in self.inputDataList.getTexts():
         self.inputDataList.clear()
+        self.goButton.setEnabled(True)
 
 
   def settingsPipelineWidgets(self):
@@ -730,6 +736,8 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.spectrumGroups.clear()
     if self.project is not None:
       if len(dataTexts) == 0:
+        self.goButton.setEnabled(False)
+        self.inputDataList.addItem(self._getInputDataHeaderLabel())
         return
       for text in dataTexts:
         obj  = self.project.getByPid(text)

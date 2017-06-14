@@ -5,15 +5,12 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -24,7 +21,6 @@ __version__ = "$Revision: 3.0.b1 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -35,6 +31,8 @@ import os
 import sys
 import time
 import typing
+import itertools
+import errno
 from datetime import datetime
 from collections import OrderedDict as OD
 # from collections import Counter
@@ -75,6 +73,7 @@ from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from ccpn.util.Logging import getLogger
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
@@ -784,55 +783,10 @@ nef2CcpnMap = {
 
   # TODO add function to get NefReader to load multiple projects, settings
 
-
-# ejb - functions and append a number to the end of a filename if it already exists
-#       I've put this in for the exportNef reader as it currently just needs a directory
-def iter_incrementing_file_names(path):
-  """
-  Iterate incrementing file names. Start with path and add " (n)" before the
-  extension, where n starts at 1 and increases.
-
-  :param path: Some path
-  :return: An iterator.
-  """
-  yield path
-  prefix, ext = os.path.splitext(path)
-  for i in itertools.count(start=1, step=1):
-    yield prefix + ' ({0})'.format(i) + ext
-
-def safe_open(path, mode):
-  """
-  Open path, but if it already exists, add " (n)" before the extension,
-  where n is the first number found such that the file does not already
-  exist.
-
-  Returns an open file handle. Make sure to close!
-
-  :param path: Some file name.
-
-  :return: Open file handle... be sure to close!
-  """
-  flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-
-  if 'b' in mode and platform.system() == 'Windows':
-    flags |= os.O_BINARY
-
-  for filename in iter_incrementing_file_names(path):
-    try:
-      file_handle = os.open(filename, flags)
-    except OSError as e:
-      if e.errno == errno.EEXIST:
-        pass
-      else:
-        raise
-    else:
-      return os.fdopen(file_handle, mode)
-
 def saveNefProject(project:Project
                    , path:str
                    , overwriteExisting:bool=False
-                   , skipPrefixes=()
-                   , useNextAvailable:bool=False):
+                   , skipPrefixes=()):
   """Save project NEF file to path"""
 
   dirPath, fileName = os.path.split(path)
@@ -842,7 +796,7 @@ def saveNefProject(project:Project
 
   filePath = os.path.join(dirPath, fileName)
 
-  if os.path.exists(filePath) and not overwriteExisting and not useNextAvailable:
+  if os.path.exists(filePath) and not overwriteExisting:
     raise IOError("%s already exists" % filePath)
 
   text = convert2NefString(project, skipPrefixes=skipPrefixes)
@@ -852,6 +806,28 @@ def saveNefProject(project:Project
 
   open(filePath, 'w').write(text)
 
+def saveNefProjectNewName(project:Project
+                       , path:str
+                       , overwriteExisting:bool=False
+                       , skipPrefixes=()):
+  """Save project NEF file to path"""
+  # ejb - added to allow the changing of the name from the current project name.
+
+  if path[-4:] != '.nef':
+    path = path+'.nef'
+    getLogger().debug('Adding .nef extension to filename %s' % path)
+
+  if os.path.exists(path) and not overwriteExisting:
+    raise IOError("%s already exists" % path)
+
+  text = convert2NefString(project, skipPrefixes=skipPrefixes)
+
+  dirPath, fileName = os.path.split(path)
+  if dirPath and not os.path.isdir(dirPath):
+    os.makedirs(dirPath)
+
+  with open(path, 'w') as f:            # save write
+    f.write(text)
 
 def convert2NefString(project:Project, skipPrefixes:Sequence=()):
   """Convert project to NEF string"""

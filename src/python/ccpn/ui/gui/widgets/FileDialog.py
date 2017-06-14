@@ -32,11 +32,16 @@ import sys
 
 class FileDialog(QtGui.QFileDialog):
 
+  # def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
+  #              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
+
   def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
+               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
+
+    # ejb - added selectFile to suggest a filename in the file box
+    #       this is not passed to the super class
 
     QtGui.QFileDialog.__init__(self, parent, caption=text, **kw)
-
 
     staticFunctionDict = {
       (0, 0): 'getOpenFileName',
@@ -59,6 +64,10 @@ class FileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
+
+    if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
+      self.selectFile(selectFile)
+
     if preferences is None:
       self.useNative = False
 

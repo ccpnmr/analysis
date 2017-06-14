@@ -1094,14 +1094,24 @@ class Framework:
     """
     from ccpn.core.lib import CcpnNefIo
 
-    dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF Directory",
-                        acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                        directory=nefPath, filter='*.nef')
-    nefPath = dialog.selectedFile()+'/'
+    # dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF Directory",
+    #                     acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+    #                     directory=nefPath, filter='*.nef')
+    # nefPath = dialog.selectedFile()+'/'
+
+    dialog = FileDialog(self.ui.mainWindow
+                        , fileMode=FileDialog.AnyFile
+                        , text="Export NEF File"
+                        , acceptMode=FileDialog.AcceptSave
+                        , preferences=self.preferences.general
+                        , selectFile=self.project.name+'.nef'
+                        , filter='*.nef')
+    nefPath = dialog.selectedFile()
+
     if not nefPath:
       return
 
-    CcpnNefIo.saveNefProject(self.project, nefPath, overwriteExisting=False, useNextAvailable=True)
+    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

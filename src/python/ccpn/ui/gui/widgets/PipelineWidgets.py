@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
-
+from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
@@ -301,6 +301,8 @@ class PipelineDropArea(DockArea):
       guiPipe.close()
 
 
+
+
 class GuiPipe(Dock, DockDrop):
 
   preferredPipe = True
@@ -317,7 +319,8 @@ class GuiPipe(Dock, DockDrop):
     :param kw: any other
     '''
     super(GuiPipe, self).__init__(name, self)
-
+    self._pulldownSGHeaderText = '-- Select SG --'
+    self._warningIcon = Icon('icons/warning')
     self.ccpnModule = False
     self.pipelineBox = True
     self.autoOrient = False
@@ -447,6 +450,7 @@ class GuiPipe(Dock, DockDrop):
     spectrumGroups = list(self.spectrumGroups)
     if len(spectrumGroups)>0:
       for widgetVariable in widgetVariables:
+
         _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
                         headerText = headerText, headerEnabled = headerEnabled, headerIcon=headerIcon)
 

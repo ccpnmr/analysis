@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
@@ -67,9 +67,13 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+    self.plusIcon = Icon('icons/plus')
+    self.minusIcon = Icon('icons/minus')
 
     self.addRemoveLabel = Label(self.pipeFrame, text="Add Region", grid=(0, 0))
-    self.addRemoveButtons = ButtonList(self.pipeFrame, texts=["+", "-"], callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
+    self.addRemoveButtons = ButtonList(self.pipeFrame, texts=['', ''], icons=[self.plusIcon, self.minusIcon],
+                                       callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
+    self.addRemoveButtons.setMaximumHeight(20)
     self.count = 1
 
     self.excludeRegion1Label = Label(self.pipeFrame, text="Select Region "+str(self.count), grid=(self.count , 0))

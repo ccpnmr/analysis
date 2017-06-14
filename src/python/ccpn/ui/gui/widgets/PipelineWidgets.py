@@ -433,7 +433,7 @@ class GuiPipe(Dock, DockDrop):
   def _updateLabel(self, name):
     self.label.deleteLater()  # delete original Label
     self.label = PipelineBoxLabel(name.upper(), self)
-    self.label.closeButton.clicked.connect(self.closeBox)
+    self.label.closeButton.clicked.connect(self._closeBox)
     # self.label.arrowDownButton.clicked.connect(self.moveBoxDown)
     # self.label.arrowUpButton.clicked.connect(self.moveBoxUp)
     self.moveLabel = True
@@ -443,6 +443,8 @@ class GuiPipe(Dock, DockDrop):
       self.setParent(None)
       self.label.setParent(None)
 
+  def _closeBox(self):
+      self.closeBox()
 
 
   def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='',headerEnabled=False, headerIcon=None):

@@ -188,6 +188,15 @@ class TargetButtonSpinBoxes(Widget, Base):
     self.linearRegions.lines[1].setPos(max(values))
 
 
+  # def _deleteLater(self):
+  #   'Remove the line from plotWidget if any'
+  #   self._turnOffPositionPicking()
+  #   self.deleteLater()
+
+  def destroy(self, bool_destroyWindow=True, bool_destroySubWindows=True):
+    self._turnOffPositionPicking()
+    self.destroy( bool_destroyWindow=bool_destroyWindow, bool_destroySubWindows=bool_destroySubWindows)
+
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.popups.Dialog import CcpnDialog

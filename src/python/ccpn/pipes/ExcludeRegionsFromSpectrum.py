@@ -67,6 +67,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
+
     self.plusIcon = Icon('icons/plus')
     self.minusIcon = Icon('icons/minus')
 
@@ -110,7 +111,11 @@ class ExcludeRegionsGuiPipe(GuiPipe):
               w.deleteLater()
         self.count -= 1
 
-
+  def _closeBox(self):
+    'remove the lines from plotwidget if any'
+    for row in range(self.count-1):
+      self._deleteRegions()
+    self.closeBox()
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################

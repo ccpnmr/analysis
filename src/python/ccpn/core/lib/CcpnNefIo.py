@@ -784,8 +784,55 @@ nef2CcpnMap = {
 
   # TODO add function to get NefReader to load multiple projects, settings
 
-def saveNefProject(project:Project, path:str, overwriteExisting:bool=False,
-                   skipPrefixes=()):
+
+# ejb - functions and append a number to the end of a filename if it already exists
+#       I've put this in for the exportNef reader as it currently just needs a directory
+def iter_incrementing_file_names(path):
+  """
+  Iterate incrementing file names. Start with path and add " (n)" before the
+  extension, where n starts at 1 and increases.
+
+  :param path: Some path
+  :return: An iterator.
+  """
+  yield path
+  prefix, ext = os.path.splitext(path)
+  for i in itertools.count(start=1, step=1):
+    yield prefix + ' ({0})'.format(i) + ext
+
+def safe_open(path, mode):
+  """
+  Open path, but if it already exists, add " (n)" before the extension,
+  where n is the first number found such that the file does not already
+  exist.
+
+  Returns an open file handle. Make sure to close!
+
+  :param path: Some file name.
+
+  :return: Open file handle... be sure to close!
+  """
+  flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+
+  if 'b' in mode and platform.system() == 'Windows':
+    flags |= os.O_BINARY
+
+  for filename in iter_incrementing_file_names(path):
+    try:
+      file_handle = os.open(filename, flags)
+    except OSError as e:
+      if e.errno == errno.EEXIST:
+        pass
+      else:
+        raise
+    else:
+      return os.fdopen(file_handle, mode)
+
+def saveNefProject(project:Project
+                   , path:str
+                   , overwriteExisting:bool=False
+                   , skipPrefixes=()
+                   , useNextAvailable:bool=False):
   """Save project NEF file to path"""
 
   dirPath, fileName = os.path.split(path)
@@ -795,7 +842,7 @@ def saveNefProject(project:Project, path:str, overwriteExisting:bool=False,
 
   filePath = os.path.join(dirPath, fileName)
 
-  if os.path.exists(filePath) and not overwriteExisting:
+  if os.path.exists(filePath) and not overwriteExisting and not useNextAvailable:
     raise IOError("%s already exists" % filePath)
 
   text = convert2NefString(project, skipPrefixes=skipPrefixes)

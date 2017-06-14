@@ -110,18 +110,19 @@ class CcpnModuleArea(ModuleArea):
 
     ## Determine the container to insert this module into.
     ## If there is no neighbor, then the container is the top.
-    if relativeTo is None or relativeTo is self:
-      if self.topContainer is None:
-        container = self
-        neighbor = None
-      else:
-        container = self.topContainer
-        neighbor = None
     else:
-      if isinstance(relativeTo, str):
-          relativeTo = self.modules[relativeTo]
-      container = self.getContainer(relativeTo)
-      neighbor = relativeTo
+      if relativeTo is None or relativeTo is self:
+        if self.topContainer is None:
+          container = self
+          neighbor = None
+        else:
+          container = self.topContainer
+          neighbor = None
+      else:
+        if isinstance(relativeTo, str):
+            relativeTo = self.modules[relativeTo]
+        container = self.getContainer(relativeTo)
+        neighbor = relativeTo
 
 
     if neededContainer != container.type() and container.type() == 'tab':
@@ -155,8 +156,9 @@ class CcpnModuleArea(ModuleArea):
     # ejb - I think there is a logic error here when adding a module
     #       that leaves the blank display without a parent
 
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-    self.modules[CcpnModule.name(module)] = module
+    # from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+    # self.modules[CcpnModule.name(module)] = module
+    self.modules[module.name()] = module                # ejb - testing
     # self.movePythonConsole()
     return module
 

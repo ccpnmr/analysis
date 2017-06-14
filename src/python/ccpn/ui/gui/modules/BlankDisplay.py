@@ -73,6 +73,9 @@ class BlankDisplay(CcpnModule):
     These are either urls or pids, as the notifier will have filtered for this
     """
     success = False # denote if we got a valid spectrum and should delete BlankDisplay
+
+    self.hide()     # ejb - hide us first before it loses its container
+
     # process urls
     for url in data.get('urls',[]):
       getLogger().debug('dropped: %s' % url)
@@ -94,9 +97,11 @@ class BlankDisplay(CcpnModule):
 
     if success:
       # self.mainWindow.deleteBlankDisplay()
-      self.hide()                               # ejb - cheat because it won't disappear
-      self._closeModule()
       getLogger().info('application.deleteBlankDisplay()')
+      self._closeModule()
+    else:
+      self.show()             # ejb - show us again, can always be shown again from the menu
+
 
   def _handlePid(self, pid):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"

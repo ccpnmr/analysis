@@ -614,6 +614,7 @@ def _axisRegionChanged(axis:'Axis'):
       else:
         # One of the Z axes
         for spectrumView in strip.spectrumViews:
+          spectrumView.update()
           if spectrumView.isVisible():
             for peakListView in spectrumView.peakListViews:
               if peakListView.isVisible():

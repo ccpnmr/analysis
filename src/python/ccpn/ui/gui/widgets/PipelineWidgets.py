@@ -441,13 +441,26 @@ class GuiPipe(Dock, DockDrop):
       self.label.setParent(None)
 
 
-  # def name(self):
-  #   return self.label.name
+
+  def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='',headerEnabled=False, headerIcon=None):
+    ''' Used to set the spectrum groups pid in the pulldowns. Called from various guiPipes'''
+    spectrumGroups = list(self.spectrumGroups)
+    if len(spectrumGroups)>0:
+      for widgetVariable in widgetVariables:
+        _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
+                        headerText = headerText, headerEnabled = headerEnabled, headerIcon=headerIcon)
+
+    else:
+      for widgetVariable in widgetVariables:
+        _getWidgetByAtt(self, widgetVariable)._clear()
+
+
+
 
   def rename(self, newName):
     self.label.name = newName
 
-  def moveBoxDown(self):
+  def _moveBoxDown(self):
     name = self.name()
     boxes = self.pipelineArea.childState(self.pipelineArea.topContainer)[1]
     boxesNames = []
@@ -461,7 +474,7 @@ class GuiPipe(Dock, DockDrop):
       self.pipelineArea.moveDock(self, 'bottom', next)
       j+=1
 
-  def moveBoxUp(self):
+  def _moveBoxUp(self):
     name = self.name()
     boxes = self.pipelineArea.childState(self.pipelineArea.topContainer)[1]
     boxesNames = []

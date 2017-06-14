@@ -36,9 +36,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.Widget import Widget
-from core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
-from ccpn.core.Peak import Peak
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()

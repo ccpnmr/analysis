@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
 
@@ -70,6 +70,10 @@ class NoiseThresholdGuiPipe(GuiPipe):
     setattr(self, NoiseThreshold,
             TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
 
+  def _closeBox(self):
+    'remove the lines from plotwidget if any'
+    _getWidgetByAtt(self, NoiseThreshold)._turnOffPositionPicking()
+    self.closeBox()
 
 
 

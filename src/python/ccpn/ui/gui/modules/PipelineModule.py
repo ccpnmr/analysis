@@ -142,7 +142,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
     # init the CcpnModule
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=self._closeAllGuiPipes)
 
     # init the Pipeline
     Pipeline.__init__(self, application=self.application, pipelineName=name, pipes=pipes)
@@ -370,7 +370,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     guiPipes = self.pipelineArea.currentGuiPipes
     if len(guiPipes) > 0:
       for guiPipe in guiPipes:
-        guiPipe.closeBox()
+        guiPipe._closeBox()
 
   def keyPressEvent(self, KeyEvent):
     ''' Run the pipeline by pressing the enter key '''

@@ -135,11 +135,6 @@ class Integral(AbstractWrapperObject):
       raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
                        % value, len(peakDims))
 
-
-  @figureOfMerit.setter
-  def figureOfMerit(self, value:float):
-    self._wrappedData.figOfMerit = value
-
   @property
   def annotation(self) -> Optional[str]:
     """Integral text annotation"""

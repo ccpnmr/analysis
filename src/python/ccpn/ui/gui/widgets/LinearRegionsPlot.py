@@ -213,8 +213,8 @@ if __name__ == '__main__':
   y1 = [1]*100
   # curve1 = pw3.plot(-np.random.normal(size=100) * 1e0, clickable=True)
   # curve1 = pw3.plot(y1, clickable=True)
-  d = curve.yData - y1
-  curveD = pw3.plot(d, clickable=True)
+  # d = curve.yData - y1
+  curveD = pw3.plot(y1, clickable=True)
   brush = (100, 100, 255)
 
 

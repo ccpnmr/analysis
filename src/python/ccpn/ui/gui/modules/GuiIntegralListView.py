@@ -32,38 +32,45 @@ import pyqtgraph as pg
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
 
-'''
-WARNING:
-This  file is Under development. 
-DO NOT USE !!
+
+# WARNING:
+# This  file is Under development.
+# DO NOT USE !!
 
 
 
 
-def _getIntegralRegions(integralList):
-  # return: array of points. Each array represent the integral shape
-
+def testintegralListView(integralList, intersectingThreshold):
+  import numpy as np
+  import pyqtgraph as pg
+  integralList = project.integralLists[0]
+  plotWidget = current.strip.plotWidget
   spectrum = integralList.spectrum
+  brush = spectrum.sliceColour
+
   limitsPairs = [integral.limits for integral in integralList.integrals]
   x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
 
-  integralRegions = []
-  for i in limitsPairs:
-    index01 = np.where((x <= i[0]) & (x >= i[1]))
-    y_region = y[index01]
-    x_region = x[index01]
-    integralRegions.append((x_region, y_region))
-  return integralRegions
+  integralBaselineCurves = []
+  for pair in limitsPairs:
+    index = np.where((x <= max(pair[0])) & (x >= min(pair[0])))
 
+    y_region = y[index]
+    x_region = x[index]
 
-def _getFillRegions(regions, intersectingLine, brush):
-  # Create curveItems and fill the area below till the intersectingLine
-  base = pg.PlotCurveItem(intersectingLine)
+    yBaselineCurve = [intersectingThreshold] * len(y_region)
+    baselineCurve = pg.PlotCurveItem(x_region, yBaselineCurve)
+    integralCurve = pg.PlotCurveItem(x_region, y_region)
+    integralBaselineCurves.append((baselineCurve, integralCurve))
+
   fills = []
-  for region in regions:
-    curve = pg.PlotCurveItem(region)
-    fills.append(pg.FillBetweenItem(curve, base, brush=brush))
-  return fills
+
+  for i in integralBaselineCurves:
+    integralCurve, baselineCurve = i
+    fill = pg.FillBetweenItem(integralCurve, baselineCurve, brush=brush)
+    fills.append(fill)
+
+  return  fills
 
 def _addIntegralRegionsToPlot(plotWidget, fillRegions):
   for fillRegion in fillRegions:
@@ -74,5 +81,3 @@ def _removeIntegralRegionsFromPlot(plotWidget, fillRegions):
   for fillRegion in fillRegions:
     if isinstance(plotWidget, PlotWidget):
       plotWidget.removeItem(fillRegion)
-
-'''

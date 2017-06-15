@@ -42,7 +42,7 @@ import numpy as np
 
 ReferenceSpectrum = 'referenceSpectrum'
 PipeName = 'AlignSpectra'
-
+HeaderText = '-- Select Spectrum --'
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -96,9 +96,10 @@ class AlignSpectraGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
     self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame,  grid=(0,1)) )
+    print(HeaderText,self._warningIcon )
+    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText, headerIcon=self._warningIcon,  grid=(0,1)) )
 
-    self._updateInputDataWidgets()
+    # self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
     self._setDataReferenceSpectrum()
@@ -107,10 +108,10 @@ class AlignSpectraGuiPipe(GuiPipe):
   def _setDataReferenceSpectrum(self):
     data = list(self.inputData)
     if len(data)>0:
-      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data)
+      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, headerText=HeaderText, headerIcon=self._warningIcon)
 
     else:
-      _getWidgetByAtt(self, ReferenceSpectrum).clear()
+      _getWidgetByAtt(self, ReferenceSpectrum)._clear()
 
 
 

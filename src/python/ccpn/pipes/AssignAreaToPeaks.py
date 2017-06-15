@@ -41,7 +41,7 @@ from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Calculate Peak Areas'
+PipeName = 'Assign Peak Areas'
 
 ExcludeRegions = 'excludeRegions'
 ReferencePeakList = 'referencePeakList'
@@ -68,13 +68,13 @@ DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
 
 
-class CalculateAreaGuiPipe(GuiPipe):
+class AssignPeakAreaGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(CalculateAreaGuiPipe, self)
+    super(AssignPeakAreaGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
@@ -110,9 +110,9 @@ class CalculateAreaGuiPipe(GuiPipe):
 
 
 
-class CalculateAreaPipe(SpectraPipe):
+class AssignPeakAreaPipe(SpectraPipe):
 
-  guiPipe = CalculateAreaGuiPipe
+  guiPipe = AssignPeakAreaGuiPipe
   pipeName = PipeName
 
   _kwargs =       {
@@ -146,11 +146,11 @@ class CalculateAreaPipe(SpectraPipe):
           if referencePeakList.peaks:
             _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:
-            print('Error. No peaks to assign volume found. Pick the peaks first' )
+            print('Error. Found no peaks to assign a volume value. Pick the peaks first.' )
 
     return spectra
 
 
-CalculateAreaPipe.register() # Registers the pipe in the pipeline
+AssignPeakAreaPipe.register() # Registers the pipe in the pipeline
 
 

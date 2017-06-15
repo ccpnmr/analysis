@@ -40,7 +40,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 
 PipeName = 'Exclude Solvent Regions'
 ExcludeRegions = 'excludeRegions'
-
+selectionLabel = "Select Regions or solvents to exclude"
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -63,7 +63,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    setattr(self, ExcludeRegions , ER(self))
+    setattr(self, ExcludeRegions , ER(self, labelAlign='l', selectionLabel=selectionLabel))
     self.pipeLayout.addWidget(self.excludeRegions)
 
 

@@ -190,6 +190,11 @@ class Undo(deque):
     if self._debug:
       print('undo.newItem', self.blocking, undoMethod, redoMethod, undoArgs, undoKwargs, redoArgs,
             redoKwargs)
+      # from ccpn.util.Logging import getLogger
+      # getLogger().debug('undo.newItem %s %s %s %s %s %s %s' % (self.blocking, undoMethod
+      #                                                          , redoMethod, undoArgs
+      #                                                          , undoKwargs, redoArgs
+      #                                                          , redoKwargs))
 
     if not undoArgs:
       undoArgs = ()

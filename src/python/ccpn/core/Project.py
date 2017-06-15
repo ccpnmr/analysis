@@ -318,8 +318,8 @@ class Project(AbstractWrapperObject):
     if undo is None:
       self._logger.warning("Trying to add undoPoint but undo is not initialised")
     else:
-      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE
-      self._logger.info("Added undoPoint")
+      undo.newWaypoint()                      # DO NOT CHANGE THIS ONE newWaypoint
+      self._logger.debug("Added undoPoint")
 
   def blockWaypoints(self):
     """Block the setting of undo waypoints,
@@ -331,7 +331,7 @@ class Project(AbstractWrapperObject):
       self._logger.warning("Trying to block waypoints but undo is not initialised")
     else:
       undo.increaseWaypointBlocking()
-      self._logger.info("Waypoint setting blocked")
+      self._logger.debug("Waypoint setting blocked")
 
   def unblockWaypoints(self):
     """Block the setting of undo waypoints,
@@ -343,7 +343,7 @@ class Project(AbstractWrapperObject):
       self._logger.warning("Trying to unblock waypoints but undo is not initialised")
     else:
       undo.decreaseWaypointBlocking()
-      self._logger.info("Waypoint setting unblocked")
+      self._logger.debug("Waypoint setting unblocked")
 
 
   # Should be removed:

@@ -40,12 +40,12 @@ from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
 
 
-def testintegralListView(integralList, intersectingThreshold):
+def _test_getIntegralFilledItems(integralList, intersectingThreshold= None):
   import numpy as np
   import pyqtgraph as pg
-  integralList = project.integralLists[0]
-  plotWidget = current.strip.plotWidget
+
   spectrum = integralList.spectrum
+  intersectingThreshold = intersectingThreshold or spectrum.noiseLevel
   brush = spectrum.sliceColour
 
   limitsPairs = [integral.limits for integral in integralList.integrals]

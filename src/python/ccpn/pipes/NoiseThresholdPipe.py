@@ -102,6 +102,8 @@ class NoiseThresholdPipe(SpectraPipe):
     Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
 
+    for spectrum in spectra:
+      spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
     self.pipeline._kwargs.update(self._kwargs)
 
     return spectra

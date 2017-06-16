@@ -68,6 +68,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     # have to add in two steps because simple plot() command draws all other data even if currently not visible
     ##self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
     self.plot = pg.PlotDataItem(x=self.data[0], y=self.data[1], pen=self.spectrum.sliceColour)
+    self.plot.setObjectName(self.spectrum.pid)
     self.strip.viewBox.addItem(self.plot)
 
     self.plot.curve.setClickable(True)
@@ -213,7 +214,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     hTrace.setData(x, v)
       
   def _clicked(self):
-    print(self.plot)
+    print(self.plot.objectName())
     
 
   # # TBD: should function below be removed???

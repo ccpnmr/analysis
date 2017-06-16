@@ -37,21 +37,25 @@ from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 # This  file is Under development.
 # DO NOT USE !!
 
+def _getSpectrumPlotItem(spectrum, plotWidget):
+  for i in plotWidget.items():
+    if isinstance(i, pg.PlotDataItem):
+      if i.objectName() == spectrum.pid:
+        return i
 
-
-
-def _test_getIntegralFilledItems(integralList, intersectingThreshold= None):
+def _test_getIntegralFilledItems(plotWidget, integralList, intersectingThreshold= None):
   import numpy as np
   import pyqtgraph as pg
 
   spectrum = integralList.spectrum
   intersectingThreshold = intersectingThreshold or spectrum.noiseLevel
   brush = spectrum.sliceColour
+  spectrumItem = _getSpectrumPlotItem(spectrum, plotWidget)
 
   limitsPairs = [integral.limits for integral in integralList.integrals]
   x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
 
-  integralBaselineCurves = []
+  fills = []
   for pair in limitsPairs:
     index = np.where((x <= max(pair[0])) & (x >= min(pair[0])))
 
@@ -61,12 +65,10 @@ def _test_getIntegralFilledItems(integralList, intersectingThreshold= None):
     yBaselineCurve = [intersectingThreshold] * len(y_region)
     baselineCurve = pg.PlotCurveItem(x_region, yBaselineCurve)
     integralCurve = pg.PlotCurveItem(x_region, y_region)
-    integralBaselineCurves.append((baselineCurve, integralCurve))
 
-  fills = []
+    baselineCurve.setParentItem(spectrumItem)
+    integralCurve.setParentItem(spectrumItem)
 
-  for i in integralBaselineCurves:
-    integralCurve, baselineCurve = i
     fill = pg.FillBetweenItem(integralCurve, baselineCurve, brush=brush)
     fills.append(fill)
 

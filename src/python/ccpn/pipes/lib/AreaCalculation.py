@@ -167,11 +167,9 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
         # create a new Peak object
         spectrum.project.suspendNotification()
         try:
-          peaks.append(newPeakList.newPeak(height= height, position = (centerOfMass,),
-                                           volume= float(integral),lineWidths= (lineWidth,),
-                                           )
-                       )
-
-          integrals.append(integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],]))
+          peak = newPeakList.newPeak(height= height, position = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
+          peaks.append(peak)
+          integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
+          integrals.append(integral)
         finally:
           spectrum.project.resumeNotification()

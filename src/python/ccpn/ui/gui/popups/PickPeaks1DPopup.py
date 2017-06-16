@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 
 class ExcludeRegions(Widget,Base):
-  '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+  '''This creates a widget group to exclude Regions from the Spectrum when automatically peak picking '''
   selectionLabelDefault = "Select Regions or \nsolvents to exclude"
 
   solvents = {'Acetic Acid-d4': [0, 0, 2.14, 2.0, 11.75, 11.65],

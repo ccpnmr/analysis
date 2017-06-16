@@ -659,7 +659,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
       for guiPipe in guiPipes:
-        guiPipe._updateInputDataWidgets()
+        guiPipe._updateWidgets()
 
 
   def settingsPipelineWidgets(self):

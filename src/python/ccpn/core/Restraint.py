@@ -237,7 +237,7 @@ def getter(self:Peak) -> Tuple[Restraint, ...]:
   result = []
   apiPeak = self._wrappedData
   for restraintList in self._project.restraintLists:
-    for apiRestraint in restraintList._wrappedData.restraints:
+    for apiRestraint in restraintList._wrappedData.constraints:
       if apiPeak in apiRestraint.peaks:
         result.append(getDataObj(apiRestraint))
   return tuple(sorted(result))

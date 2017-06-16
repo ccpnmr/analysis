@@ -1104,14 +1104,18 @@ class Framework:
                         , text="Export NEF File"
                         , acceptMode=FileDialog.AcceptSave
                         , preferences=self.preferences.general
-                        , selectFile=self.project.name+'.nef'
+                        , selectFile=self.project.name+'.nef'     # new flag to populate dialog
                         , filter='*.nef')
     nefPath = dialog.selectedFile()
 
     if not nefPath:
       return
 
+    t0 = time()
     CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True)
+    t2 = time()
+    print('Exported NEF file, time = %.2fs' %(t2-t0))
+
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

@@ -105,12 +105,12 @@ NEW_ITEM_DICT = {
   'RL': 'newRestraint',
   'SE': 'newModel',
   'Notes': 'newNote',
-  'Structures': 'newStructureEnsemble',
+  'StructureEnsembles': 'newStructureEnsemble',
   'Samples': 'newSample',
   'NmrChains': 'newNmrChain',
   'Chains': 'CreateSequence',
   'Substances': 'newSubstance',
-  'Chemical Shift Lists': 'newChemicalShiftList',
+  'ChemicalShiftLists': 'newChemicalShiftList',
   'DataSets': 'newDataSet',
   'SpectrumGroups': 'newSpectrumGroup',
   'Complexes': 'newComplex',
@@ -194,7 +194,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chemicalShiftListsItem.setFlags(self.chemicalShiftListsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.chemicalShiftListsItem.setText(0, "Chemical Shift Lists")
+    self.chemicalShiftListsItem.setText(0, "ChemicalShiftLists")
 
     self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
     self.newChemicalShiftListItem.setFlags(self.newChemicalShiftListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
@@ -202,7 +202,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setFlags(self.structuresItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.structuresItem.setText(0, "Structures")
+    self.structuresItem.setText(0, "StructureEnsembles")
 
     self.newStructuresListItem = QtGui.QTreeWidgetItem(self.structuresItem)   # ejb
     self.newStructuresListItem.setFlags(self.newStructuresListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
@@ -214,7 +214,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
     self.newDataSetItem.setFlags(self.newDataSetItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newDataSetItem.setText(0, '<New Dataset>')
+    self.newDataSetItem.setText(0, '<New DataSet>')
 
     self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setFlags(self.notesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)

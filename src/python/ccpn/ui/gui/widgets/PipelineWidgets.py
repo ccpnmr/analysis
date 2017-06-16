@@ -460,6 +460,17 @@ class GuiPipe(Dock, DockDrop):
       for widgetVariable in widgetVariables:
         _getWidgetByAtt(self, widgetVariable)._clear()
 
+  def _setMaxValueRefPeakList(self, widgetVariable):
+    ''' Used to set the reference PeakList limits. Called from various guiPipes'''
+    data = list(self.inputData)
+    if len(data) > 0:
+      for spectrum in data:
+        if spectrum is not None:
+          if spectrum.peakLists:
+            pls = spectrum.peakLists
+            _getWidgetByAtt(self, widgetVariable).setMaximum(len(pls)-1)
+    else:
+      _getWidgetByAtt(self, widgetVariable).setMaximum(0)
 
 
 

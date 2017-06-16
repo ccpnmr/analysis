@@ -41,7 +41,7 @@ from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Assign Peak Areas'
+PipeName = 'Assign Multiplets'
 
 ExcludeRegions = 'excludeRegions'
 ReferencePeakList = 'referencePeakList'
@@ -68,13 +68,13 @@ DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
 
 
-class AssignPeakAreaGuiPipe(GuiPipe):
+class AssignMultipletsGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(AssignPeakAreaGuiPipe, self)
+    super(AssignMultipletsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
@@ -110,9 +110,9 @@ class AssignPeakAreaGuiPipe(GuiPipe):
 
 
 
-class AssignPeakAreaPipe(SpectraPipe):
+class AssignMultipletsPipe(SpectraPipe):
 
-  guiPipe = AssignPeakAreaGuiPipe
+  guiPipe  = AssignMultipletsGuiPipe
   pipeName = PipeName
 
   _kwargs =       {
@@ -151,6 +151,6 @@ class AssignPeakAreaPipe(SpectraPipe):
     return spectra
 
 
-AssignPeakAreaPipe.register() # Registers the pipe in the pipeline
+AssignMultipletsPipe.register() # Registers the pipe in the pipeline
 
 

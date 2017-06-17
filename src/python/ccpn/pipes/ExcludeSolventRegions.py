@@ -39,8 +39,8 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ########################################################################################################################
 
 PipeName = 'Exclude Solvent Regions'
-ExcludeRegions = 'excludeRegions'
-selectionLabel = "Select Regions or solvents to exclude"
+ExcludeRegions = 'Exclude_Regions'
+selectionLabel = "Select_Regions_or_solvents_to_exclude"
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -51,8 +51,6 @@ selectionLabel = "Select Regions or solvents to exclude"
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
-
-
 
 class ExcludeRegionsGuiPipe(GuiPipe):
 
@@ -67,13 +65,9 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.pipeLayout.addWidget(self.excludeRegions)
 
 
-
-
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
-
-
 
 
 class ExcludeRegionsPipe(SpectraPipe):
@@ -92,7 +86,6 @@ class ExcludeRegionsPipe(SpectraPipe):
 
     self.pipeline._kwargs.update(self._kwargs)
     return spectra
-
 
 
 

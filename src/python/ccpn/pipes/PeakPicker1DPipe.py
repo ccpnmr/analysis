@@ -42,12 +42,12 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 
 PipeName =  'Peak Picker 1D'
 
-ExcludeRegions = 'excludeRegions'
-NoiseThreshold = 'noiseThreshold'
-NegativePeaks =  'negativePeaks'
-MaximumFilterSize =  'maximumFilterSize'
-MaximumFilterMode =  'maximumFilterMode'
-MinimalLineWidth =  'minimalLineWidth'
+ExcludeRegions = 'Exclude_Regions'
+NoiseThreshold = 'Noise_Threshold'
+NegativePeaks =  'Negative_Peaks'
+MaximumFilterSize =  'Maximum_Filter_Size'
+MaximumFilterMode =  'Maximum_Filter_Mode'
+MinimalLineWidth =  'Minimal_LineWidth'
 Modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
 
 DefaultNoiseThreshold = [0.0, 0.0]
@@ -76,18 +76,16 @@ class PeakPicker1DGuiPipe(GuiPipe):
     self.parent = parent
 
     gridRow = 0
-    self.pickNegativeLabel = Label(self.pipeFrame, text='Pick negative peaks', grid=(gridRow, 0))
-    setattr(self, NegativePeaks,CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1)))
-
+    self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(gridRow, 0))
+    setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1)))
 
     gridRow += 1
-    self.maximumFilterSize = Label(self.pipeFrame, text="Select Maximum Filter Size", grid=(gridRow, 0))
+    self.maximumFilterSize = Label(self.pipeFrame, text=MaximumFilterSize, grid=(gridRow, 0))
     setattr(self, MaximumFilterSize, Spinbox(self.pipeFrame, value=5, max=15, grid=(gridRow, 1)))
     gridRow += 1
 
-    self.maximumFilterMode = Label(self.pipeFrame, text="Select Maximum Filter Mode", grid=(gridRow, 0))
+    self.maximumFilterMode = Label(self.pipeFrame, text=MaximumFilterMode, grid=(gridRow, 0))
     setattr(self, MaximumFilterMode, PulldownList(self.pipeFrame, texts=Modes, grid=(gridRow, 1)))
-
 
 
 

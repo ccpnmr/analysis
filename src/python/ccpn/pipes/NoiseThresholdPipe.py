@@ -39,7 +39,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ########################################################################################################################
 
 PipeName = 'Noise Threshold'
-NoiseThreshold = 'noiseThreshold'
+NoiseThreshold = 'Noise_Threshold'
 
 
 
@@ -66,9 +66,8 @@ class NoiseThresholdGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.noiseThresholdLabel = Label(self.pipeFrame, text="Select Noise threshold", grid=(0, 0))
-    setattr(self, NoiseThreshold,
-            TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
+    self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(0, 0))
+    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
 
   def _closeBox(self):
     'remove the lines from plotwidget if any'

@@ -43,8 +43,8 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ########################################################################################################################
 
 PipeName = 'Exclude Regions'
-Region = 'region'
-ExcludeRegions = 'excludeRegions'
+Region = 'Region_'
+ExcludeRegions = 'Exclude_Regions'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -71,13 +71,13 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.plusIcon = Icon('icons/plus')
     self.minusIcon = Icon('icons/minus')
 
-    self.addRemoveLabel = Label(self.pipeFrame, text="Add Region", grid=(0, 0))
+    self.addRemoveLabel = Label(self.pipeFrame, text="", grid=(0, 0))
     self.addRemoveButtons = ButtonList(self.pipeFrame, texts=['', ''], icons=[self.plusIcon, self.minusIcon],
                                        callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
     self.addRemoveButtons.setMaximumHeight(20)
     self.count = 1
 
-    self.excludeRegion1Label = Label(self.pipeFrame, text="Select Region "+str(self.count), grid=(self.count , 0))
+    self.excludeRegion1Label = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count , 0))
     setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                     orientation='v', grid=(self.count, 1)))
     self.count += 1
@@ -85,7 +85,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
   ############       Gui Callbacks      ###########
 
   def _addRegion(self):
-    self.excludeRegionLabel = Label(self.pipeFrame, text="Select Region " + str(self.count), grid=(self.count, 0))
+    self.excludeRegionLabel = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count, 0))
     setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                   orientation='v', grid=(self.count , 1)))
 

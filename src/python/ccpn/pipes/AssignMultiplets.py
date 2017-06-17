@@ -43,11 +43,11 @@ from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 
 PipeName = 'Assign Multiplets'
 
-ExcludeRegions = 'excludeRegions'
-ReferencePeakList = 'referencePeakList'
-NoiseThreshold = 'noiseThreshold'
-NegativePeaks =  'negativePeaks'
-MinimalLineWidth =  'minimalLineWidth'
+ExcludeRegions = 'Exclude_Regions'
+ReferencePeakList = 'Reference_PeakList'
+NoiseThreshold = 'Noise_Threshold'
+NegativePeaks =  'Negative_Peaks'
+MinimalLineWidth =  'Minimal_LineWidth'
 
 DefaultMinimalLineWidth =  0.01
 DefaultReferencePeakList =  0
@@ -79,10 +79,10 @@ class AssignMultipletsGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
-    self.peakListLabel = Label(self.pipeFrame, 'Reference PeakList', grid=(row, 0))
+    self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
     setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(DefaultReferencePeakList),], grid=(row, 1)))
     row += 1
-    self.peakListLabel = Label(self.pipeFrame, 'Minimal LineWidth', grid=(row, 0))
+    self.peakListLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
     self._updateInputDataWidgets()
 

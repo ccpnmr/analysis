@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -40,7 +41,7 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 
 PipeName = 'Noise Threshold'
 NoiseThreshold = 'Noise_Threshold'
-
+EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 
 
@@ -66,8 +67,20 @@ class NoiseThresholdGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(0, 0))
-    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
+    self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(0, 0))
+    setattr(self, EstimateNoiseThreshold,
+            CheckBox(self.pipeFrame, checked=True, callback=self._manageButtons, grid=(0, 1)))
+
+    self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(1, 0))
+    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(1, 1)))
+
+  def _manageButtons(self):
+    checkBox = _getWidgetByAtt(self, EstimateNoiseThreshold)
+    noiseThreshold = _getWidgetByAtt(self, NoiseThreshold)
+    if checkBox.isChecked():
+      noiseThreshold.setDisabled(True)
+    else:
+      noiseThreshold.setDisabled(False)
 
   def _closeBox(self):
     'remove the lines from plotwidget if any'

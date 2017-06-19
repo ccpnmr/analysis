@@ -121,7 +121,6 @@ class TargetButtonSpinBoxes(Widget, Base):
     self.plotWidget = plotWidget
 
   def _togglePicking(self):
-    print('Toggle')
 
     if self.application is not None:
       self.current = self.application.current
@@ -141,13 +140,10 @@ class TargetButtonSpinBoxes(Widget, Base):
 
 
   def _turnOnPositionPicking(self):
-    print('picking on')
     if self.plotWidget is not None:
-      print(self.plotWidget.items())
       self.plotWidget.addItem(self.linearRegions)
 
   def _turnOffPositionPicking(self):
-    print('picking off')
     if self.plotWidget is not None:
       self.plotWidget.removeItem(self.linearRegions)
 

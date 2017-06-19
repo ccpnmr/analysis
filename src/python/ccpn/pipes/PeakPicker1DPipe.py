@@ -114,7 +114,6 @@ class PeakPicker1DPipe(SpectraPipe):
     :param data:
     :return:
     '''
-    print(self._kwargs)
     maximumFilterSize = self._kwargs[MaximumFilterSize]
     maximumFilterMode = self._kwargs[MaximumFilterMode]
     negativePeaks = self._kwargs[NegativePeaks]

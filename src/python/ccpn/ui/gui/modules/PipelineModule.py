@@ -876,15 +876,14 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
   from ccpn.pipes.examples import pipeExamples
 
-
   # analysis specific
   from ccpn.pipes import loadedPipes
-  from  ccpn.AnalysisScreen import pipes  # this is needed to load the pipes
+  from  ccpn.AnalysisScreen.pipes import _loadPipes
+  _loadPipes()
+
 
   app = TestApplication()
-
   win = QtGui.QMainWindow()
-
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   pipeline = GuiPipeline(mainWindow=None, pipes = loadedPipes)

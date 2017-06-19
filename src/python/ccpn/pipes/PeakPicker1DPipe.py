@@ -33,7 +33,8 @@ from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
+import numpy as np
 
 ########################################################################################################################
 ###   Attributes:
@@ -44,10 +45,12 @@ PipeName =  'Peak Picker 1D'
 
 ExcludeRegions = 'Exclude_Regions'
 NoiseThreshold = 'Noise_Threshold'
+NPeakList = 'Add_To_PeakList'
 NegativePeaks =  'Negative_Peaks'
 MaximumFilterSize =  'Maximum_Filter_Size'
 MaximumFilterMode =  'Maximum_Filter_Mode'
 MinimalLineWidth =  'Minimal_LineWidth'
+EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 Modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
 
 DefaultNoiseThreshold = [0.0, 0.0]
@@ -75,18 +78,29 @@ class PeakPicker1DGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    gridRow = 0
-    self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(gridRow, 0))
-    setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(gridRow, 1)))
+    row = 0
 
-    gridRow += 1
-    self.maximumFilterSize = Label(self.pipeFrame, text=MaximumFilterSize, grid=(gridRow, 0))
-    setattr(self, MaximumFilterSize, Spinbox(self.pipeFrame, value=5, max=15, grid=(gridRow, 1)))
-    gridRow += 1
+    peakListLabel = Label(self.pipeFrame, NPeakList, grid=(row, 0))
+    setattr(self, NPeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
+    row += 1
 
-    self.maximumFilterMode = Label(self.pipeFrame, text=MaximumFilterMode, grid=(gridRow, 0))
-    setattr(self, MaximumFilterMode, PulldownList(self.pipeFrame, texts=Modes, grid=(gridRow, 1)))
+    self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
+    setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
+    row += 1
+    self.maximumFilterSize = Label(self.pipeFrame, text=MaximumFilterSize, grid=(row, 0))
+    setattr(self, MaximumFilterSize, Spinbox(self.pipeFrame, value=10, max=35, grid=(row, 1)))
+    row += 1
+
+    self.maximumFilterMode = Label(self.pipeFrame, text=MaximumFilterMode, grid=(row, 0))
+    setattr(self, MaximumFilterMode, PulldownList(self.pipeFrame, texts=Modes, grid=(row, 1)))
+
+
+    self._updateInputDataWidgets()
+
+
+  def _updateInputDataWidgets(self):
+    self._setMaxValueRefPeakList(NPeakList)
 
 
 ########################################################################################################################
@@ -104,9 +118,11 @@ class PeakPicker1DPipe(SpectraPipe):
   _kwargs =   {
                ExcludeRegions: DefaultExcludeRegions,
                NoiseThreshold: DefaultNoiseThreshold,
+               EstimateNoiseThreshold: True,
                MaximumFilterSize: 5,
                MaximumFilterMode: Modes[0],
-               NegativePeaks: True
+               NegativePeaks: True,
+               NPeakList: 0
               }
 
   def runPipe(self, spectra):
@@ -118,13 +134,12 @@ class PeakPicker1DPipe(SpectraPipe):
     maximumFilterMode = self._kwargs[MaximumFilterMode]
     negativePeaks = self._kwargs[NegativePeaks]
 
-    if NoiseThreshold in self.pipeline._kwargs:
-      positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
-      negativeNoiseThreshold = min(self.pipeline._kwargs[NoiseThreshold])
-    else:
-      self._kwargs.update({ NoiseThreshold: DefaultNoiseThreshold})
+    if NoiseThreshold not in self._kwargs:
+      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
       positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
       negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
+
+
 
     if ExcludeRegions in self.pipeline._kwargs:
       excludeRegions = self.pipeline._kwargs[ExcludeRegions]
@@ -133,11 +148,32 @@ class PeakPicker1DPipe(SpectraPipe):
       excludeRegions = self._kwargs[ExcludeRegions]
 
     for spectrum in self.inputData:
-      spectrum.peakLists[0].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
-                                                positiveNoiseThreshold=positiveNoiseThreshold,
-                                                negativeNoiseThreshold=negativeNoiseThreshold,
-                                                excludeRegions= excludeRegions,
-                                                negativePeaks=negativePeaks)
+      if EstimateNoiseThreshold in self.pipeline._kwargs:
+        print('Pipeline know the threshold')
+        if self.pipeline._kwargs[EstimateNoiseThreshold]:
+          print('Estimates threshold')
+          if spectrum.noiseLevel is not None:
+            positiveNoiseThreshold = spectrum.noiseLevel
+            negativeNoiseThreshold = -spectrum.noiseLevel
+            print('threshold is known: ',positiveNoiseThreshold, negativeNoiseThreshold)
+          else:
+            print('threshold is unknown: ')
+            positiveNoiseThreshold =  _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+            negativeNoiseThreshold = -positiveNoiseThreshold
+      else:
+        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+        negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
+        print('threshold is Default in here: ', positiveNoiseThreshold, negativeNoiseThreshold)
+
+      nPL = self._kwargs[NPeakList]
+      if len(spectrum.peakLists) > 0:
+        if nPL  <= len(spectrum.peakLists):
+          print('PICKING')
+          spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
+                                                    positiveNoiseThreshold=positiveNoiseThreshold,
+                                                    negativeNoiseThreshold=negativeNoiseThreshold,
+                                                    excludeRegions= excludeRegions,
+                                                    negativePeaks=negativePeaks)
 
     return spectra
 

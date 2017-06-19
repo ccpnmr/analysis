@@ -37,25 +37,13 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 import numpy as np
 from scipy.integrate import trapz
 
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
 
-def _estimateNoiseLevel(x, y, factor=3):
-  '''
-  :param x,y:  spectrum.positions, spectrum.intensities
-  :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
-  :return: float of estimated noise threshold
-  '''
-
-  data = np.array([x, y])
-  dataStd = np.std(data)
-  data = np.array(data, np.float32)
-  data = data.clip(-dataStd, dataStd)
-  value = factor * np.std(data)
-  return value
 
 
 def _createIntersectingLine(x, y):
   '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
-  return [_estimateNoiseLevel(x, y)] * len(x)
+  return [_estimateNoiseLevel1D(x, y)] * len(x)
 
 
 def _getIntersectionPoints(x, y, line):

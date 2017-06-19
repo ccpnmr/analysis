@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.IntegralList import _estimateNoiseLevel
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
 import numpy as np
 
 ########################################################################################################################
@@ -53,7 +53,7 @@ DefaultNoiseThreshold = [0,0]
 def _getNoiseThreshold(spectrum, factor=5):
   if spectrum is not None:
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-    return _estimateNoiseLevel(x, y, factor=factor)
+    return _estimateNoiseLevel1D(x, y, factor=factor)
 
 
 ########################################################################################################################
@@ -124,14 +124,14 @@ class NoiseThresholdPipe(SpectraPipe):
     for spectrum in spectra:
       if self._kwargs[EstimateNoiseThreshold]:
         spectrum.noiseLevel = _getNoiseThreshold(spectrum)
-        self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
+        # self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
         print('AFTER',self._kwargs[NoiseThreshold])
       else:
         spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
         print('GIVEn', self._kwargs[NoiseThreshold])
 
     self.pipeline._kwargs.update(self._kwargs)
-
+    print(self.pipeline._kwargs)
 
     return spectra
 

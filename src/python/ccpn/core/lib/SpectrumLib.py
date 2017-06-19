@@ -33,6 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # import typing
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+import numpy as np
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
   ['dimension1', 'dimension2', 'transferType', 'isIndirect']
@@ -45,3 +46,16 @@ def getExperimentClassifications(project:Project) -> dict:
   return getExpClassificationDict(project._wrappedData)
 
 
+def _estimateNoiseLevel1D(x, y, factor=3):
+  '''
+  :param x,y:  spectrum.positions, spectrum.intensities
+  :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
+  :return: float of estimated noise threshold
+  '''
+
+  data = np.array([x, y])
+  dataStd = np.std(data)
+  data = np.array(data, np.float32)
+  data = data.clip(-dataStd, dataStd)
+  value = factor * np.std(data)
+  return value

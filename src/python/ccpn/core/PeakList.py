@@ -38,6 +38,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
 
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
@@ -303,11 +304,17 @@ class PeakList(AbstractWrapperObject):
       # data = spectrum._apiDataSource.get1dSpectrumData()
       data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
-      if positiveNoiseThreshold == 0 or positiveNoiseThreshold is None:
+      if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
         positiveNoiseThreshold = spectrum.estimateNoise() * 5
+        print(positiveNoiseThreshold, 'positiveNoiseThreshold')
+        if spectrum.noiseLevel is None:
+          positiveNoiseThreshold = _estimateNoiseLevel1D(data[0], data[1])
+          negativeNoiseThreshold = -positiveNoiseThreshold
 
-      if negativeNoiseThreshold == 0 or negativeNoiseThreshold is None:
+      if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
         negativeNoiseThreshold = -spectrum.estimateNoise() * 5
+        if spectrum.noiseLevel is None:
+          negativeNoiseThreshold = -positiveNoiseThreshold
 
       masks = []
       for region in excludeRegions:

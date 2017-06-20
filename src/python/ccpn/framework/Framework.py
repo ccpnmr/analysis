@@ -1114,7 +1114,7 @@ class Framework:
     t0 = time()
     CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True)
     t2 = time()
-    print('Exported NEF file, time = %.2fs' %(t2-t0))
+    print('Exported NEF file, time = %.2fs > %s' %(t2-t0, nefPath))
 
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:

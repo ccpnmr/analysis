@@ -228,8 +228,15 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
 
       Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
+      # dateRecorded = LineEdit(self, vAlign='t', hAlign='l', grid=(11, 1))
+      # if spectrum.date is not None:
+      #   dateRecorded.setText(str('%.3d' % spectrum.noiseLevel))
+      # else:
+      #   dateRecorded.setText('None')
+      Label(self, text='n/a', vAlign='t', hAlign='l', grid=(11, 1))
+
       Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
-      noiseLevelData = LineEdit(self)
+      noiseLevelData = LineEdit(self, vAlign='t', hAlign='l', grid=(12, 1))
       if spectrum.noiseLevel is not None:
         noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
       else:

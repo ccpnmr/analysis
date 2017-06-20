@@ -2473,7 +2473,7 @@ class CcpnNefReader:
       if name.startswith(ss):
         name = name[len(ss):]
 
-    # ejb - need to remove the rogue 'n' at the beginning of the name if it exists
+    # ejb - need to remove the rogue `n` at the beginning of the name if it exists
     #       as it is passed into the namespace and gets added iteratively every save
     #       next three lines remove all occurrences of `n` from name
     import re

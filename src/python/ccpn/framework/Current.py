@@ -256,8 +256,18 @@ Use print(current) to get a list of attribute, value pairs')
 
     # setField(obj, value) sets obj._field = value and calls notifiers
     def setField(self, value, plural=plural, enforceType=enforceType):
+
       if len(set(value)) != len(value):
-        raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+
+        # ejb - remove duplicates here
+        tempList = []
+        for inL in value:
+          if inL not in tempList:
+            tempList.append(inL)
+        value = tempList
+        set(value)
+        # raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+
       if enforceType and any(x for x in value if not isinstance(x, enforceType)):
         raise ValueError("Current values for %s must be of type %s"
                          % (plural, enforceType))

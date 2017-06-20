@@ -135,17 +135,19 @@ class CompoundView(QtGui.QGraphicsView, Base):
       self.updateAll()
 
     self.smiles = smiles
+    self.setSmiles(self.smiles)
+
+  def setSmiles(self, smiles):
+    'set the smiles'
     compound = importSmiles(smiles)
     variant = list(compound.variants)[0]
     self.setVariant(variant)
     variant.snapAtomsToGrid(ignoreHydrogens=False)
-
+    self.smiles = smiles
     self.centerView()
     self.resetView()
     self.updateAll()
-
     self.show()
-
 
 
   def resizeEvent(self, event):

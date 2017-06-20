@@ -108,13 +108,13 @@ class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
+  def __init__(self, parent, moduleParent, application, peakList=None, updateSettingsWidgets=True, **kwds):
     self._project = application.project
     self._current = application.current
     self.moduleParent = moduleParent
     self.settingWidgets = None
     self._selectedPeakList = None
-
+    self.updateSettingsWidgets = updateSettingsWidgets
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
@@ -198,7 +198,8 @@ class PeakListTableWidget(ObjectTable):
   def _updateAllModule(self):
     '''Updates the table and the settings widgets'''
     self._updateTable()
-    self._updateSettingsWidgets()
+    if self.updateSettingsWidgets:
+      self._updateSettingsWidgets()
 
   def _updateTable(self):
     '''Display the peaks on the table for the selected PeakList.
@@ -239,12 +240,16 @@ class PeakListTableWidget(ObjectTable):
 
   ##################   Widgets callbacks  ##################
 
+
   def _actionCallback(self, peak, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
-    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
     if self._current.strip is not None:
-      navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
+      widths = None
+      if peak.peakList.spectrum.dimensionCount == 1:
+        widths = _getCurrentZoomRatio(self._current.strip.viewBox.viewRange())
+      navigateToPositionInStrip(strip = self._current.strip, positions=peak.position, widths=widths)
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
 

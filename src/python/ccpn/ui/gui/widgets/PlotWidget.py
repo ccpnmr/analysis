@@ -269,6 +269,8 @@ class PlotWidget(pg.PlotWidget):
     self.xAxisTextItem = AxisTextItem(self, orientation='top', axisCode=axisOrder[0])
     self.yAxisTextItem = AxisTextItem(self, orientation='left', axisCode=axisOrder[1])
 
+  def mouseReleaseEvent(self, ev):
+    super(PlotWidget, self).mouseReleaseEvent(ev)
 
 class AxisTextItem(pg.TextItem):
 

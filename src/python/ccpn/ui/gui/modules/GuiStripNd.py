@@ -180,8 +180,8 @@ class GuiStripNd(GuiStrip):
        # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
       (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
       (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      None,                                 'hTraceAction'),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      None,                                 'vTraceAction'),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self.toggleHorizontalTrace,           'hTraceAction'),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self.toggleVerticalTrace,             'vTraceAction'),
       (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
 
       (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
@@ -311,14 +311,14 @@ class GuiStripNd(GuiStrip):
     """
     Toggles whether or not horizontal trace is displayed.
     """
-    self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
+    # self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
     self._updateTraces()
 
   def toggleVerticalTrace(self):
     """
     Toggles whether or not vertical trace is displayed.
     """
-    self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
+    # self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
     self._updateTraces()
 
   def _mouseMoved(self, positionPixel):

@@ -619,6 +619,7 @@ def _axisRegionChanged(axis:'Axis'):
         strip.viewBox.setYRange(*region, padding=padding)
       else:
         # One of the Z axes
+        strip._updateTraces()
         for spectrumView in strip.spectrumViews:
           spectrumView.update()
           if spectrumView.isVisible():

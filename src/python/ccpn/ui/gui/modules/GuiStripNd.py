@@ -296,13 +296,16 @@ class GuiStripNd(GuiStrip):
 
     cursorPosition = self.current.cursorPosition
     if cursorPosition:
-      position = QtCore.QPointF(cursorPosition[0], cursorPosition[1])
-      pixel = self.viewBox.mapViewToScene(position)
+      position = list(cursorPosition)
+      for axis in self.orderedAxes[2:]:
+        position.append(axis.position)
+      point = QtCore.QPointF(cursorPosition[0], cursorPosition[1])
+      pixel = self.viewBox.mapViewToScene(point)
       cursorPixel = (pixel.x(), pixel.y())
       updateHTrace = self.hTraceAction.isChecked()
       updateVTrace = self.vTraceAction.isChecked()
       for spectrumView in self.spectrumViews:
-        spectrumView._updateTrace(cursorPosition, cursorPixel, updateHTrace, updateVTrace)
+        spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
 
   def toggleHorizontalTrace(self):
     """

@@ -129,7 +129,7 @@ class EditSampleComponentPopup(CcpnDialog):
                                                        callback=self._initialOptionsCallBack,
                                                        direction='h',
                                                        tipTexts=None,
-                                                       setLayout=True)
+                                                       )
 
   def _setSubstanceWidgets(self):
     self.substanceLabel = Label(self, text="Current Substances")

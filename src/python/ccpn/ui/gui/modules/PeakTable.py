@@ -201,18 +201,25 @@ class PeakListTableWidget(ObjectTable):
     if self.updateSettingsWidgets:
       self._updateSettingsWidgets()
 
-  def _updateTable(self):
+  def _updateTable(self, useSelectedPeakList=True, peaks=None):
     '''Display the peaks on the table for the selected PeakList.
     Obviously, If the peak has not been previously deleted and flagged isDeleted'''
 
     self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
-    if self._selectedPeakList is not None:
-      peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
-      self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
-      self._selectOnTableCurrentPeaks(self._current.peaks)
-    else:
-      self.setObjects([]) #if not peaks, make the table empty
+    if useSelectedPeakList:
+      if self._selectedPeakList is not None:
+        peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
+        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+        self._selectOnTableCurrentPeaks(self._current.peaks)
+      else:
+        self.setObjects([]) #if not peaks, make the table empty
+    else: #set only specific peak of a peakList
+      if peaks is not None:
+        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+        self._selectOnTableCurrentPeaks(self._current.peaks)
+      else:
+        self.setObjects([]) #if not peaks, make the table empty
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''

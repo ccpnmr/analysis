@@ -878,8 +878,7 @@ if __name__ == '__main__':
 
   # analysis specific
   from ccpn.pipes import loadedPipes
-  from  ccpn.AnalysisScreen.pipes import _loadPipes
-  _loadPipes()
+  from  ccpn.AnalysisScreen import pipes
 
 
   app = TestApplication()

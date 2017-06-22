@@ -118,10 +118,12 @@ NEW_ITEM_DICT = {
 ### Flag example code removed in revision 7686
 
 class SideBar(QtGui.QTreeWidget, Base):
-  def __init__(self, parent=None, mainWindow=None):
+  def __init__(self, parent=None, mainWindow=None, multiSelect=True,):
 
     QtGui.QTreeWidget.__init__(self, parent)
     Base.__init__(self, acceptDrops=True)
+    if multiSelect:
+      self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     self.mainWindow = parent                      # ejb - needed for moduleArea
 
@@ -330,11 +332,11 @@ class SideBar(QtGui.QTreeWidget, Base):
     sidebar.
     """
     if event.button() == QtCore.Qt.RightButton:
-      self._raiseContextMenu(event, self.itemAt(event.pos()))
+      self._raiseContextMenu(event)
     else:
       QtGui.QTreeWidget.mousePressEvent(self, event)
 
-  def _raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
+  def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
     Creates and raises a context menu enabling items to be deleted from the sidebar.
     """
@@ -342,20 +344,26 @@ class SideBar(QtGui.QTreeWidget, Base):
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
     # contextMenu.addAction('Delete', partial(self.removeItem, item))
-    if item is not None:
+    objs = []
+    for item in self.selectedItems():
+      if item is not None:
         objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
         if objFromPid is not None:
-          contextMenu.addAction('Delete', partial(self._deleteItemObject, objFromPid))
-          contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
-          contextMenu.exec()
+          objs.append(objFromPid)
+
+    if len(objs)>0:
+      contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+      contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+      contextMenu.exec()
 
 
-  def _deleteItemObject(self,  obj):
+  def _deleteItemObject(self,  objs):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
-    if obj:
-      obj.delete()
+    for obj in objs:
+      if obj:
+        obj.delete()
 
   def _createItem(self, obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.
@@ -515,20 +523,16 @@ class SideBar(QtGui.QTreeWidget, Base):
     if event.mimeData().hasUrls():
       event.accept()
     else:
-      item = self.itemAt(event.pos())
-      if item:
-        text = item.text(0)
-        if ':' in text:
+      pids = []
+      for item in self.selectedItems():
+        if item is not None:
+          objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+          if objFromPid is not None:
+            pids.append(objFromPid.pid)
 
-          # mimeData = QtCore.QMimeData()     # ejb - temporary fix, not working, intermittent bug
-          # itemData = QtCore.QByteArray()    # sometimes mimeData() empty in corresponding dropEvent
-          # stream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-          # stream.writeQVariantHash({'pids':text, 'dragAction':'copy'})    # need to get rid of these strings
-          # mimeData.setData('dinner', data)
-
-          itemData = json.dumps({'pids':[text]})
-          event.mimeData().setData(ccpnmrJsonData, itemData)
-          event.mimeData().setText(itemData)
+      itemData = json.dumps({'pids':pids})
+      event.mimeData().setData(ccpnmrJsonData, itemData)
+      event.mimeData().setText(itemData)
       event.accept()
 
   def _dragMoveEvent(self, event:QtGui.QMouseEvent):

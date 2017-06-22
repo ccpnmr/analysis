@@ -131,7 +131,9 @@ class ListWidget(QtGui.QListWidget, Base):
       self.selectObject(obj)
 
   def removeItem(self):
-    self.takeItem(self.currentRow())
+    for selectedItem in self.selectedItems():
+      self.takeItem(self.row(selectedItem))
+        # self.takeItem(self.currentRow())
 
   def mousePressEvent(self, event):
     self._mouse_button = event.button()

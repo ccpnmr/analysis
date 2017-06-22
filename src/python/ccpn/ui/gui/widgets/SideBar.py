@@ -535,6 +535,9 @@ class SideBar(QtGui.QTreeWidget, Base):
       event.mimeData().setText(itemData)
       event.accept()
 
+  def _startDrag(self):
+    pass
+
   def _dragMoveEvent(self, event:QtGui.QMouseEvent):
     """
     Required function to enable dragging and dropping within the sidebar.

@@ -57,7 +57,7 @@ from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, NefFileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Logging import getLogger
 
@@ -1092,20 +1092,21 @@ class Framework:
     Export the current project as a Nef file
     Temporary routine because I don't know how else to do it yet
     """
-    from ccpn.core.lib import CcpnNefIo
-
     # dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF Directory",
     #                     acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
     #                     directory=nefPath, filter='*.nef')
     # nefPath = dialog.selectedFile()+'/'
 
-    dialog = FileDialog(self.ui.mainWindow
-                        , fileMode=FileDialog.AnyFile
-                        , text="Export NEF File"
-                        , acceptMode=FileDialog.AcceptSave
-                        , preferences=self.preferences.general
-                        , selectFile=self.project.name+'.nef'     # new flag to populate dialog
-                        , filter='*.nef')
+    from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+    from ccpn.core.lib import CcpnNefIo
+
+    dialog = ExportNefPopup(self.ui.mainWindow
+                            , fileMode=FileDialog.AnyFile
+                            , text="Export to NEF File"
+                            , acceptMode=FileDialog.AcceptSave
+                            , preferences=self.preferences.general
+                            , selectFile=self.project.name+'.nef'     # new flag to populate dialog
+                            , filter='*.nef')
     nefPath = dialog.selectedFile()
 
     if not nefPath:

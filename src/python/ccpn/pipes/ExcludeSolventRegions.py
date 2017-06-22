@@ -61,8 +61,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     super(ExcludeRegionsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    setattr(self, ExcludeRegions , ER(self, labelAlign='l', selectionLabel=selectionLabel))
-    self.pipeLayout.addWidget(self.excludeRegions)
+    setattr(self, ExcludeRegions , ER(self.pipeFrame, labelAlign='l', selectionLabel=selectionLabel, grid=(0,0)))
 
 
 ########################################################################################################################

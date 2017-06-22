@@ -26,13 +26,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import hashlib
 import sys
 import os
 import json
 from ccpn.util.Time import Time, now, day, week, year
 
+def _codeFunc(version, valid, licenceType):
+    m = hashlib.sha256()
+    for value in version, valid, licenceType:
+        m.update(bytes(str(value), 'utf-8'))
 
-def decode(key, string):
+    return m.hexdigest()
+
+def _decode(key, string):
     #string = string.decode()
     decoded_chars = []
     for i in range(len(string)):
@@ -41,12 +48,6 @@ def decode(key, string):
         decoded_chars.append(decoded_c)
     decoded_string = "".join(decoded_chars)
     return decoded_string
-
-cyphers = {}
-cyphers['3.0.a3'] = [1468679340.425289, 1468679340.423687]
-cyphers['3.0.b1'] = [1468679340.425723, 1468679340.426897, 1476254863.630204, 1478253122.381794, 1485965891.654017,
-                     1493828907.930312]
-cyphers['3.0.b2'] = [1478253122.382449, 1485965891.65454]
 
 def _check(key=None, doDecode=True):
     from ccpn.framework.Version import applicationVersion
@@ -87,7 +88,7 @@ def _check(key=None, doDecode=True):
 
     try:
         if doDecode:
-            key = decode('ccpnVersion3', key)
+            key = _decode('ccpnVersion3', key)
         ldict = json.loads(key)
     except:
         sys.stderr.write(message2 % (applicationVersion))
@@ -95,18 +96,20 @@ def _check(key=None, doDecode=True):
 
     #print(ldict)
 
-    if 'cypher' not in ldict or \
-        applicationVersion not in cyphers or \
-        ldict['cypher'] not in cyphers[applicationVersion] :
+    if 'code' not in ldict or 'version' not in ldict or 'valid' not in ldict or 'licenceType' not in ldict:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if not applicationVersion == ldict['version']:
+    if applicationVersion != ldict['version']:
         sys.stderr.write(message2 % (applicationVersion))
         sys.exit(1)
 
-    if ldict['type'] == 'developer':
-        sys.stderr.write(message4 % (ldict['type'], now()+year))
+    if ldict['code'] != _codeFunc(ldict['version'], ldict['valid'], ldict['licenceType']):
+        sys.stderr.write(message2 % (applicationVersion))
+        sys.exit(1)
+
+    if ldict['licenceType'] == 'developer':
+        sys.stderr.write(message4 % (ldict['licenceType'], now()+year))
         return True
 
     valid = Time(ldict['valid'])
@@ -114,7 +117,7 @@ def _check(key=None, doDecode=True):
         sys.stderr.write(message3 % (applicationVersion, valid))
         #sys.exit(1)
     else:
-        sys.stderr.write(message4 % (ldict['type'], valid))
+        sys.stderr.write(message4 % (ldict['licenceType'], valid))
 
     return True
 

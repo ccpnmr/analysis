@@ -334,6 +334,30 @@ class SideBar(QtGui.QTreeWidget, Base):
     else:
       QtGui.QTreeWidget.mousePressEvent(self, event)
 
+      # think we need to initialise the drag event from here
+
+      # item = self.itemAt(event.pos())
+      # if item:
+      #   text = item.text(0)
+      #   if ':' in text:
+      #
+      #     itemData = json.dumps({'pids':[text]})
+      #     mimeData = QtCore.QMimeData()
+      #     mimeData.setData(ccpnmrJsonData, itemData)
+      #     # mimeData.setText(itemData)
+      #     # pixmap = QtGui.QPixmap.grabWidget(item)
+      #     # pixmap = QtGui.QPixmap(item)
+      #     # item.render(pixmap)
+      #
+      #     drag = QtGui.QDrag(self)
+      #     drag.setMimeData(mimeData)
+      #     # drag.setPixmap(pixmap)
+      #
+      #     dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
+      #   else:
+      #     super(SideBar, self).mousePressEvent(event)
+
+
   def _raiseContextMenu(self, event:QtGui.QMouseEvent, item:QtGui.QTreeWidgetItem):
     """
     Creates and raises a context menu enabling items to be deleted from the sidebar.

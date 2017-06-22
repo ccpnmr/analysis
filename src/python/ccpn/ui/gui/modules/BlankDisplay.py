@@ -88,12 +88,12 @@ class BlankDisplay(CcpnModule):
           if isinstance(obj, Project):
             self.project = obj
           if isinstance(obj, (Spectrum)):
-            success = success or self._handlePid(obj.pid)  # pass the object as its pid so we use
+            success = self._handlePid(obj.pid)  # pass the object as its pid so we use
                                                            # the same method used to process the pids
     # process pids
     for ii, pid in enumerate(data.get('pids',[])):
       getLogger().debug('dropped: %s' % pid)
-      success = success or self._handlePid(pid)
+      success = self._handlePid(pid)
 
     if success:
       # self.mainWindow.deleteBlankDisplay()

@@ -40,25 +40,22 @@ import numpy as np
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-ReferenceSpectrum = 'referenceSpectrum'
+ReferenceSpectrum = 'Reference_Spectrum'
 PipeName = 'AlignSpectra'
-
+HeaderText = '-- Select Spectrum --'
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
 
-
 def _getShift(ref_x, ref_y, target_y):
   '''
-
   :param ref_x: X array of the reference spectra (positions)
   :param ref_y: Y array of the reference spectra (intensities)
   :param target_y: Y array of the target spectra (intensities)
   :return: the shift needed to align the two spectra.
   To align the target spectrum to its reference: add the shift to the x array.
   E.g. target_y += shift
-
   '''
   return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
 
@@ -75,15 +72,9 @@ def _alignSpectra(referenceSpectrum, spectra):
 
 
 
-
-
-
-
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
-
-
 
 
 class AlignSpectraGuiPipe(GuiPipe):
@@ -95,9 +86,8 @@ class AlignSpectraGuiPipe(GuiPipe):
     super(AlignSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.spectrumLabel = Label(self.pipeFrame, 'Reference Spectrum',  grid=(0,0))
-    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame,  grid=(0,1)) )
-
+    self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(0,0))
+    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText, headerIcon=self._warningIcon,  grid=(0,1)) )
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
@@ -107,11 +97,9 @@ class AlignSpectraGuiPipe(GuiPipe):
   def _setDataReferenceSpectrum(self):
     data = list(self.inputData)
     if len(data)>0:
-      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data)
-
+      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, headerText=HeaderText, headerIcon=self._warningIcon)
     else:
-      _getWidgetByAtt(self, ReferenceSpectrum).clear()
-
+      _getWidgetByAtt(self, ReferenceSpectrum)._clear()
 
 
 
@@ -147,8 +135,4 @@ class AlignSpectra(SpectraPipe):
           return _alignSpectra(referenceSpectrum, spectra)
 
 
-
-
 AlignSpectra.register() # Registers the pipe in the pipeline
-
-

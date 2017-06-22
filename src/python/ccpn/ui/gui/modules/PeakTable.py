@@ -107,13 +107,13 @@ class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
+  def __init__(self, parent, moduleParent, application, peakList=None, updateSettingsWidgets=True, **kwds):
     self._project = application.project
     self._current = application.current
     self.moduleParent = moduleParent
     self.settingWidgets = None
     self._selectedPeakList = None
-
+    self.updateSettingsWidgets = updateSettingsWidgets
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
@@ -197,20 +197,28 @@ class PeakListTableWidget(ObjectTable):
   def _updateAllModule(self):
     '''Updates the table and the settings widgets'''
     self._updateTable()
-    self._updateSettingsWidgets()
+    if self.updateSettingsWidgets:
+      self._updateSettingsWidgets()
 
-  def _updateTable(self):
+  def _updateTable(self, useSelectedPeakList=True, peaks=None):
     '''Display the peaks on the table for the selected PeakList.
     Obviously, If the peak has not been previously deleted and flagged isDeleted'''
 
     self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
-    if self._selectedPeakList is not None:
-      peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
-      self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
-      self._selectOnTableCurrentPeaks(self._current.peaks)
-    else:
-      self.setObjects([]) #if not peaks, make the table empty
+    if useSelectedPeakList:
+      if self._selectedPeakList is not None:
+        peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
+        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+        self._selectOnTableCurrentPeaks(self._current.peaks)
+      else:
+        self.setObjects([]) #if not peaks, make the table empty
+    else: #set only specific peak of a peakList
+      if peaks is not None:
+        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+        self._selectOnTableCurrentPeaks(self._current.peaks)
+      else:
+        self.setObjects([]) #if not peaks, make the table empty
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''
@@ -238,12 +246,16 @@ class PeakListTableWidget(ObjectTable):
 
   ##################   Widgets callbacks  ##################
 
+
   def _actionCallback(self, peak, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
-    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
     if self._current.strip is not None:
-      navigateToPositionInStrip(strip = self._current.strip, positions=peak.position)
+      widths = None
+      if peak.peakList.spectrum.dimensionCount == 1:
+        widths = _getCurrentZoomRatio(self._current.strip.viewBox.viewRange())
+      navigateToPositionInStrip(strip = self._current.strip, positions=peak.position, widths=widths)
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
 

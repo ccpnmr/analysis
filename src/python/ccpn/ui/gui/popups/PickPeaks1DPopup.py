@@ -47,7 +47,8 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 
 class ExcludeRegions(Widget,Base):
-  '''This create a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+  '''This creates a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+  selectionLabelDefault = "Select Regions or \nsolvents to exclude"
 
   solvents = {'Acetic Acid-d4': [0, 0, 2.14, 2.0, 11.75, 11.65],
               'Acetone-d6 & Water': [0, 0, 2.15, 2.0, 2.90, 2.80],
@@ -71,17 +72,17 @@ class ExcludeRegions(Widget,Base):
               'Carbon Tetrachloride & water ': [0, 0, 1.20, 1.10],
               'Water': [0, 0, 5, 4.5]}
 
-  def __init__(self, parent=None,**kw):
+  def __init__(self, parent=None, selectionLabel=selectionLabelDefault, labelAlign='c',  **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
 
 
-    self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
+    self.pulldownSolvents = PulldownList(self, grid=(0, 1), headerText='-- Select --', hAlign=labelAlign)
     self.pulldownSolvents.select('Water')
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
-    self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='c')
+    self.SolventsLabel = Label(self, selectionLabel , grid=(0, 0), hAlign=labelAlign)
     self.scrollArea = ScrollArea(self, setLayout=True, grid=(2, 0), gridSpan=(2,2))
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)
@@ -90,7 +91,6 @@ class ExcludeRegions(Widget,Base):
     self.excludedRegions = []
     self.excludedSolvents = []
     self.comboBoxes = []
-    self._addRegions('Water') #default
 
   def _addRegions(self, pressed):
     '''   '''
@@ -101,7 +101,7 @@ class ExcludeRegions(Widget,Base):
       if pressed == ('%s' %solvent):
         solventValues[0] += (solvent,)
         self.solventType = Label(self.scrollAreaWidgetContents, text=solvent, grid=(self.regioncount,0))
-        self.closebutton = Button(self.scrollAreaWidgetContents,'Remove from selection', grid=(self.regioncount,1))
+        self.closebutton = Button(self.scrollAreaWidgetContents,'Remove from selection', grid=(self.regioncount,1),)#hAlign='l')
         values = (self.solvents[solvent])
         self.selectedSolventValue = sorted(values)
         self.new_list = [values[i:i+2] for i in range(0, len(values), 2)]
@@ -116,7 +116,7 @@ class ExcludeRegions(Widget,Base):
           if values == 0:
             continue
           self.regioncount += valueCount
-          self.spin = DoubleSpinbox(self.scrollAreaWidgetContents, grid=(self.position))
+          self.spin = DoubleSpinbox(self.scrollAreaWidgetContents, grid=(self.position),)# hAlign='c')
           self.spin.setSingleStep(0.01)
           self.spin.setMinimum(-20)
           self.spin.setPrefix('ppm')

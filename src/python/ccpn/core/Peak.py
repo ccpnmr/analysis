@@ -64,7 +64,8 @@ class Peak(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
-  
+
+  _linkedPeak = None
 
   # CCPN properties  
   @property

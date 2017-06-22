@@ -142,7 +142,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
     # init the CcpnModule
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=self._closeAllGuiPipes)
 
     # init the Pipeline
     Pipeline.__init__(self, application=self.application, pipelineName=name, pipes=pipes)
@@ -370,7 +370,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     guiPipes = self.pipelineArea.currentGuiPipes
     if len(guiPipes) > 0:
       for guiPipe in guiPipes:
-        guiPipe.closeBox()
+        guiPipe._closeBox()
 
   def keyPressEvent(self, KeyEvent):
     ''' Run the pipeline by pressing the enter key '''
@@ -659,7 +659,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     if len(self.pipelineArea.findAll()[1]) > 0:
       guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
       for guiPipe in guiPipes:
-        guiPipe._updateInputDataWidgets()
+        guiPipe._updateWidgets()
 
 
   def settingsPipelineWidgets(self):
@@ -876,15 +876,13 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
   from ccpn.pipes.examples import pipeExamples
 
-
   # analysis specific
   from ccpn.pipes import loadedPipes
-  from  ccpn.AnalysisScreen import pipes  # this is needed to load the pipes
+  from  ccpn.AnalysisScreen import pipes
+
 
   app = TestApplication()
-
   win = QtGui.QMainWindow()
-
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   pipeline = GuiPipeline(mainWindow=None, pipes = loadedPipes)

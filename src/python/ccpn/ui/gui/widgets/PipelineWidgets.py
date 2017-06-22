@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
-
+from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
@@ -301,6 +301,8 @@ class PipelineDropArea(DockArea):
       guiPipe.close()
 
 
+
+
 class GuiPipe(Dock, DockDrop):
 
   preferredPipe = True
@@ -317,7 +319,8 @@ class GuiPipe(Dock, DockDrop):
     :param kw: any other
     '''
     super(GuiPipe, self).__init__(name, self)
-
+    self._pulldownSGHeaderText = '-- Select SG --'
+    self._warningIcon = Icon('icons/warning')
     self.ccpnModule = False
     self.pipelineBox = True
     self.autoOrient = False
@@ -415,7 +418,7 @@ class GuiPipe(Dock, DockDrop):
       except Exception as e:
         print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
 
-  def _updateInputDataWidgets(self):
+  def _updateWidgets(self):
     '''
     Override this method to update the widgets that are fed by input data
     '''
@@ -430,7 +433,7 @@ class GuiPipe(Dock, DockDrop):
   def _updateLabel(self, name):
     self.label.deleteLater()  # delete original Label
     self.label = PipelineBoxLabel(name.upper(), self)
-    self.label.closeButton.clicked.connect(self.closeBox)
+    self.label.closeButton.clicked.connect(self._closeBox)
     # self.label.arrowDownButton.clicked.connect(self.moveBoxDown)
     # self.label.arrowUpButton.clicked.connect(self.moveBoxUp)
     self.moveLabel = True
@@ -440,14 +443,41 @@ class GuiPipe(Dock, DockDrop):
       self.setParent(None)
       self.label.setParent(None)
 
+  def _closeBox(self):
+      self.closeBox()
 
-  # def name(self):
-  #   return self.label.name
+
+  def _setSpectrumGroupPullDowns(self, widgetVariables, headerText='',headerEnabled=False, headerIcon=None):
+    ''' Used to set the spectrum groups pid in the pulldowns. Called from various guiPipes'''
+    spectrumGroups = list(self.spectrumGroups)
+    if len(spectrumGroups)>0:
+      for widgetVariable in widgetVariables:
+
+        _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
+                        headerText = headerText, headerEnabled = headerEnabled, headerIcon=headerIcon)
+
+    else:
+      for widgetVariable in widgetVariables:
+        _getWidgetByAtt(self, widgetVariable)._clear()
+
+  def _setMaxValueRefPeakList(self, widgetVariable):
+    ''' Used to set the reference PeakList limits. Called from various guiPipes'''
+    data = list(self.inputData)
+    if len(data) > 0:
+      for spectrum in data:
+        if spectrum is not None:
+          if spectrum.peakLists:
+            pls = spectrum.peakLists
+            _getWidgetByAtt(self, widgetVariable).setMaximum(len(pls)-1)
+    else:
+      _getWidgetByAtt(self, widgetVariable).setMaximum(0)
+
+
 
   def rename(self, newName):
     self.label.name = newName
 
-  def moveBoxDown(self):
+  def _moveBoxDown(self):
     name = self.name()
     boxes = self.pipelineArea.childState(self.pipelineArea.topContainer)[1]
     boxesNames = []
@@ -461,7 +491,7 @@ class GuiPipe(Dock, DockDrop):
       self.pipelineArea.moveDock(self, 'bottom', next)
       j+=1
 
-  def moveBoxUp(self):
+  def _moveBoxUp(self):
     name = self.name()
     boxes = self.pipelineArea.childState(self.pipelineArea.topContainer)[1]
     boxesNames = []

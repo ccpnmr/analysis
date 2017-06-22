@@ -25,13 +25,15 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
+import numpy as np
 
 ########################################################################################################################
 ###   Attributes:
@@ -39,15 +41,19 @@ from ccpn.framework.lib.Pipe import SpectraPipe
 ########################################################################################################################
 
 PipeName = 'Noise Threshold'
-NoiseThreshold = 'noiseThreshold'
-
-
-
+NoiseThreshold = 'Noise_Threshold'
+EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
+DefaultEstimateNoiseThreshold = False
+DefaultNoiseThreshold = [0,0]
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
+def _getNoiseThreshold(spectrum, factor=5):
+  if spectrum is not None:
+    x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+    return _estimateNoiseLevel1D(x, y, factor=factor)
 
 
 ########################################################################################################################
@@ -66,10 +72,26 @@ class NoiseThresholdGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.noiseThresholdLabel = Label(self.pipeFrame, text="Select Noise threshold", grid=(0, 0))
-    setattr(self, NoiseThreshold,
-            TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(0, 1)))
+    self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(0, 0))
+    setattr(self, EstimateNoiseThreshold,
+            CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(0, 1)))
 
+    self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(1, 0))
+    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(1, 1)))
+    self._manageButtons()
+
+  def _manageButtons(self):
+    checkBox = _getWidgetByAtt(self, EstimateNoiseThreshold)
+    noiseThreshold = _getWidgetByAtt(self, NoiseThreshold)
+    if checkBox.isChecked():
+      noiseThreshold.setDisabled(True)
+    else:
+      noiseThreshold.setDisabled(False)
+
+  def _closeBox(self):
+    'remove the lines from plotwidget if any'
+    _getWidgetByAtt(self, NoiseThreshold)._turnOffPositionPicking()
+    self.closeBox()
 
 
 
@@ -86,19 +108,30 @@ class NoiseThresholdPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs = {
-             NoiseThreshold: [0,0]
+             EstimateNoiseThreshold : DefaultEstimateNoiseThreshold,
+             NoiseThreshold: DefaultNoiseThreshold
             }
 
   def runPipe(self, spectra):
     '''
-
     For Now this pipe is a special case because it doesn't return a new inputData for the next pipe, but set
     _kwargs in the pipeline and will be available for the next pipes they might need more then once.
     If this is run twice, the pipeline will use only the last set.
     Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
+    print('Bef',self._kwargs[NoiseThreshold])
+
+    for spectrum in spectra:
+      if self._kwargs[EstimateNoiseThreshold]:
+        spectrum.noiseLevel = _getNoiseThreshold(spectrum)
+        # self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
+        print('AFTER',self._kwargs[NoiseThreshold])
+      else:
+        spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
+        print('GIVEn', self._kwargs[NoiseThreshold])
 
     self.pipeline._kwargs.update(self._kwargs)
+    print(self.pipeline._kwargs)
 
     return spectra
 

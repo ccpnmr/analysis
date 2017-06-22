@@ -61,6 +61,9 @@ For this reason SpectrumHits cannot be renamed."""
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiSpectrumHit._metaclass.qualifiedName()
 
+  # link To a reference Spectrum #LM needed for screening hit analysis
+  _referenceSpectrum = None
+
   # CCPN properties
   @property
   def _apiSpectrumHit(self) -> ApiSpectrumHit:

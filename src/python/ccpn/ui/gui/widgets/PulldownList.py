@@ -40,7 +40,7 @@ NULL = object()
 class PulldownList(QtGui.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
-               icons=None, callback=None, index=0, headerText=None, headerEnabled=False, **kw):
+               icons=None, callback=None, index=0, headerText=None, headerEnabled=False, headerIcon=None, **kw):
     '''
 
     :param parent:
@@ -63,10 +63,11 @@ class PulldownList(QtGui.QComboBox, Base):
     self.objects = []
     self.headerText = headerText
     self.headerEnabled = headerEnabled
-    
+    self.headerIcon = headerIcon
     # self.setIconSize(QtCore.QSize(22,22))
 
-    PulldownList.setData(self, texts, objects, index, icons, headerText=headerText, headerEnabled=headerEnabled)
+    PulldownList.setData(self, texts, objects, index, icons,
+                         headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
     self.setCallback(callback)
     self.setStyleSheet("""
     PulldownList {
@@ -162,17 +163,17 @@ class PulldownList(QtGui.QComboBox, Base):
   def _clear(self):
     if self.headerText is not None:
       self.clear()
-      self._addHeaderLabel(self.headerText, self.headerEnabled)
+      self._addHeaderLabel(self.headerText, self.headerEnabled, icon=self.headerIcon)
     else:
       self.clear()
 
-  def _addHeaderLabel(self, headerText, headerEnabled):
-    self.addItem(headerText)
+  def _addHeaderLabel(self, headerText, headerEnabled, icon=None):
+    self.addItem(text=headerText, icon=icon)
     headerIndex = self.getItemIndex(headerText)
     headerItem = self.model().item(headerIndex)
     headerItem.setEnabled(headerEnabled)
 
-  def setData(self, texts=None, objects=None, index=None, icons=None, clear=True,  headerText=None, headerEnabled=False):
+  def setData(self, texts=None, objects=None, index=None, icons=None, clear=True,  headerText=None, headerEnabled=False, headerIcon=None):
 
     texts = texts or []
     objects = objects or []
@@ -199,7 +200,7 @@ class PulldownList(QtGui.QComboBox, Base):
       self.clear()
 
     if headerText:
-      self._addHeaderLabel(headerText, headerEnabled)
+      self._addHeaderLabel(headerText, headerEnabled, headerIcon)
 
     for i, text in enumerate(texts):
       self.addItem(text, objects[i], icons[i])

@@ -29,6 +29,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtGui
 
 import sys
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Frame import Frame
 
 class FileDialog(QtGui.QFileDialog):
 
@@ -89,6 +91,86 @@ class FileDialog(QtGui.QFileDialog):
       self.result = getattr(self, funcName)(caption=text, **kw)
     else:
       self.result = self.exec_()
+
+  # overrides Qt function, which does not pay any attention to whether Cancel button selected
+  def selectedFiles(self):
+
+    if self.result and not self.useNative:
+      return QtGui.QFileDialog.selectedFiles(self)
+    elif self.result and self.useNative:
+      return [self.result]
+    else:
+      return []
+
+  # Qt does not have this but useful if you know you only want one file
+  def selectedFile(self):
+
+    files = self.selectedFiles()
+    if files:
+      return files[0]
+    else:
+      return None
+
+
+class NefFileDialog(QtGui.QFileDialog):
+
+  # def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
+  #              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
+
+  def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
+               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
+
+    # ejb - added selectFile to suggest a filename in the file box
+    #       this is not passed to the super class
+
+    QtGui.QFileDialog.__init__(self, parent, caption=text, **kw)
+
+    staticFunctionDict = {
+      (0, 0): 'getOpenFileName',
+      (0, 1): 'getOpenFileName',
+      (0, 2): 'getExistingDirectory',
+      (0, 3): 'getOpenFileNames',
+      (1, 0): 'getSaveFileName',
+      (1, 1): 'getSaveFileName',
+      (1, 2): 'getSaveFileName',
+      (1, 3): 'getSaveFileName',
+      (self.AcceptOpen, self.AnyFile): 'getOpenFileName',
+      (self.AcceptOpen, self.ExistingFile): 'getOpenFileName',
+      (self.AcceptOpen, self.Directory): 'getExistingDirectory',
+      (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
+      (self.AcceptSave, self.AnyFile): 'getSaveFileName',
+      (self.AcceptSave, self.ExistingFile): 'getSaveFileName',
+      (self.AcceptSave, self.Directory): 'getSaveFileName',
+      (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
+    }
+
+    self.setFileMode(fileMode)
+    self.setAcceptMode(acceptMode)
+
+    if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
+      self.selectFile(selectFile)
+
+    if preferences is None:
+      self.useNative = False
+
+    if preferences:
+      self.useNative = preferences.useNative
+      if preferences.colourScheme == 'dark':
+        self.setStyleSheet("""
+                           QFileDialog QWidget {
+                                               background-color: #2a3358;
+                                               color: #f7ffff;
+                                               }
+                          """)
+      elif preferences.colourScheme == 'light':
+        self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+
+    # # self.result is '' (first case) or 0 (second case) if Cancel button selected
+    # if preferences and preferences.useNative and not sys.platform.lower() == 'linux':
+    #   funcName = staticFunctionDict[(acceptMode, fileMode)]
+    #   self.result = getattr(self, funcName)(caption=text, **kw)
+    # else:
+    #   self.result = self.exec_()
 
   # overrides Qt function, which does not pay any attention to whether Cancel button selected
   def selectedFiles(self):

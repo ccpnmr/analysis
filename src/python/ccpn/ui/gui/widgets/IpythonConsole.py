@@ -22,7 +22,7 @@ class IpythonConsole(Widget, Base):
         km = QtInProcessKernelManager()
         km.start_kernel()
         km.kernel.gui = 'qt4'
-        kc = km.client()
+        # kc = km.client()
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
@@ -30,7 +30,7 @@ class IpythonConsole(Widget, Base):
         self.setStyleSheet(self.mainWindow.styleSheet())
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
-        self.ipythonWidget.kernel_client = kc
+        # self.ipythonWidget.kernel_client = kc
         #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
         #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
         consoleLayout = QtGui.QGridLayout()
@@ -39,7 +39,7 @@ class IpythonConsole(Widget, Base):
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
-        kc.start_channels()
+        # kc.start_channels()
 
         self.layout().setSpacing(1)
         self.layout().addWidget(self.textEditor, 0, 0)

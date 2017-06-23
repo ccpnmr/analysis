@@ -1109,16 +1109,15 @@ class Framework:
                             , filter='*.nef')
     # dialog.exec_()
     # dialog.raise_()
-
     # nefPath = dialog.selectedFile()
 
-    nefPath = dialog.show()
+    nefPath, skipPrefixes = dialog.show()
 
     if not nefPath:
       return
 
     t0 = time()
-    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True, skipPrefixes=('ccpn' ,))
+    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True, skipPrefixes=skipPrefixes)
     t2 = time()
     print('Exported NEF file, time = %.2fs > %s' %(t2-t0, nefPath))
 

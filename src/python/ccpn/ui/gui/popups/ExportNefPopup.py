@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt4 import QtGui
 from os.path import expanduser
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 class ExportNefPopup(CcpnDialog):
   def __init__(self, parent=None, title='Export to Nef File', **kw):
@@ -49,23 +50,31 @@ class ExportNefPopup(CcpnDialog):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **filterKw)
 
     self.options = Frame(self, setLayout=True, grid=(0,0))
+    self.buttonCCPN = CheckBox(self.options, checked=True
+                               , text='include CCPN tags', callback=self._changeCCPNtag
+                               , grid=(0,0), hAlign ='c')
+    self.spacer = Spacer(self.options, 5, 5
+                         , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+                         , grid=(1,1), gridSpan=(1,1))
+    self._includeCCPN = True
 
     # put save options in this section
 
-    self.buttons = ButtonList(self.options, ['Cancel', 'OK'], [self._rejectDialog, self._acceptDialog], grid=(0, 0))
+    # self.buttons = ButtonList(self.options, ['Cancel', 'OK'], [self._rejectDialog, self._acceptDialog], grid=(0, 0))
+    #
+    # self.openPathIcon = Icon('icons/directory')
+    #
+    # self.saveFrame = Frame(self, setLayout=True, grid=(1,0))
+    # self.openPathIcon = Icon('icons/directory')
+    # self.saveLabel = Label(self.saveFrame, grid=(0,0), hAlign = 'c')
+    # self.pathButton = Button(self.saveFrame, text=''
+    #                          , icon=self.openPathIcon
+    #                          , callback=self._openFileDialog
+    #                          , grid=(0, 1), hAlign='c')
+    # self.spacer = Spacer(self.saveFrame, 5, 5
+    #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
+    #                      , grid=(1,1), gridSpan=(1,1))
 
-    self.openPathIcon = Icon('icons/directory')
-
-    self.saveFrame = Frame(self, setLayout=True, grid=(1,0))
-    self.openPathIcon = Icon('icons/directory')
-    self.saveLabel = Label(self.saveFrame, grid=(0,0), hAlign = 'c')
-    self.pathButton = Button(self.saveFrame, text=''
-                             , icon=self.openPathIcon
-                             , callback=self._openFileDialog
-                             , grid=(0, 1), hAlign='c')
-    self.spacer = Spacer(self.saveFrame, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
-                         , grid=(1,1), gridSpan=(1,1))
 
     # this show/hide button doesn't quite work yet
     # self.showHide = Frame(self, setLayout=True, grid=(2,0))
@@ -79,12 +88,10 @@ class ExportNefPopup(CcpnDialog):
     #                          , icon=self.showHideIcon
     #                          , callback=self._toggleSaveDialog
     #                          , grid=(0, 2), hAlign='t')
-
-
-    if 'selectFile' in kw:
-      self.saveLabel.setText(kw['selectFile'])
-    else:
-      self.saveLabel.setText('None')
+    # if 'selectFile' in kw:
+    #   self.saveLabel.setText(kw['selectFile'])
+    # else:
+    #   self.saveLabel.setText('None')
 
     self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
 
@@ -97,6 +104,11 @@ class ExportNefPopup(CcpnDialog):
     self.layout().addWidget(self.fileSaveDialog, 3,0)
     self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)
     self._saveState = True
+
+    self.skipPrefixes = []
+
+  def _changeCCPNtag(self):
+    self._includeCCPN = not self._includeCCPN
 
   def _toggleSaveDialog(self):
     if self._saveState is True:
@@ -121,7 +133,12 @@ class ExportNefPopup(CcpnDialog):
     self.raise_()
     val = self.exec_()
     self.accept()
-    return self.exitFileName    # and other save options here
+
+    # build the export dict
+    if self._includeCCPN is False:        # these are negated is skipped flags
+      self.skipPrefixes.append('ccpn')
+
+    return self.exitFileName, self.skipPrefixes
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, **self.saveDict)

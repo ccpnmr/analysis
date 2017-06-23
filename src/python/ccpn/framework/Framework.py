@@ -1107,13 +1107,18 @@ class Framework:
                             , preferences=self.preferences.general
                             , selectFile=self.project.name+'.nef'     # new flag to populate dialog
                             , filter='*.nef')
-    nefPath = dialog.selectedFile()
+    # dialog.exec_()
+    # dialog.raise_()
+
+    # nefPath = dialog.selectedFile()
+
+    nefPath = dialog.show()
 
     if not nefPath:
       return
 
     t0 = time()
-    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True)
+    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True, skipPrefixes=('ccpn' ,))
     t2 = time()
     print('Exported NEF file, time = %.2fs > %s' %(t2-t0, nefPath))
 

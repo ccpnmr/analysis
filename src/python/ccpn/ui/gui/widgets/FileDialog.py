@@ -114,9 +114,6 @@ class FileDialog(QtGui.QFileDialog):
 
 class NefFileDialog(QtGui.QFileDialog):
 
-  # def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-  #              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
-
   def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
                acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
 
@@ -165,16 +162,7 @@ class NefFileDialog(QtGui.QFileDialog):
       elif preferences.colourScheme == 'light':
         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
-    # # self.result is '' (first case) or 0 (second case) if Cancel button selected
-    # if preferences and preferences.useNative and not sys.platform.lower() == 'linux':
-    #   funcName = staticFunctionDict[(acceptMode, fileMode)]
-    #   self.result = getattr(self, funcName)(caption=text, **kw)
-    # else:
-    #   self.result = self.exec_()
-
-  # overrides Qt function, which does not pay any attention to whether Cancel button selected
   def selectedFiles(self):
-
     if self.result and not self.useNative:
       return QtGui.QFileDialog.selectedFiles(self)
     elif self.result and self.useNative:
@@ -182,15 +170,25 @@ class NefFileDialog(QtGui.QFileDialog):
     else:
       return []
 
-  # Qt does not have this but useful if you know you only want one file
   def selectedFile(self):
-
     files = self.selectedFiles()
     if files:
       return files[0]
     else:
       return None
 
+  def _setParent(self, parent, acceptFunc, rejectFunc):
+    self.parent = parent
+    self.acceptFunc = acceptFunc
+    self.rejectFunc = rejectFunc
+
+  def reject(self):
+    super(NefFileDialog, self).reject()
+    self.rejectFunc()
+
+  def accept(self):
+    super(NefFileDialog, self).accept()
+    self.acceptFunc(self.selectedFile())
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit

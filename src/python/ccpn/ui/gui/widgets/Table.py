@@ -368,6 +368,9 @@ class ObjectTable(QtGui.QTableView, Base):
         if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
           self.callback(obj, row, col)
 
+  def hideColumnName(self, name):
+    self.hideColumn(self.getColumnInt(columnName=name))
+
 
   def getCurrentIndex(self):
 
@@ -629,7 +632,6 @@ class ObjectTable(QtGui.QTableView, Base):
       self.exportDialog()
 
     if action == columnsSettings:
-      print(self._hiddenColumns)
       settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
       settingsPopup.show()
       settingsPopup.raise_()

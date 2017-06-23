@@ -147,7 +147,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 from collections import OrderedDict
@@ -167,7 +167,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     QtGui.QTableView.__init__(self, parent)
     Base.__init__(self, **kw)
-
+    self.parent = parent
     self.graphPanel = None
     self.filterPanel = None
     self.model = None
@@ -184,6 +184,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
+    self._hiddenColumns = []
 
     self.multiSelect = multiSelect
     if multiSelect:
@@ -237,10 +238,10 @@ class ObjectTable(QtGui.QTableView, Base):
     self.acceptDrops()
     self.setDragDropMode(self.InternalMove)
     self.setDropIndicatorShown(True)
-    # context menu on header
+    # # context menu on header  #Not used. keep the code in case we need to activate the header ContextMenu
     # headers = self.horizontalHeader()
     # headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    # headers.customContextMenuRequested.connect(lambda: self.tableContextMenu())
+    # headers.customContextMenuRequested.connect(self.headerContextMenu)
 
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.tableContextMenu)
@@ -366,6 +367,9 @@ class ObjectTable(QtGui.QTableView, Base):
         obj = self.objects[row]
         if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
           self.callback(obj, row, col)
+
+  def hideColumnName(self, name):
+    self.hideColumn(self.getColumnInt(columnName=name))
 
 
   def getCurrentIndex(self):
@@ -606,17 +610,31 @@ class ObjectTable(QtGui.QTableView, Base):
 
     QtGui.QTableView.destroy(self, *args)
 
+  # def headerContextMenu(self, pos): #Not used. keep the code in case we need to add the header ContextMenu
+  #   menu = QtGui.QMenu()
+  #   columnsSettings = menu.addAction("Columns Settings...")
+  #   action = menu.exec_(self.mapToGlobal(pos))
+  #   if action == columnsSettings:
+  #     settingsPopup = ColumnViewSettingsPopup(parent=self.parent, table=self)
+  #     settingsPopup.show()
+  #     settingsPopup.raise_()
+
   def tableContextMenu(self, pos):
 
     menu = QtGui.QMenu()
     # copyMenu =  menu.addAction("Copy Selected")
     exportMenu = menu.addAction("Export Table")
     # searchMenu = menu.addAction("Search")
-
+    columnsSettings = menu.addAction("Columns Settings...")
     action = menu.exec_(self.mapToGlobal(pos))
+
     if action == exportMenu:
       self.exportDialog()
 
+    if action == columnsSettings:
+      settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
+      settingsPopup.show()
+      settingsPopup.raise_()
 
   def exportDialog(self):
 
@@ -1147,6 +1165,19 @@ class ObjectTableExport(QtGui.QDialog, Base):
     self.formatPulldown = PulldownList(self, EXPORT_FORMATS, grid=(3,1))
     self.setMaximumWidth(300)
 
+class ColumnViewSettingsPopup(CcpnDialog):
+  def __init__(self, table, parent=None, hideColumns=None, title='Columns Settings', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    self.setContentsMargins(20, 20, 20, 20)
+    self.table = table
+    self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
+    buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1,0), hAlign='c')
+
+  def _close(self):
+    'Save the hidden columns to the table class. So it remembers when you open again the popup'
+    hiddenColumns = self.widgetColumnViewSettings._getHiddenColumns()
+    self.table._hiddenColumns = hiddenColumns
+    self.reject()
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 
@@ -1158,9 +1189,11 @@ class ColumnViewSettings(Widget):
     self.direction=direction
     self.table = table
     self.checkBoxes = []
+    self.hiddenColumns = []
     self.hideColumns = hideColumns or []
     self.initCheckBoxes()
-    self.filterLabel =  Label(self, 'Display Columns', grid=(0,0), vAlign='b')
+    self.filterLabel =  Label(self, 'Display Columns', grid=(0,1), vAlign='t', hAlign='l')
+
 
   def initCheckBoxes(self):
     columns = self.table.columns
@@ -1169,6 +1202,7 @@ class ColumnViewSettings(Widget):
       for i, colum in enumerate(columns):
         tipTex = 'Hide/Show %s column' % colum.heading
         if self.direction=='v':
+          i+=1
           cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack
                         , checked=True if colum.heading not in self.hideColumns else False,
                         hAlign='l',tipText= tipTex,)
@@ -1184,6 +1218,13 @@ class ColumnViewSettings(Widget):
           self._showColumn(colum.heading)
         else:
           self._hideColumn(colum.heading)
+    self.hiddenColumns = []
+    self.table._hiddenColumns = []
+
+
+  def _getHiddenColumns(self):
+    return self.hiddenColumns
+
 
 
   def checkBoxCallBack(self):
@@ -1204,6 +1245,8 @@ class ColumnViewSettings(Widget):
 
   def _hideColumn(self, name):
     self.table.hideColumn(self.table.getColumnInt(columnName=name))
+    self.hiddenColumns.append(name)
+
 
   def _showColumn(self, name):
     self.table.showColumn(self.table.getColumnInt(columnName=name))

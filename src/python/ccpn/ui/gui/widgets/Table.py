@@ -633,8 +633,9 @@ class ObjectTable(QtGui.QTableView, Base):
 
     if action == columnsSettings:
       settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
-      settingsPopup.show()
+      # settingsPopup.show()
       settingsPopup.raise_()
+      settingsPopup.exec_()       # exclusive control to the menu and return _hiddencolumns
 
   def exportDialog(self):
 
@@ -1166,18 +1167,20 @@ class ObjectTableExport(QtGui.QDialog, Base):
     self.setMaximumWidth(300)
 
 class ColumnViewSettingsPopup(CcpnDialog):
-  def __init__(self, table, parent=None, hideColumns=None, title='Columns Settings', **kw):
+  def __init__(self, table, parent=None, hideColumns=None, title='Column Settings', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     self.setContentsMargins(20, 20, 20, 20)
     self.table = table
     self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
     buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1,0), hAlign='c')
+    self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
   def _close(self):
     'Save the hidden columns to the table class. So it remembers when you open again the popup'
     hiddenColumns = self.widgetColumnViewSettings._getHiddenColumns()
     self.table._hiddenColumns = hiddenColumns
     self.reject()
+    return hiddenColumns
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 
@@ -1189,11 +1192,11 @@ class ColumnViewSettings(Widget):
     self.direction=direction
     self.table = table
     self.checkBoxes = []
-    self.hiddenColumns = []
-    self.hideColumns = hideColumns or []
+    # self.hiddenColumns = []
+    self.hideColumns = hideColumns or []      # list of column names
+    self._hideColumnWidths = {}
     self.initCheckBoxes()
     self.filterLabel =  Label(self, 'Display Columns', grid=(0,1), vAlign='t', hAlign='l')
-
 
   def initCheckBoxes(self):
     columns = self.table.columns
@@ -1218,14 +1221,11 @@ class ColumnViewSettings(Widget):
           self._showColumn(colum.heading)
         else:
           self._hideColumn(colum.heading)
-    self.hiddenColumns = []
-    self.table._hiddenColumns = []
+    # self.table._hiddenColumns = []
 
 
   def _getHiddenColumns(self):
-    return self.hiddenColumns
-
-
+    return self.hideColumns
 
   def checkBoxCallBack(self):
     checkBox = self.sender()
@@ -1245,12 +1245,18 @@ class ColumnViewSettings(Widget):
 
   def _hideColumn(self, name):
     self.table.hideColumn(self.table.getColumnInt(columnName=name))
-    self.hiddenColumns.append(name)
-
+    # self._hideColumnWidths[name] = self.table.columnWidth(self.table.getColumnInt(columnName=name))
+    if name not in self.hideColumns:
+      self.hideColumns.append(name)
+    # self.hiddenColumns.append(name)
 
   def _showColumn(self, name):
     self.table.showColumn(self.table.getColumnInt(columnName=name))
-
+    # if name in self._hideColumnWidths:
+    #   self.table.setColumnWidth(self.table.getColumnInt(columnName=name), self._hideColumnWidths[name])
+    self.table.resizeColumnToContents(self.table.getColumnInt(columnName=name))
+    if name in self.hideColumns:
+      self.hideColumns.remove(name)
 
 class ObjectTableFilter(Widget):
 

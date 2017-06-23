@@ -319,7 +319,6 @@ class StructureTable(ObjectTable):
                                   , callback=self._selectionButtonCallback
                                   , direction='h'
                                   , tipTexts=None
-                                  , setLayout=True
                                   , grid=(1,2), gridSpan=(1,3))
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed

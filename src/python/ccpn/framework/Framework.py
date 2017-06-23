@@ -1505,12 +1505,15 @@ class Framework:
     # self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
 
     mainWindow = self.ui.mainWindow
-    if not relativeTo:
-      relativeTo = mainWindow.moduleArea      # ejb - use same technique as below
+    blankList = mainWindow.moduleArea.findAll()
+    if 'Blank Display' not in blankList[1]:
 
-    from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-    blankDisplay = BlankDisplay(mainWindow=mainWindow)
-    mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
+      if not relativeTo:
+        relativeTo = mainWindow.moduleArea      # ejb - use same technique as below
+
+      from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+      blankDisplay = BlankDisplay(mainWindow=mainWindow)
+      mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
 
     # if not BlankDisplay.isInstance():
     #   blankDisplay = BlankDisplay.instance(mainWindow=mainWindow)

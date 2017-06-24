@@ -47,18 +47,17 @@ SEP = ', '
 
 # class SubstancePropertiesPopup(QtGui.QDialog):
 class SubstancePropertiesPopup(CcpnDialog):
-  def __init__(self, substance=None, project=None, parent=None
+  def __init__(self, substance=None, application=None, parent=None
                , sampleComponent=None, newSubstance=False
                , title='Substance Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(SubstancePropertiesPopup, self).__init__(parent)
-
-    self.project = project
+    self.application = application
+    self.project =  self.application.project
     self.sample = parent
     self.sampleComponent = sampleComponent
     self.substance = substance
-
-    self.preferences = self.project._appBase.preferences
+    self.preferences = self.application .preferences
 
     self.createNewSubstance = newSubstance
     self._setMainLayout()
@@ -91,7 +90,7 @@ class SubstancePropertiesPopup(CcpnDialog):
   def _getWidgetsToSet(self):
     widgetsToSet = (self._initialOpitionWidgets, self._setCurrentSubstanceWidgets,
                     self._substanceNameWidget, self.labellingWidget,
-                    self._chemicalNameWidget,
+                    self._chemicalNameWidget, self._referenceSpectrumWidget,
                     self._smilesWidget, self._empiricalFormulaWidget,
                     self._molecularMassWidget, self._commentWidget, self._labelUserCodeWidget,
                     self._casNumberWidget, self._atomWidget, self._bondCountWidget,
@@ -107,6 +106,7 @@ class SubstancePropertiesPopup(CcpnDialog):
             self.substanceLabel,self.nameSubstance,
             self._substanceLabellingLabel, self.labelling,
             self.chemicalNameLabel,self.chemicalName,
+            self.referenceSpectraLabel, self.referenceSpectra,
             self.smilesLabel,self.smilesLineEdit,
             self.empiricalFormulaLabel,self.empiricalFormula,
             self.molecularMassLabel, self.molecularMass,
@@ -157,12 +157,17 @@ class SubstancePropertiesPopup(CcpnDialog):
     if self.substance:
       self.labelling.setText(self.substance.labelling)
 
-  def _referenceSpectraWidget(self):
-    self.referenceSpectraLabel = Label(self, text="Ref Spectra")
-    self.referenceSpectra = PulldownList(self)
+  def _referenceSpectrumWidget(self):
+    self.referenceSpectraLabel = Label(self, text="Reference Spectrum")
+    spectra = self.project.spectra
+    spectraPids = [sp.pid for sp in self.project.spectra]
+    self.referenceSpectra = PulldownList(self, objects=spectra, texts=spectraPids)
+
     if self.substance:
-      for referenceSpectra in self.substance.referenceSpectra:
-        self.referenceSpectra.setData([referenceSpectra.pid])
+      if len(self.substance.referenceSpectra)>0:
+       referenceSpectrum = self.substance.referenceSpectra[0]
+       if referenceSpectrum is not None:
+         self.referenceSpectra.select(referenceSpectrum.pid)
 
   def _chemicalNameWidget(self):
     self.chemicalNameLabel = Label(self, text="Chemical Names")
@@ -288,6 +293,7 @@ class SubstancePropertiesPopup(CcpnDialog):
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
       self._molecularMassChanged: self.molecularMass.text(),
+      self._referenceSpectraChanged: self.referenceSpectra.getObject(),
       self._userCodeChanged: str(self.userCode.text()),
       self._casNumberChanged: str(self.casNumber.text()),
       self._atomCountChanged: self.atomCount.text(),
@@ -341,6 +347,8 @@ class SubstancePropertiesPopup(CcpnDialog):
         return
       else:
         self.substance.smiles = value
+        if self.compoundView is not None:
+          self.compoundView.setSmiles(value)
 
   def _empiricalFormulaChanged(self, value):
     if value:
@@ -355,6 +363,14 @@ class SubstancePropertiesPopup(CcpnDialog):
         return
       else:
         self.substance.molecularMass = float(value)
+
+  def _referenceSpectraChanged(self, value):
+    if value:
+      if value == 'None':
+        return
+      else:
+        self.substance.referenceSpectra = (value,)
+
 
   def _userCodeChanged(self, value):
     if value:

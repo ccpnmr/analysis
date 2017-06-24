@@ -126,7 +126,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     self.mainWindow = parent                      # ejb - needed for moduleArea
-
+    self.application = self.mainWindow.application
     self._typeToItem = dd = {}
 
     self.setFont(sidebarFont)
@@ -567,7 +567,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      popup = SubstancePropertiesPopup(substance=obj, project=self.project)
+      popup = SubstancePropertiesPopup(substance=obj, application=self.application)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NC':
@@ -696,7 +696,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           popup.raise_()
           return
         elif item.parent().text(0) == 'Substances':
-          popup = SubstancePropertiesPopup(project=self.project, newSubstance = True)
+          popup = SubstancePropertiesPopup(application=self.application, newSubstance = True)
           popup.exec_()
           popup.raise_()
           return

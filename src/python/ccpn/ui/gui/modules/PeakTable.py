@@ -183,6 +183,10 @@ class PeakListTableWidget(ObjectTable):
     volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'
     columnDefs.append(('Volume', lambda pk: pk.volume, volumeTipText, None))
 
+    # figureOfMerit column
+    figureOfMeritTipText = 'Figure of merit'
+    columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText, None))
+
     # comment column
     commentsTipText = 'Textual notes about the peak'
     columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,

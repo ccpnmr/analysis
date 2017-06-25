@@ -952,8 +952,9 @@ class Framework:
     dataType, subType, usePath = ioFormats.analyseUrl(path)
     if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF):
 
-      if self.project is not None:
-        self._closeProject()
+      if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
+        if self.project is not None:
+          self._closeProject()
 
       if subType == ioFormats.CCPN:
         sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
@@ -962,7 +963,7 @@ class Framework:
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-        project = self._loadNefFileRASMUS(path)
+        project = self._loadNefFile(path, newProject=False)   # ejb - use new load
         project._resetUndo(debug=_DEBUG)
       #
       return project

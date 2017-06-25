@@ -965,6 +965,36 @@ class Project(AbstractWrapperObject):
     ensemble = EnsembleData.from_pdb(path)
     return label, ensemble
 
+  def _loadNefFile(self, path:str, subType:str):
+    """
+    Load a Nef file into an existing project
+    """
+    # ejb - 24/6/17
+    from ccpn.core.lib import CcpnNefIo
+
+    if subType in (ioFormats.NEF):
+
+      return self._appBase.loadProject(path)
+
+      # # load Nef File here
+      # nefReader = CcpnNefIo.CcpnNefReader(self)
+      #
+      # dataBlock = nefReader.getNefData(path)
+      # # project = self.newProject(dataBlock.name)
+      # # self._echoBlocking += 1
+      # self._undo.increaseBlocking()
+      # self._wrappedData.shiftAveraging = False
+      #
+      # nefReader.importNewProject(self, dataBlock)
+      #
+      # self._wrappedData.shiftAveraging = True
+      # # self._echoBlocking -= 1
+      # self._undo.decreaseBlocking()
+      #
+      # return True
+    else:
+      raise ValueError("Project file type %s is not recognised" % subType)
+
   def loadProject(self, path:str, subType:str) -> "Project":
     """Load project from file into application and return the new project"""
 

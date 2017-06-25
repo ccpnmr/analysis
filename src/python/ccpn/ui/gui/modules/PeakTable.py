@@ -51,6 +51,7 @@ class PeakTableModule(CcpnModule):
   '''
 
   includeSettingsWidget = True
+  includeColumnsWidget = False
   maxSettingsState = 2
   settingsPosition = 'top'
 
@@ -71,7 +72,9 @@ class PeakTableModule(CcpnModule):
                                              application=self.application, grid=(0, 0))
 
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self.settingsWidget, table=self.peakListTable, grid=(0, 0))
+    if self.includeColumnsWidget:
+      self.displayColumnWidget = ColumnViewSettings(parent=self.settingsWidget, table=self.peakListTable, grid=(0, 0))
+
     self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
 
     if peakList is not None:
@@ -84,8 +87,13 @@ class PeakTableModule(CcpnModule):
     self.peakListTable._selectPeakList(peakList)
 
   def _getDisplayColumnWidget(self):
-    " CCPN-INTERNAL: used to get displayColumnWidget"
-    return self.displayColumnWidget
+    """
+    CCPN-INTERNAL: used to get displayColumnWidget
+    """
+    if self.includeColumnsWidget:
+      return self.displayColumnWidget
+    else:
+      return None
 
   def _getSearchWidget(self):
     " CCPN-INTERNAL: used to get searchWidget"
@@ -222,8 +230,9 @@ class PeakListTableWidget(ObjectTable):
 
   def _updateSettingsWidgets(self):
     ''' update settings Widgets according with the new displayed table '''
-    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-    displayColumnWidget.updateWidgets(self)
+    if self.moduleParent.includeColumnsWidget:
+      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+      displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 

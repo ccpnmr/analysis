@@ -48,6 +48,7 @@ class StructureTableModule(CcpnModule):
   This class implements the module by wrapping a StructureTable instance
   """
   includeSettingsWidget = True
+  includeColumnsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
 
@@ -194,13 +195,14 @@ class StructureTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget
-                                                  , table=self.structureTable
-                                                  , grid=(4, 0)
-                                                  , hideColumns=['altLocationCode', 'element', 'occupancy'])
+    if self.includeColumnsWidget:
+      self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget
+                                                    , table=self.structureTable
+                                                    , grid=(4, 0)
+                                                    , hideColumns=['altLocationCode', 'element', 'occupancy'])
     self.searchWidget = ObjectTableFilter(parent=self._STwidget, table=self.structureTable, grid=(5, 0))
 
-    self.displayColumnWidget._hideColumn(name='altLocationCode')
+    # self.displayColumnWidget._hideColumn(name='altLocationCode')
 
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
@@ -229,7 +231,10 @@ class StructureTableModule(CcpnModule):
     """
     CCPN-INTERNAL: used to get displayColumnWidget
     """
-    return self.displayColumnWidget
+    if self.includeColumnsWidget:
+      return self.displayColumnWidget
+    else:
+      return None
 
   def _getSearchWidget(self):
     """
@@ -340,6 +345,10 @@ class StructureTable(ObjectTable):
 
     if structureEnsemble is not None:
       self._selectStructureEnsemble(structureEnsemble)
+
+    self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
+    for colName in self._hiddenColumns:
+      self.hideColumnName(colName)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -673,8 +682,9 @@ class StructureTable(ObjectTable):
     """
     Update settings Widgets according with the new displayed table
     """
-    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-    displayColumnWidget.updateWidgets(self)
+    if self.moduleParent.includeColumnsWidget:
+      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+      displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 

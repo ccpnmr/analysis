@@ -47,6 +47,7 @@ class RestraintTableModule(CcpnModule):
   This class implements the module by wrapping a restaintsTable instance
   """
   includeSettingsWidget = True
+  includeColumnsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
 
@@ -122,7 +123,9 @@ class RestraintTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
     # settingsWidget
-    self.displayColumnWidget = ColumnViewSettings(parent=self._RTwidget, table=self.restraintTable, grid=(4, 0))
+    if self.includeColumnsWidget:
+      self.displayColumnWidget = ColumnViewSettings(parent=self._RTwidget, table=self.restraintTable, grid=(4, 0))
+
     self.searchWidget = ObjectTableFilter(parent=self._RTwidget, table=self.restraintTable, grid=(5, 0))
 
     if restraintList is not None:
@@ -152,7 +155,10 @@ class RestraintTableModule(CcpnModule):
     """
     CCPN-INTERNAL: used to get displayColumnWidget
     """
-    return self.displayColumnWidget
+    if self.includeColumnsWidget:
+      return self.displayColumnWidget
+    else:
+      return None
 
   def _getSearchWidget(self):
     """
@@ -423,8 +429,9 @@ class RestraintTable(ObjectTable):
     """
     CCPN-INTERNAL: Update settings Widgets according with the new displayed table
     """
-    displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-    displayColumnWidget.updateWidgets(self)
+    if self.moduleParent.includeColumnsWidget:
+      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
+      displayColumnWidget.updateWidgets(self)
     searchWidget = self.moduleParent._getSearchWidget()
     searchWidget.updateWidgets(self)
 

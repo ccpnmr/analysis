@@ -962,15 +962,48 @@ class Framework:
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-        project = self._loadNefFile(path)
+        project = self._loadNefFileRASMUS(path)
         project._resetUndo(debug=_DEBUG)
       #
+      return project
+
+    elif dataType == 'NefFile' and subType in (ioFormats.NEF):
+    # ejb - 24/6/17 hopefully this will insert into project
+
+      sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
+      project = self._loadNefFile(path, newProject=False)
+      project._resetUndo(debug=_DEBUG)
+
       return project
 
     else:
       sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
 
-  def _loadNefFile(self, path:str) -> Project:
+  def _loadNefFile(self, path:str, newProject=False) -> Project:
+    """Load Project from NEF file at path, and do necessary setup"""
+    # ejb - new load Nef test
+
+    dataBlock = self.nefReader.getNefData(path)
+
+    if newProject:
+      if self.project is not None:
+        self._closeProject()
+      self.project = self.newProject(dataBlock.name)
+
+    self._echoBlocking += 1
+    self.project._undo.increaseBlocking()
+    self.project._wrappedData.shiftAveraging = False
+
+    try:
+      self.nefReader.importNewProject(self.project, dataBlock)
+    finally:
+      self.project._wrappedData.shiftAveraging = True
+      self._echoBlocking -= 1
+      self.project._undo.decreaseBlocking()
+
+    return self.project
+
+  def _loadNefFileRASMUS(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
     dataBlock = self.nefReader.getNefData(path)

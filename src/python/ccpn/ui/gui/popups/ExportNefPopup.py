@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from os.path import expanduser
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -98,11 +98,11 @@ class ExportNefPopup(CcpnDialog):
     # from here down is the save dialog
     # can we add a hide/show button?
 
-    self.fileWidget = Frame(self, setLayout=True)
+    self.fileWidget = Frame(self, setLayout=True, grid=(3,0))
     self.fileWidget.hide()
     self.fileSaveDialog = NefFileDialog(self.fileWidget, **self.saveDict)
     self.layout().addWidget(self.fileSaveDialog, 3,0)
-    self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)
+    self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)  # why does this work?
     self._saveState = True
 
     self.skipPrefixes = []

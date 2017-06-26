@@ -22,7 +22,6 @@ class IpythonConsole(Widget, Base):
         km = QtInProcessKernelManager()
         km.start_kernel()
         km.kernel.gui = 'qt4'
-        kc = km.client()
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
@@ -30,7 +29,7 @@ class IpythonConsole(Widget, Base):
         self.setStyleSheet(self.mainWindow.styleSheet())
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
-        self.ipythonWidget.kernel_client = kc
+        self.ipythonWidget.kernel_client = km.client()
         #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
         #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
         consoleLayout = QtGui.QGridLayout()
@@ -39,7 +38,7 @@ class IpythonConsole(Widget, Base):
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
-        kc.start_channels()
+        ###kc.start_channels()
 
         self.layout().setSpacing(1)
         self.layout().addWidget(self.textEditor, 0, 0)
@@ -74,6 +73,14 @@ class IpythonConsole(Widget, Base):
       if macroFile:
         self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
+    def _startChannels(self):
+      """
+      # CCPN INTERNAL - called in constructor of PythonConsoleModule.
+      """
+
+      # if this is called in constructor here then keyboard input gets
+      # sucked into Python console even if it is not opened
+      self.ipythonWidget.kernel_client.start_channels()
 
     def _showHistory(self):
       """

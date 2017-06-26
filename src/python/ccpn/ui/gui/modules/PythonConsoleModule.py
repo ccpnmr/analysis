@@ -51,5 +51,7 @@ class PythonConsoleModule(CcpnModule):
 
     self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
+    self.pythonConsoleWidget._startChannels()
+
 
 

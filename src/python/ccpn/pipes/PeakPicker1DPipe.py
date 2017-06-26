@@ -130,15 +130,14 @@ class PeakPicker1DPipe(SpectraPipe):
     :param data:
     :return:
     '''
+    if NoiseThreshold not in self._kwargs:
+      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
+
     maximumFilterSize = self._kwargs[MaximumFilterSize]
     maximumFilterMode = self._kwargs[MaximumFilterMode]
     negativePeaks = self._kwargs[NegativePeaks]
-
-    if NoiseThreshold not in self._kwargs:
-      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
-      positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
-      negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
-
+    positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+    negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
 
 
     if ExcludeRegions in self.pipeline._kwargs:
@@ -159,6 +158,10 @@ class PeakPicker1DPipe(SpectraPipe):
       else:
         positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
         negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
+
+      if positiveNoiseThreshold == 0.0:
+        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+        negativeNoiseThreshold = - positiveNoiseThreshold
 
       nPL = self._kwargs[PeakListIndex]
       if len(spectrum.peakLists) > nPL:

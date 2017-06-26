@@ -119,14 +119,14 @@ class AssignMultipletsPipe(SpectraPipe):
     :param data:
     :return:
     '''
+    if NoiseThreshold not in self._kwargs:
+      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
 
-
+    positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
     minimalLineWidth = self._kwargs[MinimalLineWidth]
     PeakListIndex = int(self._kwargs[ReferencePeakList])
-    positiveNoiseThreshold = max(DefaultNoiseThreshold)
 
     for spectrum in spectra:
-      referencePeakList = spectrum.peakLists[PeakListIndex]
       if EstimateNoiseThreshold in self.pipeline._kwargs:
         if self.pipeline._kwargs[EstimateNoiseThreshold]:
           if spectrum.noiseLevel is not None:
@@ -136,7 +136,13 @@ class AssignMultipletsPipe(SpectraPipe):
       else:
         positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
-      if referencePeakList is not None:
+      if positiveNoiseThreshold == 0.0:
+        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+
+      peakListIndex = self._kwargs[PeakListIndex]
+      if len(spectrum.peakLists) > peakListIndex:
+        referencePeakList = spectrum.peakLists[peakListIndex]
+        if referencePeakList is not None:
           if referencePeakList.peaks:
             _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:

@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 restraintTypes = [
   'Distance',
@@ -50,11 +50,16 @@ class RestraintTypePopup(CcpnDialog):
     # super(RestraintTypePopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 
+    self.restraintType = ''
+
     self.restraintTypeLabel = Label(self, "Restraint Type ", grid=(0, 0))
     self.restraintTypeList = PulldownList(self, grid=(0, 1))
     self.restraintTypeList.setData(restraintTypes)
     buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._setRestraintType], grid=(1, 1))
 
   def _setRestraintType(self):
-    self.restraintType = self.restraintTypeList.currentText()
-    self.accept()
+    try:
+      self.restraintType = self.restraintTypeList.currentText()
+      self.accept()
+    except Exception as e:
+      showWarning('Notes', str(e))

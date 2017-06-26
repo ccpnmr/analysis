@@ -28,6 +28,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util import Undo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 class NotesPopup(CcpnDialog):
   """
@@ -55,7 +56,11 @@ class NotesPopup(CcpnDialog):
     """
     newName = self.noteText.text()
     if str(newName) != self.note.name:
-      self.note.rename(newName)
-    self.accept()
+      try:
+        self.note.rename(newName)
+        self.accept()
+      except Exception as e:
+        showWarning('Notes', str(e))
+
 
 

@@ -1137,6 +1137,7 @@ class Framework:
     from ccpn.core.lib import CcpnNefIo
 
     dialog = ExportNefPopup(self.ui.mainWindow
+                            , project=self.project
                             , fileMode=FileDialog.AnyFile
                             , text="Export to NEF File"
                             , acceptMode=FileDialog.AcceptSave

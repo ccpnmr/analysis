@@ -40,14 +40,18 @@ class ListWidget(QtGui.QListWidget, Base):
                border: 1px solid #182548;
                }
   """
-  def __init__(self, parent=None, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
+  def __init__(self, parent=None, objects=None, callback=None
+               , rightMouseCallback=None
+               , contextMenu=True
+               , multiSelect=True
+               , acceptDrops=False, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
 
-    self.setAcceptDrops(False)
+    self.setAcceptDrops(acceptDrops)
     self.contextMenu = contextMenu
     self.callback = callback
     self.objects = list(objects or [])
@@ -251,3 +255,67 @@ if __name__ == '__main__':
   policyDict = {}
 
   app.start()
+
+
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Spacer import Spacer
+
+class ListwidgetPair(Frame):
+  """
+  Define a pair of listwidgets such that informaiton can be cpoied from one side
+  to the other and vise-versa
+  """
+  def __init__(self, parent=None, objects=None, callback=None
+               , rightMouseCallback=None
+               , contextMenu=True
+               , multiSelect=True
+               , acceptDrops=False
+               , pairName='Copy Items', **kw):
+
+    Frame.__init__(self, parent, **kw)
+
+    self.title = Label(self, text=pairName, setLayout=True, grid=(0,0))
+    self.leftList = ListWidget(self, setLayout=True, grid=(1,0), gridSpan=(5,1))
+    self.rightList = ListWidget(self, setLayout=True, grid=(1,5), gridSpan=(5,1))
+
+    self.leftIcon = Icon('icons/previous')
+    self.rightIcon = Icon('icons/next')
+
+    self.buttons = ButtonList(self, texts=['', '']
+                             , icons=[self.leftIcon, self.rightIcon]
+                             , callbacks=[self._moveLeft, self._moveRight]
+                             , direction='v'
+                             , grid=(3,3), hAlign='c')
+    self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+    self.spacer1 = Spacer(self, 10, 10
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,2), gridSpan=(1,1))
+    self.spacer2 = Spacer(self, 10, 10
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(4,4), gridSpan=(1,1))
+
+    # self.showBorder=True
+    # self.leftList.setContentsMargins(15,15,15,15)
+    # self.rightList.setContentsMargins(15,15,15,15)
+
+  def setListObjects(self, left):
+    self.leftObjects = left
+    self._populateLeft(self.leftList, left)
+
+  def _populateLeft(self, list, objs):
+    list.clear()
+    if objs:
+      for item in objs:
+        item = QtGui.QListWidgetItem(str(item.id))
+        list.addItem(item)
+
+
+  def _moveLeft(self):
+    pass
+
+  def _moveRight(self):
+    pass

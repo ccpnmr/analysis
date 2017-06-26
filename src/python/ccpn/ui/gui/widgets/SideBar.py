@@ -495,31 +495,30 @@ class SideBar(QtGui.QTreeWidget, Base):
   # mouse events
 
   def _dragEnterEvent(self, event, enter=True):
-
-    if event.mimeData().hasFormat(ccpnmrJsonData):
-      data = event.mimeData().data(ccpnmrJsonData)
-      if 'test' in data:
-        print ('>>>_dragEnterEvent has ccpnmrJsonData')
-      else:
-        print ('>>>_dragEnterEvent empty')
-    else:
-      print('>>>_dragEnterEvent ---')
-    super(SideBar, self).dragEnterEvent(event)
-
-    # if event.mimeData().hasUrls():
-    #   event.accept()
+    # if event.mimeData().hasFormat(ccpnmrJsonData):
+    #   data = event.mimeData().data(ccpnmrJsonData)
+    #   if 'test' in data:
+    #     print ('>>>_dragEnterEvent has ccpnmrJsonData')
+    #   else:
+    #     print ('>>>_dragEnterEvent empty')
     # else:
-    #   pids = []
-    #   for item in self.selectedItems():
-    #     if item is not None:
-    #       objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
-    #       if objFromPid is not None:
-    #         pids.append(objFromPid.pid)
-    #
-    #   itemData = json.dumps({'pids':pids})
-    #   event.mimeData().setData(ccpnmrJsonData, itemData)
-    #   event.mimeData().setText(itemData)
-    #   event.accept()
+    #   print('>>>_dragEnterEvent ---')
+    # super(SideBar, self).dragEnterEvent(event)
+
+    if event.mimeData().hasUrls():
+      event.accept()
+    else:
+      pids = []
+      for item in self.selectedItems():
+        if item is not None:
+          objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+          if objFromPid is not None:
+            pids.append(objFromPid.pid)
+
+      itemData = json.dumps({'pids':pids})
+      event.mimeData().setData(ccpnmrJsonData, itemData)
+      event.mimeData().setText(itemData)
+      event.accept()
 
   # def _startDrag(self, dropActions):
   #   item = self.currentItem()
@@ -557,22 +556,22 @@ class SideBar(QtGui.QTreeWidget, Base):
     sidebar.
     """
 
-    if event.button() == QtCore.Qt.LeftButton:
-      pids = []
-      for item in self.selectedItems():
-        if item is not None:
-          objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
-          if objFromPid is not None:
-            pids.append(objFromPid.pid)
-
-      itemData = json.dumps({'pids':pids, 'test':'thisDrag'})
-      mimeData = QtCore.QMimeData()
-      mimeData.setData(ccpnmrJsonData, itemData)
-      mimeData.setText(itemData)
-
-      drag = QtGui.QDrag(self)
-      drag.setMimeData(mimeData)
-      dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
+    # if event.button() == QtCore.Qt.LeftButton:
+    #   pids = []
+    #   for item in self.selectedItems():
+    #     if item is not None:
+    #       objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+    #       if objFromPid is not None:
+    #         pids.append(objFromPid.pid)
+    #
+    #   itemData = json.dumps({'pids':pids, 'test':'thisDrag'})
+    #   mimeData = QtCore.QMimeData()
+    #   mimeData.setData(ccpnmrJsonData, itemData)
+    #   mimeData.setText(itemData)
+    #
+    #   drag = QtGui.QDrag(self)
+    #   drag.setMimeData(mimeData)
+    #   dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
 
     # if event.button() == QtCore.Qt.RightButton:
     #   self._raiseContextMenu(event)
@@ -599,9 +598,8 @@ class SideBar(QtGui.QTreeWidget, Base):
     #   else:
     #     super(SideBar, self).mousePressEvent(event)
 
-
-    else:
-      QtGui.QTreeWidget.mousePressEvent(self, event)
+    # else:
+    QtGui.QTreeWidget.mousePressEvent(self, event)
 
   def _mouseReleaseEvent(self, event):
     """

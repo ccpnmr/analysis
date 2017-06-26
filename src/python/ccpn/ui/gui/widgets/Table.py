@@ -238,10 +238,10 @@ class ObjectTable(QtGui.QTableView, Base):
     self.acceptDrops()
     self.setDragDropMode(self.InternalMove)
     self.setDropIndicatorShown(True)
-    # # context menu on header  #Not used. keep the code in case we need to activate the header ContextMenu
-    # headers = self.horizontalHeader()
-    # headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    # headers.customContextMenuRequested.connect(self.headerContextMenu)
+
+    headers = self.horizontalHeader()
+    headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+    headers.customContextMenuRequested.connect(self.headerContextMenu)
 
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.tableContextMenu)
@@ -610,32 +610,34 @@ class ObjectTable(QtGui.QTableView, Base):
 
     QtGui.QTableView.destroy(self, *args)
 
-  # def headerContextMenu(self, pos): #Not used. keep the code in case we need to add the header ContextMenu
-  #   menu = QtGui.QMenu()
-  #   columnsSettings = menu.addAction("Columns Settings...")
-  #   action = menu.exec_(self.mapToGlobal(pos))
-  #   if action == columnsSettings:
-  #     settingsPopup = ColumnViewSettingsPopup(parent=self.parent, table=self)
-  #     settingsPopup.show()
-  #     settingsPopup.raise_()
+  def headerContextMenu(self, pos):
+
+    pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
+
+
+    menu = QtGui.QMenu()
+    columnsSettings = menu.addAction("Columns Settings...")
+    action = menu.exec_(self.mapToGlobal(pos))
+
+    if action == columnsSettings:
+      settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
+      settingsPopup.raise_()
+      settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
+
+
+
 
   def tableContextMenu(self, pos):
-
+    pos = QtCore.QPoint(pos.x(), pos.y() + 10)
     menu = QtGui.QMenu()
     # copyMenu =  menu.addAction("Copy Selected")
     exportMenu = menu.addAction("Export Table")
     # searchMenu = menu.addAction("Search")
-    columnsSettings = menu.addAction("Columns Settings...")
     action = menu.exec_(self.mapToGlobal(pos))
 
     if action == exportMenu:
       self.exportDialog()
 
-    if action == columnsSettings:
-      settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
-      # settingsPopup.show()
-      settingsPopup.raise_()
-      settingsPopup.exec_()       # exclusive control to the menu and return _hiddencolumns
 
   def exportDialog(self):
 
@@ -1183,6 +1185,7 @@ class ColumnViewSettingsPopup(CcpnDialog):
     return hiddenColumns
 
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
+CheckboxTipText = 'Select column to be visible on the table.'
 
 class ColumnViewSettings(Widget):
   ''' hide show check boxes corresponding to the table columns '''
@@ -1198,21 +1201,22 @@ class ColumnViewSettings(Widget):
     self.initCheckBoxes()
     self.filterLabel =  Label(self, 'Display Columns', grid=(0,1), vAlign='t', hAlign='l')
 
+
   def initCheckBoxes(self):
     columns = self.table.columns
 
     if columns:
       for i, colum in enumerate(columns):
-        tipTex = 'Hide/Show %s column' % colum.heading
+
         if self.direction=='v':
           i+=1
           cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack
                         , checked=True if colum.heading not in self.hideColumns else False,
-                        hAlign='l',tipText= tipTex,)
+                        hAlign='l',tipText= CheckboxTipText,)
         else:
           cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack
                         , checked=True if colum.heading not in self.hideColumns else False,
-                        hAlign='l',tipText= tipTex,)
+                        hAlign='l',tipText= CheckboxTipText,)
 
         cb.setMinimumSize(cb.sizeHint()*1.3)
 
@@ -1228,12 +1232,22 @@ class ColumnViewSettings(Widget):
     return self.hideColumns
 
   def checkBoxCallBack(self):
-    checkBox = self.sender()
-    name = checkBox.text()
-    if checkBox.isChecked():
-      self._showColumn(name)
-    else:
-      self._hideColumn(name)
+    currentCheckBox = self.sender()
+    name = currentCheckBox.text()
+    checkedBoxes = []
+
+    for checkBox in self.checkBoxes:
+      checkBox.setEnabled(True)
+      if checkBox.isChecked():
+        checkedBoxes.append(checkBox)
+    if len(checkedBoxes)>0:
+      if currentCheckBox.isChecked():
+        self._showColumn(name)
+      else:
+        self._hideColumn(name)
+    else: #always display at least one columns, disables the last checkbox
+      currentCheckBox.setEnabled(False)
+      currentCheckBox.setChecked(True)
 
   def updateWidgets(self, table):
     self.table = table

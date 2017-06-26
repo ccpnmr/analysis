@@ -1058,7 +1058,7 @@ class Framework:
   def _saveLayout(self):
     moduleArea = self.ui.mainWindow.moduleArea
     layout = moduleArea.saveState()
-    currentModulesDict = moduleArea.currentModulesDict
+    ###currentModulesDict = moduleArea.currentModulesDict
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
       os.makedirs(layoutPath)

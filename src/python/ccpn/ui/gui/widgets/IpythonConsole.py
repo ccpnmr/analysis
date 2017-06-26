@@ -38,7 +38,10 @@ class IpythonConsole(Widget, Base):
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
-        ###kc.start_channels()
+        # if this is called here then keyboard input gets
+        # sucked into Python console even if it is not opened
+        # so instead call _startChannels() when opened
+        ###self.ipythonWidget.kernel_client.start_channels()
 
         self.layout().setSpacing(1)
         self.layout().addWidget(self.textEditor, 0, 0)
@@ -78,8 +81,6 @@ class IpythonConsole(Widget, Base):
       # CCPN INTERNAL - called in constructor of PythonConsoleModule.
       """
 
-      # if this is called in constructor here then keyboard input gets
-      # sucked into Python console even if it is not opened
       self.ipythonWidget.kernel_client.start_channels()
 
     def _showHistory(self):

@@ -88,9 +88,9 @@ class AlignSpectraGuiPipe(GuiPipe):
     self.parent = parent
     self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(0,0))
     setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText, headerIcon=self._warningIcon,  grid=(0,1)) )
-    self._updateInputDataWidgets()
+    self._updateWidgets()
 
-  def _updateInputDataWidgets(self):
+  def _updateWidgets(self):
     self._setDataReferenceSpectrum()
 
 

@@ -45,6 +45,7 @@ NoiseThreshold = 'Noise_Threshold'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 DefaultEstimateNoiseThreshold = False
 DefaultNoiseThreshold = [0,0]
+Brush = (0, 111, 20, 150) #tranparent green
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -77,7 +78,7 @@ class NoiseThresholdGuiPipe(GuiPipe):
             CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(0, 1)))
 
     self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(1, 0))
-    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, orientation='h', grid=(1, 1)))
+    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, brush = Brush, orientation='h', grid=(1, 1)))
     self._manageButtons()
 
   def _manageButtons(self):
@@ -119,19 +120,15 @@ class NoiseThresholdPipe(SpectraPipe):
     If this is run twice, the pipeline will use only the last set.
     Spectra is not really needed for this pipe. But is essential for the base class pipe.
     '''
-    print('Bef',self._kwargs[NoiseThreshold])
 
     for spectrum in spectra:
       if self._kwargs[EstimateNoiseThreshold]:
         spectrum.noiseLevel = _getNoiseThreshold(spectrum)
         # self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
-        print('AFTER',self._kwargs[NoiseThreshold])
       else:
         spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
-        print('GIVEn', self._kwargs[NoiseThreshold])
 
     self.pipeline._kwargs.update(self._kwargs)
-    print(self.pipeline._kwargs)
 
     return spectra
 

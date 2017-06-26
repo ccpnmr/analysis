@@ -26,13 +26,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from scipy import signal
+from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
 import numpy as np
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 
@@ -48,6 +48,7 @@ ReferencePeakList = 'Reference_PeakList'
 NoiseThreshold = 'Noise_Threshold'
 NegativePeaks =  'Negative_Peaks'
 MinimalLineWidth =  'Minimal_LineWidth'
+EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 DefaultMinimalLineWidth =  0.01
 DefaultReferencePeakList =  0
@@ -80,25 +81,14 @@ class AssignMultipletsGuiPipe(GuiPipe):
 
     row = 0
     self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
-    setattr(self, ReferencePeakList, PulldownList(self.pipeFrame, texts=[str(DefaultReferencePeakList),], grid=(row, 1)))
+    setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
     row += 1
     self.peakListLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
     self._updateInputDataWidgets()
 
   def _updateInputDataWidgets(self):
-    self._setDataReferenceSpectrum()
-
-  def _setDataReferenceSpectrum(self):
-    data = list(self.inputData)
-    if len(data) > 0:
-      for spectrum in data:
-        if spectrum is not None:
-          if spectrum.peakLists:
-            pls = spectrum.peakLists
-            _getWidgetByAtt(self, ReferencePeakList).setData(texts=[str(n) for n in range(len(pls))])
-    else:
-      _getWidgetByAtt(self, ReferencePeakList).clear()
+    self._setMaxValueRefPeakList(ReferencePeakList)
 
 
 
@@ -130,17 +120,21 @@ class AssignMultipletsPipe(SpectraPipe):
     :return:
     '''
 
-    if NoiseThreshold in self.pipeline._kwargs:
-      positiveNoiseThreshold = max(self.pipeline._kwargs[NoiseThreshold])
-    else:
-      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
-      positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
     minimalLineWidth = self._kwargs[MinimalLineWidth]
-    nPeakList = int(self._kwargs[ReferencePeakList])
+    PeakListIndex = int(self._kwargs[ReferencePeakList])
+    positiveNoiseThreshold = max(DefaultNoiseThreshold)
 
     for spectrum in spectra:
-      referencePeakList = spectrum.peakLists[nPeakList]
+      referencePeakList = spectrum.peakLists[PeakListIndex]
+      if EstimateNoiseThreshold in self.pipeline._kwargs:
+        if self.pipeline._kwargs[EstimateNoiseThreshold]:
+          if spectrum.noiseLevel is not None:
+            positiveNoiseThreshold = spectrum.noiseLevel
+          else:
+            positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+      else:
+        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
       if referencePeakList is not None:
           if referencePeakList.peaks:

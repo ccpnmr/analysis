@@ -45,7 +45,7 @@ PipeName =  'Peak Picker 1D'
 
 ExcludeRegions = 'Exclude_Regions'
 NoiseThreshold = 'Noise_Threshold'
-NPeakList = 'Add_To_PeakList'
+PeakListIndex = 'Add_To_PeakList'
 NegativePeaks =  'Negative_Peaks'
 MaximumFilterSize =  'Maximum_Filter_Size'
 MaximumFilterMode =  'Maximum_Filter_Mode'
@@ -80,8 +80,8 @@ class PeakPicker1DGuiPipe(GuiPipe):
 
     row = 0
 
-    peakListLabel = Label(self.pipeFrame, NPeakList, grid=(row, 0))
-    setattr(self, NPeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
+    peakListLabel = Label(self.pipeFrame, PeakListIndex, grid=(row, 0))
+    setattr(self, PeakListIndex, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
     row += 1
 
     self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
@@ -100,7 +100,7 @@ class PeakPicker1DGuiPipe(GuiPipe):
 
 
   def _updateInputDataWidgets(self):
-    self._setMaxValueRefPeakList(NPeakList)
+    self._setMaxValueRefPeakList(PeakListIndex)
 
 
 ########################################################################################################################
@@ -122,7 +122,7 @@ class PeakPicker1DPipe(SpectraPipe):
                MaximumFilterSize: 5,
                MaximumFilterMode: Modes[0],
                NegativePeaks: True,
-               NPeakList: 0
+               PeakListIndex: 0
               }
 
   def runPipe(self, spectra):
@@ -149,31 +149,25 @@ class PeakPicker1DPipe(SpectraPipe):
 
     for spectrum in self.inputData:
       if EstimateNoiseThreshold in self.pipeline._kwargs:
-        print('Pipeline know the threshold')
         if self.pipeline._kwargs[EstimateNoiseThreshold]:
-          print('Estimates threshold')
           if spectrum.noiseLevel is not None:
             positiveNoiseThreshold = spectrum.noiseLevel
             negativeNoiseThreshold = -spectrum.noiseLevel
-            print('threshold is known: ',positiveNoiseThreshold, negativeNoiseThreshold)
           else:
-            print('threshold is unknown: ')
             positiveNoiseThreshold =  _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
             negativeNoiseThreshold = -positiveNoiseThreshold
       else:
         positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
         negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
-        print('threshold is Default in here: ', positiveNoiseThreshold, negativeNoiseThreshold)
 
-      nPL = self._kwargs[NPeakList]
-      if len(spectrum.peakLists) > 0:
-        if nPL  <= len(spectrum.peakLists):
-          print('PICKING')
-          spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
-                                                    positiveNoiseThreshold=positiveNoiseThreshold,
-                                                    negativeNoiseThreshold=negativeNoiseThreshold,
-                                                    excludeRegions= excludeRegions,
-                                                    negativePeaks=negativePeaks)
+      nPL = self._kwargs[PeakListIndex]
+      if len(spectrum.peakLists) > nPL:
+
+        spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
+                                                  positiveNoiseThreshold=positiveNoiseThreshold,
+                                                  negativeNoiseThreshold=negativeNoiseThreshold,
+                                                  excludeRegions= excludeRegions,
+                                                  negativePeaks=negativePeaks)
 
     return spectra
 

@@ -449,17 +449,21 @@ class SubstancePropertiesPopup(CcpnDialog):
       return substance
 
   def _hideExtraSettings(self):
+    self.hide()
     for w in self._allWidgets()[12:-1]:
       w.hide()
     self.buttonBox.buttons[0].hide()
     self.buttonBox.buttons[1].show()
+    self.show()
     self.setMaximumHeight(200)
 
   def _showMoreSettings(self):
+    self.hide()
     for w in self._allWidgets()[12:-1]:
       w.show()
     self.buttonBox.buttons[0].show()
     self.buttonBox.buttons[1].hide()
+    self.show()
     self.setMaximumHeight(800)
 
   def _checkCurrentSubstances(self):

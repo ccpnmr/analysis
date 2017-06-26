@@ -118,11 +118,13 @@ NEW_ITEM_DICT = {
 ### Flag example code removed in revision 7686
 
 class SideBar(QtGui.QTreeWidget, Base):
-  def __init__(self, parent=None, mainWindow=None, multiSelect=True,):
+  def __init__(self, parent=None, mainWindow=None, multiSelect=True):
 
     QtGui.QTreeWidget.__init__(self, parent)
     Base.__init__(self, acceptDrops=True)
-    if multiSelect:
+
+    self.multiSelect = multiSelect
+    if self.multiSelect:
       self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     self.mainWindow = parent                      # ejb - needed for moduleArea
@@ -227,6 +229,8 @@ class SideBar(QtGui.QTreeWidget, Base):
     self.newNoteItem.setText(0, '<New Note>')
 
     self.mousePressEvent = self._mousePressEvent
+    self.mouseReleaseEvent = self._mouseReleaseEvent
+    # self.mouseMoveEvent = self._mouseMoveEvent
     self.dragMoveEvent = self._dragMoveEvent
     self.dragEnterEvent = self._dragEnterEvent
 
@@ -324,38 +328,6 @@ class SideBar(QtGui.QTreeWidget, Base):
   def processText(self, text, event=None):
     newNote = self.project.newNote()
     newNote.text = text
-
-
-  def _mousePressEvent(self, event):
-    """
-    Re-implementation of the mouse press event so right click can be used to delete items from the
-    sidebar.
-    """
-    if event.button() == QtCore.Qt.RightButton:
-      self._raiseContextMenu(event)
-    else:
-      QtGui.QTreeWidget.mousePressEvent(self, event)
-
-  def _raiseContextMenu(self, event:QtGui.QMouseEvent):
-    """
-    Creates and raises a context menu enabling items to be deleted from the sidebar.
-    """
-    from ccpn.ui.gui.widgets.Menu import Menu
-    contextMenu = Menu('', self, isFloatWidget=True)
-    from functools import partial
-    # contextMenu.addAction('Delete', partial(self.removeItem, item))
-    objs = []
-    for item in self.selectedItems():
-      if item is not None:
-        objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
-        if objFromPid is not None:
-          objs.append(objFromPid)
-
-    if len(objs)>0:
-      contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
-      contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
-      contextMenu.exec()
-
 
   def _deleteItemObject(self,  objs):
     """Removes the specified item from the sidebar and deletes it from the project.
@@ -519,10 +491,73 @@ class SideBar(QtGui.QTreeWidget, Base):
       #   for obj in sorted(dd.values()):
       #     self._createItem(obj)
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # mouse events
+
   def _dragEnterEvent(self, event, enter=True):
-    if event.mimeData().hasUrls():
-      event.accept()
+
+    if event.mimeData().hasFormat(ccpnmrJsonData):
+      data = event.mimeData().data(ccpnmrJsonData)
+      if 'test' in data:
+        print ('>>>_dragEnterEvent has ccpnmrJsonData')
+      else:
+        print ('>>>_dragEnterEvent empty')
     else:
+      print('>>>_dragEnterEvent ---')
+    super(SideBar, self).dragEnterEvent(event)
+
+    # if event.mimeData().hasUrls():
+    #   event.accept()
+    # else:
+    #   pids = []
+    #   for item in self.selectedItems():
+    #     if item is not None:
+    #       objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+    #       if objFromPid is not None:
+    #         pids.append(objFromPid.pid)
+    #
+    #   itemData = json.dumps({'pids':pids})
+    #   event.mimeData().setData(ccpnmrJsonData, itemData)
+    #   event.mimeData().setText(itemData)
+    #   event.accept()
+
+  # def _startDrag(self, dropActions):
+  #   item = self.currentItem()
+  #   icon = item.icon()
+  #   data = QByteArray()
+  #   stream = QDataStream(data, QIODevice.WriteOnly)
+  #   stream << item.text() << icon
+  #   mimeData = QMimeData()
+  #   mimeData.setData("application/x-icon-and-text", data)
+  #   drag = QDrag(self)
+  #   drag.setMimeData(mimeData)
+  #   pixmap = icon.pixmap(24,24)
+  #   drag.setHotSpot(QPoint(12,12))
+  #   drag.setPixmap(pixmap)
+  #   if drag.start(Qt.MoveAction) == Qt.moveAction:
+  #     self.takeItem(self.row(item))
+
+  def _dragMoveEvent(self, event:QtGui.QMouseEvent):
+    """
+    Required function to enable dragging and dropping within the sidebar.
+    """
+    event.accept()
+
+  def dragLeaveEvent(self, event):
+    # print ('>>>dragLeaveEvent %s' % str(event.type()))
+    super(SideBar, self).dragLeaveEvent(event)
+    event.accept()
+
+  def _mouseMoveEvent(self, event):
+    event.accept()
+
+  def _mousePressEvent(self, event):
+    """
+    Re-implementation of the mouse press event so right click can be used to delete items from the
+    sidebar.
+    """
+
+    if event.button() == QtCore.Qt.LeftButton:
       pids = []
       for item in self.selectedItems():
         if item is not None:
@@ -530,19 +565,84 @@ class SideBar(QtGui.QTreeWidget, Base):
           if objFromPid is not None:
             pids.append(objFromPid.pid)
 
-      itemData = json.dumps({'pids':pids})
-      event.mimeData().setData(ccpnmrJsonData, itemData)
-      event.mimeData().setText(itemData)
+      itemData = json.dumps({'pids':pids, 'test':'thisDrag'})
+      mimeData = QtCore.QMimeData()
+      mimeData.setData(ccpnmrJsonData, itemData)
+      mimeData.setText(itemData)
+
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
+
+    # if event.button() == QtCore.Qt.RightButton:
+    #   self._raiseContextMenu(event)
+    #   event.accept()
+    # else:
+    # item = self.itemAt(event.pos())
+    # if item:
+    #   text = item.text(0)
+    #   if ':' in text:
+    #
+    #     itemData = json.dumps({'pids':[text]})
+    #     mimeData = QtCore.QMimeData()
+    #     mimeData.setData(ccpnmrJsonData, itemData)
+    #     # mimeData.setText(itemData)
+    #     # pixmap = QtGui.QPixmap.grabWidget(item)
+    #     # pixmap = QtGui.QPixmap(item)
+    #     # item.render(pixmap)
+    #
+    #     drag = QtGui.QDrag(self)
+    #     drag.setMimeData(mimeData)
+    #     # drag.setPixmap(pixmap)
+    #
+    #     dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
+    #   else:
+    #     super(SideBar, self).mousePressEvent(event)
+
+
+    else:
+      QtGui.QTreeWidget.mousePressEvent(self, event)
+
+  def _mouseReleaseEvent(self, event):
+    """
+    Re-implementation of the mouse press event so right click can be used to delete items from the
+    sidebar.
+    """
+    if event.button() == QtCore.Qt.RightButton:
+      self._raiseContextMenu(event)               # ejb - moved the context menu to button release
       event.accept()
+    else:
+      QtGui.QTreeWidget.mouseReleaseEvent(self, event)
 
-  def _startDrag(self):
-    pass
+  def enterEvent(self, event):
+    # print ('>>>enterEvent')
+    super(SideBar, self).enterEvent(event)
 
-  def _dragMoveEvent(self, event:QtGui.QMouseEvent):
+  def leaveEvent(self, event):
+    # print ('>>>leaveEvent')
+    super(SideBar, self).leaveEvent(event)
+
+  def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
-    Required function to enable dragging and dropping within the sidebar.
+    Creates and raises a context menu enabling items to be deleted from the sidebar.
     """
-    event.accept()
+    from ccpn.ui.gui.widgets.Menu import Menu
+    contextMenu = Menu('', self, isFloatWidget=True)
+    from functools import partial
+    # contextMenu.addAction('Delete', partial(self.removeItem, item))
+    objs = []
+    for item in self.selectedItems():
+      if item is not None:
+        objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+        if objFromPid is not None:
+          objs.append(objFromPid)
+
+    if len(objs)>0:
+      contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+      contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
+      contextMenu.exec()
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   def raisePopup(self, obj, item):
 

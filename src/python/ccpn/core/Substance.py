@@ -554,22 +554,22 @@ class Substance(AbstractWrapperObject):
     # if name is None:
     #   name = oldName
     if not isinstance(name, str):
-      raise TypeError("ccpn.Sample.name must be a string")  # ejb
+      raise TypeError("ccpn.Substance.name must be a string")  # ejb
     elif not name:
-      raise ValueError("ccpn.Sample.name must be set")  # ejb
+      raise ValueError("ccpn.Substance.name must be set")  # ejb
     elif Pid.altCharacter in name:
-      raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+      raise ValueError("Character %s not allowed in ccpn.Substance.name" % Pid.altCharacter)
 
     oldLabelling = self.labelling
     apiLabeling = labelling
     if labelling is None:
       apiLabeling = DEFAULT_LABELLING
     elif not isinstance(labelling, str):
-      raise TypeError("ccpn.Sample.labelling must be a string")
+      raise TypeError("ccpn.Substance.labelling must be a string")
     elif not labelling:
-      raise ValueError("ccpn.Sample.labelling must be set")
+      raise ValueError("ccpn.Substance.labelling must be set")
     elif Pid.altCharacter in labelling:
-      raise ValueError("Character %s not allowed in ccpn.Sample.labelling" % Pid.altCharacter)
+      raise ValueError("Character %s not allowed in ccpn.Substance.labelling" % Pid.altCharacter)
 
     self._startCommandEchoBlock('rename', name, labelling)
     undo = self._project._undo

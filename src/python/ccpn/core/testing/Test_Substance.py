@@ -99,7 +99,7 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(substance1._id, 'notmuch.')
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(TypeError, 'ccpn.Sample.name must be a string'):
+    with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.name must be a string'):
       substance1.rename(name=None, labelling=None)
     self.assertEqual(substance1._id, 'notmuch.')
     self.assertEqual(sc1._id, 'S1.notmuch.')
@@ -114,27 +114,27 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(substance1._id, 'notmuch.')
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(ValueError, 'ccpn.Sample.name must be set'):
+    with self.assertRaisesRegexp(ValueError, 'ccpn.Substance.name must be set'):
       substance1.rename(name='', labelling=None)
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Sample.name'):
+    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance.name'):
       substance1.rename(name='^Badname', labelling=None)
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(TypeError, 'ccpn.Sample.name must be a string'):
+    with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.name must be a string'):
       substance1.rename(name=12, labelling=None)
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(ValueError, 'ccpn.Sample.labelling must be set'):
+    with self.assertRaisesRegexp(ValueError, 'ccpn.Substance.labelling must be set'):
       substance1.rename(name='notmuch', labelling='')
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Sample.labelling'):
+    with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance.labelling'):
       substance1.rename(name='notmuch', labelling='^Badname')
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(TypeError, 'ccpn.Sample.labelling must be a string'):
+    with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.labelling must be a string'):
       substance1.rename(name='notmuch', labelling=12)
     self.assertEqual(sc1._id, 'S1.notmuch.')
 

@@ -30,7 +30,9 @@ from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
 
 def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThreshold_var):
   '''Gets the noise level from the pipeline if a previous pipe was set. Otherwise takes from Spectrum.noiseLevel if set.
-  If even this is not set, it estimates'''
+  If even this is not set, it estimates
+  cls.pipeline._kwargs[estimateNoiseThreshold_var] = True or False
+  '''
 
   positiveNoiseThreshold = 0.0
   negativeNoiseThreshold = 0.0
@@ -39,15 +41,23 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
       if spectrum.noiseLevel is not None:
         positiveNoiseThreshold = spectrum.noiseLevel
         negativeNoiseThreshold = -spectrum.noiseLevel
+        spectrum.noiseLevel = positiveNoiseThreshold
+        return (negativeNoiseThreshold, positiveNoiseThreshold)
       else:
-        positiveNoiseThreshold =  _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
         negativeNoiseThreshold = -positiveNoiseThreshold
-  else:
-    positiveNoiseThreshold = max(cls._kwargs[noiseThreshold_var])
-    negativeNoiseThreshold = min(cls._kwargs[noiseThreshold_var])
+        spectrum.noiseLevel = positiveNoiseThreshold
+        return (negativeNoiseThreshold, positiveNoiseThreshold)
+    else:
+      if noiseThreshold_var in cls.pipeline._kwargs:
+        positiveNoiseThreshold = max(cls.pipeline._kwargs[noiseThreshold_var])
+        negativeNoiseThreshold = min(cls.pipeline._kwargs[noiseThreshold_var])
+        spectrum.noiseLevel = positiveNoiseThreshold
+        return (negativeNoiseThreshold, positiveNoiseThreshold)
 
-  if positiveNoiseThreshold == 0.0:
+  if spectrum.noiseLevel == 0.0 or None:
     positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
     negativeNoiseThreshold = - positiveNoiseThreshold
-
+    spectrum.noiseLevel = positiveNoiseThreshold
+    return (negativeNoiseThreshold, positiveNoiseThreshold)
   return (negativeNoiseThreshold, positiveNoiseThreshold)

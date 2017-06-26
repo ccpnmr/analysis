@@ -123,7 +123,7 @@ class AssignMultipletsPipe(SpectraPipe):
 
     positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
     minimalLineWidth = self._kwargs[MinimalLineWidth]
-    PeakListIndex = int(self._kwargs[ReferencePeakList])
+
 
     for spectrum in spectra:
       noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
@@ -131,7 +131,7 @@ class AssignMultipletsPipe(SpectraPipe):
       if noiseThreshold:
         positiveNoiseThreshold = noiseThreshold[1]
 
-      peakListIndex = self._kwargs[PeakListIndex]
+      peakListIndex = int(self._kwargs[ReferencePeakList])
       if len(spectrum.peakLists) > peakListIndex:
         referencePeakList = spectrum.peakLists[peakListIndex]
         if referencePeakList is not None:

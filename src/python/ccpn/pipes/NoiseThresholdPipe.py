@@ -122,16 +122,13 @@ class NoiseThresholdPipe(SpectraPipe):
     '''
 
     for spectrum in spectra:
-      print(self._kwargs[EstimateNoiseThreshold],'£$£$£$£')
       if self._kwargs[EstimateNoiseThreshold]:
         spectrum.noiseLevel = _getNoiseThreshold(spectrum)
         self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
       else:
         spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
-        print('spectrum.noiseLevel PIPE', spectrum.noiseLevel)
 
     self.pipeline._kwargs.update(self._kwargs)
-    print(self._kwargs, 'AAAAA')
 
     return spectra
 

@@ -130,6 +130,9 @@ class AssignMultipletsPipe(SpectraPipe):
                                              noiseThreshold_var=NoiseThreshold)
       if noiseThreshold:
         positiveNoiseThreshold = noiseThreshold[1]
+        # print('Peak Assig £££ noiseThreshold ', noiseThreshold)
+
+      # print('Peak Assig @@@ noiseThreshold', noiseThreshold)
 
       peakListIndex = int(self._kwargs[ReferencePeakList])
       if len(spectrum.peakLists) > peakListIndex:

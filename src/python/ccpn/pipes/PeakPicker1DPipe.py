@@ -151,9 +151,9 @@ class PeakPicker1DPipe(SpectraPipe):
       if noiseThreshold:
         negativeNoiseThreshold = noiseThreshold[0]
         positiveNoiseThreshold = noiseThreshold[1]
-        print('£££',positiveNoiseThreshold)
+        # print('Peak Picker £££ noiseThreshold ',noiseThreshold)
 
-      print('@@@', positiveNoiseThreshold)
+      # print('Peak Picker @@@ noiseThreshold', noiseThreshold)
       nPL = self._kwargs[PeakListIndex]
       if len(spectrum.peakLists) > nPL:
         spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,

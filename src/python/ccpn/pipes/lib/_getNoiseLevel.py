@@ -33,31 +33,39 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
   If even this is not set, it estimates
   cls.pipeline._kwargs[estimateNoiseThreshold_var] = True or False
   '''
-
   positiveNoiseThreshold = 0.0
   negativeNoiseThreshold = 0.0
+  # print('@1',  (negativeNoiseThreshold, positiveNoiseThreshold))
   if estimateNoiseThreshold_var in cls.pipeline._kwargs:
     if cls.pipeline._kwargs[estimateNoiseThreshold_var]:
       if spectrum.noiseLevel is not None:
         positiveNoiseThreshold = spectrum.noiseLevel
         negativeNoiseThreshold = -spectrum.noiseLevel
         spectrum.noiseLevel = positiveNoiseThreshold
+        # print('@2', (negativeNoiseThreshold, positiveNoiseThreshold))
         return (negativeNoiseThreshold, positiveNoiseThreshold)
       else:
         positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
         negativeNoiseThreshold = -positiveNoiseThreshold
         spectrum.noiseLevel = positiveNoiseThreshold
+        # print('@3', (negativeNoiseThreshold, positiveNoiseThreshold))
         return (negativeNoiseThreshold, positiveNoiseThreshold)
     else:
       if noiseThreshold_var in cls.pipeline._kwargs:
         positiveNoiseThreshold = max(cls.pipeline._kwargs[noiseThreshold_var])
         negativeNoiseThreshold = min(cls.pipeline._kwargs[noiseThreshold_var])
         spectrum.noiseLevel = positiveNoiseThreshold
+        # print('@4', (negativeNoiseThreshold, positiveNoiseThreshold))
         return (negativeNoiseThreshold, positiveNoiseThreshold)
 
-  if spectrum.noiseLevel == 0.0 or None:
+  if spectrum.noiseLevel == 0.0 or spectrum.noiseLevel is None:
+    # print('@5', (negativeNoiseThreshold, positiveNoiseThreshold))
     positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
     negativeNoiseThreshold = - positiveNoiseThreshold
     spectrum.noiseLevel = positiveNoiseThreshold
+    # print('@6', (negativeNoiseThreshold, positiveNoiseThreshold))
     return (negativeNoiseThreshold, positiveNoiseThreshold)
+  if spectrum.noiseLevel is not None:
+    return (-spectrum.noiseLevel, spectrum.noiseLevel)
+
   return (negativeNoiseThreshold, positiveNoiseThreshold)

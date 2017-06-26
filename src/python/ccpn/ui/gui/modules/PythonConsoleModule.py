@@ -49,10 +49,9 @@ class PythonConsoleModule(CcpnModule):
     self.mainWindow = mainWindow
     self.pythonConsoleWidget = self.mainWindow.pythonConsole
 
-    kc = self.pythonConsoleWidget.ipythonWidget.kernel_manager.client()
-    self.pythonConsoleWidget.ipythonWidget.kernel_client = kc
-    kc.start_channels()
-
     self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
+
+    self.pythonConsoleWidget._startChannels()
+
 
 

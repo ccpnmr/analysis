@@ -32,8 +32,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
-import numpy as np
+from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
 
 ########################################################################################################################
@@ -127,17 +126,10 @@ class AssignMultipletsPipe(SpectraPipe):
     PeakListIndex = int(self._kwargs[ReferencePeakList])
 
     for spectrum in spectra:
-      if EstimateNoiseThreshold in self.pipeline._kwargs:
-        if self.pipeline._kwargs[EstimateNoiseThreshold]:
-          if spectrum.noiseLevel is not None:
-            positiveNoiseThreshold = spectrum.noiseLevel
-          else:
-            positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
-      else:
-        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
-
-      if positiveNoiseThreshold == 0.0:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
+                                             noiseThreshold_var=NoiseThreshold)
+      if noiseThreshold:
+        positiveNoiseThreshold = noiseThreshold[1]
 
       peakListIndex = self._kwargs[PeakListIndex]
       if len(spectrum.peakLists) > peakListIndex:

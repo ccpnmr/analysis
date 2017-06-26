@@ -33,8 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
-import numpy as np
+from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 
 ########################################################################################################################
 ###   Attributes:
@@ -147,25 +146,14 @@ class PeakPicker1DPipe(SpectraPipe):
       excludeRegions = self._kwargs[ExcludeRegions]
 
     for spectrum in self.inputData:
-      if EstimateNoiseThreshold in self.pipeline._kwargs:
-        if self.pipeline._kwargs[EstimateNoiseThreshold]:
-          if spectrum.noiseLevel is not None:
-            positiveNoiseThreshold = spectrum.noiseLevel
-            negativeNoiseThreshold = -spectrum.noiseLevel
-          else:
-            positiveNoiseThreshold =  _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
-            negativeNoiseThreshold = -positiveNoiseThreshold
-      else:
-        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
-        negativeNoiseThreshold = min(self._kwargs[NoiseThreshold])
-
-      if positiveNoiseThreshold == 0.0:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
-        negativeNoiseThreshold = - positiveNoiseThreshold
+      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
+                                             noiseThreshold_var=NoiseThreshold)
+      if noiseThreshold:
+        negativeNoiseThreshold = noiseThreshold[0]
+        positiveNoiseThreshold = noiseThreshold[1]
 
       nPL = self._kwargs[PeakListIndex]
       if len(spectrum.peakLists) > nPL:
-
         spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
                                                   positiveNoiseThreshold=positiveNoiseThreshold,
                                                   negativeNoiseThreshold=negativeNoiseThreshold,

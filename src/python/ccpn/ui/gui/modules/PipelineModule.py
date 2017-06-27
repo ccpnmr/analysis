@@ -399,11 +399,16 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _addGuiPipe(self, name, selected):
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
-        position = self.pipelineSettingsParams['addPosit']
-        guiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
-        self.pipelineArea.addDock(guiPipe, position=position)
-        autoActive = self.pipelineSettingsParams['autoActive']
-        guiPipe.label.checkBox.setChecked(autoActive)
+        if guiPipe._alreadyOpened:
+          print('GuiPipe already opened. Impossible to open this pipe more then once.')
+          return
+
+        else:
+          position = self.pipelineSettingsParams['addPosit']
+          guiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
+          self.pipelineArea.addDock(guiPipe, position=position)
+          autoActive = self.pipelineSettingsParams['autoActive']
+          guiPipe.label.checkBox.setChecked(autoActive)
 
 
   def _runPipeline(self):

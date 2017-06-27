@@ -308,6 +308,7 @@ class GuiPipe(Dock, DockDrop):
   preferredPipe = True
   pipeName = ''
   pipe = None
+  _alreadyOpened = False #Use this to open the guiPipe only once. Inside the GuiPipe do: MyGuiPipe._alreadyOpened = True
 
   def __init__(self, parent, name, project=None, widgetsParams=None, **kw):
     '''

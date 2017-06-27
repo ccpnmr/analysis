@@ -883,8 +883,9 @@ if __name__ == '__main__':
 
   # analysis specific
   from ccpn.pipes import loadedPipes
-  from  ccpn.AnalysisScreen import pipes
+  from  ccpn.AnalysisScreen.pipes import  _loadScreenPipes
 
+  _loadScreenPipes()
 
   app = TestApplication()
   win = QtGui.QMainWindow()

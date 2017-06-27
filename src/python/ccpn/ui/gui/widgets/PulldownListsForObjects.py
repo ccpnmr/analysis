@@ -124,4 +124,4 @@ class SpectrumPulldown(_Pulldown):
 
 class IntegralListPulldown(_Pulldown):
   className = 'IntegralList'
-  attributeName = 'integralList'
+  attributeName = 'integralLists'

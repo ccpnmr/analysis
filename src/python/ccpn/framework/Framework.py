@@ -839,6 +839,7 @@ class Framework:
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
+      ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),

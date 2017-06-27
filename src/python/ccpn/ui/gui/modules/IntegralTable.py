@@ -121,10 +121,10 @@ class IntegralTable(ObjectTable):
   columnDefs = [
                 ('#', lambda integral: integral.serial, '', None),
                 ('Value', lambda integral: integral.value, '', None),
-                ('Lower Limit', lambda integral: min(integral.limits), '', None),
-                ('Higher Limit', lambda integral: max(integral.limits), '', None),
+                ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None),
+                ('Higher Limit', lambda integral:IntegralTable._getHigherLimit(integral), '', None),
                 ('ValueError', lambda integral: integral.valueError,'', None),
-                ('Bias', lambda integral: integral.bias, 'integral bias', None),
+                ('Bias', lambda integral: integral.bias, '', None),
                 ('FigureOfMerit', lambda integral: integral.figureOfMerit, '', None),
                 ('Slopes', lambda integral: integral.slopes, '', None),
                 ('Annotation', lambda integral: integral.annotation, '', None),
@@ -158,11 +158,11 @@ class IntegralTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
-    self.rtWidget = IntegralListPulldown(parent=self._widget
-                                       , project=self._project, default=0
-                                       , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
-                                       , showSelectName=True
-                                       , callback=self._selectionPulldownCallback)
+    self.itWidget = IntegralListPulldown(parent=self._widget
+                                         , project=self._project, default=0
+                                         , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
+                                         , showSelectName=True
+                                         , callback= self._selectionPulldownCallback)
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
@@ -197,16 +197,16 @@ class IntegralTable(ObjectTable):
         logger.debug('select: Object is not of type IntegralList')
         raise TypeError('select: Object is not of type IntegralList')
       else:
-        for widgetObj in self.rtWidget.textList:
+        for widgetObj in self.itWidget.textList:
           if integralList.pid == widgetObj:
-            self.nmrChain = integralList
-            self.rtWidget.select(self.nmrChain.pid)
+            self.integralList = integralList
+            self.itWidget.select(self.integralList.pid)
 
   def displayTableForIntegralList(self, integralList):
     """
     Display the table for all integrals"
     """
-    self.rtWidget.select(integralList.pid)
+    self.itWidget.select(integralList.pid)
     self._update(integralList)
 
   def _updateCallback(self, data):
@@ -252,11 +252,36 @@ class IntegralTable(ObjectTable):
     """
     Notifier Callback for selecting integral from the pull down menu
     """
-    self.integralList = self._project.getByPid(item)
-    if self.integralList is not None:
-      self.displayTableForIntegralList(self.integralList)
-    else:
-      self.clearTable()
+    print(item)
+    if item is not None:
+      self.integralList = self._project.getByPid(item)
+      if self.integralList is not None:
+        self.displayTableForIntegralList(self.integralList)
+      else:
+        self.clearTable()
+
+
+  @staticmethod
+  def _getHigherLimit(integral):
+    """
+    Returns HigherLimit
+    """
+    if integral is not None:
+      if len(integral.limits)>0:
+        limits = integral.limits[0]
+        if limits:
+          return max(limits)
+
+  @staticmethod
+  def _getLowerLimit(integral):
+    """
+    Returns Lower Limit
+    """
+    if integral is not None:
+      if len(integral.limits) > 0:
+        limits = integral.limits[0]
+        if limits:
+          return min(limits)
 
 
   @staticmethod

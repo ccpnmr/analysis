@@ -25,16 +25,17 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 
-def _create1DSpectrum(project, name, intensities, positions, expType):
+def _create1DSpectrum(project, name, intensities, positions, expType, axisCodes):
   '''
    CCPN internal. Used in pipes
   Function to create a user defined CCPN object spectrum. It can be used to create STD spectrum
   '''
-  axisCodes = ('H',)
+
   spectrum = project.createDummySpectrum(axisCodes, name)
   spectrum._positions = positions
   spectrum._intensities = intensities
-  spectrum.experimentType = expType
   spectrum.pointCounts = (len(intensities),)
+  if expType is not None:
+    spectrum.experimentType = expType
 
   return spectrum

@@ -1113,6 +1113,27 @@ Use axisCodes to set magnetisation transfers instead.""")
       values = self.reorderValues(values, axisCodes)
     setattr(self, attributeName, values)
 
+  def _clone(self):
+    'Clone to a new spectrum.'
+    #FIXME  Crude approach / hack
+
+    newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
+    newSpectrum._positions = self.positions
+    newSpectrum._intensities = self.intensities
+    for peakList in self.peakLists:
+      peakList.copyTo(newSpectrum)
+
+    import inspect
+    attr = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
+    filteredAttr = [a for a in attr if not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith('_')]
+    for i in filteredAttr:
+      att, val = i
+      try:
+        setattr(newSpectrum, att, val)
+      except Exception as e:
+        print(e, att)
+
+
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:
   """Creation of new Spectrum NOT IMPLEMENTED.

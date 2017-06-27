@@ -144,13 +144,13 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
   limitsPairs = _getPeaksLimits(x, y, intersectingLine)
 
   peaks = []
-  integrals = []
+  # integrals = []
 
   newPeakList = spectrum.newPeakList()
-  if spectrum.integralLists:
-    integralList = spectrum.integralLists[0]
-  else:
-    integralList = spectrum.newIntegralList()
+  # if spectrum.integralLists:
+  #   integralList = spectrum.integralLists[0]
+  # else:
+  #   integralList = spectrum.newIntegralList()
 
   for i in limitsPairs:
     lineWidth = abs(i[0] - i[1]) # calculate line width
@@ -164,12 +164,12 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
       # calculate new intensity for multiplet ( if single peak stays the same)
       height = _getMultipletIntensity(multiplet)
       if centerOfMass and  height is not None:
-        # create a new Peak object
+        ## create a new Peak object
         spectrum.project.suspendNotification()
         try:
           peak = newPeakList.newPeak(height= height, position = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
           peaks.append(peak)
-          integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
-          integrals.append(integral)
+          # integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
+          # integrals.append(integral)
         finally:
           spectrum.project.resumeNotification()

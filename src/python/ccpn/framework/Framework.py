@@ -40,6 +40,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
+from ccpn.core.IntegralList import IntegralList
 
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -838,6 +839,7 @@ class Framework:
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
+      ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1633,6 +1635,23 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()\n")
     getLogger().info("application.showPeakTable()")
     return  self.peakTableModule
+
+  def showIntegralTable(self, position:str='left', relativeTo:CcpnModule=None, integralList:IntegralList=None):
+    """
+    Displays integral table on left of main window with specified list selected.
+    """
+    from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.integralTableModule = IntegralTableModule(mainWindow=mainWindow, integralList=integralList)
+    mainWindow.moduleArea.addModule(self.integralTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showIntegralTable()\n")
+    getLogger().info("application.showIntegralTable()")
+    return  self.integralTableModule
+
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, restraintList:PeakList=None):
     """

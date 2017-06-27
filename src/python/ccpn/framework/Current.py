@@ -39,7 +39,7 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
 from ccpn.core.Substance import Substance
-# from ccpn.core.Spectrum import Spectrum
+from ccpn.core.Integral import Integral
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Peak import Peak
@@ -50,6 +50,7 @@ from ccpn.ui._implementation.Strip import Strip
 _currentClasses = {
   SpectrumGroup:{'singularOnly':True},
   Peak:{},
+  Integral:{},
   NmrChain:{},
   NmrResidue:{},
   NmrAtom:{},

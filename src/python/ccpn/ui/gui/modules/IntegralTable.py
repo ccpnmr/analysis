@@ -252,7 +252,6 @@ class IntegralTable(ObjectTable):
     """
     Notifier Callback for selecting integral from the pull down menu
     """
-    print(item)
     if item is not None:
       self.integralList = self._project.getByPid(item)
       if self.integralList is not None:
@@ -269,8 +268,8 @@ class IntegralTable(ObjectTable):
     if integral is not None:
       if len(integral.limits)>0:
         limits = integral.limits[0]
-        if limits:
-          return max(limits)
+        if limits is not None:
+          return float(max(limits))
 
   @staticmethod
   def _getLowerLimit(integral):
@@ -281,7 +280,7 @@ class IntegralTable(ObjectTable):
       if len(integral.limits) > 0:
         limits = integral.limits[0]
         if limits:
-          return min(limits)
+          return float(min(limits))
 
 
   @staticmethod

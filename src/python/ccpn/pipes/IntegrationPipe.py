@@ -126,7 +126,9 @@ class CalculateAreaPipe(SpectraPipe):
       iLIndex = self._kwargs[IntegralListIndex]
       if len(spectrum.integralLists) > iLIndex:
         spectrum.integralLists[iLIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth), noiseThreshold=positiveNoiseThreshold)
-      print('Integral List does not exist')
+
+      else:
+        print('Integral List does not exist. Create one first')
 
     return spectra
 

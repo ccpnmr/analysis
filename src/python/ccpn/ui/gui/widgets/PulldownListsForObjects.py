@@ -120,3 +120,8 @@ class PeakListPulldown(_Pulldown):
 class SpectrumPulldown(_Pulldown):
     className = 'Spectrum'
     attributeName = 'spectra'
+
+
+class IntegralListPulldown(_Pulldown):
+  className = 'IntegralList'
+  attributeName = 'integralList'

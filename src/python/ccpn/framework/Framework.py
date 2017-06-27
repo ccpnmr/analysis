@@ -1139,7 +1139,7 @@ class Framework:
     dialog = ExportNefPopup(self.ui.mainWindow
                             , project=self.project
                             , fileMode=FileDialog.AnyFile
-                            , text="Export to NEF File"
+                            , text="Export to Nef File"
                             , acceptMode=FileDialog.AcceptSave
                             , preferences=self.preferences.general
                             , selectFile=self.project.name+'.nef'     # new flag to populate dialog
@@ -1148,13 +1148,17 @@ class Framework:
     # dialog.raise_()
     # nefPath = dialog.selectedFile()
 
-    nefPath, skipPrefixes = dialog.show()
+    nefPath, skipPrefixes, exclusionDict = dialog.show()
 
     if not nefPath:
       return
 
     t0 = time()
-    CcpnNefIo.saveNefProjectNewName(self.project, nefPath, overwriteExisting=True, skipPrefixes=skipPrefixes)
+    CcpnNefIo.saveNefProjectNewName(self.project
+                                    , nefPath
+                                    , overwriteExisting=True
+                                    , skipPrefixes=skipPrefixes
+                                    , exclusionDict=exclusionDict)
     t2 = time()
     print('Exported NEF file, time = %.2fs > %s' %(t2-t0, nefPath))
 

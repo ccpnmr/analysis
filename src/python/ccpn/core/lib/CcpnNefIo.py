@@ -809,7 +809,8 @@ def saveNefProject(project:Project
 def saveNefProjectNewName(project:Project
                        , path:str
                        , overwriteExisting:bool=False
-                       , skipPrefixes=()):
+                       , skipPrefixes=()
+                       , exclusionDict={}):
   """Save project NEF file to path"""
   # ejb - added to allow the changing of the name from the current project name.
 
@@ -820,7 +821,7 @@ def saveNefProjectNewName(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  text = convert2NefString(project, skipPrefixes=skipPrefixes)
+  text = convert2NefString(project, skipPrefixes=skipPrefixes, exclusionDict=exclusionDict)
 
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
@@ -829,10 +830,13 @@ def saveNefProjectNewName(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
-def convert2NefString(project:Project, skipPrefixes:Sequence=()):
+def convert2NefString(project:Project, skipPrefixes:Sequence=(), exclusionDict:dict={}):
   """Convert project to NEF string"""
   converter = CcpnNefWriter(project)
-  dataBlock = converter.exportProject()
+
+  #TODO:ED check with Rasmus about removing items from the project export list
+
+  dataBlock = converter.exportProject(exclusionDict)
 
   # Delete tags starting with certain prefixes.
   # NB designed to strip out 'ccpn' tags to make output comparison easier
@@ -984,7 +988,9 @@ class CcpnNefWriter:
 
       # Substances and Chains
       for substance in substances:
-          chain = substance.chain
+        #TODO:ED chains (plural) exists so need to output all here
+
+          chain = substance.chain        # ejb - think this need to be chains (plural)
           if chain is not None:
             chainSet.add(chain)
       chains = sorted(chainSet)
@@ -1076,17 +1082,57 @@ class CcpnNefWriter:
     return result
 
 
-  def exportProject(self) -> StarIo.NmrDataBlock:
-    """Get project and all contents as NEF object tree for export"""
+  def exportProject(self, exclusionDict:dict={}) -> StarIo.NmrDataBlock:
+    """
+    Get project and all contents as NEF object tree for export
+    """
     project = self.project
 
+    # ejb - added items to be removed from the list
+    # gets a copy of all the lists in the project that are relevant to Nef files
+
+    self.chains = []
+    self.chemicalShiftLists = []
+    self.restraintLists = []
+    self.peakLists = []
+    self.samples = []
+    self.substances = []
+    self.nmrChains = []
+    self.dataSets = []
+    self.complexes = []
+    self.spectrumGroups = []
+    self.notes = []
+
+    checkList = ['chains', 'chemicalShiftLists', 'restraintLists'
+                  ,'peakLists', 'samples', 'substances', 'nmrChains'
+                  , 'dataSets', 'complexes', 'spectrumGroups', 'notes']
+
+    for name in checkList:
+      setattr(self, name, getattr(project, name))  # copy the project items
+
+      if name in exclusionDict:        # if not in list then still write all values
+        # setattr(self, name, [])           # make it an empty list
+        attrib = getattr(self, name)
+        for obj in getattr(project, name):
+          if obj.pid in exclusionDict[name]:
+            # attrib.append(obj)              # append the found items to the list
+            attrib.remove(obj)            # treat as exclusion list
+
     return self.exportObjects(expandSelection=False,
-                              chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
-                              restraintLists=project.restraintLists, peakLists=project.peakLists,
-                              samples=project.samples, substances=project.substances,
-                              nmrChains=project.nmrChains, dataSets=project.dataSets,
-                              complexes=project.complexes, spectrumGroups=project.spectrumGroups,
-                              notes=project.notes)
+                              chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
+                              restraintLists=self.restraintLists, peakLists=self.peakLists,
+                              samples=self.samples, substances=self.substances,
+                              nmrChains=self.nmrChains, dataSets=self.dataSets,
+                              complexes=self.complexes, spectrumGroups=self.spectrumGroups,
+                              notes=self.notes)
+
+    # return self.exportObjects(expandSelection=False,
+    #                           chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
+    #                           restraintLists=project.restraintLists, peakLists=project.peakLists,
+    #                           samples=project.samples, substances=project.substances,
+    #                           nmrChains=project.nmrChains, dataSets=project.dataSets,
+    #                           complexes=project.complexes, spectrumGroups=project.spectrumGroups,
+    #                           notes=project.notes)
 
     self.ccpn2SaveFrameName = {}
     saveFrames = []

@@ -41,10 +41,15 @@ from os.path import expanduser
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.ListWidget import ListwidgetPair
+from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
+
+CHAINS = 'chains'
+NMRCHAINS = 'nmrChains'
+RESTRAINTLISTS = 'restraintLists'
 
 
 class ExportNefPopup(CcpnDialog):
+
   def __init__(self, parent=None, project=None, title='Export to Nef File', **kw):
 
     B = {'fileMode':None, 'text':None, 'acceptMode':None, 'preferences':None, 'selectFile':None, 'filter':None}
@@ -65,14 +70,26 @@ class ExportNefPopup(CcpnDialog):
 
     # put save options in this section
 
-    self.chainCopy = ListwidgetPair(self, setLayout=True, grid=(1,0), pairName='Chains:')
+    self.spacer = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,0), gridSpan=(1,1))
+
+    self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
+    self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
+    self.labelRight = Label(self.labelFrame, text='Items to Export to Nef File', grid=(1,1), hAlign='c')
+
+    self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS)
     self.chainCopy.setListObjects(self.project.chains)
 
-    self.nmrChainCopy = ListwidgetPair(self, setLayout=True, grid=(2,0), pairName='NmrChains:')
+    self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS)
     self.nmrChainCopy.setListObjects(self.project.nmrChains)
 
-    self.restraintCopy = ListwidgetPair(self, setLayout=True, grid=(3,0), pairName='Restraints:')
+    self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS)
     self.restraintCopy.setListObjects(self.project.restraintLists)
+
+    self.spacer = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(6,0), gridSpan=(1,1))
 
     # file directory options here
     self.openPathIcon = Icon('icons/directory')
@@ -83,6 +100,7 @@ class ExportNefPopup(CcpnDialog):
     self.saveLabel = Label(self.saveFrame, text = '   Path:   ', grid=(0,0), hAlign = 'c')
     self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAligment='l')
     self.saveText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+    self.saveText.setDisabled(True)
     if 'selectFile' in kw:
       self.saveText.setText(kw['selectFile'])
     else:
@@ -151,7 +169,8 @@ class ExportNefPopup(CcpnDialog):
       self.fileSaveDialog.show()
 
   def _acceptDialog(self, exitSaveFileName=None):
-    self.exitFileName = exitSaveFileName
+    # self.exitFileName = exitSaveFileName
+    self.exitFileName = self.saveText.text()    # self.fileSaveDialog.selectedFile()
     self.accept()
     # return exitSaveFileName
 
@@ -166,13 +185,20 @@ class ExportNefPopup(CcpnDialog):
   def show(self):
     self.raise_()
     val = self.exec_()
-    self.accept()
 
     # build the export dict
-    if self._includeCCPN is False:        # these are negated is skipped flags
+    if self._includeCCPN is False:        # these are negated as they are skipped flags
       self.skipPrefixes.append('ccpn')
 
-    return self.exitFileName, self.skipPrefixes
+    #TODO:ED need to work on this, but currently trying to match the items
+    #       in CcpnNefIo/exportProject
+
+    self.exclusionDict = {CHAINS: self.chainCopy.getLeftList()
+                         , NMRCHAINS: self.nmrChainCopy.getLeftList()
+                         , RESTRAINTLISTS: self.restraintCopy.getLeftList()}
+
+    self.accept()
+    return self.exitFileName, self.skipPrefixes, self.exclusionDict
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, **self.saveDict)

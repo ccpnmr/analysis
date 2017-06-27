@@ -187,7 +187,7 @@ class IntegralTable(ObjectTable):
 
   def _selectIntegralList(self, integralList=None):
     """
-    Manually select a NmrChain from the pullDown
+    Manually select a IntegralList from the pullDown
     """
     if integralList is None:
       logger.debug('select: No IntegralList selected')
@@ -204,7 +204,7 @@ class IntegralTable(ObjectTable):
 
   def displayTableForIntegralList(self, integralList):
     """
-    Display the table for all integrals"
+    Display the table for the IntegralList"
     """
     self.itWidget.select(integralList.pid)
     self._update(integralList)

@@ -50,6 +50,21 @@ from ccpnmodel.ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 from time import time
 from ccpn.util.Logging import getLogger
 
+EXPANDSELECTION = 'expandSelection'
+SKIPPREFIXES = 'skipPrefixes'
+CHAINS = 'chains'
+CHEMICALSHIFTLISTS = 'chemicalShiftLists'
+RESTRAINTLISTS = 'restraintLists'
+PEAKLISTS = 'peakLists'
+SAMPLES = 'samples'
+SUBSTANCES = 'substances'
+NMRCHAINS = 'nmrChains'
+DATASETS = 'dataSets'
+COMPLEXES = 'complexes'
+SPECTRUMGROUPS = 'spectrumGroups'
+NOTES = 'notes'
+
+
 class Project(AbstractWrapperObject):
   """ The Project is the object that contains all data objects and serves as the hub for
   navigating between them.
@@ -829,8 +844,7 @@ class Project(AbstractWrapperObject):
 
   # Library functions
 
-  def _exportNef(self
-                , path:str=None
+  def _exportNef(self, path:str=None
                 , overwriteExisting:bool=False
                 , flags:dict={}
                 , exclusionDict:dict={}) -> bool:
@@ -841,6 +855,9 @@ class Project(AbstractWrapperObject):
     from ccpn.core.lib import CcpnNefIo
 
     t0 = time()
+
+    # change to a list here or an exclusionDict
+
     CcpnNefIo.exportNef(self, path
                         , overwriteExisting=overwriteExisting
                         , flags=flags
@@ -848,7 +865,10 @@ class Project(AbstractWrapperObject):
     t2 = time()
     getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
 
-  def exportNef(self, path:str, flags:dict, pidList:list=[]):
+  def exportNef(self, path:str=None
+                , overwriteExisting:bool=False
+                , flags:dict={}
+                , pidList:list=[]):
     """
     export selected contents of the project to a Nef file
     :param path: output path and filename
@@ -863,8 +883,21 @@ class Project(AbstractWrapperObject):
       # take the list of pids
       # spilt into groups
 
+      self.chains = []
+      self.chemicalShiftLists = []
+      self.restraintLists = []
+      self.peakLists = []
+      self.samples = []
+      self.substances = []
+      self.nmrChains = []
+      self.dataSets = []
+      self.complexes = []
+      self.spectrumGroups = []
+      self.notes = []
 
-      pass
+      checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
+                   , SAMPLES, SUBSTANCES, NMRCHAINS
+                   , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
 
     finally:
       self._endCommandEchoBlock()

@@ -202,6 +202,7 @@ class ExportNefPopup(CcpnDialog):
 
     #TODO:ED need to work on this, but currently trying to match the items
     #       in CcpnNefIo/exportProject
+    #       export a dict for clarity
 
     self.exclusionDict = {CHAINS: self.chainCopy.getLeftList()
                          , NMRCHAINS: self.nmrChainCopy.getLeftList()

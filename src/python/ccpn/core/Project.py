@@ -851,56 +851,97 @@ class Project(AbstractWrapperObject):
     """
     first point in exporting a Nef file
     """
+
+    # convert exclusion to pidList and call the correct list
+
+    # self.chains = []
+    # self.chemicalShiftLists = []
+    # self.restraintLists = []
+    # self.peakLists = []
+    # self.samples = []
+    # self.substances = []
+    # self.nmrChains = []
+    # self.dataSets = []
+    # self.complexes = []
+    # self.spectrumGroups = []
+    # self.notes = []
+
+    checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
+      , SAMPLES, SUBSTANCES, NMRCHAINS
+      , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
+
+    pidList = []                                # start with an empty list
+
+    # go through the checkList above and add all objects to the list
+    for name in checkList:
+      if hasattr(self, name):                   # just to be safe
+        for obj in getattr(self, name):
+          pidList.append(obj.pid)                 # append the found items to the list
+      else:
+        raise (ValueError, 'Name not found in project: %s' % self.pid)
+
+    # now remove those items that are not needed (some may be added later depending on flags)
+    for ky in exclusionDict:
+      for exPid in exclusionDict[ky]:
+        # exPidObj = self.getByPid(exPid)
+        if exPid in pidList:
+          pidList.remove(exPid)
+
+    self.exportNef(path
+                   , overwriteExisting=overwriteExisting
+                   , flags=flags
+                   , pidList=pidList)
+
     # need to sort this
-    from ccpn.core.lib import CcpnNefIo
-
-    t0 = time()
-
-    # change to a list here or an exclusionDict
-
-    CcpnNefIo.exportNef(self, path
-                        , overwriteExisting=overwriteExisting
-                        , flags=flags
-                        , exclusionDict=exclusionDict)
-    t2 = time()
-    getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
+    # from ccpn.core.lib import CcpnNefIo
+    #
+    # t0 = time()
+    #
+    # # change exclusion list to list of pids
+    #
+    # CcpnNefIo.exportNef(self, path
+    #                     , overwriteExisting=overwriteExisting
+    #                     , flags=flags
+    #                     , exclusionDict=exclusionDict)
+    # t2 = time()
+    # getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
 
   def exportNef(self, path:str=None
                 , overwriteExisting:bool=False
                 , flags:dict={}
-                , pidList:list=[]):
+                , pidList:list=None):
     """
     export selected contents of the project to a Nef file
     :param path: output path and filename
     :param flags: output arguments
     :param pidList: a list of pids
     """
-    self._startCommandEchoBlock('exportNef', values=locals(),
-                                parName='exportNef')
+    from ccpn.core.lib import CcpnNefIo
+    from collections import OrderedDict
+
+    defaults = OrderedDict((('path', None)
+                            , ('overwriteExisting', None)
+                            , ('flags', None)
+                            , ('pidList', None)))
+
+    self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
+    undo = self._undo
+    undo.increaseBlocking()
+    self.blankNotification()
+
     try:
-      # export the project here
-
-      # take the list of pids
-      # spilt into groups
-
-      self.chains = []
-      self.chemicalShiftLists = []
-      self.restraintLists = []
-      self.peakLists = []
-      self.samples = []
-      self.substances = []
-      self.nmrChains = []
-      self.dataSets = []
-      self.complexes = []
-      self.spectrumGroups = []
-      self.notes = []
-
-      checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
-                   , SAMPLES, SUBSTANCES, NMRCHAINS
-                   , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
+      t0 = time()
+      CcpnNefIo.exportNef(self, path
+                          , overwriteExisting=overwriteExisting
+                          , flags=flags
+                          , pidList=pidList)
+      t2 = time()
+      getLogger().info('Exported NEF file, time = %.2fs' % (t2 - t0))
 
     finally:
       self._endCommandEchoBlock()
+      self.unblankNotification()
+      undo.decreaseBlocking()
 
   def loadData(self, path:str) -> typing.Optional[typing.List]:
     """

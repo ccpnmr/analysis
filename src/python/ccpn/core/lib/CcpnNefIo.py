@@ -826,7 +826,8 @@ def exportNef(project:Project
                , path:str
                , overwriteExisting:bool=False
                , flags={}
-               , exclusionDict={}):
+               # , exclusionDict={}
+               , pidList=None):
   #TODO:ED check that the calling order to correct and matched command line action
   """export NEF file to path"""
   # ejb - added to allow the changing of the name from the current project name.
@@ -838,7 +839,7 @@ def exportNef(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  text = convert2NefString(project, flags=flags, exclusionDict=exclusionDict)
+  text = convert2NefString(project, flags=flags, pidList=pidList)   #, exclusionDict=exclusionDict)
 
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
@@ -847,7 +848,7 @@ def exportNef(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
-def convert2NefString(project:Project, flags:dict={}, exclusionDict:dict={}):
+def convert2NefString(project:Project, flags:dict={}, pidList:list=None):   #, exclusionDict:dict={}):
   """Convert project to NEF string"""
 
   expandSelection = flags[EXPANDSELECTION] if EXPANDSELECTION in flags else False
@@ -857,7 +858,7 @@ def convert2NefString(project:Project, flags:dict={}, exclusionDict:dict={}):
 
   #TODO:ED check with Rasmus about removing items from the project export list
 
-  dataBlock = converter.exportProject(expandSelection=expandSelection, exclusionDict=exclusionDict)
+  dataBlock = converter.exportProject(expandSelection=expandSelection, pidList=pidList)   #, exclusionDict=exclusionDict)
 
   # Delete tags starting with certain prefixes.
   # NB designed to strip out 'ccpn' tags to make output comparison easier
@@ -1106,9 +1107,11 @@ class CcpnNefWriter:
     return result
 
 
+  # def exportProject(self, expandSelection:bool=False
+  #                   , pidList:list=None
+  #                   , exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
   def exportProject(self, expandSelection:bool=False
-                    , pidList:list=None
-                    , exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
+                    , pidList:list=None) -> typing.Optional[StarIo.NmrDataBlock]:
     """
     Get project and all contents as NEF object tree for export
     """
@@ -1120,10 +1123,10 @@ class CcpnNefWriter:
     # assume that a list of pids to include is being passed in
     # if there is none
 
-    if pidList is None and exclusionDict is None:
-      # export everything
+    if pidList is None:
+      # use as a flag to export everything
 
-      return self.exportObjects(expandSelection=False,
+      return self.exportObjects(expandSelection=expandSelection,
                                 chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
                                 restraintLists=project.restraintLists, peakLists=project.peakLists,
                                 samples=project.samples, substances=project.substances,
@@ -1133,9 +1136,9 @@ class CcpnNefWriter:
     else:
       # export selection of objects
       # either everything minus the exclusionDict or the list of pids
-      if pidList is not None and exclusionDict is not None:
-        # lists must be mutually exclusive
-        return None
+      # if pidList is not None and exclusionDict is not None:
+      #   lists must be mutually exclusive
+        # return None
 
       self.chains = []
       self.chemicalShiftLists = []
@@ -1153,16 +1156,21 @@ class CcpnNefWriter:
                    , SAMPLES, SUBSTANCES, NMRCHAINS
                    , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
 
+      # put the pids in the correct lists
       for name in checkList:
-        setattr(self, name, getattr(project, name))  # copy the project items
+        attrib = getattr(self, name)
+        for aPid in pidList:
+          pidObj = project.getByPid(aPid)
+          if pidObj._pluralLinkName == name:   # need to check this
+            attrib.append(pidObj)
 
-        if name in exclusionDict:        # if not in list then still write all values
-          # setattr(self, name, [])           # make it an empty list
-          attrib = getattr(self, name)
-          for obj in getattr(project, name):
-            if obj.pid in exclusionDict[name]:
-              # attrib.append(obj)              # append the found items to the list
-              attrib.remove(obj)            # treat as exclusion list
+        # if name in exclusionDict:        # if not in list then still write all values
+        #   # setattr(self, name, [])           # make it an empty list
+        #   attrib = getattr(self, name)
+        #   for obj in getattr(project, name):
+        #     if obj.pid in exclusionDict[name]:
+        #       # attrib.append(obj)              # append the found items to the list
+        #       attrib.remove(obj)            # treat as exclusion list
 
       return self.exportObjects(expandSelection=expandSelection,
                                 chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,

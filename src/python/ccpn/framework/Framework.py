@@ -1138,6 +1138,8 @@ class Framework:
                             , selectFile=self.project.name+'.nef'     # new flag to populate dialog
                             , filter='*.nef')
 
+    # an exculsion list comes out of the dialog as it
+
     nefPath, flags, exclusionDict = dialog.show()
 
     if not nefPath:

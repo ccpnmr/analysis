@@ -791,7 +791,7 @@ class Framework:
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
-      ("Export NEF", self.exportNEF, [('shortcut', 'ex')]),
+      ("Export NEF", self._exportNEF, [('shortcut', 'ex')]),
       (),
       ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -1121,20 +1121,13 @@ class Framework:
 
     return successful
 
-
-  def exportNEF(self, path=None, nefPath=None):
+  def _exportNEF(self):
     #TODO:ED fix this temporary routine
     """
     Export the current project as a Nef file
     Temporary routine because I don't know how else to do it yet
     """
-    # dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.DirectoryOnly, text="Export NEF Directory",
-    #                     acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-    #                     directory=nefPath, filter='*.nef')
-    # nefPath = dialog.selectedFile()+'/'
-
     from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-    from ccpn.core.lib import CcpnNefIo
 
     dialog = ExportNefPopup(self.ui.mainWindow
                             , project=self.project
@@ -1144,24 +1137,16 @@ class Framework:
                             , preferences=self.preferences.general
                             , selectFile=self.project.name+'.nef'     # new flag to populate dialog
                             , filter='*.nef')
-    # dialog.exec_()
-    # dialog.raise_()
-    # nefPath = dialog.selectedFile()
 
-    nefPath, skipPrefixes, exclusionDict = dialog.show()
+    nefPath, flags, exclusionDict = dialog.show()
 
     if not nefPath:
       return
 
-    t0 = time()
-    CcpnNefIo.saveNefProjectNewName(self.project
-                                    , nefPath
-                                    , overwriteExisting=True
-                                    , skipPrefixes=skipPrefixes
-                                    , exclusionDict=exclusionDict)
-    t2 = time()
-    print('Exported NEF file, time = %.2fs > %s' %(t2-t0, nefPath))
-
+    self.project._exportNef(path=nefPath
+                            , overwriteExisting=True
+                            , flags=flags
+                            , exclusionDict=exclusionDict)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

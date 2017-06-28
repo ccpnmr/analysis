@@ -291,8 +291,8 @@ class ListWidgetPair(Frame):
     """
     Frame.__init__(self, parent, **kw)
 
-    self.title = Label(self, text=title, setLayout=True, grid=(0,0))
-    self.leftList = ListWidget(self, setLayout=True, grid=(1,0), gridSpan=(5,1))
+    self.title = Label(self, text=title, setLayout=True, grid=(0,0), gridSpan=(1,7), hAlign='l')
+    self.leftList = ListWidget(self, setLayout=True, grid=(1,1), gridSpan=(5,1))
     self.rightList = ListWidget(self, setLayout=True, grid=(1,5), gridSpan=(5,1))
     self.leftList.setSelectContextMenu()
     self.rightList.setSelectContextMenu()
@@ -317,12 +317,21 @@ class ListWidgetPair(Frame):
     #                          , grid=(3,3))
     # self.button.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
-    self.spacer1 = Spacer(self, 10, 10
+    self.spacer1 = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
-                         , grid=(2,2), gridSpan=(1,1))
+                         , grid=(0,2), gridSpan=(1,1))
     self.spacer2 = Spacer(self, 10, 10
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,2), gridSpan=(1,1))
+    self.spacer3 = Spacer(self, 10, 10
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(4,4), gridSpan=(1,1))
+    self.spacer4 = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(6,4), gridSpan=(1,1))
+
+    for i, cs in enumerate([2,6,1,1,1,6,2]):
+      self.getLayout().setColumnStretch(i, cs)
 
     # self.showBorder=True
     # self.leftList.setContentsMargins(15,15,15,15)

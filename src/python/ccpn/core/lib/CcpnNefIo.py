@@ -83,6 +83,20 @@ currentNefVersion = '1.1'
 # Lowest version that this reader can reae (may not be teh same, as float:
 minimumNefVersion = 1.1
 
+EXPANDSELECTION = 'expandSelection'
+SKIPPREFIXES = 'skipPrefixes'
+CHAINS = 'chains'
+CHEMICALSHIFTLISTS = 'chemicalShiftLists'
+RESTRAINTLISTS = 'restraintLists'
+PEAKLISTS = 'peakLists'
+SAMPLES = 'samples'
+SUBSTANCES = 'substances'
+NMRCHAINS = 'nmrChains'
+DATASETS = 'dataSets'
+COMPLEXES = 'complexes'
+SPECTRUMGROUPS = 'spectrumGroups'
+NOTES = 'notes'
+
 #  - saveframe category names in reading order
 # The order is significant, because setting of crosslinks relies on the order frames are read
 # Frames are read in correct order regardless of how they are in the file
@@ -799,19 +813,22 @@ def saveNefProject(project:Project
   if os.path.exists(filePath) and not overwriteExisting:
     raise IOError("%s already exists" % filePath)
 
-  text = convert2NefString(project, skipPrefixes=skipPrefixes)
+  # text = convert2NefString(project, skipPrefixes=skipPrefixes)
+
+  text = convert2NefString(project, flags=skipPrefixes)   # error here
 
   if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)
 
   open(filePath, 'w').write(text)
 
-def saveNefProjectNewName(project:Project
-                       , path:str
-                       , overwriteExisting:bool=False
-                       , skipPrefixes=()
-                       , exclusionDict={}):
-  """Save project NEF file to path"""
+def exportNef(project:Project
+               , path:str
+               , overwriteExisting:bool=False
+               , flags={}
+               , exclusionDict={}):
+  #TODO:ED check that the calling order to correct and matched command line action
+  """export NEF file to path"""
   # ejb - added to allow the changing of the name from the current project name.
 
   if path[-4:] != '.nef':
@@ -821,7 +838,7 @@ def saveNefProjectNewName(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  text = convert2NefString(project, skipPrefixes=skipPrefixes, exclusionDict=exclusionDict)
+  text = convert2NefString(project, flags=flags, exclusionDict=exclusionDict)
 
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
@@ -830,13 +847,17 @@ def saveNefProjectNewName(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
-def convert2NefString(project:Project, skipPrefixes:Sequence=(), exclusionDict:dict={}):
+def convert2NefString(project:Project, flags:dict={}, exclusionDict:dict={}):
   """Convert project to NEF string"""
+
+  expandSelection = flags[EXPANDSELECTION] if EXPANDSELECTION in flags else False
+  skipPrefixes = flags[SKIPPREFIXES] if SKIPPREFIXES in flags else ()
+
   converter = CcpnNefWriter(project)
 
   #TODO:ED check with Rasmus about removing items from the project export list
 
-  dataBlock = converter.exportProject(exclusionDict)
+  dataBlock = converter.exportProject(expandSelection=expandSelection, exclusionDict=exclusionDict)
 
   # Delete tags starting with certain prefixes.
   # NB designed to strip out 'ccpn' tags to make output comparison easier
@@ -989,10 +1010,13 @@ class CcpnNefWriter:
       # Substances and Chains
       for substance in substances:
         #TODO:ED chains (plural) exists so need to output all here
+          # chain = substance.chain
+          # if chain is not None:
+          #   chainSet.add(chain)
 
-          chain = substance.chain        # ejb - think this need to be chains (plural)
-          if chain is not None:
-            chainSet.add(chain)
+          for chain in substance.chains:    # ejb - modified
+            if chain is not None:
+              chainSet.add(chain)
       chains = sorted(chainSet)
 
     # MetaData
@@ -1082,7 +1106,9 @@ class CcpnNefWriter:
     return result
 
 
-  def exportProject(self, exclusionDict:dict={}) -> StarIo.NmrDataBlock:
+  def exportProject(self, expandSelection:bool=False
+                    , pidList:list=None
+                    , exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
     """
     Get project and all contents as NEF object tree for export
     """
@@ -1091,48 +1117,61 @@ class CcpnNefWriter:
     # ejb - added items to be removed from the list
     # gets a copy of all the lists in the project that are relevant to Nef files
 
-    self.chains = []
-    self.chemicalShiftLists = []
-    self.restraintLists = []
-    self.peakLists = []
-    self.samples = []
-    self.substances = []
-    self.nmrChains = []
-    self.dataSets = []
-    self.complexes = []
-    self.spectrumGroups = []
-    self.notes = []
+    # assume that a list of pids to include is being passed in
+    # if there is none
 
-    checkList = ['chains', 'chemicalShiftLists', 'restraintLists'
-                  ,'peakLists', 'samples', 'substances', 'nmrChains'
-                  , 'dataSets', 'complexes', 'spectrumGroups', 'notes']
+    if pidList is None and exclusionDict is None:
+      # export everything
 
-    for name in checkList:
-      setattr(self, name, getattr(project, name))  # copy the project items
+      return self.exportObjects(expandSelection=False,
+                                chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
+                                restraintLists=project.restraintLists, peakLists=project.peakLists,
+                                samples=project.samples, substances=project.substances,
+                                nmrChains=project.nmrChains, dataSets=project.dataSets,
+                                complexes=project.complexes, spectrumGroups=project.spectrumGroups,
+                                notes=project.notes)
+    else:
+      # export selection of objects
+      # either everything minus the exclusionDict or the list of pids
+      if pidList is not None and exclusionDict is not None:
+        # lists must be mutually exclusive
+        return None
 
-      if name in exclusionDict:        # if not in list then still write all values
-        # setattr(self, name, [])           # make it an empty list
-        attrib = getattr(self, name)
-        for obj in getattr(project, name):
-          if obj.pid in exclusionDict[name]:
-            # attrib.append(obj)              # append the found items to the list
-            attrib.remove(obj)            # treat as exclusion list
+      self.chains = []
+      self.chemicalShiftLists = []
+      self.restraintLists = []
+      self.peakLists = []
+      self.samples = []
+      self.substances = []
+      self.nmrChains = []
+      self.dataSets = []
+      self.complexes = []
+      self.spectrumGroups = []
+      self.notes = []
 
-    return self.exportObjects(expandSelection=False,
-                              chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
-                              restraintLists=self.restraintLists, peakLists=self.peakLists,
-                              samples=self.samples, substances=self.substances,
-                              nmrChains=self.nmrChains, dataSets=self.dataSets,
-                              complexes=self.complexes, spectrumGroups=self.spectrumGroups,
-                              notes=self.notes)
+      checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
+                   , SAMPLES, SUBSTANCES, NMRCHAINS
+                   , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
 
-    # return self.exportObjects(expandSelection=False,
-    #                           chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
-    #                           restraintLists=project.restraintLists, peakLists=project.peakLists,
-    #                           samples=project.samples, substances=project.substances,
-    #                           nmrChains=project.nmrChains, dataSets=project.dataSets,
-    #                           complexes=project.complexes, spectrumGroups=project.spectrumGroups,
-    #                           notes=project.notes)
+      for name in checkList:
+        setattr(self, name, getattr(project, name))  # copy the project items
+
+        if name in exclusionDict:        # if not in list then still write all values
+          # setattr(self, name, [])           # make it an empty list
+          attrib = getattr(self, name)
+          for obj in getattr(project, name):
+            if obj.pid in exclusionDict[name]:
+              # attrib.append(obj)              # append the found items to the list
+              attrib.remove(obj)            # treat as exclusion list
+
+      return self.exportObjects(expandSelection=expandSelection,
+                                chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
+                                restraintLists=self.restraintLists, peakLists=self.peakLists,
+                                samples=self.samples, substances=self.substances,
+                                nmrChains=self.nmrChains, dataSets=self.dataSets,
+                                complexes=self.complexes, spectrumGroups=self.spectrumGroups,
+                                notes=self.notes)
+
 
     self.ccpn2SaveFrameName = {}
     saveFrames = []
@@ -2139,7 +2178,7 @@ class CcpnNefReader:
 
 
     t2 = time.time()
-    print('Loaded NEF file, time = ', t2-t0)
+    getLogger().debug('Loaded NEF file, time = %.2fs' %(t2-t0))
 
     for msg in self.warnings:
       print ('====> ', msg)

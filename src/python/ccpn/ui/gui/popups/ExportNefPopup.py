@@ -46,7 +46,9 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
 RESTRAINTLISTS = 'restraintLists'
-
+CCPNTAG = 'ccpn'
+SKIPPREFIXES = 'skipPrefixes'
+EXPANDSELECTION = 'expandSelection'
 
 class ExportNefPopup(CcpnDialog):
 
@@ -61,35 +63,46 @@ class ExportNefPopup(CcpnDialog):
     self.project = project
     self.options = Frame(self, setLayout=True, grid=(0,0))
     self.buttonCCPN = CheckBox(self.options, checked=True
-                               , text='include CCPN tags', callback=self._changeCCPNtag
+                               , text='include CCPN tags'
                                , grid=(0,0), hAlign ='l')
+    self.buttonExpand = CheckBox(self.options, checked=False
+                               , text='expand selection'
+                               , grid=(1,0), hAlign ='l')
     # self.spacer = Spacer(self.options, 5, 5
     #                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
     #                      , grid=(1,1), gridSpan=(1,1))
-    self._includeCCPN = True
+    # self._includeCCPN = True
+    # self._includeExpand = False
 
     # put save options in this section
 
     self.spacer = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
-                         , grid=(2,0), gridSpan=(1,1))
+                         , grid=(1,0), gridSpan=(1,1))
 
     self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
     self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
     self.labelRight = Label(self.labelFrame, text='Items to Export to Nef File', grid=(1,1), hAlign='c')
 
     self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS)
-    self.chainCopy.setListObjects(self.project.chains)
+    if hasattr(self.project, CHAINS):
+      self.chainCopy.setListObjects(self.project.chains)
 
     self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS)
-    self.nmrChainCopy.setListObjects(self.project.nmrChains)
+    if hasattr(self.project, NMRCHAINS):
+      self.nmrChainCopy.setListObjects(self.project.nmrChains)
 
     self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS)
-    self.restraintCopy.setListObjects(self.project.restraintLists)
+    if hasattr(self.project, RESTRAINTLISTS):
+      self.restraintCopy.setListObjects(self.project.restraintLists)
 
     self.spacer = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(6,0), gridSpan=(1,1))
+
+    self.spacer = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
+                         , grid=(7,0), gridSpan=(1,1))
 
     # file directory options here
     self.openPathIcon = Icon('icons/directory')
@@ -112,9 +125,6 @@ class ExportNefPopup(CcpnDialog):
                              , icon=self.openPathIcon
                              , callback=self._openFileDialog
                              , grid=(0, 3), hAlign='c')
-    self.spacer = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
-                         , grid=(1,2), gridSpan=(1,1))
 
     self.buttonFrame = Frame(self, setLayout=True, grid=(9,0))
     self.spacer = Spacer(self.buttonFrame, 5, 5
@@ -157,10 +167,6 @@ class ExportNefPopup(CcpnDialog):
       self.saveText.setText('None')
 
     self._saveState = True
-    self.skipPrefixes = []
-
-  def _changeCCPNtag(self):
-    self._includeCCPN = not self._includeCCPN
 
   def _toggleSaveDialog(self):
     if self._saveState is True:
@@ -186,9 +192,13 @@ class ExportNefPopup(CcpnDialog):
     self.raise_()
     val = self.exec_()
 
-    # build the export dict
-    if self._includeCCPN is False:        # these are negated as they are skipped flags
-      self.skipPrefixes.append('ccpn')
+    # build the export dict and flags
+
+    self.flags = {}
+    self.flags[SKIPPREFIXES] = []
+    if self.buttonCCPN.isChecked() is False:        # these are negated as they are skipped flags
+      self.flags[SKIPPREFIXES].append(CCPNTAG)
+    self.flags[EXPANDSELECTION] = self.buttonExpand.isChecked()
 
     #TODO:ED need to work on this, but currently trying to match the items
     #       in CcpnNefIo/exportProject
@@ -198,7 +208,7 @@ class ExportNefPopup(CcpnDialog):
                          , RESTRAINTLISTS: self.restraintCopy.getLeftList()}
 
     self.accept()
-    return self.exitFileName, self.skipPrefixes, self.exclusionDict
+    return self.exitFileName, self.flags, self.exclusionDict
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, **self.saveDict)
@@ -214,7 +224,10 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.popups.Dialog import CcpnDialog
   app = TestApplication()
-  dialog = ExportNefPopup()
+  dialog = ExportNefPopup(fileMode=FileDialog.AnyFile
+                          , text="Export to Nef File"
+                          , acceptMode=FileDialog.AcceptSave
+                          , filter='*.nef')
   dialog.show()
 
 

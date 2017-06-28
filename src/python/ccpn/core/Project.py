@@ -47,7 +47,8 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpnmodel.ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
-
+from time import time
+from ccpn.util.Logging import getLogger
 
 class Project(AbstractWrapperObject):
   """ The Project is the object that contains all data objects and serves as the hub for
@@ -827,6 +828,46 @@ class Project(AbstractWrapperObject):
           notifier(self)
 
   # Library functions
+
+  def _exportNef(self
+                , path:str=None
+                , overwriteExisting:bool=False
+                , flags:dict={}
+                , exclusionDict:dict={}) -> bool:
+    """
+    first point in exporting a Nef file
+    """
+    # need to sort this
+    from ccpn.core.lib import CcpnNefIo
+
+    t0 = time()
+    CcpnNefIo.exportNef(self, path
+                        , overwriteExisting=overwriteExisting
+                        , flags=flags
+                        , exclusionDict=exclusionDict)
+    t2 = time()
+    getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
+
+  def exportNef(self, path:str, flags:dict, pidList:list=[]):
+    """
+    export selected contents of the project to a Nef file
+    :param path: output path and filename
+    :param flags: output arguments
+    :param pidList: a list of pids
+    """
+    self._startCommandEchoBlock('exportNef', values=locals(),
+                                parName='exportNef')
+    try:
+      # export the project here
+
+      # take the list of pids
+      # spilt into groups
+
+
+      pass
+
+    finally:
+      self._endCommandEchoBlock()
 
   def loadData(self, path:str) -> typing.Optional[typing.List]:
     """

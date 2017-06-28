@@ -143,6 +143,7 @@ class NefFileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
+    self.setLabelText(QtGui.QFileDialog.Accept, 'Select')
 
     if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
       self.selectFile(selectFile)
@@ -189,6 +190,10 @@ class NefFileDialog(QtGui.QFileDialog):
   def accept(self):
     super(NefFileDialog, self).accept()
     self.acceptFunc(self.selectedFile())
+
+  def setLabels(self, save='Save', cancel='Cancel'):
+    self.setLabelText(QtGui.QFileDialog.Accept, save)
+    self.setLabelText(QtGui.QFileDialog.Reject, cancel)
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit

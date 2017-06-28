@@ -429,6 +429,11 @@ class GuiPipeline(CcpnModule, Pipeline):
 
       self.runPipeline()
 
+  def _openAllPipes(self):
+    'Testing Only. Opens all the pipe in once with default name'
+    for guiPipeName in self.pipePulldown.texts:
+      self._addGuiPipe(guiPipeName, guiPipeName)
+
 
 
   def _closeModule(self):
@@ -776,7 +781,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.setDataSelection()
 
 
-
     # self.setDataSelection()
 
 class FilterMethods(CcpnDialog):
@@ -872,7 +876,6 @@ class FilterMethods(CcpnDialog):
 
 
 
-
 #################################### _________ RUN GUI TESTING ____________ ####################################
 
 
@@ -894,6 +897,7 @@ if __name__ == '__main__':
   pipeline = GuiPipeline(mainWindow=None, pipes = loadedPipes)
   # pipeline = GuiPipeline(mainWindow=None, pipes=pipeExamples)
   moduleArea.addModule(pipeline)
+  pipeline._openAllPipes()
 
   win.setCentralWidget(moduleArea)
   win.resize(1000, 500)

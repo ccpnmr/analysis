@@ -223,7 +223,8 @@ class LineEditButtonDialog(Widget, Base):
     else:
       self.fileMode = fileMode
 
-    self.lineEdit = LineEdit(self, text=self.textLineEdit, grid=(0, 0), hAlign='c')
+    self.lineEdit = LineEdit(self, text=self.textLineEdit, grid=(0, 0), hAlign='l')
+    self.lineEdit.setEnabled(False)
     button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')
     button.setStyleSheet("border: 0px solid transparent")
 

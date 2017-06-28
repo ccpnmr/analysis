@@ -134,5 +134,8 @@ class AlignSpectra(SpectraPipe):
         if spectra:
           return _alignSpectra(referenceSpectrum, spectra)
 
+      else:
+        print('Spectra not Aligned. Returned original spectra')
+        return spectra
 
 AlignSpectra.register() # Registers the pipe in the pipeline

@@ -122,13 +122,14 @@ class NoiseThresholdPipe(SpectraPipe):
     '''
 
     for spectrum in spectra:
-      if self._kwargs[EstimateNoiseThreshold]:
-        spectrum.noiseLevel = _getNoiseThreshold(spectrum)
-        self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
-      else:
-        spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
+      if spectrum is not None:
+        if self._kwargs[EstimateNoiseThreshold]:
+          spectrum.noiseLevel = _getNoiseThreshold(spectrum)
+          self._kwargs.update({NoiseThreshold:[spectrum.noiseLevel,-spectrum.noiseLevel]})
+        else:
+          spectrum.noiseLevel = max(self._kwargs[NoiseThreshold])
 
-    self.pipeline._kwargs.update(self._kwargs)
+      self.pipeline._kwargs.update(self._kwargs)
 
     return spectra
 

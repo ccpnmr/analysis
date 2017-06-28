@@ -124,7 +124,6 @@ class AssignMultipletsPipe(SpectraPipe):
     positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
     minimalLineWidth = self._kwargs[MinimalLineWidth]
 
-
     for spectrum in spectra:
       noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
                                              noiseThreshold_var=NoiseThreshold)

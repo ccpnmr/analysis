@@ -31,13 +31,16 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 
 
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.util.Hdf5 import convertDataToHdf5
-
+import pandas as pd
+from collections import OrderedDict
+import os
 
 ########################################################################################################################
 ###   Attributes:
@@ -45,22 +48,49 @@ from ccpn.util.Hdf5 import convertDataToHdf5
 ########################################################################################################################
 
 PipeName = 'Output Pipeline'
-SaveAsHDF5path = 'saveAsHDF5path'
-
+SavePath = 'Save_Directory_Path'
+SaveHDF5 = 'Save_Spectra_in_HDF5'
+SaveOutputMode = 'Save_Output_Mode'
+CSV = 'CSV'
+TAB = 'Tab'
+XLSX = 'XLSX'
+Json = 'Json'
+DataSet = 'CCPN DataSet'
+Modes = [CSV,TAB, Json, DataSet]
+DefaultPath = os.path.expanduser("~")
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
 
+def _getPipelineOutputs(pipeline):
+  outputs = []
+  if pipeline is not None:
+    application = pipeline.application
+    if application is not None:
+      outputs.append(('Application Version', application.applicationName+' '+ application.applicationVersion))
+      outputs.append(('Pipeline: '+pipeline.pipelineName , pipeline._kwargs))
+      spectraNames = []
+      if pipeline.inputData:
+        for sp in pipeline.inputData:
+          if sp is not None:
+            spectraNames.append(sp.name)
+      outputs.append(('Output spectra:', spectraNames))
 
+      for pipe in pipeline.queue:
+        if pipe is not None:
+          outputs.append(('Pipe: '+pipe.pipeName,  pipe._kwargs))
 
+  return outputs
 
+def _getOutPutDataFrame(outputList):
+  df = pd.DataFrame(outputList)
+  return df
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
-# TODO: all the pipe!
 
 class OutputPipelineGuiPipe(GuiPipe):
 
@@ -72,11 +102,27 @@ class OutputPipelineGuiPipe(GuiPipe):
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
-    self.saveAsHDF5CheckBox = CheckBox(self.pipeFrame, checked=True, text='Save output spectra as HDF5',  grid=(0,0))
-    self.saveAsHDF5Label = Label(self.pipeFrame, 'Saving  directory path',  grid=(0,1))
-    setattr(self, SaveAsHDF5path,
-            LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(0,2)))
+    row = 0
+    self.saveAsHDF5Label = Label(self.pipeFrame, SaveHDF5,  grid=(row,0))
+    setattr(self, SaveHDF5, CheckBox(self.pipeFrame, checked=False,  grid=(row,1)))
 
+    row += 1
+    self.modeLabel = Label(self.pipeFrame, SaveOutputMode, grid=(row, 0))
+    setattr(self, SaveOutputMode,
+            RadioButtons(self.pipeFrame, texts=Modes, grid=(row, 1)))
+
+    row += 1
+    self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
+    setattr(self, SavePath,
+            LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(row,1)))
+    self._setDefaultDataPath()
+
+
+
+  def _setDefaultDataPath(self):
+    'writes the default data path in the pipe lineEdit'
+    if self.application is not None:
+      getattr(self, SavePath).lineEdit.set(self.application.preferences.general.dataPath)
 
 
 ########################################################################################################################
@@ -88,40 +134,47 @@ class OutputSpectraPipe(SpectraPipe):
 
   guiPipe = OutputPipelineGuiPipe
   pipeName = PipeName
-
+  _kwargs = {
+            SavePath:DefaultPath,
+            SaveHDF5:False,
+            SaveOutputMode:''
+            }
 
   def runPipe(self, spectra):
     '''
-    :param data:
-    :return: it copies the input data as dummy spectra. Dummy spectra can be then modified.
+
     '''
 
+    outputs = _getPipelineOutputs(self.pipeline)
+    df = _getOutPutDataFrame(outputs)
 
-    if self.project is not None:
+    path = self._kwargs[SavePath]+'/'
+    mode = self._kwargs['Save_Output_Mode']
+    saveHDF5 = self._kwargs[SaveHDF5]
 
-      hdf5Spectra = []
-      path = ''
+    if saveHDF5:
       for spectrum in spectra:
-        fullPath = str(path) + str(spectrum.name) + '.hdf5'
-        convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
+        if spectrum is not None:
+          fullPath = str(path) + str(spectrum.name) + '.hdf5'
+          convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
 
-      # newDummySpectra = []
-      # for spectrum in self.inputData:
-      #   if spectrum is not None:
-      #     try:
-      #       dummySpectrum = self.project.createDummySpectrum(axisCodes=spectrum.axisCodes, name=spectrum.name)
-      #       dummySpectrum._positions = spectrum._positions
-      #       dummySpectrum._intensities = spectrum._intensities
-      #       dummySpectrum.pointCounts = spectrum.pointCounts
-      #       newDummySpectra.append(dummySpectrum)
-      #     except Exception as e:
-      #       print('Impossible create Dummy Spectrum for %s.' %spectrum,  e)
+    if df is not None:
+      if mode == CSV:
+        df.to_csv(path+self.pipeline.pipelineName)
+      if mode == TAB:
+        df.to_csv(path+self.pipeline.pipelineName, sep='\t')
+      if mode == Json:
+        df.to_json(path+self.pipeline.pipelineName)
+      # if mode == XLSX:
+      #   df.to_excel(path+self.pipeline.pipelineName, index=False)
+      if mode == DataSet:
+        newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
+        data = newDataSet.newData(name = self.pipeline.pipelineName)
+        data.setParameter(self.pipeline.pipelineName, df)
+
+    return spectra
 
 
 
-      return hdf5Spectra
-
-
-
-# OutputSpectraPipe.register()
+OutputSpectraPipe.register()
 

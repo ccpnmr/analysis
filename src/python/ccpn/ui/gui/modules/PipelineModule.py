@@ -70,6 +70,7 @@ transparentStyle = "background-color: transparent; border: 0px solid transparent
 selectPipeLabel = '< Select Pipe >'
 preferredPipeLabel = '-- Preferred Pipes --'
 otherPipeLabel =     '-- Other Pipes --'
+PipelineName = 'NewPipeline'
 
 class PipelineWorker(QtCore.QObject):
   'Object managing the  auto run pipeline simulation'
@@ -145,7 +146,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=self._closeAllGuiPipes)
 
     # init the Pipeline
-    Pipeline.__init__(self, application=self.application, pipelineName=name, pipes=pipes)
+    Pipeline.__init__(self, application=self.application, pipelineName=PipelineName, pipes=pipes)
 
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
@@ -266,7 +267,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _createSettingButtonGroup(self):
     self.nameLabel = Label(self, 'Pipeline Name:')
-    self.pipelineNameLabel = Label(self, 'NewPipeline')
+    self.pipelineNameLabel = Label(self, PipelineName )
     self.settingButtons = ButtonList(self, texts=['', ''],
                                      callbacks=[self._openSavedPipeline, self._savePipeline],
                                      icons=[self.openRecentIcon, self.saveIcon],
@@ -698,14 +699,13 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _setSettingsParams(self):
+
     widgets = [self.pipelineNameLabel.setText, self.pipelineReNameTextEdit.setText,
                self.savePipelineLineEdit.lineEdit.setText, self.autoCheckBox.setChecked, self.addBoxPosition.set]
     for widget, value in zip(widgets, self.pipelineSettingsParams.values()):
       widget(value)
 
 
-  def _renamePipeline(self):
-    self.pipelineName = self.lineEdit.text()
 
   def _applySettingsCallBack(self):
     self._displayStopButton()
@@ -713,6 +713,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self._setSettingsParams()
     self.setDataSelection()
     self._updateInputDataWidgets()
+    self.pipelineName = self.pipelineNameLabel.text()
     # self._hideSettingWidget()
 
   def _cancelSettingsCallBack(self):
@@ -897,7 +898,7 @@ if __name__ == '__main__':
   pipeline = GuiPipeline(mainWindow=None, pipes = loadedPipes)
   # pipeline = GuiPipeline(mainWindow=None, pipes=pipeExamples)
   moduleArea.addModule(pipeline)
-  pipeline._openAllPipes()
+  # pipeline._openAllPipes()
 
   win.setCentralWidget(moduleArea)
   win.resize(1000, 500)

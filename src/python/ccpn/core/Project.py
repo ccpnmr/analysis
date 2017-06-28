@@ -926,7 +926,8 @@ class Project(AbstractWrapperObject):
 
     self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
     undo = self._undo
-    undo.increaseBlocking()
+    if undo is not None:
+      undo.increaseBlocking()
     self.blankNotification()
 
     try:
@@ -941,7 +942,8 @@ class Project(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
       self.unblankNotification()
-      undo.decreaseBlocking()
+      if undo is not None:
+        undo.decreaseBlocking()
 
   def loadData(self, path:str) -> typing.Optional[typing.List]:
     """

@@ -549,7 +549,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteSelectedRows')
+      containingObject._startCommandEchoBlock('deleteSelectedRows')
 
     try:
       colData = []
@@ -625,7 +625,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteRow')
+      containingObject._startCommandEchoBlock('deleteRow', rowNumber)
 
     try:
       colData = dict((x, self.loc[index].get(x)) for x in self.columns)  # grab the original values
@@ -694,7 +694,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.deleteCol')     # ejb, values=kwargs)
+      containingObject._startCommandEchoBlock('deleteCol', columnName)     # ejb, values=kwargs)
 
     try:
       colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
@@ -837,7 +837,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.setValues', values=kwargs)
+      containingObject._startCommandEchoBlock('setValues', values=kwargs)
       undo = containingObject._project._undo      # ejb
       undo.increaseBlocking()       # ejb
 
@@ -979,7 +979,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startCommandEchoBlock('data.ccpnSort', columns)
+      containingObject._startCommandEchoBlock('ccpnSort', columns)
       undo = containingObject._project._undo      # ejb
       undo.increaseBlocking()       # ejb
 

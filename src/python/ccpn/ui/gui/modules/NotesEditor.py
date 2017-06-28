@@ -157,11 +157,11 @@ class NotesEditorModule(CcpnModule):
       text = self.textBox.toPlainText()
 
       self.note._startCommandEchoBlock('_applyNote')
-
-      self.note.rename(name)          # ejb - order doesn't matter inside the commandEchoBlock
-      self.note.text = text
-
-      self.note._endCommandEchoBlock()
+      try:
+        self.note.rename(name)
+        self.note.text = text
+      finally:
+        self.note._endCommandEchoBlock()
 
       self.noWidget.select(self.note.pid)
     self._setNotifiers()

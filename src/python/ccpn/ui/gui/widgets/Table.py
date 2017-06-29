@@ -632,12 +632,13 @@ class ObjectTable(QtGui.QTableView, Base):
     menu = QtGui.QMenu()
     # copyMenu =  menu.addAction("Copy Selected")
     exportMenu = menu.addAction("Export Table")
-    # searchMenu = menu.addAction("Search")
+    deleteMenu = menu.addAction("Delete")
     action = menu.exec_(self.mapToGlobal(pos))
 
     if action == exportMenu:
       self.exportDialog()
-
+    if action == deleteMenu:
+      self.deleteObjFromTable()
 
   def exportDialog(self):
 
@@ -691,6 +692,17 @@ class ObjectTable(QtGui.QTableView, Base):
     dataFrame = DataFrame(rows, index=None, columns=headers)
     dataFrame.apply(pd.to_numeric, errors='ignore')
     return dataFrame
+
+  def deleteObjFromTable(self):
+    selected = self.getSelectedObjects()
+    n = len(selected)
+    title = 'Delete Item%s' % ('' if n == 1 else 's')
+    msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+    if MessageDialog.showYesNo(title, msg):
+      for obj in selected:
+        if hasattr(obj, 'pid'):
+          obj.delete()
+
 
   def filterRows(self):
 

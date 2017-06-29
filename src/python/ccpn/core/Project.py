@@ -852,9 +852,9 @@ class Project(AbstractWrapperObject):
     """
     first point in exporting a Nef file
     """
-
+    # ejb - to accommodate the new exclusion list
     # convert exclusion to pidList and call the correct list
-
+    # this is the current list
     # self.chains = []
     # self.chemicalShiftLists = []
     # self.restraintLists = []
@@ -912,7 +912,19 @@ class Project(AbstractWrapperObject):
                 , flags:dict={}
                 , pidList:list=None):
     """
-    export selected contents of the project to a Nef file
+    Export selected contents of the project to a Nef file.
+
+    Flags is a dictionary of the form:
+
+      { 'skipPrefixes': [ 'ccpn', ..., <str> ], 'expandSelection': <bool> }
+
+      Include 'ccpn' in the flags will exclude ccpn specific items from the file
+      expandSelection = True  will include all data from the project, this may not be data that
+                              is not defined in the Nef standard.
+
+    PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
+    The Nef file may also contain further dependent items necessary associated with the pidList.
+
     :param path: output path and filename
     :param flags: output arguments
     :param pidList: a list of pids

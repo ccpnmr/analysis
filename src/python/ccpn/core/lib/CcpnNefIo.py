@@ -828,9 +828,9 @@ def exportNef(project:Project
                , flags={}
                # , exclusionDict={}
                , pidList=None):
-  #TODO:ED check that the calling order to correct and matched command line action
+  #TODO:ED check that the calling order to correct and matches command line action
   """export NEF file to path"""
-  # ejb - added to allow the changing of the name from the current project name.
+  # ejb - dialog added to allow the changing of the name from the current project name.
 
   if path[-4:] != '.nef':
     path = path+'.nef'
@@ -1161,7 +1161,7 @@ class CcpnNefWriter:
         attrib = getattr(self, name)
         for aPid in pidList:
           pidObj = project.getByPid(aPid)
-          if pidObj._pluralLinkName == name:   # need to check this
+          if pidObj is not None and pidObj._pluralLinkName == name:   # need to check this
             attrib.append(pidObj)
 
         # if name in exclusionDict:        # if not in list then still write all values

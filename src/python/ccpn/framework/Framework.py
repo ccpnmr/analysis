@@ -967,11 +967,15 @@ class Framework:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, newProject=False)   # ejb - use new load
         project._resetUndo(debug=_DEBUG)
-      #
+
+        # the 'newProject' parameter works but has now initialisation yet
+
       return project
 
     elif dataType == 'NefFile' and subType in (ioFormats.NEF):
-    # ejb - 24/6/17 hopefully this will insert into project
+    # ejb - testing - 24/6/17 hopefully this will insert into project
+    #                 is caught by the test above
+    #                 need to deciode whether it is a 'project' or 'NefFile' load
 
       sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
       project = self._loadNefFile(path, newProject=False)
@@ -984,7 +988,8 @@ class Framework:
 
   def _loadNefFile(self, path:str, newProject=False) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
-    # ejb - new load Nef test
+    # ejb - new load Nef file
+    #       copied/modified from original below
 
     dataBlock = self.nefReader.getNefData(path)
 
@@ -1008,6 +1013,8 @@ class Framework:
 
   def _loadNefFileRASMUS(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
+    # this was the original _loadNefFile written by Rasmus
+    # I have made left it so I don't do anything stupid - ejb
 
     dataBlock = self.nefReader.getNefData(path)
     project = self.newProject(dataBlock.name)

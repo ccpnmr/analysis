@@ -44,7 +44,8 @@ class ListWidget(QtGui.QListWidget, Base):
                , rightMouseCallback=None
                , contextMenu=True
                , multiSelect=True
-               , acceptDrops=False, **kw):
+               , acceptDrops=False
+               , sortOnDrop=False, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -57,6 +58,8 @@ class ListWidget(QtGui.QListWidget, Base):
     self.objects = list(objects or [])
     self.items = list(objects or [])
     self.multiSelect = multiSelect
+    self.dropSource = None
+    self.sortOnDrop = sortOnDrop
 
     self.rightMouseCallback = rightMouseCallback
     if callback is not None:
@@ -230,14 +233,30 @@ class ListWidget(QtGui.QListWidget, Base):
       for url in event.mimeData().urls():
         links.append(str(url.toLocalFile()))
       self.emit(QtCore.SIGNAL("dropped"), links)
+      if self.sortOnDrop is True:
+        self.sortItems()
     else:
       items = []
       if event.source() != self:  # otherwise duplicates
-        event.setDropAction(QtCore.Qt.CopyAction)
-        self.emit(QtCore.SIGNAL("dropped"), items)
-        super(ListWidget, self).dropEvent(event)
 
-      # ejb - tried to fix transfer of CopyAction, but intermittent
+        if self.dropSource is None:                         # allow event drops from anywhere
+          event.setDropAction(QtCore.Qt.CopyAction)
+          self.emit(QtCore.SIGNAL("dropped"), items)
+          super(ListWidget, self).dropEvent(event)
+          if self.sortOnDrop is True:
+            self.sortItems()
+        else:
+
+          if event.source() is self.dropSource:             # check that the drop comes
+            event.setDropAction(QtCore.Qt.MoveAction)       # from only the permitted widget
+            self.emit(QtCore.SIGNAL("dropped"), items)
+            super(ListWidget, self).dropEvent(event)
+            if self.sortOnDrop is True:
+              self.sortItems()
+          else:
+            event.accept()
+
+            # ejb - tried to fix transfer of CopyAction, but intermittent
       # encodedData = event.mimeData().data(ccpnmrJsonData)
       # stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
       # eventData = stream.readQVariantHash()
@@ -292,8 +311,13 @@ class ListWidgetPair(Frame):
     Frame.__init__(self, parent, **kw)
 
     self.title = Label(self, text=title, setLayout=True, grid=(0,0), gridSpan=(1,7), hAlign='l')
-    self.leftList = ListWidget(self, setLayout=True, grid=(1,1), gridSpan=(5,1))
-    self.rightList = ListWidget(self, setLayout=True, grid=(1,5), gridSpan=(5,1))
+    self.leftList = ListWidget(self, setLayout=True, grid=(1,1), gridSpan=(5,1), acceptDrops=True, sortOnDrop=True)
+    self.rightList = ListWidget(self, setLayout=True, grid=(1,5), gridSpan=(5,1), acceptDrops=True, sortOnDrop=True)
+
+    # set the drop source
+    self.leftList.dropSource = self.rightList
+    self.rightList.dropSource = self.leftList
+
     self.leftList.setSelectContextMenu()
     self.rightList.setSelectContextMenu()
     # self.rightList.setSelectDeleteContextMenu()

@@ -325,15 +325,17 @@ class ListWidgetPair(Frame):
     self.leftList.itemDoubleClicked.connect(self._moveRight)
     self.rightList.itemDoubleClicked.connect(self._moveLeft)
 
-    self.leftIcon = Icon('icons/previous')    # stylesheet error for these
-    self.rightIcon = Icon('icons/next')
+    self.leftIcon = Icon('icons/yellow-arrow-left')
+    self.rightIcon = Icon('icons/yellow-arrow-right')
 
-    self.buttons = ButtonList(self, texts=['', '']
+    self.buttons = ButtonList(self, texts=['move left', 'move right']
                              , icons=[self.leftIcon, self.rightIcon]
                              , callbacks=[self._moveLeft, self._moveRight]
                              , direction='v'
                              , grid=(3,3), hAlign='c')
     self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    transparentStyle = "background-color: transparent; border: 0px solid transparent"
+    self.buttons.setStyleSheet(transparentStyle)
 
     # self.button = Button(self, text=''
     #                          , icon=self.rightIcon

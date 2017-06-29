@@ -270,12 +270,131 @@ class ChainTest(WrapperTesting):
     self.assertIsNone(atom3)
     self.assertIsNone(atom4)
 
+#=========================================================================================
+# Test_Properties
+#=========================================================================================
+
+class Test_Properties(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = None
+
   #=========================================================================================
-  # testCrosslinkAtoms
+  # setUp       initialise a new chain and nmrChain
   #=========================================================================================
 
-  def test_Properties(self):
-    self.chain = self.project.createChain('ACDC', shortName='A', molType='protein' )
-    self.nmrChain = self.project.newNmrChain(shortName='A')
+  def setUp(self):
+    """
+    Create a valid chain and nmrChain
+    """
+    with self.initialSetup():
+      self.chain = self.project.createChain('ACDC', shortName='A', molType='protein')
+      self.nmrChain = self.project.newNmrChain(shortName='A')
 
+  #=========================================================================================
+  # Test_properties
+  #=========================================================================================
+
+  def test_Properties_shortName(self):
+    self.shortName = self.chain.shortName
+
+  def test_Properties_compoundName(self):
+    self.compoundName = self.chain.compoundName
+
+  def test_Properties_cyclic(self):
+    self.cyclic = self.chain.isCyclic
+
+  def test_Properties_role(self):
     checkGetSetAttr(self, obj=self.chain, attrib='role', value='free')
+
+  def test_Properties_comment(self):
+    checkGetSetAttr(self, obj=self.chain, attrib='comment', value='free')
+
+  #=========================================================================================
+  # Test_renameChain
+  #=========================================================================================
+
+  def test_renameChain_WithoutName(self):
+    """
+    Test that renaming a Chain with no parameter raises TypeError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'required positional argument'):
+      self.chain.rename()
+
+  def test_renameChain_None(self):
+    """
+    Test that renaming a Chain with None raises TypeError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'must be a string'):
+     self.chain.rename(None)
+
+  def test_renameChain_Int(self):
+    """
+    Test that renaming a Chain with 42 raises TypeError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'must be a string'):
+     self.chain.rename(42)
+
+  def test_renameChain_ES(self):
+    """
+    Test that renaming a Chain with '' raises ValueError.
+    """
+    with self.assertRaisesRegexp(ValueError, 'must be set'):
+     self.chain.rename('')
+
+  def test_renameChain_Badname(self):
+    """
+    Test that renaming a Chain with ^Badname raises ValueError.
+    """
+    with self.assertRaisesRegexp(ValueError, 'not allowed'):
+      self.chain.rename('^Badname')
+
+  def test_renameChain_Whitespace(self):
+    """
+    Test that renaming a Chain with whitespace raises ValueError.
+    """
+    with self.assertRaisesRegexp(ValueError, 'whitespace not allowed'):
+      self.chain.rename('not found')
+
+  #=========================================================================================
+  # Test_NewChain
+  #=========================================================================================
+
+  def test_newChain_WithoutName(self):
+    """
+    Test that creating a new Chain with no parameter - no error
+    """
+    self.newChain = self.project.createChain('ACDC', molType='protein')
+    self.assertEqual(len(self.project.chains), 2)
+
+  def test_newChain_None(self):
+    """
+    Test that creating a new Chain with None - no error .
+    """
+    self.newChain = self.project.createChain('ACDC', shortName=None, molType='protein')
+    self.assertEqual(len(self.project.chains), 2)
+
+  def test_newChain_Int(self):
+    """
+    Test that creating a new Chain with 42 raises TypeError.
+    """
+    with self.assertRaisesRegexp(TypeError, 'must be a string'):
+      self.newChain = self.project.createChain('ACDC', shortName=42, molType='protein')
+    self.assertEqual(len(self.project.chains), 1)
+
+  def test_newChain_Badname(self):
+    """
+    Test that creating a new Chain with ^Badname raises ValueError.
+    """
+    with self.assertRaisesRegexp(ValueError, 'not allowed in'):
+      self.newChain = self.project.createChain('ACDC', shortName='^Badname', molType='protein')
+    self.assertEqual(len(self.project.chains), 1)
+
+  def test_newChain_Exists(self):
+    """
+    Test that creating a new Chain with existing raises ValueError.
+    """
+    self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
+    with self.assertRaisesRegexp(ValueError, 'already exists'):
+      self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
+    self.assertEqual(len(self.project.chains), 2)

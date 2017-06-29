@@ -183,12 +183,29 @@ class Chain(AbstractWrapperObject):
 
   def rename(self, value:str):
     """Rename Chain, changing its shortName and Pid."""
-    if value:
-      previous = self._project.getChain(value.translate(Pid.remapSeparators))
-      if previous not in (None, self):
-        raise ValueError("%s already exists" % previous.longPid)
-    else:
-      raise ValueError("Chain name must be set")
+    # from ccpn.util.Common import contains_whitespace
+    #
+    # if not isinstance(value, str):
+    #   raise TypeError("Chain name must be a string")  # ejb catch non-string
+    # if not value:
+    #   raise ValueError("Chain name must be set")  # ejb catch empty string
+    # if Pid.altCharacter in value:
+    #   raise ValueError("Character %s not allowed in ccpn.Chain.name" % Pid.altCharacter)
+    # if contains_whitespace(value):
+    #   raise ValueError("whitespace not allowed in ccpn.Chain.name")
+
+    _validateName('Chain name', value=value, includeWhitespace=True)
+
+    previous = self._project.getChain(value.translate(Pid.remapSeparators))
+    if previous not in (None, self):
+      raise ValueError("%s already exists" % previous.longPid)
+
+    # if value:
+    #   previous = self._project.getChain(value.translate(Pid.remapSeparators))
+    #   if previous not in (None, self):
+    #     raise ValueError("%s already exists" % previous.longPid)
+    # else:
+    #   raise ValueError("Chain name must be set")
 
     self._startCommandEchoBlock('rename', value)
     try:
@@ -252,7 +269,20 @@ class Chain(AbstractWrapperObject):
     else:
       return molSystem.sortedChains()
 
+def _validateName(attrib:str, value:str, includeWhitespace:bool=False):
+  from ccpn.util.Common import contains_whitespace
 
+  if not isinstance(value, str):
+    raise TypeError("%s must be a string" % attrib)  # ejb catch non-string
+  if not value:
+    raise ValueError("%s must be set" % attrib)  # ejb catch empty string
+  if Pid.altCharacter in value:
+    raise ValueError("Character %s not allowed in %s" % (Pid.altCharacter, attrib))
+  if includeWhitespace and contains_whitespace(value):
+    raise ValueError("whitespace not allowed in %s" % attrib)
+
+  # will only get here if all the tests pass
+  return True
 
 def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str=None,
                  startNumber:int=1, molType:str=None, isCyclic:bool=False,
@@ -286,6 +316,8 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   apiMolSystem = self._wrappedData.molSystem
   if not shortName:
     shortName = apiMolSystem.nextChainCode()
+  else:
+    _validateName('shortName', value=shortName, includeWhitespace=False)   # ejb - test the name
 
   previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
   if previous is not None:
@@ -295,6 +327,8 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   if compoundName is None:
     name = self._uniqueSubstanceName()
   elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
+    _validateName('compoundName', value=compoundName, includeWhitespace=False)   # ejb - test the name
+
     name = compoundName
   else:
     raise ValueError(

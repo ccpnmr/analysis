@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -568,6 +569,8 @@ def stringifier(*fields, **options):
 
   return formatter
 
+def contains_whitespace(s):
+    return True in [c in s for c in string.whitespace]
 
 class LocalFormatter(string.Formatter):
   """Overrides the string formatter to change the float formatting"""

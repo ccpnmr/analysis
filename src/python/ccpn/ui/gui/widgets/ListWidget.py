@@ -287,7 +287,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 
 class ListWidgetPair(Frame):
   """
-  Define a pair of listWidgets such that informaiton can be cpoied from one side
+  Define a pair of listWidgets such that information can be cpoied from one side
   to the other and vise-versa
   """
   def __init__(self, parent=None, objects=None, callback=None
@@ -435,6 +435,210 @@ class ListWidgetPair(Frame):
 
   def getRightList(self):
     return self.rightList.getTexts()
+    
+
+    # RESIDUE                     ABBREVIATION                SYNONYM
+    # -----------------------------------------------------------------------------
+    # Alanine                     ALA                         A
+    # Arginine                    ARG                         R
+    # Asparagine                  ASN                         N
+    # Aspartic acid               ASP                         D
+    # ASP/ASN ambiguous           ASX                         B
+    # Cysteine                    CYS                         C
+    # Glutamine                   GLN                         Q
+    # Glutamic acid               GLU                         E
+    # GLU/GLN ambiguous           GLX                         Z
+    # Glycine                     GLY                         G
+    # Histidine                   HIS                         H
+    # Isoleucine                  ILE                         I
+    # Leucine                     LEU                         L
+    # Lysine                      LYS                         K
+    # Methionine                  MET                         M
+    # Phenylalanine               PHE                         F
+    # Proline                     PRO                         P
+    # Serine                      SER                         S
+    # Threonine                   THR                         T
+    # Tryptophan                  TRP                         W
+    # Tyrosine                    TYR                         Y
+    # Unknown                     UNK
+    # Valine                      VAL                         V
+
+
+class ListWidgetSelector(Frame):
+  """
+  Define a pair of listWidgets such that information can be cpoied from one side
+  to the other and vise-versa
+  """
+  residueTypes = [('Alanine', 'ALA', 'A')
+                  , ('Arginine','ARG', 'R')
+                  , ('Asparagine', 'ASN', 'N')
+                  , ('Aspartic acid', 'ASP', 'D')
+                  , ('ASP/ASN ambiguous', 'ASX', 'B')
+                  , ('Cysteine', 'CYS', 'C')
+                  , ('Glutamine', 'GLN', 'Q')
+                  , ('Glutamic acid', 'GLU', 'E')
+                  , ('GLU/GLN ambiguous', 'GLX', 'Z')
+                  , ('Glycine', 'GLY', 'G')
+                  , ('Histidine', 'HIS', 'H')
+                  , ('Isoleucine', 'ILE', 'I')
+                  , ('Leucine', 'LEU', 'L')
+                  , ('Lysine', 'LYS', 'K')
+                  , ('Methionine', 'MET', 'M')
+                  , ('Phenylalanine', 'PHE', 'F')
+                  , ('Proline', 'PRO', 'P')
+                  , ('Serine', 'SER', 'S')
+                  , ('Threonine', 'THR', 'T')
+                  , ('Tryptophan', 'TRP', 'W')
+                  , ('Tyrosine', 'TYR', 'Y')
+                  , ('Unknown', 'UNK', '')
+                  , ('Valine', 'VAL', 'V')]
+  
+  def __init__(self, parent=None, objects=None, callback=None
+               , rightMouseCallback=None
+               , contextMenu=True
+               , multiSelect=True
+               , acceptDrops=False
+               , title='Copy Items', **kw):
+    """
+    Initialise the pair of listWidgets
+    :param parent:
+    :param objects:
+    :param callback:
+    :param rightMouseCallback:
+    :param contextMenu:
+    :param multiSelect:
+    :param acceptDrops:
+    :param pairName:
+    :param kw:
+    """
+    Frame.__init__(self, parent, **kw)
+
+    self.title = Label(self, text=title, setLayout=True, grid=(0,0), gridSpan=(1,7), hAlign='l')
+    self.leftList = ListWidget(self, setLayout=True, grid=(1,1), gridSpan=(5,1), acceptDrops=True, sortOnDrop=True)
+    self.rightList = ListWidget(self, setLayout=True, grid=(1,5), gridSpan=(5,1), acceptDrops=True, sortOnDrop=True)
+
+    # set the drop source
+    self.leftList.dropSource = self.rightList
+    self.rightList.dropSource = self.leftList
+
+    self.leftList.setSelectContextMenu()
+    self.rightList.setSelectContextMenu()
+    # self.rightList.setSelectDeleteContextMenu()
+
+    self.leftList.itemDoubleClicked.connect(self._moveRight)
+    self.rightList.itemDoubleClicked.connect(self._moveLeft)
+
+    # self.leftIcon = Icon('icons/yellow-arrow-left')
+    # self.rightIcon = Icon('icons/yellow-arrow-right')
+    #
+    # self.buttons = ButtonList(self, texts=['move left', 'move right']
+    #                          , icons=[self.leftIcon, self.rightIcon]
+    #                          , callbacks=[self._moveLeft, self._moveRight]
+    #                          , direction='v'
+    #                          , grid=(3,3), hAlign='c')
+    # self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    # transparentStyle = "background-color: transparent; border: 0px solid transparent"
+    # self.buttons.setStyleSheet(transparentStyle)
+
+    # self.button = Button(self, text=''
+    #                          , icon=self.rightIcon
+    #                          , callback=self._copyRight
+    #                          , grid=(3,3))
+    # self.button.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+
+    self.spacer1 = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(0,2), gridSpan=(1,1))
+    self.spacer2 = Spacer(self, 10, 10
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(2,2), gridSpan=(1,1))
+    self.spacer3 = Spacer(self, 10, 10
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(4,4), gridSpan=(1,1))
+    self.spacer4 = Spacer(self, 5, 5
+                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , grid=(6,4), gridSpan=(1,1))
+
+    for i, cs in enumerate([2,6,1,1,1,6,2]):
+      self.getLayout().setColumnStretch(i, cs)
+
+    # self.showBorder=True
+    # self.leftList.setContentsMargins(15,15,15,15)
+    # self.rightList.setContentsMargins(15,15,15,15)
+
+  def setListObjects(self, left):
+    # self.leftObjects = left
+    # self._populate(self.leftList, self.objects)
+
+    self.objects = left
+    self._populate(self.rightList, self.objects)
+
+  def _populate(self, list, objs):
+    """
+    List the Pids of the objects in the listWidget
+    :param list: target listWidget
+    :param objs: list of objects with Pids
+    """
+    list.clear()
+    if objs:
+      for item in objs:
+        item = QtGui.QListWidgetItem(str(item.pid))
+        list.addItem(item)
+    list.sortItems()
+
+  def _moveLeft(self):    # not needed now
+    """
+    Move contents of the right window to the left window
+    """
+    for item in self.rightList.selectedItems():
+      leftItem = QtGui.QListWidgetItem(item)
+      self.leftList.addItem(leftItem)
+      self.rightList.takeItem(self.rightList.row(item))
+    self.leftList.sortItems()
+
+  def _moveRight(self):  # not needed now
+    """
+    Move contents of the left window to the right window
+    """
+    for item in self.leftList.selectedItems():
+      rightItem = QtGui.QListWidgetItem(item)
+      self.rightList.addItem(rightItem)
+      self.leftList.takeItem(self.leftList.row(item))
+    self.rightList.sortItems()
+
+  def _moveItemLeft(self):
+    """
+    Move contents of the right window to the left window
+    """
+    rightItem = QtGui.QListWidgetItem(self.rightList.selectedItems())
+    self.leftList.addItem(rightItem)
+    self.rightList.takeItem(self.rightList.row(rightItem))
+    self.leftList.sortItems()
+
+  def _moveItemRight(self):
+    """
+    Move contents of the left window to the right window
+    """
+    leftItem = QtGui.QListWidgetItem(self.leftList.selectedItem)
+    self.rightList.addItem(leftItem)
+    self.leftList.takeItem(self.leftList.row(leftItem))
+    self.rightList.sortItems()
+
+  def _copyRight(self):
+    """
+    Copy selection of the left window to the right window
+    """
+    for item in self.leftList.selectedItems():
+      rightItem = QtGui.QListWidgetItem(item)
+      self.rightList.addItem(rightItem)
+    self.rightList.sortItems()
+
+  def getLeftList(self):
+    return self.leftList.getTexts()
+
+  def getRightList(self):
+    return self.rightList.getTexts()
+
 
 #===================================================================================================
 # __main__

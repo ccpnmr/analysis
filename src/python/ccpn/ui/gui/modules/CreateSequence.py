@@ -1,4 +1,27 @@
-__author__ = 'CCPN'
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = ""
+__credits__ = ""
+__licence__ = ("")
+__reference__ = ("")
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy$"
+__dateModified__ = "$dateModified$"
+__version__ = "$Revision$"
+#=========================================================================================
+# Created:
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date$"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
@@ -9,6 +32,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 class CreateSequence(CcpnDialog):
 # class CreateSequence(QtGui.QDialog, Base):
@@ -34,6 +59,8 @@ class CreateSequence(CcpnDialog):
     label5a = Label(self, 'Chain code', grid=(4, 2))
     lineEdit2a = LineEdit(self, grid=(4, 3), text='A')
 
+    # self.residueList = ListWidgetSelector(self, setLayout=True, grid=(5,0), gridSpan=(1,4), title='Residue Types')
+
     buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Create Sequence'],
                            callbacks=[self.reject, self._createSequence])
     self.sequenceStart = 1
@@ -49,10 +76,13 @@ class CreateSequence(CcpnDialog):
     """
     Creates a sequence using the values specified in the text widget.
     """
-    self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
-                                 startNumber=self.sequenceStart, shortName=self.chainCode,
-                                 molType=self.molTypePulldown.currentText())
-    self.accept()
+    try:
+      self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
+                                   startNumber=self.sequenceStart, shortName=self.chainCode,
+                                   molType=self.molTypePulldown.currentText())
+      self.accept()
+    except Exception as es:
+      showWarning('Create Sequence', str(es))
 
   def _setSequenceStart(self, value:int):
     """

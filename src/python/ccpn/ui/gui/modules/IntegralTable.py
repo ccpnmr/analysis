@@ -171,6 +171,7 @@ class IntegralTable(ObjectTable):
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
                          actionCallback=self._actionCallback,
+                         multiSelect=True,
                          grid=(3, 0), gridSpan=(1, 6)
                          )
 
@@ -235,11 +236,16 @@ class IntegralTable(ObjectTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, integral,*kw):
+
+
+  def _selectionCallback(self, integrals, *args):
     """
-    Notifier Callback for selecting a row in the table
+    set as current the selected integrals on the table
     """
-    self._current.integral = integral
+    if integrals is None:
+      self._current.clearIntegrals()
+    else:
+      self._current.integrals = integrals
 
 
   def _actionCallback(self, *kw):

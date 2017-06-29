@@ -622,13 +622,13 @@ class GuiPipeline(CcpnModule, Pipeline):
     #
 
     #
-    self.selectDisplayLabel = Label(self, 'Select output Display',
-                                   tipText='Select display to show the pipeline output')
-    self.settingsWidgets.append(self.selectDisplayLabel)
-    self.selectDisplay = PulldownList(self, texts = ['Select'])
-    if self.mainWindow is not None:
-      self.selectDisplay.setData(texts = ['Select'] + [display.pid for display in self.mainWindow.spectrumDisplays])
-    self.settingsWidgets.append(self.selectDisplay)
+    # self.selectDisplayLabel = Label(self, 'Select output Display',
+    #                                tipText='Select display to show the pipeline output')
+    # self.settingsWidgets.append(self.selectDisplayLabel)
+    # self.selectDisplay = PulldownList(self, texts = ['Select'])
+    # if self.mainWindow is not None:
+    #   self.selectDisplay.setData(texts = ['Select'] + [display.pid for display in self.mainWindow.spectrumDisplays])
+    # self.settingsWidgets.append(self.selectDisplay)
 
     #
     self.addBoxLabel = Label(self, 'Add Method On')

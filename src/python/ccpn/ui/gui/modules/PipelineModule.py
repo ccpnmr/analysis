@@ -715,11 +715,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.setDataSelection()
     self._updateInputDataWidgets()
     self.pipelineName = self.pipelineNameLabel.text()
-    # self._hideSettingWidget()
+    self._settingsScrollArea.hide()
 
   def _cancelSettingsCallBack(self):
     self._setSettingsParams()
-    # self._hideSettingWidget()
+    self._settingsScrollArea.hide()
 
   def _hideSettingWidget(self):
     self.settingFrame.hide()

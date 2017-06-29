@@ -46,9 +46,10 @@ from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
 
 
 ## defaults
-SpectrumSuffix = 'Spectrum_Suffix'
-SpectrumSuffixTipText = 'Suffix to add to the spectrum Name'
-DefaultSuffix = '-Copy'
+ReplaceInputData = 'Replace_Input_Data'
+DefaultReplaceInputData  = False
+
+
 ## PipeName
 PipeName = 'Duplicate Spectra'
 
@@ -76,6 +77,11 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
     self.parent = parent
     DuplicateSpectrumGuiPipe._alreadyOpened = True
 
+    row = 0
+    tipText = 'Use the duplicated spectra as new inputData and remove the original spectra from the pipeline.'
+    self.replaceInputDataLabel = Label(self.pipeFrame, text=ReplaceInputData, grid=(row, 0))
+    setattr(self, ReplaceInputData, CheckBox(self.pipeFrame, text='', checked=DefaultReplaceInputData, tipText=tipText,
+                                             grid=(row, 1)))
 
   def _updateWidgets(self):
     pass
@@ -102,7 +108,7 @@ class DuplicateSpectrumPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs  =   {
-                SpectrumSuffix:DefaultSuffix
+                ReplaceInputData:DefaultReplaceInputData
                }
 
 
@@ -111,12 +117,19 @@ class DuplicateSpectrumPipe(SpectraPipe):
     :param spectra: inputData
     :return: new spectra
     '''
-    newSpectra = []
+    newSpectra = set()
     for spectrum in spectra:
       newspectrum = spectrum._clone()
-      newSpectra.append(newspectrum)
+      newSpectra.update([newspectrum])
 
-    return newSpectra
+    replaceInputData = self._kwargs[ReplaceInputData]
+    if replaceInputData:
+      self.pipeline.inputData = newSpectra
+      return newSpectra
+    else:
+      spectra = set(spectra)
+      spectra.update(newSpectra)
+      return spectra
 
 DuplicateSpectrumPipe.register() # Registers the pipe in the pipeline
 

@@ -56,7 +56,7 @@ TAB = 'Tab'
 XLSX = 'XLSX'
 Json = 'Json'
 DataSet = 'CCPN DataSet'
-Modes = [CSV,TAB, Json, DataSet]
+Modes = [CSV,TAB, XLSX, Json, DataSet]
 DefaultPath = os.path.expanduser("~")
 
 ########################################################################################################################
@@ -109,7 +109,7 @@ class OutputPipelineGuiPipe(GuiPipe):
     row += 1
     self.modeLabel = Label(self.pipeFrame, SaveOutputMode, grid=(row, 0))
     setattr(self, SaveOutputMode,
-            RadioButtons(self.pipeFrame, texts=Modes, grid=(row, 1)))
+            RadioButtons(self.pipeFrame, texts=Modes, direction='v', vAlign='c', selectedInd=1, grid=(row, 1)))
 
     row += 1
     self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
@@ -164,9 +164,10 @@ class OutputSpectraPipe(SpectraPipe):
       if mode == TAB:
         df.to_csv(path+self.pipeline.pipelineName, sep='\t')
       if mode == Json:
-        df.to_json(path+self.pipeline.pipelineName)
-      # if mode == XLSX:
-      #   df.to_excel(path+self.pipeline.pipelineName, index=False)
+        df.to_json(path+self.pipeline.pipelineName+'.json', orient = 'split')
+      if mode == XLSX:
+        df.to_excel(path+self.pipeline.pipelineName+'.xlsx', sheet_name=self.pipeline.pipelineName,
+                    index=False,)
       if mode == DataSet:
         newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
         data = newDataSet.newData(name = self.pipeline.pipelineName)

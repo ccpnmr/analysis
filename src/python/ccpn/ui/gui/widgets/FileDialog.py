@@ -223,8 +223,12 @@ class LineEditButtonDialog(Widget, Base):
     else:
       self.fileMode = fileMode
 
-    self.lineEdit = LineEdit(self, text=self.textLineEdit, grid=(0, 0), hAlign='l')
+    tipText= 'Select directory where to save'
+    self.lineEdit = LineEdit(self, text=self.textLineEdit, textAligment='l', hAlign='l', minimumWidth=100,
+                             tipText=tipText, grid=(0, 0))
     self.lineEdit.setEnabled(False)
+    self.lineEdit.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                  QtGui.QSizePolicy.Expanding)
     button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')
     button.setStyleSheet("border: 0px solid transparent")
 

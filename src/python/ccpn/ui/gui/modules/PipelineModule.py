@@ -174,7 +174,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     # set notifier
     if self.project is not None:
-      self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputData)
+      self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputDataFromNotifier)
 
 
 
@@ -427,8 +427,9 @@ class GuiPipeline(CcpnModule, Pipeline):
           else:
             guiPipe.pipe.isActive = False
 
-
       self.runPipeline()
+
+    self._updateInputData()
 
   def _openAllPipes(self):
     'Testing Only. Opens all the pipe in once with default name'
@@ -771,7 +772,7 @@ class GuiPipeline(CcpnModule, Pipeline):
           else:
             print(obj, 'Not available.')
 
-  def _updateInputData(self, data):
+  def _updateInputDataFromNotifier(self, data):
     ''
     dataTexts = self.inputDataList.getTexts()
     sp =  data['object']
@@ -781,8 +782,14 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList.removeItem()
     self.setDataSelection()
 
+  def _updateInputData(self):
+    'updates the InputData from the pipeline input Data'
+    self.inputDataList.clear()
+    for datum in self.inputData:
+      if datum is not None:
+        self.inputDataList.addItem(datum.pid)
 
-    # self.setDataSelection()
+    self.setDataSelection()
 
 class FilterMethods(CcpnDialog):
 

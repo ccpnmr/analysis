@@ -1113,9 +1113,9 @@ Use axisCodes to set magnetisation transfers instead.""")
       values = self.reorderValues(values, axisCodes)
     setattr(self, attributeName, values)
 
-  def _clone(self):
-    'Clone to a new spectrum.'
-    #FIXME  Crude approach / hack
+  def _clone1D(self):
+    'Clone 1D spectrum to a new spectrum.'
+    #FIXME Crude approach / hack
 
     newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
     newSpectrum._positions = self.positions
@@ -1131,7 +1131,9 @@ Use axisCodes to set magnetisation transfers instead.""")
       try:
         setattr(newSpectrum, att, val)
       except Exception as e:
-        print(e, att)
+        # print(e, att)
+        pass
+    return newSpectrum
 
 
 

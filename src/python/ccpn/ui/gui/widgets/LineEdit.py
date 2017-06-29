@@ -41,7 +41,7 @@ TextAligment = {
 
 class LineEdit(QtGui.QLineEdit, Base):
 
-  def __init__(self, parent, text='', textAligment='c', textColor=None, **kw):
+  def __init__(self, parent, text='', textAligment='c', minimumWidth=100, textColor=None, **kw):
 
     #text = translator.translate(text)
 
@@ -52,7 +52,7 @@ class LineEdit(QtGui.QLineEdit, Base):
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
     self.setAlignment(TextAligment[textAligment])
-    self.setMinimumWidth(100)
+    self.setMinimumWidth(minimumWidth)
     self.setFixedHeight(25)
 
   def get(self):

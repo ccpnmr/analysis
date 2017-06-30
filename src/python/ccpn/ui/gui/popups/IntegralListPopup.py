@@ -17,8 +17,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Created:
 #=========================================================================================
-__author__ = "$Author: Ed Brooksbank$"
-__date__ = "$Date: 9/05/2017 $"
+__author__ = "$Author: Ed Brooksbank $"
+__date__ = "$Date$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -27,14 +27,9 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.util import Undo
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-class NotesPopup(CcpnDialog):
-  """
-  Open a small popup to allow changing the name of a Note
-  """
-  def __init__(self, parent=None, mainWindow=None, title='Notes', note=None, **kw):
+class IntegralListPopup(CcpnDialog):
+  def __init__(self, parent=None, mainWindow=None, integralList=None, title='IntegralList', **kw):
     """
     Initialise the widget
     """
@@ -44,23 +39,13 @@ class NotesPopup(CcpnDialog):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    self.note = note
 
-    self.noteLabel = Label(self, "Note Name: "+self.note.pid, grid=(0, 0))
-    self.noteText = LineEdit(self, self.note.name, grid=(0, 1))
-    ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
+    self.integralList = integralList
+    self.integralListLabel = Label(self, "integralList Name ", grid=(0, 0))
+    self.integralListText = LineEdit(self, integralList.title, grid=(0, 1))
+    ButtonList(self, ['Cancel', 'OK'], [self.reject, self._integralListName], grid=(1, 1))
 
-  def _okButton(self):
-    """
-    When ok button pressed: update Note and exit
-    """
-    newName = self.noteText.text()
-    if str(newName) != self.note.name:
-      try:
-        self.note.rename(newName)     # rename covers the undo event
-        self.accept()
-      except Exception as e:
-        showWarning('Notes', str(e))
-
-
-
+  def _integralListName(self):
+    newName = self.integralListText.text()
+    self.integralList.title = newName
+    self.accept()

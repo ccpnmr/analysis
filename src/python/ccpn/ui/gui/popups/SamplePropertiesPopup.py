@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -48,11 +48,17 @@ AMOUNT_UNIT = ['L', 'g', 'mole']
 
 # class SamplePropertiesPopup(QtGui.QDialog):
 class SamplePropertiesPopup(CcpnDialog):
-  def __init__(self, sample, parent=None, project=None, title='Sample Properties', **kw):
+  def __init__(self, parent=None, mainWindow=None, sample=None, title='Sample Properties', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(SamplePropertiesPopup, self).__init__(parent)
 
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
     self.sample = sample
     self._setMainLayout()
     self._setWidgets()
@@ -138,8 +144,7 @@ class SamplePropertiesPopup(CcpnDialog):
                                          selectedInd=1,
                                          callback=None,
                                          direction='h',
-                                         tipTexts=None,
-                                         )
+                                         tipTexts=None)
     if self.sample.amountUnit is not None:
       self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
 
@@ -287,16 +292,33 @@ class SamplePropertiesPopup(CcpnDialog):
     }
 
   def _applyChanges(self):
+    applyAccept = False
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       for property, value in self._getCallBacksDict().items():
         property(value)
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
+    return applyAccept
+
   def _okButton(self):
-    self._applyChanges()
-    self.accept()
+    if self._applyChanges() is True:
+      self.accept()
 
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:

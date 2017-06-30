@@ -33,22 +33,27 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
 C_COMPONENT_UNIT = ['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
 Labelling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 
 
-# class EditSampleComponentPopup(QtGui.QDialog):
 class EditSampleComponentPopup(CcpnDialog):
-  def __init__(self, parent=None, project=None
+  def __init__(self, parent=None, mainWindow=None
                , sample=None, sampleComponent=None, newSampleComponent=False
                , title='Edit Sample Component', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(EditSampleComponentPopup, self).__init__(parent)
 
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
     self.sample = sample
     self.newSampleComponentToCreate = newSampleComponent
 
@@ -56,8 +61,8 @@ class EditSampleComponentPopup(CcpnDialog):
     self._setMainLayout()
     self._setWidgets()
     self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)
-    if self.newSampleComponentToCreate:
-      self._updateButtons()
+    # if self.newSampleComponentToCreate:
+    #   self._updateButtons()
 
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
@@ -143,7 +148,7 @@ class EditSampleComponentPopup(CcpnDialog):
     self.sampleComponentNewNameLabel = Label(self, text="Name")
     self.nameComponentLineEdit = LineEdit(self)
     # self.nameComponentLineEdit.setMinimumWidth(216)
-    self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
+    # self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
     self.nameComponentLineEdit.setReadOnly(False)
     self.nameComponentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
@@ -186,7 +191,7 @@ class EditSampleComponentPopup(CcpnDialog):
   def concentrationWidget(self):
     self.concentrationLabel = Label(self, text="Concentration")
     self.concentrationLineEdit = LineEdit(self)
-    self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
+    # self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
     self.concentrationLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sampleComponent:
       self.concentrationLineEdit.setText(str(self.sampleComponent.concentration))
@@ -251,7 +256,7 @@ class EditSampleComponentPopup(CcpnDialog):
       self.labellingPulldownList.set(str(substance.labelling))
       self.nameComponentLineEdit.setReadOnly(True)
       self.labellingPulldownList.setEnabled(False)
-      self._updateButtons()
+      # self._updateButtons()
 
   def _labellingSpecialCases(self,selected ):
     if selected == 'Type_New':
@@ -291,15 +296,19 @@ class EditSampleComponentPopup(CcpnDialog):
       self.sampleComponent =  self.sample.newSampleComponent(
         name=str(self.nameComponentLineEdit.text()), labelling=str(self.labellingPulldownList.currentText()))
 
-  def _updateButtons(self):
-    if self.nameComponentLineEdit.text():
-      self.buttons.buttons[1].setEnabled(True)
-      self.buttons.buttons[2].setEnabled(True)
-    else:
-      self.buttons.buttons[1].setEnabled(False)
-      self.buttons.buttons[2].setEnabled(False)
+  # def _updateButtons(self):
+  #   if self.nameComponentLineEdit.text():
+  #     self.buttons.buttons[1].setEnabled(True)
+  #     self.buttons.buttons[2].setEnabled(True)
+  #   else:
+  #     self.buttons.buttons[1].setEnabled(False)
+  #     self.buttons.buttons[2].setEnabled(False)
 
   def _applyChanges(self):
+    applyAccept = False
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.newSampleComponentToCreate:
@@ -308,12 +317,25 @@ class EditSampleComponentPopup(CcpnDialog):
         property(value)
       self.nameComponentLineEdit.setReadOnly(True)
       self.labellingPulldownList.setEnabled(False)
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
+    return applyAccept
+
   def _okButton(self):
-    self._applyChanges()
-    self.accept()
+    if self._applyChanges() is True:
+      self.accept()
 
   def keyPressEvent(self, event):
     if event.key() == QtCore.Qt.Key_Enter:

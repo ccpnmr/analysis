@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 # def _getColour(peakList, peakListViews, attr):
 #
@@ -56,11 +56,16 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 # class PeakListPropertiesPopup(QtGui.QDialog):
 class PeakListPropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, peakList=None, title='Peak List Properties', **kw):
+  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(PeakListPropertiesPopup, self).__init__(parent)
 
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
     self.peakList = peakList
+
     if not self.peakList:
       MessageDialog.showWarning(title, 'No PeakList Found')
       self.close()

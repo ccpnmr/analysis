@@ -53,6 +53,7 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+from ccpn.ui.gui.popups.IntegralListPopup import IntegralListPopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
 from ccpn.ui.gui.popups.StructurePopup import StructurePopup
@@ -645,11 +646,11 @@ class SideBar(QtGui.QTreeWidget, Base):
   def raisePopup(self, obj, item):
 
     if obj.shortClassName == 'SP':
-      popup = SpectrumPropertiesPopup(obj)
+      popup = SpectrumPropertiesPopup(mainWindow=self.mainWindow, spectrum=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'PL':
-      popup = PeakListPropertiesPopup(peakList=obj)
+      popup = PeakListPropertiesPopup(mainWindow=self.mainWindow, peakList=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SG':
@@ -657,15 +658,15 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SA':
-      popup = SamplePropertiesPopup(obj, project=self.project)
+      popup = SamplePropertiesPopup(mainWindow=self.mainWindow, sample=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SC':
-      popup = EditSampleComponentPopup(sampleComponent=obj)
+      popup = EditSampleComponentPopup(mainWindow=self.mainWindow, sampleComponent=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      popup = SubstancePropertiesPopup(substance=obj, application=self.application)
+      popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, substance=obj)   # ejb - , application=self.application)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NC':
@@ -743,6 +744,11 @@ class SideBar(QtGui.QTreeWidget, Base):
           'This function has not been implemented in the current version')
     elif obj.shortClassName == 'IL':
       # to be decided when we design structure
+
+      # popup = IntegralListPopup(mainWindow=self.mainWindow, integralList=obj)
+      # popup.exec_()
+      # popup.raise_()
+
       showInfo('Not implemented yet!',
                'This function has not been implemented in the current version')
     elif obj.shortClassName == 'NO':
@@ -794,7 +800,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           popup.raise_()
           return
         elif item.parent().text(0) == 'Substances':
-          popup = SubstancePropertiesPopup(application=self.application, newSubstance = True)
+          popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, newSubstance = True)   # ejb - application=self.application,
           popup.exec_()
           popup.raise_()
           return
@@ -819,7 +825,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           getattr(itemParent, ff)(restraintType)
           return
         elif itemParent.shortClassName == 'SA':
-          popup = EditSampleComponentPopup(project=self.project, sample=itemParent, newSampleComponent=True)
+          popup = EditSampleComponentPopup(mainWindow=self.mainWindow, sample=itemParent, newSampleComponent=True)
           popup.exec_()
           popup.raise_()
           return

@@ -76,7 +76,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         if isinstance(param['value'][0][1], bool):
           from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
           t, b = zip(*param['value'])
-          rb = RadioButtons(frame, texts=t,  grid=(0, 1), setLayout=True)
+          rb = RadioButtons(frame, texts=t,  grid=(0, 1))
           rb.setObjectName(AUTOGEN_TAG + param['variable'])
           setattr(widget, param['variable'], rb)
           rb.set(param['default'])

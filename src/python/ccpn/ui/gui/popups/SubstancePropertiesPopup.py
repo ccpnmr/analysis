@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -47,13 +48,19 @@ SEP = ', '
 
 # class SubstancePropertiesPopup(QtGui.QDialog):
 class SubstancePropertiesPopup(CcpnDialog):
-  def __init__(self, substance=None, application=None, parent=None
+  def __init__(self, parent=None, mainWindow=None, substance=None, application=None
                , sampleComponent=None, newSubstance=False
                , title='Substance Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
     # super(SubstancePropertiesPopup, self).__init__(parent)
-    self.application = application
-    self.project =  self.application.project
+
+    self.mainWindow = mainWindow              # ejb - should always be done like this
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
+    # self.application = application
+    # self.project =  self.application.project
     self.sample = parent
     self.sampleComponent = sampleComponent
     self.substance = substance
@@ -492,16 +499,21 @@ class SubstancePropertiesPopup(CcpnDialog):
       property(value)
 
   def _applyChanges(self):
+    applyAccept = False
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.createNewSubstance:
         self._createNewSubstance()
 
       self._setValue()
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
-  def _okButton(self):
+    return applyAccept
 
-    self._applyChanges()
-    self.accept()
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()

@@ -46,7 +46,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
@@ -56,10 +56,15 @@ class SpectrumPropertiesPopup(CcpnDialog):
   # The apply button then steps through each tab, and calls each function in the _changes dictionary
   # in order to set the parameters.
 
-  def __init__(self, spectrum, parent=None
+  def __init__(self, parent=None, mainWindow=None, spectrum=None
                , title='Spectrum Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     # super(SpectrumPropertiesPopup, self).__init__(parent)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     # layout = QtGui.QGridLayout()
     # self.setLayout(layout)
@@ -91,19 +96,39 @@ class SpectrumPropertiesPopup(CcpnDialog):
       pass
 
   def accept(self):
-    self.apply()
-    super().accept()
+    if self.apply() is True:
+      super(SpectrumPropertiesPopup, self).accept()
 
   def apply(self):
     self.setFocus()  # So editingFinished callbacks fire
     tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
     tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
-    for t in tabs:
-      try:
+
+    applyAccept = False                                   # put error checking around the whole
+                                                          # apply, should be able to undo
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      for t in tabs:
         changes = t._changes
         self._applyChanges(changes)
-      except AttributeError:
-        pass
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
+    return applyAccept
 
   def _applyChanges(self, changes):
     for v in changes.values():

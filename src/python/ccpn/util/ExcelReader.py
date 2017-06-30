@@ -295,12 +295,12 @@ class ExcelReader(object):
                   if len(data) > 0:
                     data[0].filePath = filePath
                     spectra.append(data[0])
-              else:                                      ### is a spectrum file, e.g hdf5. needs to get the extension
-                files = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
-                for file in files:
-                  if len(os.path.splitext(file))>0:
-                    if os.path.splitext(file)[0] == path:
-                      filePath = self.directoryPath + '/' + file
+              else:                                      ### is a spectrum file, needs to get the extension: e.g .hdf5
+                filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
+                for fileWithExtension in filesWithExtension:
+                  if len(os.path.splitext(fileWithExtension))>0:
+                    if os.path.splitext(fileWithExtension)[0] == path:
+                      filePath = self.directoryPath + '/' + fileWithExtension
                       data = self._project.loadData(filePath)
                       if data is not None:
                         if len(data)>0:

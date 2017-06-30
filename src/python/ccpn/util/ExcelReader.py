@@ -92,15 +92,18 @@ SUBSTANCE_PROPERTIES =  [comment,smiles,synonyms,stereoInfo,molecularMass,empiri
                          logPartitionCoefficient,userCode,]
 
 
-
-
+def _groupper(lst):
+  '''Groups the same values in lists . Returns a new list with one item of each sublist '''
+  counteredGroups = Counter(lst)
+  sortedGroups = [[k, ] * v for k, v in counteredGroups.items()]
+  return [i for j in sortedGroups for i in list(set(j))]
 
 
 class ExcelReader(object):
-  def __init__(self, project, path):
+  def __init__(self, project, excelPath):
     """
     :param project: the ccpnmr Project object
-    :param path: excel file path
+    :param excelPath: excel file path
 
     This reader will process excel files containing one or more sheets.
     The file needs to contain  either the word Substances or Samples in the sheets name.
@@ -117,10 +120,9 @@ class ExcelReader(object):
 
     Reader Steps:
 
-    - check if the file has sheets
     - Parse the sheet/s and return a dataframe for each sheet containing at least the str name Substances or Samples
-    - Create Substances and/or samples if not existing in the project else skip
-    - Create SpectrumGroups if not existing in the project else add a serial
+    - Create Substances and/or samples if not existing in the project else skip with warning
+    - Create SpectrumGroups if not existing in the project else add a suffix 
     - Load spectra on project
     - dispatch spectra to appropriate 'parent' (e.g. referenceSubstance, Sample.spectra, SG.spectra)
     - set all attributes for each object as in the wrapper
@@ -129,25 +131,19 @@ class ExcelReader(object):
     """
 
     self._project = project
-    self._path = path
-    self._pandasFile = pd.ExcelFile(self._path)
-    self.sheets = self._getSheets(self._pandasFile)
+    self.excelPath = excelPath
+    self.pandasFile = pd.ExcelFile(self.excelPath)
+    self.sheets = self._getSheets(self.pandasFile)
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
-
-    self._createSubstances(self.dataframes)
-    self._createSamples(self.dataframes)
-    self._createSpectrumGroups(self.dataframes)
+    self.substances = self._createSubstances(self.dataframes)
+    self.samples = self._createSamples(self.dataframes)
+    self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
+    self.spectra = self._loadSpectraOnProject(self.dataframes)
 
     # self._createDataFrames()
     #
     #
     # self.directoryPath = self._getWorkingDirectoryPath()
-    # try:
-    #   self.preferences = self._project._mainWidow.application.preferences
-    #   self.preferences.general.dataPath = str(self.directoryPath)
-    # except:
-    #   _debug3(getLogger(),'Data Path not set in preferences')
-
 
 
     # self.brukerDirs = self._getBrukerTopDirs()
@@ -172,7 +168,7 @@ class ExcelReader(object):
 
   def _getDataFrameFromSheet(self, sheetName):
     'Creates the dataframe for the sheet. If Values are not set, fills None with NOTGIVEN (otherwise can give errors)'
-    dataFrame = self._pandasFile.parse(sheetName)
+    dataFrame = self.pandasFile.parse(sheetName)
     dataFrame.fillna(NOTGIVEN, inplace=True)
     return dataFrame
 
@@ -220,7 +216,7 @@ class ExcelReader(object):
     for dataFrame in dataframesList:
       if SAMPLE_NAME in dataFrame.columns:
 
-        filteredSamplesNames = self._groupper(dataFrame[SAMPLE_NAME])
+        filteredSamplesNames = _groupper(dataFrame[SAMPLE_NAME])
 
         for name in filteredSamplesNames:
           if self._project is not None:
@@ -246,7 +242,7 @@ class ExcelReader(object):
     spectrumGroups = []
     for dataFrame in dataframesList:
       if SPECTRUM_GROUP_NAME in dataFrame.columns:
-        filteredSGNames = self._groupper(dataFrame[SPECTRUM_GROUP_NAME])
+        filteredSGNames = _groupper(dataFrame[SPECTRUM_GROUP_NAME])
         for groupName in filteredSGNames:
           name = self._checkDuplicatedSpectrumGroupName(groupName)
           newSG =  self._createNewSpectrumGroup(name)
@@ -271,18 +267,32 @@ class ExcelReader(object):
         self._createNewSpectrumGroup(name)
 
 
+  ######################################################################################################################
+  ######################            LOAD SPECTRA ON PROJECT              ##############################################
+  ######################################################################################################################
+
+
+  def _loadSpectraOnProject(self, dataframesList):
+    '''
+    If only the file name is given:
+    - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory
+    of the excel file.
+    If the full path is given, from the root to the spectrum file name, then tries to use that.
+    '''
+
+    for dataFrame in dataframesList:
+      if SPECTRUM_PATH in dataFrame.columns:
+        for filePath in dataFrame[SPECTRUM_PATH]:
+          if os.path.exists(filePath):
+            spectrum = self._project.loadData(filePath)
 
 
 
-  def _groupper(self, lst):
-    '''Groups the same values in lists . Returns a new list with one item of each sublist '''
-    counteredGroups = Counter(lst)
-    sortedGroups = [[k, ] * v for k, v in counteredGroups.items()]
-    return [i for j in sortedGroups for i in list(set(j))]
+    self.directoryPath = self._getWorkingDirectoryPath()
 
 
   def _getWorkingDirectoryPath(self):
-    xlsLookupPath = pathlib.Path(self._path)
+    xlsLookupPath = pathlib.Path(self.excelPath)
     return str(xlsLookupPath.parent)
 
   def _getBrukerTopDirs(self):
@@ -424,5 +434,5 @@ class ExcelReader(object):
       return value[0][1]
 
 
-if True:
-  ExcelReader(project=None, path='/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoDataset_Lookup/Lookup_Demo.xls')
+if False:
+  ExcelReader(project=None, excelPath='/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoDataset_Lookup/Lookup_Demo.xls')

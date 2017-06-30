@@ -142,20 +142,11 @@ class ExcelReader(object):
     self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
     self.spectra = self._loadSpectraOnProject(self.dataframes)
 
-    # self._createDataFrames()
-    #
-    #
-    # self.directoryPath = self._getWorkingDirectoryPath()
 
 
-    # self.brukerDirs = self._getBrukerTopDirs()
-    # if self.referencesDataFrame[SpectrumType].all() == BRUKER:
-    #   self.fullFilePaths = self._getFullBrukerFilePaths()
-    #   self.spectrumFormat = BRUKER
-    # if self.referencesDataFrame[SpectrumType].all() == HDF5:
-    #   self.fullFilePaths = self._getFullHDF5FilePaths()
-    #   self.spectrumFormat = HDF5
-    #
+
+
+
     # self._loadReferenceSpectrumToProject()
     # self._createReferencesDataDicts()
     # self._initialiseParsingSamples()
@@ -271,7 +262,7 @@ class ExcelReader(object):
 
 
   ######################################################################################################################
-  ######################            LOAD SPECTRA ON PROJECT              ##############################################
+  ######################             LOAD SPECTRA ON PROJECT              ##############################################
   ######################################################################################################################
 
 
@@ -286,74 +277,42 @@ class ExcelReader(object):
     if self._project is not None:
       for dataFrame in dataframesList:
         if SPECTRUM_PATH in dataFrame.columns:
-          for name in dataFrame[SPECTRUM_PATH]:
+          for path in dataFrame[SPECTRUM_PATH]:
 
-            if os.path.exists(name):                     ### the full path is given:
-              data = self._project.loadData(name)
+            if os.path.exists(path):                     ### the full path is given:
+              data = self._project.loadData(path)
               if data is not None:
                 if len(data)>0:
+                  data[0].filePath = path
                   spectra.append(data[0])
 
             else:                                        ### needs to find the path:
-              self.directoryPath = self._getWorkingDirectoryPath()
-              filePath = self.directoryPath+'/'+name
+              self.directoryPath = str(pathlib.Path(self.excelPath).parent)
+              filePath = self.directoryPath+'/'+path
               if os.path.exists(filePath):               ### is a folder, e.g Bruker type
                 data = self._project.loadData(filePath)
                 if data is not None:
                   if len(data) > 0:
+                    data[0].filePath = filePath
                     spectra.append(data[0])
-              else:                                      ### is a spectrum file, e.g hdf5
+              else:                                      ### is a spectrum file, e.g hdf5. needs to get the extension
                 files = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
                 for file in files:
                   if len(os.path.splitext(file))>0:
-                    if os.path.splitext(file)[0] == name:
+                    if os.path.splitext(file)[0] == path:
                       filePath = self.directoryPath + '/' + file
                       data = self._project.loadData(filePath)
                       if data is not None:
                         if len(data)>0:
+                          data[0].filePath = filePath
                           spectra.append(data[0])
 
-  def _getWorkingDirectoryPath(self):
-    xlsLookupPath = pathlib.Path(self.excelPath)
-    return str(xlsLookupPath.parent)
+  ######################################################################################################################
+  ######################              DISPATCH  SPECTRA TO RELATIVE OBJECTS         ####################################
+  ######################################################################################################################
 
-  def _getBrukerTopDirs(self):
-    dirs = os.listdir(str(self.directoryPath))
-    excludedFiles = ('.DS_Store', '.xls')
-    brukerDirs = [dir for dir in dirs if not dir.endswith(excludedFiles)]
-    return brukerDirs
 
-  def _getFullHDF5FilePaths(self):
-    paths = []
-    for spectrumName in self.referencesDataFrame[SPECTRUM_NAME]:
-      path = self.directoryPath + '/' + str(spectrumName)+'.hdf5'
-      paths.append(str(path))
-    print(paths)
-    return paths
 
-  def _getFullBrukerFilePaths(self):
-    fullPaths = []
-    for spectrumName in self.brukerDirs:
-      path = self.directoryPath + '/' + spectrumName
-      for dirname, dirnames, filenames in os.walk(path):
-        for filename in filenames:
-          if filename == '1r':
-            fullPath = os.path.join(dirname, filename)
-            fullPaths.append(fullPath)
-    return fullPaths
-
-  def _loadReferenceSpectrumToProject(self):
-
-    for spectrumName in self.referencesDataFrame[SPECTRUM_NAME]:
-      for path in self.fullFilePaths:
-        for item in path.split('/'):
-          if str(item).endswith('.hdf5'):
-            item = item.split('.')[0]
-          if item == spectrumName:
-            data = self._project.loadData(path)
-            if data is not None:
-              if len(data)>0:
-                spectrum = data[0]
 
 
   def _createReferencesDataDicts(self):

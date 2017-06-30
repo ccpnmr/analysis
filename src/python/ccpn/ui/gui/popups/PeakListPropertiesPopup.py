@@ -54,11 +54,9 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 # Add apply, cancel button.
 # 1D.
 
-# class PeakListPropertiesPopup(QtGui.QDialog):
 class PeakListPropertiesPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(PeakListPropertiesPopup, self).__init__(parent)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

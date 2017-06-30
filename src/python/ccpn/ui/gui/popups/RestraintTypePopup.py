@@ -43,12 +43,9 @@ restraintTypes = [
   'JCoupling'
 ]
 
-# class RestraintTypePopup(QtGui.QDialog, Base):
 class RestraintTypePopup(CcpnDialog):
   def __init__(self, parent=None, peakList=None, title='Restraints', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(RestraintTypePopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
 
     self.restraintType = ''
 
@@ -62,4 +59,4 @@ class RestraintTypePopup(CcpnDialog):
       self.restraintType = self.restraintTypeList.currentText()
       self.accept()
     except Exception as e:
-      showWarning('Notes', str(e))
+      showWarning('Restraints', str(e))

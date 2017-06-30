@@ -28,6 +28,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
+
 class IntegralListPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, integralList=None, title='IntegralList', **kw):
     """

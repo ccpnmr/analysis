@@ -38,16 +38,21 @@ from ccpn.util.Logging import getLogger
 
 import sys
 
+
 class NmrResiduePopup(CcpnDialog):
-  def __init__(self, parent=None, nmrResidue=None, nmrAtom=None, title='Nmr Residues', **kw):
+  def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='Nmr Residues', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(NmrResiduePopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     self.setStyleSheet("border: 0px solid")
     self.parent = parent
-    self.project = nmrResidue.project
-    self.current = self.project._appBase.current
     self.nmrAtom = nmrAtom
     self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 1))
     chainLabel = Label(self, "Chain ", grid=(1, 0))
@@ -64,8 +69,9 @@ class NmrResiduePopup(CcpnDialog):
 
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
-    applyButton = Button(self, grid=(6, 1), text='Apply', callback=self._assignResidue)
-    closeButton = Button(self, grid=(6, 2), text='Close', callback=self.reject)
+    closeButton = Button(self, grid=(6, 1), text='Close', callback=self.reject)
+    applyButton = Button(self, grid=(6, 2), text='Apply', callback=self._assignResidue)
+    okButton = Button(self, grid=(6, 3), text='Ok', callback=self._okButton)
 
     self._updatePopup(nmrResidue)
 
@@ -133,7 +139,12 @@ class NmrResiduePopup(CcpnDialog):
 
   def _assignResidue(self):
     chain = self.project.getByPid(self.chainPulldown.currentText())
-    self.project._startCommandEchoBlock('_assignResidue')
+
+    applyAccept = False
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
+    self.project._startCommandEchoBlock('_applyChanges')
     try:
       if isinstance(chain, Chain):
         residueItem = self.seqCodePulldown.currentText().split(' ')
@@ -152,5 +163,22 @@ class NmrResiduePopup(CcpnDialog):
           self.parent.updateTables()
           self.parent.updateAssignedNmrAtomsListwidgets()
           self.parent.updateWidgetLabels()
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
+
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
+    return applyAccept
+
+  def _okButton(self):
+    if self._assignResidue() is True:
+      self.accept()

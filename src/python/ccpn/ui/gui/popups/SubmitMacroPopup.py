@@ -52,12 +52,9 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 
-# class SubmitMacroPopup(QtGui.QDialog):
 class SubmitMacroPopup(CcpnDialog):
   def __init__(self, parent=None, title='Submit Macro Form', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # QtGui.QDialog.__init__(self, parent=parent)
-    # self.setWindowTitle(title)
 
     self.setContentsMargins(5, 5, 5, 5)
     self._registrationDict = Register.loadDict()

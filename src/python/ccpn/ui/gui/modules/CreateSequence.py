@@ -36,13 +36,16 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 class CreateSequence(CcpnDialog):
-# class CreateSequence(QtGui.QDialog, Base):
-  def __init__(self, parent=None, project=None, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Generate Chain', **kw)
-    # super(CreateSequence, self).__init__(parent)
-    # Base.__init__(self, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kw):
+    """
+    Initialise the widget
+    """
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     label2a = Label(self, text="Molecule Name", grid=(2, 0))
     moleculeName = LineEdit(self, text="", grid=(2, 1), gridSpan=(1, 1))

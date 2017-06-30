@@ -37,12 +37,9 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
 class ExperimentFilterPopup(CcpnDialog):
-# class ExperimentFilterPopup(QtGui.QDialog, Base):
   def __init__(self, spectrum=None, parent=None, application=None,
                title:str='Experiment Type Filter', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(ExperimentFilterPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
 
     detectionBox = GroupBox(self, grid=(0, 0), gridSpan=(1, 4))
     filterBox = GroupBox(self, grid=(1, 0), gridSpan=(2, 4))

@@ -52,15 +52,35 @@ EXPANDSELECTION = 'expandSelection'
 
 class ExportNefPopup(CcpnDialog):
 
-  def __init__(self, parent=None, project=None, title='Export to Nef File', **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Export to Nef File'
+               , fileMode=FileDialog.AnyFile
+               , text='Export File'
+               , acceptMode=FileDialog.AcceptSave
+               , preferences=None
+               , selectFile=None
+               , filter='*'
+               , **kw):
+    """
+    Initialise the widget
+    """
+    # pre __init__ to process extra keywords
 
-    B = {'fileMode':None, 'text':None, 'acceptMode':None, 'preferences':None, 'selectFile':None, 'filter':None}
-    self.saveDict = {k:v for k, v in kw.items() if k in B}
-    filterKw = {k:v for k, v in kw.items() if k not in B}
+    # B = {'fileMode':None
+    #       , 'text':None
+    #       , 'acceptMode':None
+    #       , 'preferences':None
+    #       , 'selectFile':None
+    #       , 'filter':None}
+    # self.saveDict = {k:v for k, v in kw.items() if k in B}
+    # filterKw = {k:v for k, v in kw.items() if k not in B}
 
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **filterKw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
     self.options = Frame(self, setLayout=True, grid=(0,0))
     self.buttonCCPN = CheckBox(self.options, checked=True
                                , text='include CCPN tags'
@@ -160,8 +180,16 @@ class ExportNefPopup(CcpnDialog):
     # self.layout().addWidget(self.fileSaveDialog, 3,0)
     # self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)  # why does this work?
 
-    self.fileSaveDialog = NefFileDialog(self, **self.saveDict)
-    if 'selectFile' in kw:
+    # self.fileSaveDialog = NefFileDialog(self, **self.saveDict)
+    self.fileSaveDialog = NefFileDialog(self
+                                        , fileMode = fileMode
+                                        , text = text
+                                        , acceptMode = acceptMode
+                                        , preferences = preferences
+                                        , selectFile = selectFile
+                                        , filter = filter)
+
+    if 'selectFile':
       self.saveText.setText(self.fileSaveDialog.selectedFile())
     else:
       self.saveText.setText('None')

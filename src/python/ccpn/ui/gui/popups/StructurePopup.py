@@ -27,16 +27,23 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
 
 class StructurePopup(CcpnDialog):
   """
   Open a small popup to allow changing the label of a StructureEnsemble
   """
-  def __init__(self, parent=None, mainWindow=None, title='Notes', structure=None, **kw):
+  def __init__(self, parent=None, mainWindow=None, title='StructureEnsembles', structure=None, **kw):
     """
     Initialise the widget
     """
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     self.structure = structure
     self.structureLabel = Label(self, "Structure Name: "+self.structure.pid, grid=(0, 0))
@@ -48,7 +55,10 @@ class StructurePopup(CcpnDialog):
     When ok button pressed: update StructureEnsemble and exit
     """
     newName = self.structureText.text()
-    if str(newName) != self.structure.name:
-      self.structure.rename(newName)
-    self.accept()
+    try:
+      if str(newName) != self.structure.name:
+        self.structure.rename(newName)
+      self.accept()
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
 

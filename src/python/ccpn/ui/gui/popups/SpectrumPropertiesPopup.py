@@ -50,7 +50,6 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
-# class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 class SpectrumPropertiesPopup(CcpnDialog):
   # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
   # The apply button then steps through each tab, and calls each function in the _changes dictionary
@@ -59,7 +58,6 @@ class SpectrumPropertiesPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, spectrum=None
                , title='Spectrum Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(SpectrumPropertiesPopup, self).__init__(parent)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

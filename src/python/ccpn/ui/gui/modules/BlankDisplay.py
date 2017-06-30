@@ -8,13 +8,11 @@ subsequently displayed.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -38,6 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class BlankDisplay(CcpnModule):
@@ -79,7 +78,13 @@ class BlankDisplay(CcpnModule):
     # process urls
     for url in data.get('urls',[]):
       getLogger().debug('dropped: %s' % url)
-      objects = self.project.loadData(url)
+
+      # ejb - quick error trap so that it doesn't destroy window structure
+      try:
+        objects = self.project.loadData(url)
+      except Exception as es:
+        self.show()
+        showWarning(self.windowTitle(), str(es))
 
       if objects is not None and len(objects) > 0:
         # NB: In case a new project was dropped, self.project still points to the old project

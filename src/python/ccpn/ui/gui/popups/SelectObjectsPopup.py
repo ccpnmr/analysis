@@ -35,14 +35,11 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-# class SelectObjectsPopup(QtGui.QDialog, Base):
 class SelectObjectsPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , dim=None, objects=None
                , title='Select Objects', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(SelectObjectsPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
 
     self.parent = parent
     if len(objects)>0:

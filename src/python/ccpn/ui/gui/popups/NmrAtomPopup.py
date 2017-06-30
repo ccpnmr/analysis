@@ -14,18 +14,26 @@ from ccpn.util.Common import isotopeCode2Nucleus
 ###from ccpn.framework.Framework import createFramework  # see note below
 
 class NmrAtomPopup(CcpnDialog):
-  def __init__(self, parent=None, nmrAtom=None, title='Nmr Atom', **kw):
+  def __init__(self, parent=None, mainWindow=None, nmrAtom=None, title='Nmr Atom', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     # WARNING: above says nmrAtom can be None but code below assumes it is not None
     # super(NmrAtomPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
 
     self.nmrAtom = nmrAtom
-    self.project = nmrAtom.project
+    # self.project = nmrAtom.project
     ###application = createFramework() # this does not work, it creates a new Framework
-    application = self.project._appBase
-    self.colourScheme = application.colourScheme
+    # application = self.project._appBase
+    self.colourScheme = self.application.colourScheme
     self.nmrAtomLabel = Label(self, "NmrAtom: %s " % self.nmrAtom.id, grid=(0, 0))
     self.nmrAtomNameLabel = Label(self, "NmrAtom name", grid=(1, 0))
     self.nmrAtomNamePulldown = PulldownList(self, grid=(1, 1))
@@ -37,8 +45,9 @@ class NmrAtomPopup(CcpnDialog):
     self.nmrResiduePulldown.setData([x.id for x in self.nmrAtom.project.nmrResidues])
     self.nmrResiduePulldown.select(self.nmrAtom.nmrResidue.id)
     leftOverLabel = Label(self, grid=(5, 0))
-    applyButton = Button(self, grid=(6, 1), text='Apply', callback=self._applyChanges)
-    applyButton = Button(self, grid=(6, 2), text='Close', callback=self.reject)
+    closeButton = Button(self, grid=(6, 1), text='Close', callback=self.reject)
+    applyButton = Button(self, grid=(6, 2), text='Apply', callback=self._applyChanges)
+    okButton = Button(self, grid=(6, 3), text='Ok', callback=self._okButton)
     isotopeCode = nmrAtom.isotopeCode
     nucleus = isotopeCode2Nucleus(isotopeCode)
     if nucleus:
@@ -53,7 +62,11 @@ class NmrAtomPopup(CcpnDialog):
 
 
   def _applyChanges(self):
-    self.project._startCommandEchoBlock('applyChanges')
+    applyAccept = False
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
+    self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
         self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())
@@ -73,5 +86,22 @@ class NmrAtomPopup(CcpnDialog):
                                 mergeToExisting=self.mergeBox.isChecked())
 
         self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
+
+      # if an error occurred during the echo block, some values
+      # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+      # self.project.unblankNotification()
+      # self.project._undo.decreaseBlocking()
+    return applyAccept
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()

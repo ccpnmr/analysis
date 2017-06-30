@@ -59,12 +59,9 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/feedback/submitFeedback.py'
 # code below has to be synchronised with code in SCRIPT_URL
 
 class FeedbackPopup(CcpnDialog):
-# class FeedbackPopup(QtGui.QDialog):
   # parent mandatory and that needs to have attribute application
   def __init__(self, parent=None, title='Feedback Form', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # QtGui.QDialog.__init__(self, parent=parent)
-    # self.setWindowTitle(title)
 
     self.setContentsMargins(5, 5, 5, 5)
     self._registrationDict = Register.loadDict()

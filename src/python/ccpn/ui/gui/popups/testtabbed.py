@@ -29,11 +29,9 @@ from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-# class TabDialog(QtGui.QDialog):
 class TabDialog(CcpnDialog):
     def __init__(self, fileName, parent=None, title='Tab Dialog', **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-        # super(TabDialog, self).__init__(parent)
 
         fileInfo = QtCore.QFileInfo(fileName)
 

@@ -808,7 +808,7 @@ class FilterMethods(CcpnDialog):
 
   def __init__(self, parent=None, title='Preferred Pipes', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(FilterMethods, self).__init__(parent)
+
     self.parent = parent
     self._setMainLayout()
     self._setWidgets()

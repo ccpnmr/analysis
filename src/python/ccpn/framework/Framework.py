@@ -1137,7 +1137,7 @@ class Framework:
     from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
 
     dialog = ExportNefPopup(self.ui.mainWindow
-                            , project=self.project
+                            , mainWindow=self.ui.mainWindow
                             , fileMode=FileDialog.AnyFile
                             , text="Export to Nef File"
                             , acceptMode=FileDialog.AcceptSave
@@ -1430,7 +1430,7 @@ class Framework:
       MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-      SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
+      SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editorMode=True).exec_()
 
 
   def showProjectionPopup(self):
@@ -1489,7 +1489,7 @@ class Framework:
     from ccpn.ui.gui.modules.CreateSequence import CreateSequence
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
     getLogger().info("application.showMoleculePopup()")
-    popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
+    popup = CreateSequence(mainWindow=self.ui.mainWindow).exec_()
 
 
   def toggleSequenceModule(self):

@@ -41,10 +41,7 @@ from ccpn.ui.gui.widgets.Base import Base             # ejb
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-# class ShortcutModule(CcpnModule):
 class ShortcutModule(CcpnDialog):
-  # def __init__(self, mainWindow, parent=None, title='Define User Shortcuts'):
-    # CcpnModule.__init__(self, mainWindow=mainWindow, name='Define User Shortcuts', **kw)
   def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 

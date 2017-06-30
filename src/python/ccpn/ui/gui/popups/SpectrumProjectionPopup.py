@@ -39,14 +39,10 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 import os
 
 
-# class SpectrumProjectionPopup(QtGui.QDialog, Base):
 class SpectrumProjectionPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , title='Make Spectrum Projection', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(SpectrumProjectionPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
-    # self.setWindowTitle('Make Spectrum Projection')
 
     projectionMethods = ('max', 'sum', 'sum above noise')
     self.project = project

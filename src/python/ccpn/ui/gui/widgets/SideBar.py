@@ -654,7 +654,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SG':
-      popup = SpectrumGroupEditor(project=self.project, spectrumGroup=obj)
+      popup = SpectrumGroupEditor(mainWindow=self.mainWindow, spectrumGroup=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SA':
@@ -666,27 +666,27 @@ class SideBar(QtGui.QTreeWidget, Base):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, substance=obj)   # ejb - , application=self.application)
+      popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, substance=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NC':
-      popup = NmrChainPopup(nmrChain=obj)
+      popup = NmrChainPopup(mainWindow=self.mainWindow, nmrChain=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NR':
-      popup = NmrResiduePopup(nmrResidue=obj)
+      popup = NmrResiduePopup(mainWindow=self.mainWindow, nmrResidue=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NA':
-      popup = NmrAtomPopup(nmrAtom=obj)
+      popup = NmrAtomPopup(mainWindow=self.mainWindow, nmrAtom=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'CL':
-      popup = ChemicalShiftListPopup(chemicalShiftList=obj)
+      popup = ChemicalShiftListPopup(mainWindow=self.mainWindow, chemicalShiftList=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SE':
-      popup = StructurePopup(structure=obj)
+      popup = StructurePopup(mainWindow=self.mainWindow, structure=obj)
       popup.exec_()
       popup.raise_()
 
@@ -711,7 +711,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       showInfo('Not implemented yet!',
           'This function has not been implemented in the current version')
     elif obj.shortClassName == 'DS':
-      popup = DataSetPopup(dataSet=obj)
+      popup = DataSetPopup(mainWindow=self.mainWindow, dataSet=obj)
       popup.exec_()
       popup.raise_()
 
@@ -745,7 +745,7 @@ class SideBar(QtGui.QTreeWidget, Base):
     elif obj.shortClassName == 'IL':
       # to be decided when we design structure
 
-      # popup = IntegralListPopup(mainWindow=self.mainWindow, integralList=obj)
+      # popup = IntegralListPopup(mainWindow=self.mainWindow, integralList=obj)   # ejb - temp
       # popup.exec_()
       # popup.raise_()
 
@@ -795,17 +795,17 @@ class SideBar(QtGui.QTreeWidget, Base):
       if itemParent is None:
         # Top level object - parent is project
         if item.parent().text(0) == 'Chains':
-          popup = CreateSequence(project=self.project)
+          popup = CreateSequence(mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           return
         elif item.parent().text(0) == 'Substances':
-          popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, newSubstance = True)   # ejb - application=self.application,
+          popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, newSubstance=True)   # ejb - application=self.application,
           popup.exec_()
           popup.raise_()
           return
         elif item.parent().text(0) == 'SpectrumGroups':
-          popup = SpectrumGroupEditor(project=self.project, addNew=True)
+          popup = SpectrumGroupEditor(mainWindow=self.mainWindow, addNew=True)
           popup.exec_()
           popup.raise_()
           return

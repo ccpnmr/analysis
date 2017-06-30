@@ -34,18 +34,22 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
-# class SpectrumGroupEditor(QtGui.QDialog):
 class SpectrumGroupEditor(CcpnDialog):
-  def __init__(self, parent=None, project=None
+  def __init__(self, parent=None, mainWindow=None
                , spectrumGroup=None, addNew=False, editorMode=False
                , title='Spectrum Group Setup', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
-    # super(SpectrumGroupEditor, self).__init__(parent)
-
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
     self.addNewSpectrumGroup = addNew
     self.spectrumGroup = spectrumGroup
@@ -107,8 +111,8 @@ class SpectrumGroupEditor(CcpnDialog):
     self._initialLabelListWidgetRight()
 
   def _setApplyButtons(self):
-    self.applyButtons = ButtonList(self, texts=['Cancel', 'Restore', 'Apply', 'Ok'],
-                                   callbacks=[self.reject, self._restoreButton, self._applyChanges, self._okButton],
+    self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+                                   callbacks=[self.reject, self._applyChanges, self._okButton],
                                    tipTexts=['', '', '', None], direction='h',
                                    hAlign='r')
     if self.addNewSpectrumGroup:  # Restore button disabled
@@ -337,11 +341,16 @@ class SpectrumGroupEditor(CcpnDialog):
       self._populateLeftPullDownList()
 
   def _applyChanges(self):
+    leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
+    rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
+
+    applyAccept = False                                   # put error checking around the whole
+                                                          # apply, should be able to undo
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
-      leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
-      rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
-
       if self.addNewSpectrumGroup:
         self._applyToNewSG(leftWidgetSpectra)
 
@@ -352,16 +361,26 @@ class SpectrumGroupEditor(CcpnDialog):
       if self.spectrumGroup:
         self._applyToCurrentSG(leftWidgetSpectra)
 
-      if self.rightPullDownSelection.getText() == ' ':
-        return # don't do changes to spectra
-
-      if self.rightPullDownSelection.getText() == 'Available Spectra':
-        return # don't do changes to spectra
-
+      if self.rightPullDownSelection.getText() == ' ' or self.rightPullDownSelection.getText() == 'Available Spectra':
+        # return # don't do changes to spectra
+        pass
       else:
-       self._updateRightSGspectra(rightWidgetSpectra)
+        self._updateRightSGspectra(rightWidgetSpectra)
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
+
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
+    return applyAccept
 
   def _applyToNewSG(self, leftWidgetSpectra):
     name = str(self.leftSpectrumGroupLineEdit.text())
@@ -396,14 +415,14 @@ class SpectrumGroupEditor(CcpnDialog):
     self.leftPullDownSelection.setData([sg.name for sg in self.project.spectrumGroups])
 
   def _okButton(self):
-    self._applyChanges()
-    self.accept()
+    if self._applyChanges() is True:
+      self.accept()
 
-  def _restoreButton(self):
-    if not self.addNewSpectrumGroup:
-      self._populateLeftPullDownList()
-      self._populateListWidgetLeft()
-      self._selectAnOptionState()
+  # def _restoreButton(self):
+  #   if not self.addNewSpectrumGroup:
+  #     self._populateLeftPullDownList()
+  #     self._populateListWidgetLeft()
+  #     self._selectAnOptionState()
 
 
   def _selectAnOptionState(self):

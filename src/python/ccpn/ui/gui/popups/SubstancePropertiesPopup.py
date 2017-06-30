@@ -46,13 +46,11 @@ SUBSTANCE_TYPE =  ['Molecule', 'Cell', 'Material', 'Composite ', 'Other']
 SEP = ', '
 
 
-# class SubstancePropertiesPopup(QtGui.QDialog):
 class SubstancePropertiesPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, substance=None, application=None
                , sampleComponent=None, newSubstance=False
                , title='Substance Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(SubstancePropertiesPopup, self).__init__(parent)
 
     self.mainWindow = mainWindow              # ejb - should always be done like this
     self.application = mainWindow.application
@@ -500,18 +498,29 @@ class SubstancePropertiesPopup(CcpnDialog):
 
   def _applyChanges(self):
     applyAccept = False
+    # self.project._undo.increaseBlocking()
+    # self.project.blankNotification()
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.createNewSubstance:
         self._createNewSubstance()
 
       self._setValue()
+
       applyAccept = True
     except Exception as es:
       showWarning(self.windowTitle(), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
+    # if an error occurred during the echo block, some values
+    # may be set, reject the changes that may have happened
+    if applyAccept is False:
+      self.application.undo()
+
+    # self.project.unblankNotification()
+    # self.project._undo.decreaseBlocking()
     return applyAccept
 
   def _okButton(self):

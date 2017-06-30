@@ -31,11 +31,10 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-# class CopyPeakListPopup(QtGui.QDialog):
+
 class CopyPeakListPopup(CcpnDialog):
   def __init__(self, parent=None, title='Copy PeakList', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
-    # super(CopyPeakListPopup, self).__init__(parent)
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.project = self.application.project

@@ -52,7 +52,6 @@ class RegisterPopup(CcpnDialog):
 
     self.version = version
     
-    # QtGui.QDialog.__init__(self, parent=parent)
     if modal: # Set before visible
       modality = QtCore.Qt.ApplicationModal
       self.setWindowModality(modality)

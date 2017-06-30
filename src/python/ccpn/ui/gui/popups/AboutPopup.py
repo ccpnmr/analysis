@@ -57,12 +57,10 @@ TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
             any other undesired consequences originating from the usage of this software.
         '''
 
-# class AboutPopup(QtGui.QDialog):
+
 class AboutPopup(CcpnDialog):
   def __init__(self, parent=None, title='About CcpNmr', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # self.setWindowTitle("About CcpNmr")
-    # self.setContentsMargins(5, 5, 5, 5)
 
     pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr.png')
     self.label = Label(self, grid=(0, 0))

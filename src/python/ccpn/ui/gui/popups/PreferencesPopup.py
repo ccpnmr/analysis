@@ -42,12 +42,9 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 
 
-# class PreferencesPopup(QtGui.QDialog, Base):
 class PreferencesPopup(CcpnDialog):
   def __init__(self, parent=None, preferences=None, project=None, title='Preferences', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(PreferencesPopup, self).__init__(parent)
-    # Base.__init__(self, setLayout=True, **kw)
 
     if not project:                                         # ejb - should always be loaded
       MessageDialog.showWarning(title, 'No project loaded')

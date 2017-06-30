@@ -46,7 +46,7 @@ SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
 
 AMOUNT_UNIT = ['L', 'g', 'mole']
 
-# class SamplePropertiesPopup(QtGui.QDialog):
+
 class SamplePropertiesPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, sample=None, title='Sample Properties', **kw):
     """

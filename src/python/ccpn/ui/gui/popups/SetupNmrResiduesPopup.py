@@ -36,13 +36,10 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
-# class SetupNmrResiduesPopup(QtGui.QDialog, Base):
 class SetupNmrResiduesPopup(CcpnDialog):
   def __init__(self, parent=None, project=None
                , title='Setup nmrResidues', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-    # super(SetupNmrResiduesPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
 
     self.parent = parent
     self.project = project

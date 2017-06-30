@@ -43,12 +43,9 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 import os
 
-# class SelectSpectrumDisplayPopup(QtGui.QDialog):
 class SelectSpectrumDisplayPopup(CcpnDialog):
   def __init__(self,parent=None, project=None, **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Select Spectrum Display', **kw)
-    # super(SelectSpectrumDisplayPopup, self).__init__()
-    # self.setWindowTitle('Select Spectrum Display')
 
     self.project = project
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication

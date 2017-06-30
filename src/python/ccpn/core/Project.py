@@ -35,6 +35,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpn.util import Undo
 from ccpn.util import Logging
+from ccpn.util.ExcelReader import ExcelReader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -46,7 +47,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
-from ccpnmodel.ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
+
 from time import time
 from ccpn.util.Logging import getLogger
 
@@ -1138,10 +1139,11 @@ class Project(AbstractWrapperObject):
     """Load data from a look-up file, csv or xls ."""
 
     if subType == ioFormats.CSV:
-      readCsv(self, path=path)
+      self._logger.warning("This function has not been implemented yet")
+      # readCsv(self, path=path)
 
-    elif subType == ioFormats.XLS:
-      readXls(self, path=path)
+    elif subType == ioFormats.EXCEL:
+      ExcelReader(project=self, path=path)
 
 
   def _uniqueSubstanceName(self, name:str=None, defaultName:str= 'Molecule') -> str:

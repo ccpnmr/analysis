@@ -25,6 +25,8 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from collections import Counter
 import os
+from os.path import isfile, join
+
 import csv
 from collections import OrderedDict
 import pathlib
@@ -180,6 +182,7 @@ class ExcelReader(object):
       dataFrames.append(self._getDataFrameFromSheet(sheetName))
     for sheetName in [name for name in sheetNamesList if SAMPLES in name]:
       dataFrames.append(self._getDataFrameFromSheet(sheetName))
+
     return dataFrames
 
 
@@ -195,8 +198,8 @@ class ExcelReader(object):
       if SUBSTANCE_NAME in dataFrame.columns:
         for name in dataFrame[SUBSTANCE_NAME]:
           if self._project is not None:
-            if not self._project.getByPid('SU:'+name+'.'):
-              substance = self._project.newSubstance(name=name)
+            if not self._project.getByPid('SU:'+str(name)+'.'):
+              substance = self._project.newSubstance(name=str(name))
               substances.append(substance)
             else:
               getLogger().warning('Impossible to create substance %s. A substance with the same name already '
@@ -220,8 +223,8 @@ class ExcelReader(object):
 
         for name in filteredSamplesNames:
           if self._project is not None:
-            if not self._project.getByPid('SA:'+name):
-              sample = self._project.newSample(name=name)
+            if not self._project.getByPid('SA:'+str(name)):
+              sample = self._project.newSample(name=str(name))
               samples.append(sample)
             else:
               getLogger().warning('Impossible to create sample %s. A sample with the same name already '
@@ -279,17 +282,36 @@ class ExcelReader(object):
     of the excel file.
     If the full path is given, from the root to the spectrum file name, then tries to use that.
     '''
+    spectra = []
+    if self._project is not None:
+      for dataFrame in dataframesList:
+        if SPECTRUM_PATH in dataFrame.columns:
+          for name in dataFrame[SPECTRUM_PATH]:
 
-    for dataFrame in dataframesList:
-      if SPECTRUM_PATH in dataFrame.columns:
-        for filePath in dataFrame[SPECTRUM_PATH]:
-          if os.path.exists(filePath):
-            spectrum = self._project.loadData(filePath)
+            if os.path.exists(name):                     ### the full path is given:
+              data = self._project.loadData(name)
+              if data is not None:
+                if len(data)>0:
+                  spectra.append(data[0])
 
-
-
-    self.directoryPath = self._getWorkingDirectoryPath()
-
+            else:                                        ### needs to find the path:
+              self.directoryPath = self._getWorkingDirectoryPath()
+              filePath = self.directoryPath+'/'+name
+              if os.path.exists(filePath):               ### is a folder, e.g Bruker type
+                data = self._project.loadData(filePath)
+                if data is not None:
+                  if len(data) > 0:
+                    spectra.append(data[0])
+              else:                                      ### is a spectrum file, e.g hdf5
+                files = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
+                for file in files:
+                  if len(os.path.splitext(file))>0:
+                    if os.path.splitext(file)[0] == name:
+                      filePath = self.directoryPath + '/' + file
+                      data = self._project.loadData(filePath)
+                      if data is not None:
+                        if len(data)>0:
+                          spectra.append(data[0])
 
   def _getWorkingDirectoryPath(self):
     xlsLookupPath = pathlib.Path(self.excelPath)

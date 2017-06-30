@@ -1143,7 +1143,7 @@ class Project(AbstractWrapperObject):
       # readCsv(self, path=path)
 
     elif subType == ioFormats.EXCEL:
-      ExcelReader(project=self, path=path)
+      ExcelReader(project=self, excelPath=path)
 
 
   def _uniqueSubstanceName(self, name:str=None, defaultName:str= 'Molecule') -> str:

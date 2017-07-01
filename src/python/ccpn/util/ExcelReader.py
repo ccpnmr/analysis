@@ -57,7 +57,7 @@ SUBSTANCE_NAME = 'substanceName'
 comment  = 'comment'
 smiles = 'smiles'
 synonyms = 'synonyms'
-stereoInfo = 'stereoInfo'
+
 molecularMass = 'molecularMass'
 empiricalFormula = 'empiricalFormula'
 atomCount = 'atomCount'
@@ -75,7 +75,7 @@ casNumber = 'casNumber'
 SAMPLE_NAME = 'sampleName'
 
 ### other sample properties # do not change these names
-SAMPLE_COMPONENTS = 'referenceComponents'
+SAMPLE_COMPONENTS = 'sampleComponents'
 pH = 'pH'
 ionicStrength = 'ionicStrength'
 amount = 'amount'
@@ -91,7 +91,7 @@ columnNumber = 'columnNumber'
 SAMPLE_PROPERTIES =     [comment, pH, ionicStrength,  amount , amountUnit,isHazardous,creationDate, batchIdentifier,
                          plateIdentifier,rowNumber,columnNumber]
 
-SUBSTANCE_PROPERTIES =  [comment,smiles,synonyms,stereoInfo,molecularMass,empiricalFormula,atomCount,
+SUBSTANCE_PROPERTIES =  [comment,smiles,synonyms,molecularMass,empiricalFormula,atomCount,
                          hBondAcceptorCount,hBondDonorCount, bondCount,ringCount,polarSurfaceArea,
                          logPartitionCoefficient,userCode,]
 
@@ -134,23 +134,15 @@ class ExcelReader(object):
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
     self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
+    self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
     self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
 
     self._dispatchAttrsToObjs(self.substancesDicts)
     self._loadSpectraForSheet(self.substancesDicts)
-
-    self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
     self._dispatchAttrsToObjs(self.samplesDicts)
     self._loadSpectraForSheet(self.samplesDicts)
 
 
-
-
-
-
-    # self._loadReferenceSpectrumToProject()
-    # self._createReferencesDataDicts()
-    # self._initialiseParsingSamples()
 
   ######################################################################################################################
   ######################                  PARSE EXCEL                     ##############################################
@@ -212,26 +204,36 @@ class ExcelReader(object):
   def _createSamplesDataDicts(self, dataframesList):
     '''Creates samples in the project if not already present , For each sample link a dictionary of all its values
      from the dataframe row. '''
-
     samplesDataFrames = []
-    for dataFrame in dataframesList:
-      for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
-        if SAMPLE_NAME in dataFrame.columns:
-          for key, value in dataFrameAsDict.items():
-            if key == SAMPLE_NAME:
-              if self._project is not None:
-                if not self._project.getByPid('SA:'+str(value)):
-                  sample = self._project.newSample(name=str(value))
-
-                else:
-                  getLogger().warning('Impossible to create sample %s. A sample with the same name already '
-                                      'exsists in the project. ' % value)
-
-                sample = self._project.getByPid('SA:'+str(value))
-                if sample is not None:
-                  samplesDataFrames.append({sample: dataFrameAsDict})
+    ## first creates samples without duplicates,
+    samples = self._createSamples(dataframesList)
+    if len(samples)>0:
+      ## Second creates dataframes to dispatch the properties,
+      for dataFrame in dataframesList:
+        for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
+          if SAMPLE_NAME in dataFrame.columns:
+            for key, value in dataFrameAsDict.items():
+              if key == SAMPLE_NAME:
+                if self._project is not None:
+                  sample = self._project.getByPid('SA:'+str(value))
+                  if sample is not None:
+                    samplesDataFrames.append({sample: dataFrameAsDict})
 
     return samplesDataFrames
+
+  def _createSamples(self, dataframesList):
+    samples = []
+    for dataFrame in dataframesList:
+      if SAMPLE_NAME in dataFrame.columns:
+        for name in list(set((dataFrame[SAMPLE_NAME]))):
+          if not self._project.getByPid('SA:' + str(name)):
+            sample = self._project.newSample(name=str(name))
+            samples.append(sample)
+
+          else:
+            getLogger().warning('Impossible to create sample %s. A sample with the same name already '
+                                'exsists in the project. ' % name)
+    return samples
 
 
   ######################################################################################################################
@@ -359,17 +361,20 @@ class ExcelReader(object):
 
         if isinstance(obj, Sample):
           self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dct)
+          self._createSampleComponents(obj, dct)
 
 
   def _setWrapperProperties(self, wrapperObject, properties, dataframe):
-    for property in properties:
-      if property == 'synonyms':
-        setattr(wrapperObject, property, (self._getDFValue(property, dataframe),))
+    for attr in properties:
+      if attr == 'synonyms':
+        setattr(wrapperObject, attr, (self._getDFValue(attr, dataframe),))
       else:
         try:
-          setattr(wrapperObject, property, self._getDFValue(property, dataframe))
+          if getattr(wrapperObject, attr) is None:
+            setattr(wrapperObject, attr, self._getDFValue(attr, dataframe))
+
         except Exception as e:
-          _debug3(getLogger(), msg=(e, property))
+          _debug3(getLogger(), msg=(e, attr))
 
 
   def _getDFValue(self, header, data):
@@ -380,23 +385,17 @@ class ExcelReader(object):
 
 
 
+
   ######################################################################################################################
   ######################                    ADD SAMPLE COMPONENTS                   ####################################
   ######################################################################################################################
 
-  def _addSampleComponents(self, sample, data):
-    sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
+  def _createSampleComponents(self, sample, data):
+    sampleComponentsNames = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
                         header == SAMPLE_COMPONENTS]
-    for name in sampleComponents[0][1].split(','):
-      sampleComponent = sample.newSampleComponent(name=(str(name) + '-1'))
-      sampleComponent.role = 'Compound'
-
-
-
-
-
-
-
-
-if False:
-  ExcelReader(project=None, excelPath='/Users/luca/AnalysisV3/data/testProjects/AnalysisScreen_Demo1/demoDataset_Lookup/Lookup_Demo.xls')
+    if len(sample.sampleComponents) == 0:
+      if len(sampleComponentsNames)>0:
+        for name in sampleComponentsNames[0][1].split(','):
+          if not self._project.getByPid('SC:'+str(name)):
+            sampleComponent = sample.newSampleComponent(name=(str(name)))
+            sampleComponent.role = 'Compound'

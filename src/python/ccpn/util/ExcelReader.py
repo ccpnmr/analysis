@@ -298,9 +298,8 @@ class ExcelReader(object):
                   newFilePath = os.path.dirname(filePath)
                   filesWithExtension = [f for f in os.listdir(newFilePath) if isfile(join(newFilePath, f))]
                   for fileWithExtension in filesWithExtension:
-                    print(os.path.splitext(fileWithExtension))
                     if len(os.path.splitext(fileWithExtension)) > 0:
-                      if '/' in value:
+                      if '/' in value: # is a relative path from the excel plus file without extension
                         value = value.split('/')[-1]
                       if os.path.splitext(fileWithExtension)[0] == value:
                         filePath = newFilePath + '/' + fileWithExtension

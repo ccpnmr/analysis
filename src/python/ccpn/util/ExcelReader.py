@@ -137,10 +137,14 @@ class ExcelReader(object):
     self.pandasFile = pd.ExcelFile(self.excelPath)
     self.sheets = self._getSheets(self.pandasFile)
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
+
     self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
+    self._dispatchAttrsToObjs(self.substancesDicts)
+    self._loadSpectraOnProject(self.substancesDicts)
+
     self.samples = self._createSamples(self.dataframes)
     self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
-    self._loadSpectraOnProject(self.substancesDicts)
+
 
 
 
@@ -282,11 +286,9 @@ class ExcelReader(object):
     of the excel file.
     If the full path is given, from the root to the spectrum file name, then it uses that.
     '''
-    spectra = []
     if self._project is not None:
       for objDict in dictLists:
         for obj , dct in objDict.items():
-
           for key, value in dct.items():
             # for path in dataFrame[SPECTRUM_PATH]:
             if key == SPECTRUM_PATH:
@@ -295,10 +297,7 @@ class ExcelReader(object):
                 if data is not None:
                   if len(data)>0:
                     data[0].filePath = value
-                    spectra.append(data[0])
-                    self._linkSpectrumToObj(obj, data[0], dct)
-
-
+                    self._linkSpectrumToObj(obj, data[0])
 
               else:                                        ### needs to find the path from the excel file:
                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
@@ -308,11 +307,9 @@ class ExcelReader(object):
                   if data is not None:
                     if len(data) > 0:
                       data[0].filePath = filePath
-                      spectra.append(data[0])
-                      self._linkSpectrumToObj(obj, data[0], dct)
+                      self._linkSpectrumToObj(obj, data[0])
 
-
-                else:                                      ### is a spectrum file, The project needs to get the extension: e.g .hdf5
+                else:                       ### is a spectrum file, The project needs to get the extension: e.g .hdf5
                   filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
                   for fileWithExtension in filesWithExtension:
                     if len(os.path.splitext(fileWithExtension))>0:
@@ -322,49 +319,45 @@ class ExcelReader(object):
                         if data is not None:
                           if len(data)>0:
                             data[0].filePath = filePath
-                            spectra.append(data[0])
-                            self._linkSpectrumToObj(obj, data[0], dct)
+                            self._linkSpectrumToObj(obj, data[0])
+
 
   ######################################################################################################################
-  ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
+  ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
   ######################################################################################################################
 
 
-  def _linkSpectrumToObj(self, obj, spectrum, dataDict):
+  def _linkSpectrumToObj(self, obj, spectrum):
     from ccpn.core.Sample import Sample
     from ccpn.core.SpectrumGroup import SpectrumGroup
     from ccpn.core.Substance import Substance
 
     if isinstance(obj, Substance):
       obj.referenceSpectra = (spectrum,)
-      self._setWrapperProperties(obj, SUBSTANCE_PROPERTIES, dataDict)
 
     if isinstance(obj, Sample):
       obj.spectra = (spectrum,)
-      self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dataDict)
 
 
 
+  ######################################################################################################################
+  ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
+  ######################################################################################################################
 
 
+  def _dispatchAttrsToObjs(self, dataDicts):
+    from ccpn.core.Sample import Sample
+    from ccpn.core.Substance import Substance
+
+    for objDict in dataDicts:
+      for obj, dct in objDict.items():
+        if isinstance(obj, Substance):
+          self._setWrapperProperties(obj, SUBSTANCE_PROPERTIES, dct)
+
+        if isinstance(obj, Sample):
+          self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dct)
 
 
-
-
-
-  def _createReferencesDataDicts(self):
-    spectrum = None
-    for data in self.referencesDataFrame.to_dict(orient="index").values():
-      for key, value in data.items():
-        if key == SPECTRUM_NAME:
-          if self.spectrumFormat == BRUKER:
-            spectrum = self._project.getByPid('SP:'+str(value)+'-1')
-          else:
-            spectrum = self._project.getByPid('SP:'+str(value))
-          if spectrum is not None:
-            dataDict = {spectrum: data}
-            self._dispatchSpectrumToProjectGroups(dataDict)
-            self._createNewSubstance(dataDict)
 
 
   def _initialiseParsingSamples(self):
@@ -390,30 +383,6 @@ class ExcelReader(object):
     for name in sampleComponents[0][1].split(','):
       sampleComponent = sample.newSampleComponent(name=(str(name) + '-1'))
       sampleComponent.role = 'Compound'
-
-
-  def _getSampleSpectra(self, samplesDataDict):
-    for sample, data in samplesDataDict.items():
-      for spectrumNameHeader, experimentType in EXP_TYPES.items():
-        spectrum = self._getSpectrum(data, spectrumNameHeader)
-        if spectrum:
-          if spectrumNameHeader == SPECTRUM_OFF_RESONANCE:
-            spectrum.comment = SPECTRUM_OFF_RESONANCE
-          if spectrumNameHeader == SPECTRUM_ON_RESONANCE:
-            spectrum.comment = SPECTRUM_ON_RESONANCE
-          spectrum.experimentType = experimentType
-          sample.spectra += (spectrum, )
-
-
-  def _getSpectrum(self, data, header):
-      spectrumName = [[excelHeader, value] for excelHeader, value in data.items()
-                                  if excelHeader == header and value != NOTGIVEN]
-      if len(spectrumName)>0:
-        brukerDir = [str(spectrumName[0][1])]
-        path = self._getFullBrukerFilePaths()
-        spectrum = self._project.loadData(path[0])
-        return spectrum[0]
-
 
 
 

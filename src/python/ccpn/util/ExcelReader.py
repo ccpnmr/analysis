@@ -32,6 +32,7 @@ from collections import OrderedDict
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger , _debug3
+
 ######################### Excel Headers ##################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
 Changing these will fail to set the attribute"""
@@ -111,13 +112,12 @@ class ExcelReader(object):
     The file needs to contain  either the word Substances or Samples in the sheets name.
 
     The user can load a file only with Substances or Samples sheet or both. Or a file with enumerate sheets
-    called eg Samples_Exp_1000, Samples_Exp_1001 etc in which the sample information stays the same but changes only the
-    spectra recorded with it. The spectra will be loaded in a new SpectrumGroup with the same name plus a suffix '@'.
+    called eg Samples_Exp_1000, Samples_Exp_1001 etc.
 
-    The project will create new Substances and/or Samples only once for a given name.
-     Therefore, dropping twice the same file, or giving two sheets with same sample name will fail to create new objects.
-     However  if  the user wants to drop a file with only spectra changed and preserve the sample information, He can drop
-     the file with same sample names and the spectra will be loaded in a different SpectrumGroup Name.
+    The project will create new Substances and/or Samples and SpectrumGroups only once for a given name.
+    Therefore, dropping twice the same file, or giving two sheets with same sample/substance/spectrumGroup name
+    will fail to create new objects.
+
 
 
     Reader Steps:
@@ -137,10 +137,10 @@ class ExcelReader(object):
     self.pandasFile = pd.ExcelFile(self.excelPath)
     self.sheets = self._getSheets(self.pandasFile)
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
-    self.substances = self._createSubstances(self.dataframes)
+    self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
     self.samples = self._createSamples(self.dataframes)
     self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
-    self.spectra = self._loadSpectraOnProject(self.dataframes)
+    self._loadSpectraOnProject(self.substancesDicts)
 
 
 
@@ -182,21 +182,25 @@ class ExcelReader(object):
   ######################                  CREATE SUBSTANCES               ##############################################
   ######################################################################################################################
 
-  def _createSubstances(self, dataframesList):
-    '''Creates substances in the project if not already present'''
-    substances = []
-    for dataFrame in dataframesList:
-      if SUBSTANCE_NAME in dataFrame.columns:
-        for name in dataFrame[SUBSTANCE_NAME]:
-          if self._project is not None:
-            if not self._project.getByPid('SU:'+str(name)+'.'):
-              substance = self._project.newSubstance(name=str(name))
-              substances.append(substance)
-            else:
-              getLogger().warning('Impossible to create substance %s. A substance with the same name already '
-                                  'exsists in the project. ' % name)
+  def _createSubstancesDataFrames(self, dataframesList):
+    '''Creates substances in the project if not already present, For each substance link a dictionary of all its values
+     from the dataframe row. '''
 
-    return substances
+    substancesDataFrames = []
+    for dataFrame in dataframesList:
+      for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
+        if SUBSTANCE_NAME in dataFrame.columns:
+          for key, value in dataFrameAsDict.items():
+            if key == SUBSTANCE_NAME:
+              if self._project is not None:
+                if not self._project.getByPid('SU:'+str(value)+'.'):
+                  substance = self._project.newSubstance(name=str(value))
+                  substancesDataFrames.append({substance:dataFrameAsDict})
+                else:
+                  getLogger().warning('Impossible to create substance %s. A substance with the same name already '
+                                      'exsists in the project. ' % value)
+
+    return substancesDataFrames
 
 
 
@@ -205,7 +209,9 @@ class ExcelReader(object):
   ######################################################################################################################
 
   def _createSamples(self, dataframesList):
-    '''Creates samples in the project if not already present'''
+    '''Creates samples in the project if not already present , For each sample link a dictionary of all its values
+     from the dataframe row. '''
+
     samples = []
     for dataFrame in dataframesList:
       if SAMPLE_NAME in dataFrame.columns:
@@ -238,8 +244,8 @@ class ExcelReader(object):
       if SPECTRUM_GROUP_NAME in dataFrame.columns:
         filteredSGNames = _groupper(dataFrame[SPECTRUM_GROUP_NAME])
         for groupName in filteredSGNames:
-          name = self._checkDuplicatedSpectrumGroupName(groupName)
-          newSG =  self._createNewSpectrumGroup(name)
+          # name = self._checkDuplicatedSpectrumGroupName(groupName)
+          newSG =  self._createNewSpectrumGroup(groupName)
           spectrumGroups.append(newSG)
     return spectrumGroups
 
@@ -257,8 +263,11 @@ class ExcelReader(object):
       if not self._project.getByPid('SG:' + name):
         return self._project.newSpectrumGroup(name=str(name))
       else:
-        name = self._checkDuplicatedSpectrumGroupName(name)
-        self._createNewSpectrumGroup(name)
+        getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
+                            'exsists in the project. ' % name)
+
+        # name = self._checkDuplicatedSpectrumGroupName(name)
+        # self._createNewSpectrumGroup(name)
 
 
   ######################################################################################################################
@@ -266,50 +275,78 @@ class ExcelReader(object):
   ######################################################################################################################
 
 
-  def _loadSpectraOnProject(self, dataframesList):
+  def _loadSpectraOnProject(self, dictLists):
     '''
     If only the file name is given:
     - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory
     of the excel file.
-    If the full path is given, from the root to the spectrum file name, then tries to use that.
+    If the full path is given, from the root to the spectrum file name, then it uses that.
     '''
     spectra = []
     if self._project is not None:
-      for dataFrame in dataframesList:
-        if SPECTRUM_PATH in dataFrame.columns:
-          for path in dataFrame[SPECTRUM_PATH]:
+      for objDict in dictLists:
+        for obj , dct in objDict.items():
 
-            if os.path.exists(path):                     ### the full path is given:
-              data = self._project.loadData(path)
-              if data is not None:
-                if len(data)>0:
-                  data[0].filePath = path
-                  spectra.append(data[0])
-
-            else:                                        ### needs to find the path:
-              self.directoryPath = str(pathlib.Path(self.excelPath).parent)
-              filePath = self.directoryPath+'/'+path
-              if os.path.exists(filePath):               ### is a folder, e.g Bruker type
-                data = self._project.loadData(filePath)
+          for key, value in dct.items():
+            # for path in dataFrame[SPECTRUM_PATH]:
+            if key == SPECTRUM_PATH:
+              if os.path.exists(value):                     ### the full path is given:
+                data = self._project.loadData(value)
                 if data is not None:
-                  if len(data) > 0:
-                    data[0].filePath = filePath
+                  if len(data)>0:
+                    data[0].filePath = value
                     spectra.append(data[0])
-              else:                                      ### is a spectrum file, needs to get the extension: e.g .hdf5
-                filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
-                for fileWithExtension in filesWithExtension:
-                  if len(os.path.splitext(fileWithExtension))>0:
-                    if os.path.splitext(fileWithExtension)[0] == path:
-                      filePath = self.directoryPath + '/' + fileWithExtension
-                      data = self._project.loadData(filePath)
-                      if data is not None:
-                        if len(data)>0:
-                          data[0].filePath = filePath
-                          spectra.append(data[0])
+                    self._linkSpectrumToObj(obj, data[0], dct)
+
+
+
+              else:                                        ### needs to find the path from the excel file:
+                self.directoryPath = str(pathlib.Path(self.excelPath).parent)
+                filePath = self.directoryPath+'/'+value
+                if os.path.exists(filePath):               ### is a folder, e.g Bruker type. The project can handle.
+                  data = self._project.loadData(filePath)
+                  if data is not None:
+                    if len(data) > 0:
+                      data[0].filePath = filePath
+                      spectra.append(data[0])
+                      self._linkSpectrumToObj(obj, data[0], dct)
+
+
+                else:                                      ### is a spectrum file, The project needs to get the extension: e.g .hdf5
+                  filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
+                  for fileWithExtension in filesWithExtension:
+                    if len(os.path.splitext(fileWithExtension))>0:
+                      if os.path.splitext(fileWithExtension)[0] == value:
+                        filePath = self.directoryPath + '/' + fileWithExtension
+                        data = self._project.loadData(filePath)
+                        if data is not None:
+                          if len(data)>0:
+                            data[0].filePath = filePath
+                            spectra.append(data[0])
+                            self._linkSpectrumToObj(obj, data[0], dct)
 
   ######################################################################################################################
-  ######################              DISPATCH  SPECTRA TO RELATIVE OBJECTS         ####################################
+  ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
   ######################################################################################################################
+
+
+  def _linkSpectrumToObj(self, obj, spectrum, dataDict):
+    from ccpn.core.Sample import Sample
+    from ccpn.core.SpectrumGroup import SpectrumGroup
+    from ccpn.core.Substance import Substance
+
+    if isinstance(obj, Substance):
+      obj.referenceSpectra = (spectrum,)
+      self._setWrapperProperties(obj, SUBSTANCE_PROPERTIES, dataDict)
+
+    if isinstance(obj, Sample):
+      obj.spectra = (spectrum,)
+      self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dataDict)
+
+
+
+
+
 
 
 

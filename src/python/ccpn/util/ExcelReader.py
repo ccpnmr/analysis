@@ -1,3 +1,12 @@
+# df = pd.DataFrame({
+#   'sampleName': ['Sample1', 'Sample1', 'Sample1', 'Sample2', 'Sample2', 'Sample2'],
+#   'sampleComponents': ['DT', 'Org', 'Org', 'VBN', ' IN', 'Location'],
+#   'pH': [5, 5, 5, 3, 3, 3]
+#
+# })
+# df.groupby('sampleName', sort=False)['pH'].apply(set)
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -110,9 +119,9 @@ class ExcelReader(object):
 
     - Parse the sheet/s and return a dataframe for each sheet containing at least the str name Substances or Samples
     - Create Substances and/or samples if not existing in the project else skip with warning
+    - For each row create a dict and link to the obj eg. {Substance: {its dataframe row as dict}
     - Create SpectrumGroups if not existing in the project else add a suffix 
-    - Load spectra on project
-    - dispatch spectra to appropriate 'parent' (e.g. referenceSubstance, Sample.spectra, SG.spectra)
+    - Load spectra on project and dispatch to the object. (e.g. SU.referenceSpectra, SA.spectra, SG.spectra)
     - set all attributes for each object as in the wrapper
 
 
@@ -125,12 +134,14 @@ class ExcelReader(object):
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
     self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
-    self._dispatchAttrsToObjs(self.substancesDicts)
-    self._loadSpectraOnProject(self.substancesDicts)
-
-    self.samples = self._createSamples(self.dataframes)
     self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
 
+    self._dispatchAttrsToObjs(self.substancesDicts)
+    self._loadSpectraForSheet(self.substancesDicts)
+
+    self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
+    self._dispatchAttrsToObjs(self.samplesDicts)
+    self._loadSpectraForSheet(self.samplesDicts)
 
 
 
@@ -198,23 +209,29 @@ class ExcelReader(object):
   ######################                  CREATE SAMPLES                  ##############################################
   ######################################################################################################################
 
-  def _createSamples(self, dataframesList):
+  def _createSamplesDataDicts(self, dataframesList):
     '''Creates samples in the project if not already present , For each sample link a dictionary of all its values
      from the dataframe row. '''
 
-    samples = []
+    samplesDataFrames = []
     for dataFrame in dataframesList:
-      if SAMPLE_NAME in dataFrame.columns:
-        for name in list(set(dataFrame[SAMPLE_NAME])):
-          if self._project is not None:
-            if not self._project.getByPid('SA:'+str(name)):
-              sample = self._project.newSample(name=str(name))
-              samples.append(sample)
-            else:
-              getLogger().warning('Impossible to create sample %s. A sample with the same name already '
-                                  'exsists in the project. ' % name)
+      for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
+        if SAMPLE_NAME in dataFrame.columns:
+          for key, value in dataFrameAsDict.items():
+            if key == SAMPLE_NAME:
+              if self._project is not None:
+                if not self._project.getByPid('SA:'+str(value)):
+                  sample = self._project.newSample(name=str(value))
 
-    return samples
+                else:
+                  getLogger().warning('Impossible to create sample %s. A sample with the same name already '
+                                      'exsists in the project. ' % value)
+
+                sample = self._project.getByPid('SA:'+str(value))
+                if sample is not None:
+                  samplesDataFrames.append({sample: dataFrameAsDict})
+
+    return samplesDataFrames
 
 
   ######################################################################################################################
@@ -261,7 +278,7 @@ class ExcelReader(object):
   ######################################################################################################################
 
 
-  def _loadSpectraOnProject(self, dictLists):
+  def _loadSpectraForSheet(self, dictLists):
     '''
     If only the file name is given:
     - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory
@@ -321,7 +338,7 @@ class ExcelReader(object):
 
     for key, value in dct.items():
       if key == SPECTRUM_GROUP_NAME:
-        spectrumGroup = self._project.getByPid('SG:'+value)
+        spectrumGroup = self._project.getByPid('SG:'+str(value))
         if spectrumGroup is not None:
           spectrumGroup.spectra += (spectrum,)
 
@@ -344,38 +361,6 @@ class ExcelReader(object):
           self._setWrapperProperties(obj, SAMPLE_PROPERTIES, dct)
 
 
-
-
-
-
-
-
-  def _addSampleComponents(self, sample, data):
-    sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
-                        header == SAMPLE_COMPONENTS]
-    for name in sampleComponents[0][1].split(','):
-      sampleComponent = sample.newSampleComponent(name=(str(name) + '-1'))
-      sampleComponent.role = 'Compound'
-
-
-
-
-  def _addSpectrumToSpectrumGroup(self, spectrumGroup, spectrum):
-    spectrumGroup.spectra += (spectrum,)
-
-  def _dispatchSpectrumToProjectGroups(self, dataDict):
-    for spectrum, data in dataDict.items():
-      spectrumGroupName = data[GROUP_NAME]
-      spectrumGroup = self._project.getByPid('SG:'+spectrumGroupName)
-      if spectrumGroup is not None:
-        self._addSpectrumToSpectrumGroup(spectrumGroup, spectrum)
-
-  def _createNewSubstance(self, dataDict):
-    for spectrum, data in dataDict.items():
-      substance = self._project.newSubstance(name=spectrum.id)
-      substance.referenceSpectra = [spectrum]
-      self._setWrapperProperties(substance, SUBSTANCE_PROPERTIES, data)
-
   def _setWrapperProperties(self, wrapperObject, properties, dataframe):
     for property in properties:
       if property == 'synonyms':
@@ -392,6 +377,25 @@ class ExcelReader(object):
                      if excelHeader == str(header) and value != NOTGIVEN]
     if len(value) > 0:
       return value[0][1]
+
+
+
+  ######################################################################################################################
+  ######################                    ADD SAMPLE COMPONENTS                   ####################################
+  ######################################################################################################################
+
+  def _addSampleComponents(self, sample, data):
+    sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
+                        header == SAMPLE_COMPONENTS]
+    for name in sampleComponents[0][1].split(','):
+      sampleComponent = sample.newSampleComponent(name=(str(name) + '-1'))
+      sampleComponent.role = 'Compound'
+
+
+
+
+
+
 
 
 if False:

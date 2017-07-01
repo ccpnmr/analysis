@@ -285,29 +285,34 @@ class ExcelReader(object):
           for key, value in dct.items():
             if key == SPECTRUM_PATH:
               if os.path.exists(value):                     ### the full path is given:
-                self._loadSpectrum(filePath=value, dct=dct, obj=obj)
+                self._addSpectrum(filePath=value, dct=dct, obj=obj)
 
               else:                                        ### needs to find the path from the excel file:
                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
                 filePath = self.directoryPath+'/'+value
                 if os.path.exists(filePath):               ### is a folder, e.g Bruker type. The project can handle.
-                  self._loadSpectrum(filePath=filePath, dct=dct, obj=obj)
+                  self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
 
 
                 else:                       ### is a spectrum file, The project needs to get the extension: e.g .hdf5
-                  filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
+                  newFilePath = os.path.dirname(filePath)
+                  filesWithExtension = [f for f in os.listdir(newFilePath) if isfile(join(newFilePath, f))]
                   for fileWithExtension in filesWithExtension:
-                    if len(os.path.splitext(fileWithExtension))>0:
+                    print(os.path.splitext(fileWithExtension))
+                    if len(os.path.splitext(fileWithExtension)) > 0:
+                      if '/' in value:
+                        value = value.split('/')[-1]
                       if os.path.splitext(fileWithExtension)[0] == value:
-                        filePath = self.directoryPath + '/' + fileWithExtension
-                        self._loadSpectrum(filePath=filePath, dct=dct, obj=obj)
+                        filePath = newFilePath + '/' + fileWithExtension
+                        self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
 
-  def _loadSpectrum(self, filePath, dct,  obj):
+
+  def _addSpectrum(self, filePath, dct, obj):
     '''
 
     :param filePath: spectrum full file path
     :param dct:  dict with information for the spectrum. eg EXP type
-    :return: None,
+    :obj: obj to link the spectrum to. E.g. Sample or Substance,
     '''
     data = self._project.loadData(filePath)
     if data is not None:

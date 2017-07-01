@@ -23,12 +23,9 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-from collections import Counter
+
 import os
 from os.path import isfile, join
-
-import csv
-from collections import OrderedDict
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger , _debug3
@@ -67,7 +64,6 @@ casNumber = 'casNumber'
 
 # '''SAMPLES PAGE'''
 SAMPLE_NAME = 'sampleName'
-SPECTRUM_1H = 'spectrum_1H'
 
 ### other sample properties # do not change these names
 SAMPLE_COMPONENTS = 'referenceComponents'
@@ -82,10 +78,6 @@ plateIdentifier = 'plateIdentifier'
 rowNumber = 'rowNumber'
 columnNumber = 'columnNumber'
 
-SpectrumType = 'spectrumType'
-BRUKER = 'Bruker'
-
-
 
 SAMPLE_PROPERTIES =     [comment, pH, ionicStrength,  amount , amountUnit,isHazardous,creationDate, batchIdentifier,
                          plateIdentifier,rowNumber,columnNumber]
@@ -94,12 +86,6 @@ SUBSTANCE_PROPERTIES =  [comment,smiles,synonyms,stereoInfo,molecularMass,empiri
                          hBondAcceptorCount,hBondDonorCount, bondCount,ringCount,polarSurfaceArea,
                          logPartitionCoefficient,userCode,]
 
-
-def _groupper(lst):
-  '''Groups the same values in lists . Returns a new list with one item of each sublist '''
-  counteredGroups = Counter(lst)
-  sortedGroups = [[k, ] * v for k, v in counteredGroups.items()]
-  return [i for j in sortedGroups for i in list(set(j))]
 
 
 class ExcelReader(object):
@@ -219,10 +205,7 @@ class ExcelReader(object):
     samples = []
     for dataFrame in dataframesList:
       if SAMPLE_NAME in dataFrame.columns:
-
-        filteredSamplesNames = _groupper(dataFrame[SAMPLE_NAME])
-
-        for name in filteredSamplesNames:
+        for name in list(set(dataFrame[SAMPLE_NAME])):
           if self._project is not None:
             if not self._project.getByPid('SA:'+str(name)):
               sample = self._project.newSample(name=str(name))
@@ -246,21 +229,20 @@ class ExcelReader(object):
     spectrumGroups = []
     for dataFrame in dataframesList:
       if SPECTRUM_GROUP_NAME in dataFrame.columns:
-        filteredSGNames = _groupper(dataFrame[SPECTRUM_GROUP_NAME])
-        for groupName in filteredSGNames:
+        for groupName in list(set((dataFrame[SPECTRUM_GROUP_NAME]))):
           # name = self._checkDuplicatedSpectrumGroupName(groupName)
           newSG =  self._createNewSpectrumGroup(groupName)
           spectrumGroups.append(newSG)
     return spectrumGroups
 
-
-  def _checkDuplicatedSpectrumGroupName(self, name):
-    'Checks in the preject if a spectrumGroup name exists already and returns a new available name '
-    if self._project:
-      for sg in self._project.spectrumGroups:
-        if sg.name == name:
-          name += '@'
-      return name
+  ##keep this code
+  # def _checkDuplicatedSpectrumGroupName(self, name):
+  #   'Checks in the preject if a spectrumGroup name exists already and returns a new available name '
+  #   if self._project:
+  #     for sg in self._project.spectrumGroups:
+  #       if sg.name == name:
+  #         name += '@'
+  #     return name
 
   def _createNewSpectrumGroup(self, name):
     if self._project:
@@ -297,7 +279,7 @@ class ExcelReader(object):
                 if data is not None:
                   if len(data)>0:
                     data[0].filePath = value
-                    self._linkSpectrumToObj(obj, data[0])
+                    self._linkSpectrumToObj(obj, data[0],dct)
 
               else:                                        ### needs to find the path from the excel file:
                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
@@ -307,7 +289,7 @@ class ExcelReader(object):
                   if data is not None:
                     if len(data) > 0:
                       data[0].filePath = filePath
-                      self._linkSpectrumToObj(obj, data[0])
+                      self._linkSpectrumToObj(obj, data[0],dct)
 
                 else:                       ### is a spectrum file, The project needs to get the extension: e.g .hdf5
                   filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
@@ -319,7 +301,7 @@ class ExcelReader(object):
                         if data is not None:
                           if len(data)>0:
                             data[0].filePath = filePath
-                            self._linkSpectrumToObj(obj, data[0])
+                            self._linkSpectrumToObj(obj, data[0],dct)
 
 
   ######################################################################################################################
@@ -327,17 +309,21 @@ class ExcelReader(object):
   ######################################################################################################################
 
 
-  def _linkSpectrumToObj(self, obj, spectrum):
+  def _linkSpectrumToObj(self, obj, spectrum, dct):
     from ccpn.core.Sample import Sample
-    from ccpn.core.SpectrumGroup import SpectrumGroup
     from ccpn.core.Substance import Substance
 
     if isinstance(obj, Substance):
-      obj.referenceSpectra = (spectrum,)
+      obj.referenceSpectra += (spectrum,)
 
     if isinstance(obj, Sample):
-      obj.spectra = (spectrum,)
+      obj.spectra += (spectrum,)
 
+    for key, value in dct.items():
+      if key == SPECTRUM_GROUP_NAME:
+        spectrumGroup = self._project.getByPid('SG:'+value)
+        if spectrumGroup is not None:
+          spectrumGroup.spectra += (spectrum,)
 
 
   ######################################################################################################################
@@ -360,22 +346,9 @@ class ExcelReader(object):
 
 
 
-  def _initialiseParsingSamples(self):
-    self._createSamplesDataDicts()
-    for samplesDataDict in self.samplesDataDicts:
-      self._getSampleSpectra(samplesDataDict)
 
 
-  def _createSamplesDataDicts(self):
-    self.samplesDataDicts = []
-    for data in self.samplesDataFrame.to_dict(orient="index").values():
-      for key, value in data.items():
-        if key == SAMPLE_NAME:
-          sample = self._project.newSample(str(value))
-          dataDict = {sample: data}
-          self._setWrapperProperties(sample, SAMPLE_PROPERTIES, data)
-          self._addSampleComponents(sample, data)
-          self.samplesDataDicts.append(dataDict)
+
 
   def _addSampleComponents(self, sample, data):
     sampleComponents = [[header, sampleComponentName] for header, sampleComponentName in data.items() if

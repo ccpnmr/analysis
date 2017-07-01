@@ -1,12 +1,3 @@
-# df = pd.DataFrame({
-#   'sampleName': ['Sample1', 'Sample1', 'Sample1', 'Sample2', 'Sample2', 'Sample2'],
-#   'sampleComponents': ['DT', 'Org', 'Org', 'VBN', ' IN', 'Location'],
-#   'pH': [5, 5, 5, 3, 3, 3]
-#
-# })
-# df.groupby('sampleName', sort=False)['pH'].apply(set)
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -39,25 +30,26 @@ import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger , _debug3
 
-######################### Excel Headers ##################
+################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
 Changing these will fail to set the attribute"""
 
+
 # SHEET NAMES
-SUBSTANCES = 'Substances'
-SAMPLES = 'Samples'
+SUBSTANCE = 'Substance'
+SAMPLE = 'Sample'
 NOTGIVEN = 'Not Given'
 
 # '''REFERENCES PAGE'''
 SPECTRUM_GROUP_NAME = 'spectrumGroupName'
-EXP_TYPE = 'expType'
+EXP_TYPE = 'experimentType'
 SPECTRUM_PATH = 'spectrumPath'
 SUBSTANCE_NAME = 'substanceName'
+
 ### Substance properties: # do not change these names
 comment  = 'comment'
 smiles = 'smiles'
 synonyms = 'synonyms'
-
 molecularMass = 'molecularMass'
 empiricalFormula = 'empiricalFormula'
 atomCount = 'atomCount'
@@ -162,9 +154,9 @@ class ExcelReader(object):
     '''Reads sheets containing the names SUBSTANCES or SAMPLES and creates a dataFrame for each'''
 
     dataFrames = []
-    for sheetName in [name for name in sheetNamesList if SUBSTANCES in name]:
+    for sheetName in [name for name in sheetNamesList if SUBSTANCE in name]:
       dataFrames.append(self._getDataFrameFromSheet(sheetName))
-    for sheetName in [name for name in sheetNamesList if SAMPLES in name]:
+    for sheetName in [name for name in sheetNamesList if SAMPLE in name]:
       dataFrames.append(self._getDataFrameFromSheet(sheetName))
 
     return dataFrames
@@ -291,24 +283,16 @@ class ExcelReader(object):
       for objDict in dictLists:
         for obj , dct in objDict.items():
           for key, value in dct.items():
-            # for path in dataFrame[SPECTRUM_PATH]:
             if key == SPECTRUM_PATH:
               if os.path.exists(value):                     ### the full path is given:
-                data = self._project.loadData(value)
-                if data is not None:
-                  if len(data)>0:
-                    data[0].filePath = value
-                    self._linkSpectrumToObj(obj, data[0],dct)
+                self._loadSpectrum(filePath=value, dct=dct, obj=obj)
 
               else:                                        ### needs to find the path from the excel file:
                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
                 filePath = self.directoryPath+'/'+value
                 if os.path.exists(filePath):               ### is a folder, e.g Bruker type. The project can handle.
-                  data = self._project.loadData(filePath)
-                  if data is not None:
-                    if len(data) > 0:
-                      data[0].filePath = filePath
-                      self._linkSpectrumToObj(obj, data[0],dct)
+                  self._loadSpectrum(filePath=filePath, dct=dct, obj=obj)
+
 
                 else:                       ### is a spectrum file, The project needs to get the extension: e.g .hdf5
                   filesWithExtension = [f for f in os.listdir(self.directoryPath) if isfile(join(self.directoryPath, f))]
@@ -316,12 +300,25 @@ class ExcelReader(object):
                     if len(os.path.splitext(fileWithExtension))>0:
                       if os.path.splitext(fileWithExtension)[0] == value:
                         filePath = self.directoryPath + '/' + fileWithExtension
-                        data = self._project.loadData(filePath)
-                        if data is not None:
-                          if len(data)>0:
-                            data[0].filePath = filePath
-                            self._linkSpectrumToObj(obj, data[0],dct)
+                        self._loadSpectrum(filePath=filePath, dct=dct, obj=obj)
 
+  def _loadSpectrum(self, filePath, dct,  obj):
+    '''
+
+    :param filePath: spectrum full file path
+    :param dct:  dict with information for the spectrum. eg EXP type
+    :return: None,
+    '''
+    data = self._project.loadData(filePath)
+    if data is not None:
+      if len(data) > 0:
+        data[0].filePath = filePath
+        self._linkSpectrumToObj(obj, data[0], dct)
+        if EXP_TYPE in dct:
+          try:
+            data[0].experimentType = dct[EXP_TYPE]
+          except Exception as e:
+            _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))
 
   ######################################################################################################################
   ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
@@ -366,7 +363,7 @@ class ExcelReader(object):
 
   def _setWrapperProperties(self, wrapperObject, properties, dataframe):
     for attr in properties:
-      if attr == 'synonyms':
+      if attr == synonyms:
         setattr(wrapperObject, attr, (self._getDFValue(attr, dataframe),))
       else:
         try:
@@ -392,7 +389,7 @@ class ExcelReader(object):
 
   def _createSampleComponents(self, sample, data):
     sampleComponentsNames = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
-                        header == SAMPLE_COMPONENTS]
+                        header == SAMPLE_COMPONENTS and sampleComponentName != NOTGIVEN]
     if len(sample.sampleComponents) == 0:
       if len(sampleComponentsNames)>0:
         for name in sampleComponentsNames[0][1].split(','):

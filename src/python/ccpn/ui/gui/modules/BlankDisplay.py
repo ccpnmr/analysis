@@ -110,6 +110,9 @@ class BlankDisplay(CcpnModule):
     if obj is not None and isinstance(obj, Spectrum):
       spectrumDisplay = self._createSpectrumDisplay(obj)
       self.current.strip = spectrumDisplay.strips[0]
+      if obj.dimensionCount == 1:
+        self.current.strip.plotWidget.autoRange()
+
       success = True
     elif obj is not None and isinstance(obj, SpectrumGroup):
       self._handleSpectrumGroup(obj)
@@ -142,6 +145,9 @@ class BlankDisplay(CcpnModule):
       spectrumDisplay.spectrumToolBar.hide()
       spectrumDisplay.spectrumGroupToolBar.show()
       spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+      self.current.strip = spectrumDisplay.strips[0]
+      if spectrumGroup.spectra[0].dimensionCount == 1:
+        self.current.strip.plotWidget.autoRange()
 
 
   def _closeModule(self):

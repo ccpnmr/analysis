@@ -296,14 +296,18 @@ class ExcelReader(object):
 
                 else:                       ### is a spectrum file, The project needs to get the extension: e.g .hdf5
                   newFilePath = os.path.dirname(filePath)
-                  filesWithExtension = [f for f in os.listdir(newFilePath) if isfile(join(newFilePath, f))]
-                  for fileWithExtension in filesWithExtension:
-                    if len(os.path.splitext(fileWithExtension)) > 0:
-                      if '/' in value: # is a relative path from the excel plus file without extension
-                        value = value.split('/')[-1]
-                      if os.path.splitext(fileWithExtension)[0] == value:
-                        filePath = newFilePath + '/' + fileWithExtension
-                        self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                  try:
+                    filesWithExtension = [f for f in os.listdir(newFilePath) if isfile(join(newFilePath, f))]
+                    for fileWithExtension in filesWithExtension:
+                      if len(os.path.splitext(fileWithExtension)) > 0:
+                        if '/' in value: # is a relative path from the excel plus file without extension
+                          value = value.split('/')[-1]
+                        if os.path.splitext(fileWithExtension)[0] == value:
+                          filePath = newFilePath + '/' + fileWithExtension
+                          self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                  except Exception as e:
+                    getLogger().warning(e)
+
 
 
   def _addSpectrum(self, filePath, dct, obj):

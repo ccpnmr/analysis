@@ -293,25 +293,35 @@ class SamplePropertiesPopup(CcpnDialog):
 
   def _applyChanges(self):
     applyAccept = False
+    oldUndo = self.project._undo.numItems()
 
     self.project._startCommandEchoBlock('_applyChanges')
-    self.project.blankNotification()
+
+    # self.application._startCommandBlock('_applyChanges')
+    # self.project._startCommandEchoBlock('_applyChanges')
+    # self.project.blankNotification()
     try:
       for property, value in self._getCallBacksDict().items():
         property(value)
 
       applyAccept = True
     except Exception as es:
-      showWarning(self.windowTitle(), str(es))
+      showWarning('Sample Properties', str(es))
     finally:
-      self.project.unblankNotification()
+      # self.project.unblankNotification()
+      # self.project._endCommandEchoBlock()
       self.project._endCommandEchoBlock()
+      # self.application._endCommandBlock()
 
     if applyAccept is False:
-      self.application.undo()
-      self.accept()
-
-    return applyAccept
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+      return False
+    else:
+      return True
 
   def _okButton(self):
     if self._applyChanges() is True:

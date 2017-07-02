@@ -274,8 +274,9 @@ class EditSampleComponentPopup(CcpnDialog):
   def _fillInfoFromSubstance(self, selected):
     if selected != 'Select an option':
       substance = self.project.getByPid('SU:'+selected)
-      self.nameComponentLineEdit.setText(str(substance.name))
-      self.labellingPulldownList.set(str(substance.labelling))
+      if substance:
+        self.nameComponentLineEdit.setText(str(substance.name))
+        self.labellingPulldownList.set(str(substance.labelling))
       self.nameComponentLineEdit.setReadOnly(True)
       self.labellingPulldownList.setEnabled(False)
       self._updateButtons()
@@ -329,8 +330,9 @@ class EditSampleComponentPopup(CcpnDialog):
   def _applyChanges(self):
     applyAccept = False
 
-    self.project._startCommandEchoBlock('_applyChanges')
-    self.project.blankNotification()
+    self.application._startCommandBlock('_applyChanges')
+    # self.project._startCommandEchoBlock('_applyChanges')
+    # self.project.blankNotification()
     try:
       if self.newSampleComponentToCreate:
         self._createNewComponent()
@@ -341,16 +343,17 @@ class EditSampleComponentPopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning(self.windowTitle(), str(es))
+      showWarning('Sample Component Properties', str(es))
     finally:
-      self.project.unblankNotification()
-      self.project._endCommandEchoBlock()
+      # self.project.unblankNotification()
+      # self.project._endCommandEchoBlock()
+      self.application._endCommandBlock()
 
     if applyAccept is False:
       self.application.undo()
-      self.accept()
-
-    return applyAccept
+      return False
+    else:
+      return True
 
   def _okButton(self):
     if self._applyChanges() is True:

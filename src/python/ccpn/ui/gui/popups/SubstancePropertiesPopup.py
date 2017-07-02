@@ -47,9 +47,12 @@ SEP = ', '
 
 
 class SubstancePropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, substance=None, application=None
-               , sampleComponent=None, newSubstance=False
+  def __init__(self, parent=None, mainWindow=None
+               , substance=None, sampleComponent=None, newSubstance=False
                , title='Substance Properties', **kw):
+    """
+    Initialise the widget
+    """
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
     self.mainWindow = mainWindow              # ejb - should always be done like this
@@ -57,12 +60,10 @@ class SubstancePropertiesPopup(CcpnDialog):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    # self.application = application
-    # self.project =  self.application.project
     self.sample = parent
     self.sampleComponent = sampleComponent
     self.substance = substance
-    self.preferences = self.application .preferences
+    self.preferences = self.application.preferences
 
     self.createNewSubstance = newSubstance
     self._setMainLayout()
@@ -77,7 +78,7 @@ class SubstancePropertiesPopup(CcpnDialog):
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
     self.setLayout(self.mainLayout)
-    self.setWindowTitle("Substance Properties")
+    # self.setWindowTitle("Substance Properties")
     # self.setFixedHeight(300)
     self.mainLayout.setContentsMargins(15, 20, 25, 10)  # L,T,R,B
 
@@ -105,7 +106,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     return widgetsToSet
 
   def _allWidgets(self):
-    return  [
+    return  (
             self.spacerLabel, self.selectInitialRadioButtons,
             self.currentSubstanceLabel, self.substancePulldownList,
             self.substanceLabel,self.nameSubstance,
@@ -127,7 +128,7 @@ class SubstancePropertiesPopup(CcpnDialog):
             self.moleculeViewLabel,self.compoundView,
             self.labelcomment, self.comment,
             self.spacerLabel, self.buttonBox
-            ]
+    )
 
   def _initialOpitionWidgets(self):
     self.spacerLabel = Label(self, text="")
@@ -505,8 +506,10 @@ class SubstancePropertiesPopup(CcpnDialog):
 
   def _applyChanges(self):
     applyAccept = False
+    oldUndo = self.project._undo.numItems()
 
-    self.application._startCommandBlock('_applyChanges')
+    # self.application._startCommandBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges')
     # self.project.blankNotification()
     # self.project._undo.increaseBlocking()
     try:
@@ -517,15 +520,16 @@ class SubstancePropertiesPopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning(self.windowTitle(), str(es))
+      showWarning('Substance Properties', str(es))
     finally:
       # self.project.unblankNotification()
       # self.project._undo.decreaseBlocking()
-      self.application._endCommandBlock()
-      pass
+      self.project._endCommandEchoBlock()
+      # self.application._endCommandBlock()
 
     if applyAccept is False:
-      self.application.undo()
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
       return False
     else:
       return True

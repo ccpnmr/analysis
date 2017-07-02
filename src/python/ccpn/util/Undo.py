@@ -377,3 +377,6 @@ class Undo(deque):
   def canRedo(self) -> bool:
     """True if a redo operation can be performed"""
     return self.nextIndex <= len(self)
+
+  def numItems(self):
+    return len(self)

@@ -181,22 +181,22 @@ class Sample(AbstractWrapperObject):
     self._wrappedData.plateIdentifier = value
 
   @property
-  def rowNumber(self) -> str:
+  def rowNumber(self) -> int:
     """Row number on plate"""
     return self._wrappedData.rowPosition
 
   @rowNumber.setter
-  def rowNumber(self, value:str):
-    self._wrappedData.rowPosition = value
+  def rowNumber(self, value):
+    self._wrappedData.rowPosition = int(value)
 
   @property
-  def columnNumber(self) -> str:
+  def columnNumber(self) -> int:
     """Column number on plate"""
     return self._wrappedData.colPosition
 
   @columnNumber.setter
-  def columnNumber(self, value:str):
-    self._wrappedData.colPosition = value
+  def columnNumber(self, value:int):
+    self._wrappedData.colPosition = int(value)
   
   @property
   def comment(self) -> str:

@@ -316,7 +316,6 @@ class ExcelReader(object):
     data = self._project.loadData(filePath)
     if data is not None:
       if len(data) > 0:
-        data[0].filePath = filePath
         self._linkSpectrumToObj(obj, data[0], dct)
         if EXP_TYPE in dct:
           try:

@@ -62,7 +62,7 @@ class SamplePropertiesPopup(CcpnDialog):
     self.sample = sample
     self._setMainLayout()
     self._setWidgets()
-    self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout= self.mainLayout)
+    self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)
 
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
@@ -136,7 +136,7 @@ class SamplePropertiesPopup(CcpnDialog):
     self.sampleStatePulldownList.addItems(SAMPLE_STATES)
     self.sampleStatePulldownList.setMinimumWidth(50)
     self.sampleStatePulldownList.setFixedHeight(25)
-    self.sampleStatePulldownList.activated[str].connect(self._sampleStateChanged)
+    # self.sampleStatePulldownList.activated[str].connect(self._sampleStateChanged)
 
   def _setsampleAmountUnitWidgets(self):
     self.sampleAmountUnitLabel = Label(self, text="Amount Unit")
@@ -293,10 +293,9 @@ class SamplePropertiesPopup(CcpnDialog):
 
   def _applyChanges(self):
     applyAccept = False
-    # self.project._undo.increaseBlocking()
-    # self.project.blankNotification()
 
     self.project._startCommandEchoBlock('_applyChanges')
+    self.project.blankNotification()
     try:
       for property, value in self._getCallBacksDict().items():
         property(value)
@@ -305,15 +304,13 @@ class SamplePropertiesPopup(CcpnDialog):
     except Exception as es:
       showWarning(self.windowTitle(), str(es))
     finally:
+      self.project.unblankNotification()
       self.project._endCommandEchoBlock()
 
-    # if an error occurred during the echo block, some values
-    # may be set, reject the changes that may have happened
     if applyAccept is False:
       self.application.undo()
+      self.accept()
 
-    # self.project.unblankNotification()
-    # self.project._undo.decreaseBlocking()
     return applyAccept
 
   def _okButton(self):

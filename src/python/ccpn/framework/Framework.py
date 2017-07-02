@@ -825,7 +825,7 @@ class Framework:
     ms.append(('Molecules', [
       ("Chain from FASTA...", lambda:self.loadData(text='Load FASTA')),
       (),
-      ("Generate Chain...", self.showMoleculePopup),
+      ("Generate Chain...", self.showCreateChainPopup),
       ("Inspect...", self.inspectMolecule, [('enabled', False)]),
       (),
       ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
@@ -1482,14 +1482,14 @@ class Framework:
   ## MENU callbacks:  Molecule
   ################################################################################################
 
-  def showMoleculePopup(self):
+  def showCreateChainPopup(self):
     """
     Displays sequence creation popup.
     """
-    from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
-    getLogger().info("application.showMoleculePopup()")
-    popup = CreateSequence(mainWindow=self.ui.mainWindow).exec_()
+    from ccpn.ui.gui.modules.CreateChainPopup import CreateChainPopup
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showCreateChainPopup()")
+    getLogger().info("application.showCreateChainPopup()")
+    popup = CreateChainPopup(mainWindow=self.ui.mainWindow).exec_()
 
 
   def toggleSequenceModule(self):

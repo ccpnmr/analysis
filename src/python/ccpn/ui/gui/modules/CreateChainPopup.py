@@ -35,7 +35,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-class CreateSequence(CcpnDialog):
+class CreateChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kw):
     """
     Initialise the widget
@@ -64,7 +64,7 @@ class CreateSequence(CcpnDialog):
 
     # self.residueList = ListWidgetSelector(self, setLayout=True, grid=(5,0), gridSpan=(1,4), title='Residue Types')
 
-    buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Create Sequence'],
+    buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Ok'],
                            callbacks=[self.reject, self._createSequence])
     self.sequenceStart = 1
     self.chainCode = 'A'

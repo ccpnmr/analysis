@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import time
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -61,8 +62,12 @@ class EditSampleComponentPopup(CcpnDialog):
     self._setMainLayout()
     self._setWidgets()
     self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)
-    # if self.newSampleComponentToCreate:
-    #   self._updateButtons()
+    if self.newSampleComponentToCreate:
+      self._updateButtons()
+      self._checkCurrentSubstances()
+    else:
+      # self._hideSubstanceCreator()
+      pass
 
   def _setMainLayout(self):
     self.mainLayout = QtGui.QGridLayout()
@@ -74,8 +79,8 @@ class EditSampleComponentPopup(CcpnDialog):
 
   def _getWidgetsToSet(self):
 
-    return  (
-            self._initialOpitionWidgets,
+    return  [
+            self._initialOptionWidgets,
             self._setSubstanceWidgets,
             self.componentNameEditWidget,
             self.componentNameWidget,
@@ -86,7 +91,7 @@ class EditSampleComponentPopup(CcpnDialog):
             self.concentrationWidget,
             self._commentWidget,
             self._setPerformButtonWidgets
-            )
+            ]
 
   def _setWidgets(self):
     for setWidget in self._getWidgetsToSet():
@@ -110,7 +115,6 @@ class EditSampleComponentPopup(CcpnDialog):
     else:
       self._editorOptionWidgets()
 
-
   def _getAllWidgets(self):
     '''
     All widgets are ordered in the way they will be added to the layout EG:
@@ -125,9 +129,9 @@ class EditSampleComponentPopup(CcpnDialog):
             self.typeLabel, self.typePulldownList,
             self.concentrationUnitLabel, self.concentrationUnitPulldownList,
             self.concentrationLabel, self.concentrationLineEdit,
-            self.labelcomment, self.commentLineEdit
-           )
-  def _initialOpitionWidgets(self):
+            self.labelcomment, self.commentLineEdit)
+
+  def _initialOptionWidgets(self):
     self.spacerLabel = Label(self, text="")
     self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Substances'],
                                                        selectedInd=1,
@@ -148,7 +152,7 @@ class EditSampleComponentPopup(CcpnDialog):
     self.sampleComponentNewNameLabel = Label(self, text="Name")
     self.nameComponentLineEdit = LineEdit(self)
     # self.nameComponentLineEdit.setMinimumWidth(216)
-    # self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
+    self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
     self.nameComponentLineEdit.setReadOnly(False)
     self.nameComponentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
@@ -191,7 +195,7 @@ class EditSampleComponentPopup(CcpnDialog):
   def concentrationWidget(self):
     self.concentrationLabel = Label(self, text="Concentration")
     self.concentrationLineEdit = LineEdit(self)
-    # self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
+    self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
     self.concentrationLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sampleComponent:
       self.concentrationLineEdit.setText(str(self.sampleComponent.concentration))
@@ -206,6 +210,24 @@ class EditSampleComponentPopup(CcpnDialog):
   def _setPerformButtonWidgets(self):
     tipTexts = ['','Click to apply changes. Name and Labelling cannot be changed once a new sample component is created','Click to apply and close']
     self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton], texts=['Cancel', 'Apply', 'Ok'], tipTexts = tipTexts)
+
+  def _checkCurrentSubstances(self):
+    if len(self.project.substances) > 0:
+      self.selectInitialRadioButtons.radioButtons[0].setChecked(True)
+      self.selectInitialRadioButtons.radioButtons[1].setEnabled(True)
+      self.substanceLabel.show()
+      self.substancePulldownList.show()
+
+    else:
+      self.selectInitialRadioButtons.radioButtons[0].setChecked(True)
+      self.selectInitialRadioButtons.radioButtons[1].setEnabled(False)
+      self.substanceLabel.hide()
+      self.substancePulldownList.hide()
+
+  def _hideSubstanceCreator(self):
+    if len(self.project.substances) > 0:
+      self.substanceLabel.hide()
+      self.substancePulldownList.hide()
 
   ######### Widget Callbacks #########
 
@@ -256,7 +278,7 @@ class EditSampleComponentPopup(CcpnDialog):
       self.labellingPulldownList.set(str(substance.labelling))
       self.nameComponentLineEdit.setReadOnly(True)
       self.labellingPulldownList.setEnabled(False)
-      # self._updateButtons()
+      self._updateButtons()
 
   def _labellingSpecialCases(self,selected ):
     if selected == 'Type_New':
@@ -271,9 +293,9 @@ class EditSampleComponentPopup(CcpnDialog):
       value = float(self.concentrationLineEdit.text())
       return value
     except:
-      print('Concentration error: \n Value must be flot or int.')
+      # print('Concentration error: \n Value must be flot or int.')
       # info = showInfo('Concentration error', 'Value must be a flot or int')
-
+      return 0
 
   def _typeComponent(self, value):
     if value:
@@ -296,20 +318,19 @@ class EditSampleComponentPopup(CcpnDialog):
       self.sampleComponent =  self.sample.newSampleComponent(
         name=str(self.nameComponentLineEdit.text()), labelling=str(self.labellingPulldownList.currentText()))
 
-  # def _updateButtons(self):
-  #   if self.nameComponentLineEdit.text():
-  #     self.buttons.buttons[1].setEnabled(True)
-  #     self.buttons.buttons[2].setEnabled(True)
-  #   else:
-  #     self.buttons.buttons[1].setEnabled(False)
-  #     self.buttons.buttons[2].setEnabled(False)
+  def _updateButtons(self):
+    if self.nameComponentLineEdit.text():
+      self.buttons.buttons[1].setEnabled(True)
+      self.buttons.buttons[2].setEnabled(True)
+    else:
+      self.buttons.buttons[1].setEnabled(False)
+      self.buttons.buttons[2].setEnabled(False)
 
   def _applyChanges(self):
     applyAccept = False
-    # self.project._undo.increaseBlocking()
-    # self.project.blankNotification()
 
     self.project._startCommandEchoBlock('_applyChanges')
+    self.project.blankNotification()
     try:
       if self.newSampleComponentToCreate:
         self._createNewComponent()
@@ -322,15 +343,13 @@ class EditSampleComponentPopup(CcpnDialog):
     except Exception as es:
       showWarning(self.windowTitle(), str(es))
     finally:
+      self.project.unblankNotification()
       self.project._endCommandEchoBlock()
 
-    # if an error occurred during the echo block, some values
-    # may be set, reject the changes that may have happened
     if applyAccept is False:
       self.application.undo()
+      self.accept()
 
-    # self.project.unblankNotification()
-    # self.project._undo.decreaseBlocking()
     return applyAccept
 
   def _okButton(self):

@@ -292,6 +292,7 @@ class SubstancePropertiesPopup(CcpnDialog):
 
   def _getCallBacksDict(self):
     return {
+      # self._renameLabelSubstance: str(self.nameSubstance.text()),   # ejb - not sure yet
       self._changeNameSubstance: str(self.nameSubstance.text()),
       self._labellingChanged:str(self.labelling.text()) ,
       self._chemicalNameChanged: [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
@@ -338,6 +339,12 @@ class SubstancePropertiesPopup(CcpnDialog):
     if value:
       if self.substance.labelling != value:
         self.substance.rename(labelling=value)
+
+  def _renameLabelSubstance(self, value):
+    name = str(self.nameSubstance.text())
+    label = str(self.labelling.text())
+    if self.substance.name != name or self.substance.labelling != label:
+      self.substance.rename(name=name, labelling=label)
 
   def _chemicalNameChanged(self, value):
     if value:
@@ -498,10 +505,10 @@ class SubstancePropertiesPopup(CcpnDialog):
 
   def _applyChanges(self):
     applyAccept = False
-    # self.project._undo.increaseBlocking()
-    # self.project.blankNotification()
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.application._startCommandBlock('_applyChanges')
+    # self.project.blankNotification()
+    # self.project._undo.increaseBlocking()
     try:
       if self.createNewSubstance:
         self._createNewSubstance()
@@ -512,16 +519,16 @@ class SubstancePropertiesPopup(CcpnDialog):
     except Exception as es:
       showWarning(self.windowTitle(), str(es))
     finally:
-      self.project._endCommandEchoBlock()
+      # self.project.unblankNotification()
+      # self.project._undo.decreaseBlocking()
+      self.application._endCommandBlock()
+      pass
 
-    # if an error occurred during the echo block, some values
-    # may be set, reject the changes that may have happened
     if applyAccept is False:
       self.application.undo()
-
-    # self.project.unblankNotification()
-    # self.project._undo.decreaseBlocking()
-    return applyAccept
+      return False
+    else:
+      return True
 
   def _okButton(self):
     if self._applyChanges() is True:

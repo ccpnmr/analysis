@@ -99,8 +99,14 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(substance1._id, 'notmuch.')
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
-    with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.name must be a string'):
-      substance1.rename(name=None, labelling=None)
+    # with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.name must be a string'):
+    #   substance1.rename(name=None, labelling=None)
+
+    substance1.rename(name=None, labelling='noName')
+    self.assertEqual(substance1._id, 'notmuch.noName')
+    self.assertEqual(sc1._id, 'S1.notmuch.noName')
+    self.project._undo.undo()
+
     self.assertEqual(substance1._id, 'notmuch.')
     self.assertEqual(sc1._id, 'S1.notmuch.')
     self.project._undo.undo()

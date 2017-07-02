@@ -550,9 +550,11 @@ class Substance(AbstractWrapperObject):
     SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
     ill be used. Labelling 'None'  means 'Natural abundance'"""
 
+    # ejb - name should always be passed in, strange not to
+
     oldName = self.name
-    # if name is None:
-    #   name = oldName
+    if name is None:                # ejb - stupid renaming in substancePopup
+      name = oldName
     if not isinstance(name, str):
       raise TypeError("ccpn.Substance.name must be a string")  # ejb
     elif not name:

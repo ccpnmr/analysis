@@ -39,7 +39,7 @@ from ccpn.core import _coreClassMap
 from ccpn.core.lib import Pid
 from ccpn.ui.gui.widgets.Base import Base
 
-from ccpn.ui.gui.modules.CreateSequence import CreateSequence
+from ccpn.ui.gui.modules.CreateChainPopup import CreateChainPopup
 #from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
@@ -109,7 +109,7 @@ NEW_ITEM_DICT = {
   'StructureEnsembles': 'newStructureEnsemble',
   'Samples': 'newSample',
   'NmrChains': 'newNmrChain',
-  'Chains': 'CreateSequence',
+  'Chains': 'newChain',
   'Substances': 'newSubstance',
   'ChemicalShiftLists': 'newChemicalShiftList',
   'DataSets': 'newDataSet',
@@ -795,7 +795,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       if itemParent is None:
         # Top level object - parent is project
         if item.parent().text(0) == 'Chains':
-          popup = CreateSequence(mainWindow=self.mainWindow)
+          popup = CreateChainPopup(mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           return

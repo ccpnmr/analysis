@@ -874,7 +874,10 @@ class CcpnNefReader:
     nmrProject = memopsRoot.newNmrProject(name=name)
     memopsRoot.newMolSystem(code=name, name=name)
     memopsRoot.newAnalysisProject(name=name, nmrProject=nmrProject)
-    self.refExpDimRefCodeMap = NmrExpPrototypeLib.refExpDimRefCodeMap(memopsRoot)
+    self.refExpDimRefCodeMap = dd = NmrExpPrototypeLib.refExpDimRefCodeMap(memopsRoot)
+    for key,val in dd.items():
+      # V2 has '_' separators in axis codes, but the NmrExpPrototypes and V3 does not
+      dd[key] = val.replace('_','')
 
 
   def importNewProject(self, memopsRoot, dataBlock):
@@ -1038,7 +1041,7 @@ class CcpnNefReader:
         # Make chainMapping
         chainDict[sequenceCode] = resDict = {'residue':residue, 'resonanceGroup':None}
         atomMappings = resDict['atomMappings'] = {}
-        residueMapping = MoleculeBasic.getResidueMapping(residue, aromaticsEquivalent=False)
+        residueMapping = MoleculeBasic.getResidueMapping(residue, aromaticsEquivalent=True)
         for asm in residueMapping.atomSetMappings:
           atDict = {'atomSetMapping':asm}
           for tag in ('name', 'mappingType', 'elementSymbol', 'atomSets'):
@@ -1182,7 +1185,7 @@ class CcpnNefReader:
         return None
       data = saveFrame.get('ccpn_restraint').data
 
-    # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
+    # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
     comment = saveFrame.get('comment')
     newListFunc = getattr(nmrConstraintStore,"new%sConstraintList" % restraintType)
@@ -1276,7 +1279,7 @@ class CcpnNefReader:
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
 
-    # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
+    # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
     comment = saveFrame.get('comment')
 
@@ -1543,6 +1546,7 @@ class CcpnNefReader:
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
+
     experimentMapping = OD((
       ('num_dimensions','numDim'),
       # ('chemical_shift_list',None),
@@ -1596,15 +1600,27 @@ class CcpnNefReader:
       if val is not None:
         peakListParams[tag] = val
 
-    # Get DataSource name from spectrum parameters, or from the frameCode
+
+    # Get name from spectrum parameters, or from the framecode
     spectrumName = framecode[len(category) + 1:]
-    peakListSerial = peakListParams.get('serial')
-    if peakListSerial:
-      ss = '`%s`' % peakListSerial
-      # Remove peakList serial suffix (which was added for disambiguation)
-      # So that multiple peakLists all go to one Spectrum
-      if spectrumName.endswith(ss):
-        spectrumName = spectrumName[:-len(ss)]
+    if spectrumName.endswith('`'):
+      peakListSerial = peakListParams.get('serial')
+      if peakListSerial:
+        ss = '`%s`' % peakListSerial
+        # Remove peakList serial suffix (which was added for disambiguation)
+        # So that multiple peakLists all go to one Spectrum
+        if spectrumName.endswith(ss):
+          spectrumName = spectrumName[:-len(ss)]
+      else:
+        ll = spectrumName.rsplit('`',2)
+        if len(ll) == 3:
+          # name is of form abc`xyz`
+          try:
+            peakListParams['serial'] = int(ll[1])
+          except ValueError:
+            pass
+          else:
+            spectrumName = ll[0]
     dataSourceParams['name'] = spectrumName
 
     for experiment in nmrProject.sortedExperiments():
@@ -1617,9 +1633,9 @@ class CcpnNefReader:
       # Spectrum does not already exist - create it.
       # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
-      frameCode = saveFrame.get('chemical_shift_list')
-      if frameCode:
-        experimentParams['shiftList'] = self.frameCode2Object[frameCode]
+      framecode = saveFrame.get('chemical_shift_list')
+      if framecode:
+        experimentParams['shiftList'] = self.frameCode2Object[framecode]
       else:
         # Defaults to first (there should be only one, but we want the read to work) ShiftList
         experimentParams['shiftList'] = self.defaultChemicalShiftList
@@ -1638,9 +1654,9 @@ class CcpnNefReader:
         else:
           experimentParams['refExperiment'] = refExperiment
 
-      # frameCode = saveFrame.get('ccpn_sample')
-      # if frameCode:
-      #   experimentParams['sample'] = self.frameCode2Object[frameCode]
+      # framecode = saveFrame.get('ccpn_sample')
+      # if framecode:
+      #   experimentParams['sample'] = self.frameCode2Object[framecode]
 
       nmrExperiment = nmrProject.newExperiment(**experimentParams)
       dataSource = nmrExperiment.newDataSource(**dataSourceParams)
@@ -1802,7 +1818,7 @@ class CcpnNefReader:
           transferType = row.get('transfer_type')
           isDirect = not row.get('is_indirect')
           nmrExperiment.newExpTransfer(expDimRefs=xdr, transferType=transferType,
-                                    isDirect=isDirect)
+                                       isDirect=isDirect)
           transferData.append(dims + [transferType, not isDirect])
 
       # Make data storage object
@@ -1822,7 +1838,18 @@ class CcpnNefReader:
 
       # Set refExpDimRef links
       if refExperiment is not None:
-        if not axisCodesRead:
+
+        if axisCodesRead:
+          # We have ccpn axis codes read - use them to set up refExpDim links
+          for refExpDim in refExperiment.sortedRefExpDims():
+            for refExpDimRef in refExpDim.sortedRefExpDimRefs():
+              name =self.refExpDimRefCodeMap[refExpDimRef]
+              for expDim in nmrExperiment.sortedExpDims():
+                expDimRef = expDim.findFirstExpDimRef(name=name)
+                if expDimRef is not None:
+                  expDimRef.refExpDimRef = refExpDimRef
+        else:
+          # we need to do a heuristic match
           expDims = nmrExperiment.sortedExpDims()
           expDimRefs = [x.findFirstExpDimRef() for x in expDims]
           if None not in expDimRefs:
@@ -1834,21 +1861,13 @@ class CcpnNefReader:
 
             axisCodes = makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex,
                                          transferData)
-            for ii,expDimRef in enumerate(expDimRefs):
-              expDimRef.name = expDimRef.displayName = axisCodes[ii]
-            axisCodesRead = True
 
-        if axisCodesRead:
-          # We have ccpn axis codes (either read or reconstructed)
-          # - use them to set up refExpDim links
-          for refExpDim in refExperiment.sortedRefExpDims():
-            for refExpDimRef in refExpDim.sortedRefExpDimRefs():
-              name =self.refExpDimRefCodeMap[refExpDimRef]
-              for expDim in nmrExperiment.sortedExpDims():
-                expDimRef = expDim.findFirstExpDimRef(name=name)
-                if expDimRef is not None:
-                  expDimRef.refExpDimRef = refExpDimRef
-        else:
+            refExpDimRefNames = self.matchRefExpDimRefNames(refExperiment, axisCodes)
+            if refExpDimRefNames:
+              for ii,expDimRef in enumerate(expDimRefs):
+                expDimRef.name = refExpDimRefNames[ii]
+            axisCodesRead = True
+        if not axisCodesRead:
           # try setting dimension links with heuristics
           ExperimentBasic.setRefExperiment(nmrExperiment, refExperiment)
 
@@ -1916,7 +1935,7 @@ class CcpnNefReader:
         # finalise previous peak
         if result and assignedResonances:
           # There is a peak in result, and the peak has assignments to set
-          self._assignPeak(result[-1], assignedResonances)
+          assignPeak(result[-1], assignedResonances)
           del assignedResonances[:]
 
         # Make new peak
@@ -1952,7 +1971,7 @@ class CcpnNefReader:
           # Necessary to first create ResonanceGroup, if it does not exist:
           dummy = self.fetchResidueMap(tt[0] or self.defaultChainCode, tt[1], tt[2])
           atomMap = self.fetchAtomMap(tt[0] or self.defaultChainCode, tt[1], tt[3])
-          resonancesPerDimension.append(atomMap['resonances'])
+          resonancesPerDimension.append(tuple(atomMap['resonances']))
         else:
           # partial and unusable assignment
           self.warning("Uninterpretable Peak assignment for peak %s: %s. Set to None"
@@ -1965,31 +1984,12 @@ class CcpnNefReader:
     # finalise last peak
     if result and assignedResonances:
       # There is a peak in result, and the peak has assignments to set
-      self._assignPeak(peak, assignedResonances)
+      assignPeak(peak, assignedResonances)
       del assignedResonances[:]
     #
     return result
   #
   importers['nef_peak'] = load_nef_peak
-
-  def _assignPeak(self, peak, assignedResonances):
-    """Assign all dimensions of peak to each of the assignments in the assignedResonances tuples
-
-    Each tuple is given a separate PeakContrib, to sow is is a differnet contribution
-    """
-    peakDims = peak.sortedPeakDims()
-    for resonancesPerDimension in assignedResonances:
-      if any(resonancesPerDimension):
-        peakContribs = set((peak.newPeakContrib(),))
-        for ii, resonances in enumerate(resonancesPerDimension):
-          peakDim = peakDims[ii]
-          for resonance in resonances:
-            # We set the small tolerance to prevent the program from merging
-            # resonances (unless they really are identical)
-            # and aoid generation of defalut tolerances (which breaks without an application)
-            AssignmentBasic.assignResToDim(peakDim, resonance, doWarning=False,
-                                           peakContribs=peakContribs,
-                                           tolerance=1.0e-6)
 
   def load_nef_peak_restraint_links(self, project, saveFrame):
     """load nef_peak_restraint_links saveFrame"""
@@ -2266,12 +2266,12 @@ class CcpnNefReader:
           linkType = 'identity'
         else:
           linkType = 'sequential'
-        mainResonanceGroup.newResonanceGroupProb(linkType=linkType, offset=offset,
+        mainResonanceGroup.newResonanceGroupProb(linkType=linkType, sequenceOffset=offset,
                                                  possibility=resonanceGroup)
       elif linkToMap is not None:
         # This is a residue in a continuous stretch - and linkToMap is the map for the i-1 residue
         previousResonanceGroup = linkToMap['resonanceGroup']
-        previousResonanceGroup.newResonanceGroupProb(linkType='sequential', offset=1,
+        previousResonanceGroup.newResonanceGroupProb(linkType='sequential', sequenceOffset=1,
                                                      possibility=resonanceGroup)
 
     #
@@ -2333,49 +2333,52 @@ class CcpnNefReader:
 
 
 
-  # def _parametersFromSaveFrame(self, saveFrame, mapping, ccpnPrefix=None):
-  #   """Extract {parameter:value} dictionary and list of loop names from saveFrame
-  #
-  #   The mapping gives the map from NEF tags to ccpn tags.
-  #   If the ccpn tag is of the form <ccpnPrefix.tag> it is ignored unless
-  #   the first part of the tag matches the passed-in ccpnPrefix
-  #   (NB the ccpnPrefix may contain '.')."""
-  #
-  #   # Get attributes that have a simple tag mapping, and make a separate loop list
-  #   parameters = {}
-  #   loopNames = []
-  #   if ccpnPrefix is None:
-  #     # Normal extraction from saveframe map
-  #     for tag, ccpnTag in mapping.items():
-  #       if ccpnTag == _isALoop:
-  #         loopNames.append(tag)
-  #       elif ccpnTag and '.' not in ccpnTag:
-  #         val = saveFrame.get(tag)
-  #         if val is not None:
-  #           # necessary as tags like ccpn_serial should NOT be set if absent of None
-  #           parameters[ccpnTag] = val
-  #   else:
-  #     # extracting tags of the form `ccpnPrefix`.tag
-  #     for tag, ccpnTag in mapping.items():
-  #       if ccpnTag == _isALoop:
-  #         loopNames.append(tag)
-  #       elif ccpnTag:
-  #         parts = ccpnTag.rsplit('.', 1)
-  #         if parts[0] == ccpnPrefix:
-  #           val = saveFrame.get(tag)
-  #           if val is not None:
-  #             # necessary as tags like ccpn_serial should NOT be set if absent of None
-  #             parameters[parts[1]] = val
-  #
-  #   #
-  #   return parameters, loopNames
 
   def warning(self, message):
     template = "WARNING in saveFrame%s\n%s"
     self.warnings.append(template % (self.saveFrameName, message))
 
+  def matchRefExpDimRefNames(self, refExperiment, axisCodes):
+    """return the best set of RefExpDimRef.name matching axisCodes (in order)
+
+    WARNING - this may give incorrect matchings for cases where
+    there are several dimensions with the same nucleus and the axisCodes
+    have been regenerated (from a native NEF file). E.g. HCcH will be vulnerable."""
+
+    matchStrings = []
+    for refExpDim in refExperiment.sortedRefExpDims():
+      matchStrings.append(tuple(self.refExpDimRefCodeMap[x] for x in refExpDim.sortedRefExpDimRefs()))
+
+    data = []
+    for permutation in itertools.permutations(matchStrings):
+      score = 0
+      ll = []
+      for ii,tt in enumerate(permutation):
+        match = ''
+        name = axisCodes[ii]
+        for ss in tt:
+          overlap = os.path.commonprefix((ss,name))
+          if len(overlap) > len(match):
+            match = ss
+        if match:
+          score += len(overlap)
+          ll.append(match)
+        else:
+          break
+      else:
+        data.append((score, ll))
+
+    if data:
+      return sorted(data)[-1][1]
+    else:
+      return []
+
 
 def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferData):
+  """Returns axisCodes sorted in order of dimensionId.
+  NB this will NOT be fully correct, as we are lacking information about
+  transfers between unmeasured frequencies, as well as hte C/CA/CO ditinction.
+  NB generated e.g. H_1 instead of H1, as per V2 convention."""
 
   nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
   dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
@@ -2399,7 +2402,7 @@ def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferD
   if acquisitionAxisIndex is not None:
 
     # Put acquisition axis first, to make sure it gets the lowest number
-    # even if it is not teh first to start with.
+    # even if it is not the first to start with.
     acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
     dimensionIds.remove(acquisitionAxisId)
     dimensionIds.insert(0, acquisitionAxisId)
@@ -2422,6 +2425,17 @@ def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferD
         dimensionToAxisCode[otherDim] = ss
 
     resultMap[dim] = axisCode
+
+  if acquisitionAxisIndex is not None:
+    # HACK (or heuristic). If the acquisition code is duplicated
+    # (it might be if we do not have all necessary transfers)
+    # This ensures that the duplicates get a suffix.
+    # This should help with mapping e.g. 2D NOESY or HCcH
+    acquisitoniAxisCode = resultMap[acquisitionAxisId]
+    for dim, val in resultMap.items():
+      if val == acquisitoniAxisCode and dim != acquisitionAxisId:
+        resultMap[dim] = val + '1'
+
   dimensionIds.sort()
   result = list(resultMap[ii] for ii in dimensionIds)
   #
@@ -2669,6 +2683,55 @@ def fetchDataUrl(memopsRoot, fullPath):
   #
   return dataUrl
 
+
+def assignPeak(peak, assignedResonances):
+  """Assign all dimensions of peak to each of the assignments in the assignedResonances tuples
+
+  assignedResonances is a list of tuple of tuples of resonances - the inner tuple may be empty.
+  The list gives the alternative assignments.
+  The first tuple gives one assignment per dimension
+  The inner tuple gives teh resonances that match the dimension for that assignment
+  (there may be more than one, e.g. from wildcard assignments)
+  """
+
+  peakDims = peak.sortedPeakDims()
+
+  for peakContrib in peak.sortedPeakContribs()[1:]:
+    # We keep one peakContrib (otherwise an empty one is create anyway),
+    # but additional ones are in the way
+    peakContrib.delete()
+
+  # Assign each dimension to all resonances
+  combinationCount = 1
+  for ii, resonancesPerDimension in enumerate(zip(*assignedResonances)):
+    peakDimContribs = set()
+    peakDim = peakDims[ii]
+    xx = set(resonancesPerDimension)
+    combinationCount *= len(xx)
+    for resonance in set(resonance for tt in xx for resonance in tt):
+        peakDimContribs.add(AssignmentBasic.newPeakDimContrib(peakDim, resonance))
+
+    for peakDimContrib in peakDim.peakDimContribs:
+      if peakDimContrib not in peakDimContribs:
+        # remove peakDimContribs left over from earlier times
+        # NB done here to avoid deleting and re-creating peakDimContribs for the same resonance
+        peakDimContrib.delete()
+
+  if len(assignedResonances) != combinationCount:
+    # the number of assignment tuples does not match the number of combinations
+    # We must set individual PeakContribs for each assignment tuple
+    previousContrib = peak.findFirstPeakContrib()  # for later deletion - there will be exactly one
+
+    for assignmentTuple in assignedResonances:
+      peakDimContribs = []
+      for ii, tt in enumerate(assignmentTuple):
+        peakDim = peakDims[ii]
+        for resonance in tt:
+          # NB, there is always a peakDimContrib taht matches, as it was set jsut above
+          peakDimContribs.append(peakDim.findFirstPeakDimContrib(resonance=resonance))
+      peak.newPeakContrib(peakDimContribs=peakDimContribs)
+    #
+    previousContrib.delete()
 
 if __name__ == '__main__':
   path = sys.argv[1]

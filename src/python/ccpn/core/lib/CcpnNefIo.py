@@ -1588,7 +1588,7 @@ class CcpnNefWriter:
 
     spectrum = peakList.spectrum
 
-    # frameCode for saveFrame that holds spectrum adn first peaklist.
+    # framecode for saveFrame that holds spectrum adn first peaklist.
     # If not None, the peakList will be read into that specttum
     spectrumAlreadySaved =  bool(self.ccpn2SaveFrameName.get(spectrum))
 
@@ -2558,7 +2558,7 @@ class CcpnNefReader:
     parameters['restraintType'] = restraintType
     namePrefix = restraintType[:3].capitalize() + '-'
 
-    # Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition
+    # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
     dataSetSerial = saveFrame.get('ccpn_dataset_serial')
     if dataSetSerial is not None:
@@ -2719,32 +2719,43 @@ class CcpnNefReader:
     spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
                                                                   ccpnPrefix='spectrum')
 
-    # Get name from spectrum parameters, or from the frameCode
+    # Get name from spectrum parameters, or from the framecode
     spectrumName = framecode[len(category) + 1:]
-    peakListSerial = peakListParameters.get('serial')
-    if peakListSerial:
-      ss = '`%s`' % peakListSerial
-      # Remove peakList serial suffix (which was added for disambiguation)
-      # So that multiple peakLists all go to one Spectrum
-      if spectrumName.endswith(ss):
-        spectrumName = spectrumName[:-len(ss)]
+    if spectrumName.endswith('`'):
+      peakListSerial = peakListParameters.get('serial')
+      if peakListSerial:
+        ss = '`%s`' % peakListSerial
+        # Remove peakList serial suffix (which was added for disambiguation)
+        # So that multiple peakLists all go to one Spectrum
+        if spectrumName.endswith(ss):
+          spectrumName = spectrumName[:-len(ss)]
+      else:
+        ll = spectrumName.rsplit('`',2)
+        if len(ll) == 3:
+          # name is of form abc`xyz`
+          try:
+            peakListParams['serial'] = int(ll[1])
+          except ValueError:
+            pass
+          else:
+            spectrumName = ll[0]
 
     spectrum = project.getSpectrum(spectrumName)
     if spectrum is None:
       # Spectrum does not already exist - create it.
       # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
-      frameCode = saveFrame.get('chemical_shift_list')
-      if frameCode:
-        spectrumParameters['chemicalShiftList'] = self.frameCode2Object[frameCode]
+      framecode = saveFrame.get('chemical_shift_list')
+      if framecode:
+        spectrumParameters['chemicalShiftList'] = self.frameCode2Object[framecode]
       else:
         # Defaults to first (there should be only one, but we want the read to work) ShiftList
         spectrumParameters['chemicalShiftList'] = self.defaultChemicalShiftList
 
 
-      frameCode = saveFrame.get('ccpn_sample')
-      if frameCode:
-        spectrumParameters['sample'] = self.frameCode2Object[frameCode]
+      framecode = saveFrame.get('ccpn_sample')
+      if framecode:
+        spectrumParameters['sample'] = self.frameCode2Object[framecode]
 
       # get per-dimension data - NB these are mandatory and cannot be worked around
       dimensionData = self.read_nef_spectrum_dimension(project,
@@ -4183,5 +4194,5 @@ if __name__ == '__main__':
   # nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
   nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

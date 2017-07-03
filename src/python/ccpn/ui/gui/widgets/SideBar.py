@@ -802,7 +802,7 @@ class SideBar(QtGui.QTreeWidget, Base):
         elif item.parent().text(0) == 'Substances':
           popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, newSubstance=True)   # ejb - application=self.application,
           popup.exec_()
-          popup.raise_()
+          popup.raise_()        # included setModal(True) in the above as was not modal???
           return
         elif item.parent().text(0) == 'SpectrumGroups':
           popup = SpectrumGroupEditor(mainWindow=self.mainWindow, addNew=True)
@@ -817,12 +817,19 @@ class SideBar(QtGui.QTreeWidget, Base):
       else:
         # Lower level object - get parent from parentItem
         if itemParent.shortClassName == 'DS':
-          popup = RestraintTypePopup()
+          popup = RestraintTypePopup(mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           restraintType = popup.restraintType
-          ff = NEW_ITEM_DICT.get(itemParent.shortClassName)
-          getattr(itemParent, ff)(restraintType)
+          if restraintType:
+
+            # ejb - added here because not sure whether to put it in the popup yet
+            try:
+              ff = NEW_ITEM_DICT.get(itemParent.shortClassName)
+              getattr(itemParent, ff)(restraintType)
+            except Exception as es:
+              showWarning('Restraints', 'Error modifying restraint type')
+
           return
         elif itemParent.shortClassName == 'SA':
           popup = EditSampleComponentPopup(mainWindow=self.mainWindow, sample=itemParent, newSampleComponent=True)

@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 restraintTypes = [
   'Distance',
@@ -43,20 +44,73 @@ restraintTypes = [
   'JCoupling'
 ]
 
+
 class RestraintTypePopup(CcpnDialog):
-  def __init__(self, parent=None, peakList=None, title='Restraints', **kw):
+  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Restraints', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.restraintType = ''
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
+    self.restraintType = None
 
     self.restraintTypeLabel = Label(self, "Restraint Type ", grid=(0, 0))
     self.restraintTypeList = PulldownList(self, grid=(0, 1))
     self.restraintTypeList.setData(restraintTypes)
-    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._setRestraintType], grid=(1, 1))
+    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
   def _setRestraintType(self):
-    try:
+    # try:
       self.restraintType = self.restraintTypeList.currentText()
       self.accept()
-    except Exception as e:
-      showWarning('Restraints', str(e))
+    # except Exception as e:
+    #   showWarning('Restraints', str(e))
+
+  def _repopulate(self):
+    self.restraintTypeList.setText(self.restraintType)
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    # ejb - major refactoring
+
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      self._setRestraintType()
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(str(self.windowTitle()), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
+      return False
+    else:
+      return True
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()

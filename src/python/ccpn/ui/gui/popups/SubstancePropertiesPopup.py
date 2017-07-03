@@ -281,13 +281,15 @@ class SubstancePropertiesPopup(CcpnDialog):
     self.spacerLabel = Label(self, text="")
     callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._okButton]
     texts = ['Less', 'More', 'Cancel', 'Ok']
-    if not self.createNewSubstance:
+
+    # if not self.createNewSubstance:
       # Apply doesn't really work when creating new substance
       # (So after the apply, does the next apply/ok affect the just created substance or is a new one created??)
       # Pulldown list is not updated
       # But more seriously you end up editing existing substance instead of creating new ones
-      callbacks.insert(-1, self._applyChanges)
-      texts.insert(-1, 'Apply')
+    callbacks.insert(-1, self._applyChanges)
+    texts.insert(-1, 'Apply')
+
     self.buttonBox = ButtonList(self, callbacks=callbacks, texts=texts)
     self._hideExtraSettings()
 
@@ -296,9 +298,9 @@ class SubstancePropertiesPopup(CcpnDialog):
 
   def _getCallBacksDict(self):
     return {
-      # self._renameLabelSubstance: str(self.nameSubstance.text()),   # ejb - not sure yet
-      self._changeNameSubstance: str(self.nameSubstance.text()),
-      self._labellingChanged:str(self.labelling.text()) ,
+      self._renameLabelSubstance: str(self.nameSubstance.text()),   # ejb - swap for the next two
+      # self._changeNameSubstance: str(self.nameSubstance.text()),
+      # self._labellingChanged:str(self.labelling.text()) ,
       self._chemicalNameChanged: [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
@@ -335,15 +337,15 @@ class SubstancePropertiesPopup(CcpnDialog):
       self.nameSubstance.setText(str(substance.name)+'-Copy')
       self.labelling.setText(str(substance.labelling))
 
-  def _changeNameSubstance(self, value):
-    if value:
-      if self.substance.name != value:
-        self.substance.rename(name=value)
-
-  def _labellingChanged(self, value):
-    if value:
-      if self.substance.labelling != value:
-        self.substance.rename(labelling=value)
+  # def _changeNameSubstance(self, value):
+  #   if value:
+  #     if self.substance.name != value:
+  #       self.substance.rename(name=value)
+  #
+  # def _labellingChanged(self, value):
+  #   if value:
+  #     if self.substance.labelling != value:
+  #       self.substance.rename(labelling=value)
 
   def _renameLabelSubstance(self, value):
     name = str(self.nameSubstance.text())
@@ -512,7 +514,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     return [
       (self.substance.name, str, self.nameSubstance.setText),
       (self.substance.labelling, str, self.labelling.setText),
-      (self.substance.synonyms, str, self.chemicalName.setText),
+      # (self.substance.synonyms, str, self.chemicalName.setText),
       (self.substance.smiles, str, self.smilesLineEdit.setText),
       (self.substance.empiricalFormula, str, self.empiricalFormula.setText),
       (self.substance.molecularMass, str, self.molecularMass.setText),
@@ -542,6 +544,8 @@ class SubstancePropertiesPopup(CcpnDialog):
         referenceSpectrum = self.substance.referenceSpectra[0]
         if referenceSpectrum is not None:
           self.referenceSpectra.select(referenceSpectrum.pid)
+
+      self.chemicalName.setText(SEP.join(self.substance.synonyms))  # don't know how to handle above
 
   def _applyChanges(self):
     """

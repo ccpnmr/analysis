@@ -119,17 +119,20 @@ class DuplicateSpectrumPipe(SpectraPipe):
     '''
     newSpectra = set()
     for spectrum in spectra:
-      newspectrum = spectrum._clone()
+      newspectrum = spectrum._clone1D()
       newSpectra.update([newspectrum])
 
     replaceInputData = self._kwargs[ReplaceInputData]
     if replaceInputData:
+      self.pipeline.updateInputData = True
       self.pipeline.inputData = newSpectra
       return newSpectra
     else:
       spectra = set(spectra)
       spectra.update(newSpectra)
       return spectra
+
+
 
 DuplicateSpectrumPipe.register() # Registers the pipe in the pipeline
 

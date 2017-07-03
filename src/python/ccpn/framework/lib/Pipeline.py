@@ -43,11 +43,10 @@ class Pipeline(object):
     self.pipelineName = pipelineName
     self._kwargs = {}
 
-
-
     self.inputData = set()
     self.spectrumGroups = set()
     self.queue = [] # Pipes to be ran
+    self.updateInputData = False
     # self.finishedPipe = [] # Pipes already ran
 
 
@@ -91,14 +90,15 @@ class Pipeline(object):
 
   def runPipeline(self):
     '''Run all pipes in the specified order '''
+    self._kwargs = {}
     if len(self.queue)>0:
       for pipe in self.queue:
         if pipe is not None:
+            self.updateInputData = False
             pipe.inputData = self.inputData
             pipe.spectrumGroups = self.spectrumGroups
             result = pipe.runPipe(self.inputData)
             self.inputData = result or set()
-            # self.queue.remove(pipe)
 
     return self.inputData
 

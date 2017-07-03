@@ -426,10 +426,11 @@ class GuiPipeline(CcpnModule, Pipeline):
 
           else:
             guiPipe.pipe.isActive = False
-
       self.runPipeline()
 
-    # self._updateInputData()
+    if self.updateInputData:
+      print('@{@@')
+      self._updateGuiInputData()
 
   def _openAllPipes(self):
     'Testing Only. Opens all the pipe in once with default name'
@@ -780,7 +781,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList.removeItem()
     self.setDataSelection()
 
-  def _updateInputData(self):
+  def _updateGuiInputData(self):
     'updates the InputData from the pipeline input Data'
     self.inputDataList.clear()
     for datum in self.inputData:

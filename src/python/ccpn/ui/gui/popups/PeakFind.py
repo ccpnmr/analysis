@@ -44,18 +44,22 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 class PeakFindPopup(CcpnDialog):
 # class PeakFindPopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, project=None, current=None, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
+  '''This popup works only for nDs. should be renamed '''
+  def __init__(self, mainWindow, **kw):
+    CcpnDialog.__init__(self, parent=mainWindow, setLayout=True, windowTitle='', **kw)
     # super(PeakFindPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
-
-    self.project = project
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application =  self.mainWindow.application
+    self.current = self.application.current
     self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
-    self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
-    if current is not None and current.strip is not None and len(current.strip.spectra)>0:
-      self.peakListPulldown.select(current.strip.spectra[0].peakLists[0].pid)
-    self.peakList = project.getByPid(self.peakListPulldown.currentText())
+    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
+                                   if peakList.spectrum.dimensionCount != 1])
+    if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra)>0:
+      self.peakListPulldown.select(self.current.strip.spectra[0].peakLists[0].pid)
+    self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
     self.checkBoxWidget = QtGui.QWidget()
     layout = QtGui.QGridLayout()
     self.checkBoxWidget.setLayout(layout)
@@ -123,23 +127,23 @@ class PeakFindPopup(CcpnDialog):
     self.minPositionBoxes = []
     self.maxPositionBoxes = []
 
-
-    for ii in range(self.peakList.spectrum.dimensionCount):
-      dim1MinLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' min', grid=(2+ii, 0), vAlign='t')
-      dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 1), vAlign='t')
-      dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
-      dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
-      dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][0])
-      dim1MaxLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' max', grid=(2+ii, 2), vAlign='t')
-      dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 3))
-      dim1MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
-      dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
-      dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][1])
-      self.minPositionBoxes.append(dim1MinDoubleSpinBox)
-      self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)
-    # self.excludedRegionsButton = Button(self, grid=(self.peakList.spectrum.dimensionCount+3, 0), text='Exclude Regions')
-    # self.excludedRegionsButton.setCheckable(True)
-    # self.excludedRegionsButton.toggled.connect(self.toggleExcludedRegionsPopup)
+    if self.peakList is not None:
+      for ii in range(self.peakList.spectrum.dimensionCount):
+        dim1MinLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' min', grid=(2+ii, 0), vAlign='t')
+        dim1MinDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 1), vAlign='t')
+        dim1MinDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
+        dim1MinDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
+        dim1MinDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][0])
+        dim1MaxLabel = Label(self, text='F%s ' % str (ii+1) + self.peakList.spectrum.axisCodes[ii]+' max', grid=(2+ii, 2), vAlign='t')
+        dim1MaxDoubleSpinBox = DoubleSpinbox(self, grid=(2+ii, 3))
+        dim1MaxDoubleSpinBox.setMinimum(self.peakList.spectrum.aliasingLimits[ii][0])
+        dim1MaxDoubleSpinBox.setMaximum(self.peakList.spectrum.aliasingLimits[ii][1])
+        dim1MaxDoubleSpinBox.setValue(self.peakList.spectrum.aliasingLimits[ii][1])
+        self.minPositionBoxes.append(dim1MinDoubleSpinBox)
+        self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)
+      # self.excludedRegionsButton = Button(self, grid=(self.peakList.spectrum.dimensionCount+3, 0), text='Exclude Regions')
+      # self.excludedRegionsButton.setCheckable(True)
+      # self.excludedRegionsButton.toggled.connect(self.toggleExcludedRegionsPopup)
 
 
   def _toggleExcludedRegionsPopup(self):

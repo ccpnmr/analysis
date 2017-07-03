@@ -1457,8 +1457,8 @@ class Framework:
       getLogger().warning('Peak Picking: Project has no Specta.')
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
-      from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-      popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
+      from ccpn.ui.gui.popups.PPDimensionSelector import PPdimensionSelector
+      popup = PPdimensionSelector(mainWindow=self.ui.mainWindow)
       popup.exec_()
 
   def showCopyPeakListPopup(self):

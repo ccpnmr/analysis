@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -54,6 +55,8 @@ class SubstancePropertiesPopup(CcpnDialog):
     Initialise the widget
     """
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+
+    self.setModal(True)         # ejb - WHY????
 
     self.mainWindow = mainWindow              # ejb - should always be done like this
     self.application = mainWindow.application
@@ -312,6 +315,7 @@ class SubstancePropertiesPopup(CcpnDialog):
       self._commentChanged: str(self.comment.text()),
 
     }
+
   #
   # def _substanceType(self, value):
   #   if value:
@@ -504,14 +508,53 @@ class SubstancePropertiesPopup(CcpnDialog):
     for property, value in self._getCallBacksDict().items():
       property(value)
 
+  def _setCallBacksDict(self):
+    return [
+      (self.substance.name, str, self.nameSubstance.setText),
+      (self.substance.labelling, str, self.labelling.setText),
+      (self.substance.synonyms, str, self.chemicalName.setText),
+      (self.substance.smiles, str, self.smilesLineEdit.setText),
+      (self.substance.empiricalFormula, str, self.empiricalFormula.setText),
+      (self.substance.molecularMass, str, self.molecularMass.setText),
+      # (self.QWERT, str, self.referenceSpectra.setText),
+      (self.substance.userCode, str, self.userCode.setText),
+      (self.substance.casNumber, str, self.casNumber.setText),
+      (self.substance.atomCount, str, self.atomCount.setText),
+      (self.substance.bondCount, str, self.bondCount.setText),
+      (self.substance.ringCount, str, self.ringCount.setText),
+      (self.substance.hBondDonorCount, str, self.hBondDonorCount.setText),
+      (self.substance.hBondAcceptorCount, str, self.hBondAcceptorCount.setText),
+      (self.substance.polarSurfaceArea, str, self.polarSurfaceArea.setText),
+      (self.substance.logPartitionCoefficient, str, self.logP.setText),
+      (self.substance.comment, str, self.comment.setText)
+    ]
+
+  def _repopulate(self):
+    if self.substance:
+      for attrib, attribType, widget in self._setCallBacksDict():
+        try:
+          if attrib is not None:            # trap the setting of the widgets
+            widget(attribType(attrib))
+        finally:
+          pass
+
+      if len(self.substance.referenceSpectra) > 0:
+        referenceSpectrum = self.substance.referenceSpectra[0]
+        if referenceSpectrum is not None:
+          self.referenceSpectra.select(referenceSpectrum.pid)
+
   def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    # self.application._startCommandBlock('_applyChanges')
     self.project._startCommandEchoBlock('_applyChanges')
-    # self.project.blankNotification()
-    # self.project._undo.increaseBlocking()
     try:
       if self.createNewSubstance:
         self._createNewSubstance()
@@ -520,16 +563,23 @@ class SubstancePropertiesPopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning('Substance Properties', str(es))
+      showWarning(str(self.windowTitle()), str(es))
     finally:
-      # self.project.unblankNotification()
-      # self.project._undo.decreaseBlocking()
       self.project._endCommandEchoBlock()
-      # self.application._endCommandBlock()
 
     if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
       if oldUndo != self.project._undo.numItems():
         self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
       return False
     else:
       return True

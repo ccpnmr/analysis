@@ -146,8 +146,11 @@ class SamplePropertiesPopup(CcpnDialog):
                                          callback=None,
                                          direction='h',
                                          tipTexts=None)
-    if self.sample.amountUnit is not None:
+    if self.sample.amountUnit is not None:                    # if empty then set it
       self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
+    else:
+      # put the selected value into amount
+      self.sample.amountUnit = self.sampleAmountUnitRadioButtons.get()
 
   def _setsampleAmountWidgets(self):
     self.amountQuantityLabel = Label(self, text='Amount')
@@ -292,35 +295,42 @@ class SamplePropertiesPopup(CcpnDialog):
       self._commentChanged: self.commentTextEditor.text()
     }
 
-#========================================================================================
-# ejb - new section for repopulating the widgets
-#========================================================================================
+  #========================================================================================
+  # ejb - new section for repopulating the widgets
+  #========================================================================================
 
   def _setCallBacksDict(self):
-    return {
-      str(self.sample.name): self.sampleNameLineEdit.setText,
-      str(self.sample.amountUnit): self.sampleAmountUnitRadioButtons.set,
-      str(self.sample.amount): self.sampleAmountLineEdit.setText,
-      float(self.sample.pH): self.samplepHDoubleSpinbox.setValue,
-      str(self.sample.ionicStrength): self.ionicStrengthLineEdit.setText,
-      str(self.sample.batchIdentifier): self.batchIdentifierLineEdit.setText,
-      str(self.sample.plateIdentifier): self.plateIdentifierLineEdit.setText,
-      self.sample.rowNumber: self.rowNumberLineEdit.setText,
-      self.sample.columnNumber: self.columnNumberLineEdit.setText,
-      self.sample.comment: self.commentTextEditor.setText
-    }
+    return [
+      (self.sample.name, str, self.sampleNameLineEdit.setText),
+      (self.sample.amountUnit, str, self.sampleAmountUnitRadioButtons.set),
+      (self.sample.amount, str, self.sampleAmountLineEdit.setText),
+      (self.sample.pH, float, self.samplepHDoubleSpinbox.setValue),
+      (self.sample.ionicStrength, str, self.ionicStrengthLineEdit.setText),
+      (self.sample.batchIdentifier, str, self.batchIdentifierLineEdit.setText),
+      (self.sample.plateIdentifier, str, self.plateIdentifierLineEdit.setText),
+      (self.sample.rowNumber, str, self.rowNumberLineEdit.setText),
+      (self.sample.columnNumber, str, self.columnNumberLineEdit.setText),
+      (self.sample.comment, str, self.commentTextEditor.setText)
+    ]
 
   def _repopulate(self):
-    self.sampleNameLineEdit.setText(str(self.sample.name))
-    self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
-    self.sampleAmountLineEdit.setText(str(self.sample.amount))
-    self.samplepHDoubleSpinbox.setValue(float(self.sample.pH))
-    self.ionicStrengthLineEdit.setText(str(self.sample.ionicStrength))
-    self.batchIdentifierLineEdit.setText(str(self.sample.batchIdentifier))
-    self.plateIdentifierLineEdit.setText(str(self.sample.plateIdentifier))
-    self.rowNumberLineEdit.setText(str(self.sample.rowNumber))
-    self.columnNumberLineEdit.setText(str(self.sample.columnNumber))
-    self.commentTextEditor.setText(str(self.sample.comment))
+    for attrib, attribType, widget in self._setCallBacksDict():
+      try:
+        if attrib is not None:            # trap the setting of the widgets
+          widget(attribType(attrib))
+      finally:
+        pass
+
+    # self.sampleNameLineEdit.setText(str(self.sample.name))
+    # self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
+    # self.sampleAmountLineEdit.setText(str(self.sample.amount))
+    # self.samplepHDoubleSpinbox.setValue(float(self.sample.pH))
+    # self.ionicStrengthLineEdit.setText(str(self.sample.ionicStrength))
+    # self.batchIdentifierLineEdit.setText(str(self.sample.batchIdentifier))
+    # self.plateIdentifierLineEdit.setText(str(self.sample.plateIdentifier))
+    # self.rowNumberLineEdit.setText(str(self.sample.rowNumber))
+    # self.columnNumberLineEdit.setText(str(self.sample.columnNumber))
+    # self.commentTextEditor.setText(str(self.sample.comment))
 
   def _applyChanges(self):
     """
@@ -342,7 +352,7 @@ class SamplePropertiesPopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning('Sample Properties', str(es))
+      showWarning(str(self.windowTitle()), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
@@ -350,11 +360,12 @@ class SamplePropertiesPopup(CcpnDialog):
       # should only undo if something new has been added to the undo deque
       # may cause a problem as some things may be set with the same values
       # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
       if oldUndo != self.project._undo.numItems():
         self.application.undo()
-        getLogger().debug('>>>Undo.SamplePropertiesPopup._applychanges removed')
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
       else:
-        getLogger().debug('>>>Undo.SamplePropertiesPopup._applychanges nothing to remove')
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
 
       # repopulate popup
       self._repopulate()

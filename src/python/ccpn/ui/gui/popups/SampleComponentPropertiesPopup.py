@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
 C_COMPONENT_UNIT = ['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
@@ -234,7 +235,7 @@ class EditSampleComponentPopup(CcpnDialog):
   def _getCallBacksDict(self):
     return {
             self._typeComponent: str(self.typePulldownList.get()),
-            self._concentrationChanged: self._getConcentrationValue(),
+            self._concentrationChanged: float(self.concentrationLineEdit.get()),      # ejb - self._getConcentrationValue(),
             self._concentrationUnitChanged: str(self.concentrationUnitPulldownList.get()),
             self._commentChanged: str(self.commentLineEdit.text())
             }
@@ -328,12 +329,39 @@ class EditSampleComponentPopup(CcpnDialog):
       self.buttons.buttons[1].setEnabled(False)
       self.buttons.buttons[2].setEnabled(False)
 
-  def _applyChanges(self):
-    applyAccept = False
+  #========================================================================================
+  # ejb - new section for repopulating the widgets
+  #========================================================================================
 
-    self.application._startCommandBlock('_applyChanges')
-    # self.project._startCommandEchoBlock('_applyChanges')
-    # self.project.blankNotification()
+  def _setCallBacksDict(self):
+    return [
+      (self.sampleComponent.role, str, self.typePulldownList.set),
+      (self.sampleComponent.concentrationUnit, str, self.concentrationUnitPulldownList.set),
+      (self.sampleComponent.concentration, float, self.columnNumberLineEdit.setText),
+      (self.sampleComponent.comment, str, self.commentLineEdit.setText)
+    ]
+
+  def _repopulate(self):
+    if not self.sampleComponent:
+      for attrib, attribType, widget in self._setCallBacksDict():
+        try:
+          if attrib is not None:            # trap the setting of the widgets
+            widget(attribType(attrib))
+        finally:
+          pass
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.newSampleComponentToCreate:
         self._createNewComponent()
@@ -344,14 +372,23 @@ class EditSampleComponentPopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning('Sample Component Properties', str(es))
+      showWarning(str(self.windowTitle()), str(es))
     finally:
-      # self.project.unblankNotification()
-      # self.project._endCommandEchoBlock()
-      self.application._endCommandBlock()
+      self.project._endCommandEchoBlock()
 
     if applyAccept is False:
-      self.application.undo()
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
       return False
     else:
       return True

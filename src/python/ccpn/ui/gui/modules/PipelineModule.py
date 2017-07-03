@@ -35,7 +35,7 @@ import collections
 import json
 import time
 import os
-
+from ccpn.util.Logging import getLogger , _debug3
 from collections import OrderedDict
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Spectrum import Spectrum
@@ -95,7 +95,7 @@ class PipelineWorker(QtCore.QObject):
 
   def stop(self):
     self._isRunning = False
-    print('Pipeline Thread stopped')
+    getLogger().warning('Pipeline Thread stopped')
 
 
 
@@ -401,7 +401,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     for guiPipe in self.guiPipes:
       if guiPipe.pipeName == selected:
         if guiPipe._alreadyOpened:
-          print('GuiPipe already opened. Impossible to open this pipe more then once.')
+          getLogger().warning('GuiPipe already opened. Impossible to open this pipe more then once.')
           return
 
         else:
@@ -460,7 +460,6 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _getGuiPipeClassFromClassName(self, name):
     for guiPipe in self.guiPipes:
       if guiPipe.__name__ == name:
-        print('guiPipe.__name__ == name', name)
         return guiPipe
 
   def _getGuiPipeClass(self, name):
@@ -519,7 +518,6 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [guiPipesState], pipelineSettingsParams]   '''
-    print('Saving')
     guiPipesState = self.pipelineArea.guiPipesState
     if len(guiPipesState)>0:
       self.jsonData = []
@@ -543,16 +541,16 @@ class GuiPipeline(CcpnModule, Pipeline):
           else:
             savingPath+='.json'
       except:
-        print('Insert a valid directory path. E.g /Users/user1/Desktop/')
+        getLogger().warning('Insert a valid directory path. E.g /Users/user1/Desktop/')
     self.savingDataPath = str(savingPath)
 
     try:
       with open(self.savingDataPath, 'w') as fp:
         json.dump(self.jsonData, fp, indent=2)
         fp.close()
-      print('File saved in: ', self.savingDataPath)
+        self.project._logger.info('File saved in: ', self.savingDataPath)
     except:
-      print('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
+      getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
 
 
 
@@ -756,7 +754,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputData.clear()
     self.spectrumGroups.clear()
     self.inputData = set(self.inputData)
-    print('setDataSelection Pipeline Module -> inputData:  ',self.inputData,)
     if self.project is not None:
       if len(dataTexts) == 0:
         self.goButton.setEnabled(False)

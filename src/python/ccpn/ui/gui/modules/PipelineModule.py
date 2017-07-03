@@ -429,7 +429,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
       self.runPipeline()
 
-    self._updateInputData()
+    # self._updateInputData()
 
   def _openAllPipes(self):
     'Testing Only. Opens all the pipe in once with default name'
@@ -715,7 +715,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.setDataSelection()
     self._updateInputDataWidgets()
     self.pipelineName = self.pipelineNameLabel.text()
-    self._settingsScrollArea.hide()
 
   def _cancelSettingsCallBack(self):
     self._setSettingsParams()
@@ -756,6 +755,8 @@ class GuiPipeline(CcpnModule, Pipeline):
     dataTexts = self.inputDataList.getTexts()
     self.inputData.clear()
     self.spectrumGroups.clear()
+    self.inputData = set(self.inputData)
+    print('setDataSelection Pipeline Module -> inputData:  ',self.inputData,)
     if self.project is not None:
       if len(dataTexts) == 0:
         self.goButton.setEnabled(False)

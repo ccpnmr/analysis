@@ -140,19 +140,19 @@ class SampleComponent(AbstractWrapperObject):
     """Unit of SampleComponent.concentration, one of: 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g' """
 
     result =  self._wrappedData.concentrationUnit
-    if result not in Constants.concentrationUnits:
-      self._project._logger.warning(
-        "Unsupported stored value %s for SampleComponent.concentrationUnit"
-        % result)
+    # if result is not None and result not in Constants.concentrationUnits:
+    #   self._project._logger.warning(
+    #     "Unsupported stored value %s for SampleComponent.concentrationUnit"
+    #     % result)
     #
     return result
 
   @concentrationUnit.setter
   def concentrationUnit(self, value:str):
-    if value not in Constants.concentrationUnits:
-      self._project._logger.warning(
-        "Setting unsupported value %s for SampleComponent.concentrationUnit."
-        % value)
+    # if value not in Constants.concentrationUnits:
+    #   self._project._logger.warning(
+    #     "Setting unsupported value %s for SampleComponent.concentrationUnit."
+    #     % value)
     self._wrappedData.concentrationUnit = value
 
   @property
@@ -260,10 +260,11 @@ def _newSampleComponent(self:Sample, name:str=None, labelling:str=None, role:str
   #
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-  if concentrationUnit not in Constants.concentrationUnits:
+  if concentrationUnit is not None and concentrationUnit not in Constants.concentrationUnits:
     self._project._logger.warning(
       "Unsupported value %s for SampleComponent.concentrationUnit"
       % concentrationUnit)
+    raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)  # ejb
 
   apiSample = self._wrappedData
   self._startCommandEchoBlock('newSampleComponent', name, values=locals(), defaults=defaults,

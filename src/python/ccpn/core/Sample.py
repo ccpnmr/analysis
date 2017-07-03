@@ -39,7 +39,7 @@ from ccpn.util import Constants
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
-
+from ccpn.util.Logging import getLogger
 
 class Sample(AbstractWrapperObject):
   """Corresponds to an NMR (or other) sample, with properties such as amount, pH,
@@ -119,19 +119,19 @@ class Sample(AbstractWrapperObject):
   def amountUnit(self) -> str:
     """amountUnit for sample, one of : 'L', 'g', 'mole' """
     result =  self._wrappedData.amountUnit
-    if result not in Constants.amountUnits:
-      self._project._logger.warning(
-        "Unsupported stored value %s for Sample.amountUnit."
-        % result)
+    # if result is not None and result not in Constants.amountUnits:
+    #   self._project._logger.warning(
+    #     "Unsupported stored value %s for Sample.amountUnit."
+    #     % result)
     #
     return result
 
   @amountUnit.setter
   def amountUnit(self, value:str):
-    if value not in Constants.amountUnits:
-      self._project._logger.warning(
-        "Setting unsupported value %s for Sample.amountUnit."
-        % value)
+    # if value not in Constants.amountUnits:
+    #   self._project._logger.warning(
+    #     "Setting unsupported value %s for Sample.amountUnit."
+    #     % value)
     self._wrappedData.amountUnit = value
 
   @property
@@ -291,10 +291,11 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
      ('rowNumber',None), ('columnNumber',None), ('comment', None)
     )
   )
-  if amountUnit not in Constants.amountUnits:
+  if amountUnit is not None and amountUnit not in Constants.amountUnits:
     self._project._logger.warning(
       "Unsupported value %s for Sample.amountUnit."
       % amountUnit)
+    raise ValueError("Sample.amountUnit must be in the list: %s" % Constants.amountUnits)  # ejb
 
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore

@@ -167,7 +167,7 @@ class EditSampleComponentPopup(CcpnDialog):
     self.labellingPulldownList = PulldownList(self)
     self.labellingPulldownList.setMinimumWidth(210)
     self.labellingPulldownList.setData(Labelling)
-    self.labellingPulldownList.setEnabled(False)
+    self.labellingPulldownList.setEnabled(True)   # ejb - was False
     self.labellingPulldownList.activated[str].connect(self._labellingSpecialCases)
 
   def currentLabellingWidget(self):
@@ -248,6 +248,7 @@ class EditSampleComponentPopup(CcpnDialog):
     else:
       self.substanceLabel.hide()
       self.substancePulldownList.hide()
+
       self.nameComponentLineEdit.setText('')
       self.nameComponentLineEdit.setReadOnly(False)
       self.labellingPulldownList.setEnabled(True)

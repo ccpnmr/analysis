@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 OTHER_UNIT = ['µ','m', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -291,15 +292,50 @@ class SamplePropertiesPopup(CcpnDialog):
       self._commentChanged: self.commentTextEditor.text()
     }
 
+#========================================================================================
+# ejb - new section for repopulating the widgets
+#========================================================================================
+
+  def _setCallBacksDict(self):
+    return {
+      str(self.sample.name): self.sampleNameLineEdit.setText,
+      str(self.sample.amountUnit): self.sampleAmountUnitRadioButtons.set,
+      str(self.sample.amount): self.sampleAmountLineEdit.setText,
+      float(self.sample.pH): self.samplepHDoubleSpinbox.setValue,
+      str(self.sample.ionicStrength): self.ionicStrengthLineEdit.setText,
+      str(self.sample.batchIdentifier): self.batchIdentifierLineEdit.setText,
+      str(self.sample.plateIdentifier): self.plateIdentifierLineEdit.setText,
+      self.sample.rowNumber: self.rowNumberLineEdit.setText,
+      self.sample.columnNumber: self.columnNumberLineEdit.setText,
+      self.sample.comment: self.commentTextEditor.setText
+    }
+
+  def _repopulate(self):
+    self.sampleNameLineEdit.setText(str(self.sample.name))
+    self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))
+    self.sampleAmountLineEdit.setText(str(self.sample.amount))
+    self.samplepHDoubleSpinbox.setValue(float(self.sample.pH))
+    self.ionicStrengthLineEdit.setText(str(self.sample.ionicStrength))
+    self.batchIdentifierLineEdit.setText(str(self.sample.batchIdentifier))
+    self.plateIdentifierLineEdit.setText(str(self.sample.plateIdentifier))
+    self.rowNumberLineEdit.setText(str(self.sample.rowNumber))
+    self.columnNumberLineEdit.setText(str(self.sample.columnNumber))
+    self.commentTextEditor.setText(str(self.sample.comment))
+
   def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    # ejb - major refactoring
+
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
     self.project._startCommandEchoBlock('_applyChanges')
-
-    # self.application._startCommandBlock('_applyChanges')
-    # self.project._startCommandEchoBlock('_applyChanges')
-    # self.project.blankNotification()
     try:
       for property, value in self._getCallBacksDict().items():
         property(value)
@@ -308,17 +344,20 @@ class SamplePropertiesPopup(CcpnDialog):
     except Exception as es:
       showWarning('Sample Properties', str(es))
     finally:
-      # self.project.unblankNotification()
-      # self.project._endCommandEchoBlock()
       self.project._endCommandEchoBlock()
-      # self.application._endCommandBlock()
 
     if applyAccept is False:
       # should only undo if something new has been added to the undo deque
       # may cause a problem as some things may be set with the same values
-      # and still be added to the change list
+      # and still be added to the change list, so only undo if length has changed
       if oldUndo != self.project._undo.numItems():
         self.application.undo()
+        getLogger().debug('>>>Undo.SamplePropertiesPopup._applychanges removed')
+      else:
+        getLogger().debug('>>>Undo.SamplePropertiesPopup._applychanges nothing to remove')
+
+      # repopulate popup
+      self._repopulate()
       return False
     else:
       return True

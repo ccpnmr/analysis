@@ -64,10 +64,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 
     self.spectrumDisplayIds = [sd.title for sd in project.spectrumDisplays]
     self.spectrumDisplayPids = [sd.pid for sd in project.spectrumDisplays]
-    self.radioButtonBox = RadioButtons(self.scrollArea
-                                       , self.spectrumDisplayIds
-                                       , direction='v'
-                                       , setLayout=True)
+    self.radioButtonBox = RadioButtons(self.scrollArea, self.spectrumDisplayIds, direction='v')
     # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
     self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
                                 texts=['Cancel', 'Select Display'])

@@ -429,7 +429,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
       self.runPipeline()
 
-    # self._updateInputData()
+    self._updateInputData()
 
   def _openAllPipes(self):
     'Testing Only. Opens all the pipe in once with default name'

@@ -108,12 +108,9 @@
 <span class="c1"># code below has to be synchronised with code in SCRIPT_URL</span>
 
 <div class="viewcode-block" id="FeedbackPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.FeedbackPopup.FeedbackPopup">[docs]</a><span class="k">class</span> <span class="nc">FeedbackPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-<span class="c1"># class FeedbackPopup(QtGui.QDialog):</span>
   <span class="c1"># parent mandatory and that needs to have attribute application</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Feedback Form&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    <span class="c1"># QtGui.QDialog.__init__(self, parent=parent)</span>
-    <span class="c1"># self.setWindowTitle(title)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>

@@ -232,12 +232,29 @@
 
 <div class="viewcode-block" id="Chain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Rename Chain, changing its shortName and Pid.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-      <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
-      <span class="k">if</span> <span class="n">previous</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain name must be set&quot;</span><span class="p">)</span>
+    <span class="c1"># from ccpn.util.Common import contains_whitespace</span>
+    <span class="c1">#</span>
+    <span class="c1"># if not isinstance(value, str):</span>
+    <span class="c1">#   raise TypeError(&quot;Chain name must be a string&quot;)  # ejb catch non-string</span>
+    <span class="c1"># if not value:</span>
+    <span class="c1">#   raise ValueError(&quot;Chain name must be set&quot;)  # ejb catch empty string</span>
+    <span class="c1"># if Pid.altCharacter in value:</span>
+    <span class="c1">#   raise ValueError(&quot;Character %s not allowed in ccpn.Chain.name&quot; % Pid.altCharacter)</span>
+    <span class="c1"># if contains_whitespace(value):</span>
+    <span class="c1">#   raise ValueError(&quot;whitespace not allowed in ccpn.Chain.name&quot;)</span>
+
+    <span class="n">_validateName</span><span class="p">(</span><span class="s1">&#39;Chain name&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">includeWhitespace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">previous</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
+
+    <span class="c1"># if value:</span>
+    <span class="c1">#   previous = self._project.getChain(value.translate(Pid.remapSeparators))</span>
+    <span class="c1">#   if previous not in (None, self):</span>
+    <span class="c1">#     raise ValueError(&quot;%s already exists&quot; % previous.longPid)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   raise ValueError(&quot;Chain name must be set&quot;)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -301,7 +318,20 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span></div>
 
+<span class="k">def</span> <span class="nf">_validateName</span><span class="p">(</span><span class="n">attrib</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">includeWhitespace</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">contains_whitespace</span>
 
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> must be a string&quot;</span> <span class="o">%</span> <span class="n">attrib</span><span class="p">)</span>  <span class="c1"># ejb catch non-string</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> must be set&quot;</span> <span class="o">%</span> <span class="n">attrib</span><span class="p">)</span>  <span class="c1"># ejb catch empty string</span>
+  <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">attrib</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">includeWhitespace</span> <span class="ow">and</span> <span class="n">contains_whitespace</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;whitespace not allowed in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">attrib</span><span class="p">)</span>
+
+  <span class="c1"># will only get here if all the tests pass</span>
+  <span class="k">return</span> <span class="bp">True</span>
 
 <span class="k">def</span> <span class="nf">_createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">compoundName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
@@ -335,6 +365,8 @@
   <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">shortName</span><span class="p">:</span>
     <span class="n">shortName</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">nextChainCode</span><span class="p">()</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">_validateName</span><span class="p">(</span><span class="s1">&#39;shortName&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">includeWhitespace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>   <span class="c1"># ejb - test the name</span>
 
   <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
   <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -344,6 +376,8 @@
   <span class="k">if</span> <span class="n">compoundName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uniqueSubstanceName</span><span class="p">()</span>
   <span class="k">elif</span> <span class="n">apiRefComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">compoundName</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">_validateName</span><span class="p">(</span><span class="s1">&#39;compoundName&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">compoundName</span><span class="p">,</span> <span class="n">includeWhitespace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>   <span class="c1"># ejb - test the name</span>
+
     <span class="n">name</span> <span class="o">=</span> <span class="n">compoundName</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

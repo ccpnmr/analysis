@@ -11,10 +11,8 @@ Subpackages
 
 .. toctree::
 
-    ccpn.AnalysisScreen.guiPipeline
     ccpn.AnalysisScreen.lib
-    ccpn.AnalysisScreen.modules
-    ccpn.AnalysisScreen.popups
+    ccpn.AnalysisScreen.pipes
 
 Submodules
 ----------

@@ -189,19 +189,19 @@
     <span class="sd">&quot;&quot;&quot;Unit of SampleComponent.concentration, one of: &#39;Molar&#39;, &#39;g/L&#39;, &#39;L/L&#39;, &#39;mol/mol&#39;, &#39;g/g&#39; &quot;&quot;&quot;</span>
 
     <span class="n">result</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">concentrationUnit</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;Unsupported stored value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit&quot;</span>
-        <span class="o">%</span> <span class="n">result</span><span class="p">)</span>
+    <span class="c1"># if result is not None and result not in Constants.concentrationUnits:</span>
+    <span class="c1">#   self._project._logger.warning(</span>
+    <span class="c1">#     &quot;Unsupported stored value %s for SampleComponent.concentrationUnit&quot;</span>
+    <span class="c1">#     % result)</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@concentrationUnit.setter</span>
   <span class="k">def</span> <span class="nf">concentrationUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;Setting unsupported value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit.&quot;</span>
-        <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+    <span class="c1"># if value not in Constants.concentrationUnits:</span>
+    <span class="c1">#   self._project._logger.warning(</span>
+    <span class="c1">#     &quot;Setting unsupported value %s for SampleComponent.concentrationUnit.&quot;</span>
+    <span class="c1">#     % value)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">concentrationUnit</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
@@ -309,10 +309,11 @@
   <span class="c1">#</span>
   <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb</span>
 
-  <span class="k">if</span> <span class="n">concentrationUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">concentrationUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">concentrationUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
       <span class="s2">&quot;Unsupported value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit&quot;</span>
       <span class="o">%</span> <span class="n">concentrationUnit</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SampleComponent.concentrationUnit must be in the list: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">)</span>  <span class="c1"># ejb</span>
 
   <span class="n">apiSample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newSampleComponent&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>

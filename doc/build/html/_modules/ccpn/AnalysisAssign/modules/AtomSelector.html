@@ -216,9 +216,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_cleanupPickAndAssignWidget</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sidechainModifiers</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
+    <span class="c1"># wb104 27 Jun 2017: changed _cleanupPickAndAssignWidget so removes widgets in reverse order</span>
+    <span class="c1"># not sure if there was anything else leading to this cludge (and one below) though</span>
     <span class="c1"># cludge: don&#39;t know why I have to do this for the button to appear: TODO: fix this</span>
-    <span class="n">_Label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">_Label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1">###_Label = Label(self, text=&#39;&#39;)</span>
+    <span class="c1">###self.pickAndAssignWidget.layout().addWidget(_Label, 0, 0)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;CA&#39;</span><span class="p">,</span> <span class="s1">&#39;CB&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;HA&#39;</span><span class="p">,</span> <span class="s1">&#39;HB&#39;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
@@ -236,9 +238,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_cleanupPickAndAssignWidget</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sidechainModifiers</span><span class="p">:</span> <span class="n">w</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
+    <span class="c1"># see comment about cludge above</span>
     <span class="c1"># cludge: don&#39;t know why I have to do this for the button to appear: TODO: fix this</span>
-    <span class="n">_label</span><span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>  <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">_label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+    <span class="c1">###_label= Label(self.pickAndAssignWidget, &#39;&#39;,  hAlign=&#39;l&#39;)</span>
+    <span class="c1">###self.pickAndAssignWidget.layout().addWidget(_label, 0, 0, QtCore.Qt.AlignRight)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateLayout</span><span class="p">()</span>
 
@@ -356,8 +359,8 @@
   <span class="k">def</span> <span class="nf">_cleanupPickAndAssignWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
     <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
-      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()):</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">():</span>

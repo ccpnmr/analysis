@@ -25,6 +25,14 @@ ccpn.util.nef.CingCcpn module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.nef.CompareNef module
+-------------------------------
+
+.. automodule:: ccpn.util.nef.CompareNef
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.nef.GenericStarParser module
 --------------------------------------
 

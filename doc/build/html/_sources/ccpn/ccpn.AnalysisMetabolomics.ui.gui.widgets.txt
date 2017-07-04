@@ -17,12 +17,4 @@ ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.ui.gui.widgets.PipelineWidgets module
----------------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.ui.gui.widgets.PipelineWidgets
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 

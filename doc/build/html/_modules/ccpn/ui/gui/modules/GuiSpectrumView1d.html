@@ -117,10 +117,11 @@
     <span class="c1"># have to add in two steps because simple plot() command draws all other data even if currently not visible</span>
     <span class="c1">##self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotDataItem</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">sliceColour</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curve</span><span class="o">.</span><span class="n">setClickable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">sigClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clicked</span><span class="p">)</span>
+    <span class="c1"># self.plot.curve.setClickable(True)</span>
+    <span class="c1"># self.plot.sigClicked.connect(self._clicked)</span>
     <span class="c1"># below causes a problem because wrapper not ready yet at this point</span>
     <span class="c1">#for peakList in self.spectrum.peakLists:</span>
     <span class="c1">#  self.strip.showPeaks(peakList)</span>
@@ -260,9 +261,9 @@
     <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#e4e15b&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span> <span class="k">else</span> <span class="s1">&#39;#000000&#39;</span>
     <span class="n">hTrace</span><span class="o">.</span><span class="n">setPen</span><span class="p">({</span><span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="n">colour</span><span class="p">})</span>
     <span class="n">hTrace</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-      
-  <span class="k">def</span> <span class="nf">_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="c1"># def _clicked(self):</span>
+  <span class="c1">#   print(self.plot.objectName())</span>
     
 
   <span class="c1"># # TBD: should function below be removed???</span>

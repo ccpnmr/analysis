@@ -209,6 +209,14 @@ ccpn.ui.gui.widgets.FileDialog module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.FillBetweenRegions module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.FillBetweenRegions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.FilteringPulldownList module
 ------------------------------------------------
 
@@ -277,6 +285,14 @@ ccpn.ui.gui.widgets.LineEdit module
 -----------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.LineEdit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.LinearRegionsPlot module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.LinearRegionsPlot
     :members:
     :undoc-members:
     :show-inheritance:

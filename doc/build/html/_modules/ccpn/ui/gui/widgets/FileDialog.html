@@ -47,8 +47,8 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.widgets.FileDialog</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
-
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module Documentation here</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
@@ -78,14 +78,21 @@
 <span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 
 <div class="viewcode-block" id="FileDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.FileDialog">[docs]</a><span class="k">class</span> <span class="nc">FileDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">):</span>
 
+  <span class="c1"># def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,</span>
+  <span class="c1">#              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):</span>
+
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">acceptMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+               <span class="n">acceptMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="c1"># ejb - added selectFile to suggest a filename in the file box</span>
+    <span class="c1">#       this is not passed to the super class</span>
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-
 
     <span class="n">staticFunctionDict</span> <span class="o">=</span> <span class="p">{</span>
       <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s1">&#39;getOpenFileName&#39;</span><span class="p">,</span>
@@ -108,6 +115,10 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">fileMode</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptMode</span><span class="p">(</span><span class="n">acceptMode</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selectFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>    <span class="c1"># ejb - populates fileDialog with a suggested filename</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectFile</span><span class="p">(</span><span class="n">selectFile</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">preferences</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">False</span>
 
@@ -150,15 +161,99 @@
       <span class="k">return</span> <span class="bp">None</span></div></div>
 
 
+<div class="viewcode-block" id="NefFileDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog">[docs]</a><span class="k">class</span> <span class="nc">NefFileDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">acceptMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="c1"># ejb - added selectFile to suggest a filename in the file box</span>
+    <span class="c1">#       this is not passed to the super class</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="n">staticFunctionDict</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s1">&#39;getOpenFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="s1">&#39;getOpenFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s1">&#39;getExistingDirectory&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="s1">&#39;getOpenFileNames&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">):</span> <span class="s1">&#39;getOpenFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">):</span> <span class="s1">&#39;getOpenFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Directory</span><span class="p">):</span> <span class="s1">&#39;getExistingDirectory&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ExistingFiles</span><span class="p">):</span> <span class="s1">&#39;getOpenFileNames&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Directory</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ExistingFiles</span><span class="p">):</span> <span class="s1">&#39;getSaveFileName&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">fileMode</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptMode</span><span class="p">(</span><span class="n">acceptMode</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Accept</span><span class="p">,</span> <span class="s1">&#39;Select&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selectFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>    <span class="c1"># ejb - populates fileDialog with a suggested filename</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectFile</span><span class="p">(</span><span class="n">selectFile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">preferences</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">preferences</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span> <span class="o">=</span> <span class="n">preferences</span><span class="o">.</span><span class="n">useNative</span>
+      <span class="k">if</span> <span class="n">preferences</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                           QFileDialog QWidget {</span>
+<span class="s2">                                               background-color: #2a3358;</span>
+<span class="s2">                                               color: #f7ffff;</span>
+<span class="s2">                                               }</span>
+<span class="s2">                          &quot;&quot;&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">preferences</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;QFileDialog QWidget {color: #464e76; }&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NefFileDialog.selectedFiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.selectedFiles">[docs]</a>  <span class="k">def</span> <span class="nf">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="NefFileDialog.selectedFile"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.selectedFile">[docs]</a>  <span class="k">def</span> <span class="nf">selectedFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span></div>
+
+  <span class="k">def</span> <span class="nf">_setParent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">acceptFunc</span><span class="p">,</span> <span class="n">rejectFunc</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">acceptFunc</span> <span class="o">=</span> <span class="n">acceptFunc</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rejectFunc</span> <span class="o">=</span> <span class="n">rejectFunc</span>
+
+<div class="viewcode-block" id="NefFileDialog.reject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.reject">[docs]</a>  <span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">NefFileDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rejectFunc</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NefFileDialog.accept"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.accept">[docs]</a>  <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">NefFileDialog</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">acceptFunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="NefFileDialog.setLabels"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.setLabels">[docs]</a>  <span class="k">def</span> <span class="nf">setLabels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="s1">&#39;Save&#39;</span><span class="p">,</span> <span class="n">cancel</span><span class="o">=</span><span class="s1">&#39;Cancel&#39;</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Accept</span><span class="p">,</span> <span class="n">save</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Reject</span><span class="p">,</span> <span class="n">cancel</span><span class="p">)</span></div></div>
+
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span>
 
-<div class="viewcode-block" id="LineEditButtonDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog">[docs]</a><span class="k">class</span> <span class="nc">LineEditButtonDialog</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="LineEditButtonDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog">[docs]</a><span class="k">class</span> <span class="nc">LineEditButtonDialog</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span> <span class="n">textDialog</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">textLineEdit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">openPathIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">)</span>
 
@@ -177,7 +272,12 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">fileMode</span> <span class="o">=</span> <span class="n">fileMode</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">textLineEdit</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+    <span class="n">tipText</span><span class="o">=</span> <span class="s1">&#39;Select directory where to save&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">textLineEdit</span><span class="p">,</span> <span class="n">textAligment</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">minimumWidth</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                             <span class="n">tipText</span><span class="o">=</span><span class="n">tipText</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+                  <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
     <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openPathIcon</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_openFileDialog</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
     <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;border: 0px solid transparent&quot;</span><span class="p">)</span>
 
@@ -186,7 +286,13 @@
                <span class="n">acceptMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,)</span>
     <span class="n">selectedFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">selectedFile</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">selectedFile</span><span class="p">))</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">selectedFile</span><span class="p">))</span>
+
+<div class="viewcode-block" id="LineEditButtonDialog.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LineEditButtonDialog.setText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.LineEditButtonDialog.setText">[docs]</a>  <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div></div>
 
 
 

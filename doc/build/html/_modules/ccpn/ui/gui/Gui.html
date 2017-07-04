@@ -88,7 +88,9 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.Ui</span> <span class="kn">import</span> <span class="n">Ui</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.RegisterPopup</span> <span class="kn">import</span> <span class="n">RegisterPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">Application</span>
+
 <span class="c1"># This import initializes relative paths for QT style-sheets.  Do not remove!</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">resources_rc</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
 
@@ -238,10 +240,11 @@
       <span class="n">position</span><span class="o">=</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">position</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">position</span><span class="p">,</span>
       <span class="n">relativeTo</span><span class="o">=</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">relativeTo</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">relativeTo</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.ui.addBlankDisplay({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logParametersString</span><span class="p">))</span>
+    <span class="n">thisBlank</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">mDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">currentModulesDict</span>
       <span class="k">if</span> <span class="s1">&#39;BlankDisplay&#39;</span> <span class="ow">in</span> <span class="n">mDict</span><span class="p">:</span>
-        <span class="k">pass</span>
+        <span class="n">thisBlank</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="c1"># blankDisplay = mDict[&#39;BlankDisplay&#39;]</span>
         <span class="c1"># blankDisplay.show()</span>
       <span class="k">else</span><span class="p">:</span>
@@ -252,18 +255,18 @@
         <span class="c1"># The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.</span>
 
 
-        <span class="c1"># blankDisplay = self.mainWindow.newBlankDisplay()</span>
+        <span class="n">thisBlank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">newBlankDisplay</span><span class="p">()</span>
         <span class="c1"># return blankDisplay # Why a return blankDisplay?</span>
 
          <span class="c1"># Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay</span>
-        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.BlankDisplay</span> <span class="kn">import</span> <span class="n">BlankDisplay</span>
-        <span class="n">blankDisplay</span> <span class="o">=</span> <span class="n">BlankDisplay</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">blankDisplay</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span>
-                                             <span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">)</span>   <span class="c1"># ejb</span>
+        <span class="c1"># from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay</span>
+        <span class="c1"># blankDisplay = BlankDisplay(mainWindow=self.mainWindow)</span>
+        <span class="c1"># self.mainWindow.moduleArea.addModule(blankDisplay, position=&#39;right&#39;</span>
+        <span class="c1">#                                      , relativeTo=self.mainWindow.moduleArea)   # ejb</span>
 
     <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
-
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+      <span class="k">return</span> <span class="n">thisBlank</span></div>
 
   <span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
   <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>

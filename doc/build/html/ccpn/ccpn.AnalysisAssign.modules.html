@@ -62,8 +62,54 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="ccpn-analysisassign-modules-assignmentinspectormodule-module">
-<h2>ccpn.AnalysisAssign.modules.AssignmentInspectorModule module<a class="headerlink" href="#ccpn-analysisassign-modules-assignmentinspectormodule-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ccpn.AnalysisAssign.modules.AssignmentInspectorModule">
+<span id="ccpn-analysisassign-modules-assignmentinspectormodule-module"></span><h2>ccpn.AnalysisAssign.modules.AssignmentInspectorModule module<a class="headerlink" href="#module-ccpn.AnalysisAssign.modules.AssignmentInspectorModule" title="Permalink to this headline">¶</a></h2>
+<p>This file contains AssignmentInspectorModule class</p>
+<p>derived from ModifyAssignmentModule by Simon;
+extensively modified by Geerten 1-9/12/2016:
+- intialisation with &#8216;empty&#8217; settings possible,
+- now responsive to current.nmrResidues</p>
+<dl class="class">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule">
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.AssignmentInspectorModule.</code><code class="descname">AssignmentInspectorModule</code><span class="sig-paren">(</span><em>mainWindow</em>, <em>name='Assignment Inspector'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/AssignmentInspectorModule.html#AssignmentInspectorModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>This Module allows inspection of the NmrAtoms of a selected NmrResidue
+It responds to current.nmrResidues, taking the last added residue to this list
+The NmrAtom listWidget allows for selection of the nmrAtom; subsequently its assignedPeaks
+are displayed.</p>
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.Position">
+<code class="descname">Position</code><em class="property"> = 'top'</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.Position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.className">
+<code class="descname">className</code><em class="property"> = 'AssignmentInspectorModule'</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.getColumns">
+<code class="descname">getColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/AssignmentInspectorModule.html#AssignmentInspectorModule.getColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.getColumns" title="Permalink to this definition">¶</a></dt>
+<dd><p>get collumns for intialisation of table</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.includeColumnsWidget">
+<code class="descname">includeColumnsWidget</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.includeColumnsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.AnalysisAssign.modules.AtomSelector">
 <span id="ccpn-analysisassign-modules-atomselector-module"></span><h2>ccpn.AnalysisAssign.modules.AtomSelector module<a class="headerlink" href="#module-ccpn.AnalysisAssign.modules.AtomSelector" title="Permalink to this headline">¶</a></h2>
@@ -393,7 +439,7 @@ ordered lists to makeStripPlot so strips are in the correct order.</p>
   <ul>
 <li><a class="reference internal" href="#">ccpn.AnalysisAssign.modules package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#ccpn-analysisassign-modules-assignmentinspectormodule-module">ccpn.AnalysisAssign.modules.AssignmentInspectorModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.AnalysisAssign.modules.AssignmentInspectorModule">ccpn.AnalysisAssign.modules.AssignmentInspectorModule module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisAssign.modules.AtomSelector">ccpn.AnalysisAssign.modules.AtomSelector module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisAssign.modules.BackboneAssignmentModule">ccpn.AnalysisAssign.modules.BackboneAssignmentModule module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisAssign.modules.PickAndAssignModule">ccpn.AnalysisAssign.modules.PickAndAssignModule module</a></li>

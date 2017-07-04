@@ -93,6 +93,7 @@
 <p>chain (last selected chain); chains (all selected chains); 
 chemicalShift (last selected chemicalShift); chemicalShifts (all selected chemicalShifts); 
 chemicalShiftList (last selected chemicalShiftList); chemicalShiftLists (all selected chemicalShiftLists); 
+integral (last selected integral); integrals (all selected integrals); 
 nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); 
 nmrChain (last selected nmrChain); nmrChains (all selected nmrChains); 
 nmrResidue (last selected nmrResidue); nmrResidues (all selected nmrResidues); 
@@ -100,6 +101,7 @@ peak (last selected peak); peaks (all selected peaks);
 residue (last selected residue); residues (all selected residues); 
 sample (last selected sample); samples (all selected samples); 
 spectrumGroup (last selected spectrumGroup); 
+spectrumHit (last selected spectrumHit); 
 strip (last selected strip); 
 substance (last selected substance); substances (all selected substances); 
 axisCode (last selected axisCode); 
@@ -119,6 +121,11 @@ position (last cursor position); positions (last cursor positions)</p>
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.addChemicalShiftList">
 <code class="descname">addChemicalShiftList</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addChemicalShiftList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.addIntegral">
+<code class="descname">addIntegral</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addIntegral" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -237,6 +244,11 @@ Current chemicalShifts</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Current.Current.clearIntegrals">
+<code class="descname">clearIntegrals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearIntegrals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Current.Current.clearNmrAtoms">
 <code class="descname">clearNmrAtoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearNmrAtoms" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -300,8 +312,22 @@ Current cursorPosition</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.framework.Current.Current.integral">
+<code class="descname">integral</code><a class="headerlink" href="#ccpn.framework.Current.Current.integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current integral</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.integrals">
+<code class="descname">integrals</code><a class="headerlink" href="#ccpn.framework.Current.Current.integrals" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current integrals</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.framework.Current.Current.ll">
-<code class="descname">ll</code><em class="property"> = ['\nchain (last selected chain)', 'chains (all selected chains)', '\nchemicalShift (last selected chemicalShift)', 'chemicalShifts (all selected chemicalShifts)', '\nchemicalShiftList (last selected chemicalShiftList)', 'chemicalShiftLists (all selected chemicalShiftLists)', '\nnmrAtom (last selected nmrAtom)', 'nmrAtoms (all selected nmrAtoms)', '\nnmrChain (last selected nmrChain)', 'nmrChains (all selected nmrChains)', '\nnmrResidue (last selected nmrResidue)', 'nmrResidues (all selected nmrResidues)', '\npeak (last selected peak)', 'peaks (all selected peaks)', '\nresidue (last selected residue)', 'residues (all selected residues)', '\nsample (last selected sample)', 'samples (all selected samples)', '\nspectrumGroup (last selected spectrumGroup)', '\nstrip (last selected strip)', '\nsubstance (last selected substance)', 'substances (all selected substances)', '\naxisCode (last selected axisCode)', '\ncursorPosition (last cursor cursorPosition - (posX,posY) tuple)', '\nposition (last cursor position)', 'positions (last cursor positions)']</em><a class="headerlink" href="#ccpn.framework.Current.Current.ll" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ll</code><em class="property"> = ['\nchain (last selected chain)', 'chains (all selected chains)', '\nchemicalShift (last selected chemicalShift)', 'chemicalShifts (all selected chemicalShifts)', '\nchemicalShiftList (last selected chemicalShiftList)', 'chemicalShiftLists (all selected chemicalShiftLists)', '\nintegral (last selected integral)', 'integrals (all selected integrals)', '\nnmrAtom (last selected nmrAtom)', 'nmrAtoms (all selected nmrAtoms)', '\nnmrChain (last selected nmrChain)', 'nmrChains (all selected nmrChains)', '\nnmrResidue (last selected nmrResidue)', 'nmrResidues (all selected nmrResidues)', '\npeak (last selected peak)', 'peaks (all selected peaks)', '\nresidue (last selected residue)', 'residues (all selected residues)', '\nsample (last selected sample)', 'samples (all selected samples)', '\nspectrumGroup (last selected spectrumGroup)', '\nspectrumHit (last selected spectrumHit)', '\nstrip (last selected strip)', '\nsubstance (last selected substance)', 'substances (all selected substances)', '\naxisCode (last selected axisCode)', '\ncursorPosition (last cursor cursorPosition - (posX,posY) tuple)', '\nposition (last cursor position)', 'positions (last cursor positions)']</em><a class="headerlink" href="#ccpn.framework.Current.Current.ll" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -421,6 +447,11 @@ on the module.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Current.Current.removeIntegral">
+<code class="descname">removeIntegral</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeIntegral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Current.Current.removeNmrAtom">
 <code class="descname">removeNmrAtom</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeNmrAtom" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -499,6 +530,13 @@ Current samples</p>
 <code class="descname">spectrumGroup</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
 Current spectrumGroup</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.spectrumHit">
+<code class="descname">spectrumHit</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumHit" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current spectrumHit</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -646,12 +684,6 @@ Current substances</p>
 <dt id="ccpn.framework.Framework.Framework.backupProject">
 <code class="descname">backupProject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.backupProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.backupProject" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Framework.Framework.blankDisplay">
-<code class="descname">blankDisplay</code><a class="headerlink" href="#ccpn.framework.Framework.Framework.blankDisplay" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>mutable</em> -</p>
-</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.clearLogFile">
@@ -944,6 +976,12 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Framework.Framework.showCreateChainPopup">
+<code class="descname">showCreateChainPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showCreateChainPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showCreateChainPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays sequence creation popup.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showExperimentTypePopup">
 <code class="descname">showExperimentTypePopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showExperimentTypePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showExperimentTypePopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays experiment type popup.</p>
@@ -953,6 +991,12 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 <dt id="ccpn.framework.Framework.Framework.showFeedbackPopup">
 <code class="descname">showFeedbackPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showFeedbackPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showFeedbackPopup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Framework.Framework.showIntegralTable">
+<code class="descname">showIntegralTable</code><span class="sig-paren">(</span><em>position: str = 'left'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em>, <em>integralList: ccpn.core.IntegralList.IntegralList = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showIntegralTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showIntegralTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays integral table on left of main window with specified list selected.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showIssuesList">
@@ -968,12 +1012,6 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 <dt id="ccpn.framework.Framework.Framework.showMacroEditor">
 <code class="descname">showMacroEditor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showMacroEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showMacroEditor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays macro editor.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Framework.Framework.showMoleculePopup">
-<code class="descname">showMoleculePopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showMoleculePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showMoleculePopup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Displays sequence creation popup.</p>
 </dd></dl>
 
 <dl class="method">

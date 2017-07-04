@@ -380,6 +380,7 @@
     <span class="c1"># xPpm = peak.position[dataDims[0].dimensionIndex]</span>
     <span class="n">xAxisIndex</span> <span class="o">=</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">xPpm</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">xAxisIndex</span><span class="p">]</span>
+    <span class="c1"># if xPpm and peak.height is not None:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">xPpm</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">setupPeakAnnotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">peakListView</span><span class="o">.</span><span class="n">peakItems</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span></div>

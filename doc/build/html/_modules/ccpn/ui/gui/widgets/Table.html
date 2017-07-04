@@ -196,7 +196,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
@@ -216,7 +216,7 @@
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
@@ -233,6 +233,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DefaultContextMenu</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalScrollMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScrollPerItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setVerticalScrollMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScrollPerItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span> <span class="o">=</span> <span class="n">multiSelect</span>
     <span class="k">if</span> <span class="n">multiSelect</span><span class="p">:</span>
@@ -286,10 +287,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">acceptDrops</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setDragDropMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InternalMove</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="c1"># context menu on header</span>
-    <span class="c1"># headers = self.horizontalHeader()</span>
-    <span class="c1"># headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)</span>
-    <span class="c1"># headers.customContextMenuRequested.connect(lambda: self.tableContextMenu())</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span>
+    <span class="n">headers</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
+    <span class="n">headers</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headerContextMenu</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableContextMenu</span><span class="p">)</span>
@@ -415,6 +416,9 @@
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">setEditValue</span><span class="p">:</span>    <span class="c1"># ejb - editable fields don&#39;t actionCallback</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.hideColumnName"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.hideColumnName">[docs]</a>  <span class="k">def</span> <span class="nf">hideColumnName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getColumnInt</span><span class="p">(</span><span class="n">columnName</span><span class="o">=</span><span class="n">name</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ObjectTable.getCurrentIndex"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentIndex">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -655,17 +659,35 @@
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObjectTable.tableContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.tableContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">tableContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectTable.headerContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.headerContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">headerContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
 
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item</span>
+
+
+    <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+    <span class="n">columnsSettings</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Columns Settings...&quot;</span><span class="p">)</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">columnsSettings</span><span class="p">:</span>
+      <span class="n">settingsPopup</span> <span class="o">=</span> <span class="n">ColumnViewSettingsPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hiddenColumns</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+      <span class="n">settingsPopup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+      <span class="n">settingsPopup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>  <span class="c1"># exclusive control to the menu and return _hiddencolumns</span></div>
+
+
+
+
+<div class="viewcode-block" id="ObjectTable.tableContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.tableContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">tableContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
     <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
     <span class="c1"># copyMenu =  menu.addAction(&quot;Copy Selected&quot;)</span>
     <span class="n">exportMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Export Table&quot;</span><span class="p">)</span>
-    <span class="c1"># searchMenu = menu.addAction(&quot;Search&quot;)</span>
-
+    <span class="n">deleteMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Delete&quot;</span><span class="p">)</span>
     <span class="n">action</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">exportMenu</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="p">()</span></div>
 
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">exportMenu</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">deleteMenu</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">deleteObjFromTable</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ObjectTable.exportDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.exportDialog">[docs]</a>  <span class="k">def</span> <span class="nf">exportDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -719,6 +741,17 @@
     <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
     <span class="n">dataFrame</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dataFrame</span></div>
+
+<div class="viewcode-block" id="ObjectTable.deleteObjFromTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.deleteObjFromTable">[docs]</a>  <span class="k">def</span> <span class="nf">deleteObjFromTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Delete Item</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Delete </span><span class="si">%s</span><span class="s1">selected item</span><span class="si">%s</span><span class="s1"> from the project?&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">):</span>
+          <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="ObjectTable.filterRows"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.filterRows">[docs]</a>  <span class="k">def</span> <span class="nf">filterRows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1196,44 +1229,86 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">formatPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EXPORT_FORMATS</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="ColumnViewSettingsPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettingsPopup">[docs]</a><span class="k">class</span> <span class="nc">ColumnViewSettingsPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Column Settings&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widgetColumnViewSettings</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="n">hideColumns</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Close&#39;</span><span class="p">],</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="s1">&#39;Save the hidden columns to the table class. So it remembers when you open again the popup&#39;</span>
+    <span class="n">hiddenColumns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetColumnViewSettings</span><span class="o">.</span><span class="n">_getHiddenColumns</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">_hiddenColumns</span> <span class="o">=</span> <span class="n">hiddenColumns</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">hiddenColumns</span></div>
 
 <span class="n">SEARCH_MODES</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;Literal&#39;</span><span class="p">,</span><span class="s1">&#39;Case Sensitive Literal&#39;</span><span class="p">,</span><span class="s1">&#39;Regular Expression&#39;</span> <span class="p">]</span>
+<span class="n">CheckboxTipText</span> <span class="o">=</span> <span class="s1">&#39;Select column to be visible on the table.&#39;</span>
 
 <div class="viewcode-block" id="ColumnViewSettings"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings">[docs]</a><span class="k">class</span> <span class="nc">ColumnViewSettings</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
   <span class="sd">&#39;&#39;&#39; hide show check boxes corresponding to the table columns &#39;&#39;&#39;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">hideColumns</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="o">=</span><span class="n">direction</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># self.hiddenColumns = []</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="o">=</span> <span class="n">hideColumns</span> <span class="ow">or</span> <span class="p">[]</span>      <span class="c1"># list of column names</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hideColumnWidths</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initCheckBoxes</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">filterLabel</span> <span class="o">=</span>  <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Display Columns&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterLabel</span> <span class="o">=</span>  <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Display Columns&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="ColumnViewSettings.initCheckBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings.initCheckBoxes">[docs]</a>  <span class="k">def</span> <span class="nf">initCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span>
+
     <span class="k">if</span> <span class="n">columns</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">colum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
-        <span class="n">tipTex</span> <span class="o">=</span> <span class="s1">&#39;Hide/Show </span><span class="si">%s</span><span class="s1"> column&#39;</span> <span class="o">%</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="o">==</span><span class="s1">&#39;v&#39;</span><span class="p">:</span>
-          <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span><span class="p">,</span>  <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                        <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span><span class="n">tipText</span><span class="o">=</span> <span class="n">tipTex</span><span class="p">,)</span>
+          <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+          <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span>
+                        <span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="bp">False</span><span class="p">,</span>
+                        <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span><span class="n">tipText</span><span class="o">=</span> <span class="n">CheckboxTipText</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span><span class="p">,</span>  <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                        <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span><span class="n">tipText</span><span class="o">=</span> <span class="n">tipTex</span><span class="p">,)</span>
+          <span class="n">cb</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCallBack</span>
+                        <span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span> <span class="k">else</span> <span class="bp">False</span><span class="p">,</span>
+                        <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span><span class="n">tipText</span><span class="o">=</span> <span class="n">CheckboxTipText</span><span class="p">,)</span>
 
         <span class="n">cb</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">cb</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span><span class="o">*</span><span class="mf">1.3</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">colum</span><span class="o">.</span><span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_showColumn</span><span class="p">(</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_hideColumn</span><span class="p">(</span><span class="n">colum</span><span class="o">.</span><span class="n">heading</span><span class="p">)</span></div>
+    <span class="c1"># self.table._hiddenColumns = []</span>
 
+
+  <span class="k">def</span> <span class="nf">_getHiddenColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span>
 
 <div class="viewcode-block" id="ColumnViewSettings.checkBoxCallBack"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings.checkBoxCallBack">[docs]</a>  <span class="k">def</span> <span class="nf">checkBoxCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">checkBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_showColumn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_hideColumn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+    <span class="n">currentCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">checkedBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxes</span><span class="p">:</span>
+      <span class="n">checkBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">checkedBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkBox</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">checkedBoxes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_showColumn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hideColumn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1">#always display at least one columns, disables the last checkbox</span>
+      <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+      <span class="n">currentCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ColumnViewSettings.updateWidgets"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ColumnViewSettings.updateWidgets">[docs]</a>  <span class="k">def</span> <span class="nf">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
@@ -1245,10 +1320,18 @@
 
   <span class="k">def</span> <span class="nf">_hideColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">hideColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getColumnInt</span><span class="p">(</span><span class="n">columnName</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+    <span class="c1"># self._hideColumnWidths[name] = self.table.columnWidth(self.table.getColumnInt(columnName=name))</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="c1"># self.hiddenColumns.append(name)</span>
 
   <span class="k">def</span> <span class="nf">_showColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">showColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getColumnInt</span><span class="p">(</span><span class="n">columnName</span><span class="o">=</span><span class="n">name</span><span class="p">))</span></div>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">showColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getColumnInt</span><span class="p">(</span><span class="n">columnName</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+    <span class="c1"># if name in self._hideColumnWidths:</span>
+    <span class="c1">#   self.table.setColumnWidth(self.table.getColumnInt(columnName=name), self._hideColumnWidths[name])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getColumnInt</span><span class="p">(</span><span class="n">columnName</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">hideColumns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectTableFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableFilter</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
 

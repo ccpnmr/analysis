@@ -77,6 +77,309 @@ and converts strings to numerical values with some limited heuristics.</p>
 <div class="section" id="ccpn-util-nef-cingccpn-module">
 <h2>ccpn.util.nef.CingCcpn module<a class="headerlink" href="#ccpn-util-nef-cingccpn-module" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-ccpn.util.nef.CompareNef">
+<span id="ccpn-util-nef-comparenef-module"></span><h2>ccpn.util.nef.CompareNef module<a class="headerlink" href="#module-ccpn.util.nef.CompareNef" title="Permalink to this headline">¶</a></h2>
+<p>compareNef - a series of routines to compare the contents of two Nef files</p>
+<dl class="docutils">
+<dt>Command Line Usage:</dt>
+<dd><p class="first">compareNef for execution from the command line with a suitable script
+An example can be found in AnalysisV3/bin/compareNef:</p>
+<blockquote>
+<div>#!/usr/bin/env sh
+export CCPNMR_TOP_DIR=&#8221;$(dirname $(cd $(dirname &#8220;$0&#8221;); pwd))&#8221;
+export ANACONDA3=${CCPNMR_TOP_DIR}/miniconda
+export PYTHONPATH=${CCPNMR_TOP_DIR}/src/python:${CCPNMR_TOP_DIR}/src/c
+${ANACONDA3}/bin/python ${CCPNMR_TOP_DIR}/src/python/ccpn/util/nef/compareNef.py $*</div></blockquote>
+<p>Usage:  compareNef [options]</p>
+<dl class="last docutils">
+<dt>optional arguments:</dt>
+<dd><table class="first docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
+<td>show this help message</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-H</span>, <span class="option">--Help</span></kbd></td>
+<td>Show detailed help</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-i</span>, <span class="option">--ignoreblockname</span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Ignore the blockname when comparing two Nef files
+May be required when converting Nef files through
+different applications
+May be used with -f and -b</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-k</span>, <span class="option">--keep</span></kbd></td>
+<td>Keep existing .txt files. New files are appended with &#8216;(n)&#8217; before
+the extension, where n is the next available number.</td></tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>-f inFile1 inFile2, &#8211;file inFile1 inFile2</dt>
+<dd>Compare two Nef files and print the results to the
+screen</dd>
+</dl>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-s</span>, <span class="option">--screen</span></kbd></td>
+<td>Output batch processing to screen, default is to .txt files
+may be used with -b</td></tr>
+</tbody>
+</table>
+<dl class="last docutils">
+<dt>-b inDir1 inDir2 outDir, &#8211;block inDir1 inDir2 outDir</dt>
+<dd>compare Nef files common to directories
+inDir1 and inDir2. Write output <a href="#id1"><span class="problematic" id="id2">*</span></a>.txt for each
+file into the outDir directory.</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Details of the contents of Nef files can be found in GenericStarParser
+The general structure of a Nef file is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+  <span class="n">DataBlock</span>
+    <span class="n">Item</span>
+    <span class="n">Loop</span>
+    <span class="n">SaveFrame</span>
+      <span class="n">Item</span>
+      <span class="n">Loop</span>
+</pre></div>
+</div>
+<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional &#8216;name&#8217; attribute
+DataBlocks and SaveFrames are entered in their container using their name as the key.</p>
+<p>Loop is an object with a &#8216;columns&#8217; list, a &#8216;data&#8217; list-of-row-OrderedDict, and a name attribute
+set equal to the name of the first column. A loop is entered in its container under each
+column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
+exist and both correspond to the same loop object.</p>
+<dl class="docutils">
+<dt>Items are entered as a string key - string value pair.</dt>
+<dd>the string value can be a dictionary</dd>
+</dl>
+<div class="section" id="module-contents">
+<h3>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>compareNef contains the following routines:</dt>
+<dd><p class="first">compareNefFiles      compare two Nef files and return a compare object</p>
+<blockquote>
+<div><p>Searches through all objects: dataExtents, dataBlocks, saveFrames and Loops within the files.
+Comparisons are made for all data structures that have the same name.
+Differences for items within a column are listed in the form:</p>
+<blockquote>
+<div>dataExtent:dataBlock:saveFrame:Loop:  &lt;Column&gt;: columnName  &lt;rowIndex&gt;: row  &#8211;&gt;  value1 != value2</div></blockquote>
+<dl class="docutils">
+<dt>dataExtents, dataBlocks, saveFrames, Loops, columns present only in one file are listed, in the form:</dt>
+<dd><dl class="first last docutils">
+<dt>dataExtent:dataBlock:saveFrame:Loop: contains &#8211;&gt; parameter1</dt>
+<dd>parameter2
+...
+parameterN</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>A compare object is a list of nefItems of the form:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">NefItem</span>
+  <span class="n">inWhich</span>         <span class="n">a</span> <span class="n">flag</span> <span class="n">labelling</span> <span class="n">which</span> <span class="n">file</span> <span class="n">the</span> <span class="n">item</span> <span class="n">was</span> <span class="n">found</span> <span class="ow">in</span>
+                  <span class="mi">1</span> <span class="o">=</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">first</span> <span class="n">file</span><span class="p">,</span> <span class="mi">2</span> <span class="o">=</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">second</span> <span class="n">file</span><span class="p">,</span> <span class="mi">3</span> <span class="o">=</span> <span class="n">common</span> <span class="n">to</span> <span class="n">both</span>
+  <span class="n">List</span>
+    <span class="n">Item</span>          <span class="n">multiple</span> <span class="n">strings</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">comparison</span> <span class="n">tree</span>
+    <span class="p">(,</span><span class="n">List</span><span class="p">)</span>       <span class="n">the</span> <span class="n">last</span> <span class="n">item</span> <span class="n">of</span> <span class="n">which</span> <span class="n">may</span> <span class="n">be</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">items</span> <span class="n">common</span> <span class="n">to</span> <span class="n">the</span> <span class="n">tree</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>e.g., for parameters present in the first file:</dt>
+<dd><dl class="first docutils">
+<dt>[</dt>
+<dd>inWhich=1
+list=[dataExtent1, dataBlock1, saveFrame1, Loop1, [parameter1, parameter2, parameter3]]</dd>
+</dl>
+<p class="last">]</p>
+</dd>
+</dl>
+<p>compareDataExtents    compare two DataExtent objects and return a compare list as above
+compareDataBlocks     compare two DataBlock objects and return a compare list as above
+compareSaveFrames     compare two SaveFrame objects and return a compare list as above
+compareLoops          compare two Loop objects and return a compare list as above</p>
+<p>compareNefFiles       compare two Nef files and return a compare list as above
+batchCompareNefFiles  compare two directories of Nef files.</p>
+<blockquote>
+<div>Nef Files common to specified directories are compared and the compare
+lists are written to the third directory as .txt</div></blockquote>
+<p class="last">printCompareList      print the compare list to the screen</p>
+</dd>
+</dl>
+<dl class="class">
+<dt id="ccpn.util.nef.CompareNef.Test_Compare_Files">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">Test_Compare_Files</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#Test_Compare_Files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.Test_Compare_Files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p>Test the comparison of nef files and print the results</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.addToList">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">addToList</code><span class="sig-paren">(</span><em>inList</em>, <em>cItem</em>, <em>nefList</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#addToList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.addToList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append cItem to the compare list
+Currently adds one cItem with a list as the last element</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inList</strong> &#8211; a list of items to add to the end of cItem</li>
+<li><strong>cItem</strong> &#8211; object containing the current tree to add to the list</li>
+<li><strong>nefList</strong> &#8211; current list of comparisons</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of type nefItem</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.batchCompareNefFiles">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">batchCompareNefFiles</code><span class="sig-paren">(</span><em>inDir1</em>, <em>inDir2</em>, <em>outDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#batchCompareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.batchCompareNefFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Batch compare the Nef files common to the two directories
+For each file found, write the compare log to the corresponding .txt file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inDir1</strong> &#8211; </li>
+<li><strong>inDir2</strong> &#8211; </li>
+<li><strong>outDir</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.compareDataBlocks">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareDataBlocks</code><span class="sig-paren">(</span><em>dataBlock1: ccpn.util.nef.GenericStarParser.DataBlock</em>, <em>dataBlock2: ccpn.util.nef.GenericStarParser.DataBlock</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataBlocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataBlocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two dataBlocks, if they have the same name then check their contents
+:param dataBlock1: name of the first DataBlock object
+:param dataBlock2: name of the second DataBlock object
+:return: list of type nefItem</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.compareDataExtents">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareDataExtents</code><span class="sig-paren">(</span><em>dataExt1: ccpn.util.nef.GenericStarParser.DataExtent</em>, <em>dataExt2: ccpn.util.nef.GenericStarParser.DataExtent</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareDataExtents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareDataExtents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two dataExtents, if they have the same name then check their contents
+:param dataExt1: name of the first DataExtent object
+:param dataExt2: name of the second DataExtent object
+:return: list of type nefItem</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.compareLoops">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareLoops</code><span class="sig-paren">(</span><em>loop1: ccpn.util.nef.GenericStarParser.Loop</em>, <em>loop2: ccpn.util.nef.GenericStarParser.Loop</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareLoops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two Loops
+:param loop1: name of the first Loop object
+:param loop2: name of the second Loop object
+:return: list of type nefItem</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.compareNefFiles">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareNefFiles</code><span class="sig-paren">(</span><em>inFile1</em>, <em>inFile2</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list=None<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareNefFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareNefFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two Nef files and return comparison as a nefItem list
+:param inFile1: name of the first file
+:param inFile2: name of the second file
+:return: list of type nefItem</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.compareSaveFrames">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">compareSaveFrames</code><span class="sig-paren">(</span><em>saveFrame1: ccpn.util.nef.GenericStarParser.SaveFrame</em>, <em>saveFrame2: ccpn.util.nef.GenericStarParser.SaveFrame</em>, <em>cItem=None</em>, <em>nefList=None</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#compareSaveFrames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.compareSaveFrames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two saveFrames, if they have the same name then check their contents
+:param saveFrame1: name of the first SaveFrame object
+:param saveFrame2: name of the second SaveFrame object
+:return: list of type nefItem</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.defineArguments">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">defineArguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#defineArguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.defineArguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the arguments of the program
+:return argparse instance</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.CompareNef.nefItem">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">nefItem</code><span class="sig-paren">(</span><em>cItem=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#nefItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.nefItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Holds the contents of a single Nef comparison
+inWhich   a flag labelling which file the item was found in</p>
+<blockquote>
+<div>1 = found in the first file, 2 = found on the second file, 3 = common to both</div></blockquote>
+<p>list      a list of strings containing the comparison information</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.printCompareList">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printCompareList</code><span class="sig-paren">(</span><em>nefList</em>, <em>inFile1</em>, <em>inFile2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printCompareList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printCompareList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the contents of the nef compare list to the screen</p>
+<dl class="docutils">
+<dt>Output is in three parts:</dt>
+<dd><ul class="first last simple">
+<li>items that are present only in the first file</li>
+<li>items that are only in the second file</li>
+<li>differences between objects that are common in both files</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nefList</strong> &#8211; list to print</li>
+<li><strong>inFile1</strong> &#8211; name of the first file</li>
+<li><strong>inFile2</strong> &#8211; name of the second file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.printFile">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printFile</code><span class="sig-paren">(</span><em>thisFile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a file to the screen</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.printWhichList">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">printWhichList</code><span class="sig-paren">(</span><em>nefList</em>, <em>whichType=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#printWhichList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.printWhichList" title="Permalink to this definition">¶</a></dt>
+<dd><p>List only those items that are of type whichType
+:param nefList: list to print
+:param whichType: type to print</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.CompareNef.sizeNefList">
+<code class="descclassname">ccpn.util.nef.CompareNef.</code><code class="descname">sizeNefList</code><span class="sig-paren">(</span><em>nefList</em>, <em>whichType=0</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="../_modules/ccpn/util/nef/CompareNef.html#sizeNefList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.CompareNef.sizeNefList" title="Permalink to this definition">¶</a></dt>
+<dd><p>List only those items that are of type whichType
+:param nefList: list to print
+:param whichType: type to print</p>
+</dd></dl>
+
+</div>
+</div>
 <div class="section" id="module-ccpn.util.nef.GenericStarParser">
 <span id="ccpn-util-nef-genericstarparser-module"></span><h2>ccpn.util.nef.GenericStarParser module<a class="headerlink" href="#module-ccpn.util.nef.GenericStarParser" title="Permalink to this headline">¶</a></h2>
 <p>Star-type file parser, agnostic between cif, mmcif, star, nef, etc.</p>
@@ -99,7 +402,7 @@ with the following exceptions:</p>
 <div><ul class="simple">
 <li>Nested loops are NOT supported</li>
 <li>Global blocks are treated as simple data blocks. If the first data block in the file is
-a <a href="#id1"><span class="problematic" id="id2">global_</span></a>, is is named &#8216;<a href="#id3"><span class="problematic" id="id4">global_</span></a>&#8216;; globals elsewhere are named global_1, global_2, etc.
+a <a href="#id3"><span class="problematic" id="id4">global_</span></a>, is is named &#8216;<a href="#id5"><span class="problematic" id="id6">global_</span></a>&#8216;; globals elsewhere are named global_1, global_2, etc.
 This may cause trouble downstream if there is a DataBlock named e.g. &#8216;data_global_1&#8217;.</li>
 </ul>
 </div></blockquote>
@@ -120,7 +423,7 @@ set equal to the name of the first column. A loop is entered in its container un
 column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
 exist and both correspond to the same loop object.</p>
 <p>Items are entered as a string key - string value pair.</p>
-<p>All tags are preserved &#8216;as is&#8217; (i.e. without stripping leading &#8216;_&#8217;, &#8216;<a href="#id5"><span class="problematic" id="id6">data_</span></a>&#8216;, or &#8216;<a href="#id7"><span class="problematic" id="id8">save_</span></a>&#8216;),
+<p>All tags are preserved &#8216;as is&#8217; (i.e. without stripping leading &#8216;_&#8217;, &#8216;<a href="#id7"><span class="problematic" id="id8">data_</span></a>&#8216;, or &#8216;<a href="#id9"><span class="problematic" id="id10">save_</span></a>&#8216;),
 basically to avoid the theoretical risk that a SaveFrame name might clash with
 an item name or loop column, or a DataBlock with a Global. Duplicate tags raise an error.</p>
 <p>Quoted values are returned as str,
@@ -212,8 +515,8 @@ producing a nested object structure matching the file (see module documentation 
 <p>Parameters (default values correspond to the International Tables for Crystallography standard):</p>
 <ul class="simple">
 <li><em>text</em> Text to parse</li>
-<li><em>enforceSaveFrameStop</em> : True. Raise an error for missing &#8216;<a href="#id9"><span class="problematic" id="id10">save_</span></a>&#8216; terminators - Yes/No</li>
-<li><em>enforceLoopStop</em> : False. Raise an error for missing &#8216;<a href="#id11"><span class="problematic" id="id12">stop_</span></a>&#8216; terminators - Yes/No</li>
+<li><em>enforceSaveFrameStop</em> : True. Raise an error for missing &#8216;<a href="#id11"><span class="problematic" id="id12">save_</span></a>&#8216; terminators - Yes/No</li>
+<li><em>enforceLoopStop</em> : False. Raise an error for missing &#8216;<a href="#id13"><span class="problematic" id="id14">stop_</span></a>&#8216; terminators - Yes/No</li>
 <li><em>padIncompleteLoops</em> : False.  Pad final loop row with &#8216;.&#8217; for missing values - Yes/No</li>
 <li><em>allowSquareBracketStrings</em> : False.  Allow values starting &#8216;[&#8216; or &#8216;]&#8217; - Yes/No</li>
 <li><em>lowerCaseTags</em> : True. Convert all data and object names to lower case</li>
@@ -366,8 +669,8 @@ STAR special values (like null,  unknown, ...) are only recognised if unquoted s
 <dt id="ccpn.util.nef.GenericStarParser.parse">
 <code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse STAR text string &#8216;text&#8217;.
-Standard settings allow skipping &#8216;<a href="#id13"><span class="problematic" id="id14">stop_</span></a>&#8216; tags and strings starting with &#8216;[&#8216; or &#8216;]&#8217;,
-but require &#8216;<a href="#id15"><span class="problematic" id="id16">save_</span></a>&#8216; termination of SaveFrames and throw an error if the number of loop
+Standard settings allow skipping &#8216;<a href="#id15"><span class="problematic" id="id16">stop_</span></a>&#8216; tags and strings starting with &#8216;[&#8216; or &#8216;]&#8217;,
+but require &#8216;<a href="#id17"><span class="problematic" id="id18">save_</span></a>&#8216; termination of SaveFrames and throw an error if the number of loop
 values do not match the number of columns.</p>
 <p>&#8216;strict&#8217; and &#8216;lenient&#8217; modes are available; mode=&#8217;IUCr&#8217; follows the IUCr standard, which
 is like standard except that strings starting with &#8216;[&#8216; and &#8216;]&#8217; are not allowed</p>
@@ -412,7 +715,7 @@ _nef_saveframe.description
 _nef_saveframe.example</p>
 <p>A table for contained loops:</p>
 <dl class="docutils">
-<dt><a href="#id17"><span class="problematic" id="id18">loop_</span></a></dt>
+<dt><a href="#id19"><span class="problematic" id="id20">loop_</span></a></dt>
 <dd><blockquote class="first">
 <div><p>_nef_loop.category
 _nef_loop.is_mandatory
@@ -421,7 +724,7 @@ _nef_loop.example</p>
 </div></blockquote>
 <p class="last">And a table for contained items and loop columns:</p>
 </dd>
-<dt><a href="#id19"><span class="problematic" id="id20">loop_</span></a></dt>
+<dt><a href="#id21"><span class="problematic" id="id22">loop_</span></a></dt>
 <dd><p class="first">_nef_item.name
 _nef_item.loop_category
 _nef_item.type_code
@@ -515,7 +818,7 @@ and the framecode value must start with the &#8216;&lt;sf_category&gt;&#8217; fo
 <dd>the &#8216;Nef&#8217; functions will also enforce the NEF=-specific constraints above</dd>
 </dl>
 </div></blockquote>
-<p>On reading tag prefixes (&#8216;_&#8217;, &#8216;<a href="#id21"><span class="problematic" id="id22">save_</span></a>&#8216;, &#8216;<a href="#id23"><span class="problematic" id="id24">data_</span></a>&#8216; are stripped,
+<p>On reading tag prefixes (&#8216;_&#8217;, &#8216;<a href="#id23"><span class="problematic" id="id24">save_</span></a>&#8216;, &#8216;<a href="#id25"><span class="problematic" id="id26">data_</span></a>&#8216; are stripped,
 as are the parts of tags before the first &#8216;.&#8217;</p>
 </div></blockquote>
 <dl class="class">
@@ -644,6 +947,49 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
 </div>
 <div class="section" id="module-ccpn.util.nef.StarTokeniser">
 <span id="ccpn-util-nef-startokeniser-module"></span><h2>ccpn.util.nef.StarTokeniser module<a class="headerlink" href="#module-ccpn.util.nef.StarTokeniser" title="Permalink to this headline">¶</a></h2>
+<p>STAR file tokenizer</p>
+<p># Copyright © 2011, 2013 Global Phasing Ltd. All rights reserved.
+#
+# Author: Peter Keller
+#
+# This file forms part of the GPhL StarTools library.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  Redistributions of source code must retain the above copyright
+#  notice, this list of conditions and the following disclaimer.
+#
+#  Redistributions in binary form must reproduce the above copyright
+#  notice, this list of conditions and the following disclaimer in the
+#  documentation and/or other materials provided with the
+#  distribution.
+#
+#  If the regular expression used to match STAR/CIF data in the
+#  redistribution is not identical to that in the original version,
+#  this fact must be stated wherever the copyright notice is
+#  reproduced.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# &#8220;AS IS&#8221; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+# OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<p>&#8216;&#8217;&#8217;
+Created on 25 Nov 2013</p>
+<p>&#64;author: pkeller
+&#8216;&#8217;&#8216;</p>
+<p>#
+# Modified by Rasmus Fogh, CCPN project, 5/2/2016
+#</p>
 <dl class="class">
 <dt id="ccpn.util.nef.StarTokeniser.StarToken">
 <em class="property">class </em><code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">StarToken</code><span class="sig-paren">(</span><em>type</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
@@ -683,6 +1029,10 @@ are ignored, with the first/last residue treated, effectively, as linking &#8216
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#ccpn-util-nef-ccpn-module">ccpn.util.nef.Ccpn module</a></li>
 <li><a class="reference internal" href="#ccpn-util-nef-cingccpn-module">ccpn.util.nef.CingCcpn module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.CompareNef">ccpn.util.nef.CompareNef module</a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-ccpn.util.nef.GenericStarParser">ccpn.util.nef.GenericStarParser module</a><ul>
 <li><a class="reference internal" href="#reading-behaviour">Reading behaviour</a></li>
 <li><a class="reference internal" href="#writing-behaviour">Writing behaviour</a></li>

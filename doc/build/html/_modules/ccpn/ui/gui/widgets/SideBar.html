@@ -88,7 +88,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CreateSequence</span> <span class="kn">import</span> <span class="n">CreateSequence</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CreateChainPopup</span> <span class="kn">import</span> <span class="n">CreateChainPopup</span>
 <span class="c1">#from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.DataSetPopup</span> <span class="kn">import</span> <span class="n">DataSetPopup</span>
@@ -102,6 +102,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SampleComponentPropertiesPopup</span> <span class="kn">import</span> <span class="n">EditSampleComponentPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SubstancePropertiesPopup</span> <span class="kn">import</span> <span class="n">SubstancePropertiesPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumGroupEditor</span> <span class="kn">import</span> <span class="n">SpectrumGroupEditor</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.IntegralListPopup</span> <span class="kn">import</span> <span class="n">IntegralListPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.NotesPopup</span> <span class="kn">import</span> <span class="n">NotesPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.ChemicalShiftListPopup</span> <span class="kn">import</span> <span class="n">ChemicalShiftListPopup</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.StructurePopup</span> <span class="kn">import</span> <span class="n">StructurePopup</span>
@@ -113,6 +114,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ccpnmrJsonData</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="c1"># NB the order matters!</span>
 <span class="c1"># NB &#39;SG&#39; must be before &#39;SP&#39;, as SpectrumGroups must be ready before Spectra</span>
@@ -153,12 +155,12 @@
   <span class="s1">&#39;RL&#39;</span><span class="p">:</span> <span class="s1">&#39;newRestraint&#39;</span><span class="p">,</span>
   <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="s1">&#39;newModel&#39;</span><span class="p">,</span>
   <span class="s1">&#39;Notes&#39;</span><span class="p">:</span> <span class="s1">&#39;newNote&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;Structures&#39;</span><span class="p">:</span> <span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;StructureEnsembles&#39;</span><span class="p">:</span> <span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">,</span>
   <span class="s1">&#39;Samples&#39;</span><span class="p">:</span> <span class="s1">&#39;newSample&#39;</span><span class="p">,</span>
   <span class="s1">&#39;NmrChains&#39;</span><span class="p">:</span> <span class="s1">&#39;newNmrChain&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;Chains&#39;</span><span class="p">:</span> <span class="s1">&#39;CreateSequence&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Chains&#39;</span><span class="p">:</span> <span class="s1">&#39;newChain&#39;</span><span class="p">,</span>
   <span class="s1">&#39;Substances&#39;</span><span class="p">:</span> <span class="s1">&#39;newSubstance&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;Chemical Shift Lists&#39;</span><span class="p">:</span> <span class="s1">&#39;newChemicalShiftList&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;ChemicalShiftLists&#39;</span><span class="p">:</span> <span class="s1">&#39;newChemicalShiftList&#39;</span><span class="p">,</span>
   <span class="s1">&#39;DataSets&#39;</span><span class="p">:</span> <span class="s1">&#39;newDataSet&#39;</span><span class="p">,</span>
   <span class="s1">&#39;SpectrumGroups&#39;</span><span class="p">:</span> <span class="s1">&#39;newSpectrumGroup&#39;</span><span class="p">,</span>
   <span class="s1">&#39;Complexes&#39;</span><span class="p">:</span> <span class="s1">&#39;newComplex&#39;</span><span class="p">,</span>
@@ -166,13 +168,17 @@
 <span class="c1">### Flag example code removed in revision 7686</span>
 
 <div class="viewcode-block" id="SideBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar">[docs]</a><span class="k">class</span> <span class="nc">SideBar</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>                      <span class="c1"># ejb - needed for moduleArea</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span> <span class="o">=</span> <span class="n">multiSelect</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>                      <span class="c1"># ejb - needed for moduleArea</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_typeToItem</span> <span class="o">=</span> <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">sidebarFont</span><span class="p">)</span>
@@ -242,7 +248,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Chemical Shift Lists&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ChemicalShiftLists&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
@@ -250,7 +256,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Structures&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;StructureEnsembles&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">newStructuresListItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="p">)</span>   <span class="c1"># ejb</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newStructuresListItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newStructuresListItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
@@ -262,7 +268,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New Dataset&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New DataSet&gt;&#39;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
@@ -273,6 +279,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">newNoteItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New Note&gt;&#39;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mousePressEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseReleaseEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mouseReleaseEvent</span>
+    <span class="c1"># self.mouseMoveEvent = self._mouseMoveEvent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dragMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragMoveEvent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dragEnterEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragEnterEvent</span>
 
@@ -287,7 +295,8 @@
   <span class="k">def</span> <span class="nf">_processDroppedItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="s2">&quot;Handle the dropped urls&quot;</span>
     <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;urls&#39;</span><span class="p">,[]):</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;SideBar._processDroppedItems&gt;&gt;&gt; dropped:&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+      <span class="c1"># print(&#39;SideBar._processDroppedItems&gt;&gt;&gt; dropped:&#39;, url)</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SideBar._processDroppedItems&gt;&gt;&gt; dropped: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
       <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
       <span class="c1"># if objects is None or len(objects) == 0:</span>
       <span class="c1">#   showWarning(&#39;Invalid File&#39;, &#39;Cannot handle &quot;%s&quot;&#39; % url)</span>
@@ -370,39 +379,13 @@
     <span class="n">newNote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newNote</span><span class="p">()</span>
     <span class="n">newNote</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span></div>
 
-
-  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-implementation of the mouse press event so right click can be used to delete items from the</span>
-<span class="sd">    sidebar.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_raiseContextMenu</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()))</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_raiseContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates and raises a context menu enabling items to be deleted from the sidebar.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
-    <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-    <span class="c1"># contextMenu.addAction(&#39;Delete&#39;, partial(self.removeItem, item))</span>
-    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">objFromPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">objFromPid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteItemObject</span><span class="p">,</span> <span class="n">objFromPid</span><span class="p">))</span>
-          <span class="n">contextMenu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-          <span class="n">contextMenu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
-
-
-  <span class="k">def</span> <span class="nf">_deleteItemObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">obj</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_deleteItemObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">objs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Removes the specified item from the sidebar and deletes it from the project.</span>
 <span class="sd">    NB, the clean-up of the side bar is done through notifiers</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
-      <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_createItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create a new sidebar item from a new object.</span>
@@ -558,25 +541,50 @@
       <span class="c1">#   for obj in sorted(dd.values()):</span>
       <span class="c1">#     self._createItem(obj)</span>
 
+  <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+  <span class="c1"># mouse events</span>
+
   <span class="k">def</span> <span class="nf">_dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="c1"># if event.mimeData().hasFormat(ccpnmrJsonData):</span>
+    <span class="c1">#   data = event.mimeData().data(ccpnmrJsonData)</span>
+    <span class="c1">#   if &#39;test&#39; in data:</span>
+    <span class="c1">#     print (&#39;&gt;&gt;&gt;_dragEnterEvent has ccpnmrJsonData&#39;)</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     print (&#39;&gt;&gt;&gt;_dragEnterEvent empty&#39;)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   print(&#39;&gt;&gt;&gt;_dragEnterEvent ---&#39;)</span>
+    <span class="c1"># super(SideBar, self).dragEnterEvent(event)</span>
+
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
       <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-      <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+      <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">objFromPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">))</span>
+          <span class="k">if</span> <span class="n">objFromPid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objFromPid</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
-          <span class="c1"># mimeData = QtCore.QMimeData()     # ejb - temporary fix, not working, intermittent bug</span>
-          <span class="c1"># itemData = QtCore.QByteArray()    # sometimes mimeData() empty in corresponding dropEvent</span>
-          <span class="c1"># stream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)</span>
-          <span class="c1"># stream.writeQVariantHash({&#39;pids&#39;:text, &#39;dragAction&#39;:&#39;copy&#39;})    # need to get rid of these strings</span>
-          <span class="c1"># mimeData.setData(&#39;dinner&#39;, data)</span>
+      <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;pids&#39;</span><span class="p">:</span><span class="n">pids</span><span class="p">})</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">ccpnmrJsonData</span><span class="p">,</span> <span class="n">itemData</span><span class="p">)</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
-          <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;pids&#39;</span><span class="p">:[</span><span class="n">text</span><span class="p">]})</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">ccpnmrJsonData</span><span class="p">,</span> <span class="n">itemData</span><span class="p">)</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
-
+  <span class="c1"># def _startDrag(self, dropActions):</span>
+  <span class="c1">#   item = self.currentItem()</span>
+  <span class="c1">#   icon = item.icon()</span>
+  <span class="c1">#   data = QByteArray()</span>
+  <span class="c1">#   stream = QDataStream(data, QIODevice.WriteOnly)</span>
+  <span class="c1">#   stream &lt;&lt; item.text() &lt;&lt; icon</span>
+  <span class="c1">#   mimeData = QMimeData()</span>
+  <span class="c1">#   mimeData.setData(&quot;application/x-icon-and-text&quot;, data)</span>
+  <span class="c1">#   drag = QDrag(self)</span>
+  <span class="c1">#   drag.setMimeData(mimeData)</span>
+  <span class="c1">#   pixmap = icon.pixmap(24,24)</span>
+  <span class="c1">#   drag.setHotSpot(QPoint(12,12))</span>
+  <span class="c1">#   drag.setPixmap(pixmap)</span>
+  <span class="c1">#   if drag.start(Qt.MoveAction) == Qt.moveAction:</span>
+  <span class="c1">#     self.takeItem(self.row(item))</span>
 
   <span class="k">def</span> <span class="nf">_dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -584,50 +592,150 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
+<div class="viewcode-block" id="SideBar.dragLeaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.dragLeaveEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="c1"># print (&#39;&gt;&gt;&gt;dragLeaveEvent %s&#39; % str(event.type()))</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SideBar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dragLeaveEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of the mouse press event so right click can be used to delete items from the</span>
+<span class="sd">    sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># if event.button() == QtCore.Qt.LeftButton:</span>
+    <span class="c1">#   pids = []</span>
+    <span class="c1">#   for item in self.selectedItems():</span>
+    <span class="c1">#     if item is not None:</span>
+    <span class="c1">#       objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))</span>
+    <span class="c1">#       if objFromPid is not None:</span>
+    <span class="c1">#         pids.append(objFromPid.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   itemData = json.dumps({&#39;pids&#39;:pids, &#39;test&#39;:&#39;thisDrag&#39;})</span>
+    <span class="c1">#   mimeData = QtCore.QMimeData()</span>
+    <span class="c1">#   mimeData.setData(ccpnmrJsonData, itemData)</span>
+    <span class="c1">#   mimeData.setText(itemData)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   drag = QtGui.QDrag(self)</span>
+    <span class="c1">#   drag.setMimeData(mimeData)</span>
+    <span class="c1">#   dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)</span>
+
+    <span class="c1"># if event.button() == QtCore.Qt.RightButton:</span>
+    <span class="c1">#   self._raiseContextMenu(event)</span>
+    <span class="c1">#   event.accept()</span>
+    <span class="c1"># else:</span>
+    <span class="c1"># item = self.itemAt(event.pos())</span>
+    <span class="c1"># if item:</span>
+    <span class="c1">#   text = item.text(0)</span>
+    <span class="c1">#   if &#39;:&#39; in text:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     itemData = json.dumps({&#39;pids&#39;:[text]})</span>
+    <span class="c1">#     mimeData = QtCore.QMimeData()</span>
+    <span class="c1">#     mimeData.setData(ccpnmrJsonData, itemData)</span>
+    <span class="c1">#     # mimeData.setText(itemData)</span>
+    <span class="c1">#     # pixmap = QtGui.QPixmap.grabWidget(item)</span>
+    <span class="c1">#     # pixmap = QtGui.QPixmap(item)</span>
+    <span class="c1">#     # item.render(pixmap)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     drag = QtGui.QDrag(self)</span>
+    <span class="c1">#     drag.setMimeData(mimeData)</span>
+    <span class="c1">#     # drag.setPixmap(pixmap)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     dropAction = drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     super(SideBar, self).mousePressEvent(event)</span>
+
+    <span class="c1"># else:</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of the mouse press event so right click can be used to delete items from the</span>
+<span class="sd">    sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_raiseContextMenu</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>               <span class="c1"># ejb - moved the context menu to button release</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SideBar.enterEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.enterEvent">[docs]</a>  <span class="k">def</span> <span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="c1"># print (&#39;&gt;&gt;&gt;enterEvent&#39;)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SideBar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">enterEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SideBar.leaveEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.leaveEvent">[docs]</a>  <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="c1"># print (&#39;&gt;&gt;&gt;leaveEvent&#39;)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SideBar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">leaveEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_raiseContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates and raises a context menu enabling items to be deleted from the sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+    <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="c1"># contextMenu.addAction(&#39;Delete&#39;, partial(self.removeItem, item))</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">objFromPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">objFromPid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">objs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objFromPid</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteItemObject</span><span class="p">,</span> <span class="n">objs</span><span class="p">))</span>
+      <span class="n">contextMenu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+      <span class="n">contextMenu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+
+  <span class="c1">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
 <div class="viewcode-block" id="SideBar.raisePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.raisePopup">[docs]</a>  <span class="k">def</span> <span class="nf">raisePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SP&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumPropertiesPopup</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumPropertiesPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;PL&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">peakList</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SG&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SA&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">SamplePropertiesPopup</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SamplePropertiesPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SC&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SU&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">substance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">substance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NC&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrChainPopup</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrChainPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">nmrChain</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NR&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrResiduePopup</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrResiduePopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrAtomPopup</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrAtomPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;CL&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">ChemicalShiftListPopup</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">ChemicalShiftListPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">chemicalShiftList</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SE&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">StructurePopup</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">StructurePopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
@@ -652,7 +760,7 @@
       <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
           <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;DS&#39;</span><span class="p">:</span>
-      <span class="n">popup</span> <span class="o">=</span> <span class="n">DataSetPopup</span><span class="p">(</span><span class="n">dataSet</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">DataSetPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">dataSet</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
       <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
 
@@ -685,6 +793,11 @@
           <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;IL&#39;</span><span class="p">:</span>
       <span class="c1"># to be decided when we design structure</span>
+
+      <span class="c1"># popup = IntegralListPopup(mainWindow=self.mainWindow, integralList=obj)   # ejb - temp</span>
+      <span class="c1"># popup.exec_()</span>
+      <span class="c1"># popup.raise_()</span>
+
       <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
                <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NO&#39;</span><span class="p">:</span>
@@ -731,17 +844,17 @@
       <span class="k">if</span> <span class="n">itemParent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># Top level object - parent is project</span>
         <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Chains&#39;</span><span class="p">:</span>
-          <span class="n">popup</span> <span class="o">=</span> <span class="n">CreateSequence</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">CreateChainPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
           <span class="k">return</span>
         <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Substances&#39;</span><span class="p">:</span>
-          <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">newSubstance</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">newSubstance</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>   <span class="c1"># ejb - application=self.application,</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
-          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>        <span class="c1"># included setModal(True) in the above as was not modal???</span>
           <span class="k">return</span>
         <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;SpectrumGroups&#39;</span><span class="p">:</span>
-          <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">addNew</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">addNew</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
           <span class="k">return</span>
@@ -753,15 +866,22 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Lower level object - get parent from parentItem</span>
         <span class="k">if</span> <span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;DS&#39;</span><span class="p">:</span>
-          <span class="n">popup</span> <span class="o">=</span> <span class="n">RestraintTypePopup</span><span class="p">()</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">RestraintTypePopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
           <span class="n">restraintType</span> <span class="o">=</span> <span class="n">popup</span><span class="o">.</span><span class="n">restraintType</span>
-          <span class="n">ff</span> <span class="o">=</span> <span class="n">NEW_ITEM_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">)</span>
-          <span class="nb">getattr</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">ff</span><span class="p">)(</span><span class="n">restraintType</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">restraintType</span><span class="p">:</span>
+
+            <span class="c1"># ejb - added here because not sure whether to put it in the popup yet</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">ff</span> <span class="o">=</span> <span class="n">NEW_ITEM_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">)</span>
+              <span class="nb">getattr</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">ff</span><span class="p">)(</span><span class="n">restraintType</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+              <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Restraints&#39;</span><span class="p">,</span> <span class="s1">&#39;Error modifying restraint type&#39;</span><span class="p">)</span>
+
           <span class="k">return</span>
         <span class="k">elif</span> <span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SA&#39;</span><span class="p">:</span>
-          <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">newSampleComponent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">newSampleComponent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
           <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
           <span class="k">return</span>

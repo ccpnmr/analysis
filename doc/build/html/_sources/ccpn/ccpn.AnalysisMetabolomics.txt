@@ -33,14 +33,6 @@ ccpn.AnalysisMetabolomics.Decomposition module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.GuiPipeLine module
---------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.GuiPipeLine
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisMetabolomics.IntegralAssignment module
 ---------------------------------------------------
 
@@ -57,14 +49,6 @@ ccpn.AnalysisMetabolomics.Integration module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.MetabolomicsPipeline module
------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.MetabolomicsPipeline
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisMetabolomics.PeakAssignment module
 -----------------------------------------------
 
@@ -77,14 +61,6 @@ ccpn.AnalysisMetabolomics.PickandFit module
 -------------------------------------------
 
 .. automodule:: ccpn.AnalysisMetabolomics.PickandFit
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.AnalysisMetabolomics.Pipeline module
------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.Pipeline
     :members:
     :undoc-members:
     :show-inheritance:

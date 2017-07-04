@@ -85,7 +85,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="n">OTHER_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µ&#39;</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">]</span>
 <span class="n">CONCENTRATION_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;µM&#39;</span><span class="p">,</span> <span class="s1">&#39;mM&#39;</span><span class="p">,</span> <span class="s1">&#39;nM&#39;</span><span class="p">,</span> <span class="s1">&#39;pM&#39;</span><span class="p">]</span>
@@ -95,17 +96,23 @@
 
 <span class="n">AMOUNT_UNIT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;mole&#39;</span><span class="p">]</span>
 
-<span class="c1"># class SamplePropertiesPopup(QtGui.QDialog):</span>
-<div class="viewcode-block" id="SamplePropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SamplePropertiesPopup.SamplePropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">SamplePropertiesPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Sample Properties&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    <span class="c1"># super(SamplePropertiesPopup, self).__init__(parent)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+<div class="viewcode-block" id="SamplePropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SamplePropertiesPopup.SamplePropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">SamplePropertiesPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Sample Properties&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialise the widget</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setWidgets</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">(</span><span class="n">widgets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllWidgets</span><span class="p">(),</span> <span class="n">layout</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">(</span><span class="n">widgets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllWidgets</span><span class="p">(),</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
@@ -179,7 +186,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">SAMPLE_STATES</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sampleStatePulldownList</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampleStateChanged</span><span class="p">)</span>
+    <span class="c1"># self.sampleStatePulldownList.activated[str].connect(self._sampleStateChanged)</span>
 
   <span class="k">def</span> <span class="nf">_setsampleAmountUnitWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Amount Unit&quot;</span><span class="p">)</span>
@@ -188,8 +195,11 @@
                                          <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                                          <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
                                          <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>                    <span class="c1"># if empty then set it</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># put the selected value into amount</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_setsampleAmountWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">amountQuantityLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Amount&#39;</span><span class="p">)</span>
@@ -334,17 +344,87 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_commentChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
     <span class="p">}</span>
 
+  <span class="c1">#========================================================================================</span>
+  <span class="c1"># ejb - new section for repopulating the widgets</span>
+  <span class="c1">#========================================================================================</span>
+
+  <span class="k">def</span> <span class="nf">_setCallBacksDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleNameLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountUnitRadioButtons</span><span class="o">.</span><span class="n">set</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleAmountLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">pH</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplepHDoubleSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">ionicStrength</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionicStrengthLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">batchIdentifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchIdentifierLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">plateIdentifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plateIdentifierLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">rowNumber</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowNumberLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">columnNumber</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnNumberLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">),</span>
+      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentTextEditor</span><span class="o">.</span><span class="n">setText</span><span class="p">)</span>
+    <span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_repopulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">attrib</span><span class="p">,</span> <span class="n">attribType</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setCallBacksDict</span><span class="p">():</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attrib</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>            <span class="c1"># trap the setting of the widgets</span>
+          <span class="n">widget</span><span class="p">(</span><span class="n">attribType</span><span class="p">(</span><span class="n">attrib</span><span class="p">))</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># self.sampleNameLineEdit.setText(str(self.sample.name))</span>
+    <span class="c1"># self.sampleAmountUnitRadioButtons.set(str(self.sample.amountUnit))</span>
+    <span class="c1"># self.sampleAmountLineEdit.setText(str(self.sample.amount))</span>
+    <span class="c1"># self.samplepHDoubleSpinbox.setValue(float(self.sample.pH))</span>
+    <span class="c1"># self.ionicStrengthLineEdit.setText(str(self.sample.ionicStrength))</span>
+    <span class="c1"># self.batchIdentifierLineEdit.setText(str(self.sample.batchIdentifier))</span>
+    <span class="c1"># self.plateIdentifierLineEdit.setText(str(self.sample.plateIdentifier))</span>
+    <span class="c1"># self.rowNumberLineEdit.setText(str(self.sample.rowNumber))</span>
+    <span class="c1"># self.columnNumberLineEdit.setText(str(self.sample.columnNumber))</span>
+    <span class="c1"># self.commentTextEditor.setText(str(self.sample.comment))</span>
+
   <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The apply button has been clicked</span>
+<span class="sd">    Define an undo block for setting the properties of the object</span>
+<span class="sd">    If there is an error setting any values then generate an error message</span>
+<span class="sd">      If anything has been added to the undo queue then remove it with application.undo()</span>
+<span class="sd">      repopulate the popup widgets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># ejb - major refactoring</span>
+
+    <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+      <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 
+    <span class="k">if</span> <span class="n">applyAccept</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+      <span class="c1"># should only undo if something new has been added to the undo deque</span>
+      <span class="c1"># may cause a problem as some things may be set with the same values</span>
+      <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
+      <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
+
+      <span class="c1"># repopulate popup</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_repopulate</span><span class="p">()</span>
+      <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">True</span>
+
   <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SamplePropertiesPopup.keyPressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SamplePropertiesPopup.SamplePropertiesPopup.keyPressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span><span class="p">:</span>

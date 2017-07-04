@@ -41,14 +41,6 @@ ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 module
     :undoc-members:
     :show-inheritance:
 
-ccpnmodel.ccpncore.lib.spectrum.formats.Lookup module
------------------------------------------------------
-
-.. automodule:: ccpnmodel.ccpncore.lib.spectrum.formats.Lookup
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpnmodel.ccpncore.lib.spectrum.formats.NmrPipe module
 ------------------------------------------------------
 

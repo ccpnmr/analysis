@@ -184,11 +184,6 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The slopes value </span><span class="si">%s</span><span class="s2"> does not match the dimensionality of the spectrum, </span><span class="si">%s</span><span class="s2">&quot;</span>
                        <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakDims</span><span class="p">))</span>
 
-
-  <span class="nd">@figureOfMerit.setter</span>
-  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
-
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Integral text annotation&quot;&quot;&quot;</span>
@@ -227,7 +222,7 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">peakDim</span><span class="o">.</span><span class="n">value</span>
         <span class="n">halfWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">valuePerPoint</span><span class="p">)</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">halfWidth</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="n">halfWidth</span><span class="p">)</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">value</span> <span class="o">-</span> <span class="n">halfWidth</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="n">halfWidth</span><span class="p">))</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 

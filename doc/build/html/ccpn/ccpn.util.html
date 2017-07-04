@@ -65,6 +65,10 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#ccpn-util-nef-ccpn-module">ccpn.util.nef.Ccpn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#ccpn-util-nef-cingccpn-module">ccpn.util.nef.CingCcpn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.CompareNef">ccpn.util.nef.CompareNef module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ccpn.util.nef.html#module-contents">Module Contents</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.nef.html#module-ccpn.util.nef.GenericStarParser">ccpn.util.nef.GenericStarParser module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ccpn.util.nef.html#reading-behaviour">Reading behaviour</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ccpn.util.nef.html#writing-behaviour">Writing behaviour</a></li>
@@ -206,6 +210,11 @@ NB a series of single-letter axisCodes (e.g. &#8216;N&#8217;, &#8216;HCN&#8217;)
 <p>This function is intended for external format isotope specifications, <em>not</em> for
 axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.contains_whitespace">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">contains_whitespace</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#contains_whitespace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.contains_whitespace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.convertStringToFileName">
@@ -399,6 +408,15 @@ into an (integer,string) tuple</p>
 <dd><p>Alias for field number 4</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.ExcelReader">
+<span id="ccpn-util-excelreader-module"></span><h2>ccpn.util.ExcelReader module<a class="headerlink" href="#module-ccpn.util.ExcelReader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.util.ExcelReader.ExcelReader">
+<em class="property">class </em><code class="descclassname">ccpn.util.ExcelReader.</code><code class="descname">ExcelReader</code><span class="sig-paren">(</span><em>project</em>, <em>excelPath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/ExcelReader.html#ExcelReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.ExcelReader.ExcelReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 </dd></dl>
 
 </div>
@@ -721,6 +739,30 @@ If no suitable location is found, superdirectory is returned as None</p>
 <dt id="ccpn.util.Register.updateServer">
 <code class="descclassname">ccpn.util.Register.</code><code class="descname">updateServer</code><span class="sig-paren">(</span><em>registrationDict</em>, <em>version='3'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Register.html#updateServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Register.updateServer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.SafeFilename">
+<span id="ccpn-util-safefilename-module"></span><h2>ccpn.util.SafeFilename module<a class="headerlink" href="#module-ccpn.util.SafeFilename" title="Permalink to this headline">¶</a></h2>
+<p>Functions to append a number to the end of a filename if it already exists</p>
+<dl class="function">
+<dt id="ccpn.util.SafeFilename.safeOpen">
+<code class="descclassname">ccpn.util.SafeFilename.</code><code class="descname">safeOpen</code><span class="sig-paren">(</span><em>path</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/SafeFilename.html#safeOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.SafeFilename.safeOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open path, but if it already exists, add &#8216;(n)&#8217; before the extension,
+where n is the first number found such that the file does not already
+exist.
+Returns an open file handle.</p>
+<p>Usage:  with safeOpen(path, [options]) as ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; filepath and filename.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Open file handle... be sure to close!</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.util.Sorting">
@@ -1341,7 +1383,7 @@ zz component of tensor</p>
 <p>General undo handle supporting undo/redo stack</p>
 <dl class="class">
 <dt id="ccpn.util.Undo.Undo">
-<em class="property">class </em><code class="descclassname">ccpn.util.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=99</em>, <em>maxOperations=10000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ccpn.util.Undo.</code><code class="descname">Undo</code><span class="sig-paren">(</span><em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.deque</span></code></p>
 <p>Implementation of an undo and redo stack, with possibility of waypoints.
 A waypoint is the level at which an undo happens, and each of them could
@@ -1411,6 +1453,11 @@ Allows multiple external functions to set blocking without trampling each other<
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.util.Undo.Undo.numItems">
+<code class="descname">numItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.numItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.numItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.util.Undo.Undo.redo">
 <code class="descname">redo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.redo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.redo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Redo one waypoint - or one operation if waypoints are not set.</p>
@@ -1443,7 +1490,7 @@ Allows multiple external functions to set blocking without trampling each other<
 
 <dl class="function">
 <dt id="ccpn.util.Undo.resetUndo">
-<code class="descclassname">ccpn.util.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=99</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Undo.</code><code class="descname">resetUndo</code><span class="sig-paren">(</span><em>memopsRoot</em>, <em>maxWaypoints=20</em>, <em>maxOperations=10000</em>, <em>debug: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Undo.html#resetUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.resetUndo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set or reset undo stack, using passed-in parameters.
 NB setting either parameter to 0 removes the undo stack.</p>
 </dd></dl>
@@ -1659,6 +1706,7 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.Colour">ccpn.util.Colour module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Common">ccpn.util.Common module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Constants">ccpn.util.Constants module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.ExcelReader">ccpn.util.ExcelReader module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.GitTools">ccpn.util.GitTools module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Graph">ccpn.util.Graph module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Hdf5">ccpn.util.Hdf5 module</a></li>
@@ -1670,6 +1718,7 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.Phasing">ccpn.util.Phasing module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.PrintFile">ccpn.util.PrintFile module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Register">ccpn.util.Register module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.SafeFilename">ccpn.util.SafeFilename module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Sorting">ccpn.util.Sorting module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.SphinxExtensions">ccpn.util.SphinxExtensions module</a></li>
 <li><a class="reference internal" href="#ccpn-util-structuredata-module">ccpn.util.StructureData module</a></li>

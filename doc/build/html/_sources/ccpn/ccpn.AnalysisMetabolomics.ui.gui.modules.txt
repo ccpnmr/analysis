@@ -17,12 +17,4 @@ ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.ui.gui.modules.Pipeline module
---------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.ui.gui.modules.Pipeline
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 

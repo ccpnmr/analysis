@@ -125,6 +125,12 @@
 <span class="sd">    is the stase as pyqtGraph  &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentModulesDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveState</span><span class="p">()]</span>
 
+<div class="viewcode-block" id="CcpnModuleArea.switchModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.switchModule">[docs]</a>  <span class="k">def</span> <span class="nf">switchModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module1</span><span class="p">,</span> <span class="n">module2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    switch the new module into the blankDisplay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
 <div class="viewcode-block" id="CcpnModuleArea.addModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea.addModule">[docs]</a>  <span class="k">def</span> <span class="nf">addModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;With these settings the user can close all the modules from the label &#39;close module&#39; or pop up and</span>
 <span class="sd">     when re-add a new module it makes sure there is a container available.</span>
@@ -153,18 +159,19 @@
 
     <span class="c1">## Determine the container to insert this module into.</span>
     <span class="c1">## If there is no neighbor, then the container is the top.</span>
-    <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span>
-        <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-          <span class="n">relativeTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">relativeTo</span><span class="p">]</span>
-      <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContainer</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">)</span>
-      <span class="n">neighbor</span> <span class="o">=</span> <span class="n">relativeTo</span>
+      <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span>
+          <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topContainer</span>
+          <span class="n">neighbor</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">relativeTo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">relativeTo</span><span class="p">]</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContainer</span><span class="p">(</span><span class="n">relativeTo</span><span class="p">)</span>
+        <span class="n">neighbor</span> <span class="o">=</span> <span class="n">relativeTo</span>
 
 
     <span class="k">if</span> <span class="n">neededContainer</span> <span class="o">!=</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="ow">and</span> <span class="n">container</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tab&#39;</span><span class="p">:</span>
@@ -194,8 +201,13 @@
     <span class="n">module</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="bp">self</span>
 <span class="c1">#    self.modules[module.getName()] = module</span>
     <span class="c1"># explicitly calling the CcpnModule.name() method as GuiDisplay modules have their name masked by</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">CcpnModule</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">module</span><span class="p">)]</span> <span class="o">=</span> <span class="n">module</span>
+
+    <span class="c1"># ejb - I think there is a logic error here when adding a module</span>
+    <span class="c1">#       that leaves the blank display without a parent</span>
+
+    <span class="c1"># from ccpn.ui.gui.modules.CcpnModule import CcpnModule</span>
+    <span class="c1"># self.modules[CcpnModule.name(module)] = module</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">()]</span> <span class="o">=</span> <span class="n">module</span>                <span class="c1"># ejb - testing</span>
     <span class="c1"># self.movePythonConsole()</span>
     <span class="k">return</span> <span class="n">module</span></div>
 

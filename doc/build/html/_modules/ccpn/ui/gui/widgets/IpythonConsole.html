@@ -71,7 +71,6 @@
         <span class="n">km</span> <span class="o">=</span> <span class="n">QtInProcessKernelManager</span><span class="p">()</span>
         <span class="n">km</span><span class="o">.</span><span class="n">start_kernel</span><span class="p">()</span>
         <span class="n">km</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s1">&#39;qt4&#39;</span>
-        <span class="n">kc</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">client</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span> <span class="o">=</span> <span class="n">RichJupyterWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gui_completion</span><span class="o">=</span><span class="s1">&#39;plain&#39;</span><span class="p">)</span>
@@ -79,7 +78,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">styleSheet</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">_set_font</span><span class="p">(</span><span class="n">fixedWidthFont</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_manager</span> <span class="o">=</span> <span class="n">km</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_client</span> <span class="o">=</span> <span class="n">kc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_client</span> <span class="o">=</span> <span class="n">km</span><span class="o">.</span><span class="n">client</span><span class="p">()</span>
         <span class="c1">#TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)</span>
         <span class="c1">#use getLayout() of the widget class to get hold of the widget layout in case you need to do something special</span>
         <span class="n">consoleLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
@@ -88,7 +87,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">kc</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
+        <span class="c1"># if this is called here then keyboard input gets</span>
+        <span class="c1"># sucked into Python console even if it is not opened</span>
+        <span class="c1"># so instead call _startChannels() when opened</span>
+        <span class="c1">###self.ipythonWidget.kernel_client.start_channels()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -123,6 +125,12 @@
       <span class="k">if</span> <span class="n">macroFile</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1">un -i {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">macroFile</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">_startChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      # CCPN INTERNAL - called in constructor of PythonConsoleModule.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">ipythonWidget</span><span class="o">.</span><span class="n">kernel_client</span><span class="o">.</span><span class="n">start_channels</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_showHistory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;</span>

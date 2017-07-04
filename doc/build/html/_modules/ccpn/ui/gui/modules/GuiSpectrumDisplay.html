@@ -102,7 +102,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <div class="viewcode-block" id="GuiSpectrumDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumDisplay</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -184,7 +184,7 @@
 <span class="sd">                          So for now add option below to have it turned off (False) or on (True).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GuiSpectrumDisplay&gt;&gt; mainWindow, name: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GuiSpectrumDisplay&gt;&gt; mainWindow, name: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">GuiSpectrumDisplay</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                                              <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1100</span><span class="p">,</span> <span class="mi">1300</span><span class="p">),</span> <span class="n">autoOrientation</span><span class="o">=</span><span class="bp">False</span>
                                              <span class="p">)</span>
@@ -250,7 +250,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">droppedNotifier</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="p">,</span>
-                                       <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">],</span> <span class="p">[</span><span class="n">DropBase</span><span class="o">.</span><span class="n">URLS</span><span class="p">,</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">PIDS</span><span class="p">],</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">_processDroppedItems</span><span class="p">)</span>
 
     <span class="c1"># GWV: This assures that a &#39;hoverbar&#39; is visible over the strip when dragging</span>
@@ -266,11 +266,23 @@
 <span class="sd">    </span>
 <span class="sd">    CCPN INTERNAL: Also called from GuiStrip</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">,[])):</span>
-      <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GuiSpectrumDisplay._processDroppedItems&gt;&gt;&gt; dropped:&#39;</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="n">theObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;theObject&#39;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_handlePid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;urls&#39;</span><span class="p">,[]):</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;dropped: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+      <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">objects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">theObject</span><span class="p">)</span>  <span class="c1"># pass the object as its pid so we use</span>
+                                      <span class="c1"># the same method used to process the pids</span>
+
+    <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">,[]):</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;dropped:&#39;</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">theObject</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_handlePid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="s2">&quot;handle a; return True in case it is a Spectrum or a SpectrumGroup&quot;</span>
     <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
@@ -279,6 +291,10 @@
         <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Forbidden drop&#39;</span><span class="p">,</span><span class="s1">&#39;A Single spectrum cannot be dropped onto grouped displays. Open a new Blank Display (N,D)&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">success</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">strip</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
       <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">elif</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">PeakList</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_handlePeakList</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
@@ -306,6 +322,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupToolBar</span><span class="o">.</span><span class="n">_addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <div class="viewcode-block" id="GuiSpectrumDisplay.setScrollbarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.setScrollbarPolicies">[docs]</a>  <span class="k">def</span> <span class="nf">setScrollbarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">):</span>
     <span class="s2">&quot;Set the scrolbar policies; convenience to expose to the user&quot;</span>
@@ -313,7 +331,7 @@
 
     <span class="k">if</span> <span class="n">horizontal</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCROLLBAR_POLICY_DICT</span> <span class="ow">or</span> \
        <span class="n">vertical</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCROLLBAR_POLICY_DICT</span><span class="p">:</span>
-      <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Invalid scrollbar policy (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">horizontal</span><span class="p">,</span> <span class="n">vertical</span><span class="p">))</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Invalid scrollbar policy (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">horizontal</span><span class="p">,</span> <span class="n">vertical</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">setScrollBarPolicies</span><span class="p">((</span><span class="n">horizontal</span><span class="p">,</span> <span class="n">vertical</span><span class="p">))</span></div>
 
   <span class="k">def</span> <span class="nf">_updatePivot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -414,7 +432,7 @@
     <span class="n">newStrip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
     <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span>
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;strip.clone()&quot;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">newStrip</span><span class="p">)</span>
-    <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrumDisplay = ui.getByGid(</span><span class="si">%r</span><span class="s2">); spectrumDisplay.addStrip(</span><span class="si">%d</span><span class="s2">)&quot;</span> \
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;spectrumDisplay = ui.getByGid(</span><span class="si">%r</span><span class="s2">); spectrumDisplay.addStrip(</span><span class="si">%d</span><span class="s2">)&quot;</span> \
                      <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">stripIndex</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">newStrip</span></div>
 

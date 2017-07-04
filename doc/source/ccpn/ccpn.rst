@@ -17,6 +17,7 @@ Subpackages
     ccpn.AnalysisStructure
     ccpn.core
     ccpn.framework
+    ccpn.pipes
     ccpn.ui
     ccpn.util
 

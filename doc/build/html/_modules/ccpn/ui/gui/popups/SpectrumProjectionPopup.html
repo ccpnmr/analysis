@@ -88,14 +88,10 @@
 <span class="kn">import</span> <span class="nn">os</span>
 
 
-<span class="c1"># class SpectrumProjectionPopup(QtGui.QDialog, Base):</span>
 <div class="viewcode-block" id="SpectrumProjectionPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.SpectrumProjectionPopup.SpectrumProjectionPopup">[docs]</a><span class="k">class</span> <span class="nc">SpectrumProjectionPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span>
                <span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Make Spectrum Projection&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    <span class="c1"># super(SpectrumProjectionPopup, self).__init__(parent)</span>
-    <span class="c1"># Base.__init__(self, **kw)</span>
-    <span class="c1"># self.setWindowTitle(&#39;Make Spectrum Projection&#39;)</span>
 
     <span class="n">projectionMethods</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;max&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;sum above noise&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>

@@ -185,15 +185,18 @@ class NefFileDialog(QtGui.QFileDialog):
 
   def reject(self):
     super(NefFileDialog, self).reject()
-    self.rejectFunc()
+    # self.rejectFunc()
 
   def accept(self):
     super(NefFileDialog, self).accept()
-    self.acceptFunc(self.selectedFile())
+    # self.acceptFunc(self.selectedFile())
 
   def setLabels(self, save='Save', cancel='Cancel'):
     self.setLabelText(QtGui.QFileDialog.Accept, save)
     self.setLabelText(QtGui.QFileDialog.Reject, cancel)
+
+  def _setResult(self, value):
+    self.thisAccepted = value
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit

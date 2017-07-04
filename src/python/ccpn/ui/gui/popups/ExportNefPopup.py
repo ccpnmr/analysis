@@ -66,6 +66,13 @@ class ExportNefPopup(CcpnDialog):
     """
     Initialise the widget
     """
+    self._nefFileMode = fileMode
+    self._nefText = text
+    self._nefAcceptMode = acceptMode
+    self._nefPreferences = preferences
+    self._nefSelectFile = selectFile
+    self._nefFilter = filter
+
     # pre __init__ to process extra keywords
 
     # B = {'fileMode':None
@@ -136,7 +143,12 @@ class ExportNefPopup(CcpnDialog):
     self.saveLabel = Label(self.saveFrame, text = '   Path:   ', grid=(0,0), hAlign = 'c')
     self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAligment='l')
     self.saveText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-    self.saveText.setDisabled(True)
+
+    self.saveText.setDisabled(False)   # ejb - enable but need to check path on okay
+
+    self.pathEdited = False
+    self.saveText.textEdited.connect(self._editPath)
+
     if 'selectFile' in kw:
       self.saveText.setText(kw['selectFile'])
     else:
@@ -185,17 +197,18 @@ class ExportNefPopup(CcpnDialog):
 
     # self.fileSaveDialog = NefFileDialog(self, **self.saveDict)
     self.fileSaveDialog = NefFileDialog(self
-                                        , fileMode = fileMode
-                                        , text = text
-                                        , acceptMode = acceptMode
-                                        , preferences = preferences
-                                        , selectFile = selectFile
-                                        , filter = filter)
+                                        , fileMode = self._nefFileMode
+                                        , text = self._nefText
+                                        , acceptMode = self._nefAcceptMode
+                                        , preferences = self._nefPreferences
+                                        , selectFile = self._nefSelectFile
+                                        , filter = self._nefFilter)
 
     if 'selectFile':
       self.saveText.setText(self.fileSaveDialog.selectedFile())
     else:
       self.saveText.setText('None')
+    self.oldFilePath = self.saveText.text()       # set to the same for the minute
 
     self._saveState = True
 
@@ -206,10 +219,15 @@ class ExportNefPopup(CcpnDialog):
       self.fileSaveDialog.show()
 
   def _acceptDialog(self, exitSaveFileName=None):
-    # self.exitFileName = exitSaveFileName
-    self.exitFileName = self.saveText.text()    # self.fileSaveDialog.selectedFile()
-    self.accept()
-    # return exitSaveFileName
+    self.exitFileName = self.saveText.text()
+
+    if self.pathEdited is False:     # self.exitFileName == self.oldFilePath:
+      # user has not changed the path so we can accept()
+      self.accept()
+    else:
+      # call the dialog again to accept the new change to the path
+      self._openFileDialog()
+      self.accept()
 
   def _rejectDialog(self):
     self.exitFileName = None
@@ -224,7 +242,6 @@ class ExportNefPopup(CcpnDialog):
     val = self.exec_()
 
     # build the export dict and flags
-
     self.flags = {}
     self.flags[SKIPPREFIXES] = []
     if self.buttonCCPN.isChecked() is False:        # these are negated as they are skipped flags
@@ -243,14 +260,24 @@ class ExportNefPopup(CcpnDialog):
     return self.exitFileName, self.flags, self.exclusionDict
 
   def _openFileDialog(self):
-    self.fileDialog = FileDialog(self, **self.saveDict)
+    self.fileDialog = FileDialog(self                       # ejb - old, , **self.saveDict)
+                                 , fileMode=self._nefFileMode
+                                 , text=self._nefText
+                                 , acceptMode=self._nefAcceptMode
+                                 , preferences=self._nefPreferences
+                                 , selectFile=self.saveText.text()
+                                 , filter=self._nefFilter)
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:
       self.saveText.setText(str(selectedFile))
+      self.oldFilePath = str(selectedFile)
+      self.pathEdited = False                     # we have reset the path
 
   def _save(self):
     self.accept()
 
+  def _editPath(self):
+    self.pathEdited = True      # user has manually changed the path
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

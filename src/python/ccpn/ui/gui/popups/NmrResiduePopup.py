@@ -70,7 +70,7 @@ class NmrResiduePopup(CcpnDialog):
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
     closeButton = Button(self, grid=(6, 1), text='Close', callback=self.reject)
-    applyButton = Button(self, grid=(6, 2), text='Apply', callback=self._assignResidue)
+    applyButton = Button(self, grid=(6, 2), text='Apply', callback=self._applyChanges)
     okButton = Button(self, grid=(6, 3), text='Ok', callback=self._okButton)
 
     self._updatePopup(nmrResidue)
@@ -137,12 +137,22 @@ class NmrResiduePopup(CcpnDialog):
     leftovers.remove(self.nmrResidue.residue)
     return [residue.id for residue in leftovers]
 
-  def _assignResidue(self):
+  def _repopulate(self):
+    #TODO:ED make sure that this popup is repopulated correctly
+    pass
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
     chain = self.project.getByPid(self.chainPulldown.currentText())
 
     applyAccept = False
-    # self.project._undo.increaseBlocking()
-    # self.project.blankNotification()
+    oldUndo = self.project._undo.numItems()
 
     self.project._startCommandEchoBlock('_applyChanges')
     try:
@@ -166,19 +176,27 @@ class NmrResiduePopup(CcpnDialog):
 
       applyAccept = True
     except Exception as es:
-      showWarning(self.windowTitle(), str(es))
+      showWarning(str(self.windowTitle()), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
-    # if an error occurred during the echo block, some values
-    # may be set, reject the changes that may have happened
     if applyAccept is False:
-      self.application.undo()
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
 
-    # self.project.unblankNotification()
-    # self.project._undo.decreaseBlocking()
-    return applyAccept
+      # repopulate popup
+      self._repopulate()
+      return False
+    else:
+      return True
 
   def _okButton(self):
-    if self._assignResidue() is True:
+    if self._applyChanges() is True:
       self.accept()

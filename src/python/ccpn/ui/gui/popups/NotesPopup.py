@@ -54,6 +54,7 @@ class NotesPopup(CcpnDialog):
     """
     When ok button pressed: update Note and exit
     """
+    #TODO:ED doesn't need _startCommandEchoBlock yet
     newName = self.noteText.text()
     if str(newName) != self.note.name:
       try:

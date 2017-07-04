@@ -791,7 +791,9 @@ class Framework:
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
-      ("Export NEF", self._exportNEF, [('shortcut', 'ex')]),
+      ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', False)]),
+                ("Export Nef File", self._exportNEF, [('shortcut', 'ex')])
+              )),
       (),
       ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -1105,6 +1107,10 @@ class Framework:
       #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
     return successful
+
+  def _importNef(self):
+    #TODO:ED add import routine here, dangerous so add warnings
+    pass
 
   def _exportNEF(self):
     #TODO:ED fix this temporary routine

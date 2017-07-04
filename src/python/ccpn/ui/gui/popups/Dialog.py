@@ -45,3 +45,5 @@ class CcpnDialog(QtGui.QDialog, Base):
     self.setSizePolicy(self.sizePolicy)
     self.setFixedSize(self.maximumWidth(), self.maximumHeight())
     self.setSizeGripEnabled(False)
+
+  #TODO:ED include widget here for self.centralWidget, self.buttonWidget and undo functionality

@@ -34,6 +34,8 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
+
 
 class CreateChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kw):
@@ -65,7 +67,7 @@ class CreateChainPopup(CcpnDialog):
     # self.residueList = ListWidgetSelector(self, setLayout=True, grid=(5,0), gridSpan=(1,4), title='Residue Types')
 
     buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Ok'],
-                           callbacks=[self.reject, self._createSequence])
+                           callbacks=[self.reject, self._okButton])
     self.sequenceStart = 1
     self.chainCode = 'A'
     self.sequence = self.sequenceEditor.toPlainText()
@@ -79,13 +81,13 @@ class CreateChainPopup(CcpnDialog):
     """
     Creates a sequence using the values specified in the text widget.
     """
-    try:
-      self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
-                                   startNumber=self.sequenceStart, shortName=self.chainCode,
-                                   molType=self.molTypePulldown.currentText())
-      self.accept()
-    except Exception as es:
-      showWarning('Create Sequence', str(es))
+    # try:
+    self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
+                                 startNumber=self.sequenceStart, shortName=self.chainCode,
+                                 molType=self.molTypePulldown.currentText())
+    #   self.accept()
+    # except Exception as es:
+    #   showWarning('Create Sequence', str(es))
 
   def _setSequenceStart(self, value:int):
     """
@@ -113,4 +115,49 @@ class CreateChainPopup(CcpnDialog):
     """
     self.moleculeName = value
 
+  def _repopulate(self):
+    #TODO:ED make sure that this popup is repopulated correctly
+    pass
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      self._createSequence()
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(str(self.windowTitle()), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
+      return False
+    else:
+      return True
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()
 

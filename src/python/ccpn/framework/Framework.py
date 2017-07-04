@@ -931,7 +931,7 @@ class Framework:
 
     self._initialiseProject(project)
 
-    project._resetUndo(debug=_DEBUG)
+    project._resetUndo(debug=self.level > Logging.DEBUG3)
 
     return project
 
@@ -963,12 +963,12 @@ class Framework:
       if subType == ioFormats.CCPN:
         sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
         project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-        project._resetUndo(debug=_DEBUG)
+        project._resetUndo(debug=self.level > Logging.DEBUG3)
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default
-        project._resetUndo(debug=_DEBUG)
+        project._resetUndo(debug=self.level > Logging.DEBUG3)
 
 
       return project

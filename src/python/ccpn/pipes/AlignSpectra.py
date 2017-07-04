@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
+from ccpn.util.Logging import getLogger , _debug3
 
 
 ########################################################################################################################
@@ -135,7 +136,7 @@ class AlignSpectra(SpectraPipe):
           return _alignSpectra(referenceSpectrum, spectra)
 
       else:
-        print('Spectra not Aligned. Returned original spectra')
+        getLogger().warning('Spectra not Aligned. Returned original spectra')
         return spectra
 
 AlignSpectra.register() # Registers the pipe in the pipeline

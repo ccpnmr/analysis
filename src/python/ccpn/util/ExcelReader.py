@@ -374,7 +374,7 @@ class ExcelReader(object):
         setattr(wrapperObject, attr, (self._getDFValue(attr, dataframe),))
       else:
         try:
-          if getattr(wrapperObject, attr) is None:
+          if getattr(wrapperObject, attr) is None or getattr(wrapperObject, attr) == 0:
             setattr(wrapperObject, attr, self._getDFValue(attr, dataframe))
 
         except Exception as e:

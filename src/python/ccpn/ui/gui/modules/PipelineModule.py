@@ -574,14 +574,19 @@ class GuiPipeline(CcpnModule, Pipeline):
     self._createSettingsGroupBox()
     self._createAllSettingWidgets()
     self._addWidgetsToLayout(self.settingsWidgets, self.settingWidgetsLayout)
+
     self._setSettingsParams()
 
   def _createSettingsGroupBox(self):
     self.settingFrame = Frame(self, setLayout=False)
-    self.settingFrame.setMaximumWidth(300)
     self.settingWidgetsLayout = QtGui.QGridLayout()
     self.settingFrame.setLayout(self.settingWidgetsLayout)
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
+    self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
+    self.settingsWidget.getLayout().setContentsMargins(10,10,10,10)
+    self.settingFrame.setMaximumWidth(300)
+    self._settingsScrollArea.setMaximumWidth(350)
+
 
   def _getInputDataHeaderLabel(self):
     color = QtGui.QColor('Red')

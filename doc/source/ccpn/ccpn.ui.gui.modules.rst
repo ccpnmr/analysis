@@ -49,10 +49,18 @@ ccpn.ui.gui.modules.CopyPeaksModule module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.CreateSequence module
------------------------------------------
+ccpn.ui.gui.modules.CreateChainPopup module
+-------------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.CreateSequence
+.. automodule:: ccpn.ui.gui.modules.CreateChainPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.modules.GuiIntegralListView module
+----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.GuiIntegralListView
     :members:
     :undoc-members:
     :show-inheritance:
@@ -153,18 +161,18 @@ ccpn.ui.gui.modules.GuiStripNd module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.GuiTableGenerator module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiTableGenerator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.modules.GuiWindow module
 ------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.GuiWindow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.modules.IntegralTable module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.IntegralTable
     :members:
     :undoc-members:
     :show-inheritance:

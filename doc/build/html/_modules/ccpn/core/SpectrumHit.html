@@ -110,6 +110,9 @@
   <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSpectrumHit</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
+  <span class="c1"># link To a reference Spectrum #LM needed for screening hit analysis</span>
+  <span class="n">_referenceSpectrum</span> <span class="o">=</span> <span class="bp">None</span>
+
   <span class="c1"># CCPN properties</span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiSpectrumHit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiSpectrumHit</span><span class="p">:</span>

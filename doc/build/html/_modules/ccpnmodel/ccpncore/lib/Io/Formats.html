@@ -113,7 +113,8 @@
 
 <span class="c1">#  Look-up formats</span>
 <span class="n">CSV</span> <span class="o">=</span> <span class="s1">&#39;csv&#39;</span>
-<span class="n">XLS</span> <span class="o">=</span> <span class="s1">&#39;xls&#39;</span>
+<span class="n">EXCEL</span> <span class="o">=</span> <span class="s1">&#39;Excel&#39;</span>
+
 
 <span class="n">DataTypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;Text&#39;</span><span class="p">,</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;LookupFile&#39;</span><span class="p">,</span> <span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="s1">&#39;Macro&#39;</span><span class="p">]</span>
 
@@ -255,25 +256,12 @@
       <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">CCPNTARFILE</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
-  <span class="c1"># Test Lookup format</span>
-  <span class="c1"># import csv</span>
-  <span class="c1"># if filePath.endswith(&#39;.csv&#39;):</span>
-  <span class="c1">#   print(&#39;is a look up csv&#39;)</span>
-  <span class="c1">#   csv_in = open(filePath, &#39;r&#39;)</span>
-  <span class="c1">#   reader = csv.reader(csv_in)</span>
-  <span class="c1">#   for row in reader:</span>
-  <span class="c1">#    if row[0].split(&#39;/&#39;)[-1] == &#39;procs&#39;:</span>
-  <span class="c1">#      filename = row[0].split(&#39;/&#39;)</span>
-  <span class="c1">#      filename.pop()</span>
-  <span class="c1">#      Filename = &#39;/&#39;.join(filename)</span>
-  <span class="c1">#      print(Filename, &#39;filename path in format.py&#39;)</span>
 
   <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;LookupFile&#39;</span><span class="p">,</span> <span class="n">CSV</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xls&#39;</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;LookupFile&#39;</span><span class="p">,</span> <span class="n">XLS</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
-
+  <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.xls&#39;</span><span class="p">,</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">)):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;LookupFile&#39;</span><span class="p">,</span> <span class="n">EXCEL</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
   <span class="k">else</span><span class="p">:</span>
 

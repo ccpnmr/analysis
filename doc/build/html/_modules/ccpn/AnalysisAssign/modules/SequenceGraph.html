@@ -403,6 +403,10 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrChainOrPid</span>
 
+    <span class="c1"># nmrChainOrPid could be &#39;&lt;Select&gt;&#39; in which case nmrChain would be None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrChain</span><span class="p">:</span>
+      <span class="k">return</span>
+
     <span class="c1">###self.project._appBase._startCommandBlock(&#39;application.sequenceGraph.setNmrChainDisplay({!r})&#39;.format(nmrChainPid))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="s1">&#39;application.sequenceGraph.setNmrChainDisplay({!r})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>

@@ -1189,6 +1189,13 @@ value error of Integral</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>An object containing Integrals. Note: the object is not a (subtype of a) Python list.
 To access all Integral objects, use integralList.integrals.</p>
+<dl class="method">
+<dt id="ccpn.core.IntegralList.IntegralList.automaticIntegral1D">
+<code class="descname">automaticIntegral1D</code><span class="sig-paren">(</span><em>minimalLineWidth=0.01</em>, <em>noiseThreshold=None</em><span class="sig-paren">)</span> &rarr; List[Integral]<a class="reference internal" href="../_modules/ccpn/core/IntegralList.html#IntegralList.automaticIntegral1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.automaticIntegral1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
+noiseThreshold: value used to calculate the intersectingLine to get the peak limits</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.IntegralList.IntegralList.className">
 <code class="descname">className</code><em class="property"> = 'IntegralList'</em><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.className" title="Permalink to this definition">¶</a></dt>
@@ -2272,7 +2279,7 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaks1dFiltered">
-<code class="descname">pickPeaks1dFiltered</code><span class="sig-paren">(</span><em>size: int = 9</em>, <em>mode: str = 'wrap'</em>, <em>ignoredRegions=None</em>, <em>noiseThreshold=None</em>, <em>negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1dFiltered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaks1dFiltered</code><span class="sig-paren">(</span><em>size: int = 9</em>, <em>mode: str = 'wrap'</em>, <em>excludeRegions=None</em>, <em>positiveNoiseThreshold=None</em>, <em>negativeNoiseThreshold=None</em>, <em>negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1dFiltered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick 1D peaks form data in  self.spectrum</p>
 </dd></dl>
 
@@ -2527,6 +2534,35 @@ interface matches the action</p>
 <code class="descname">execute</code><span class="sig-paren">(</span><em>pid</em>, <em>funcName</em>, <em>*params</em>, <em>**kwparams</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.execute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the object identified by pid, execute object.funcName(*params, **kwparams)
 and return the result</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.exportNef">
+<code class="descname">exportNef</code><span class="sig-paren">(</span><em>path: str = None</em>, <em>overwriteExisting: bool = False</em>, <em>skipPrefixes: Sequence[T_co] = ()</em>, <em>expandSelection: bool = True</em>, <em>pidList: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.exportNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.exportNef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export selected contents of the project to a Nef file.</p>
+<p>Flags is a dictionary of the form:</p>
+<blockquote>
+<div><p>{ &#8216;skipPrefixes&#8217;: [ &#8216;ccpn&#8217;, ..., &lt;str&gt; ], &#8216;expandSelection&#8217;: &lt;bool&gt; }</p>
+<p>Include &#8216;ccpn&#8217; in the flags will exclude ccpn specific items from the file
+expandSelection = True  will include all data from the project, this may not be data that</p>
+<blockquote>
+<div>is not defined in the Nef standard.</div></blockquote>
+</div></blockquote>
+<p>PidList is a list of &lt;str&gt;, e.g. &#8216;NC:&#64;-&#8216;, obtained from the objects to be included.
+The Nef file may also contain further dependent items necessary associated with the pidList.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; output path and filename</li>
+<li><strong>flags</strong> &#8211; output arguments</li>
+<li><strong>pidList</strong> &#8211; a list of pids</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -4012,7 +4048,7 @@ batch identifier for sample</p>
 <dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.columnNumber">
 <code class="descname">columnNumber</code><a class="headerlink" href="#ccpn.core.Sample.Sample.columnNumber" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Column number on plate</p>
 </dd></dl>
 
@@ -4102,7 +4138,7 @@ Pseudodimensions where sample is used for only one point along the sampled dimen
 <dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.rowNumber">
 <code class="descname">rowNumber</code><a class="headerlink" href="#ccpn.core.Sample.Sample.rowNumber" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Row number on plate</p>
 </dd></dl>
 

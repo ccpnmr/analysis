@@ -184,17 +184,19 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">smiles</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setSmiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompoundView.setSmiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.setSmiles">[docs]</a>  <span class="k">def</span> <span class="nf">setSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+    <span class="s1">&#39;set the smiles&#39;</span>
     <span class="n">compound</span> <span class="o">=</span> <span class="n">importSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
     <span class="n">variant</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">variants</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setVariant</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
     <span class="n">variant</span><span class="o">.</span><span class="n">snapAtomsToGrid</span><span class="p">(</span><span class="n">ignoreHydrogens</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">smiles</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">centerView</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">updateAll</span><span class="p">()</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="CompoundView.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CompoundView.CompoundView.resizeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>

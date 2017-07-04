@@ -151,16 +151,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increases contour base level for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Raise Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
-        <span class="k">return</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Raise Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
-                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span>
+
+    <span class="sd">&quot;&quot;&quot; wb: no good reason to insist on current strip being in this display</span>
+<span class="sd">    try:</span>
+<span class="sd">      if not self.current.strip:</span>
+<span class="sd">        showWarning(&#39;Raise Contour Base&#39;, &#39;No strip selected&#39;)</span>
+<span class="sd">        return</span>
+<span class="sd">      if self.current.strip not in self.strips:</span>
+<span class="sd">        showWarning(&#39;Raise Contour Base&#39;, &#39;Selected strip &quot;%s&quot; is not part of SpectrumDisplay &quot;%s&quot;&#39; \</span>
+<span class="sd">                    % (self.current.strip.pid, self.pid))</span>
+<span class="sd">        return</span>
+<span class="sd">    except:</span>
+<span class="sd">      return</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
@@ -200,16 +203,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decreases contour base level for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Lower Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
-        <span class="k">return</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Lower Contour Base&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
-                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span>
+
+    <span class="sd">&quot;&quot;&quot; wb: no good reason to insist on current strip being in this display</span>
+<span class="sd">    try:</span>
+<span class="sd">      if not self.current.strip:</span>
+<span class="sd">        showWarning(&#39;Lower Contour Base&#39;, &#39;No strip selected&#39;)</span>
+<span class="sd">        return</span>
+<span class="sd">      if self.current.strip not in self.strips:</span>
+<span class="sd">        showWarning(&#39;Lower Contour Base&#39;, &#39;Selected strip &quot;%s&quot; is not part of SpectrumDisplay &quot;%s&quot;&#39; \</span>
+<span class="sd">                    % (self.current.strip.pid, self.pid))</span>
+<span class="sd">        return</span>
+<span class="sd">    except:</span>
+<span class="sd">      return</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
@@ -249,16 +255,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Increases number of contours by 1 for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Add Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
-        <span class="k">return</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Add Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
-                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span>
+
+    <span class="sd">&quot;&quot;&quot; wb: no good reason to insist on current strip being in this display</span>
+<span class="sd">    try:</span>
+<span class="sd">      if not self.current.strip:</span>
+<span class="sd">        showWarning(&#39;Add Contour Level&#39;, &#39;No strip selected&#39;)</span>
+<span class="sd">        return</span>
+<span class="sd">      if self.current.strip not in self.strips:</span>
+<span class="sd">        showWarning(&#39;Add Contour Level&#39;, &#39;Selected strip &quot;%s&quot; is not part of SpectrumDisplay &quot;%s&quot;&#39; \</span>
+<span class="sd">                    % (self.current.strip.pid, self.pid))</span>
+<span class="sd">        return</span>
+<span class="sd">    except:</span>
+<span class="sd">      return</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
@@ -294,17 +303,20 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decreases number of contours by 1 for all spectra visible in the display.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Remove Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;No strip selected&#39;</span><span class="p">)</span>
-        <span class="k">return</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
-        <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Remove Contour Level&#39;</span><span class="p">,</span> <span class="s1">&#39;Selected strip &quot;</span><span class="si">%s</span><span class="s1">&quot; is not part of SpectrumDisplay &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> \
-                    <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="k">return</span>
 
+    <span class="sd">&quot;&quot;&quot; wb: no good reason to insist on current strip being in this display</span>
+<span class="sd">    try:</span>
+<span class="sd">      if not self.current.strip:</span>
+<span class="sd">        showWarning(&#39;Remove Contour Level&#39;, &#39;No strip selected&#39;)</span>
+<span class="sd">        return</span>
+<span class="sd">      if self.current.strip not in self.strips:</span>
+<span class="sd">        showWarning(&#39;Remove Contour Level&#39;, &#39;Selected strip &quot;%s&quot; is not part of SpectrumDisplay &quot;%s&quot;&#39; \</span>
+<span class="sd">                    % (self.current.strip.pid, self.pid))</span>
+<span class="sd">        return</span>
+<span class="sd">    except:</span>
+<span class="sd">      return</span>
+<span class="sd">&quot;&quot;&quot;</span>
+    
     <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>

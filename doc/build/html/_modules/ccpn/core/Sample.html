@@ -88,7 +88,7 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims.Sample</span> <span class="kn">import</span> <span class="n">Sample</span> <span class="k">as</span> <span class="n">ApiSample</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <div class="viewcode-block" id="Sample"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Sample">[docs]</a><span class="k">class</span> <span class="nc">Sample</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Corresponds to an NMR (or other) sample, with properties such as amount, pH,</span>
@@ -168,19 +168,19 @@
   <span class="k">def</span> <span class="nf">amountUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;amountUnit for sample, one of : &#39;L&#39;, &#39;g&#39;, &#39;mole&#39; &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">amountUnit</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">amountUnits</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;Unsupported stored value </span><span class="si">%s</span><span class="s2"> for Sample.amountUnit.&quot;</span>
-        <span class="o">%</span> <span class="n">result</span><span class="p">)</span>
+    <span class="c1"># if result is not None and result not in Constants.amountUnits:</span>
+    <span class="c1">#   self._project._logger.warning(</span>
+    <span class="c1">#     &quot;Unsupported stored value %s for Sample.amountUnit.&quot;</span>
+    <span class="c1">#     % result)</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@amountUnit.setter</span>
   <span class="k">def</span> <span class="nf">amountUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">amountUnits</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s2">&quot;Setting unsupported value </span><span class="si">%s</span><span class="s2"> for Sample.amountUnit.&quot;</span>
-        <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+    <span class="c1"># if value not in Constants.amountUnits:</span>
+    <span class="c1">#   self._project._logger.warning(</span>
+    <span class="c1">#     &quot;Setting unsupported value %s for Sample.amountUnit.&quot;</span>
+    <span class="c1">#     % value)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">amountUnit</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
@@ -230,22 +230,22 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">plateIdentifier</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">rowNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">rowNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Row number on plate&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">rowPosition</span>
 
   <span class="nd">@rowNumber.setter</span>
-  <span class="k">def</span> <span class="nf">rowNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">rowPosition</span> <span class="o">=</span> <span class="n">value</span>
+  <span class="k">def</span> <span class="nf">rowNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">rowPosition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">columnNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">columnNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Column number on plate&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">colPosition</span>
 
   <span class="nd">@columnNumber.setter</span>
-  <span class="k">def</span> <span class="nf">columnNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">colPosition</span> <span class="o">=</span> <span class="n">value</span>
+  <span class="k">def</span> <span class="nf">columnNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">colPosition</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -340,10 +340,11 @@
      <span class="p">(</span><span class="s1">&#39;rowNumber&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;columnNumber&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="p">)</span>
   <span class="p">)</span>
-  <span class="k">if</span> <span class="n">amountUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">amountUnits</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">amountUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">amountUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">amountUnits</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
       <span class="s2">&quot;Unsupported value </span><span class="si">%s</span><span class="s2"> for Sample.amountUnit.&quot;</span>
       <span class="o">%</span> <span class="n">amountUnit</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sample.amountUnit must be in the list: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">amountUnits</span><span class="p">)</span>  <span class="c1"># ejb</span>
 
   <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="n">apiSampleStore</span> <span class="o">=</span>  <span class="n">nmrProject</span><span class="o">.</span><span class="n">sampleStore</span>

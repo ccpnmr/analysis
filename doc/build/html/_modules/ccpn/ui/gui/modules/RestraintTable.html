@@ -96,6 +96,7 @@
 <span class="sd">  This class implements the module by wrapping a restaintsTable instance</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">includeColumnsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
   <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
@@ -171,7 +172,9 @@
                                         <span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span>
                                         <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
     <span class="c1"># settingsWidget</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_RTwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_RTwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_RTwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">restraintList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -201,7 +204,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CCPN-INTERNAL: used to get displayColumnWidget</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
 
   <span class="k">def</span> <span class="nf">_getSearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -472,8 +478,9 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CCPN-INTERNAL: Update settings Widgets according with the new displayed table</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getDisplayColumnWidget</span><span class="p">()</span>
-    <span class="n">displayColumnWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getDisplayColumnWidget</span><span class="p">()</span>
+      <span class="n">displayColumnWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getSearchWidget</span><span class="p">()</span>
     <span class="n">searchWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 

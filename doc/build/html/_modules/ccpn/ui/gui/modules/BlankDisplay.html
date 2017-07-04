@@ -57,13 +57,11 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
@@ -87,6 +85,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
 
 
 <div class="viewcode-block" id="BlankDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.BlankDisplay.BlankDisplay">[docs]</a><span class="k">class</span> <span class="nc">BlankDisplay</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -122,10 +121,19 @@
 <span class="sd">    These are either urls or pids, as the notifier will have filtered for this</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># denote if we got a valid spectrum and should delete BlankDisplay</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>     <span class="c1"># ejb - hide us first before it loses its container</span>
+
     <span class="c1"># process urls</span>
     <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;urls&#39;</span><span class="p">,[]):</span>
       <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;dropped: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
-      <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+      <span class="c1"># ejb - quick error trap so that it doesn&#39;t destroy window structure</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+      <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
 
       <span class="k">if</span> <span class="n">objects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># NB: In case a new project was dropped, self.project still points to the old project</span>
@@ -134,23 +142,31 @@
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Project</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">obj</span>
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="n">Spectrum</span><span class="p">)):</span>
-            <span class="n">success</span> <span class="o">=</span> <span class="n">success</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>  <span class="c1"># pass the object as its pid so we use</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>  <span class="c1"># pass the object as its pid so we use</span>
                                                            <span class="c1"># the same method used to process the pids</span>
     <span class="c1"># process pids</span>
     <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">,[])):</span>
       <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;dropped: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">pid</span><span class="p">)</span>
-      <span class="n">success</span> <span class="o">=</span> <span class="n">success</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+      <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handlePid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">deleteBlankDisplay</span><span class="p">()</span>
+      <span class="c1"># self.mainWindow.deleteBlankDisplay()</span>
       <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;application.deleteBlankDisplay()&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>             <span class="c1"># ejb - show us again, can always be shown again from the menu</span>
+
 
   <span class="k">def</span> <span class="nf">_handlePid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">):</span>
     <span class="s2">&quot;handle a; return True in case it is a Spectrum or a SpectrumGroup&quot;</span>
     <span class="n">success</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Spectrum</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_createSpectrumDisplay</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createSpectrumDisplay</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
+
       <span class="n">success</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">elif</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SpectrumGroup</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_handleSpectrumGroup</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
@@ -158,7 +174,8 @@
     <span class="k">return</span> <span class="n">success</span>
 
   <span class="k">def</span> <span class="nf">_createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+
     <span class="c1"># TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log</span>
     <span class="c1"># This routine can then be ommitted and the call above replaced by the one remaining line</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span>
@@ -166,6 +183,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.deleteBlankDisplay()&quot;</span><span class="p">)</span>
     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spectrum = project.getByPid(</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;application.createSpectrumDisplay(spectrum)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">spectrumDisplay</span>
 
   <span class="k">def</span> <span class="nf">_handleSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.</span>
@@ -180,6 +199,9 @@
       <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
       <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumGroupToolBar</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
       <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumGroupToolBar</span><span class="o">.</span><span class="n">_addAction</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
 
 
   <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -187,7 +209,7 @@
 <span class="sd">    Re-implementation of closeModule function from CcpnModule.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Shortcut &quot;ND&quot; to open a new blank display&#39;</span><span class="p">)</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BlankDisplay</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div>
 
 </pre></div>
 

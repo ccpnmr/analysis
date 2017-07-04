@@ -54,15 +54,12 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,7 +70,6 @@
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
-
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -84,6 +80,8 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">errno</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span> <span class="k">as</span> <span class="n">OD</span>
 <span class="c1"># from collections import Counter</span>
@@ -124,9 +122,30 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.MoleculeLib</span> <span class="kn">import</span> <span class="n">extraBoundAtomPairs</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">RestraintLib</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="c1"># Max value used for random integer. Set to be expressible as a signed 32-bit integer.</span>
 <span class="n">maxRandomInt</span> <span class="o">=</span>  <span class="mi">2000000000</span>
+
+<span class="c1"># Current NEF versio (as string</span>
+<span class="n">currentNefVersion</span> <span class="o">=</span> <span class="s1">&#39;1.1&#39;</span>
+<span class="c1"># Lowest version that this reader can reae (may not be teh same, as float:</span>
+<span class="n">minimumNefVersion</span> <span class="o">=</span> <span class="mf">1.1</span>
+
+
+<span class="c1"># TODO These should be consolidated with the sams constants in CcpnNefIo</span>
+<span class="c1"># (and likely those in ExportNefPopup) and likely replaced wiht a list of classes</span>
+<span class="n">CHAINS</span> <span class="o">=</span> <span class="s1">&#39;chains&#39;</span>
+<span class="n">CHEMICALSHIFTLISTS</span> <span class="o">=</span> <span class="s1">&#39;chemicalShiftLists&#39;</span>
+<span class="n">RESTRAINTLISTS</span> <span class="o">=</span> <span class="s1">&#39;restraintLists&#39;</span>
+<span class="n">PEAKLISTS</span> <span class="o">=</span> <span class="s1">&#39;peakLists&#39;</span>
+<span class="n">SAMPLES</span> <span class="o">=</span> <span class="s1">&#39;samples&#39;</span>
+<span class="n">SUBSTANCES</span> <span class="o">=</span> <span class="s1">&#39;substances&#39;</span>
+<span class="n">NMRCHAINS</span> <span class="o">=</span> <span class="s1">&#39;nmrChains&#39;</span>
+<span class="n">DATASETS</span> <span class="o">=</span> <span class="s1">&#39;dataSets&#39;</span>
+<span class="n">COMPLEXES</span> <span class="o">=</span> <span class="s1">&#39;complexes&#39;</span>
+<span class="n">SPECTRUMGROUPS</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroups&#39;</span>
+<span class="n">NOTES</span> <span class="o">=</span> <span class="s1">&#39;notes&#39;</span>
 
 <span class="c1">#  - saveframe category names in reading order</span>
 <span class="c1"># The order is significant, because setting of crosslinks relies on the order frames are read</span>
@@ -828,8 +847,10 @@
 
   <span class="c1"># TODO add function to get NefReader to load multiple projects, settings</span>
 
-<div class="viewcode-block" id="saveNefProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.saveNefProject">[docs]</a><span class="k">def</span> <span class="nf">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">()):</span>
+<div class="viewcode-block" id="saveNefProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.saveNefProject">[docs]</a><span class="k">def</span> <span class="nf">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span>
+                   <span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span>
+                   <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+                   <span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">()):</span>
   <span class="sd">&quot;&quot;&quot;Save project NEF file to path&quot;&quot;&quot;</span>
 
   <span class="n">dirPath</span><span class="p">,</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -849,11 +870,43 @@
 
   <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="exportNef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.exportNef">[docs]</a><span class="k">def</span> <span class="nf">exportNef</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span>
+               <span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span>
+               <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+               <span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="o">=</span><span class="p">()</span>
+               <span class="p">,</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span>
+               <span class="c1"># , exclusionDict={}</span>
+               <span class="p">,</span> <span class="n">pidList</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="c1">#TODO:ED check that the calling order to correct and matches command line action</span>
+  <span class="sd">&quot;&quot;&quot;export NEF file to path&quot;&quot;&quot;</span>
+  <span class="c1"># ejb - dialog added to allow the changing of the name from the current project name.</span>
 
-<div class="viewcode-block" id="convert2NefString"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.convert2NefString">[docs]</a><span class="k">def</span> <span class="nf">convert2NefString</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">Sequence</span><span class="o">=</span><span class="p">()):</span>
+  <span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;.nef&#39;</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span><span class="s1">&#39;.nef&#39;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Adding .nef extension to filename </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwriteExisting</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+
+  <span class="n">text</span> <span class="o">=</span> <span class="n">convert2NefString</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">,</span> <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
+                           <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>   <span class="c1">#, exclusionDict=exclusionDict)</span>
+
+  <span class="n">dirPath</span><span class="p">,</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">dirPath</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dirPath</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirPath</span><span class="p">)</span>
+
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>            <span class="c1"># save write</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="convert2NefString"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.convert2NefString">[docs]</a><span class="k">def</span> <span class="nf">convert2NefString</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="o">=</span><span class="p">(),</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                      <span class="n">pidList</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>   <span class="c1">#, exclusionDict:dict={}):</span>
   <span class="sd">&quot;&quot;&quot;Convert project to NEF string&quot;&quot;&quot;</span>
+
   <span class="n">converter</span> <span class="o">=</span> <span class="n">CcpnNefWriter</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
-  <span class="n">dataBlock</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">exportProject</span><span class="p">()</span>
+
+  <span class="c1">#TODO:ED check with Rasmus about removing items from the project export list</span>
+
+  <span class="n">dataBlock</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">exportProject</span><span class="p">(</span><span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span> <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>   <span class="c1">#, exclusionDict=exclusionDict)</span>
 
   <span class="c1"># Delete tags starting with certain prefixes.</span>
   <span class="c1"># NB designed to strip out &#39;ccpn&#39; tags to make output comparison easier</span>
@@ -891,8 +944,11 @@
       <span class="c1"># NBNB TBD reconsider whether we want the spec summary or something else</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">specification</span> <span class="o">=</span> <span class="n">Specification</span><span class="o">.</span><span class="n">getCcpnSpecification</span><span class="p">(</span><span class="n">specificationFile</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationName</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">programVersion</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationVersion</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;_appBase&#39;</span><span class="p">):</span>
+      <span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationName</span>
+      <span class="n">programVersion</span> <span class="o">=</span> <span class="n">programVersion</span> <span class="ow">or</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationVersion</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">programName</span> <span class="o">=</span> <span class="n">programName</span> <span class="ow">or</span> <span class="s1">&#39;CcpnNefWriter&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">programVersion</span> <span class="o">=</span> <span class="n">programVersion</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="CcpnNefWriter.exportObjects"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportObjects">[docs]</a>  <span class="k">def</span> <span class="nf">exportObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
@@ -1002,9 +1058,14 @@
 
       <span class="c1"># Substances and Chains</span>
       <span class="k">for</span> <span class="n">substance</span> <span class="ow">in</span> <span class="n">substances</span><span class="p">:</span>
-          <span class="n">chain</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">chain</span>
-          <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">chainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+        <span class="c1">#TODO:ED chains (plural) exists so need to output all here</span>
+          <span class="c1"># chain = substance.chain</span>
+          <span class="c1"># if chain is not None:</span>
+          <span class="c1">#   chainSet.add(chain)</span>
+
+          <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">substance</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>    <span class="c1"># ejb - modified</span>
+            <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="n">chainSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
       <span class="n">chains</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chainSet</span><span class="p">)</span>
 
     <span class="c1"># MetaData</span>
@@ -1094,17 +1155,79 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="CcpnNefWriter.exportProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportProject">[docs]</a>  <span class="k">def</span> <span class="nf">exportProject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get project and all contents as NEF object tree for export&quot;&quot;&quot;</span>
+  <span class="c1"># def exportProject(self, expandSelection:bool=False</span>
+  <span class="c1">#                   , pidList:list=None</span>
+  <span class="c1">#                   , exclusionDict:dict=None) -&gt; typing.Optional[StarIo.NmrDataBlock]:</span>
+<div class="viewcode-block" id="CcpnNefWriter.exportProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportProject">[docs]</a>  <span class="k">def</span> <span class="nf">exportProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+                    <span class="p">,</span> <span class="n">pidList</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get project and all contents as NEF object tree for export</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
 
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exportObjects</span><span class="p">(</span><span class="n">expandSelection</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                              <span class="n">chains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">chemicalShiftLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">,</span>
-                              <span class="n">restraintLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">,</span> <span class="n">peakLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span>
-                              <span class="n">samples</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">substances</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">,</span>
-                              <span class="n">nmrChains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">,</span> <span class="n">dataSets</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">,</span>
-                              <span class="n">complexes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">complexes</span><span class="p">,</span> <span class="n">spectrumGroups</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">,</span>
-                              <span class="n">notes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
+    <span class="c1"># ejb - added items to be removed from the list</span>
+    <span class="c1"># gets a copy of all the lists in the project that are relevant to Nef files</span>
+
+    <span class="c1"># assume that a list of pids to include is being passed in</span>
+    <span class="c1"># if there is none</span>
+
+    <span class="k">if</span> <span class="n">pidList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># use as a flag to export everything</span>
+
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exportObjects</span><span class="p">(</span><span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
+                                <span class="n">chains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">chemicalShiftLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">,</span>
+                                <span class="n">restraintLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">,</span> <span class="n">peakLists</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span>
+                                <span class="n">samples</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">substances</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">,</span>
+                                <span class="n">nmrChains</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">,</span> <span class="n">dataSets</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">dataSets</span><span class="p">,</span>
+                                <span class="n">complexes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">complexes</span><span class="p">,</span> <span class="n">spectrumGroups</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">,</span>
+                                <span class="n">notes</span><span class="o">=</span><span class="n">project</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># export selection of objects</span>
+      <span class="c1"># either everything minus the exclusionDict or the list of pids</span>
+      <span class="c1"># if pidList is not None and exclusionDict is not None:</span>
+      <span class="c1">#   lists must be mutually exclusive</span>
+        <span class="c1"># return None</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftLists</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">restraintLists</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">substances</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nmrChains</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dataSets</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">complexes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="n">checkList</span> <span class="o">=</span> <span class="p">[</span><span class="n">CHAINS</span><span class="p">,</span> <span class="n">CHEMICALSHIFTLISTS</span><span class="p">,</span> <span class="n">RESTRAINTLISTS</span><span class="p">,</span> <span class="n">PEAKLISTS</span>
+                   <span class="p">,</span> <span class="n">SAMPLES</span><span class="p">,</span> <span class="n">SUBSTANCES</span><span class="p">,</span> <span class="n">NMRCHAINS</span>
+                   <span class="p">,</span> <span class="n">DATASETS</span><span class="p">,</span> <span class="n">COMPLEXES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPS</span><span class="p">,</span> <span class="n">NOTES</span><span class="p">]</span>
+
+      <span class="c1"># put the pids in the correct lists</span>
+      <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">checkList</span><span class="p">:</span>
+        <span class="n">attrib</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">aPid</span> <span class="ow">in</span> <span class="n">pidList</span><span class="p">:</span>
+          <span class="n">pidObj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">aPid</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">pidObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">pidObj</span><span class="o">.</span><span class="n">_pluralLinkName</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>   <span class="c1"># need to check this</span>
+            <span class="n">attrib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pidObj</span><span class="p">)</span>
+
+        <span class="c1"># if name in exclusionDict:        # if not in list then still write all values</span>
+        <span class="c1">#   # setattr(self, name, [])           # make it an empty list</span>
+        <span class="c1">#   attrib = getattr(self, name)</span>
+        <span class="c1">#   for obj in getattr(project, name):</span>
+        <span class="c1">#     if obj.pid in exclusionDict[name]:</span>
+        <span class="c1">#       # attrib.append(obj)              # append the found items to the list</span>
+        <span class="c1">#       attrib.remove(obj)            # treat as exclusion list</span>
+
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exportObjects</span><span class="p">(</span><span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span><span class="p">,</span>
+                                <span class="n">chains</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">chemicalShiftLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">,</span>
+                                <span class="n">restraintLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">,</span> <span class="n">peakLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span>
+                                <span class="n">samples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">,</span> <span class="n">substances</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">substances</span><span class="p">,</span>
+                                <span class="n">nmrChains</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">,</span> <span class="n">dataSets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSets</span><span class="p">,</span>
+                                <span class="n">complexes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complexes</span><span class="p">,</span> <span class="n">spectrumGroups</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">,</span>
+                                <span class="n">notes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
+
 
     <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">saveFrames</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1187,7 +1310,7 @@
 
     <span class="c1"># NBNB TBD FIXME add proper values for format version from specification file</span>
     <span class="n">result</span><span class="p">[</span><span class="s1">&#39;format_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;nmr_exchange_format&#39;</span>
-    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;format_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.1&#39;</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;format_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">currentNefVersion</span>
     <span class="c1"># format_version=None</span>
     <span class="n">result</span><span class="p">[</span><span class="s1">&#39;coordinate_file_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coordinateFileName</span>
     <span class="k">if</span> <span class="n">headObject</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;Project&#39;</span><span class="p">:</span>
@@ -1513,7 +1636,7 @@
 
     <span class="n">spectrum</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
 
-    <span class="c1"># frameCode for saveFrame that holds spectrum adn first peaklist.</span>
+    <span class="c1"># framecode for saveFrame that holds spectrum adn first peaklist.</span>
     <span class="c1"># If not None, the peakList will be read into that specttum</span>
     <span class="n">spectrumAlreadySaved</span> <span class="o">=</span>  <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">spectrum</span><span class="p">))</span>
 
@@ -1591,7 +1714,7 @@
         <span class="k">try</span><span class="p">:</span>
           <span class="n">data</span><span class="p">[</span><span class="n">neftag</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrgetter</span><span class="p">(</span><span class="n">attrstring</span><span class="p">)(</span><span class="n">spectrum</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-          <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Could not get </span><span class="si">%s</span><span class="s2"> from Spectrum </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attrstring</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">))</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Could not get </span><span class="si">%s</span><span class="s2"> from Spectrum </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attrstring</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">))</span>
 
     <span class="n">aliasingLimits</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span>
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
@@ -1969,7 +2092,7 @@
             <span class="c1"># The dotted navigation expression can not always be followed</span>
             <span class="c1"># as is the case e.g. for (PeakList.)spectrum._wrappedData.dataStore.headerSize&#39;</span>
             <span class="c1"># where the dataStore is sometimes None</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Could not get </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">itemvalue</span><span class="p">,</span> <span class="n">wrapperObj</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Could not get </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">itemvalue</span><span class="p">,</span> <span class="n">wrapperObj</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># This is a loop</span>
           <span class="k">assert</span> <span class="n">itemvalue</span> <span class="o">==</span> <span class="n">_isALoop</span><span class="p">,</span> <span class="s2">&quot;Invalid item specifier in Nef2CcpnMap: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">itemvalue</span><span class="p">,)</span>
@@ -2111,7 +2234,7 @@
 
 
     <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loaded NEF file, time = &#39;</span><span class="p">,</span> <span class="n">t2</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loaded NEF file, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">t2</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
       <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;====&gt; &#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
@@ -2123,6 +2246,28 @@
 
     <span class="c1"># Other data are read in here at the end of the load</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainDataSetSerial</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_dataset_serial&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TODO this is a quick hack - should be improved and extended</span>
+
+    <span class="n">formatName</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;format_name&#39;</span><span class="p">)</span>
+    <span class="n">formatVersion</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;format_version&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">formatName</span> <span class="o">==</span> <span class="s1">&#39;nmr_exchange_format&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">formatVersion</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">version</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">formatVersion</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Illegal version string </span><span class="si">%s</span><span class="s2"> for nmr_exchange_format&quot;</span>
+                           <span class="o">%</span> <span class="n">formatVersion</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="n">minimumNefVersion</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported nef file version </span><span class="si">%s</span><span class="s2">; minimum version is </span><span class="si">%s</span><span class="s2">&quot;</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">formatVersion</span><span class="p">,</span> <span class="n">minimumNefVersion</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;NEF file format version missing: Reading may fail.&quot;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;NEF file format name &#39;</span><span class="si">%s</span><span class="s2">&#39;, not recognised. Reading may fail.&quot;</span>
+                              <span class="o">%</span> <span class="n">formatName</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">None</span></div>
 
@@ -2310,13 +2455,16 @@
         <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nef_chemical_shift&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-            <span class="n">chainCode</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
+            <span class="c1"># NB the self.defaultChainCode guards against chainCode being None</span>
+            <span class="n">chainCode</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChainCode</span>
+
             <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">assignmentData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">OD</span><span class="p">())</span>
             <span class="n">assignmentData</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidues</span>
             <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="bp">None</span>
 
       <span class="c1"># Create objects with reserved names</span>
       <span class="k">for</span> <span class="n">chainCode</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignmentData</span><span class="p">):</span>
+
         <span class="k">if</span> <span class="n">chainCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;@#&#39;</span> <span class="ow">and</span> <span class="n">chainCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
           <span class="c1"># reserved name - make chain</span>
           <span class="k">try</span><span class="p">:</span>
@@ -2458,13 +2606,20 @@
     <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;restraintType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">restraintType</span>
     <span class="n">namePrefix</span> <span class="o">=</span> <span class="n">restraintType</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span>
 
-    <span class="c1"># Get name from frameCode, add type disambiguation, and correct for ccpn dataSetSerial addition</span>
+    <span class="c1"># Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">framecode</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
     <span class="n">dataSetSerial</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_dataset_serial&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dataSetSerial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">dataSetSerial</span>
       <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">):]</span>
+
+    <span class="c1"># ejb - need to remove the rogue `n` at the beginning of the name if it exists</span>
+    <span class="c1">#       as it is passed into the namespace and gets added iteratively every save</span>
+    <span class="c1">#       next three lines remove all occurrences of `n` from name</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="s1">u&#39;\`\d*`+?&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>    <span class="c1"># substitute with &#39;&#39;</span>
 
     <span class="c1"># Make main object</span>
     <span class="n">dataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetchDataSet</span><span class="p">(</span><span class="n">dataSetSerial</span><span class="p">)</span>
@@ -2612,32 +2767,43 @@
     <span class="n">spectrumParameters</span><span class="p">,</span> <span class="n">loopNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromSaveFrame</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span>
                                                                   <span class="n">ccpnPrefix</span><span class="o">=</span><span class="s1">&#39;spectrum&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Get name from spectrum parameters, or from the frameCode</span>
+    <span class="c1"># Get name from spectrum parameters, or from the framecode</span>
     <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">framecode</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
-    <span class="n">peakListSerial</span> <span class="o">=</span> <span class="n">peakListParameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">peakListSerial</span><span class="p">:</span>
-      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">peakListSerial</span>
-      <span class="c1"># Remove peakList serial suffix (which was added for disambiguation)</span>
-      <span class="c1"># So that multiple peakLists all go to one Spectrum</span>
-      <span class="k">if</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
-        <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">spectrumName</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;`&#39;</span><span class="p">):</span>
+      <span class="n">peakListSerial</span> <span class="o">=</span> <span class="n">peakListParameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">peakListSerial</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">peakListSerial</span>
+        <span class="c1"># Remove peakList serial suffix (which was added for disambiguation)</span>
+        <span class="c1"># So that multiple peakLists all go to one Spectrum</span>
+        <span class="k">if</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
+          <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">spectrumName</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">)]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;`&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+          <span class="c1"># name is of form abc`xyz`</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">peakListParams</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+          <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getSpectrum</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="c1"># Spectrum does not already exist - create it.</span>
       <span class="c1"># NB For CCPN-exported projects spectra with multiple peakLists are handled this way</span>
 
-      <span class="n">frameCode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chemical_shift_list&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">frameCode</span><span class="p">:</span>
-        <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="p">[</span><span class="n">frameCode</span><span class="p">]</span>
+      <span class="n">framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chemical_shift_list&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">framecode</span><span class="p">:</span>
+        <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="p">[</span><span class="n">framecode</span><span class="p">]</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Defaults to first (there should be only one, but we want the read to work) ShiftList</span>
         <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChemicalShiftList</span>
 
 
-      <span class="n">frameCode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_sample&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">frameCode</span><span class="p">:</span>
-        <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="p">[</span><span class="n">frameCode</span><span class="p">]</span>
+      <span class="n">framecode</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_sample&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">framecode</span><span class="p">:</span>
+        <span class="n">spectrumParameters</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span><span class="p">[</span><span class="n">framecode</span><span class="p">]</span>
 
       <span class="c1"># get per-dimension data - NB these are mandatory and cannot be worked around</span>
       <span class="n">dimensionData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_nef_spectrum_dimension</span><span class="p">(</span><span class="n">project</span><span class="p">,</span>
@@ -2981,7 +3147,8 @@
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
 
       <span class="c1"># Add assignment</span>
-      <span class="n">chainCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">])</span>
+      <span class="c1"># NB the self.defaultChainCode or converts code None to the default chain code</span>
+      <span class="n">chainCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChainCode</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">])</span>
       <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;sequenceCodes&#39;</span><span class="p">])</span>
       <span class="n">residueTypes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;residueTypes&#39;</span><span class="p">])</span>
       <span class="n">atomNames</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;atomNames&#39;</span><span class="p">])</span>
@@ -3314,6 +3481,7 @@
     <span class="n">map2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">nmrResidueLoopName</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
+      <span class="c1"># NB chainCode None is not possible here (for ccpn data)</span>
       <span class="n">chainCode</span> <span class="o">=</span>  <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
       <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrChains</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span>
       <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
@@ -3453,7 +3621,7 @@
     <span class="sd">&quot;&quot;&quot;Get NmrChain, correcting for possible errors&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">chainCode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">chainCode</span> <span class="o">=</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span>
+        <span class="n">chainCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultNmrChainCode</span>
     <span class="n">newChainCode</span> <span class="o">=</span> <span class="n">chainCode</span>
     <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
       <span class="k">try</span><span class="p">:</span>
@@ -3466,6 +3634,8 @@
 
 <div class="viewcode-block" id="CcpnNefReader.produceNmrResidue"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrResidue">[docs]</a>  <span class="k">def</span> <span class="nf">produceNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get NmrResidue, correcting for possible errors&quot;&quot;&quot;</span>
+
+    <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCode</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChainCode</span>
 
     <span class="n">inputTuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">inputTuple</span><span class="p">)</span>
@@ -3906,6 +4076,8 @@
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;nef&#39;</span>
   <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.ccpn/&#39;</span><span class="p">):</span>
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;nef&#39;</span>
+  <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.nef&#39;</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.nef&#39;</span>
 
@@ -4055,12 +4227,21 @@
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="c1"># Explanation:</span>
+  <span class="c1"># _exportToNef will read a project from path and export the corresponding NEF file</span>
+  <span class="c1"># skipPrefixes=(&#39;ccpn&#39; ,) means &#39;remove all ccpn-specific tags from the output&#39;;</span>
+  <span class="c1"># default is to leave them in. Note that path may also be a NEF file,</span>
+  <span class="c1"># which will then be imported and re-exported</span>
+  <span class="c1">#</span>
+  <span class="c1"># testNefIo will read a NEF file and re-export it (with a .out.nef suffix),</span>
+  <span class="c1"># producing a V3 project on disk as a byproduct if the original is a V2 project.</span>
+
   <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
   <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(path)</span>
-  <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="c1"># nefpath = _exportToNef(path)</span>
   <span class="c1"># _testNefIo(nefpath)</span>
-  <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
+  <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span> <span class="p">,))</span>
   <span class="c1"># _testNefIo(nefpath, skipPrefixes=(&#39;ccpn&#39;,))</span>
   <span class="c1"># print(_extractVariantsTable(path))</span>
 </pre></div>

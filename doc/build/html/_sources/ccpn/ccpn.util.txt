@@ -57,6 +57,14 @@ ccpn.util.Constants module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.ExcelReader module
+----------------------------
+
+.. automodule:: ccpn.util.ExcelReader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.GitTools module
 -------------------------
 
@@ -141,6 +149,14 @@ ccpn.util.Register module
 -------------------------
 
 .. automodule:: ccpn.util.Register
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.SafeFilename module
+-----------------------------
+
+.. automodule:: ccpn.util.SafeFilename
     :members:
     :undoc-members:
     :show-inheritance:

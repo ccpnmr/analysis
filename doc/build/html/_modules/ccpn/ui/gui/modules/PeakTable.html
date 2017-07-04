@@ -1,0 +1,443 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.PeakTable &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.PeakTable</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
+               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:40 +0100 (Fri, April 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">PeakListPulldown</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span> <span class="p">,</span> <span class="n">ColumnViewSettings</span><span class="p">,</span>  <span class="n">ObjectTableFilter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">getPeakPosition</span><span class="p">,</span> <span class="n">getPeakAnnotation</span><span class="p">,</span> <span class="n">getPeakLinewidth</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
+
+<span class="n">UNITS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">,</span> <span class="s1">&#39;point&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="PeakTableModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTableModule">[docs]</a><span class="k">class</span> <span class="nc">PeakTableModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  This class implements the module by wrapping a PeakListTable instance</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">includeColumnsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
+  <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;PeakTable&#39;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PeakList Table&#39;</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># Derive application, project, and current from mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+
+    <span class="c1"># mainWidget</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">PeakListTableWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># settingsWidget</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PeakTableModule.selectPeakList"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTableModule.selectPeakList">[docs]</a>  <span class="k">def</span> <span class="nf">selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manually select a peakList from the pullDown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">_selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_getDisplayColumnWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CCPN-INTERNAL: used to get displayColumnWidget</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="k">def</span> <span class="nf">_getSearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="s2">&quot; CCPN-INTERNAL: used to get searchWidget&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span>
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Re-implementation of closeModule function from CcpnModule to unregister notification &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PeakTableModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PeakTableModule.close"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTableModule.close">[docs]</a>  <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Close the table from the commandline</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="PeakListTableWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget">[docs]</a><span class="k">class</span> <span class="nc">PeakListTableWidget</span><span class="p">(</span><span class="n">ObjectTable</span><span class="p">):</span>
+
+  <span class="n">positionsUnit</span> <span class="o">=</span> <span class="n">UNITS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#default</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">moduleParent</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">updateSettingsWidgets</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgets</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateSettingsWidgets</span> <span class="o">=</span> <span class="n">updateSettingsWidgets</span>
+    <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+    <span class="c1">## create peakList table widget</span>
+    <span class="n">ObjectTable</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[],</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">autoResize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+    <span class="c1">## create Pulldown for selection of peakList</span>
+    <span class="n">gridHPos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span> <span class="o">=</span> <span class="n">PeakListPulldown</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span>
+                                     <span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+                                     <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridHPos</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                     <span class="p">,</span> <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span>
+                                     <span class="p">,</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownPLcallback</span><span class="p">)</span>
+
+    <span class="c1">## create widgets for selection of position units</span>
+    <span class="n">gridHPos</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldownLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span> <span class="s1">&#39; Position Unit&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridHPos</span><span class="p">))</span>
+    <span class="n">gridHPos</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">UNITS</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownUnitsCallback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridHPos</span><span class="p">))</span>
+
+    <span class="c1">## set notifiers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaksNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="p">,[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CURRENT</span><span class="p">],</span> <span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;peaks&#39;</span><span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaksNotifierCallback</span><span class="p">)</span>
+    <span class="c1"># TODO set notifier to trigger only for the selected peakList.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_peakListDeleteNotifier</span> <span class="o">=</span> <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,</span> <span class="p">[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">],</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peakListNotifierCallback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifier</span> <span class="o">=</span>  <span class="n">Notifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">,[</span><span class="n">Notifier</span><span class="o">.</span><span class="n">DELETE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">Notifier</span><span class="o">.</span><span class="n">CHANGE</span><span class="p">],</span> <span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifierNotifierCallback</span><span class="p">)</span>
+
+    <span class="c1">## populate the table if there are peaklists in the project</span>
+    <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getTableColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Add default columns  plus the ones according with peakList.spectrum dimension</span>
+<span class="sd">     format of column = ( Header Name, value, tipText, editOption) </span>
+<span class="sd">     editOption allows the user to modify the value content by doubleclick</span>
+<span class="sd">     &#39;&#39;&#39;</span>
+
+    <span class="n">columnDefs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Serial column</span>
+    <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="s1">&#39;Peak serial number&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># Assignment column</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
+      <span class="n">assignTipText</span> <span class="o">=</span> <span class="s1">&#39;NmrAtom assignments of peak in dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;Assign F</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakAnnotation</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">assignTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># Peak positions column</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
+      <span class="n">positionTipText</span> <span class="o">=</span> <span class="s1">&#39;Peak position in dimension </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pos F</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">PeakListTableWidget</span><span class="o">.</span><span class="n">positionsUnit</span><span class="p">:</span> <span class="n">getPeakPosition</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
+                         <span class="n">positionTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># linewidth column TODO remove hardcoded Hz unit</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
+      <span class="n">linewidthTipTexts</span> <span class="o">=</span> <span class="s1">&#39;Peak line width </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;LW F</span><span class="si">%s</span><span class="s1"> (Hz)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">getPeakLinewidth</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">linewidthTipTexts</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># height column</span>
+    <span class="n">heightTipText</span> <span class="o">=</span> <span class="s1">&#39;Magnitude of spectrum intensity at peak center (interpolated), unless user edited&#39;</span>
+    <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">heightTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># volume column</span>
+    <span class="n">volumeTipText</span> <span class="o">=</span> <span class="s1">&#39;Integral of spectrum intensity around peak location, according to chosen volume method&#39;</span>
+    <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="n">volumeTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># figureOfMerit column</span>
+    <span class="n">figureOfMeritTipText</span> <span class="o">=</span> <span class="s1">&#39;Figure of merit&#39;</span>
+    <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Merit&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">figureOfMerit</span><span class="p">,</span> <span class="n">figureOfMeritTipText</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="c1"># comment column</span>
+    <span class="n">commentsTipText</span> <span class="o">=</span> <span class="s1">&#39;Textual notes about the peak&#39;</span>
+    <span class="n">columnDefs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Comment&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">PeakListTableWidget</span><span class="o">.</span><span class="n">_getCommentText</span><span class="p">(</span><span class="n">pk</span><span class="p">),</span> <span class="n">commentsTipText</span><span class="p">,</span>
+                       <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">PeakListTableWidget</span><span class="o">.</span><span class="n">_setComment</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">value</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">colName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="n">tipText</span><span class="p">,</span> <span class="n">setEditValue</span><span class="o">=</span><span class="n">editValue</span><span class="p">)</span> <span class="k">for</span> <span class="n">colName</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">tipText</span><span class="p">,</span> <span class="n">editValue</span> <span class="ow">in</span>
+            <span class="n">columnDefs</span><span class="p">]</span>
+
+
+  <span class="c1">##################   Updates   ##################</span>
+
+  <span class="k">def</span> <span class="nf">_updateAllModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Updates the table and the settings widgets&#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateTable</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateSettingsWidgets</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsWidgets</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_updateTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSelectedPeakList</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Display the peaks on the table for the selected PeakList.</span>
+<span class="sd">    Obviously, If the peak has not been previously deleted and flagged isDeleted&#39;&#39;&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setObjectsAndColumns</span><span class="p">(</span><span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[])</span> <span class="c1">#clear current table first</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">useSelectedPeakList</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="o">.</span><span class="n">peaks</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">peak</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectsAndColumns</span><span class="p">(</span><span class="n">objects</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getTableColumns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span> <span class="c1">#if not peaks, make the table empty</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1">#set only specific peak of a peakList</span>
+      <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjectsAndColumns</span><span class="p">(</span><span class="n">objects</span><span class="o">=</span><span class="n">peaks</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getTableColumns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span> <span class="c1">#if not peaks, make the table empty</span>
+
+  <span class="k">def</span> <span class="nf">_updateSettingsWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; update settings Widgets according with the new displayed table &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
+      <span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getDisplayColumnWidget</span><span class="p">()</span>
+      <span class="n">displayColumnWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getSearchWidget</span><span class="p">()</span>
+    <span class="n">searchWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manually select a PeakList from the pullDown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: No PeakList selected&#39;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;select: No PeakList selected&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peakList</span><span class="p">,</span> <span class="n">PeakList</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type PeakList&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;select: Object is not of type PeakList&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">widgetObj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">textList</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">peakList</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="n">widgetObj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="n">peakList</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+  <span class="c1">##################   Widgets callbacks  ##################</span>
+
+
+  <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; If current strip contains the double clicked peak will navigateToPositionInStrip &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span><span class="p">,</span> <span class="n">_getCurrentZoomRatio</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">widths</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="n">_getCurrentZoomRatio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">viewRange</span><span class="p">())</span>
+      <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to peak position. Set a current strip first&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_selectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    set as current the selected peaks on the table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">clearPeaks</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span>
+
+  <span class="k">def</span> <span class="nf">_pulldownUnitsCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+    <span class="c1"># update the table with new units</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setPositionUnit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateAllModule</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_pulldownPLcallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateAllModule</span><span class="p">()</span>
+
+  <span class="c1">##################   Notifiers callbacks  ##################</span>
+
+  <span class="k">def</span> <span class="nf">_peakListNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Refreshs the table only if the peakList involved in the notification is the one displayed &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pLwidget</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="c1">#otherwise automatically reset from the compoundWidget pulldown notifiers</span>
+
+    <span class="n">peakList</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">!=</span> <span class="n">peakList</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_updateAllModule</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_peakNotifierNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Callback for peak notifier. Refresh the table only if the peak belongs to the peakList displayed</span>
+<span class="sd">    NB. Currently impossible to register and trigger the notifier dynamically for only the peaks in the peakList displayed.</span>
+<span class="sd">    This because when deleting a peakList or spectrum from the project, the process starts by deleting one by one the peak and triggering the peak notifier automatically and therefore refreshing the table,</span>
+<span class="sd">    TODO: better notifier that if a parent object is deleted it suspends all the children notifiers.</span>
+<span class="sd">   &#39;&#39;&#39;</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;object&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">!=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="p">:</span>
+        <span class="k">return</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateAllModule</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_selectOnTableCurrentPeaksNotifierCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;callback from a notifier to select the current peaks  &#39;&#39;&#39;</span>
+    <span class="n">currentPeaks</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentPeaks</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; highlight current peaks on the opened peak table &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+
+
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span> <span class="nf">_getCommentText</span><span class="p">(</span><span class="n">peak</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">peak</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39; &#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">peak</span><span class="o">.</span><span class="n">comment</span>
+
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span> <span class="nf">_setComment</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">peak</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="k">def</span> <span class="nf">_setPositionUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">UNITS</span><span class="p">:</span>
+      <span class="n">PeakListTableWidget</span><span class="o">.</span><span class="n">positionsUnit</span> <span class="o">=</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="PeakListTableWidget.destroy"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakListTableWidget.destroy">[docs]</a>  <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="s2">&quot;Cleanup of self&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peakListDeleteNotifier</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_peakListDeleteNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifier</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_peakNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaksNotifier</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -65,10 +65,26 @@ ccpn.ui.gui.popups.ExperimentTypePopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.ExportNefPopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ExportNefPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.FeedbackPopup module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.FeedbackPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.IntegralListPopup module
+-------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.IntegralListPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -101,6 +117,14 @@ ccpn.ui.gui.popups.NotesPopup module
 ------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.NotesPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.PPDimensionSelector module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.PPDimensionSelector
     :members:
     :undoc-members:
     :show-inheritance:

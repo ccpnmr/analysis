@@ -101,11 +101,9 @@
     <span class="k">return</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dna</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">dna</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">[</span><span class="n">dim</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="getPeakLinewidth"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.peakUtils.getPeakLinewidth">[docs]</a><span class="k">def</span> <span class="nf">getPeakLinewidth</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-  <span class="c1">#FIXME: why index out of range, remove try:except</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
-  <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-    <span class="k">return</span></div>
+  <span class="n">lw</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">lineWidths</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">lw</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span></div>
 
 </pre></div>
 

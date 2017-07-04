@@ -84,6 +84,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Undo</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.ExcelReader</span> <span class="kn">import</span> <span class="n">ExcelReader</span>
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">NmrProject</span> <span class="k">as</span> <span class="n">ApiNmrProject</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Notifiers</span>
@@ -95,7 +96,23 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Fasta</span> <span class="k">as</span> <span class="n">fastaIo</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Pdb</span> <span class="k">as</span> <span class="n">pdbIo</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum.formats.Lookup</span> <span class="kn">import</span> <span class="n">readXls</span><span class="p">,</span><span class="n">readCsv</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="c1"># TODO These should be merged with the sams constants in CcpnNefIo</span>
+<span class="c1"># (and likely those in ExportNefPopup) and moved elsewhere</span>
+<span class="n">CHAINS</span> <span class="o">=</span> <span class="s1">&#39;chains&#39;</span>
+<span class="n">CHEMICALSHIFTLISTS</span> <span class="o">=</span> <span class="s1">&#39;chemicalShiftLists&#39;</span>
+<span class="n">RESTRAINTLISTS</span> <span class="o">=</span> <span class="s1">&#39;restraintLists&#39;</span>
+<span class="n">PEAKLISTS</span> <span class="o">=</span> <span class="s1">&#39;peakLists&#39;</span>
+<span class="n">SAMPLES</span> <span class="o">=</span> <span class="s1">&#39;samples&#39;</span>
+<span class="n">SUBSTANCES</span> <span class="o">=</span> <span class="s1">&#39;substances&#39;</span>
+<span class="n">NMRCHAINS</span> <span class="o">=</span> <span class="s1">&#39;nmrChains&#39;</span>
+<span class="n">DATASETS</span> <span class="o">=</span> <span class="s1">&#39;dataSets&#39;</span>
+<span class="n">COMPLEXES</span> <span class="o">=</span> <span class="s1">&#39;complexes&#39;</span>
+<span class="n">SPECTRUMGROUPS</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroups&#39;</span>
+<span class="n">NOTES</span> <span class="o">=</span> <span class="s1">&#39;notes&#39;</span>
 
 
 <div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -354,7 +371,7 @@
     <span class="sd">&quot;&quot;&quot;undo stack for Project. Implementation attribute&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
 
-  <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span> <span class="n">maxOperations</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">_resetUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxWaypoints</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">maxOperations</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
                  <span class="n">debug</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset undo stack, using passed-in parameters.</span>
 <span class="sd">    NB setting either parameter to 0 removes the undo stack.&quot;&quot;&quot;</span>
@@ -367,8 +384,8 @@
     <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to add undoPoint but undo is not initialised&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>                      <span class="c1"># DO NOT CHANGE THIS ONE</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added undoPoint&quot;</span><span class="p">)</span></div>
+      <span class="n">undo</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>                      <span class="c1"># DO NOT CHANGE THIS ONE newWaypoint</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Added undoPoint&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Project.blockWaypoints"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.blockWaypoints">[docs]</a>  <span class="k">def</span> <span class="nf">blockWaypoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Block the setting of undo waypoints,</span>
@@ -380,7 +397,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to block waypoints but undo is not initialised&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">increaseWaypointBlocking</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waypoint setting blocked&quot;</span><span class="p">)</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Waypoint setting blocked&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Project.unblockWaypoints"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.unblockWaypoints">[docs]</a>  <span class="k">def</span> <span class="nf">unblockWaypoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Block the setting of undo waypoints,</span>
@@ -392,7 +409,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trying to unblock waypoints but undo is not initialised&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">decreaseWaypointBlocking</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waypoint setting unblocked&quot;</span><span class="p">)</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Waypoint setting unblocked&quot;</span><span class="p">)</span></div>
 
 
   <span class="c1"># Should be removed:</span>
@@ -877,6 +894,131 @@
 
   <span class="c1"># Library functions</span>
 
+  <span class="k">def</span> <span class="nf">_exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span>
+                <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+                <span class="p">,</span> <span class="n">flags</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{}</span>
+                <span class="p">,</span> <span class="n">exclusionDict</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    first point in exporting a Nef file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO Merge this into Framework._exportNef, to keep the &#39;flags. confined to gui-near code</span>
+
+    <span class="c1"># flags are skipPrefixes, expandSelection</span>
+    <span class="n">skipPrefixes</span> <span class="o">=</span> <span class="n">flags</span><span class="p">[</span><span class="s1">&#39;skipPrefixes&#39;</span><span class="p">]</span>
+    <span class="n">expandSelection</span> <span class="o">=</span> <span class="n">flags</span><span class="p">[</span><span class="s1">&#39;expandSelection&#39;</span><span class="p">]</span>
+
+    <span class="c1"># ejb - to accommodate the new exclusion list</span>
+    <span class="c1"># convert exclusion to pidList and call the correct list</span>
+    <span class="c1"># this is the current list</span>
+    <span class="c1"># self.chains = []</span>
+    <span class="c1"># self.chemicalShiftLists = []</span>
+    <span class="c1"># self.restraintLists = []</span>
+    <span class="c1"># self.peakLists = []</span>
+    <span class="c1"># self.samples = []</span>
+    <span class="c1"># self.substances = []</span>
+    <span class="c1"># self.nmrChains = []</span>
+    <span class="c1"># self.dataSets = []</span>
+    <span class="c1"># self.complexes = []</span>
+    <span class="c1"># self.spectrumGroups = []</span>
+    <span class="c1"># self.notes = []</span>
+
+    <span class="n">checkList</span> <span class="o">=</span> <span class="p">[</span><span class="n">CHAINS</span><span class="p">,</span> <span class="n">CHEMICALSHIFTLISTS</span><span class="p">,</span> <span class="n">RESTRAINTLISTS</span><span class="p">,</span> <span class="n">PEAKLISTS</span>
+      <span class="p">,</span> <span class="n">SAMPLES</span><span class="p">,</span> <span class="n">SUBSTANCES</span><span class="p">,</span> <span class="n">NMRCHAINS</span>
+      <span class="p">,</span> <span class="n">DATASETS</span><span class="p">,</span> <span class="n">COMPLEXES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPS</span><span class="p">,</span> <span class="n">NOTES</span><span class="p">]</span>
+
+    <span class="n">pidList</span> <span class="o">=</span> <span class="p">[]</span>                                <span class="c1"># start with an empty list</span>
+
+    <span class="c1"># go through the checkList above and add all objects to the list</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">checkList</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>                   <span class="c1"># just to be safe</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+          <span class="n">pidList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>                 <span class="c1"># append the found items to the list</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Name not found in project: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+    <span class="c1"># now remove those items that are not needed (some may be added later depending on flags)</span>
+    <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">exclusionDict</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="n">exclusionDict</span><span class="p">[</span><span class="n">ky</span><span class="p">]:</span>
+        <span class="c1"># exPidObj = self.getByPid(exPid)</span>
+        <span class="k">if</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="n">pidList</span><span class="p">:</span>
+          <span class="n">pidList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">exPid</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">exportNef</span><span class="p">(</span><span class="n">path</span>
+                   <span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span>
+                   <span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span>
+                   <span class="p">,</span> <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span>
+                   <span class="p">,</span> <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
+
+    <span class="c1"># need to sort this</span>
+    <span class="c1"># from ccpn.core.lib import CcpnNefIo</span>
+    <span class="c1">#</span>
+    <span class="c1"># t0 = time()</span>
+    <span class="c1">#</span>
+    <span class="c1"># # change exclusion list to list of pids</span>
+    <span class="c1">#</span>
+    <span class="c1"># CcpnNefIo.exportNef(self, path</span>
+    <span class="c1">#                     , overwriteExisting=overwriteExisting</span>
+    <span class="c1">#                     , skipPrefixes=skipPrefixes</span>
+    <span class="c1">#                     , expandSelection=expandSelection</span>
+    <span class="c1">#                     , exclusionDict=exclusionDict)</span>
+    <span class="c1"># t2 = time()</span>
+    <span class="c1"># getLogger().info(&#39;Exported NEF file, time = %.2fs &gt; %s&#39; %(t2-t0, path))</span>
+
+<div class="viewcode-block" id="Project.exportNef"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.exportNef">[docs]</a>  <span class="k">def</span> <span class="nf">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span>
+                <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
+                <span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="o">=</span><span class="p">()</span>
+                <span class="p">,</span> <span class="n">expandSelection</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span>
+                <span class="p">,</span> <span class="n">pidList</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export selected contents of the project to a Nef file.</span>
+
+<span class="sd">    Flags is a dictionary of the form:</span>
+
+<span class="sd">      { &#39;skipPrefixes&#39;: [ &#39;ccpn&#39;, ..., &lt;str&gt; ], &#39;expandSelection&#39;: &lt;bool&gt; }</span>
+
+<span class="sd">      Include &#39;ccpn&#39; in the flags will exclude ccpn specific items from the file</span>
+<span class="sd">      expandSelection = True  will include all data from the project, this may not be data that</span>
+<span class="sd">                              is not defined in the Nef standard.</span>
+
+<span class="sd">    PidList is a list of &lt;str&gt;, e.g. &#39;NC:@-&#39;, obtained from the objects to be included.</span>
+<span class="sd">    The Nef file may also contain further dependent items necessary associated with the pidList.</span>
+
+<span class="sd">    :param path: output path and filename</span>
+<span class="sd">    :param flags: output arguments</span>
+<span class="sd">    :param pidList: a list of pids</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                            <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;overwriteExisting&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                            <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;skipPrefixes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                            <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;expandSelection&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                            <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;pidList&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;exportNef&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+      <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span>
+                          <span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span>
+                          <span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span>
+                          <span class="p">,</span> <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span>
+                          <span class="p">,</span> <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
+      <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Exported NEF file, time = </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="Project.loadData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadData">[docs]</a>  <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load data from path, determining type first.</span>
@@ -995,12 +1137,11 @@
       <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;{} type structures cannot be loaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subType</span><span class="p">))</span>
     <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">()</span>
     <span class="n">se</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ensemble</span>
-    <span class="n">se</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="n">se</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">newData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Derived&#39;</span><span class="p">)</span>
-    <span class="c1"># TODO: Rasmus fix me!</span>
-    <span class="c1"># d.setParameter(&#39;average&#39;, averageStructure(ensemble))</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="n">averageStructure</span><span class="p">(</span><span class="n">ensemble</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">se</span><span class="p">]</span>
 
@@ -1014,6 +1155,36 @@
 
     <span class="n">ensemble</span> <span class="o">=</span> <span class="n">EnsembleData</span><span class="o">.</span><span class="n">from_pdb</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">label</span><span class="p">,</span> <span class="n">ensemble</span>
+
+  <span class="k">def</span> <span class="nf">_loadNefFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a Nef file into an existing project</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># ejb - 24/6/17</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
+
+    <span class="k">if</span> <span class="n">subType</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ioFormats</span><span class="o">.</span><span class="n">NEF</span><span class="p">):</span>
+
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+      <span class="c1"># # load Nef File here</span>
+      <span class="c1"># nefReader = CcpnNefIo.CcpnNefReader(self)</span>
+      <span class="c1">#</span>
+      <span class="c1"># dataBlock = nefReader.getNefData(path)</span>
+      <span class="c1"># # project = self.newProject(dataBlock.name)</span>
+      <span class="c1"># # self._echoBlocking += 1</span>
+      <span class="c1"># self._undo.increaseBlocking()</span>
+      <span class="c1"># self._wrappedData.shiftAveraging = False</span>
+      <span class="c1">#</span>
+      <span class="c1"># nefReader.importNewProject(self, dataBlock)</span>
+      <span class="c1">#</span>
+      <span class="c1"># self._wrappedData.shiftAveraging = True</span>
+      <span class="c1"># # self._echoBlocking -= 1</span>
+      <span class="c1"># self._undo.decreaseBlocking()</span>
+      <span class="c1">#</span>
+      <span class="c1"># return True</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Project file type </span><span class="si">%s</span><span class="s2"> is not recognised&quot;</span> <span class="o">%</span> <span class="n">subType</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Project.loadProject"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.loadProject">[docs]</a>  <span class="k">def</span> <span class="nf">loadProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Project&quot;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load project from file into application and return the new project&quot;&quot;&quot;</span>
@@ -1041,10 +1212,11 @@
     <span class="sd">&quot;&quot;&quot;Load data from a look-up file, csv or xls .&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">CSV</span><span class="p">:</span>
-      <span class="n">readCsv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;This function has not been implemented yet&quot;</span><span class="p">)</span>
+      <span class="c1"># readCsv(self, path=path)</span>
 
-    <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">XLS</span><span class="p">:</span>
-      <span class="n">readXls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">EXCEL</span><span class="p">:</span>
+      <span class="n">ExcelReader</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">excelPath</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
 
 
   <span class="k">def</span> <span class="nf">_uniqueSubstanceName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaultName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

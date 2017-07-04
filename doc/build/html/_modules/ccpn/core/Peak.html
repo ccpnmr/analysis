@@ -113,7 +113,8 @@
 
   <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
-  
+
+  <span class="n">_linkedPeak</span> <span class="o">=</span> <span class="bp">None</span>
 
   <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
@@ -384,8 +385,8 @@
         <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
           <span class="n">resonance</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">_wrappedData</span>
           <span class="k">if</span> <span class="n">isotopeCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="ow">and</span> <span class="n">resonance</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="s1">&#39;?&#39;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NmrAtom assigned to dimension </span><span class="si">%s</span><span class="s2"> must have isotope </span><span class="si">%s</span><span class="s2"> or &#39;?&#39;&quot;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">isotopeCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NmrAtom </span><span class="si">%s</span><span class="s2">, isotope </span><span class="si">%s</span><span class="s2">, assigned to dimension </span><span class="si">%s</span><span class="s2"> must have isotope </span><span class="si">%s</span><span class="s2"> or &#39;?&#39;&quot;</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">,</span> <span class="n">resonance</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">isotopeCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]))</span>
 
           <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">resonance</span>
 

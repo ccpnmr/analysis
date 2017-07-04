@@ -25,14 +25,6 @@ ccpn.AnalysisScreen.lib.ScreenLookup module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisScreen.lib.Screening module
-----------------------------------------
-
-.. automodule:: ccpn.AnalysisScreen.lib.Screening
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisScreen.lib.SimulatedAnnealing module
 -------------------------------------------------
 

@@ -162,17 +162,24 @@
       <span class="k">if</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showYesNo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="n">current</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">deleteObjects</span><span class="p">(</span><span class="o">*</span><span class="n">peaks</span><span class="p">)</span></div>
 
-  <span class="c1">#FIXME:WAYNE: I don&#39;t think this can be correct</span>
 <div class="viewcode-block" id="GuiWindow.getCurrentPositionAndStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.getCurrentPositionAndStrip">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentPositionAndStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
-    <span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">parentObject</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">cursorPosition</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span>
-                      <span class="n">current</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
-    <span class="c1"># if len(current.strip.axisOrder) &gt; 2:</span>
-    <span class="c1">#   for axis in current.strip.orderedAxes[2:]:</span>
-    <span class="c1">#     position.append(axis.position)</span>
-    <span class="c1"># current.position = tuple(position)</span>
-    <span class="n">current</span><span class="o">.</span><span class="n">cursorPosition</span> <span class="o">=</span> <span class="n">cursorPosition</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # this function is called as a shortcut macro (&quot;w1&quot;) but</span>
+<span class="sd">    # with the code commented out that is pretty pointless.</span>
+<span class="sd">    # current.strip and current.cursorPosition are now set by</span>
+<span class="sd">    # clicking on a position in the strip so this commented</span>
+<span class="sd">    # out code is no longer useful, and this function might</span>
+<span class="sd">    # be more generally useful, so leave the brief version</span>
+<span class="sd">    current.strip = current.viewBox.parentObject().parent</span>
+<span class="sd">    cursorPosition = (current.viewBox.position.x(),</span>
+<span class="sd">                      current.viewBox.position.y())</span>
+<span class="sd">    # if len(current.strip.axisOrder) &gt; 2:</span>
+<span class="sd">    #   for axis in current.strip.orderedAxes[2:]:</span>
+<span class="sd">    #     position.append(axis.position)</span>
+<span class="sd">    # current.position = tuple(position)</span>
+<span class="sd">    current.cursorPosition = cursorPosition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">current</span><span class="o">.</span><span class="n">cursorPosition</span></div>
 
   <span class="k">def</span> <span class="nf">_getPeaksParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>

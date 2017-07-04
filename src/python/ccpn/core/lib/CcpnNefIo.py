@@ -83,8 +83,9 @@ currentNefVersion = '1.1'
 # Lowest version that this reader can reae (may not be teh same, as float:
 minimumNefVersion = 1.1
 
-EXPANDSELECTION = 'expandSelection'
-SKIPPREFIXES = 'skipPrefixes'
+
+# TODO These should be consolidated with the sams constants in CcpnNefIo
+# (and likely those in ExportNefPopup) and likely replaced wiht a list of classes
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
 RESTRAINTLISTS = 'restraintLists'
@@ -813,9 +814,7 @@ def saveNefProject(project:Project
   if os.path.exists(filePath) and not overwriteExisting:
     raise IOError("%s already exists" % filePath)
 
-  # text = convert2NefString(project, skipPrefixes=skipPrefixes)
-
-  text = convert2NefString(project, flags=skipPrefixes)   # error here
+  text = convert2NefString(project, skipPrefixes=skipPrefixes)
 
   if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)
@@ -825,9 +824,10 @@ def saveNefProject(project:Project
 def exportNef(project:Project
                , path:str
                , overwriteExisting:bool=False
-               , flags={}
+               , skipPrefixes:typing.Sequence=()
+               , expandSelection:bool=True
                # , exclusionDict={}
-               , pidList=None):
+               , pidList:typing.Sequence=None):
   #TODO:ED check that the calling order to correct and matches command line action
   """export NEF file to path"""
   # ejb - dialog added to allow the changing of the name from the current project name.
@@ -839,7 +839,8 @@ def exportNef(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  text = convert2NefString(project, flags=flags, pidList=pidList)   #, exclusionDict=exclusionDict)
+  text = convert2NefString(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+                           pidList=pidList)   #, exclusionDict=exclusionDict)
 
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
@@ -848,11 +849,9 @@ def exportNef(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
-def convert2NefString(project:Project, flags:dict={}, pidList:list=None):   #, exclusionDict:dict={}):
+def convert2NefString(project:Project, skipPrefixes:typing.Sequence=(), expandSelection:bool=True,
+                      pidList:list=None):   #, exclusionDict:dict={}):
   """Convert project to NEF string"""
-
-  expandSelection = flags[EXPANDSELECTION] if EXPANDSELECTION in flags else False
-  skipPrefixes = flags[SKIPPREFIXES] if SKIPPREFIXES in flags else ()
 
   converter = CcpnNefWriter(project)
 

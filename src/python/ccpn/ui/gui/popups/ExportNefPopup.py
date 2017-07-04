@@ -43,6 +43,9 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 
+
+# TODO These should maybe be consolidated with the same constants in CcpnNefIo
+# (and likely those in Project)
 CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
 RESTRAINTLISTS = 'restraintLists'

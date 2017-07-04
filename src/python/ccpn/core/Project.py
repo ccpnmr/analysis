@@ -51,8 +51,8 @@ from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from time import time
 from ccpn.util.Logging import getLogger
 
-EXPANDSELECTION = 'expandSelection'
-SKIPPREFIXES = 'skipPrefixes'
+# TODO These should be merged with the sams constants in CcpnNefIo
+# (and likely those in ExportNefPopup) and moved elsewhere
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
 RESTRAINTLISTS = 'restraintLists'
@@ -852,6 +852,13 @@ class Project(AbstractWrapperObject):
     """
     first point in exporting a Nef file
     """
+
+    # TODO Merge this into Framework._exportNef, to keep the 'flags. confined to gui-near code
+
+    # flags are skipPrefixes, expandSelection
+    skipPrefixes = flags['skipPrefixes']
+    expandSelection = flags['expandSelection']
+
     # ejb - to accommodate the new exclusion list
     # convert exclusion to pidList and call the correct list
     # this is the current list
@@ -890,7 +897,8 @@ class Project(AbstractWrapperObject):
 
     self.exportNef(path
                    , overwriteExisting=overwriteExisting
-                   , flags=flags
+                   , skipPrefixes=skipPrefixes
+                   , expandSelection=expandSelection
                    , pidList=pidList)
 
     # need to sort this
@@ -902,14 +910,16 @@ class Project(AbstractWrapperObject):
     #
     # CcpnNefIo.exportNef(self, path
     #                     , overwriteExisting=overwriteExisting
-    #                     , flags=flags
+    #                     , skipPrefixes=skipPrefixes
+    #                     , expandSelection=expandSelection
     #                     , exclusionDict=exclusionDict)
     # t2 = time()
     # getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
 
   def exportNef(self, path:str=None
                 , overwriteExisting:bool=False
-                , flags:dict={}
+                , skipPrefixes:typing.Sequence=()
+                , expandSelection:bool=True
                 , pidList:list=None):
     """
     Export selected contents of the project to a Nef file.
@@ -934,7 +944,8 @@ class Project(AbstractWrapperObject):
 
     defaults = OrderedDict((('path', None)
                             , ('overwriteExisting', None)
-                            , ('flags', None)
+                            , ('skipPrefixes', None)
+                            , ('expandSelection', None)
                             , ('pidList', None)))
 
     self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
@@ -947,7 +958,8 @@ class Project(AbstractWrapperObject):
       t0 = time()
       CcpnNefIo.exportNef(self, path
                           , overwriteExisting=overwriteExisting
-                          , flags=flags
+                          , skipPrefixes=skipPrefixes
+                          , expandSelection=expandSelection
                           , pidList=pidList)
       t2 = time()
       getLogger().info('Exported NEF file, time = %.2fs' % (t2 - t0))

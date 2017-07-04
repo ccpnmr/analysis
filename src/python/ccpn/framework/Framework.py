@@ -965,35 +965,32 @@ class Framework:
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-        project = self._loadNefFile(path, newProject=False)   # ejb - use new load
+        project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default
         project._resetUndo(debug=_DEBUG)
 
-        # the 'newProject' parameter works but has now initialisation yet
 
       return project
 
-    elif dataType == 'NefFile' and subType in (ioFormats.NEF):
-    # ejb - testing - 24/6/17 hopefully this will insert into project
-    #                 is caught by the test above
-    #                 need to deciode whether it is a 'project' or 'NefFile' load
-
-      sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
-      project = self._loadNefFile(path, newProject=False)
-      project._resetUndo(debug=_DEBUG)
-
-      return project
+    # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
+    # # ejb - testing - 24/6/17 hopefully this will insert into project
+    # #                 is caught by the test above
+    # #                 need to deciode whether it is a 'project' or 'NefFile' load
+    #
+    #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
+    #   project = self._loadNefFile(path, makeNewProject=False)
+    #   project._resetUndo(debug=_DEBUG)
+    #
+    #   return project
 
     else:
       sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
 
-  def _loadNefFile(self, path:str, newProject=False) -> Project:
+  def _loadNefFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
-    # ejb - new load Nef file
-    #       copied/modified from original below
 
     dataBlock = self.nefReader.getNefData(path)
 
-    if newProject:
+    if makeNewProject:
       if self.project is not None:
         self._closeProject()
       self.project = self.newProject(dataBlock.name)
@@ -1010,25 +1007,6 @@ class Framework:
       self.project._undo.decreaseBlocking()
 
     return self.project
-
-  def _loadNefFileRASMUS(self, path:str) -> Project:
-    """Load Project from NEF file at path, and do necessary setup"""
-    # this was the original _loadNefFile written by Rasmus
-    # I have made left it so I don't do anything stupid - ejb
-
-    dataBlock = self.nefReader.getNefData(path)
-    project = self.newProject(dataBlock.name)
-    self._echoBlocking += 1
-    self.project._undo.increaseBlocking()
-    self.project._wrappedData.shiftAveraging = False
-    try:
-      self.nefReader.importNewProject(project, dataBlock)
-    finally:
-      self.project._wrappedData.shiftAveraging = True
-      self._echoBlocking -= 1
-      self.project._undo.decreaseBlocking()
-
-    return project
 
   def clearRecentProjects(self):
     self.preferences.recentFiles = []
@@ -1148,8 +1126,6 @@ class Framework:
     # an exclusion list comes out of the dialog as it
 
     nefPath, flags, exclusionDict = dialog.show()
-
-    # flags are skipPrefixes, expandSelection
 
     if not nefPath:
       return

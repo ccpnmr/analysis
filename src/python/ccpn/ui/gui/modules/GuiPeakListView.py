@@ -766,7 +766,7 @@ class PeakNd(QtGui.QGraphicsItem):
         ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
         ###yPpm = peak.position[yDim]
         ###self.setPos(xPpm, yPpm)
-        colour = self.peakListView.symbolColour
+        colour = self.peakListView.peakList.symbolColour
         if widget:
           painter.setPen(QtGui.QColor(colour))
           # if self.colourScheme == 'light':
@@ -797,7 +797,7 @@ class PeakNd(QtGui.QGraphicsItem):
         #   painter.drawRect(-r,-r,w,w)
 
       elif self._isInFlankingPlane:
-        colour = self.peakListView.symbolColour
+        colour = self.peakListView.peakList.symbolColour
         pen = QtGui.QPen(QtGui.QColor(colour))
         pen.setStyle(QtCore.Qt.DotLine)
         painter.setPen(pen)
@@ -846,7 +846,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # if self.isSelected():
     #   print(self)
     self.colourScheme = peakItem.peakListView.spectrumView.application.colourScheme
-    colour = peakItem.peakListView.textColour
+    colour = peakItem.peakListView.peakList.textColour
     # if self.colourScheme == 'light':
     #   colour = QtGui.QColor('#080000')
     # else:
@@ -863,7 +863,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
-    colour = peakItem.peakListView.textColour
+    colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
     text = _getPeakAnnotation(peakItem.peak)
 

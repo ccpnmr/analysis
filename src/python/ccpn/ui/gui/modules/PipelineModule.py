@@ -429,7 +429,6 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.runPipeline()
 
     if self.updateInputData:
-      print('@{@@')
       self._updateGuiInputData()
 
   def _openAllPipes(self):
@@ -781,12 +780,27 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList.removeItem()
     self.setDataSelection()
 
+
   def _updateGuiInputData(self):
-    'updates the InputData from the pipeline input Data'
+    'updates the InputData list widget if more data are added in the pipeline inputData'
+    spectGroupPids = []
+    spectraPids = []
+    for item in self.inputDataList.getTexts():
+      if item.startswith('SG'):
+        spectGroupPids.append(item)
+      if item.startswith('SP'):
+        spectraPids.append(item)
+
     self.inputDataList.clear()
-    for datum in self.inputData:
-      if datum is not None:
-        self.inputDataList.addItem(datum.pid)
+    if len(self.spectrumGroups)>=len(spectGroupPids):
+      for sg in self.spectrumGroups:
+        if sg is not None:
+          self.inputDataList.addItem(sg.pid)
+    inputspectGroupSpectra = [sp for sg in self.spectrumGroups for sp in sg.spectra]
+    inputDataSpectra = [sp for sp in self.inputData if sp not in inputspectGroupSpectra]
+    for sp in inputDataSpectra:
+      if sp is not None:
+        self.inputDataList.addItem(sp.pid)
 
     self.setDataSelection()
 

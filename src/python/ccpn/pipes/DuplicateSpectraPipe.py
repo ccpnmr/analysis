@@ -126,6 +126,8 @@ class DuplicateSpectrumPipe(SpectraPipe):
     if replaceInputData:
       self.pipeline.updateInputData = True
       self.pipeline.inputData = newSpectra
+      print(self.pipeline.inputData, '@@')
+      print(newSpectra, 'newSpectra @@')
       return newSpectra
     else:
       spectra = set(spectra)

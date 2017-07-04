@@ -71,8 +71,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.plot.setObjectName(self.spectrum.pid)
     self.strip.viewBox.addItem(self.plot)
 
-    self.plot.curve.setClickable(True)
-    self.plot.sigClicked.connect(self._clicked)
+    # self.plot.curve.setClickable(True)
+    # self.plot.sigClicked.connect(self._clicked)
     # below causes a problem because wrapper not ready yet at this point
     #for peakList in self.spectrum.peakLists:
     #  self.strip.showPeaks(peakList)
@@ -212,9 +212,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
     colour = '#e4e15b' if self._application.colourScheme == 'dark' else '#000000'
     hTrace.setPen({'color':colour})
     hTrace.setData(x, v)
-      
-  def _clicked(self):
-    print(self.plot.objectName())
+  #
+  # def _clicked(self):
+  #   print(self.plot.objectName())
     
 
   # # TBD: should function below be removed???

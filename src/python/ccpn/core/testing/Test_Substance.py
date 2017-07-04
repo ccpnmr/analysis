@@ -195,6 +195,7 @@ class Test_Substance_SpectrumLink(WrapperTesting):
       atomLabel = self.substance2.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
   def test_Substance_removeAtomLabelling(self):
+    # TODO the error raised seems to be different to the test. Fix?
     with self.assertRaisesRegexp(ValueError, 'does not exist'):
       atomLabel = self.substance1.removeSpecificAtomLabelling('X.1.ALA.CA')
 

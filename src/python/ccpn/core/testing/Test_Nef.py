@@ -33,8 +33,9 @@ class TestCourse2c(WrapperTesting):
 
   def test_Course2c(self):
     outPath = os.path.dirname(self.project.path)[:-5] + '.out.nef'
-    CcpnNefIo.saveNefProject(self.project, outPath, overwriteExisting=True)
-    application = self.project._appBase
-    application.loadProject(outPath)
-    nefOutput = CcpnNefIo.convert2NefString(application.project)
-    # TODO do diff to compare nefOutput with input file
+    self.assertRaises(NotImplementedError,
+                      CcpnNefIo.saveNefProject(self.project, outPath, overwriteExisting=True))
+    # application = self.project._appBase
+    # application.loadProject(outPath)
+    # nefOutput = CcpnNefIo.convert2NefString(application.project)
+    # # TODO do diff to compare nefOutput with input file

@@ -1487,17 +1487,19 @@ class Framework:
     """
     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
-    mainWindow = self.ui.mainWindow
-    self.sequenceModule = SequenceModule(mainWindow=mainWindow)
-    mainWindow.moduleArea.addModule(self.sequenceModule,
-                                    position=position, relativeTo=relativeTo)
+    if not hasattr(self, 'sequenceModule'):
+      mainWindow = self.ui.mainWindow
+      self.sequenceModule = SequenceModule(mainWindow=mainWindow)
+      mainWindow.moduleArea.addModule(self.sequenceModule,
+                                      position=position, relativeTo=relativeTo)
     return self.sequenceModule
 
 
   def hideSequenceModule(self):
     """Hides sequence module"""
-    self.sequenceModule.close()
-    delattr(self, 'sequenceModule')
+    if hasattr(self, 'sequenceModule'):
+      self.sequenceModule.close()
+      delattr(self, 'sequenceModule')
 
 
   def inspectMolecule(self):

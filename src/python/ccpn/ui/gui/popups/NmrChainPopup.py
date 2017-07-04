@@ -50,12 +50,12 @@ class NmrChainPopup(CcpnDialog):
     self.nmrChain = nmrChain
     self.nmrChainLabel = Label(self, "NmrChain Name ", grid=(0, 0))
     self.nmrChainText = LineEdit(self, nmrChain.shortName, grid=(0, 1))
-    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._setNmrChainName], grid=(1, 1))
+    buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(1, 1))
 
-  def _setNmrChainName(self):
+  def _okButton(self):
     newName = self.nmrChainText.text()
     try:
-      if str(newName) != self.nmrChain.name:
+      if str(newName) != self.nmrChain.shortName:
         self.nmrChain.rename(newName)       # currently okay for undo as only does one thing
       self.accept()
     except Exception as es:

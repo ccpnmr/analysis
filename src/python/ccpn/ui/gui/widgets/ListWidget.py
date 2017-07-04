@@ -295,6 +295,7 @@ class ListWidgetPair(Frame):
                , contextMenu=True
                , multiSelect=True
                , acceptDrops=False
+               , showMoveArrows=False
                , title='Copy Items', **kw):
     """
     Initialise the pair of listWidgets
@@ -328,14 +329,15 @@ class ListWidgetPair(Frame):
     self.leftIcon = Icon('icons/yellow-arrow-left')
     self.rightIcon = Icon('icons/yellow-arrow-right')
 
-    self.buttons = ButtonList(self, texts=['move left', 'move right']
-                             , icons=[self.leftIcon, self.rightIcon]
-                             , callbacks=[self._moveLeft, self._moveRight]
-                             , direction='v'
-                             , grid=(3,3), hAlign='c')
-    self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-    transparentStyle = "background-color: transparent; border: 0px solid transparent"
-    self.buttons.setStyleSheet(transparentStyle)
+    if showMoveArrows:
+      self.buttons = ButtonList(self, texts=['move left', 'move right']
+                               , icons=[self.leftIcon, self.rightIcon]
+                               , callbacks=[self._moveLeft, self._moveRight]
+                               , direction='v'
+                               , grid=(3,3), hAlign='c')
+      self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+      transparentStyle = "background-color: transparent; border: 0px solid transparent"
+      self.buttons.setStyleSheet(transparentStyle)
 
     # self.button = Button(self, text=''
     #                          , icon=self.rightIcon

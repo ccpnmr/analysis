@@ -846,6 +846,7 @@ def exportNef(project:Project
   if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)
 
+  #TODO:ED check overwriteExisting flag and whether file exists
   with open(path, 'w') as f:            # save write
     f.write(text)
 

@@ -1131,15 +1131,26 @@ class Framework:
 
     # an exclusion list comes out of the dialog as it
 
-    nefPath, flags, exclusionDict = dialog.show()
+    nefPath, flags, pidList = dialog.show()
 
     if not nefPath:
       return
 
-    self.project._exportNef(path=nefPath
-                            , overwriteExisting=True
-                            , flags=flags
-                            , exclusionDict=exclusionDict)
+    # flags are skipPrefixes, expandSelection
+    skipPrefixes = flags['skipPrefixes']
+    expandSelection = flags['expandSelection']
+
+    self.project.exportNef(nefPath
+                   , overwriteExisting=True
+                   , skipPrefixes=skipPrefixes
+                   , expandSelection=expandSelection
+                   , pidList=pidList)
+
+    # this is the original
+    # self.project._exportNef(path=nefPath
+    #                         , overwriteExisting=True
+    #                         , flags=flags
+    #                         , exclusionDict=exclusionDict)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

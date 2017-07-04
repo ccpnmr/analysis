@@ -583,9 +583,10 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.settingFrame.setLayout(self.settingWidgetsLayout)
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
     self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
-    self.settingsWidget.getLayout().setContentsMargins(10,10,10,10)
+    self.settingsWidget.getLayout().setContentsMargins(1,1,1,1)
+    self.settingWidgetsLayout.setContentsMargins(10,15,10,10)
     self.settingFrame.setMaximumWidth(300)
-    self._settingsScrollArea.setMaximumWidth(350)
+    self._settingsScrollArea.setMaximumWidth(320)
 
 
   def _getInputDataHeaderLabel(self):
@@ -607,6 +608,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList = ListWidget(self)
     self.inputDataList.setMaximumHeight(200)
     self.inputDataList.setAcceptDrops(True)
+
+    self.refPL = Label(self, 'Reference PeakList')
+    self.referencePL = RadioButtons(self, texts=['Last Added', 'First'], direction='v')
+    self.settingsWidgets.append(self.refPL)
+    self.settingsWidgets.append(self.referencePL)
 
     self.inputDataList.addItem(self._getInputDataHeaderLabel())
     self.settingsWidgets.append(self.inputDataList)

@@ -569,7 +569,11 @@ class Substance(AbstractWrapperObject):
     elif not isinstance(labelling, str):
       raise TypeError("ccpn.Substance.labelling must be a string")
     elif not labelling:
-      raise ValueError("ccpn.Substance.labelling must be set")
+      # raise ValueError("ccpn.Substance.labelling must be set")
+
+      #TODO:ED testing
+      apiLabeling = DEFAULT_LABELLING
+
     elif Pid.altCharacter in labelling:
       raise ValueError("Character %s not allowed in ccpn.Substance.labelling" % Pid.altCharacter)
 

@@ -115,7 +115,6 @@ class PeakListPropertiesPopup(CcpnDialog):
     colour = list(spectrumColours.keys())[value]
     self.peakList.symbolColour = colour
 
-
   def _changeTextColour(self, value):
     colour = list(spectrumColours.keys())[value]
     self.peakList.textColour = colour

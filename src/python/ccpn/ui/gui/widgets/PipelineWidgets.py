@@ -306,6 +306,7 @@ class PipelineDropArea(DockArea):
 class GuiPipe(Dock, DockDrop):
 
   preferredPipe = True
+  applicationSpecificPipe = False
   pipeName = ''
   pipe = None
   _alreadyOpened = False #Use this to open the guiPipe only once. Inside the GuiPipe do: MyGuiPipe._alreadyOpened = True

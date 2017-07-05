@@ -69,7 +69,8 @@ DropHereLabel = 'Drop here SP or SG'
 transparentStyle = "background-color: transparent; border: 0px solid transparent"
 selectPipeLabel = '< Select Pipe >'
 preferredPipeLabel = '-- Preferred Pipes --'
-otherPipeLabel =     '-- Other Pipes --'
+applicationPipeLabel = '-- Application Pipes --'
+otherPipeLabel = '-- Other Pipes --'
 PipelineName = 'NewPipeline'
 
 class PipelineWorker(QtCore.QObject):
@@ -308,29 +309,29 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _setDataPipesPulldown(self):
+    '''Sets all the GuiPipes names on the Pulldown Pipe. Orderes by flag '''
     self.pipePulldownData = [selectPipeLabel, ]
     preferredGuiPipes = [preferredPipeLabel, ]
+    applicationPipes = [applicationPipeLabel,]
     otherGuiPipes = [otherPipeLabel, ]
-
 
     for guiPipe in self.guiPipes:
       if guiPipe is not None:
         if guiPipe.preferredPipe:
           preferredGuiPipes.append(guiPipe.pipe.pipeName)
+        elif guiPipe.applicationSpecificPipe and not guiPipe.preferredPipe:
+          applicationPipes.append(guiPipe.pipe.pipeName)
         else:
           otherGuiPipes.append(guiPipe.pipe.pipeName)
+
     self.pipePulldownData.extend(preferredGuiPipes)
+    self.pipePulldownData.extend(applicationPipes)
     self.pipePulldownData.extend(otherGuiPipes)
 
     self.pipePulldown.setData(self.pipePulldownData)
-
-    disablePreferredPipeLabel = self.pipePulldown.getItemIndex(preferredPipeLabel)
-    self.pipePulldown.model().item(disablePreferredPipeLabel).setEnabled(False)
-    disableOtherPipeLabel = self.pipePulldown.getItemIndex(otherPipeLabel)
-    self.pipePulldown.model().item(disableOtherPipeLabel).setEnabled(False)
-
-    # self.pipePulldown.insertSeparator(countPreferredGuiPipes)
+    self.pipePulldown.disableLabelsOnPullDown([preferredPipeLabel,applicationPipeLabel,otherPipeLabel], colour='red')
     self.pipePulldown.activated[str].connect(self._selectPipe)
+
 
   def _updatePipePulldown(self):
     if len(self.guiPipes) != len(self.pipes):

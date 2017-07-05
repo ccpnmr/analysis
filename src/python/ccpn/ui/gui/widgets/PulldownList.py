@@ -246,6 +246,18 @@ class PulldownList(QtGui.QComboBox, Base):
   def enable(self):
 
     self.setEnabled(True)
+
+
+  def disableLabelsOnPullDown(self, texts, colour=None):
+    ''' Disable items from pulldon (not selectable, not clickable). And if given, changes the colour '''
+    for text in texts:
+      if text is not None:
+        item = self.model().item(self.getItemIndex(text))
+        if item:
+          item.setEnabled(False)
+          if colour is not None:
+            item.setForeground(QtGui.QColor(colour))
+
   
   def setCallback(self, callback):
     

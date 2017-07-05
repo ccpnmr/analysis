@@ -844,8 +844,9 @@ class ObjectTable(QtGui.QTableView, Base):
     self._silenceCallback = False
 
 
-  def setObjects(self, objects, applyFilter=False):
-
+  def setObjects(self, objects, applyFilter=False, filterApplied=False):
+    if not filterApplied:
+      self.searchWidget.updateWidgets(self)
 
     model = self.model
     sourceModel = model.sourceModel()
@@ -1326,6 +1327,7 @@ class ObjectTableFilter(Widget):
     self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
                                    callbacks=[self.hideSearch, partial(self.restoreTable, self.table),
                                               partial(self.findOnTable, self.table)])
+    self.searchButtons.buttons[1].setEnabled(False)
 
     self.widgetLayout = QtGui.QHBoxLayout()
     self.setLayout(self.widgetLayout)
@@ -1349,6 +1351,7 @@ class ObjectTableFilter(Widget):
     self.table = table
     self.origObjects = self.table.objects
     self.setColumnOptions()
+    self.searchButtons.buttons[1].setEnabled(False)
 
   def hideSearch(self):
     if self.table.searchWidget is not None:
@@ -1356,20 +1359,16 @@ class ObjectTableFilter(Widget):
 
 
   def restoreTable(self, table):
-    for obj in self.origObjects:
-      if obj not in table.objects:
-        self.edit.clear()
-        return
-      else:
-        table.setObjects(self.origObjects)
-        self.edit.clear()
+      table.setObjects(self.origObjects)
+      self.edit.clear()
+      self.searchButtons.buttons[1].setEnabled(False)
 
   def findOnTable(self, table):
     self.updateWidgets(table)
     if self.edit.text() == '' or None:
       self.restoreTable(table)
       return
-    self.table.setObjects(self.origObjects)
+    self.table.setObjects(self.origObjects, filterApplied=True)
 
     text = self.edit.text()
     columns = self.table.columns
@@ -1387,8 +1386,10 @@ class ObjectTableFilter(Widget):
       matched = self.searchMatches(objCol, text)
 
     if matched:
-      self.table.setObjects(matched)
+      self.table.setObjects(matched, filterApplied=True)
+      self.searchButtons.buttons[1].setEnabled(True)
     else:
+      self.searchButtons.buttons[1].setEnabled(False)
       MessageDialog.showWarning('Not found', '')
 
 

@@ -255,6 +255,8 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
     for peakItem in self.peakItems.values():
       if isinstance(peakItem, PeakNd):
+        # can I force a repaint of the PeakNd here?
+
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
 class Peak1d(QtGui.QGraphicsItem):

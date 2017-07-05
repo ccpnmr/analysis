@@ -62,6 +62,8 @@ class NotesPopup(CcpnDialog):
         self.accept()
       except Exception as e:
         showWarning('Notes', str(e))
+    else:
+      self.accept()                   # no change so accept and exit
 
 
 

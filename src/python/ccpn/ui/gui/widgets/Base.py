@@ -75,7 +75,7 @@ class Base(DropBase):
 
                      # keywords related to optional layout
                      setLayout=False,
-                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(0,0),
+                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(12,6),
 
                      # keywords for adding to parent
                      grid=(None, None), gridSpan=(1,1), stretch=(0,0),
@@ -128,11 +128,7 @@ class Base(DropBase):
 
     if setLayout:
       self.setGridLayout(margins=margins, spacing=spacing)
-      # self.setStyleSheet('padding: 0px; '
-      #                    'padding-top: 1px; '
-      #                    'padding-left: 1px; '
-      #                    'padding-bottom: 1px; '
-      #                    'padding-right: 1px')
+      self.setStyleSheet('padding: 0px;')
 
     # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
     # or grid[1] (vertical) are defined

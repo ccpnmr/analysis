@@ -295,7 +295,8 @@ class ListWidgetPair(Frame):
                , contextMenu=True
                , multiSelect=True
                , acceptDrops=False
-               , showMoveArrows=False
+               , showMoveArrows=True
+               , showMoveText=False
                , title='Copy Items', **kw):
     """
     Initialise the pair of listWidgets
@@ -330,7 +331,11 @@ class ListWidgetPair(Frame):
     self.rightIcon = Icon('icons/yellow-arrow-right')
 
     if showMoveArrows:
-      self.buttons = ButtonList(self, texts=['move left', 'move right']
+      moveText = ['', '']
+      if showMoveText:
+        moveText = ['move left', 'move right']
+
+      self.buttons = ButtonList(self, texts=moveText
                                , icons=[self.leftIcon, self.rightIcon]
                                , callbacks=[self._moveLeft, self._moveRight]
                                , direction='v'
@@ -348,17 +353,17 @@ class ListWidgetPair(Frame):
     self.spacer1 = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
-    self.spacer2 = Spacer(self, 10, 10
+    self.spacer2 = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,2), gridSpan=(1,1))
-    self.spacer3 = Spacer(self, 10, 10
+    self.spacer3 = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(4,4), gridSpan=(1,1))
     self.spacer4 = Spacer(self, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(6,4), gridSpan=(1,1))
 
-    for i, cs in enumerate([2,6,1,1,1,6,2]):
+    for i, cs in enumerate([2,8,1,1,1,8,2]):
       self.getLayout().setColumnStretch(i, cs)
 
     # self.showBorder=True

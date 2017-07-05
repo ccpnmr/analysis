@@ -235,10 +235,10 @@ class EditSampleComponentPopup(CcpnDialog):
   def _getCallBacksDict(self):
     return {
             self._typeComponent: str(self.typePulldownList.get()),
-            self._concentrationChanged: float(self.concentrationLineEdit.get()),      # ejb - self._getConcentrationValue(),
+            self._concentrationChanged: self._getConcentrationValue(),
             self._concentrationUnitChanged: str(self.concentrationUnitPulldownList.get()),
             self._commentChanged: str(self.commentLineEdit.text())
-            }
+    }
 
   def _initialOptionsCallBack(self):
     selected = self.selectInitialRadioButtons.get()
@@ -343,12 +343,12 @@ class EditSampleComponentPopup(CcpnDialog):
 
   def _repopulate(self):
     if not self.sampleComponent:
-      for attrib, attribType, widget in self._setCallBacksDict():
-        try:
+      try:
+        for attrib, attribType, widget in self._setCallBacksDict():
           if attrib is not None:            # trap the setting of the widgets
             widget(attribType(attrib))
-        finally:
-          pass
+      except:
+        pass
 
   def _applyChanges(self):
     """
@@ -364,15 +364,29 @@ class EditSampleComponentPopup(CcpnDialog):
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       if self.newSampleComponentToCreate:
-        self._createNewComponent()
-      for property, value in self._getCallBacksDict().items():
-        property(value)
+        self.sampleComponent = self.sample.newSampleComponent(
+                    name=str(self.nameComponentLineEdit.text()),
+                    labelling=str(self.labellingPulldownList.currentText()),
+                    role=str(self.typePulldownList.get()),
+                    concentration=float(self.concentrationLineEdit.text()),
+                    concentrationUnit=str(self.concentrationUnitPulldownList.get()),
+                    comment=str(self.commentLineEdit.text()))
+      else:
+        for property, value in self._getCallBacksDict().items():
+          # if value or type(value) is str and value is not 'None':
+          property(value)
+
       self.nameComponentLineEdit.setReadOnly(True)
       self.labellingPulldownList.setEnabled(False)
 
       applyAccept = True
     except Exception as es:
-      showWarning(str(self.windowTitle()), str(es))
+      if 'pre-existing object' in str(es):
+        #TODO:ED this catches api trying to duplicate object
+        applyAccept=True
+      else:
+        showWarning(str(self.windowTitle()), str(es))
+
     finally:
       self.project._endCommandEchoBlock()
 

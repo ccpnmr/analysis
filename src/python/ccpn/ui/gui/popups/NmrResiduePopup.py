@@ -54,7 +54,7 @@ class NmrResiduePopup(CcpnDialog):
     self.setStyleSheet("border: 0px solid")
     self.parent = parent
     self.nmrAtom = nmrAtom
-    self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 1))
+    self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 2))
     chainLabel = Label(self, "Chain ", grid=(1, 0))
     self.chainPulldown = PulldownList(self, grid=(1, 1), callback=self._selectNmrChain)
     nmrChains = [nmrChain.pid for nmrChain in self.project.nmrChains] + [chain.pid for chain in self.project.chains]

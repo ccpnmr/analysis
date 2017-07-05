@@ -119,6 +119,15 @@ class PeakListPropertiesPopup(CcpnDialog):
     colour = list(spectrumColours.keys())[value]
     self.peakList.textColour = colour
 
+  def _changeColours(self):
+    value = self.symbolColourPulldownList.index
+    colour = list(spectrumColours.keys())[value]
+    self.peakList.symbolColour = colour
+
+    value = self.textColourPulldownList.index
+    colour = list(spectrumColours.keys())[value]
+    self.peakList.textColour = colour
+
   def _fillColourPulldown(self, pulldown):
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20, 20))

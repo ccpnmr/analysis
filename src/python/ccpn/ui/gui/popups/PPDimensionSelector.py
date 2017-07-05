@@ -55,6 +55,7 @@ class PPdimensionSelector(CcpnDialog):
     self.reject()
     popup = PeakFindPopup(mainWindow=self.mainWindow)
     popup.exec_()
+    popup.raise_()
 
 
 if __name__ == '__main__':

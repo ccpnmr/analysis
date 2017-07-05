@@ -814,7 +814,9 @@ class Framework:
       ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
-      ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
+      ("Pick Peaks...", (("Pick 1D Peaks", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
+                        ("Pick ND Peaks", self.showPeakPickNDPopup, [('shortcut', 'pp')])
+                         )),
       ("Copy PeakList", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
 
       (),
@@ -1451,17 +1453,31 @@ class Framework:
       popup.exec_()
 
 
-  def showPeakPickPopup(self):
+  def showPeakPick1DPopup(self):
     """
-    Displays Peak Picking Popup.
+    Displays Peak Picking 1D Popup.
     """
     if not self.project.peakLists:
       getLogger().warning('Peak Picking: Project has no Specta.')
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
-      from ccpn.ui.gui.popups.PPDimensionSelector import PPdimensionSelector
-      popup = PPdimensionSelector(mainWindow=self.ui.mainWindow)
+      from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+      popup = PickPeak1DPopup(mainWindow=self.ui.mainWindow)
       popup.exec_()
+      popup.raise_()
+
+  def showPeakPickNDPopup(self):
+    """
+    Displays Peak Picking ND Popup.
+    """
+    if not self.project.peakLists:
+      getLogger().warning('Peak Picking: Project has no Specta.')
+      MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
+    else:
+      from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+      popup = PeakFindPopup(mainWindow=self.ui.mainWindow)
+      popup.exec_()
+      popup.raise_()
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:

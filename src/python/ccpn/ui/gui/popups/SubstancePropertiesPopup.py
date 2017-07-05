@@ -239,13 +239,13 @@ class SubstancePropertiesPopup(CcpnDialog):
       self.ringCount.setText(str(self.substance.ringCount))
 
   def _bondDonorCountWidget(self):
-    self.labelHBondDonorCount = Label(self, text="H Bond Donors")
+    self.labelHBondDonorCount = Label(self, text="H Bond Donor Count")
     self.hBondDonorCount = LineEdit(self)
     if self.substance:
       self.hBondDonorCount.setText(str(self.substance.hBondDonorCount))
 
   def _bondAcceptorCountWidget(self):
-    self.labelHBondAcceptorCount = Label(self, text="H Bond Acceptors")
+    self.labelHBondAcceptorCount = Label(self, text="H Bond Acceptor Count")
     self.hBondAcceptorCount = LineEdit(self)
     if self.substance:
       self.hBondAcceptorCount.setText(str(self.substance.hBondAcceptorCount))

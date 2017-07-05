@@ -1489,11 +1489,20 @@ class Framework:
 
   def toggleSequenceModule(self):
     """Toggles whether Sequence Module is displayed or not"""
-    if hasattr(self, 'sequenceModule'):
-      if self.sequenceModule.isVisible():
-        self.hideSequenceModule()
+    from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+
+    if SequenceModule._alreadyOpened is True:
+      if SequenceModule._currentModule is not None:
+        SequenceModule._currentModule.close()
+        SequenceModule._alreadyOpened = False
     else:
       self.showSequenceModule()
+
+    # if hasattr(self, 'sequenceModule'):
+    #   if self.sequenceModule.isVisible():
+    #     self.hideSequenceModule()
+    # else:
+    #   self.showSequenceModule()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
     getLogger().info("application.toggleSequenceModule()")
 
@@ -1504,7 +1513,9 @@ class Framework:
     """
     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
-    if not hasattr(self, 'sequenceModule'):
+    # if not hasattr(self, 'sequenceModule'):
+
+    if SequenceModule._alreadyOpened is False:
       mainWindow = self.ui.mainWindow
       self.sequenceModule = SequenceModule(mainWindow=mainWindow)
       mainWindow.moduleArea.addModule(self.sequenceModule,
@@ -1514,10 +1525,11 @@ class Framework:
 
   def hideSequenceModule(self):
     """Hides sequence module"""
+    from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+
     if hasattr(self, 'sequenceModule'):
       self.sequenceModule.close()
       delattr(self, 'sequenceModule')
-
 
   def inspectMolecule(self):
     pass

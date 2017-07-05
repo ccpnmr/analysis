@@ -27,9 +27,11 @@ from PyQt4 import QtGui, QtCore
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Container import Container
+from ccpn.util.Logging import getLogger
 
 ModuleArea = DockArea
 Module = Dock
+
 
 class CcpnModuleArea(ModuleArea):
 
@@ -86,6 +88,18 @@ class CcpnModuleArea(ModuleArea):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.
     """
+
+    # test that only one instance of the module is opened
+    if hasattr(type(module), '_alreadyOpened'):
+      _alreadyOpened = getattr(type(module), '_alreadyOpened')
+
+      if _alreadyOpened is True:
+        if hasattr(type(module), '_onlySingleInstance'):
+          getLogger().warning('Only one instance of %s allowed' % str(module.name))
+          return
+      setattr(type(module), '_alreadyOpened', True)
+      setattr(type(module), '_currentModule', module)    # remember the module
+
     if module is None:
       raise RuntimeError('No module given')
 

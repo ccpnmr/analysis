@@ -75,7 +75,7 @@ class Base(DropBase):
 
                      # keywords related to optional layout
                      setLayout=False,
-                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(12,6),
+                     hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(12,7),
 
                      # keywords for adding to parent
                      grid=(None, None), gridSpan=(1,1), stretch=(0,0),

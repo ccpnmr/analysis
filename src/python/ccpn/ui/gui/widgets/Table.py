@@ -1360,6 +1360,9 @@ class ObjectTableFilter(Widget):
 
 
   def restoreTable(self, table):
+    #TODO:ED this works for all objects in the project EXCEPT PandasDataframes which
+    # don't have _parent
+
       if len(self.table.objects)>0:
         if hasattr(self.table.objects[0], '_parent'):
           parentObjects = self.table.objects[0]._parent

@@ -1361,13 +1361,16 @@ class ObjectTableFilter(Widget):
 
   def restoreTable(self, table):
       if len(self.table.objects)>0:
-        parentObjects = self.table.objects[0]._parent
-        if parentObjects is not  None:
-          cC = parentObjects._childClasses
-          if len(cC)>0:
-            names = parentObjects._childClasses[0]._pluralLinkName
-            originalObjects = getattr(parentObjects, names)
-            table.setObjects(originalObjects)
+        if hasattr(self.table.objects[0], '_parent'):
+          parentObjects = self.table.objects[0]._parent
+          if parentObjects is not  None:
+            if hasattr(parentObjects, '_childClasses'):
+              cC = parentObjects._childClasses
+              if len(cC)>0:
+                if hasattr(parentObjects._childClasses[0], '_pluralLinkName'):
+                  names = parentObjects._childClasses[0]._pluralLinkName
+                  originalObjects = getattr(parentObjects, names)
+                  table.setObjects(originalObjects)
 
       self.edit.clear()
       self.searchButtons.buttons[1].setEnabled(False)

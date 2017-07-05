@@ -50,8 +50,7 @@ class PeakTableModule(CcpnModule):
   This class implements the module by wrapping a PeakListTable instance
   '''
 
-  includeSettingsWidget = True
-  includeColumnsWidget = False
+  includeSettingsWidget = False
   maxSettingsState = 2
   settingsPosition = 'top'
 
@@ -71,12 +70,6 @@ class PeakTableModule(CcpnModule):
     self.peakListTable = PeakListTableWidget(parent=self.mainWidget, moduleParent=self, setLayout=True,
                                              application=self.application, grid=(0, 0))
 
-    # settingsWidget
-    if self.includeColumnsWidget:
-      self.displayColumnWidget = ColumnViewSettings(parent=self.settingsWidget, table=self.peakListTable, grid=(0, 0))
-
-    self.searchWidget = ObjectTableFilter(parent=self.settingsWidget, table=self.peakListTable, grid=(1, 0))
-
     if peakList is not None:
       self.selectPeakList(peakList)
 
@@ -86,18 +79,6 @@ class PeakTableModule(CcpnModule):
     """
     self.peakListTable._selectPeakList(peakList)
 
-  def _getDisplayColumnWidget(self):
-    """
-    CCPN-INTERNAL: used to get displayColumnWidget
-    """
-    if self.includeColumnsWidget:
-      return self.displayColumnWidget
-    else:
-      return None
-
-  def _getSearchWidget(self):
-    " CCPN-INTERNAL: used to get searchWidget"
-    return self.searchWidget
 
   def _closeModule(self):
     """Re-implementation of closeModule function from CcpnModule to unregister notification """
@@ -115,13 +96,12 @@ class PeakListTableWidget(ObjectTable):
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent, moduleParent, application, peakList=None, updateSettingsWidgets=True, **kwds):
+  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
     self._project = application.project
     self._current = application.current
     self.moduleParent = moduleParent
     self.settingWidgets = None
     self._selectedPeakList = None
-    self.updateSettingsWidgets = updateSettingsWidgets
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
 
@@ -209,8 +189,6 @@ class PeakListTableWidget(ObjectTable):
   def _updateAllModule(self):
     '''Updates the table and the settings widgets'''
     self._updateTable()
-    if self.updateSettingsWidgets:
-      self._updateSettingsWidgets()
 
   def _updateTable(self, useSelectedPeakList=True, peaks=None):
     '''Display the peaks on the table for the selected PeakList.
@@ -231,14 +209,6 @@ class PeakListTableWidget(ObjectTable):
         self._selectOnTableCurrentPeaks(self._current.peaks)
       else:
         self.setObjects([]) #if not peaks, make the table empty
-
-  def _updateSettingsWidgets(self):
-    ''' update settings Widgets according with the new displayed table '''
-    if self.moduleParent.includeColumnsWidget:
-      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-      displayColumnWidget.updateWidgets(self)
-    searchWidget = self.moduleParent._getSearchWidget()
-    searchWidget.updateWidgets(self)
 
   def _selectPeakList(self, peakList=None):
     """

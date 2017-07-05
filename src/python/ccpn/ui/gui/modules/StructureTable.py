@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from PyQt4 import QtGui, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
@@ -48,7 +48,6 @@ class StructureTableModule(CcpnModule):
   This class implements the module by wrapping a StructureTable instance
   """
   includeSettingsWidget = True
-  includeColumnsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
 
@@ -194,15 +193,6 @@ class StructureTableModule(CcpnModule):
                                         , application=self.application
                                         , moduleParent=self
                                         , grid=(0,0))
-    # settingsWidget
-    if self.includeColumnsWidget:
-      self.displayColumnWidget = ColumnViewSettings(parent=self._STwidget
-                                                    , table=self.structureTable
-                                                    , grid=(4, 0)
-                                                    , hideColumns=['altLocationCode', 'element', 'occupancy'])
-    self.searchWidget = ObjectTableFilter(parent=self._STwidget, table=self.structureTable, grid=(5, 0))
-
-    # self.displayColumnWidget._hideColumn(name='altLocationCode')
 
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
@@ -227,20 +217,6 @@ class StructureTableModule(CcpnModule):
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
-  def _getDisplayColumnWidget(self):
-    """
-    CCPN-INTERNAL: used to get displayColumnWidget
-    """
-    if self.includeColumnsWidget:
-      return self.displayColumnWidget
-    else:
-      return None
-
-  def _getSearchWidget(self):
-    """
-    CCPN-INTERNAL: used to get searchWidget
-    """
-    return self.searchWidget
 
   def _closeModule(self):
     """
@@ -503,7 +479,6 @@ class StructureTable(ObjectTable):
       tuples = structureEnsemble.data.as_namedtuples()
       self.setColumns(self.STcolumns)
       self.setObjects(tuples)
-      self._updateSettingsWidgets()
       self.show()
 
   def _updateDataSet(self, structureData):
@@ -514,7 +489,6 @@ class StructureTable(ObjectTable):
       tuples = structureData.as_namedtuples()
       self.setColumns(self.STcolumns)
       self.setObjects(tuples)
-      self._updateSettingsWidgets()
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -678,15 +652,6 @@ class StructureTable(ObjectTable):
     except:
       return None
 
-  def _updateSettingsWidgets(self):
-    """
-    Update settings Widgets according with the new displayed table
-    """
-    if self.moduleParent.includeColumnsWidget:
-      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-      displayColumnWidget.updateWidgets(self)
-    searchWidget = self.moduleParent._getSearchWidget()
-    searchWidget.updateWidgets(self)
 
   def initialiseButtons(self, index):
     """

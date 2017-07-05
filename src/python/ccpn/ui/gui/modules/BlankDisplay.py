@@ -72,6 +72,7 @@ class BlankDisplay(CcpnModule):
     These are either urls or pids, as the notifier will have filtered for this
     """
     success = False # denote if we got a valid spectrum and should delete BlankDisplay
+    objects = None
 
     self.hide()     # ejb - hide us first before it loses its container
 
@@ -84,7 +85,7 @@ class BlankDisplay(CcpnModule):
         objects = self.project.loadData(url)
       except Exception as es:
         self.show()
-        showWarning(self.windowTitle(), str(es))
+        getLogger().warning('Error during Load: %s' % str(es))
 
       if objects is not None and len(objects) > 0:
         # NB: In case a new project was dropped, self.project still points to the old project

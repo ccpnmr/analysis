@@ -846,7 +846,8 @@ class ObjectTable(QtGui.QTableView, Base):
 
   def setObjects(self, objects, applyFilter=False, filterApplied=False):
     if not filterApplied:
-      self.searchWidget.updateWidgets(self)
+      if self.searchWidget is not None:
+        self.searchWidget.updateWidgets(self)
 
     model = self.model
     sourceModel = model.sourceModel()

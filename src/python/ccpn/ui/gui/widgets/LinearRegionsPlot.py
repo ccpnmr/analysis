@@ -48,6 +48,8 @@ from ccpn.ui.gui.lib.Strip import GuiStrip
 
 
 
+
+
 class LinearRegionsPlot(LinearRegionItem):
   """
 
@@ -55,11 +57,23 @@ class LinearRegionsPlot(LinearRegionItem):
   The region can be dragged and is bounded by lines which can be dragged individually.
   """
 
-  def __init__(self, values=None, orientation='v', brush = None, movable=True, bounds=None, **kw):
+  def __init__(self, values=None, orientation='v', brush = None, colour = None, movable=True, bounds=None, **kw):
     if orientation == 'v':
       orientation = LinearRegionItem.Vertical
     else:
       orientation = LinearRegionItem.Horizontal
+
+    colours = {
+                'green': (0, 111, 20, 50),
+                'yellow': (0, 111, 20, 50),
+                'blue': None,  # Default,
+                'transparent': (0, 111, 20, 50),
+                'grey': (255, 255, 255, 50),
+                'red': (255, 0, 0, 50),
+                'purple': (178, 102, 255, 50)
+              }
+    if colour in  colours.keys():
+      brush = colours[colour]
 
     LinearRegionItem.__init__(self, values=values, orientation=orientation, brush=brush, movable=movable, bounds=bounds)
 
@@ -67,7 +81,7 @@ class LinearRegionsPlot(LinearRegionItem):
 
 
 class TargetButtonSpinBoxes(Widget, Base):
-  def __init__(self, parent, application=None, orientation = 'v', plotWidget=None, values=None, step=None, brush = None, movable=True, bounds=None, **kw):
+  def __init__(self, parent, application=None, orientation = 'v', plotWidget=None, values=None, step=None, colour = None, brush = None, movable=True, bounds=None, **kw):
     Widget.__init__(self, parent,  setLayout=False,)
     Base.__init__(self, setLayout=True, **kw)
     self.parent = parent
@@ -77,6 +91,7 @@ class TargetButtonSpinBoxes(Widget, Base):
 
     self.movable = movable
     self.brush = brush
+    self.colour = colour
     self.orientation = orientation
 
     self.toggleOnIcon = Icon('icons/target3+')
@@ -106,7 +121,7 @@ class TargetButtonSpinBoxes(Widget, Base):
     self.pickOnSpectrumButton.setMaximumWidth(50)
 
     self.linearRegions = LinearRegionsPlot(values=self.values, orientation=self.orientation, bounds=self.bounds,
-                                           brush=self.brush, movable=self.movable)
+                                           brush=self.brush, colour = self.colour, movable=self.movable)
 
     for line in self.linearRegions.lines:
       line.sigPositionChanged.connect(self._lineMoved)
@@ -219,12 +234,9 @@ if __name__ == '__main__':
     pw3.addItem(f)
   curve.curve.setClickable(True)
   curve.setPen('w')  ## white pen
-  # curve.setShadowPen(pg.mkPen((70, 70, 30), width=6, cosmetic=True))
-  # brush = (100, 100, 255)
-  # curve.setFillBrush(brush)
-  # curve.setFillLevel(-2)
 
-  w = TargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30],  step=0.02, orientation='h', grid=(1,0) )
+
+  w = TargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30], colour = 'yellow', step=0.02, orientation='h', grid=(1,0) )
 
 
   popup.show()

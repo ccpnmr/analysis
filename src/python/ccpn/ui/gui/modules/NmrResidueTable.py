@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
@@ -56,7 +56,6 @@ class NmrResidueTableModule(CcpnModule):
   This class implements the module by wrapping a NmrResidueTable instance
   """
   includeSettingsWidget = True
-  includeColumnsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
 
@@ -132,11 +131,7 @@ class NmrResidueTableModule(CcpnModule):
                                            actionCallback=self.navigateToNmrResidue,
                                            grid=(0,0))
     # settingsWidget
-    if self.includeColumnsWidget:
-      self.displayColumnWidget = ColumnViewSettings(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(4, 0))
 
-    self.searchWidget = ObjectTableFilter(parent=self._NTSwidget, table=self.nmrResidueTable, grid=(5, 0))
-    
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
 
@@ -191,20 +186,6 @@ class NmrResidueTableModule(CcpnModule):
     finally:
         self.application._endCommandBlock()
 
-  def _getDisplayColumnWidget(self):
-    """
-    CCPN-INTERNAL: used to get displayColumnWidget
-    """
-    if self.includeColumnsWidget:
-      return self.displayColumnWidget
-    else:
-      return None
-
-  def _getSearchWidget(self):
-    """
-    CCPN-INTERNAL: used to get searchWidget
-    """
-    return self.searchWidget
 
   def _closeModule(self):
     """
@@ -347,7 +328,6 @@ class NmrResidueTable(ObjectTable):
     if not self._updateSilence:
       self.setColumns(self.NMRcolumns)
       self.setObjects(nmrChain.nmrResidues)
-      self._updateSettingsWidgets()
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -443,13 +423,4 @@ class NmrResidueTable(ObjectTable):
     """
     self._clearNotifiers()
 
-  def _updateSettingsWidgets(self):
-    """
-    Update settings Widgets according with the new displayed table
-    """
-    if self.moduleParent.includeColumnsWidget:
-      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-      displayColumnWidget.updateWidgets(self)
-    searchWidget = self.moduleParent._getSearchWidget()
-    searchWidget.updateWidgets(self)
 

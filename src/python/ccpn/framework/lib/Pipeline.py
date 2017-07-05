@@ -47,7 +47,6 @@ class Pipeline(object):
     self.spectrumGroups = set()
     self.queue = [] # Pipes to be ran
     self.updateInputData = False
-    # self.finishedPipe = [] # Pipes already ran
 
 
     if application is not None:

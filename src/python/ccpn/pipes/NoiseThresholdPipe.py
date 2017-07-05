@@ -45,7 +45,7 @@ NoiseThreshold = 'Noise_Threshold'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 DefaultEstimateNoiseThreshold = False
 DefaultNoiseThreshold = [0,0]
-Brush = (0, 111, 20, 150) #tranparent green
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -78,7 +78,8 @@ class NoiseThresholdGuiPipe(GuiPipe):
             CheckBox(self.pipeFrame, checked=DefaultEstimateNoiseThreshold, callback=self._manageButtons, grid=(0, 1)))
 
     self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(1, 0))
-    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, brush = Brush, orientation='h', grid=(1, 1)))
+    setattr(self, NoiseThreshold, TargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
+                                                        orientation='h', grid=(1, 1)))
     self._manageButtons()
 
   def _manageButtons(self):

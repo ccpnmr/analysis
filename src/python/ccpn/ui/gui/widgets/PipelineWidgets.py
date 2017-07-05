@@ -306,6 +306,7 @@ class PipelineDropArea(DockArea):
 class GuiPipe(Dock, DockDrop):
 
   preferredPipe = True
+  applicationSpecificPipe = False
   pipeName = ''
   pipe = None
   _alreadyOpened = False #Use this to open the guiPipe only once. Inside the GuiPipe do: MyGuiPipe._alreadyOpened = True
@@ -363,12 +364,10 @@ class GuiPipe(Dock, DockDrop):
     self.pipeFrame.setLayout(self.pipeLayout)
     self.layout.addWidget(self.pipeFrame)
 
-    # self.pipeFrame = Frame(self, setLayout=True)
-    # self.pipeLayout = self.pipeFrame.getLayout()
-    # self.pipeLayout.addWidget(self.pipeFrame)
+    self.layout.setAlignment(self.pipeFrame, QtCore.Qt.AlignTop)
+    self.layout.setContentsMargins(5,5,5,5)
 
     self._kwargs = None
-    print(self._kwargs, 'PIPE')
     if self.pipe is not None:
       self.pipe._kwargs = self._kwargs
 

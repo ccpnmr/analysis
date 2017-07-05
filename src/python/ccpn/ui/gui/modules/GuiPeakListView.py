@@ -427,13 +427,12 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 
     peak = peakItem.peak
-    spectrumId = peakItem.peak.peakList.spectrum.id
 
     # NBNB TBD FIXME
 
     text = _getPeakAnnotation(peak)
     # text = text + "*"
-    text = spectrumId
+    text = peak.id
     self.setText(text)
 
   def updatePos(self):

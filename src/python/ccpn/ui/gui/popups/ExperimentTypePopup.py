@@ -26,8 +26,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
-
-#from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
@@ -46,6 +46,11 @@ class ExperimentTypePopup(CcpnDialog):
     spectra = project.spectra
     self.experimentTypes = project._experimentTypeMap
     self.spPulldowns = []
+    self.scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
+    self.scrollArea.setWidgetResizable(True)
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
+    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
     for spectrumIndex, spectrum in enumerate(spectra):
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
@@ -53,14 +58,14 @@ class ExperimentTypePopup(CcpnDialog):
 
       atomCodes = tuple(sorted(axisCodes))
       self.pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
-      spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
-      self.spPulldown = FilteringPulldownList(self, grid=(spectrumIndex, 1),
+      spLabel = Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(spectrumIndex, 0))
+      self.spPulldown = FilteringPulldownList(self.scrollAreaWidgetContents, grid=(spectrumIndex, 1),
                                 callback=partial(self._setExperimentType, spectrum, atomCodes),
                                 texts=self.pulldownItems)
       self.spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, self.spPulldown, self.pulldownItems))
       # self.spPulldown._completer.setCompletionMode(QtGui.QCompleter.InlineCompletion &~  QtGui.QCompleter.UnfilteredPopupCompletion)
       self.spPulldowns.append(self.spPulldown)
-      spButton = Button(self, grid=(spectrumIndex, 2),
+      spButton = Button(self.scrollAreaWidgetContents, grid=(spectrumIndex, 2),
                         callback=partial(self.raiseExperimentFilterPopup,
                                          spectrum, spectrumIndex, atomCodes),
                         hPolicy='fixed', icon='icons/applications-system')
@@ -82,8 +87,8 @@ class ExperimentTypePopup(CcpnDialog):
       text = priorityNameRemapping.get(text, text)
       self.spPulldown.setCurrentIndex(self.spPulldown.findText(text))
 
-    self.buttonBox = Button(self, grid=(len(project.spectra)+1, 1), text='Close',
-                           callback=self.accept)
+    self.buttonBox = Button(self, grid=(1, 0), text='Close',
+                           callback=self.accept, hAlign='r', vAlign='b')
 
     self.setWindowTitle(title)
 

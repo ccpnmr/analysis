@@ -45,7 +45,9 @@ class ListWidget(QtGui.QListWidget, Base):
                , contextMenu=True
                , multiSelect=True
                , acceptDrops=False
-               , sortOnDrop=False, **kw):
+               , sortOnDrop=False
+               , copyDrop=True
+               ,  **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -60,6 +62,7 @@ class ListWidget(QtGui.QListWidget, Base):
     self.multiSelect = multiSelect
     self.dropSource = None
     self.sortOnDrop = sortOnDrop
+    self.copyDrop = copyDrop
 
     self.rightMouseCallback = rightMouseCallback
     if callback is not None:
@@ -239,8 +242,11 @@ class ListWidget(QtGui.QListWidget, Base):
       items = []
       if event.source() != self:  # otherwise duplicates
 
-        if self.dropSource is None:                         # allow event drops from anywhere
-          event.setDropAction(QtCore.Qt.CopyAction)
+        if self.dropSource is None: # allow event drops from anywhere
+          if self.copyDrop:
+            event.setDropAction(QtCore.Qt.CopyAction)
+          else:
+            event.setDropAction(QtCore.Qt.MoveAction)
           self.emit(QtCore.SIGNAL("dropped"), items)
           super(ListWidget, self).dropEvent(event)
           if self.sortOnDrop is True:

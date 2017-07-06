@@ -242,7 +242,7 @@ class Substance(AbstractWrapperObject):
   def molecularMass(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'molecularMass'):
-      apiRefComponent.molecularMass = float(value)
+      apiRefComponent.molecularMass = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'molecularMass'"
@@ -258,7 +258,7 @@ class Substance(AbstractWrapperObject):
   def atomCount(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'atomCount'):
-      apiRefComponent.atomCount = int(value)
+      apiRefComponent.atomCount = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'atomCount'"
@@ -274,7 +274,7 @@ class Substance(AbstractWrapperObject):
   def bondCount(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'bondCount'):
-      apiRefComponent.bondCount = int(value)
+      apiRefComponent.bondCount = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'bondCount'"
@@ -290,7 +290,7 @@ class Substance(AbstractWrapperObject):
   def ringCount(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'ringCount'):
-      apiRefComponent.ringCount = int(value)
+      apiRefComponent.ringCount = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'ringCount'"
@@ -306,7 +306,7 @@ class Substance(AbstractWrapperObject):
   def hBondDonorCount(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'hBondDonorCount'):
-      apiRefComponent.hBondDonorCount = int(value)
+      apiRefComponent.hBondDonorCount = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'hBondDonorCount'"
@@ -323,7 +323,7 @@ class Substance(AbstractWrapperObject):
   def hBondAcceptorCount(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'hBondAcceptorCount'):
-      apiRefComponent.hBondAcceptorCount = int(value)
+      apiRefComponent.hBondAcceptorCount = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'hBondAcceptorCount'"
@@ -340,7 +340,7 @@ class Substance(AbstractWrapperObject):
   def polarSurfaceArea(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'polarSurfaceArea'):
-      apiRefComponent.polarSurfaceArea = float(value)
+      apiRefComponent.polarSurfaceArea = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'polarSurfaceArea'"
@@ -357,7 +357,7 @@ class Substance(AbstractWrapperObject):
   def logPartitionCoefficient(self, value):
     apiRefComponent = self._wrappedData
     if hasattr(apiRefComponent, 'logPartitionCoefficient'):
-      apiRefComponent.logPartitionCoefficient = float(value)
+      apiRefComponent.logPartitionCoefficient = value
     else:
       ss = apiRefComponent.className
       raise TypeError( "%s type Substance has no attribute 'logPartitionCoefficient'"

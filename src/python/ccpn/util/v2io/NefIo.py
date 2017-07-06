@@ -907,13 +907,16 @@ class CcpnNefReader:
       self.saveFrameName = 'ccpn_assignment'
       self.load_ccpn_assignment(memopsRoot, saveFrame)
       del saveframeOrderedDict['ccpn_assignment']
+    else:
+      self.preloadAssignmentData(dataBlock)
 
     for sf_category, saveFrames in saveframeOrderedDict.items():
-      if sf_category == 'nef_nmr_meta_data':
-        # We are doing nothiing with it, but we do not want a warning
-        continue
       for saveFrame in saveFrames:
         saveFrameName = self.saveFrameName = saveFrame.name
+
+        if saveFrameName == 'nef_nmr_meta_data':
+        # We are doing nothing with it, but we do not want a warning
+          continue
 
         importer = self.importers.get(sf_category)
         if importer is None:
@@ -1108,13 +1111,19 @@ class CcpnNefReader:
     framecode = saveFrame['sf_framecode']
     name = framecode[len(category) + 1:]
     comment = saveFrame.get('ccpn_comment')
+    isSimulated = saveFrame.get('ccpn_is_simulated', False)
+    serial = saveFrame.get('ccpn_serial')
 
-    shiftList = project.currentNmrProject.newShiftList(name=name, details=comment)
+    shiftList = project.currentNmrProject.newShiftList(name=name, details=comment,
+                                                       isSimulated=isSimulated)
     if self.defaultChemicalShiftList is None:
       # ChemicalShiftList should default to the unique ChemicalShIftList in the file
       # A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists
       # given for all spectra- but this is not the place for validity checking
       self.defaultChemicalShiftList = shiftList
+
+    if serial is not None:
+      resetSerial(shiftList, serial)
 
     # Read shifts loop
     loop = saveFrame.get('nef_chemical_shift') or []
@@ -1173,12 +1182,13 @@ class CcpnNefReader:
       data = saveFrame.get('nef_rdc_restraint').data
       restraintType = 'Rdc'
     else:
-      # For now we do not support any non-standard restraint lists.
-      # We could do Csa, JCoupling, and ChemicalShift
       restraintType = saveFrame.get('restraint_type')
       if restraintType == 'JCoupling':
         itemLength = 2
-      elif restraintType in ('Csa', 'ChemicalShift'):
+      elif restraintType == 'ChemicalShift':
+        itemLength = 1
+        restraintType = 'ChemShift'
+      elif restraintType == 'Csa':
         itemLength = 1
       else:
         # Other types are not recognised
@@ -1187,11 +1197,15 @@ class CcpnNefReader:
 
     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
-    comment = saveFrame.get('comment')
+    comment = saveFrame.get('ccpn_comment')
     newListFunc = getattr(nmrConstraintStore,"new%sConstraintList" % restraintType)
     restraintList = newListFunc(name=name, details=comment)
     newRestraintFunc = getattr(restraintList, "new%sConstraint" % restraintType)
     newItemFuncName =  "new%sConstraintItem" % restraintType
+
+    serial = saveFrame.get('ccpn_serial')
+    if serial is not None:
+      resetSerial(restraintList, serial)
 
     restraints = {}
     # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
@@ -1281,7 +1295,7 @@ class CcpnNefReader:
 
     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
-    comment = saveFrame.get('comment')
+    comment = saveFrame.get('ccpn_comment')
 
     defaultSerial = 1
     dataSetSerial = saveFrame.get('ccpn_dataset_serial', defaultSerial)
@@ -1295,6 +1309,10 @@ class CcpnNefReader:
     newItemFuncName =  "newDihedralConstraintItem"
     itemLength = 4
     data = saveFrame.get('nef_dihedral_restraint').data
+
+    serial = saveFrame.get('ccpn_serial')
+    if serial is not None:
+      resetSerial(restraintList, serial)
 
     restraints = {}
 
@@ -1831,10 +1849,6 @@ class CcpnNefReader:
           addDataStore(dataSource, filePath,
                        numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
                                   **dataStoreParams)
-        # dataSource.dataStore = dataLocationStore.newBlockedBinaryMatrix(
-        #   path=filePath, numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
-        #   **dataStoreParams
-        # )
 
       # Set refExpDimRef links
       if refExperiment is not None:
@@ -2235,7 +2249,11 @@ class CcpnNefReader:
     if result is None:
       result = chainMapping[sequenceCode] = {'atomMappings':{}}
 
-    if result.get('resonanceGroup') is None:
+    resonanceGroup = result.get('resonanceGroup')
+    mainResonanceGroup = None
+    previousResonanceGroup = None
+
+    if resonanceGroup is None:
       if chainCode == '@-':
         # default chain
         name = sequenceCode
@@ -2258,7 +2276,22 @@ class CcpnNefReader:
         resonanceGroup.descriptor = residue.descriptor
 
       seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
-      if offset is not None:
+      if offset is None:
+        if seqCode is None and seqInsertCode.startswith('@') and seqInsertCode[1:].isdigit():
+          try:
+            resetSerial(resonanceGroup, int(seqInsertCode[1:]))
+          except ValueError:
+            print("INFO: ResonanceGroup serial number %s could not be preserved. "
+                  "Data are still correct.")
+            # If the serial is taken we lose coherence, but that is better than an error
+            pass
+
+        if linkToMap is not None:
+          # This is a residue in a continuous stretch - and linkToMap is the map for the i-1 residue
+          previousResonanceGroup = linkToMap['resonanceGroup']
+          previousResonanceGroup.newResonanceGroupProb(linkType='sequential', sequenceOffset=1,
+                                                       possibility=resonanceGroup)
+      else:
         # Offset residue - add to main residue
         mainResidueMap = self.fetchResidueMap(chainCode, '%s.%s' % (seqCode, seqInsertCode))
         mainResonanceGroup = mainResidueMap['resonanceGroup']
@@ -2268,12 +2301,11 @@ class CcpnNefReader:
           linkType = 'sequential'
         mainResonanceGroup.newResonanceGroupProb(linkType=linkType, sequenceOffset=offset,
                                                  possibility=resonanceGroup)
-      elif linkToMap is not None:
-        # This is a residue in a continuous stretch - and linkToMap is the map for the i-1 residue
-        previousResonanceGroup = linkToMap['resonanceGroup']
-        previousResonanceGroup.newResonanceGroupProb(linkType='sequential', sequenceOffset=1,
-                                                     possibility=resonanceGroup)
 
+    # print ('@~@~ fetchResidueMap |', chainCode, sequenceCode, residueType, '|', resonanceGroup.serial,
+    #        resonanceGroup.name, resonanceGroup.ccpCode, '|',
+    #        mainResonanceGroup and mainResonanceGroup.name,
+    #        previousResonanceGroup and previousResonanceGroup.name)
     #
     return result
 
@@ -2332,6 +2364,60 @@ class CcpnNefReader:
   # importers['ccpn_assignment'] = load_ccpn_assignment
 
 
+
+  def preloadAssignmentData(self, dataBlock):
+    """Set up NmrChains and NmrResidues in found order to create NmrResidues in connected
+    nmrChains in order and to get offset residues connected correctly
+
+    NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable.
+    This heuristic creates NmrResidues in connected stretches in the order they are found,
+    but this will break if connected stretches appear in multiple shiftlists and some are partial."""
+
+    assignmentData1 = {}
+    assignmentData2 = {}
+    for saveFrameName, saveFrame in dataBlock.items():
+
+      # get all NmrResidue data in chemicalshift lists
+      if saveFrameName.startswith('nef_chemical_shift_list'):
+        loop = saveFrame.get('nef_chemical_shift')
+        if loop:
+          for row in loop.data:
+            # NB the self.defaultChainCode guards against chainCode being None
+            chainCode = row['chain_code'] or self.defaultChainCode
+            if chainCode[0] in '@#':
+              # We want to treat unassigned chains first, to preserve the resonanceGroup serials
+              assignmentData = assignmentData1
+            else:
+              assignmentData = assignmentData2
+
+            nmrResidues = assignmentData.get(chainCode, OD())
+            assignmentData[chainCode] = nmrResidues
+            nmrResidues[(row['sequence_code'], row['residue_name'])] = None
+
+    previousConnectedMaps = {}
+    postponed = []
+    for assignmentData in (assignmentData1, assignmentData2):
+      for chainCode, residueDict in sorted(assignmentData.items()):
+        # Sorting is not really necessary, but this makes the order deterministic
+        for (sequenceCode, residueType) in residueDict:
+          seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+          if offset is None:
+            if chainCode.startswith('#'):
+              linkToMap = previousConnectedMaps.get(chainCode)
+            else:
+              linkToMap = None
+
+            newMap = self.fetchResidueMap(chainCode=chainCode, sequenceCode=sequenceCode,
+                                          residueType=residueType, linkToMap=linkToMap)
+            if chainCode.startswith('#'):
+              previousConnectedMaps[chainCode] = newMap
+          else:
+            postponed.append((sequenceCode, residueType))
+
+    for (sequenceCode, residueType) in postponed:
+      # Do the offset residues now, after the main ones
+      self.fetchResidueMap(chainCode=chainCode, sequenceCode=sequenceCode,
+                           residueType=residueType)
 
 
   def warning(self, message):
@@ -2646,6 +2732,7 @@ def resetSerial(apiObject, newSerial):
 def addDataStore(dataSource, spectrumPath, **params):
   """Create and set DataSource.dataStore.
   The values of params are given by the 'tags' tuple, below"""
+  # print ('@~@~ addDataStore', dataSource, spectrumPath, params)
 
   dirName, fileName = os.path.split(spectrumPath)
   dataUrl = fetchDataUrl(dataSource.root, dirName)

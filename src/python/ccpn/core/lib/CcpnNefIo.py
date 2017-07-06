@@ -1511,7 +1511,9 @@ class CcpnNefWriter:
     name = restraintList.name
     if not singleDataSet:
       # If there are multiple DataSets, add the dataSet serial for disambiguation
-      name = '`%s`%s' % (restraintList.dataSet.serial, name)
+      ss = '`%s`' % restraintList.dataSet.serial
+      if not name.startswith(ss):
+        name = ss + name
 
     result = self._newNefSaveFrame(restraintList, category, name)
 
@@ -2386,14 +2388,14 @@ class CcpnNefReader:
 
   def preloadAssignmentData(self, dataBlock:StarIo.NmrDataBlock):
     """Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
-    and create NmrResidues in connencted nmrChains in order
+    and create NmrResidues in connected nmrChains in order
 
     NB later we can store serials in CCPN projects, but something is needed that works anyway
 
     NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable,
     and that serials are put back where they came from.
     This heuristic creates NmrResidues in connected stretches in the order they are found,
-    but this will break if connected tretches appear in multiple shiftlists and some are partial."""
+    but this will break if connected stretches appear in multiple shiftlists and some are partial."""
 
 
     project = self.project
@@ -2402,7 +2404,6 @@ class CcpnNefReader:
 
       # get all NmrResidue data in chemicalshift lists
       assignmentData = {}
-      assignmentData2 = {}
       if saveFrameName.startswith('nef_chemical_shift_list'):
         loop = saveFrame.get('nef_chemical_shift')
         if loop:
@@ -2414,42 +2415,43 @@ class CcpnNefReader:
             assignmentData[chainCode] = nmrResidues
             nmrResidues[(row['sequence_code'], row['residue_name'])] = None
 
-      # Create objects with reserved names
-      for chainCode in sorted(assignmentData):
+    # Create objects with reserved names
+    for chainCode in sorted(assignmentData):
 
-        if chainCode[0] in '@#' and chainCode[1:].isdigit():
-          # reserved name - make chain
-          try:
-            project.fetchNmrChain(chainCode)
-          except ValueError:
-            # Could not be done, probably because we have NmrChain '@1'. Leave for later
-            pass
-
-      for chainCode, nmrResidues in sorted(assignmentData.items()):
-
-        # Create NmrChain
+      if chainCode[0] in '@#' and chainCode[1:].isdigit():
+        # reserved name - make chain
         try:
-          nmrChain = project.fetchNmrChain(chainCode)
+          project.fetchNmrChain(chainCode)
         except ValueError:
-          nmrChain = project.fetchNmrChain('`%s`' % chainCode)
+          # Could not be done, probably because we have NmrChain '@1'. Leave for later
+          pass
 
-        if nmrChain.isConnected:
-          # Save data for later processing
-          assignmentData2[nmrChain] = nmrResidues
-        else:
-          # Create non-assigned NmrResidues to reserve the serials. The rest can wait
-          for sequenceCode, residueType in list(nmrResidues.keys()):
-            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-              nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+    assignmentData2 = {}
+    for chainCode, nmrResidues in sorted(assignmentData.items()):
 
-      for nmrChain, nmrResidues in sorted(assignmentData2.items()):
-        # Create NmrResidues in order, to preserve connection order
+      # Create NmrChain
+      try:
+        nmrChain = project.fetchNmrChain(chainCode)
+      except ValueError:
+        nmrChain = project.fetchNmrChain('`%s`' % chainCode)
+
+      if nmrChain.isConnected:
+        # Save data for later processing
+        assignmentData2[nmrChain] = nmrResidues
+      else:
+        # Create non-assigned NmrResidues to reserve the serials. The rest can wait
         for sequenceCode, residueType in list(nmrResidues.keys()):
-          # This time we want all non-offset, regardless of type - as we must get them in order
-          if (len(sequenceCode) < 2 or sequenceCode[-2] not in '+-'
-              or not sequenceCode[-1].isdigit()):
-            # I.e. for sequenceCodes that do not include an offset
+          if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
             nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+
+    for nmrChain, nmrResidues in sorted(assignmentData2.items()):
+      # Create NmrResidues in order, to preserve connection order
+      for sequenceCode, residueType in list(nmrResidues.keys()):
+        # This time we want all non-offset, regardless of type - as we must get them in order
+        if (len(sequenceCode) < 2 or sequenceCode[-2] not in '+-'
+            or not sequenceCode[-1].isdigit()):
+          # I.e. for sequenceCodes that do not include an offset
+          nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
 
   def load_nef_chemical_shift_list(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
@@ -2734,7 +2736,7 @@ class CcpnNefReader:
         if len(ll) == 3:
           # name is of form abc`xyz`
           try:
-            peakListParams['serial'] = int(ll[1])
+            peakListParameters['serial'] = int(ll[1])
           except ValueError:
             pass
           else:
@@ -4191,8 +4193,8 @@ if __name__ == '__main__':
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
-  # nefpath = _exportToNef(path)
+  nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
-  nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
+  # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

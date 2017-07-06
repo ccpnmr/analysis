@@ -361,13 +361,13 @@ class SideBar(QtGui.QTreeWidget, Base):
             for sg in spectrumGroups:
 
               # # ejb - search for the spectrumGroup, if not there then create it
-              sglist = self._findItems(str(sg.pid))
-              if not sglist:
-                # have not found the group
-                newTempSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
-                newTempSpectrumGroup.setFlags(
-                  newTempSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-                newTempSpectrumGroup.setText(0, str(sg.pid))
+              # sglist = self._findItems(str(sg.pid))
+              # if not sglist:
+              #   # have not found the group
+              #   newTempSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+              #   newTempSpectrumGroup.setFlags(
+              #     newTempSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+              #   newTempSpectrumGroup.setText(0, str(sg.pid))
               #
               #   # sglist = self._findItems('SpectrumGroups')
               #   # for sgitem in self._findItems('SpectrumGroups'):
@@ -388,7 +388,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
 
         itemParent = self._typeToItem.get(shortClassName)
-        newItem = self._addItem(itemParent, obj.pid)        # this adds the item
+        newItem = self._addItem(itemParent, obj.pid)
         # itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
         if shortClassName in ['SA', 'NC', 'DS']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
@@ -501,9 +501,19 @@ class SideBar(QtGui.QTreeWidget, Base):
     """
     Fills the sidebar with the relevant data from the project.
     """
+
     self.setProjectName(project)
 
-    for className, cls in classesInSideBar.items():
+    #TODO: check that reversing the order of Spectrum and SpectrumGroup in the list works
+    listOrder = [ky for ky in classesInSideBar.keys()]
+    tempKy = listOrder[0]
+    listOrder[0] = listOrder[1]
+    listOrder[1] = tempKy
+    new_dict = OrderedDict()
+    for ky in listOrder:
+      new_dict[ky] = classesInSideBar[ky]
+
+    for className, cls in new_dict.items():       # ejb - classesInSideBar.items()
       for obj in getattr(project, cls._pluralLinkName):
         self._createItem(obj)
       # dd = pid2Obj.get(className)

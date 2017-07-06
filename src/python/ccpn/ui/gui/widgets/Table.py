@@ -249,21 +249,7 @@ class ObjectTable(QtGui.QTableView, Base):
     self.customContextMenuRequested.connect(self.tableContextMenu)
 
     self.searchWidget = None
-    self._addSearchWidget()
 
-  def _addSearchWidget(self):
-    if self.parent is not None:
-      if hasattr(self.parent, 'getLayout'):
-        parentLayout = self.parent.getLayout()
-        if parentLayout is not None:
-          idx = parentLayout.indexOf(self)
-          location = parentLayout.getItemPosition(idx)
-          if location is not None:
-            if len(location)>0:
-              row, column, rowSpan, columnSpan = location
-              self.searchWidget = ObjectTableFilter(table=self)
-              parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
-              self.searchWidget.hide()
 
   def clearTable(self):
     "remove all objects from the table"
@@ -630,12 +616,14 @@ class ObjectTable(QtGui.QTableView, Base):
     QtGui.QTableView.destroy(self, *args)
 
   def headerContextMenu(self, pos):
+    if self.searchWidget is None:
+      self._addSearchWidget()
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
-
     menu = QtGui.QMenu()
     columnsSettings = menu.addAction("Columns Settings...")
+    searchSettings = None
     if self.searchWidget is not None:
       searchSettings = menu.addAction("Search")
     action = menu.exec_(self.mapToGlobal(pos))
@@ -648,6 +636,24 @@ class ObjectTable(QtGui.QTableView, Base):
     if action == searchSettings:
       self.showSearchSettings()
 
+  def _addSearchWidget(self):
+    # TODO:Luca Add search option for any table
+    if self.parent is not None:
+      parentLayout = None
+      if isinstance(self.parent, Base):
+      # if hasattr(self.parent, 'getLayout'):
+        parentLayout = self.parent.getLayout()
+
+      if parentLayout is not None:
+        idx = parentLayout.indexOf(self)
+        location = parentLayout.getItemPosition(idx)
+        if location is not None:
+          if len(location)>0:
+            row, column, rowSpan, columnSpan = location
+            self.searchWidget = ObjectTableFilter(table=self, grid=(0,0), vAlign='B')
+            parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
+            self.searchWidget.hide()
+    return True
 
   def showSearchSettings(self):
 
@@ -849,7 +855,7 @@ class ObjectTable(QtGui.QTableView, Base):
   def setObjects(self, objects, applyFilter=False, filterApplied=False):
     if not filterApplied:
       if self.searchWidget is not None:
-        self.searchWidget.updateWidgets(self)
+        self.searchWidget.updateSearchWidgets(self)
 
     model = self.model
     sourceModel = model.sourceModel()
@@ -1339,6 +1345,7 @@ class ObjectTableFilter(Widget):
       self.widgetLayout.addWidget(w)
     self.setColumnOptions()
 
+
   def setColumnOptions(self):
     columns = self.table.columns
     texts = [c.heading for c in columns]
@@ -1350,7 +1357,7 @@ class ObjectTableFilter(Widget):
       self.columnOptions.addItem(text, objectsRange[i])
     self.columnOptions.setIndex(0)
 
-  def updateWidgets(self, table):
+  def updateSearchWidgets(self, table):
     self.table = table
     self.origObjects = self.table.objects
     self.setColumnOptions()
@@ -1381,10 +1388,13 @@ class ObjectTableFilter(Widget):
       self.searchButtons.buttons[1].setEnabled(False)
 
   def findOnTable(self, table):
-    self.updateWidgets(table)
+
     if self.edit.text() == '' or None:
       self.restoreTable(table)
       return
+
+    self.table = table
+    self.origObjects = self.table.objects
     self.table.setObjects(self.origObjects, filterApplied=True)
 
     text = self.edit.text()
@@ -1407,6 +1417,7 @@ class ObjectTableFilter(Widget):
       self.searchButtons.buttons[1].setEnabled(True)
     else:
       self.searchButtons.buttons[1].setEnabled(False)
+      self.restoreTable(table)
       MessageDialog.showWarning('Not found', '')
 
 

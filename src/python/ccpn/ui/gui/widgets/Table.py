@@ -644,7 +644,7 @@ class ObjectTable(QtGui.QTableView, Base):
       # if hasattr(self.parent, 'getLayout'):
         parentLayout = self.parent.getLayout()
 
-      if parentLayout is not None:
+      if isinstance(parentLayout, QtGui.QGridLayout):
         idx = parentLayout.indexOf(self)
         location = parentLayout.getItemPosition(idx)
         if location is not None:

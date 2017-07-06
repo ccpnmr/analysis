@@ -157,21 +157,28 @@ class OutputSpectraPipe(SpectraPipe):
         if spectrum is not None:
           fullPath = str(path) + str(spectrum.name) + '.hdf5'
           convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
-
+    sucess = False
     if df is not None:
       if mode == CSV:
         df.to_csv(path+self.pipeline.pipelineName)
+        sucess = True
       if mode == TAB:
         df.to_csv(path+self.pipeline.pipelineName, sep='\t')
+        sucess = True
       if mode == Json:
         df.to_json(path+self.pipeline.pipelineName+'.json', orient = 'split')
+        sucess = True
       if mode == XLSX:
         df.to_excel(path+self.pipeline.pipelineName+'.xlsx', sheet_name=self.pipeline.pipelineName,
                     index=False,)
+        sucess = True
       if mode == DataSet:
         newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
         data = newDataSet.newData(name = self.pipeline.pipelineName)
         data.setParameter(self.pipeline.pipelineName, df)
+
+    if sucess:
+      self.project._logger.info("Pipeline Output saved in %s" %path)
 
     return spectra
 

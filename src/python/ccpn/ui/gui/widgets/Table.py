@@ -149,6 +149,8 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Frame import Frame
+from functools import partial
 
 from collections import OrderedDict
 
@@ -245,6 +247,22 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.tableContextMenu)
+
+    self.searchWidget = None
+    self._addSearchWidget()
+
+  def _addSearchWidget(self):
+    if self.parent is not None:
+      parentLayout = self.parent.getLayout()
+      if parentLayout is not None:
+        idx = parentLayout.indexOf(self)
+        location = parentLayout.getItemPosition(idx)
+        if location is not None:
+          if len(location)>0:
+            row, column, rowSpan, columnSpan = location
+            self.searchWidget = ObjectTableFilter(table=self)
+            parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
+            self.searchWidget.hide()
 
   def clearTable(self):
     "remove all objects from the table"
@@ -617,6 +635,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     menu = QtGui.QMenu()
     columnsSettings = menu.addAction("Columns Settings...")
+    searchSettings = menu.addAction("Search")
     action = menu.exec_(self.mapToGlobal(pos))
 
     if action == columnsSettings:
@@ -624,8 +643,14 @@ class ObjectTable(QtGui.QTableView, Base):
       settingsPopup.raise_()
       settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
 
+    if action == searchSettings:
+      self.showSearchSettings()
 
 
+  def showSearchSettings(self):
+
+    if self.searchWidget is not None:
+      self.searchWidget.show()
 
   def tableContextMenu(self, pos):
     pos = QtCore.QPoint(pos.x(), pos.y() + 10)
@@ -819,7 +844,10 @@ class ObjectTable(QtGui.QTableView, Base):
     self._silenceCallback = False
 
 
-  def setObjects(self, objects, applyFilter=False):
+  def setObjects(self, objects, applyFilter=False, filterApplied=False):
+    if not filterApplied:
+      if self.searchWidget is not None:
+        self.searchWidget.updateWidgets(self)
 
     model = self.model
     sourceModel = model.sourceModel()
@@ -1287,34 +1315,26 @@ class ColumnViewSettings(Widget):
 class ObjectTableFilter(Widget):
 
   def __init__(self, table, parent=None, **kw):
-    Widget.__init__(self, parent, setLayout=True, **kw)
+    Widget.__init__(self, parent, setLayout=False, **kw)
     self.table = table
 
     self.origObjects = self.table.objects
 
-    labelColumn = Label(self, 'Search in', grid=(0,0), hAlign='l')
-    self.columnOptions = PulldownList(self, grid=(0, 1), hAlign='l')
-    labelObjects = Label(self, 'Search for', grid=(0,2), hAlign='l')
-    self.edit = LineEdit(self,grid=(0,3), hAlign='l')
-    self.edit.setMinimumSize(self.edit.sizeHint())
+    labelColumn = Label(self,'Search in',)
+    self.columnOptions = PulldownList(self,)
+    self.columnOptions.setMinimumWidth(self.columnOptions.sizeHint().width()*2)
+    self.searchLabel = Label(self,'Search for',)
+    self.edit = LineEdit(self,)
+    self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
+                                   callbacks=[self.hideSearch, partial(self.restoreTable, self.table),
+                                              partial(self.findOnTable, self.table)])
+    self.searchButtons.buttons[1].setEnabled(False)
 
-    self.searchButtons = ButtonList(self, texts=['Reset','Search'],
-                                   tipTexts=['Restore Table','Search'],
-                                   callbacks=[self.restoreTable,self.findOnTable ],
-                                   grid=(0, 4), hAlign='c')
-
-    # self.clearButton = Button(self, text='Reset',
-    #                                 tipText='Restore Table',
-    #                                 callback=self.restoreTable,
-    #                                 grid=(0, 4), hAlign='c')
-    # self.searchButton = Button(self, text='Search',
-    #                             tipText='Search in Table',
-    #                             callback=self.findOnTable,
-    #                             grid=(0, 5), hAlign='c')
-
-    # self.clearButton.setMinimumSize(self.clearButton.sizeHint()*1.5)
-    # self.searchButton.setMinimumSize(self.searchButton.sizeHint()*1.5)
-
+    self.widgetLayout = QtGui.QHBoxLayout()
+    self.setLayout(self.widgetLayout)
+    ws = [labelColumn,self.columnOptions, self.searchLabel,self.edit, self.searchButtons]
+    for w in ws:
+      self.widgetLayout.addWidget(w)
     self.setColumnOptions()
 
   def setColumnOptions(self):
@@ -1332,20 +1352,35 @@ class ObjectTableFilter(Widget):
     self.table = table
     self.origObjects = self.table.objects
     self.setColumnOptions()
+    self.searchButtons.buttons[1].setEnabled(False)
+
+  def hideSearch(self):
+    if self.table.searchWidget is not None:
+      self.table.searchWidget.hide()
 
 
+  def restoreTable(self, table):
+      if len(self.table.objects)>0:
+        if hasattr(self.table.objects[0], '_parent'):
+          parentObjects = self.table.objects[0]._parent
+          if parentObjects is not  None:
+            if hasattr(parentObjects, '_childClasses'):
+              cC = parentObjects._childClasses
+              if len(cC)>0:
+                if hasattr(parentObjects._childClasses[0], '_pluralLinkName'):
+                  names = parentObjects._childClasses[0]._pluralLinkName
+                  originalObjects = getattr(parentObjects, names)
+                  table.setObjects(originalObjects)
 
+      self.edit.clear()
+      self.searchButtons.buttons[1].setEnabled(False)
 
-  def restoreTable(self):
-    # origObjects =  [obj for obj in self.origObjects if obj is not None]
-    self.table.setObjects(self.origObjects)
-    self.edit.clear()
-
-  def findOnTable(self):
+  def findOnTable(self, table):
+    self.updateWidgets(table)
     if self.edit.text() == '' or None:
-      self.restoreTable()
+      self.restoreTable(table)
       return
-    self.table.setObjects(self.origObjects)
+    self.table.setObjects(self.origObjects, filterApplied=True)
 
     text = self.edit.text()
     columns = self.table.columns
@@ -1363,9 +1398,10 @@ class ObjectTableFilter(Widget):
       matched = self.searchMatches(objCol, text)
 
     if matched:
-      self.table.setObjects(matched)
+      self.table.setObjects(matched, filterApplied=True)
+      self.searchButtons.buttons[1].setEnabled(True)
     else:
-
+      self.searchButtons.buttons[1].setEnabled(False)
       MessageDialog.showWarning('Not found', '')
 
 

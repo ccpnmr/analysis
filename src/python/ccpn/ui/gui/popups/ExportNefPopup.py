@@ -114,15 +114,15 @@ class ExportNefPopup(CcpnDialog):
     self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
     self.labelRight = Label(self.labelFrame, text='Items to Export to Nef File', grid=(1,1), hAlign='c')
 
-    self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS)
+    self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS, showMoveArrows=True)
     if hasattr(self.project, CHAINS):
       self.chainCopy.setListObjects(self.project.chains)
 
-    self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS)
+    self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS, showMoveArrows=True)
     if hasattr(self.project, NMRCHAINS):
       self.nmrChainCopy.setListObjects(self.project.nmrChains)
 
-    self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS)
+    self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS, showMoveArrows=True)
     if hasattr(self.project, RESTRAINTLISTS):
       self.restraintCopy.setListObjects(self.project.restraintLists)
 
@@ -146,7 +146,7 @@ class ExportNefPopup(CcpnDialog):
 
     self.saveText.setDisabled(False)   # ejb - enable but need to check path on okay
 
-    self.pathEdited = False
+    self.pathEdited = True
     self.saveText.textEdited.connect(self._editPath)
 
     if 'selectFile' in kw:
@@ -256,8 +256,53 @@ class ExportNefPopup(CcpnDialog):
                          , NMRCHAINS: self.nmrChainCopy.getLeftList()
                          , RESTRAINTLISTS: self.restraintCopy.getLeftList()}
 
+    from ccpn.core.Chain import Chain
+    from ccpn.core.ChemicalShiftList import ChemicalShiftList
+    from ccpn.core.RestraintList import RestraintList
+    from ccpn.core.PeakList import PeakList
+    from ccpn.core.Sample import Sample
+    from ccpn.core.Substance import Substance
+    from ccpn.core.NmrChain import NmrChain
+    from ccpn.core.DataSet import DataSet
+    from ccpn.core.Complex import Complex
+    from ccpn.core.SpectrumGroup import SpectrumGroup
+    from ccpn.core.Note import Note
+
+    checkList = [Chain._pluralLinkName
+                 , ChemicalShiftList._pluralLinkName
+                 , RestraintList._pluralLinkName
+                 , PeakList._pluralLinkName
+                 , Sample._pluralLinkName
+                 , Substance._pluralLinkName
+                 , NmrChain._pluralLinkName
+                 , DataSet._pluralLinkName
+                 , Complex._pluralLinkName
+                 , SpectrumGroup._pluralLinkName
+                 , Note._pluralLinkName]
+
+      # CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
+      # , SAMPLES, SUBSTANCES, NMRCHAINS
+      # , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
+
+    self.pidList = []                                # start with an empty list
+
+    # go through the checkList above and add all objects to the list
+    for name in checkList:
+      if hasattr(self.project, name):                   # just to be safe
+        for obj in getattr(self.project, name):
+          self.pidList.append(obj.pid)                 # append the found items to the list
+      else:
+        raise (ValueError, 'Name not found in project: %s' % self.pid)
+
+    # now remove those items that are not needed (some may be added later depending on flags)
+    for ky in self.exclusionDict:
+      for exPid in self.exclusionDict[ky]:
+        # exPidObj = self.getByPid(exPid)
+        if exPid in self.pidList:
+          self.pidList.remove(exPid)
+
     self.accept()
-    return self.exitFileName, self.flags, self.exclusionDict
+    return self.exitFileName, self.flags, self.pidList
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self                       # ejb - old, , **self.saveDict)

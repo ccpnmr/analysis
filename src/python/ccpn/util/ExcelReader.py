@@ -374,11 +374,17 @@ class ExcelReader(object):
         setattr(wrapperObject, attr, (self._getDFValue(attr, dataframe),))
       else:
         try:
-          if getattr(wrapperObject, attr) is None:
+          if getattr(wrapperObject, attr) is None or getattr(wrapperObject, attr) == 0:
             setattr(wrapperObject, attr, self._getDFValue(attr, dataframe))
 
-        except Exception as e:
-          _debug3(getLogger(), msg=(e, attr))
+        except Exception: #wrapper needs a int
+          setattr(wrapperObject, attr, int(self._getDFValue(attr, dataframe)))
+
+        except:
+          print( 'Value  not set for %s' %attr)
+          _debug3(getLogger(), msg=( 'Value  not set for %s' %attr))
+
+
 
 
   def _getDFValue(self, header, data):

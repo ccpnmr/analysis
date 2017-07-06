@@ -26,14 +26,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
-
+from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
 ###   Attributes:
@@ -48,7 +47,7 @@ EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 DefaultMinimalLineWidth =  0.01
 DefaultNoiseThreshold = [0.0, 0.0]
-DefaultIntegralListIndex = 0
+DefaultIntegralListIndex = -1
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -75,9 +74,6 @@ class CalculateAreaGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
-    integralListLabel = Label(self.pipeFrame, IntegralListIndex, grid=(row, 0))
-    setattr(self, IntegralListIndex, Spinbox(self.pipeFrame, value=0, max=10, grid=(row, 1)))
-    row += 1
 
     self.mlwLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
@@ -100,7 +96,6 @@ class CalculateAreaPipe(SpectraPipe):
   _kwargs =       {
                     NoiseThreshold: DefaultNoiseThreshold,
                     MinimalLineWidth: DefaultMinimalLineWidth,
-                    IntegralListIndex : DefaultIntegralListIndex,
                     EstimateNoiseThreshold: True,
                    }
 
@@ -118,17 +113,19 @@ class CalculateAreaPipe(SpectraPipe):
     positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
 
     for spectrum in spectra:
-      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
+      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum,
+                                             estimateNoiseThreshold_var=EstimateNoiseThreshold,
                                              noiseThreshold_var=NoiseThreshold)
       if noiseThreshold:
         positiveNoiseThreshold = noiseThreshold[1]
 
-      iLIndex = self._kwargs[IntegralListIndex]
-      if len(spectrum.integralLists) > iLIndex:
-        spectrum.integralLists[iLIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth), noiseThreshold=positiveNoiseThreshold)
+
+      if len(spectrum.integralLists) > 0:
+        spectrum.integralLists[DefaultIntegralListIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),
+                                                                             noiseThreshold=positiveNoiseThreshold)
 
       else:
-        print('Integral List does not exist. Create one first')
+        getLogger().warning('Error: IntegralList not found. Add a new IntegralList first')
 
     return spectra
 

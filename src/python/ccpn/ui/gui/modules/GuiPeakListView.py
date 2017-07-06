@@ -255,6 +255,8 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
     for peakItem in self.peakItems.values():
       if isinstance(peakItem, PeakNd):
+
+        peakItem.update()     # ejb - force a repaint of the peakItem
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
 class Peak1d(QtGui.QGraphicsItem):
@@ -425,13 +427,12 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
 
 
     peak = peakItem.peak
-    spectrumId = peakItem.peak.peakList.spectrum.id
 
     # NBNB TBD FIXME
 
     text = _getPeakAnnotation(peak)
     # text = text + "*"
-    text = spectrumId
+    text = peak.id
     self.setText(text)
 
   def updatePos(self):

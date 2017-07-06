@@ -187,7 +187,7 @@ class Sample(AbstractWrapperObject):
 
   @rowNumber.setter
   def rowNumber(self, value):
-    self._wrappedData.rowPosition = int(value)
+    self._wrappedData.rowPosition = value
 
   @property
   def columnNumber(self) -> int:
@@ -196,7 +196,7 @@ class Sample(AbstractWrapperObject):
 
   @columnNumber.setter
   def columnNumber(self, value:int):
-    self._wrappedData.colPosition = int(value)
+    self._wrappedData.colPosition = value
   
   @property
   def comment(self) -> str:

@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.Label import Label
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
+from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
 ###   Attributes:
@@ -44,7 +45,6 @@ PipeName =  'Peak Picker 1D'
 
 ExcludeRegions = 'Exclude_Regions'
 NoiseThreshold = 'Noise_Threshold'
-PeakListIndex = 'Add_To_PeakList'
 NegativePeaks =  'Negative_Peaks'
 MaximumFilterSize =  'Maximum_Filter_Size'
 MaximumFilterMode =  'Maximum_Filter_Mode'
@@ -54,6 +54,7 @@ Modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
 
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
+DefaultPeakListIndex = -1
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -78,11 +79,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
-
-    peakListLabel = Label(self.pipeFrame, PeakListIndex, grid=(row, 0))
-    setattr(self, PeakListIndex, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
-    row += 1
-
     self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
     setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
@@ -95,11 +91,6 @@ class PeakPicker1DGuiPipe(GuiPipe):
     setattr(self, MaximumFilterMode, PulldownList(self.pipeFrame, texts=Modes, grid=(row, 1)))
 
 
-    self._updateInputDataWidgets()
-
-
-  def _updateInputDataWidgets(self):
-    self._setMaxValueRefPeakList(PeakListIndex)
 
 
 ########################################################################################################################
@@ -121,7 +112,7 @@ class PeakPicker1DPipe(SpectraPipe):
                MaximumFilterSize: 5,
                MaximumFilterMode: Modes[0],
                NegativePeaks: True,
-               PeakListIndex: 0
+
               }
 
   def runPipe(self, spectra):
@@ -151,16 +142,17 @@ class PeakPicker1DPipe(SpectraPipe):
       if noiseThreshold:
         negativeNoiseThreshold = noiseThreshold[0]
         positiveNoiseThreshold = noiseThreshold[1]
-        # print('Peak Picker £££ noiseThreshold ',noiseThreshold)
 
       # print('Peak Picker @@@ noiseThreshold', noiseThreshold)
-      nPL = self._kwargs[PeakListIndex]
-      if len(spectrum.peakLists) > nPL:
-        spectrum.peakLists[nPL].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
+
+      if len(spectrum.peakLists) > 0:
+        spectrum.peakLists[DefaultPeakListIndex].pickPeaks1dFiltered(size=maximumFilterSize, mode=maximumFilterMode,
                                                   positiveNoiseThreshold=positiveNoiseThreshold,
                                                   negativeNoiseThreshold=negativeNoiseThreshold,
                                                   excludeRegions= excludeRegions,
                                                   negativePeaks=negativePeaks)
+      else:
+        getLogger().warning('Error: PeakList not found. Add a new PeakList first')
 
     return spectra
 

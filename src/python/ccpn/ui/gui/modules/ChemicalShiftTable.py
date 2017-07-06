@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
@@ -49,7 +49,6 @@ class ChemicalShiftTableModule(CcpnModule):
   This class implements the module by wrapping a NmrResidueTable instance
   """
   includeSettingsWidget = True
-  includeColumnsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
 
@@ -123,10 +122,6 @@ class ChemicalShiftTableModule(CcpnModule):
                                                moduleParent=self,
                                                grid=(0,0))
     # settingsWidget
-    if self.includeColumnsWidget:
-      self.displayColumnWidget = ColumnViewSettings(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(4, 0))
-
-    self.searchWidget = ObjectTableFilter(parent=self._CSTwidget, table=self.chemicalShiftTable, grid=(5, 0))
 
     if chemicalShiftList is not None:
       self.selectChemicalShiftList(chemicalShiftList)
@@ -151,20 +146,6 @@ class ChemicalShiftTableModule(CcpnModule):
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
-  def _getDisplayColumnWidget(self):
-    """
-    CCPN-INTERNAL: used to get displayColumnWidget
-    """
-    if self.includeColumnsWidget:
-      return self.displayColumnWidget
-    else:
-      return None
-
-  def _getSearchWidget(self):
-    """
-    CCPN-INTERNAL: used to get searchWidget
-    """
-    return self.searchWidget
 
   def _closeModule(self):
     """
@@ -298,7 +279,6 @@ class ChemicalShiftTable(ObjectTable):
     if not self._updateSilence:
       self.setColumns(self.CScolumns)
       self.setObjects(chemicalShiftList.chemicalShifts)
-      self._updateSettingsWidgets()
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -412,15 +392,7 @@ class ChemicalShiftTable(ObjectTable):
     """
     self._clearNotifiers()
 
-  def _updateSettingsWidgets(self):
-    """
-    CCPN-INTERNAL: Update settings Widgets according with the new displayed table
-    """
-    if self.moduleParent.includeColumnsWidget:
-      displayColumnWidget = self.moduleParent._getDisplayColumnWidget()
-      displayColumnWidget.updateWidgets(self)
-    searchWidget = self.moduleParent._getSearchWidget()
-    searchWidget.updateWidgets(self)
+
 
 # class ChemicalShiftTable(CcpnModule):
 #   def __init__(self, parent=None, chemicalShiftLists=None, name='Chemical Shift Table', **kw):

@@ -25,8 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
@@ -34,6 +33,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
+from ccpn.util.Logging import getLogger , _debug3
 
 ########################################################################################################################
 ###   Attributes:
@@ -50,7 +50,7 @@ MinimalLineWidth =  'Minimal_LineWidth'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 DefaultMinimalLineWidth =  0.01
-DefaultReferencePeakList =  0
+DefaultReferencePeakList =  -1
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
@@ -79,15 +79,12 @@ class AssignMultipletsGuiPipe(GuiPipe):
     self.parent = parent
 
     row = 0
-    self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
-    setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
-    row += 1
+    # self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
+    # setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
+    # row += 1
     self.peakListLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
-    self._updateInputDataWidgets()
 
-  def _updateInputDataWidgets(self):
-    self._setMaxValueRefPeakList(ReferencePeakList)
 
 
 
@@ -105,7 +102,7 @@ class AssignMultipletsPipe(SpectraPipe):
   pipeName = PipeName
 
   _kwargs =       {
-                    ReferencePeakList : DefaultReferencePeakList,
+
                     ExcludeRegions: DefaultExcludeRegions,
                     NoiseThreshold: DefaultNoiseThreshold,
                     NegativePeaks: False,
@@ -129,18 +126,17 @@ class AssignMultipletsPipe(SpectraPipe):
                                              noiseThreshold_var=NoiseThreshold)
       if noiseThreshold:
         positiveNoiseThreshold = noiseThreshold[1]
-        # print('Peak Assig £££ noiseThreshold ', noiseThreshold)
 
-      # print('Peak Assig @@@ noiseThreshold', noiseThreshold)
-
-      peakListIndex = int(self._kwargs[ReferencePeakList])
-      if len(spectrum.peakLists) > peakListIndex:
+      peakListIndex = int(DefaultReferencePeakList)
+      if len(spectrum.peakLists) > 0:
         referencePeakList = spectrum.peakLists[peakListIndex]
         if referencePeakList is not None:
           if referencePeakList.peaks:
             _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:
-            print('Error. Found no peaks to assign a volume value. Pick the peaks first.' )
+            getLogger().warning('Error: Found no peaks to assign a volume value. Pick the peaks first.')
+      else:
+        getLogger().warning('Error: PeakLists not found. Add a new PeakList first')
 
     return spectra
 

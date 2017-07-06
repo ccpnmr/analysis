@@ -364,8 +364,8 @@ class GuiPipe(Dock, DockDrop):
     self.pipeFrame.setLayout(self.pipeLayout)
     self.layout.addWidget(self.pipeFrame)
 
-    self.layout.setAlignment(self.pipeFrame, QtCore.Qt.AlignTop)
-    self.layout.setContentsMargins(5,5,5,5)
+    # self.layout.setAlignment(self.pipeFrame, QtCore.Qt.AlignTop)
+    # self.layout.setContentsMargins(5,5,5,5)
 
     self._kwargs = None
     if self.pipe is not None:

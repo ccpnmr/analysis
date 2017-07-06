@@ -23,6 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -42,7 +43,19 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning
 
+from ccpn.core.Chain import Chain
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.RestraintList import RestraintList
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Sample import Sample
+from ccpn.core.Substance import Substance
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.DataSet import DataSet
+from ccpn.core.Complex import Complex
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Note import Note
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
 # (and likely those in Project)
@@ -53,7 +66,24 @@ CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
 
+
 class ExportNefPopup(CcpnDialog):
+
+  checkList = [Chain._pluralLinkName
+              , ChemicalShiftList._pluralLinkName
+              , RestraintList._pluralLinkName
+              , PeakList._pluralLinkName
+              , Sample._pluralLinkName
+              , Substance._pluralLinkName
+              , NmrChain._pluralLinkName
+              , DataSet._pluralLinkName
+              , Complex._pluralLinkName
+              , SpectrumGroup._pluralLinkName
+              , Note._pluralLinkName]
+
+  selectList = [Chain._pluralLinkName
+              , RestraintList._pluralLinkName
+              , NmrChain._pluralLinkName]
 
   def __init__(self, parent=None, mainWindow=None, title='Export to Nef File'
                , fileMode=FileDialog.AnyFile
@@ -98,7 +128,7 @@ class ExportNefPopup(CcpnDialog):
     self.buttonExpand = CheckBox(self.options, checked=False
                                , text='expand selection'
                                , grid=(1,0), hAlign ='l')
-    # self.spacer = Spacer(self.options, 5, 5
+    # self.spacer = Spacer(self.options, 3, 3
     #                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
     #                      , grid=(1,1), gridSpan=(1,1))
     # self._includeCCPN = True
@@ -106,33 +136,35 @@ class ExportNefPopup(CcpnDialog):
 
     # put save options in this section
 
-    self.spacer = Spacer(self, 5, 5
+    self.spacer = Spacer(self, 3, 3
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(1,0), gridSpan=(1,1))
 
-    self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
-    self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
-    self.labelRight = Label(self.labelFrame, text='Items to Export to Nef File', grid=(1,1), hAlign='c')
+    # self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
+    # self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
+    # self.labelRight = Label(self.labelFrame, text='Items to Export to Nef File', grid=(1,1), hAlign='c')
+    #
+    # self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS, showMoveArrows=True)
+    # if hasattr(self.project, CHAINS):
+    #   self.chainCopy.setListObjects(self.project.chains)
+    #
+    # self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS, showMoveArrows=True)
+    # if hasattr(self.project, NMRCHAINS):
+    #   self.nmrChainCopy.setListObjects(self.project.nmrChains)
+    #
+    # self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS, showMoveArrows=True)
+    # if hasattr(self.project, RESTRAINTLISTS):
+    #   self.restraintCopy.setListObjects(self.project.restraintLists)
+    #
+    # self.spacer = Spacer(self, 3, 3
+    #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+    #                      , grid=(6,0), gridSpan=(1,1))
+    #
+    # self.spacer = Spacer(self, 3, 3
+    #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
+    #                      , grid=(7,0), gridSpan=(1,1))
 
-    self.chainCopy = ListWidgetPair(self, setLayout=True, grid=(3,0), title=CHAINS, showMoveArrows=True)
-    if hasattr(self.project, CHAINS):
-      self.chainCopy.setListObjects(self.project.chains)
-
-    self.nmrChainCopy = ListWidgetPair(self, setLayout=True, grid=(4,0), title=NMRCHAINS, showMoveArrows=True)
-    if hasattr(self.project, NMRCHAINS):
-      self.nmrChainCopy.setListObjects(self.project.nmrChains)
-
-    self.restraintCopy = ListWidgetPair(self, setLayout=True, grid=(5,0), title=RESTRAINTLISTS, showMoveArrows=True)
-    if hasattr(self.project, RESTRAINTLISTS):
-      self.restraintCopy.setListObjects(self.project.restraintLists)
-
-    self.spacer = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
-                         , grid=(6,0), gridSpan=(1,1))
-
-    self.spacer = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
-                         , grid=(7,0), gridSpan=(1,1))
+    self._addTreeWidget(grid=(3,0))
 
     # file directory options here
     self.openPathIcon = Icon('icons/directory')
@@ -140,7 +172,7 @@ class ExportNefPopup(CcpnDialog):
     self.saveFrame = Frame(self, setLayout=True, grid=(8,0))
 
     self.openPathIcon = Icon('icons/directory')
-    self.saveLabel = Label(self.saveFrame, text = '   Path:   ', grid=(0,0), hAlign = 'c')
+    self.saveLabel = Label(self.saveFrame, text = ' Path: ', grid=(0,0), hAlign = 'c')
     self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAligment='l')
     self.saveText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
 
@@ -153,7 +185,7 @@ class ExportNefPopup(CcpnDialog):
       self.saveText.setText(kw['selectFile'])
     else:
       self.saveText.setText('None')
-    self.spacer = Spacer(self.saveFrame, 15, 5
+    self.spacer = Spacer(self.saveFrame, 13, 3
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
     self.pathButton = Button(self.saveFrame, text=''
@@ -162,7 +194,7 @@ class ExportNefPopup(CcpnDialog):
                              , grid=(0, 3), hAlign='c')
 
     self.buttonFrame = Frame(self, setLayout=True, grid=(9,0))
-    self.spacer = Spacer(self.buttonFrame, 5, 5
+    self.spacer = Spacer(self.buttonFrame, 3, 3
                          , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.buttons = ButtonList(self.buttonFrame, ['Cancel', 'Save'], [self._rejectDialog, self._acceptDialog], grid=(0,1))
@@ -171,7 +203,7 @@ class ExportNefPopup(CcpnDialog):
     # self.showHide = Frame(self, setLayout=True, grid=(2,0))
     # self.showHideIcon = Icon('icons/directory')               # need to change this
     #
-    # self.spacer = Spacer(self.showHide, 5, 5
+    # self.spacer = Spacer(self.showHide, 3, 3
     #                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed
     #                      , grid=(0,0), gridSpan=(1,1))
     # self.saveLabel2 = Label(self.showHide, text='Show/Hide saveDialog', grid=(0,1), hAlign = 'c')
@@ -219,15 +251,18 @@ class ExportNefPopup(CcpnDialog):
       self.fileSaveDialog.show()
 
   def _acceptDialog(self, exitSaveFileName=None):
-    self.exitFileName = self.saveText.text()
+    self.exitFileName = self.saveText.text().strip()    # strip the trailing whitespace
 
     if self.pathEdited is False:     # self.exitFileName == self.oldFilePath:
       # user has not changed the path so we can accept()
       self.accept()
     else:
-      # call the dialog again to accept the new change to the path
-      self._openFileDialog()
-      self.accept()
+      # have edited the path so check the new file
+      if os.path.isfile(self.exitFileName):
+        yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFileName)
+                            , 'Do you want to replace it?')
+        if yes:
+          self.accept()
 
   def _rejectDialog(self):
     self.exitFileName = None
@@ -248,37 +283,45 @@ class ExportNefPopup(CcpnDialog):
       self.flags[SKIPPREFIXES].append(CCPNTAG)
     self.flags[EXPANDSELECTION] = self.buttonExpand.isChecked()
 
-    #TODO:ED need to work on this, but currently trying to match the items
-    #       in CcpnNefIo/exportProject
-    #       export a dict for clarity
+    #TODO:ED do final checking
 
-    self.exclusionDict = {CHAINS: self.chainCopy.getLeftList()
-                         , NMRCHAINS: self.nmrChainCopy.getLeftList()
-                         , RESTRAINTLISTS: self.restraintCopy.getLeftList()}
+    # new bit to read all the checked pids (contain ':') from the checkboxtreewidget
+    self.newList = []
+    for item in self.treeView.findItems(':', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+      if item.checkState(0) == QtCore.Qt.Checked:
+        self.newList.append(item.text(0))
 
-    from ccpn.core.Chain import Chain
-    from ccpn.core.ChemicalShiftList import ChemicalShiftList
-    from ccpn.core.RestraintList import RestraintList
-    from ccpn.core.PeakList import PeakList
-    from ccpn.core.Sample import Sample
-    from ccpn.core.Substance import Substance
-    from ccpn.core.NmrChain import NmrChain
-    from ccpn.core.DataSet import DataSet
-    from ccpn.core.Complex import Complex
-    from ccpn.core.SpectrumGroup import SpectrumGroup
-    from ccpn.core.Note import Note
+    self.accept()
+    return self.exitFileName, self.flags, self.newList
 
-    checkList = [Chain._pluralLinkName
-                 , ChemicalShiftList._pluralLinkName
-                 , RestraintList._pluralLinkName
-                 , PeakList._pluralLinkName
-                 , Sample._pluralLinkName
-                 , Substance._pluralLinkName
-                 , NmrChain._pluralLinkName
-                 , DataSet._pluralLinkName
-                 , Complex._pluralLinkName
-                 , SpectrumGroup._pluralLinkName
-                 , Note._pluralLinkName]
+    # this is the old bit that reads from the drag boxes
+    self.exclusionDict = {Chain._pluralLinkName: self.chainCopy.getLeftList()
+                         , NmrChain._pluralLinkName: self.nmrChainCopy.getLeftList()
+                         , RestraintList._pluralLinkName: self.restraintCopy.getLeftList()}
+
+    # from ccpn.core.Chain import Chain
+    # from ccpn.core.ChemicalShiftList import ChemicalShiftList
+    # from ccpn.core.RestraintList import RestraintList
+    # from ccpn.core.PeakList import PeakList
+    # from ccpn.core.Sample import Sample
+    # from ccpn.core.Substance import Substance
+    # from ccpn.core.NmrChain import NmrChain
+    # from ccpn.core.DataSet import DataSet
+    # from ccpn.core.Complex import Complex
+    # from ccpn.core.SpectrumGroup import SpectrumGroup
+    # from ccpn.core.Note import Note
+    #
+    # checkList = [Chain._pluralLinkName
+    #              , ChemicalShiftList._pluralLinkName
+    #              , RestraintList._pluralLinkName
+    #              , PeakList._pluralLinkName
+    #              , Sample._pluralLinkName
+    #              , Substance._pluralLinkName
+    #              , NmrChain._pluralLinkName
+    #              , DataSet._pluralLinkName
+    #              , Complex._pluralLinkName
+    #              , SpectrumGroup._pluralLinkName
+    #              , Note._pluralLinkName]
 
       # CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
       # , SAMPLES, SUBSTANCES, NMRCHAINS
@@ -287,7 +330,7 @@ class ExportNefPopup(CcpnDialog):
     self.pidList = []                                # start with an empty list
 
     # go through the checkList above and add all objects to the list
-    for name in checkList:
+    for name in ExportNefPopup.checkList:
       if hasattr(self.project, name):                   # just to be safe
         for obj in getattr(self.project, name):
           self.pidList.append(obj.pid)                 # append the found items to the list
@@ -323,6 +366,46 @@ class ExportNefPopup(CcpnDialog):
 
   def _editPath(self):
     self.pathEdited = True      # user has manually changed the path
+
+  def _addTreeWidget(self, grid=None):
+
+    self.treeView = QtGui.QTreeWidget()
+    self.headerItem = QtGui.QTreeWidgetItem()
+    self.item = QtGui.QTreeWidgetItem()
+
+    self.treeView.header().hide()
+
+    for name in ExportNefPopup.checkList:
+      if hasattr(self.project, name):                   # just to be safe
+
+        parent = QtGui.QTreeWidgetItem(self.treeView)
+        parent.setText(0, name)
+        parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+        for obj in getattr(self.project, name):
+
+          child = QtGui.QTreeWidgetItem(parent)
+          child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+          child.setText(0, obj.pid)
+          child.setCheckState(0, QtCore.Qt.Unchecked)
+
+        parent.setCheckState(0, QtCore.Qt.Checked)
+        parent.setExpanded(False)
+        parent.setDisabled(name not in ExportNefPopup.selectList)
+
+    #       self.pidList.append(obj.pid)                 # append the found items to the list
+    #
+    # for i in range(3):
+    #     parent = QtGui.QTreeWidgetItem(self.treeView)
+    #     parent.setText(0, "Parent {}".format(i))
+    #     parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+    #     for x in range(5):
+    #         child = QtGui.QTreeWidgetItem(parent)
+    #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+    #         child.setText(0, "Child {}".format(x))
+    #         child.setCheckState(0, QtCore.Qt.Unchecked)
+
+    self.layout().addWidget(self.treeView, grid[0], grid[1])
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

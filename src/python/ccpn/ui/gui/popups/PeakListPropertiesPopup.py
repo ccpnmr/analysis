@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
 # def _getColour(peakList, peakListViews, attr):
 #
@@ -89,13 +90,13 @@ class PeakListPropertiesPopup(CcpnDialog):
       self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
       self._fillColourPulldown(self.symbolColourPulldownList)
       self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.symbolColour))
-      self.symbolColourPulldownList.currentIndexChanged.connect(self._changeSymbolColour)
+      self.symbolColourPulldownList.currentIndexChanged.connect(self._applyChanges)
 
       self.textColourLabel = Label(self, 'Peak Text Colour', grid=(4, 0))
       self.textColourPulldownList = PulldownList(self, grid=(4, 1))
       self._fillColourPulldown(self.textColourPulldownList)
       self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.textColour))
-      self.textColourPulldownList.currentIndexChanged.connect(self._changeTextColour)
+      self.textColourPulldownList.currentIndexChanged.connect(self._applyChanges)
 
       self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self.accept)
       ## Broken.
@@ -111,13 +112,19 @@ class PeakListPropertiesPopup(CcpnDialog):
       # for peakListView in self.peakListViews:
       #   self.displayedCheckBox.toggled.connect(peakListView.setVisible)
 
+    self.numUndos = 0
+
   def _changeSymbolColour(self, value):
+    self.project._undo.increaseBlocking()     # prevent more undo points
     colour = list(spectrumColours.keys())[value]
     self.peakList.symbolColour = colour
+    self.project._undo.decreaseBlocking()
 
   def _changeTextColour(self, value):
+    self.project._undo.increaseBlocking()     # prevent more undo points
     colour = list(spectrumColours.keys())[value]
     self.peakList.textColour = colour
+    self.project._undo.decreaseBlocking()
 
   def _changeColours(self):
     value = self.symbolColourPulldownList.index
@@ -134,3 +141,47 @@ class PeakListPropertiesPopup(CcpnDialog):
       pix.fill(QtGui.QColor(item[0]))
       pulldown.addItem(icon=QtGui.QIcon(pix), text=item[1])
 
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    while self.numUndos > 0:      # remove any previous undo from this popup
+      self.application.undo()     # so only the last colour change is kept
+      self.numUndos -= 1
+
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      self._changeColours()
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(str(self.windowTitle()), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.application.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      return False
+    else:
+      self.numUndos += 1
+      return True
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()

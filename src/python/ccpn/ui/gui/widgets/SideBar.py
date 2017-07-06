@@ -359,7 +359,26 @@ class SideBar(QtGui.QTreeWidget, Base):
           spectrumGroups = obj.spectrumGroups
           if spectrumGroups:
             for sg in spectrumGroups:
-              for sgitem in self._findItems(str(sg.pid)):
+
+              # # ejb - search for the spectrumGroup, if not there then create it
+              sglist = self._findItems(str(sg.pid))
+              if not sglist:
+                # have not found the group
+                newTempSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+                newTempSpectrumGroup.setFlags(
+                  newTempSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+                newTempSpectrumGroup.setText(0, str(sg.pid))
+              #
+              #   # sglist = self._findItems('SpectrumGroups')
+              #   # for sgitem in self._findItems('SpectrumGroups'):
+              #   #   newSpectrumGroup = QtGui.QTreeWidgetItem(sgitem)
+              #   #   newSpectrumGroup.setFlags(
+              #   #     newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+              #   #   newSpectrumGroup.setText(0, str(sg.pid))
+              #
+              # # now carry on and insert the new groups
+
+              for sgitem in self._findItems(str(sg.pid)):   # add '<new spectrumGroup>'
                 newItem = self._addItem(sgitem, str(obj.pid))
                 newObjectItem = QtGui.QTreeWidgetItem(newItem)
                 newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
@@ -369,7 +388,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
 
         itemParent = self._typeToItem.get(shortClassName)
-        newItem = self._addItem(itemParent, obj.pid)
+        newItem = self._addItem(itemParent, obj.pid)        # this adds the item
         # itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
         if shortClassName in ['SA', 'NC', 'DS']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)

@@ -146,7 +146,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.chain = chain
 
     self.colourScheme = project._appBase.colourScheme
-    #print('>>', self.colourScheme)
+
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'
       self.colour2 = '#f7ffff'
@@ -172,6 +172,39 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
         scene.addItem(newResidue)
         self.residueDict[residue.sequenceCode] = newResidue
         i += 1
+
+
+# WB: TODO: this used to be in some util library but the
+# way drag and drop is done now has changed but
+# until someone figures out how to do it the new
+# way then we are stuck with the below
+# (looks like only first part of if below is needed)
+def _interpretEvent(event):
+  """ Interpret drop event and return (type, data)
+  """
+
+  import json
+  from ccpn.util.Constants import ccpnmrJsonData
+
+  mimeData = event.mimeData()
+  if mimeData.hasFormat(ccpnmrJsonData):
+    jsonData = json.loads(mimeData.text())
+    pids = jsonData.get('pids')
+
+    if pids is not None:
+      # internal data transfer - series of pids
+      return (pids, 'pids')
+
+      # NBNB TBD add here slots for between-applications transfer, and other types as needed
+
+  elif event.mimeData().hasUrls():
+    filePaths = [url.path() for url in event.mimeData().urls()]
+    return (filePaths, 'urls')
+
+  elif event.mimeData().hasText():
+    return (event.mimeData().text(), 'text')
+
+  return (None, None)
 
 
 class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
@@ -209,6 +242,9 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     position = labelPosition+(20*index)
     self.setPos(QtCore.QPointF(position, yPosition))
     self.residueNumber = residue.sequenceCode
+    # WB: TODO: below is terrible code (the scene functions are trampled over and over)
+    # but somehow this seems to be the way it has to be done
+    # and this then means there is that awful itemAt(position) check in the drag functions
     scene.dragLeaveEvent = self._dragLeaveEvent
     scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent
@@ -241,7 +277,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     of GuiChainResidues during drag-and-drop.
     Required for processNmrChains to work properly.
     """
-    item = self.scene.itemAt(event.scenePos())
+    # WB: TODO: this is awful, having to check what item is at the position
+    # the trampling of the scene drag functions above means that self is always
+    # the last GuiChainResidue, and a much better way would be if self was the
+    # GuiChainResidue of interest, which would then eliminate this itemAt check
+    pos = event.scenePos()
+    pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
+    item = self.scene.itemAt(pos)
+    ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor(self.colour3))
     event.accept()
@@ -257,12 +300,24 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
       colour = '#f7ffff'
     elif self.colourScheme == 'light':
       colour = '#666e98'
-    item = self.scene.itemAt(event.scenePos())
+    pos = event.scenePos()
+    pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
+    item = self.scene.itemAt(pos)
+    ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor(colour))
     event.accept()
 
-  def processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
+  # WB: TODO: a version of this used to be in DropBase but that has
+  # been changed but it is not clear (to me) how to use this new
+  # system so stick with the old for now
+  def dropEvent(self, event):
+
+    data, dataType = _interpretEvent(event)
+    if dataType == 'pids':
+      self._processNmrChains(data, event)
+
+  def _processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
     Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.

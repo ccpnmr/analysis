@@ -92,6 +92,7 @@ class Undo(deque):
      To create a waypoint use newWaypoint().
   """
 
+  # TODO: get rid of debug and use logging function instead
   def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False):
     """Create Undo object with maximum stack length maxUndoCount"""
 

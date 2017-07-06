@@ -253,16 +253,17 @@ class ObjectTable(QtGui.QTableView, Base):
 
   def _addSearchWidget(self):
     if self.parent is not None:
-      parentLayout = self.parent.getLayout()
-      if parentLayout is not None:
-        idx = parentLayout.indexOf(self)
-        location = parentLayout.getItemPosition(idx)
-        if location is not None:
-          if len(location)>0:
-            row, column, rowSpan, columnSpan = location
-            self.searchWidget = ObjectTableFilter(table=self)
-            parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
-            self.searchWidget.hide()
+      if hasattr(self.parent, 'getLayout'):
+        parentLayout = self.parent.getLayout()
+        if parentLayout is not None:
+          idx = parentLayout.indexOf(self)
+          location = parentLayout.getItemPosition(idx)
+          if location is not None:
+            if len(location)>0:
+              row, column, rowSpan, columnSpan = location
+              self.searchWidget = ObjectTableFilter(table=self)
+              parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
+              self.searchWidget.hide()
 
   def clearTable(self):
     "remove all objects from the table"
@@ -635,7 +636,8 @@ class ObjectTable(QtGui.QTableView, Base):
 
     menu = QtGui.QMenu()
     columnsSettings = menu.addAction("Columns Settings...")
-    searchSettings = menu.addAction("Search")
+    if self.searchWidget is not None:
+      searchSettings = menu.addAction("Search")
     action = menu.exec_(self.mapToGlobal(pos))
 
     if action == columnsSettings:

@@ -791,7 +791,7 @@ class Framework:
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
-      ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', False)]),
+      ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
                 ("Export Nef File", self._exportNEF, [('shortcut', 'ex')])
               )),
       (),
@@ -1022,7 +1022,7 @@ class Framework:
     self.ui.mainWindow._fillRecentMacrosMenu()
 
 
-  def loadData(self, paths=None, text=None):
+  def loadData(self, paths=None, text=None, filter=None):
     """
     Opens a file dialog box and loads data from selected file.
     """
@@ -1034,7 +1034,8 @@ class Framework:
       # NBNB TBD I assume here that path is either a string or a list lf string paths.
       # NBNB #FIXME if incorrect
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general
+                          , filter=filter)
       path = dialog.selectedFile()
       if not path:
         return
@@ -1112,7 +1113,27 @@ class Framework:
 
   def _importNef(self):
     #TODO:ED add import routine here, dangerous so add warnings
-    pass
+
+    ok = MessageDialog.showOkCancelWarning('WARNING'
+                                           , 'Importing Nef file over an existing project'
+                                          ' can cause undocumented errors. Use with caution')
+
+    if ok:
+      text='Import Nef File into Project'
+      filter = '*.nef'
+      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general
+                          , filter=filter)
+      path = dialog.selectedFile()
+      if not path:
+        return
+      paths = [path]
+
+      try:
+        for path in paths:
+          self._loadNefFile(path=path, makeNewProject=False)
+      except Exception as es:
+        getLogger().warning('Error Importing Nef File: %s' % str(es))
 
   def _exportNEF(self):
     #TODO:ED fix this temporary routine
@@ -1147,12 +1168,6 @@ class Framework:
                    , skipPrefixes=skipPrefixes
                    , expandSelection=expandSelection
                    , pidList=pidList)
-
-    # this is the original
-    # self.project._exportNef(path=nefPath
-    #                         , overwriteExisting=True
-    #                         , flags=flags
-    #                         , exclusionDict=exclusionDict)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

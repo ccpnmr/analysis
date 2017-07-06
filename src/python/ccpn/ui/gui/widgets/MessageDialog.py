@@ -153,6 +153,26 @@ def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.exec_()
   return
 
+def showOkCancelWarning(title, message, parent=None, colourScheme=None, iconPath=None):
+
+  dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+
+  dialog.setStandardButtons(Ok | Cancel)
+  dialog.setDefaultButton(Cancel)
+
+  dialog.raise_()
+  return dialog.exec_() == Ok
+
+def showYesNoWarning(title, message, parent=None, colourScheme=None, iconPath=None):
+
+  dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+
+  dialog.setStandardButtons(Yes | No)
+  dialog.setDefaultButton(No)
+
+  dialog.raise_()
+  return dialog.exec_() == Yes
+
 def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None, iconPath=None):
 
   if objects:
@@ -172,7 +192,6 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   else:
     return texts[index]  
 
-
 def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   
   dialog = MessageDialog('Error', title, message, Critical, iconPath, parent)
@@ -181,7 +200,6 @@ def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.raise_()
   dialog.exec_()
   return
-
 
 def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   

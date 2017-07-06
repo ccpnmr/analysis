@@ -845,77 +845,6 @@ class Project(AbstractWrapperObject):
 
   # Library functions
 
-  def _exportNef(self, path:str=None
-                , overwriteExisting:bool=False
-                , flags:dict={}
-                , exclusionDict:dict={}) -> bool:
-    """
-    first point in exporting a Nef file
-    """
-
-    # TODO Merge this into Framework._exportNef, to keep the 'flags. confined to gui-near code
-
-    # flags are skipPrefixes, expandSelection
-    skipPrefixes = flags['skipPrefixes']
-    expandSelection = flags['expandSelection']
-
-    # ejb - to accommodate the new exclusion list
-    # convert exclusion to pidList and call the correct list
-    # this is the current list
-    # self.chains = []
-    # self.chemicalShiftLists = []
-    # self.restraintLists = []
-    # self.peakLists = []
-    # self.samples = []
-    # self.substances = []
-    # self.nmrChains = []
-    # self.dataSets = []
-    # self.complexes = []
-    # self.spectrumGroups = []
-    # self.notes = []
-
-    checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
-      , SAMPLES, SUBSTANCES, NMRCHAINS
-      , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
-
-    pidList = []                                # start with an empty list
-
-    # go through the checkList above and add all objects to the list
-    for name in checkList:
-      if hasattr(self, name):                   # just to be safe
-        for obj in getattr(self, name):
-          pidList.append(obj.pid)                 # append the found items to the list
-      else:
-        raise (ValueError, 'Name not found in project: %s' % self.pid)
-
-    # now remove those items that are not needed (some may be added later depending on flags)
-    for ky in exclusionDict:
-      for exPid in exclusionDict[ky]:
-        # exPidObj = self.getByPid(exPid)
-        if exPid in pidList:
-          pidList.remove(exPid)
-
-    self.exportNef(path
-                   , overwriteExisting=overwriteExisting
-                   , skipPrefixes=skipPrefixes
-                   , expandSelection=expandSelection
-                   , pidList=pidList)
-
-    # need to sort this
-    # from ccpn.core.lib import CcpnNefIo
-    #
-    # t0 = time()
-    #
-    # # change exclusion list to list of pids
-    #
-    # CcpnNefIo.exportNef(self, path
-    #                     , overwriteExisting=overwriteExisting
-    #                     , skipPrefixes=skipPrefixes
-    #                     , expandSelection=expandSelection
-    #                     , exclusionDict=exclusionDict)
-    # t2 = time()
-    # getLogger().info('Exported NEF file, time = %.2fs > %s' %(t2-t0, path))
-
   def exportNef(self, path:str=None
                 , overwriteExisting:bool=False
                 , skipPrefixes:typing.Sequence=()
@@ -924,19 +853,19 @@ class Project(AbstractWrapperObject):
     """
     Export selected contents of the project to a Nef file.
 
-    Flags is a dictionary of the form:
+      skipPrefixes: ( 'ccpn', ..., <str> )
+      expandSelection: <bool> }
 
-      { 'skipPrefixes': [ 'ccpn', ..., <str> ], 'expandSelection': <bool> }
-
-      Include 'ccpn' in the flags will exclude ccpn specific items from the file
+      Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
       expandSelection = True  will include all data from the project, this may not be data that
                               is not defined in the Nef standard.
 
     PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
-    The Nef file may also contain further dependent items necessary associated with the pidList.
+    The Nef file may also contain further dependent items associated with the pidList.
 
     :param path: output path and filename
-    :param flags: output arguments
+    :param skipPrefixes: items to skip
+    :param expandSelection: expand the selection
     :param pidList: a list of pids
     """
     from ccpn.core.lib import CcpnNefIo

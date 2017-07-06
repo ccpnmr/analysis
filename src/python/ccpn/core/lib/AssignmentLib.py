@@ -595,7 +595,7 @@ def matchingNmrAtomsForPeaks(peaks:typing.List[Peak], nmrAtoms:typing.List[NmrAt
     for dim in range(N_dims):
       # Find and add the NmrAtoms that dimension dim in all peaks
 
-      common = set()
+      common = set(nmrAtoms)      # ejb - was empty?
       if sameAxisCodes(peaks, dim):
         for peak in peaks:
           matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,

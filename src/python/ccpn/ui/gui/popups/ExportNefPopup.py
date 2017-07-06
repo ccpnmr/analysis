@@ -82,6 +82,7 @@ class ExportNefPopup(CcpnDialog):
               , Note._pluralLinkName]
 
   selectList = [Chain._pluralLinkName
+              , ChemicalShiftList._pluralLinkName
               , RestraintList._pluralLinkName
               , NmrChain._pluralLinkName]
 

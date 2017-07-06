@@ -140,7 +140,7 @@ class PeakAssigner(CcpnModule):
     """
     Creates an empty ListWidget to contain the dimensionNmrAtoms assigned to a peak dimension.
     """
-    listWidget = ListWidget(self, callback=partial(self._updateAssigmentWidget, dim),
+    listWidget = ListWidget(self, callback=partial(self._updateAssignmentWidget, dim),
                             rightMouseCallback=self._updateNmrAtomsFromListWidgets)
     listWidget.setFixedWidth(120)
     listWidget.setFixedHeight(100)
@@ -376,7 +376,7 @@ class PeakAssigner(CcpnModule):
         layout.removeItem(item)
 
 
-  def _updateAssigmentWidget(self, dim:int, item:object):
+  def _updateAssignmentWidget(self, dim:int, item:object):
     """
     Update all information in assignment widget when NmrAtom is selected in list widget of that
     assignment widget.

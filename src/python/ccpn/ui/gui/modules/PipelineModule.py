@@ -610,11 +610,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.inputDataList.setMaximumHeight(200)
     self.inputDataList.setAcceptDrops(True)
 
-    self.refPL = Label(self, 'Reference PeakList')
-    self.referencePL = RadioButtons(self, texts=['Last Added', 'First'], direction='v')
-    self.settingsWidgets.append(self.refPL)
-    self.settingsWidgets.append(self.referencePL)
-
     self.inputDataList.addItem(self._getInputDataHeaderLabel())
     self.settingsWidgets.append(self.inputDataList)
     self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)

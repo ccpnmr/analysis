@@ -126,7 +126,7 @@ class CcpnModule(Dock):
       #                                       minimumSizes=self.settingsMinimumSizes
       #                                      )
       self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
-      self.settingsWidget = Frame(showBorder=True)
+      self.settingsWidget = Frame(showBorder=False)
       # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
       # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
       self._settingsScrollArea.setWidget(self.settingsWidget)

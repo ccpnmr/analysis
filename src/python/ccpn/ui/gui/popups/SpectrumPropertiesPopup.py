@@ -259,7 +259,7 @@ class GeneralTab(QtGui.QWidget, Base):
 
     if spectrum.dimensionCount == 1:
       Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
-      self.colourBox = PulldownList(self, vAlign='t', hAlign='l', grid=(7, 1))
+      self.colourBox = PulldownList(self, vAlign='t', grid=(7, 1))
       for item in spectrumColours.items():
         pix=QtGui.QPixmap(QtCore.QSize(20, 20))
         pix.fill(QtGui.QColor(item[0]))

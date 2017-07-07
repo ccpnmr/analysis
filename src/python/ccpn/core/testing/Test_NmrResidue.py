@@ -167,11 +167,11 @@ class NmrStretchTest(WrapperTesting):
     for residueType in ('ALA', 'VAL', None):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
     nmrChain.mainNmrResidues = nmrResidues
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[1].disconnectPrevious()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -183,11 +183,11 @@ class NmrStretchTest(WrapperTesting):
     for residueType in ('ALA', 'VAL', None):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
     nmrChain.mainNmrResidues = nmrResidues
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[2].disconnectPrevious()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -203,7 +203,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[0].disconnectNext()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -219,7 +219,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[1].disconnectNext()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -236,7 +236,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[0].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -253,7 +253,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[1].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -271,7 +271,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     nmrResidues[2].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -288,7 +288,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', ])
     nmrResidues[0].disconnectNext()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -304,7 +304,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     nmrResidues[1].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -320,7 +320,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     nmrResidues[2].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -336,7 +336,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     nmrResidues[3].disconnect()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -352,7 +352,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     nmrResidues[2].disconnectNext()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -368,7 +368,7 @@ class NmrStretchTest(WrapperTesting):
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     nmrResidues[2].disconnectPrevious()
     self.undo.undo()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
     self.undo.redo()
     self.assertEqual([x.id for x in nmrResidues],
@@ -400,11 +400,11 @@ class NmrStretchTest(WrapperTesting):
                      ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
 
     nmrChain.mainNmrResidues = nmrResidues
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '#2.@5.GLN', ])
 
     nmrResidues[-1].disconnectNext()
-    self.assertEqual([x.id for x in nmrResidues],
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
                      ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '#2.@5.GLN', ])
 
     nmrResidues[-1].disconnectPrevious()

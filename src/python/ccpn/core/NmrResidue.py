@@ -175,14 +175,6 @@ class NmrResidue(AbstractWrapperObject):
     self.rename to reset the residueType"""
     return self._wrappedData.residueType or ''
 
-    # # The below is unnecessary - apiResidue is derived using self.residueType
-    # apiResonanceGroup = self._wrappedData
-    # apiResidue = apiResonanceGroup.assignedResidue
-    # if apiResidue is None:
-    #   return apiResonanceGroup.residueType or ''
-    # else:
-    #   return apiResidue.code3Letter
-
   @property
   def relativeOffset(self) -> typing.Optional[int]:
     """Sequential offset of NmrResidue relative to mainNmrResidue
@@ -391,11 +383,20 @@ class NmrResidue(AbstractWrapperObject):
 
         if apiResonanceGroup is stretch[0]:
           # chop off end ResonanceGroup
-          apiResonanceGroup.directNmrChain = defaultChain
-          if len(stretch) == 2:
-            stretch[1].directNmrChain = defaultChain
-            # delete one-element remaining chain
+          if len(stretch) <= 2:
+            # Chain gets removed
+            for resonanceGroup in reversed(stretch):
+              resonanceGroup.directNmrChain = defaultChain
+            # delete empty chain
             apiNmrChain.delete()
+          else:
+            #
+            data2Obj = self._project._data2Obj
+            nextNmrResidue = data2Obj[stretch[1]]
+            nmrChain = data2Obj[apiNmrChain]
+            nmrChain.reverse()
+            nextNmrResidue.disconnectNext()
+            nmrChain.reverse()
 
         elif apiResonanceGroup is stretch[-2]:
           # chop off end ResonanceGroup
@@ -571,18 +572,13 @@ class NmrResidue(AbstractWrapperObject):
             # delete one-element remaining chain
             apiNmrChain.delete()
 
-        elif apiResonanceGroup is stretch[1]:
-          # chop off end ResonanceGroup
-          stretch[0].directNmrChain = defaultChain
-
         else:
-          # make new connected NmrChain with rightmost ResonanceGroups
-          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-          for rg in stretch:
-            if rg is apiResonanceGroup:
-              break
-            else:
-              rg.directNmrChain = newNmrChain
+          # Done with reverses because disconnectNext is easily undoable
+          nmrChain = self.nmrChain
+          nmrChain.reverse()
+          self.disconnectNext()
+          nmrChain.reverse()
+
 
     finally:
       self._endCommandEchoBlock()
@@ -610,7 +606,7 @@ class NmrResidue(AbstractWrapperObject):
 
         if len(stretch) < 3 or len(stretch) == 3 and apiResonanceGroup is stretch[1]:
           for rg in reversed(stretch):
-            # reversed to add residues back in proper order (they ar added to end)
+            # reversed to add residues back in proper order (they are added to end)
             rg.directNmrChain = defaultChain
           apiNmrChain.delete()
 
@@ -630,8 +626,13 @@ class NmrResidue(AbstractWrapperObject):
             data2Obj[stretch[1]].disconnectPrevious()
 
           elif index == 1:
-            data2Obj[stretch[1]].disconnectPrevious()
-            data2Obj[stretch[2]].disconnectPrevious()
+            nmrChain = self.nmrChain
+            nr1 = data2Obj[stretch[1]]
+            nr2 = data2Obj[stretch[2]]
+            nmrChain.reverse()
+            nr1.disconnectNext()
+            nr2.disconnectNext()
+            nmrChain.reverse()
           else:
             self.disconnectNext()
             apiResonanceGroup.directNmrChain = defaultChain

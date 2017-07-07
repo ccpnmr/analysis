@@ -232,6 +232,26 @@ class NmrChain(AbstractWrapperObject):
     finally:
      self._endCommandEchoBlock()
 
+  def reverse(self):
+    """Reverse order of NmrResidues within NmrChain
+
+    Illegal for assigned NmrChains, and only relevant for connected NmrChains.
+    Serves mainly as building block to make disconnections easier to undo"""
+
+    if self.chain is not None:
+      raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
+                       % self.chain.longPid)
+
+    # _undo
+    undo = self._wrappedData.root._undo
+    self._startCommandEchoBlock('reverse')
+    try:
+      self._wrappedData.__dict__['mainResonanceGroups'].reverse()
+      if undo is not None:
+        undo.newItem(self.reverse, self.reverse)
+    finally:
+      self._endCommandEchoBlock()
+
   def renumberNmrResidues(self, offset:int, start:int=None, stop:int=None):
     """Renumber nmrResidues in range start-stop (inclusive) by adding offset
 

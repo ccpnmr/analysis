@@ -814,7 +814,9 @@ class Framework:
       ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
-      ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
+      ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
+                        ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
+                         )),
       ("Copy PeakList", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
 
       (),

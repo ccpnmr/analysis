@@ -115,7 +115,8 @@ class PeakListTableWidget(ObjectTable):
                                      , project=self._project
                                      , grid=(0, gridHPos), gridSpan=(1, 1)
                                      , showSelectName=True
-                                     , minimumWidths=(0, 100),callback=self._pulldownPLcallback)
+                                     , minimumWidths=(0, 100)
+                                     ,callback=self._pulldownPLcallback)
 
     ## create widgets for selection of position units
     gridHPos+=1

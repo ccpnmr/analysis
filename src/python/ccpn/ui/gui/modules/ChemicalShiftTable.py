@@ -205,6 +205,7 @@ class ChemicalShiftTable(ObjectTable):
                                      # first NmrChain in project (if present)
                                      grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
+                                     sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow,
                                      callback=self._selectionPulldownCallback
                                      )
     self.spacer = Spacer(self._widget, 5, 5

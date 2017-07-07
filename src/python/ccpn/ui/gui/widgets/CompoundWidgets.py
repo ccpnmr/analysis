@@ -202,7 +202,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
   def __init__(self, parent=None, showBorder=False, orientation='left',
                minimumWidths=None, maximumWidths=None, fixedWidths=None,
-               labelText='', texts=None, callback=None, default=None, **kwds):
+               labelText='', texts=None, callback=None, default=None,
+               sizeAdjustPolicy=None, **kwds):
     """
     :param parent: parent widget
     :param showBorder: flag to display the border of Frame (True, False)
@@ -247,6 +248,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
     if fixedWidths is not None:
       self.setFixedWidths(fixedWidths)
+
+    if sizeAdjustPolicy is not None:
+      self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
 
   def getText(self):
     "Convenience: Return selected text in Pulldown"

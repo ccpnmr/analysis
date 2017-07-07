@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+from PyQt4 import QtGui
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
@@ -115,6 +115,7 @@ class PeakListTableWidget(ObjectTable):
                                      , grid=(0, gridHPos), gridSpan=(1, 1)
                                      , showSelectName=True
                                      , minimumWidths=(0, 100)
+                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
                                      ,callback=self._pulldownPLcallback)
 
     ## create widgets for selection of position units

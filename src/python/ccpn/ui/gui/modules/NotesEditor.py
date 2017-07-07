@@ -73,7 +73,8 @@ class NotesEditorModule(CcpnModule):
                                    , project=self.project, default=0
                                    , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                    , showSelectName=True
-                                   , callback=self._selectionPulldownCallback)
+                                  , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
+                                  , callback=self._selectionPulldownCallback)
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))

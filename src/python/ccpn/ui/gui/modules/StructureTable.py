@@ -294,6 +294,7 @@ class StructureTable(ObjectTable):
                                      , project=self._project, default=0  # first Structure in project (if present)
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
+                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
                                      , callback=self._selectionPulldownCallback)
     self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'average']
                                   , selectedInd=1

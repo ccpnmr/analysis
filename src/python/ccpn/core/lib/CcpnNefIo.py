@@ -3463,7 +3463,7 @@ class CcpnNefReader:
   def load_ccpn_notes(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
 
     # ccpn_notes contains nothing except for the ccpn_note loop
-    loopName = 'ccpn_notes'
+    loopName = 'ccpn_note'
     loop = saveFrame[loopName]
     creatorFunc = project.newNote
 
@@ -3472,10 +3472,11 @@ class CcpnNefReader:
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
     for row in loop.data:
       parameters = self._parametersFromLoopRow(row, map2)
-      result.append(creatorFunc(**parameters))
+      obj = creatorFunc(**parameters)
+      result.append(obj)
 
       # load time stamps and serial = must bypass the API, as they are frozen
-      apiNote = result._wrappedData
+      apiNote = obj._wrappedData
       created = row.get('created')
       if created:
         apiNote.__dict__['created'] = datetime.strptime(created, Constants.isoTimeFormat)
@@ -3485,7 +3486,7 @@ class CcpnNefReader:
                                                              Constants.isoTimeFormat)
       serial = row.get('serial')
       if serial is not None:
-        result.resetSerial(serial)
+        obj.resetSerial(serial)
         # NB former call was BROKEN!
         # modelUtil.resetSerial(apiNote, serial, 'notes')
 

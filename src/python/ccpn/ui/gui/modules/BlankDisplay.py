@@ -81,11 +81,11 @@ class BlankDisplay(CcpnModule):
       getLogger().debug('dropped: %s' % url)
 
       # ejb - quick error trap so that it doesn't destroy window structure
-      try:
-        objects = self.project.loadData(url)
-      except Exception as es:
-        self.show()
-        getLogger().warning('Error during Load: %s' % str(es))
+      # try:
+      objects = self.project.loadData(url)
+      # except Exception as es:
+      #   self.show()
+      #   getLogger().warning('Error during Load: %s' % str(es))
 
       if objects is not None and len(objects) > 0:
         # NB: In case a new project was dropped, self.project still points to the old project

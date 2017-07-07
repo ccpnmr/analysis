@@ -1115,8 +1115,9 @@ class Framework:
     #TODO:ED add import routine here, dangerous so add warnings
 
     ok = MessageDialog.showOkCancelWarning('WARNING'
-                                           , 'Importing Nef file over an existing project'
-                                          ' can cause undocumented errors. Use with caution')
+                                           , 'Importing Nef file will merge the Nef file with'
+                                          ' the current project. This can cause conflicts with'
+                                          ' existing objects. USE WITH CAUTION')
 
     if ok:
       text='Import Nef File into Project'

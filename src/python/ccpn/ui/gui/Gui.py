@@ -15,13 +15,13 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-04-12 17:10:47 +0100 (Wed, April 12, 2017) $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: Wayne Boucher $"
 
+__author__ = "$Author: Wayne Boucher $"
 __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 # Start of code

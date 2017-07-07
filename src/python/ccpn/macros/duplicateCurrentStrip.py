@@ -4,20 +4,28 @@ This macro duplicates the spectrum display from the current strip
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
-               "or ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                 " or ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __author__ = ": $rhfogh $"
 __date__ = ": 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $"
 __version__ = ": 7686 $"
 
+__modifiedBy__ = "$modifiedBy: CCPN $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-04-30 13:44:57 +0000 (Sun, April 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================

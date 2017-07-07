@@ -121,7 +121,7 @@ class GuiStrip(Frame):
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='test',
-                                   grid=(2,0), hAlign='left', vAlign='center', hPolicy='minimum')
+                                   grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='center', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
     self.hideStripLabel()
 

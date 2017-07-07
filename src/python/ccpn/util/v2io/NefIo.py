@@ -80,6 +80,9 @@ from ccpnmr.analysis.core import AssignmentBasic
 from ccpnmr.analysis.core import ExperimentBasic
 from ccpnmr.analysis.core import ConstraintBasic
 
+defaultNmrChainCode = '@-'
+defaultNmrResidueCode = '@'
+
 # # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 # maxRandomInt =  2000000000
 
@@ -101,671 +104,13 @@ saveFrameReadingOrder = [
   'nef_peak_restraint_links',
   # 'ccpn_complex',     # Not supported in V2
   # 'ccpn_spectrum_group',     # Not supported in V2
-  # 'ccpn_restraint_list',
+  'ccpn_restraint_list',
   # 'ccpn_notes',     # Not supported in V2
   # 'ccpn_additional_data'     # Not supported in V2
 ]
 
 # TODO: implement residue variants, disulfides. Test
 
-class _isALoop:
-  # Dummy value - to be removed
-  pass
-
-nef2CcpnMap = {
-  'nef_nmr_meta_data':OD((
-    ('format_name',None),
-    ('format_version',None),
-    ('program_name',None),
-    ('program_version',None),
-    ('creation_date',None),
-    ('uuid',None),
-    ('coordinate_file_name',None),
-    ('ccpn_dataset_serial', None),
-    ('ccpn_dataset_comment',None),
-    ('nef_related_entries',_isALoop),
-    ('nef_program_script',_isALoop),
-    ('nef_run_history',_isALoop),
-  )),
-  'nef_related_entries':OD((
-    ('database_name',None),
-    ('database_accession_code',None),
-  )),
-  'nef_program_script':OD((
-    ('program_name',None),
-    ('script_name',None),
-    ('script',None),
-  )),
-  'nef_run_history':OD((
-    ('run_number','serial'),
-    ('program_name','programName'),
-    ('program_version','programVersion'),
-    ('script_name','scriptName'),
-    ('script','script'),
-    ('ccpn_input_uuid','inputDataUuid'),
-    ('ccpn_output_uuid','outputDataUuid'),
-  )),
-
-  'nef_molecular_system':OD((
-    ('nef_sequence',_isALoop),
-    ('nef_covalent_links',_isALoop),
-  )),
-  'nef_sequence':OD((
-    ('index', None),
-    ('chain_code','chain.shortName'),
-    ('sequence_code','sequenceCode'),
-    ('residue_name','residueType'),
-    ('linking','linking'),
-    ('residue_variant','residueVariant'),
-    ('cis_peptide',None),
-    ('ccpn_comment','comment'),
-    ('ccpn_chain_role','chain.role'),
-    ('ccpn_compound_name','chain.compoundName'),
-    ('ccpn_chain_comment','chain.comment'),
-  )),
-  'nef_covalent_links':OD((
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-  )),
-
-  'nef_chemical_shift_list':OD((
-    ('ccpn_serial','serial'),
-    ('ccpn_auto_update','autoUpdate'),
-    ('ccpn_is_simulated','isSimulated'),
-    ('ccpn_comment','comment'),
-    ('nef_chemical_shift',_isALoop),
-  )),
-  'nef_chemical_shift':OD((
-    ('chain_code',None),
-    ('sequence_code',None),
-    ('residue_name',None),
-    ('atom_name',None),
-    ('value','value'),
-    ('value_uncertainty','valueError'),
-    ('element',None),
-    ('isotope_number',None),
-    ('ccpn_figure_of_merit','figureOfMerit'),
-    ('ccpn_comment','comment'),
-  )),
-
-  'nef_distance_restraint_list':OD((
-    ('potential_type','potentialType'),
-    ('restraint_origin','origin'),
-    ('ccpn_tensor_chain_code','tensorChainCode'),
-    ('ccpn_tensor_sequence_code','tensorSequenceCode'),
-    ('ccpn_tensor_residue_name','tensorResidueType'),
-    ('ccpn_tensor_magnitude', 'tensorMagnitude'),
-    ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
-    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
-    ('ccpn_serial','serial'),
-    ('ccpn_dataset_serial','dataSet.serial'),
-    ('ccpn_unit','unit'),
-    ('ccpn_comment','comment'),
-    ('nef_distance_restraint',_isALoop),
-  )),
-  'nef_distance_restraint':OD((
-    ('index',None),
-    ('restraint_id','restraint.serial'),
-    ('restraint_combination_id','combinationId'),
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-    ('weight','weight'),
-    ('target_value','targetValue'),
-    ('target_value_uncertainty','error'),
-    ('lower_linear_limit','additionalLowerLimit'),
-    ('lower_limit','lowerLimit'),
-    ('upper_limit','upperLimit'),
-    ('upper_linear_limit','additionalUpperLimit'),
-    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
-    ('ccpn_comment','restraint.comment'),
-  )),
-
-  'nef_dihedral_restraint_list':OD((
-    ('potential_type','potentialType'),
-    ('restraint_origin','origin'),
-    ('ccpn_tensor_chain_code','tensorChainCode'),
-    ('ccpn_tensor_sequence_code','tensorSequenceCode'),
-    ('ccpn_tensor_residue_name','tensorResidueType'),
-    ('ccpn_tensor_magnitude', 'tensorMagnitude'),
-    ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
-    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
-    ('ccpn_serial','serial'),
-    ('ccpn_dataset_serial','dataSet.serial'),
-    ('ccpn_unit','unit'),
-    ('ccpn_comment','comment'),
-    ('nef_dihedral_restraint',_isALoop),
-  )),
-  'nef_dihedral_restraint':OD((
-    ('index',None),
-    ('restraint_id','restraint.serial'),
-    ('restraint_combination_id','combinationId'),
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-    ('chain_code_3',None),
-    ('sequence_code_3',None),
-    ('residue_name_3',None),
-    ('atom_name_3',None),
-    ('chain_code_4',None),
-    ('sequence_code_4',None),
-    ('residue_name_4',None),
-    ('atom_name_4',None),
-    ('weight','weight'),
-    ('target_value','targetValue'),
-    ('target_value_uncertainty','error'),
-    ('lower_linear_limit','additionalLowerLimit'),
-    ('lower_limit','lowerLimit'),
-    ('upper_limit','upperLimit'),
-    ('upper_linear_limit','additionalUpperLimit'),
-    ('name',None),
-    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
-    ('ccpn_comment','restraint.comment'),
-  )),
-
-  'nef_rdc_restraint_list':OD((
-    ('potential_type','potentialType'),
-    ('restraint_origin','origin'),
-    ('tensor_magnitude', 'tensorMagnitude'),
-    ('tensor_rhombicity', 'tensorRhombicity'),
-    ('tensor_chain_code','tensorChainCode'),
-    ('tensor_sequence_code','tensorSequenceCode'),
-    ('tensor_residue_name','tensorResidueType'),
-    ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
-    ('ccpn_serial','serial'),
-    ('ccpn_dataset_serial','dataSet.serial'),
-    ('ccpn_unit','unit'),
-    ('ccpn_comment','comment'),
-    ('nef_rdc_restraint',_isALoop),
-  )),
-  'nef_rdc_restraint':OD((
-    ('index',None),
-    ('restraint_id','restraint.serial'),
-    ('restraint_combination_id','combinationId'),
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-    ('weight','weight'),
-    ('target_value','targetValue'),
-    ('target_value_uncertainty','error'),
-    ('lower_linear_limit','additionalLowerLimit'),
-    ('lower_limit','lowerLimit'),
-    ('upper_limit','upperLimit'),
-    ('upper_linear_limit','additionalUpperLimit'),
-    ('scale','scale'),
-    ('distance_dependent','isDistanceDependent'),
-    ('ccpn_vector_length','restraint.vectorLength'),
-    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
-    ('ccpn_comment','restraint.comment'),
-  )),
-
-  'nef_nmr_spectrum':OD((
-    ('num_dimensions','spectrum.dimensionCount'),
-    ('chemical_shift_list',None),
-    ('experiment_classification','spectrum.experimentType'),
-    ('experiment_type','spectrum.experimentName'),
-    ('ccpn_positive_contour_count','spectrum.positiveContourCount'),
-    ('ccpn_positive_contour_base','spectrum.positiveContourBase'),
-    ('ccpn_positive_contour_factor','spectrum.positiveContourFactor'),
-    ('ccpn_positive_contour_colour','spectrum.positiveContourColour'),
-    ('ccpn_negative_contour_count','spectrum.negativeContourCount'),
-    ('ccpn_negative_contour_base','spectrum.negativeContourBase'),
-    ('ccpn_negative_contour_factor','spectrum.negativeContourFactor'),
-    ('ccpn_negative_contour_colour','spectrum.negativeContourColour'),
-    ('ccpn_slice_colour','spectrum.sliceColour'),
-    ('ccpn_spectrum_scale','spectrum.scale'),
-    ('ccpn_spinning_rate','spectrum.spinningRate'),
-    ('ccpn_spectrum_comment','spectrum.comment'),
-    ('ccpn_spectrum_file_path', None),
-    ('ccpn_sample', None),
-    ('ccpn_file_header_size', 'spectrum._wrappedData.dataStore.headerSize'),
-    ('ccpn_file_number_type', 'spectrum._wrappedData.dataStore.numberType'),
-    ('ccpn_file_complex_stored_by', 'spectrum._wrappedData.dataStore.complexStoredBy'),
-    ('ccpn_file_scale_factor', 'spectrum._wrappedData.dataStore.scaleFactor'),
-    ('ccpn_file_is_big_endian', 'spectrum._wrappedData.dataStore.isBigEndian'),
-    ('ccpn_file_byte_number', 'spectrum._wrappedData.dataStore.nByte'),
-    ('ccpn_file_has_block_padding', 'spectrum._wrappedData.dataStore.hasBlockPadding'),
-    ('ccpn_file_block_header_size', 'spectrum._wrappedData.dataStore.blockHeaderSize'),
-    ('ccpn_file_type', 'spectrum._wrappedData.dataStore.fileType'),
-    ('ccpn_peaklist_serial','serial'),
-    ('ccpn_peaklist_comment','comment'),
-    ('ccpn_peaklist_name','title'),
-    ('ccpn_peaklist_is_simulated','isSimulated'),
-    ('ccpn_peaklist_symbol_colour','symbolColour'),
-    ('ccpn_peaklist_symbol_style','symbolStyle'),
-    ('ccpn_peaklist_text_colour','textColour'),
-    ('nef_spectrum_dimension',_isALoop),
-    ('ccpn_spectrum_dimension',_isALoop),
-    ('nef_spectrum_dimension_transfer',_isALoop),
-    ('nef_peak',_isALoop),
-    ('ccpn_integral_list',_isALoop),
-    ('ccpn_integral',_isALoop),
-    ('ccpn_spectrum_hit',_isALoop),
-  )),
-  'nef_spectrum_dimension':OD((
-    ('dimension_id',None),
-    ('axis_unit','axisUnits'),
-    ('axis_code','isotopeCodes'),
-    ('spectrometer_frequency','spectrometerFrequencies'),
-    ('spectral_width','spectralWidths'),
-    ('value_first_point',None),
-    ('folding',None),
-    ('absolute_peak_positions',None),
-    ('is_acquisition',None),
-    ('ccpn_axis_code','axisCodes'),
-  )),
-  # NB PseudoDimensions are not yet supported
-  'ccpn_spectrum_dimension':OD((
-    ('dimension_id',None),
-    ('point_count','pointCounts'),
-    ('reference_point','referencePoints'),
-    ('total_point_count','totalPointCounts'),
-    ('point_offset','pointOffsets'),
-    ('assignment_tolerance','assignmentTolerances'),
-    ('lower_aliasing_limit',None),
-    ('higher_aliasing_limit',None),
-    ('measurement_type','measurementTypes'),
-    ('phase_0','phases0'),
-    ('phase_1','phases1'),
-    ('window_function','windowFunctions'),
-    ('lorentzian_broadening','lorentzianBroadenings'),
-    ('gaussian_broadening','gaussianBroadenings'),
-    ('sine_window_shift','sineWindowShifts'),
-    ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
-    ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
-  )),
-  'nef_spectrum_dimension_transfer':OD((
-    ('dimension_1',None),
-    ('dimension_2',None),
-    ('transfer_type',None),
-    ('is_indirect',None),
-  )),
-  'nef_peak':OD((
-    ('index',None),
-    ('peak_id','serial'),
-    ('volume','volume'),
-    ('volume_uncertainty','volumeError'),
-    ('height','height'),
-    ('height_uncertainty','heightError'),
-    ('position_1',None),
-    ('position_uncertainty_1',None),
-    ('position_2',None),
-    ('position_uncertainty_2',None),
-    ('position_3',None),
-    ('position_uncertainty_3',None),
-    ('position_4',None),
-    ('position_uncertainty_4',None),
-    ('position_5',None),
-    ('position_uncertainty_5',None),
-    ('position_6',None),
-    ('position_uncertainty_6',None),
-    ('position_7',None),
-    ('position_uncertainty_7',None),
-    ('position_8',None),
-    ('position_uncertainty_8',None),
-    ('position_9',None),
-    ('position_uncertainty_9',None),
-    ('position_10',None),
-    ('position_uncertainty_10',None),
-    ('position_11',None),
-    ('position_uncertainty_11',None),
-    ('position_12',None),
-    ('position_uncertainty_12',None),
-    ('position_13',None),
-    ('position_uncertainty_13',None),
-    ('position_14',None),
-    ('position_uncertainty_14',None),
-    ('position_15',None),
-    ('position_uncertainty_15',None),
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-    ('chain_code_3',None),
-    ('sequence_code_3',None),
-    ('residue_name_3',None),
-    ('atom_name_3',None),
-    ('chain_code_4',None),
-    ('sequence_code_4',None),
-    ('residue_name_4',None),
-    ('atom_name_4',None),
-    ('chain_code_5',None),
-    ('sequence_code_5',None),
-    ('residue_name_5',None),
-    ('atom_name_5',None),
-    ('chain_code_6',None),
-    ('sequence_code_6',None),
-    ('residue_name_6',None),
-    ('atom_name_6',None),
-    ('chain_code_7',None),
-    ('sequence_code_7',None),
-    ('residue_name_7',None),
-    ('atom_name_7',None),
-    ('chain_code_8',None),
-    ('sequence_code_8',None),
-    ('residue_name_8',None),
-    ('atom_name_8',None),
-    ('chain_code_9',None),
-    ('sequence_code_9',None),
-    ('residue_name_9',None),
-    ('atom_name_9',None),
-    ('chain_code_10',None),
-    ('sequence_code_10',None),
-    ('residue_name_10',None),
-    ('atom_name_10',None),
-    ('chain_code_11',None),
-    ('sequence_code_11',None),
-    ('residue_name_11',None),
-    ('atom_name_11',None),
-    ('chain_code_12',None),
-    ('sequence_code_12',None),
-    ('residue_name_12',None),
-    ('atom_name_12',None),
-    ('chain_code_13',None),
-    ('sequence_code_13',None),
-    ('residue_name_13',None),
-    ('atom_name_13',None),
-    ('chain_code_14',None),
-    ('sequence_code_14',None),
-    ('residue_name_14',None),
-    ('atom_name_14',None),
-    ('chain_code_15',None),
-    ('sequence_code_15',None),
-    ('residue_name_15',None),
-    ('atom_name_15',None),
-    ('ccpn_figure_of_merit','figureOfMerit'),
-    ('ccpn_annotation','annotation'),
-    ('ccpn_comment','comment'),
-  )),
-  # NB SpectrumHit crosslink to sample and sampleComponent are derived
-  # And need not be stored here.
-  'ccpn_spectrum_hit':OD((
-    ('ccpn_substance_name','substanceName'),
-    ('ccpn_pseudo_dimension_number','pseudoDimensionNumber'),
-    ('ccpn_point_number','pointNumber'),
-    ('ccpn_figure_of_merit','figureOfMerit'),
-    ('ccpn_merit_code','meritCode'),
-    ('ccpn_normalised_change','normalisedChange'),
-    ('ccpn_is_confirmed_','isConfirmed'),
-    ('ccpn_concentration','concentration'),
-    ('ccpn_','concentrationError'),
-    ('ccpn_concentration_uncertainty','concentrationUnit'),
-    ('ccpn_comment','comment'),
-  )),
-
-  'nef_peak_restraint_links':OD((
-    ('nef_peak_restraint_link',_isALoop),
-  )),
-  'nef_peak_restraint_link':OD((
-    ('nmr_spectrum_id',None),
-    ('peak_id',None),
-    ('restraint_list_id',None),
-    ('restraint_id',None),
-  )),
-
-  'ccpn_complex':OD((
-    ('name','name'),
-    ('ccpn_complex_chain',_isALoop),
-  )),
-  'ccpn_complex_chain':OD((
-    ('complex_chain_code',None),
-  )),
-
-  'ccpn_spectrum_group':OD((
-    ('name','name'),
-    ('ccpn_group_spectrum',_isALoop),
-  )),
-  'ccpn_group_spectrum':OD((
-    ('nmr_spectrum_id',None),
-  )),
-
-  'ccpn_integral_list':OD((
-    ('serial',None),
-    ('name','title'),
-    ('symbol_colour','symbolColour'),
-    ('text_colour','textColour'),
-    ('comment','comment'),
-  )),
-
-  'ccpn_integral':OD((
-    ('integral_list_serial','integralList.serial'),
-    ('integral_serial',None),
-    ('value','value'),
-    ('value_uncertainty','valueError'),
-    ('bias','bias'),
-    ('figure_of_merit','figureOfMerit'),
-    ('slopes_1',None),
-    ('slopes_2',None),
-    ('slopes_3',None),
-    ('slopes_4',None),
-    ('lower_limits_1',None),
-    ('upper_limits_1',None),
-    ('lower_limits_2',None),
-    ('upper_limits_2',None),
-    ('lower_limits_3',None),
-    ('upper_limits_3',None),
-    ('lower_limits_4',None),
-    ('upper_limits_4',None),
-    ('annotation','annotation'),
-    ('comment','comment'),
-  )),
-
-  # NB Sample crosslink to spectrum is handled on the spectrum side
-  'ccpn_sample':OD((
-    ('name','name'),
-    ('pH','ph'),
-    ('ionic_strength','ionicStrength'),
-    ('amount','amount'),
-    ('amount_unit','amountUnit'),
-    ('is_hazardous','isHazardous'),
-    ('is_virtual','isVirtual'),
-    ('creation_date','creationDate'),
-    ('batch_identifier','batchIdentifier'),
-    ('plate_identifier','plateIdentifier'),
-    ('row_number','rowNumber'),
-    ('column_number','columnNumber'),
-    ('comment','comment'),
-    ('ccpn_sample_component',_isALoop),
-  )),
-  'ccpn_sample_component':OD((
-    ('name','name'),
-    ('labelling','labelling'),
-    ('role','role'),
-    ('concentration','concentration'),
-    ('concentration_error','concentrationError'),
-    ('concentration_unit','concentrationUnit'),
-    ('purity','purity'),
-    ('comment','comment'),
-  )),
-
-  'ccpn_substance':OD((
-    ('name','name'),
-    ('labelling','labelling'),
-    ('substance_type', None),
-    ('user_code','userCode'),
-    ('smiles','smiles'),
-    ('inchi','inChi'),
-    ('cas_number','casNumber'),
-    ('empirical_formula','empiricalFormula'),
-    ('sequence_string',None),
-    ('mol_type',None),
-    ('start_number',None),
-    ('is_cyclic',None),
-    ('molecular_mass','molecularMass'),
-    ('atom_count','atomCount'),
-    ('bond_count','bondCount'),
-    ('ring_count','ringCount'),
-    ('h_bond_donor_count','hBondDonorCount'),
-    ('h_bond_acceptor_count','hBondAcceptorCount'),
-    ('polar_surface_area','polarSurfaceArea'),
-    ('log_partition_coefficient','logPartitionCoefficient'),
-    ('comment','comment'),
-    ('ccpn_substance_synonym',_isALoop),
-  )),
-  'ccpn_substance_synonym':OD((
-    ('synonym',None),
-  )),
-
-  'ccpn_assignment':OD((
-    ('nmr_chain',_isALoop),
-    ('nmr_residue',_isALoop),
-    ('nmr_atom',_isALoop),
-  )),
-
-  'nmr_chain':OD((
-    ('short_name','shortName'),
-    ('serial',None),
-    ('label','label'),
-    ('is_connected','isConnected'),
-    ('comment','comment'),
-  )),
-
-  'nmr_residue':OD((
-    ('chain_code', 'nmrChain.shortName'),
-    ('sequence_code','sequenceCode'),
-    ('residue_name','residueType'),
-    ('serial',None),
-    ('comment','comment'),
-  )),
-
-  'nmr_atom':OD((
-    ('chain_code','nmrResidue.nmrChain.shortName'),
-    ('sequence_code','nmrResidue.sequenceCode'),
-    ('serial',None),
-    ('name','name'),
-    ('isotopeCode','isotopeCode'),
-    ('comment','comment'),
-  )),
-
-  'ccpn_dataset':OD((
-    ('serial','serial'),
-    ('title','title'),
-    ('program_name','programName'),
-    ('program_version','programVersion'),
-    ('data_path','dataPath'),
-    ('creation_date',None),
-    ('uuid','uuid'),
-    ('comment','comment'),
-    ('ccpn_calculation_step',_isALoop),
-    ('ccpn_calculation_data',_isALoop),
-  )),
-
-  'ccpn_calculation_step':OD((
-    ('serial', None),
-    ('program_name','programName'),
-    ('program_version','programVersion'),
-    ('script_name','scriptName'),
-    ('script','script'),
-    ('input_data_uuid','inputDataUuid'),
-    ('output_data_uuid','outputDataUuid'),
-  )),
-
-  'ccpn_calculation_data':OD((
-    ('data_name','name'),
-    ('attached_object_pid','attachedObjectPid'),
-    ('parameter_name', None),
-    ('parameter_value', None),
-  )),
-
-  'ccpn_restraint_list':OD((
-    ('potential_type','potentialType'),
-    ('restraint_origin','origin'),
-    ('tensor_chain_code','tensorChainCode'),
-    ('tensor_sequence_code','tensorSequenceCode'),
-    ('tensor_residue_name','tensorResidueType'),
-    ('tensor_magnitude', 'tensorMagnitude'),
-    ('tensor_rhombicity', 'tensorRhombicity'),
-    ('tensor_isotropic_value', 'tensorIsotropicValue'),
-    ('ccpn_serial','serial'),
-    ('dataset_serial','dataSet.serial'),
-    ('name','name'),
-    ('restraint_type','restraintType'),
-    ('restraint_item_length','restraintItemLength'),
-    ('unit','unit'),
-    ('measurement_type','measurementType'),
-    ('comment','comment'),
-    ('ccpn_restraint',_isALoop),
-  )),
-  'ccpn_restraint':OD((
-    ('index',None),
-    ('restraint_id','restraint.serial'),
-    ('restraint_combination_id','combinationId'),
-    ('chain_code_1',None),
-    ('sequence_code_1',None),
-    ('residue_name_1',None),
-    ('atom_name_1',None),
-    ('chain_code_2',None),
-    ('sequence_code_2',None),
-    ('residue_name_2',None),
-    ('atom_name_2',None),
-    ('chain_code_3',None),
-    ('sequence_code_3',None),
-    ('residue_name_3',None),
-    ('atom_name_3',None),
-    ('chain_code_4',None),
-    ('sequence_code_4',None),
-    ('residue_name_4',None),
-    ('atom_name_4',None),
-    ('weight','weight'),
-    ('target_value','targetValue'),
-    ('target_value_uncertainty','error'),
-    ('lower_linear_limit','additionalLowerLimit'),
-    ('lower_limit','lowerLimit'),
-    ('upper_limit','upperLimit'),
-    ('upper_linear_limit','additionalUpperLimit'),
-    ('scale','scale'),
-    ('distance_dependent','isDistanceDependent'),
-    ('name',None),
-    ('vector_length','restraint.vectorLength'),
-    ('figure_of_merit','restraint.figureOfMerit'),
-    ('ccpn_comment','restraint.comment'),
-  )),
-
-  'ccpn_notes':OD((
-    ('ccpn_note',_isALoop),
-  )),
-  'ccpn_note':OD((
-    ('serial',None),
-    ('name','name'),
-    ('created', None),
-    ('last_modified', None),
-    ('text','text'),
-  )),
-
-  'ccpn_additional_data':OD((
-    ('ccpn_internal_data',_isALoop),
-  )),
-  'ccpn_internal_data':OD((
-    ('ccpn_object_pid',None),
-    ('internal_data_string',None)
-  )),
-
-}
 def loadProject(nefFilePath, pdbFilePaths=None, projectName=None, pdbFileType='pdb'):
   """Create new CCPN project from files at nefFilepath and (optional) pdbFilepaths
 
@@ -913,6 +258,8 @@ class CcpnNefReader:
     for sf_category, saveFrames in saveframeOrderedDict.items():
       for saveFrame in saveFrames:
         saveFrameName = self.saveFrameName = saveFrame.name
+
+        print ('@~@~ addressing', sf_category, saveFrameName, self.importers.get(sf_category))
 
         if saveFrameName == 'nef_nmr_meta_data':
         # We are doing nothing with it, but we do not want a warning
@@ -1163,6 +510,8 @@ class CcpnNefReader:
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
 
+    print ('@~@~ LOADING', framecode)
+
     defaultSerial = 1
     dataSetSerial = saveFrame.get('ccpn_dataset_serial', defaultSerial)
     nmrConstraintStore = project.findFirstNmrConstraintStore(serial=dataSetSerial)
@@ -1194,6 +543,8 @@ class CcpnNefReader:
         # Other types are not recognised
         return None
       data = saveFrame.get('ccpn_restraint').data
+
+    print('@~@~ LOADING', framecode, restraintType, itemLength)
 
     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
@@ -1651,9 +1002,9 @@ class CcpnNefReader:
       # Spectrum does not already exist - create it.
       # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
-      framecode = saveFrame.get('chemical_shift_list')
-      if framecode:
-        experimentParams['shiftList'] = self.frameCode2Object[framecode]
+      shiftFramecode = saveFrame.get('chemical_shift_list')
+      if shiftFramecode:
+        experimentParams['shiftList'] = self.frameCode2Object[shiftFramecode]
       else:
         # Defaults to first (there should be only one, but we want the read to work) ShiftList
         experimentParams['shiftList'] = self.defaultChemicalShiftList
@@ -1671,10 +1022,6 @@ class CcpnNefReader:
           experimentParams['userExpCode'] = refExperimentName
         else:
           experimentParams['refExperiment'] = refExperiment
-
-      # framecode = saveFrame.get('ccpn_sample')
-      # if framecode:
-      #   experimentParams['sample'] = self.frameCode2Object[framecode]
 
       nmrExperiment = nmrProject.newExperiment(**experimentParams)
       dataSource = nmrExperiment.newDataSource(**dataSourceParams)
@@ -1741,7 +1088,7 @@ class CcpnNefReader:
           val = row.get('lower_aliasing_limit')
           if val is not None:
             dd['minAliasedFreq'] = val
-          val = row.get('upper_aliasing_limit')
+          val = row.get('higher_aliasing_limit')
           if val is not None:
             dd['maxAliasedFreq'] = val
           val = row.get('measurement_type')
@@ -1846,9 +1193,9 @@ class CcpnNefReader:
         dataLocationStore = memopsRoot.findFirstDataLocationStore()
         if not dataLocationStore:
           dataLocationStore = memopsRoot.newDataLocationStore(name='default')
-          addDataStore(dataSource, filePath,
-                       numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
-                                  **dataStoreParams)
+        addDataStore(dataSource, filePath,
+                     numPoints= [x.numPoints for x in dataSource.sortedDataDims()],
+                     **dataStoreParams)
 
       # Set refExpDimRef links
       if refExperiment is not None:
@@ -2178,8 +1525,13 @@ class CcpnNefReader:
   # #
   # importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
 
-  def fetchAtomMap(self, chainCode, sequenceCode, name, isotopeCode=None, comment=None):
+  def fetchAtomMap(self, chainCode, sequenceCode, name, isotopeCode=None, comment=None,
+                   serial=None):
 
+    print ('@~@~ fetchAtomMap', chainCode, sequenceCode, name, isotopeCode, serial)
+
+    chainCode = chainCode or self.defaultChainCode
+    sequenceCode = sequenceCode or defaultNmrResidueCode
 
     # TODO HACK: names like HBX, HBY should not really be supported, but temporarily...
     # There is test data with upper case instead of the correct (HBx, HBy),
@@ -2196,6 +1548,7 @@ class CcpnNefReader:
     # First do non-offset residues, to make sure main residue maps are ready
     if isotopeCode is None:
       isotopeCode = commonUtil.name2IsotopeCode(name) or 'unknown'
+    elementSymbol = commonUtil.isotopeCode2Nucleus(isotopeCode)
     residueMap = self.fetchResidueMap(chainCode, sequenceCode)
     atomMappings = residueMap['atomMappings']
     atomMap = atomMappings.get(name)
@@ -2203,19 +1556,36 @@ class CcpnNefReader:
     if atomMap is None:
       # we have no preceding map. Make one, but we clearly can have only simple atoms,
       # with no atomSets or provision for prochirals etc.
-      fixedName = name.replace('%','*')  # convert pseudoatom marker
-      fixedName = fixedName.replace('@', '__') # necessary as names like H@123 are reserved
+      if '*' in name:
+        fixedName = nameForSetting = name.replace('%','*')  # convert pseudoatom marker
+
+      elif len(name.split('@')) == 2:
+        if serial and name == '%s@%s' % (elementSymbol, serial):
+          fixedName = name
+          nameForSetting = None
+        elif name.split('@')[1].isdigit():
+          # Name does not match serial number, so we must change it
+          # - names like H@123 are reserved
+          fixedName = nameForSetting = name.replace('@', '__')
+      else:
+        nameForSetting = fixedName = name
       atomMap = atomMappings[name] = {'name':fixedName, 'mappingType':'simple',
-                                      'atomSets':[],}
-      atomMap['elementSymbol'] = commonUtil.isotopeCode2Nucleus(isotopeCode)
+                                      'atomSets':[], 'elementSymbol':elementSymbol}
+
+    else:
+      # nameForSetting needed to allow setting name=None for names of the form H@237
+      nameForSetting = name
+
 
     if atomMap.get('resonances') is None:
       # Make resonance
       resonanceGroup = residueMap['resonanceGroup']
-      resonance = self.memopsRoot.currentNmrProject.newResonance(name=atomMap['name'],
+      resonance = self.memopsRoot.currentNmrProject.newResonance(name=nameForSetting,
                                                                  isotopeCode=isotopeCode,
                                                                  resonanceGroup=resonanceGroup,
                                                                  details=comment)
+      if serial:
+        resetSerial(resonance, serial)
       atomMap['resonances'] = [resonance]
 
       atomSets = atomMap.get('atomSets')
@@ -2238,8 +1608,13 @@ class CcpnNefReader:
     #
     return atomMap
 
-  def fetchResidueMap(self, chainCode, sequenceCode, residueType=None, linkToMap=None):
+  def fetchResidueMap(self, chainCode, sequenceCode, residueType=None, linkToMap=None,
+                      serial=None):
     """Return _chainMapping entry (if necessary)"""
+
+    chainCode = chainCode or defaultNmrChainCode
+    sequenceCode = sequenceCode or defaultNmrResidueCode
+
     nmrProject = self.memopsRoot.currentNmrProject
 
     chainMapping = self._chainMapping.get(chainCode)
@@ -2250,11 +1625,9 @@ class CcpnNefReader:
       result = chainMapping[sequenceCode] = {'atomMappings':{}}
 
     resonanceGroup = result.get('resonanceGroup')
-    mainResonanceGroup = None
-    previousResonanceGroup = None
 
     if resonanceGroup is None:
-      if chainCode == '@-':
+      if chainCode == defaultNmrChainCode:
         # default chain
         name = sequenceCode
       else:
@@ -2276,19 +1649,31 @@ class CcpnNefReader:
         resonanceGroup.descriptor = residue.descriptor
 
       seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
+
+      if serial:
+        useSerial= serial
+      elif (offset is None and seqCode is None and seqInsertCode.startswith('@')
+            and seqInsertCode[1:].isdigit()):
+        useSerial = int(seqInsertCode[1:])
+      else:
+        useSerial = None
+
+      if useSerial:
+        try:
+          resetSerial(resonanceGroup, useSerial)
+        except ValueError:
+          print("INFO: ResonanceGroup serial number %s could not be preserved. "
+                "Data are still correct.")
+          # If the serial is taken we lose coherence, but that is better than an error
+          pass
+
       if offset is None:
-        if seqCode is None and seqInsertCode.startswith('@') and seqInsertCode[1:].isdigit():
-          try:
-            resetSerial(resonanceGroup, int(seqInsertCode[1:]))
-          except ValueError:
-            print("INFO: ResonanceGroup serial number %s could not be preserved. "
-                  "Data are still correct.")
-            # If the serial is taken we lose coherence, but that is better than an error
-            pass
 
         if linkToMap is not None:
           # This is a residue in a continuous stretch - and linkToMap is the map for the i-1 residue
           previousResonanceGroup = linkToMap['resonanceGroup']
+          print ('@~@~ setting prob',  chainCode, sequenceCode, residueType, resonanceGroup,
+                 previousResonanceGroup)
           previousResonanceGroup.newResonanceGroupProb(linkType='sequential', sequenceOffset=1,
                                                        possibility=resonanceGroup)
       else:
@@ -2301,18 +1686,13 @@ class CcpnNefReader:
           linkType = 'sequential'
         mainResonanceGroup.newResonanceGroupProb(linkType=linkType, sequenceOffset=offset,
                                                  possibility=resonanceGroup)
-
-    # print ('@~@~ fetchResidueMap |', chainCode, sequenceCode, residueType, '|', resonanceGroup.serial,
-    #        resonanceGroup.name, resonanceGroup.ccpCode, '|',
-    #        mainResonanceGroup and mainResonanceGroup.name,
-    #        previousResonanceGroup and previousResonanceGroup.name)
     #
     return result
 
   def load_ccpn_assignment(self, project, saveFrame):
     nmrChainTypes = {}
-    for row in saveFrame['nmr_chain']:
-      chainCode = row['chain_code']
+    for row in saveFrame['nmr_chain'].data:
+      chainCode = row['short_name']
       isConnected = row['is_connected']
       if chainCode in self._chainMapping:
         # NB This assumes that the chainMapping is set for MolSystem chains,
@@ -2322,17 +1702,19 @@ class CcpnNefReader:
         self._chainMapping[chainCode] = OD()
         if isConnected:
           nmrChainTypes[chainCode] = 'connected'
-        elif chainCode == '@-':
+        elif chainCode == defaultNmrChainCode:
           nmrChainTypes[chainCode] = 'default'
         else:
           nmrChainTypes[chainCode] = 'unassigned'
+          #
+          print('@~@~ nmrChain', chainCode, isConnected, nmrChainTypes[chainCode])
 
     offsetRows = []
     previousConnectedMaps = {}
-    for row in saveFrame['nmr_residue']:
+    for row in saveFrame['nmr_residue'].data:
       # First do non-offset residues, to make sure main residue maps are ready
       chainCode = row['chain_code']
-      sequenceCode = row['sequenceCode']
+      sequenceCode = row['sequence_code']
       seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
       if offset is None:
         chainType = nmrChainTypes[chainCode]
@@ -2343,7 +1725,8 @@ class CcpnNefReader:
           linkToMap = previousConnectedMaps.get(chainCode)
         else:
           linkToMap = None
-        newMap = self.fetchResidueMap(chainCode, sequenceCode, residueType=row['residue_name'],
+        newMap = self.fetchResidueMap(chainCode, sequenceCode,
+                                      residueType=row['residue_name'] or None,
                                       linkToMap=linkToMap)
         newMap['resonanceGroup'].details = row.get('comment')
         if chainType == 'connected':
@@ -2353,16 +1736,16 @@ class CcpnNefReader:
 
     for row in offsetRows:
       chainCode = row['chain_code']
-      sequenceCode = row['sequenceCode']
+      sequenceCode = row['sequence_code']
       newMap = self.fetchResidueMap(chainCode, sequenceCode, row['residue_name'])
       newMap['resonanceGroup'].details = row.get('comment')
 
-    for row in saveFrame['nmr_atom']:
-      self.fetchAtomMap(row['chain_code'], row['sequenceCode'], row['name'],
-                        isotopeCode=row['isotope_code'], comment=row.get('comment'))
-  # #
-  # importers['ccpn_assignment'] = load_ccpn_assignment
-
+    for row in saveFrame['nmr_atom'].data:
+      self.fetchAtomMap(row['chain_code'], row['sequence_code'], row['name'],
+                        isotopeCode=row['isotope_code'], comment=row.get('comment'),
+                        serial=row.get('serial'))
+  #
+  importers['ccpn_assignment'] = load_ccpn_assignment
 
 
   def preloadAssignmentData(self, dataBlock):
@@ -2732,7 +2115,6 @@ def resetSerial(apiObject, newSerial):
 def addDataStore(dataSource, spectrumPath, **params):
   """Create and set DataSource.dataStore.
   The values of params are given by the 'tags' tuple, below"""
-  # print ('@~@~ addDataStore', dataSource, spectrumPath, params)
 
   dirName, fileName = os.path.split(spectrumPath)
   dataUrl = fetchDataUrl(dataSource.root, dirName)

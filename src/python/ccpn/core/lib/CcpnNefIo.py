@@ -677,7 +677,7 @@ nef2CcpnMap = {
   'nmr_residue':OD((
     ('chain_code', 'nmrChain.shortName'),
     ('sequence_code','sequenceCode'),
-    ('residue_name','residueType'),
+    ('residue_name',None),
     ('serial',None),
     ('comment','comment'),
   )),
@@ -687,7 +687,7 @@ nef2CcpnMap = {
     ('sequence_code','nmrResidue.sequenceCode'),
     ('serial',None),
     ('name','name'),
-    ('isotopeCode','isotopeCode'),
+    ('isotope_code','isotopeCode'),
     ('comment','comment'),
   )),
 
@@ -730,8 +730,9 @@ nef2CcpnMap = {
     ('tensor_magnitude', 'tensorMagnitude'),
     ('tensor_rhombicity', 'tensorRhombicity'),
     ('tensor_isotropic_value', 'tensorIsotropicValue'),
+    # NB These tags have 'ccpn' prefix to match corresponding nef restraitn lists
     ('ccpn_serial','serial'),
-    ('dataset_serial','dataSet.serial'),
+    ('ccpn_dataset_serial','dataSet.serial'),
     ('name','name'),
     ('restraint_type','restraintType'),
     ('restraint_item_length','restraintItemLength'),
@@ -772,6 +773,7 @@ nef2CcpnMap = {
     ('name',None),
     ('vector_length','restraint.vectorLength'),
     ('figure_of_merit','restraint.figureOfMerit'),
+    # NB This tag has 'ccpn' prefix to match corresponding nef restraitn lists
     ('ccpn_comment','restraint.comment'),
   )),
 
@@ -1026,6 +1028,9 @@ class CcpnNefWriter:
     # Chains
     saveFrames.append(self.chains2Nef(sorted(chains)))
 
+    # CCPN assignment
+    saveFrames.append(self.ccpnAssignentToNef(nmrChains))
+
     # ChemicalShiftLists
     for obj in sorted(chemicalShiftLists):
       saveFrames.append(self.chemicalShiftList2Nef(obj))
@@ -1063,7 +1068,7 @@ class CcpnNefWriter:
     for obj in sorted(substances):
       saveFrames.append(self.substance2Nef(obj))
 
-    # SpectrumGroups
+    # Complexes
     for obj in project.complexes:
       saveFrames.append(self.complex2Nef(obj))
 
@@ -1362,6 +1367,7 @@ class CcpnNefWriter:
       for nmrResidue in sorted(nmrChain.nmrResidues):
         rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)
         rowdata['serial'] = nmrResidue.serial
+        rowdata['residue_name'] = nmrResidue.residueType or None
         nmrResidueLoop.newRow(rowdata)
 
         for nmrAtom in sorted(nmrResidue.nmrAtoms):
@@ -1934,6 +1940,36 @@ class CcpnNefWriter:
         loop.newRow((synonym,))
     else:
       del result[loopName]
+    #
+    return result
+
+  def ccpnAssignentToNef(self, nmrChains:List[NmrChain]):
+    """Write CCPN assignment data, to preserve serials etc."""
+    category = 'ccpn_assignment'
+    if nmrChains:
+      project = nmrChains[0].project
+      result = self._newNefSaveFrame(project, category, category)
+
+      loopName = 'nmr_chain'
+      loop = result[loopName]
+      for nmrChain in nmrChains:
+        row = loop.newRow(self._loopRowData(loopName, nmrChain))
+        row['serial'] = nmrChain.serial
+
+      loopName = 'nmr_residue'
+      loop = result[loopName]
+      for nmrResidue in project.nmrResidues:
+        row = loop.newRow(self._loopRowData(loopName, nmrResidue))
+        row['serial'] = nmrResidue.serial
+
+      loopName = 'nmr_atom'
+      loop = result[loopName]
+      for nmrAtom in project.nmrAtoms:
+        row = loop.newRow(self._loopRowData(loopName, nmrAtom))
+        row['serial'] = nmrAtom.serial
+
+    else:
+      result = None
     #
     return result
 
@@ -3435,6 +3471,7 @@ class CcpnNefReader:
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
     for row in saveFrame[nmrResidueLoopName].data:
       parameters = self._parametersFromLoopRow(row, map2)
+      parameters['residueType'] = row.get('residue_name')
       # NB chainCode None is not possible here (for ccpn data)
       chainCode =  row['chain_code']
       nmrChain = nmrChains[chainCode]
@@ -3451,7 +3488,7 @@ class CcpnNefReader:
       parameters = self._parametersFromLoopRow(row, map2)
       chainCode =  row['chain_code']
       sequenceCode =  row['sequence_code']
-      nmrResidue = nmrResidue[(chainCode, sequenceCode)]
+      nmrResidue = nmrResidues[(chainCode, sequenceCode)]
       nmrAtom = nmrResidue.newNmrAtom(**parameters)
       nmrAtom.resetSerial(row['serial'])
       # NB former call was BROKEN!
@@ -3487,9 +3524,6 @@ class CcpnNefReader:
       serial = row.get('serial')
       if serial is not None:
         obj.resetSerial(serial)
-        # NB former call was BROKEN!
-        # modelUtil.resetSerial(apiNote, serial, 'notes')
-
     #
     return result
 

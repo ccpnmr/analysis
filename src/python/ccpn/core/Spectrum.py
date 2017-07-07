@@ -322,13 +322,6 @@ class Spectrum(AbstractWrapperObject):
       apiDataStore.repointToDataUrl(dataUrl)
       apiDataStore.path = value[len(dataUrl.url.path)+1:]
 
-      # # NBNB TBD this is silly - no reuse of DataUrls.
-      # dirName, fileName = os.path.split(Path.normalisePath(value, makeAbsolute=True))
-      # apiDataLocationStore = apiDataStore.dataLocationStore
-      # dataUrl = apiDataLocationStore.newDataUrl(url=Url(path=dirName))
-      # apiDataStore.dataUrl = dataUrl
-      # apiDataStore.path = fileName
-
   @property
   def headerSize(self) -> int:
     """File header size in bytes."""

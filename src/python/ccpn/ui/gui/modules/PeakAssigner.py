@@ -528,7 +528,7 @@ class PeakAssigner(CcpnModule):
     for peak in self.current.peaks:
       #### Should be simplified with function in Peak class
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
-        newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
+        newAssignments = list(peak.dimensionNmrAtoms[dim]) + [nmrAtom]
         axisCode = peak.peakList.spectrum.axisCodes[dim]
         peak.assignDimension(axisCode, newAssignments)
 

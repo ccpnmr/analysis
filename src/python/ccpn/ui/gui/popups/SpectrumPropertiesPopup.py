@@ -76,7 +76,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
 
       self.tabWidget.addTab(self._generalTab, "General")
       self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-
+      self._contoursTab = None
     else:
       self._generalTab = GeneralTab(spectrum)
       self._dimensionsTab = DimensionsTab(spectrum, spectrum.dimensionCount)
@@ -103,10 +103,12 @@ class SpectrumPropertiesPopup(CcpnDialog):
       pass
 
   def _repopulate(self):
-    self._generalTab._repopulate()
-    self._dimensionsTab._repopulate()
-    self._contoursTab._repopulate()
-    pass
+    if self._generalTab:
+      self._generalTab._repopulate()
+    if self._dimensionsTab:
+      self._dimensionsTab._repopulate()
+    if self._contoursTab:
+      self._contoursTab._repopulate()
 
   def _applyAllChanges(self, changes):
     for v in changes.values():
@@ -198,6 +200,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.item = item
     self.spectrum = spectrum
     self._changes = dict()
+    self.atomCodes = ()
 
     self.experimentTypes = spectrum._project._experimentTypeMap
     Label(self, text="Spectrum name ", grid=(1, 0))
@@ -351,13 +354,14 @@ class GeneralTab(QtGui.QWidget, Base):
     if self.spectrum.sample is not None:
       self.samplesPulldownList.select(self.spectrum.sample.name)
 
-    itemsList = list(self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).keys())
-    self.spectrumType.addItems(itemsList)
-    text = self.spectrum.experimentName
-    if text not in itemsList:
-      text = self.spectrum.experimentType
-    text = priorityNameRemapping.get(text, text)
-    self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+    if self.atomCodes:
+      itemsList = list(self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).keys())
+      self.spectrumType.addItems(itemsList)
+      text = self.spectrum.experimentName
+      if text not in itemsList:
+        text = self.spectrum.experimentType
+      text = priorityNameRemapping.get(text, text)
+      self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
     if self.spectrum.scale is not None:
       self.spectrumScalingData.setText(str(self.spectrum.scale))
@@ -525,7 +529,7 @@ class GeneralTab(QtGui.QWidget, Base):
     spectrum._apiDataSource.setSliceColour(newColour.name())
     self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
-    spectrum.guiSpectrumView.plot.setPen(spectrum._apiDataSource.sliceColour)
+    # spectrum.guiSpectrumView.plot.setPen(spectrum._apiDataSource.sliceColour)
 
 
   # TODO: 1D Only.  Fix this when fixing 1D!

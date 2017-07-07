@@ -186,7 +186,9 @@ class PeakAssigner(CcpnModule):
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
     for peak in self.current.peaks:
-      dimNmrAtoms = peak.dimensionNmrAtoms[dim]
+      # dimNmrAtoms = peak.dimensionNmrAtoms[dim]
+
+      dimNmrAtoms = list(peak.dimensionNmrAtoms[dim])   # ejb - changed to list
       currentItem = self.listWidgets[dim].currentItem()
       if not currentItem:
         self.listWidgets[dim].addItem(nmrAtom.pid)
@@ -500,7 +502,9 @@ class PeakAssigner(CcpnModule):
 
     for peak in self.current.peaks:
       if nmrAtom not in peak.dimensionNmrAtoms[dim]:
-        newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
+        # newAssignments = peak.dimensionNmrAtoms[dim] + [nmrAtom]
+
+        newAssignments = list(peak.dimensionNmrAtoms[dim]) + [nmrAtom]    # ejb - changed to list
         axisCode = peak.peakList.spectrum.axisCodes[dim]
         peak.assignDimension(axisCode, newAssignments)
     self.listWidgets[dim].addItem(nmrAtom.pid)

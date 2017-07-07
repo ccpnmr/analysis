@@ -837,7 +837,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     ###self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
-    font.setPointSize(10)
+    font.setPointSize(14)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)

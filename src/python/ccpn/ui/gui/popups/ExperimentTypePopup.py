@@ -80,6 +80,7 @@ class ExperimentTypePopup(CcpnDialog):
       # or (too ugly for words) to have a third attribute in parallel with
       # spectrum.experimentName and spectrum.experimentType
       text = spectrum.experimentName
+      text = priorityNameRemapping.get(text, text)
       if text not in self.pulldownItems:
         text = spectrum.experimentType
       # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment

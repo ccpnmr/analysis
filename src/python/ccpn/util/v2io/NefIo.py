@@ -260,8 +260,6 @@ class CcpnNefReader:
       for saveFrame in saveFrames:
         saveFrameName = self.saveFrameName = saveFrame.name
 
-        print ('@~@~ addressing', sf_category, saveFrameName, self.importers.get(sf_category))
-
         if saveFrameName == 'nef_nmr_meta_data':
         # We are doing nothing with it, but we do not want a warning
           continue
@@ -544,8 +542,6 @@ class CcpnNefReader:
         # Other types are not recognised
         return None
       data = saveFrame.get('ccpn_restraint').data
-
-    print('@~@~ LOADING', framecode, restraintType, itemLength)
 
     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
     name = framecode[len(category) + 1:]
@@ -1529,8 +1525,6 @@ class CcpnNefReader:
   def fetchAtomMap(self, chainCode, sequenceCode, name, isotopeCode=None, comment=None,
                    serial=None):
 
-    print ('@~@~ fetchAtomMap', chainCode, sequenceCode, name, isotopeCode, serial)
-
     chainCode = chainCode or self.defaultChainCode
     sequenceCode = sequenceCode or defaultNmrResidueCode
 
@@ -1707,8 +1701,8 @@ class CcpnNefReader:
           nmrChainTypes[chainCode] = 'default'
         else:
           nmrChainTypes[chainCode] = 'unassigned'
-          #
-          print('@~@~ nmrChain', chainCode, isConnected, nmrChainTypes[chainCode])
+      #
+      print('@~@~ nmrChain', chainCode, isConnected, nmrChainTypes[chainCode])
 
     offsetRows = []
     previousConnectedMaps = {}

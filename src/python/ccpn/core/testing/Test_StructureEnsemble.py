@@ -61,10 +61,6 @@ class StructureEnsembleTesting_None(WrapperTesting):
         'occupancy', 'bFactor',
         'nmrChainCode', 'nmrSequenceCode', 'nmrResidueName', 'nmrAtomName',
       ]
-      print ('@~@~ columns', data.columns)
-      print ('@~@~ dtypes', data.dtypes)
-      for tag in tags:
-        print ('\n\n@~@~', tag, '\n', data[tag].value_counts())
     finally:
       loadedProject.delete()
 

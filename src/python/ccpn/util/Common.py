@@ -222,33 +222,6 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
   Inspired by numpy.isclose()"""
   return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
-# # No longer used - Rasmus 20/2/2017
-# def flattenIfNumpy(data, shape=None):
-#   """If data are Numpy, convert to flat array
-#   If shape is given, check that numpy fits shape, and flat sequence fits total number of elements"""
-#
-#   if hasattr(data, 'flat'):
-#     # Numpy array
-#     if shape and data.shape != tuple(shape):
-#       raise ValueError("Shape of array data is %s, should be %s" % (data.shape, shape))
-#     data = data.flat
-#
-#   elif shape:
-#       elementCount = 1
-#       for x in shape:
-#         elementCount *= x
-#       if len(data) != elementCount:
-#         raise ValueError("Number of elements in data sequence is %s, should be %s"
-#                          % (len(data), elementCount))
-#   #
-#   return data
-
-# def stringToIdentifier(value):
-#   """Convert string to identifier, replacing non-alphanumeric values by underscore"""
-#   if value.isidentifier():
-#     return value
-#   else:
-#     return ''.join(x if x.isalnum() else '_' for x in value)
 
 def getTimeStamp():
   """Get iso-formtted timestamp"""
@@ -323,16 +296,6 @@ def name2ElementSymbol(name):
         break
   #
   return None
-
-  # for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):
-  #   # Reversed looping guarantees that the longer of two matches will be chosen
-  #   if name.startswith(tag):
-  #     result = tag
-  #     break
-  # else:
-  #   result = None
-  # #
-  # return result
 
 
 def checkIsotope(text):
@@ -570,6 +533,43 @@ def stringifier(*fields, **options):
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]
+
+def resetSerial(apiObject, newSerial):
+  """ADVANCED Reset serial of object to newSerial, resetting parent link
+  and the nextSerial of the parent.
+
+  Raises ValueError for objects that do not have a serial
+  (or, more precisely, where the _wrappedData does not have a serial)."""
+
+  # NB, needed both from V2 NefIo and V3, hence putting nit here,
+  # even though it uses V2 objects
+
+  if not hasattr(apiObject, 'serial'):
+    raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
+                     % apiObject)
+  downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
+
+  parentDict = apiObject.parent.__dict__
+  downdict = parentDict[downlink]
+  oldSerial = apiObject.serial
+  serialDict = parentDict['_serialDict']
+
+  if newSerial == oldSerial:
+    return
+
+  elif newSerial in downdict:
+    raise ValueError("Cannot reset serial to %s - value already in use" % newSerial)
+
+  else:
+    maxSerial = serialDict[downlink]
+    apiObject.__dict__['serial'] = newSerial
+    downdict[newSerial] = apiObject
+    del downdict[oldSerial]
+    if newSerial > maxSerial:
+      serialDict[downlink] = newSerial
+    elif oldSerial == maxSerial:
+      serialDict[downlink] = max(downdict)
+
 
 class LocalFormatter(string.Formatter):
   """Overrides the string formatter to change the float formatting"""

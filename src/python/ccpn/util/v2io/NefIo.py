@@ -1920,7 +1920,6 @@ def fetchDataUrl(memopsRoot, fullPath):
   checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
   for dataUrl in checkUrls:
     if dataUrl is not None:
-      print ("%s-%s-%s" % (dataUrl.name, dataUrl.url, dataUrl))
       directoryPath = os.path.join(dataUrl.url.path, '')
       if fullPath.startswith(directoryPath):
         break

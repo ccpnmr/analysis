@@ -350,11 +350,8 @@ class PickPeak1DPopup(CcpnDialog):
     for sg in self.allSG_CheckBoxes:
       if sg.isChecked():
         spectrumGroup = self.project.getByPid(str(sg.text()))
-        spectra.append(spectrumGroup.spectra)
-    if len(spectra)>0:
-      return list(spectra[0])
-    else:
-      return spectra
+        spectra += spectrumGroup.spectra
+    return spectra
 
 
   def _getNoiseThreshold(self):

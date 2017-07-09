@@ -53,18 +53,18 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:04 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -202,6 +202,26 @@
   <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
   <span class="k">return</span></div>
 
+<div class="viewcode-block" id="showOkCancelWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showOkCancelWarning">[docs]</a><span class="k">def</span> <span class="nf">showOkCancelWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+  <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Ok</span> <span class="o">|</span> <span class="n">Cancel</span><span class="p">)</span>
+  <span class="n">dialog</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">Cancel</span><span class="p">)</span>
+
+  <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Ok</span></div>
+
+<div class="viewcode-block" id="showYesNoWarning"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showYesNoWarning">[docs]</a><span class="k">def</span> <span class="nf">showYesNoWarning</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+  <span class="n">dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">No</span><span class="p">)</span>
+  <span class="n">dialog</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">No</span><span class="p">)</span>
+
+  <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span> <span class="o">==</span> <span class="n">Yes</span></div>
+
 <div class="viewcode-block" id="showMulti"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMulti">[docs]</a><span class="k">def</span> <span class="nf">showMulti</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
   <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
@@ -221,7 +241,6 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">texts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>  </div>
 
-
 <div class="viewcode-block" id="showError"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showError">[docs]</a><span class="k">def</span> <span class="nf">showError</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   
   <span class="n">dialog</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="p">(</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">Critical</span><span class="p">,</span> <span class="n">iconPath</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
@@ -230,7 +249,6 @@
   <span class="n">dialog</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
   <span class="n">dialog</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
   <span class="k">return</span></div>
-
 
 <div class="viewcode-block" id="showMessage"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.MessageDialog.showMessage">[docs]</a><span class="k">def</span> <span class="nf">showMessage</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iconPath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   

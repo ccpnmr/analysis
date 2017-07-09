@@ -54,27 +54,27 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:14 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Luca Mureddu $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Luca Mureddu $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 <span class="c1">#====================================</span>
 
 
@@ -118,7 +118,8 @@
 <span class="n">transparentStyle</span> <span class="o">=</span> <span class="s2">&quot;background-color: transparent; border: 0px solid transparent&quot;</span>
 <span class="n">selectPipeLabel</span> <span class="o">=</span> <span class="s1">&#39;&lt; Select Pipe &gt;&#39;</span>
 <span class="n">preferredPipeLabel</span> <span class="o">=</span> <span class="s1">&#39;-- Preferred Pipes --&#39;</span>
-<span class="n">otherPipeLabel</span> <span class="o">=</span>     <span class="s1">&#39;-- Other Pipes --&#39;</span>
+<span class="n">applicationPipeLabel</span> <span class="o">=</span> <span class="s1">&#39;-- Application Pipes --&#39;</span>
+<span class="n">otherPipeLabel</span> <span class="o">=</span> <span class="s1">&#39;-- Other Pipes --&#39;</span>
 <span class="n">PipelineName</span> <span class="o">=</span> <span class="s1">&#39;NewPipeline&#39;</span>
 
 <div class="viewcode-block" id="PipelineWorker"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PipelineModule.PipelineWorker">[docs]</a><span class="k">class</span> <span class="nc">PipelineWorker</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
@@ -357,29 +358,29 @@
 
 
   <span class="k">def</span> <span class="nf">_setDataPipesPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Sets all the GuiPipes names on the Pulldown Pipe. Orderes by flag &#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldownData</span> <span class="o">=</span> <span class="p">[</span><span class="n">selectPipeLabel</span><span class="p">,</span> <span class="p">]</span>
     <span class="n">preferredGuiPipes</span> <span class="o">=</span> <span class="p">[</span><span class="n">preferredPipeLabel</span><span class="p">,</span> <span class="p">]</span>
+    <span class="n">applicationPipes</span> <span class="o">=</span> <span class="p">[</span><span class="n">applicationPipeLabel</span><span class="p">,]</span>
     <span class="n">otherGuiPipes</span> <span class="o">=</span> <span class="p">[</span><span class="n">otherPipeLabel</span><span class="p">,</span> <span class="p">]</span>
-
 
     <span class="k">for</span> <span class="n">guiPipe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiPipes</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">guiPipe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">guiPipe</span><span class="o">.</span><span class="n">preferredPipe</span><span class="p">:</span>
           <span class="n">preferredGuiPipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">guiPipe</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">pipeName</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">guiPipe</span><span class="o">.</span><span class="n">applicationSpecificPipe</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">guiPipe</span><span class="o">.</span><span class="n">preferredPipe</span><span class="p">:</span>
+          <span class="n">applicationPipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">guiPipe</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">pipeName</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="n">otherGuiPipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">guiPipe</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">pipeName</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldownData</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">preferredGuiPipes</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldownData</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">applicationPipes</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldownData</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">otherGuiPipes</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipePulldownData</span><span class="p">)</span>
-
-    <span class="n">disablePreferredPipeLabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">getItemIndex</span><span class="p">(</span><span class="n">preferredPipeLabel</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">disablePreferredPipeLabel</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-    <span class="n">disableOtherPipeLabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">getItemIndex</span><span class="p">(</span><span class="n">otherPipeLabel</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">disableOtherPipeLabel</span><span class="p">)</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-
-    <span class="c1"># self.pipePulldown.insertSeparator(countPreferredGuiPipes)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">disableLabelsOnPullDown</span><span class="p">([</span><span class="n">preferredPipeLabel</span><span class="p">,</span><span class="n">applicationPipeLabel</span><span class="p">,</span><span class="n">otherPipeLabel</span><span class="p">],</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pipePulldown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectPipe</span><span class="p">)</span>
+
 
   <span class="k">def</span> <span class="nf">_updatePipePulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiPipes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipes</span><span class="p">):</span>
@@ -623,14 +624,20 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_createSettingsGroupBox</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_createAllSettingWidgets</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidgets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_setSettingsParams</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_createSettingsGroupBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgetsLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrame</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_settingsScrollArea</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">320</span><span class="p">)</span>
+
 
   <span class="k">def</span> <span class="nf">_getInputDataHeaderLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>

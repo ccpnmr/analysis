@@ -61,24 +61,23 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:45 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:57 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -272,33 +271,6 @@
 <span class="sd">  Inspired by numpy.isclose()&quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">absTolerance</span> <span class="o">+</span> <span class="n">relTolerance</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span></div>
 
-<span class="c1"># # No longer used - Rasmus 20/2/2017</span>
-<span class="c1"># def flattenIfNumpy(data, shape=None):</span>
-<span class="c1">#   &quot;&quot;&quot;If data are Numpy, convert to flat array</span>
-<span class="c1">#   If shape is given, check that numpy fits shape, and flat sequence fits total number of elements&quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#   if hasattr(data, &#39;flat&#39;):</span>
-<span class="c1">#     # Numpy array</span>
-<span class="c1">#     if shape and data.shape != tuple(shape):</span>
-<span class="c1">#       raise ValueError(&quot;Shape of array data is %s, should be %s&quot; % (data.shape, shape))</span>
-<span class="c1">#     data = data.flat</span>
-<span class="c1">#</span>
-<span class="c1">#   elif shape:</span>
-<span class="c1">#       elementCount = 1</span>
-<span class="c1">#       for x in shape:</span>
-<span class="c1">#         elementCount *= x</span>
-<span class="c1">#       if len(data) != elementCount:</span>
-<span class="c1">#         raise ValueError(&quot;Number of elements in data sequence is %s, should be %s&quot;</span>
-<span class="c1">#                          % (len(data), elementCount))</span>
-<span class="c1">#   #</span>
-<span class="c1">#   return data</span>
-
-<span class="c1"># def stringToIdentifier(value):</span>
-<span class="c1">#   &quot;&quot;&quot;Convert string to identifier, replacing non-alphanumeric values by underscore&quot;&quot;&quot;</span>
-<span class="c1">#   if value.isidentifier():</span>
-<span class="c1">#     return value</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     return &#39;&#39;.join(x if x.isalnum() else &#39;_&#39; for x in value)</span>
 
 <div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">():</span>
   <span class="sd">&quot;&quot;&quot;Get iso-formtted timestamp&quot;&quot;&quot;</span>
@@ -373,16 +345,6 @@
         <span class="k">break</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="bp">None</span></div>
-
-  <span class="c1"># for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):</span>
-  <span class="c1">#   # Reversed looping guarantees that the longer of two matches will be chosen</span>
-  <span class="c1">#   if name.startswith(tag):</span>
-  <span class="c1">#     result = tag</span>
-  <span class="c1">#     break</span>
-  <span class="c1"># else:</span>
-  <span class="c1">#   result = None</span>
-  <span class="c1"># #</span>
-  <span class="c1"># return result</span>
 
 
 <div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -620,6 +582,43 @@
 
 <div class="viewcode-block" id="contains_whitespace"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.contains_whitespace">[docs]</a><span class="k">def</span> <span class="nf">contains_whitespace</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">whitespace</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="resetSerial"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.resetSerial">[docs]</a><span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;ADVANCED Reset serial of object to newSerial, resetting parent link</span>
+<span class="sd">  and the nextSerial of the parent.</span>
+
+<span class="sd">  Raises ValueError for objects that do not have a serial</span>
+<span class="sd">  (or, more precisely, where the _wrappedData does not have a serial).&quot;&quot;&quot;</span>
+
+  <span class="c1"># NB, needed both from V2 NefIo and V3, hence putting nit here,</span>
+  <span class="c1"># even though it uses V2 objects</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial, </span><span class="si">%s</span><span class="s2"> does not have a &#39;serial&#39; attribute&quot;</span>
+                     <span class="o">%</span> <span class="n">apiObject</span><span class="p">)</span>
+  <span class="n">downlink</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="n">parentDict</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span>
+  <span class="n">downdict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+  <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">serial</span>
+  <span class="n">serialDict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">newSerial</span> <span class="o">==</span> <span class="n">oldSerial</span><span class="p">:</span>
+    <span class="k">return</span>
+
+  <span class="k">elif</span> <span class="n">newSerial</span> <span class="ow">in</span> <span class="n">downdict</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial to </span><span class="si">%s</span><span class="s2"> - value already in use&quot;</span> <span class="o">%</span> <span class="n">newSerial</span><span class="p">)</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">maxSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+    <span class="n">apiObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
+    <span class="n">downdict</span><span class="p">[</span><span class="n">newSerial</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiObject</span>
+    <span class="k">del</span> <span class="n">downdict</span><span class="p">[</span><span class="n">oldSerial</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">newSerial</span> <span class="o">&gt;</span> <span class="n">maxSerial</span><span class="p">:</span>
+      <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
+    <span class="k">elif</span> <span class="n">oldSerial</span> <span class="o">==</span> <span class="n">maxSerial</span><span class="p">:</span>
+      <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">downdict</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="LocalFormatter"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter">[docs]</a><span class="k">class</span> <span class="nc">LocalFormatter</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Overrides the string formatter to change the float formatting&quot;&quot;&quot;</span>

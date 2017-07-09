@@ -1606,6 +1606,14 @@ and e.g. nmrResidue <a class="reference external" href="mailto:'&#37;&#52;&#48;1
 <p>NB Will rename nmrResidues one by one, and stop on error.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.NmrChain.NmrChain.reverse">
+<code class="descname">reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse order of NmrResidues within NmrChain</p>
+<p>Illegal for assigned NmrChains, and only relevant for connected NmrChains.
+Serves mainly as building block to make disconnections easier to undo</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.NmrChain.NmrChain.serial">
 <code class="descname">serial</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.serial" title="Permalink to this definition">¶</a></dt>
@@ -2540,23 +2548,24 @@ and return the result</p>
 <dt id="ccpn.core.Project.Project.exportNef">
 <code class="descname">exportNef</code><span class="sig-paren">(</span><em>path: str = None</em>, <em>overwriteExisting: bool = False</em>, <em>skipPrefixes: Sequence[T_co] = ()</em>, <em>expandSelection: bool = True</em>, <em>pidList: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.exportNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.exportNef" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export selected contents of the project to a Nef file.</p>
-<p>Flags is a dictionary of the form:</p>
 <blockquote>
-<div><p>{ &#8216;skipPrefixes&#8217;: [ &#8216;ccpn&#8217;, ..., &lt;str&gt; ], &#8216;expandSelection&#8217;: &lt;bool&gt; }</p>
-<p>Include &#8216;ccpn&#8217; in the flags will exclude ccpn specific items from the file
+<div><p>skipPrefixes: ( &#8216;ccpn&#8217;, ..., &lt;str&gt; )
+expandSelection: &lt;bool&gt; }</p>
+<p>Include &#8216;ccpn&#8217; in the skipPrefixes list will exclude ccpn specific items from the file
 expandSelection = True  will include all data from the project, this may not be data that</p>
 <blockquote>
 <div>is not defined in the Nef standard.</div></blockquote>
 </div></blockquote>
 <p>PidList is a list of &lt;str&gt;, e.g. &#8216;NC:&#64;-&#8216;, obtained from the objects to be included.
-The Nef file may also contain further dependent items necessary associated with the pidList.</p>
+The Nef file may also contain further dependent items associated with the pidList.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>path</strong> &#8211; output path and filename</li>
-<li><strong>flags</strong> &#8211; output arguments</li>
+<li><strong>skipPrefixes</strong> &#8211; items to skip</li>
+<li><strong>expandSelection</strong> &#8211; expand the selection</li>
 <li><strong>pidList</strong> &#8211; a list of pids</li>
 </ul>
 </td>

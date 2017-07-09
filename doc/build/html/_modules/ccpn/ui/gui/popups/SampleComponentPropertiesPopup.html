@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -284,10 +284,10 @@
   <span class="k">def</span> <span class="nf">_getCallBacksDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">{</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_typeComponent</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typePulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_concentrationChanged</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationLineEdit</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>      <span class="c1"># ejb - self._getConcentrationValue(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_concentrationChanged</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getConcentrationValue</span><span class="p">(),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_concentrationUnitChanged</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationUnitPulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_commentChanged</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-            <span class="p">}</span>
+    <span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">_initialOptionsCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectInitialRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -392,12 +392,12 @@
 
   <span class="k">def</span> <span class="nf">_repopulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponent</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">attrib</span><span class="p">,</span> <span class="n">attribType</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setCallBacksDict</span><span class="p">():</span>
-        <span class="k">try</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attrib</span><span class="p">,</span> <span class="n">attribType</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setCallBacksDict</span><span class="p">():</span>
           <span class="k">if</span> <span class="n">attrib</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>            <span class="c1"># trap the setting of the widgets</span>
             <span class="n">widget</span><span class="p">(</span><span class="n">attribType</span><span class="p">(</span><span class="n">attrib</span><span class="p">))</span>
-        <span class="k">finally</span><span class="p">:</span>
-          <span class="k">pass</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
 
   <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -413,15 +413,29 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSampleComponentToCreate</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_createNewComponent</span><span class="p">()</span>
-      <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                    <span class="n">labelling</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()),</span>
+                    <span class="n">role</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typePulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                    <span class="n">concentration</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                    <span class="n">concentrationUnit</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concentrationUnitPulldownList</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                    <span class="n">comment</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commentLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="nb">property</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getCallBacksDict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+          <span class="c1"># if value or type(value) is str and value is not &#39;None&#39;:</span>
+          <span class="nb">property</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
       <span class="bp">self</span><span class="o">.</span><span class="n">nameComponentLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">labellingPulldownList</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
       <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
-      <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+      <span class="k">if</span> <span class="s1">&#39;pre-existing object&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">):</span>
+        <span class="c1">#TODO:ED this catches api trying to duplicate object</span>
+        <span class="n">applyAccept</span><span class="o">=</span><span class="bp">True</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">showWarning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">windowTitle</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
 

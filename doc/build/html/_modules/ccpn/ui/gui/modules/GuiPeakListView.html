@@ -54,24 +54,23 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:41 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Wayne Boucher $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Wayne Boucher $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -304,6 +303,8 @@
 
     <span class="k">for</span> <span class="n">peakItem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakItems</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">peakItem</span><span class="p">,</span> <span class="n">PeakNd</span><span class="p">):</span>
+
+        <span class="n">peakItem</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>     <span class="c1"># ejb - force a repaint of the peakItem</span>
         <span class="n">peakItem</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">setupPeakAnnotationItem</span><span class="p">(</span><span class="n">peakItem</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Peak1d"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiPeakListView.Peak1d">[docs]</a><span class="k">class</span> <span class="nc">Peak1d</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
@@ -474,13 +475,12 @@
 
 
     <span class="n">peak</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peak</span>
-    <span class="n">spectrumId</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span>
 
     <span class="c1"># NBNB TBD FIXME</span>
 
     <span class="n">text</span> <span class="o">=</span> <span class="n">_getPeakAnnotation</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
     <span class="c1"># text = text + &quot;*&quot;</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">spectrumId</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">id</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Peak1dAnnotation.updatePos"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiPeakListView.Peak1dAnnotation.updatePos">[docs]</a>  <span class="k">def</span> <span class="nf">updatePos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -815,7 +815,7 @@
         <span class="c1">###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??</span>
         <span class="c1">###yPpm = peak.position[yDim]</span>
         <span class="c1">###self.setPos(xPpm, yPpm)</span>
-        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">symbolColour</span>
+        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span>
         <span class="k">if</span> <span class="n">widget</span><span class="p">:</span>
           <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
           <span class="c1"># if self.colourScheme == &#39;light&#39;:</span>
@@ -846,7 +846,7 @@
         <span class="c1">#   painter.drawRect(-r,-r,w,w)</span>
 
       <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isInFlankingPlane</span><span class="p">:</span>
-        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">symbolColour</span>
+        <span class="n">colour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span>
         <span class="n">pen</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
         <span class="n">pen</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DotLine</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
@@ -885,7 +885,7 @@
     <span class="c1">###self.setColor()</span>
     <span class="c1"># self.analysisLayout = parent.glWidget.analysisLayout</span>
     <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">()</span>
-    <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
     <span class="c1"># self.setCacheMode(self.DeviceCoordinateCache)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setFlag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ItemIgnoresTransformations</span><span class="p">)</span><span class="c1">#+self.ItemIsMovable+self.ItemIsSelectable)</span>
@@ -895,7 +895,7 @@
     <span class="c1"># if self.isSelected():</span>
     <span class="c1">#   print(self)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">textColour</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span>
     <span class="c1"># if self.colourScheme == &#39;light&#39;:</span>
     <span class="c1">#   colour = QtGui.QColor(&#39;#080000&#39;)</span>
     <span class="c1"># else:</span>
@@ -912,7 +912,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">peakItem</span> <span class="o">=</span> <span class="n">peakItem</span> <span class="c1"># When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setParentItem</span><span class="p">(</span><span class="n">peakItem</span><span class="p">)</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">textColour</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">peakItem</span><span class="o">.</span><span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">_getPeakAnnotation</span><span class="p">(</span><span class="n">peakItem</span><span class="o">.</span><span class="n">peak</span><span class="p">)</span>
 

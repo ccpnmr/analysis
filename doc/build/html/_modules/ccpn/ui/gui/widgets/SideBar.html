@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-05-24 16:28:35 +0100 (Wed, May 24, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -408,7 +408,26 @@
           <span class="n">spectrumGroups</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">spectrumGroups</span>
           <span class="k">if</span> <span class="n">spectrumGroups</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spectrumGroups</span><span class="p">:</span>
-              <span class="k">for</span> <span class="n">sgitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">pid</span><span class="p">)):</span>
+
+              <span class="c1"># # ejb - search for the spectrumGroup, if not there then create it</span>
+              <span class="c1"># sglist = self._findItems(str(sg.pid))</span>
+              <span class="c1"># if not sglist:</span>
+              <span class="c1">#   # have not found the group</span>
+              <span class="c1">#   newTempSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)</span>
+              <span class="c1">#   newTempSpectrumGroup.setFlags(</span>
+              <span class="c1">#     newTempSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)</span>
+              <span class="c1">#   newTempSpectrumGroup.setText(0, str(sg.pid))</span>
+              <span class="c1">#</span>
+              <span class="c1">#   # sglist = self._findItems(&#39;SpectrumGroups&#39;)</span>
+              <span class="c1">#   # for sgitem in self._findItems(&#39;SpectrumGroups&#39;):</span>
+              <span class="c1">#   #   newSpectrumGroup = QtGui.QTreeWidgetItem(sgitem)</span>
+              <span class="c1">#   #   newSpectrumGroup.setFlags(</span>
+              <span class="c1">#   #     newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)</span>
+              <span class="c1">#   #   newSpectrumGroup.setText(0, str(sg.pid))</span>
+              <span class="c1">#</span>
+              <span class="c1"># # now carry on and insert the new groups</span>
+
+              <span class="k">for</span> <span class="n">sgitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">pid</span><span class="p">)):</span>   <span class="c1"># add &#39;&lt;new spectrumGroup&gt;&#39;</span>
                 <span class="n">newItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addItem</span><span class="p">(</span><span class="n">sgitem</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
                 <span class="n">newObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
                 <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
@@ -531,9 +550,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fills the sidebar with the relevant data from the project.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">setProjectName</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">className</span><span class="p">,</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1">#TODO: check that reversing the order of Spectrum and SpectrumGroup in the list works</span>
+    <span class="n">listOrder</span> <span class="o">=</span> <span class="p">[</span><span class="n">ky</span> <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+    <span class="n">tempKy</span> <span class="o">=</span> <span class="n">listOrder</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">listOrder</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">listOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">listOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tempKy</span>
+    <span class="n">new_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">listOrder</span><span class="p">:</span>
+      <span class="n">new_dict</span><span class="p">[</span><span class="n">ky</span><span class="p">]</span> <span class="o">=</span> <span class="n">classesInSideBar</span><span class="p">[</span><span class="n">ky</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">className</span><span class="p">,</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>       <span class="c1"># ejb - classesInSideBar.items()</span>
       <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
       <span class="c1"># dd = pid2Obj.get(className)</span>

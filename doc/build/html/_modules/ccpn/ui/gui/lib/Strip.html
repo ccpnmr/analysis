@@ -207,7 +207,9 @@
 <span class="sd">  return list of strips</span>
 <span class="sd">  </span>
 <span class="sd">  :param nmrResidue: </span>
-<span class="sd">  :param display: </span>
+<span class="sd">  :param display:</span>
+<span class="sd">  :param stripIndex: location of strip in display (assumed 0 if connected and showSequentialResidues)</span>
+<span class="sd">  :param widths: ignored (for now)</span>
 <span class="sd">  :param showSequentialResidues: boolean selecting if sequential strips are displayed</span>
 <span class="sd">  :param markPositions: boolean selecting if marks are displayed</span>
 <span class="sd">  :return list of strips </span>
@@ -220,43 +222,44 @@
   <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
   <span class="n">strips</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">if</span> <span class="n">showSequentialResidues</span> <span class="ow">and</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-      <span class="c1"># showing sequential strips</span>
-      <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-          <span class="n">display</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
-      <span class="n">stripIndex</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">stripIndex</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">stripIndex</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># for now enforce this, o/w below woudl be more complicated</span>
 
-      <span class="c1"># display the previousNmrResidue if not None</span>
-      <span class="n">previousNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
-      <span class="k">if</span> <span class="n">previousNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">previousNmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
-                                  <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">previousNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
+    <span class="n">nextNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span>
+    <span class="n">minNumStrips</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">previousNmrResidue</span><span class="p">:</span>
+      <span class="n">minNumStrips</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">nextNmrResidue</span><span class="p">:</span>
+      <span class="n">minNumStrips</span> <span class="o">+=</span> <span class="mi">1</span>
 
+    <span class="c1"># showing sequential strips</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">minNumStrips</span><span class="p">:</span>
+        <span class="n">display</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
+
+    <span class="c1"># display the previousNmrResidue if not None</span>
+    <span class="k">if</span> <span class="n">previousNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">previousNmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
       <span class="n">stripIndex</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
-                                  <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
-      <span class="n">stripIndex</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="c1"># display the nextNmrResidue if not None</span>
-      <span class="n">nextNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span>
-      <span class="k">if</span> <span class="n">nextNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nextNmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
-                                  <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-
-  <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># not showing sequential strips</span>
+    <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># this better be true or would hit Exception long before you get here</span>
       <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
                                 <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
       <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
+      <span class="n">stripIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># display the nextNmrResidue if not None</span>
+    <span class="k">if</span> <span class="n">nextNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nextNmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># not showing sequential strips</span>
+    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                              <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
 
   <span class="k">return</span> <span class="n">strips</span></div>
 

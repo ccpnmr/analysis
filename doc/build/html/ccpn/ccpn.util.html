@@ -320,6 +320,15 @@ if this is longer than the values.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Common.resetSerial">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">resetSerial</code><span class="sig-paren">(</span><em>apiObject</em>, <em>newSerial</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#resetSerial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.resetSerial" title="Permalink to this definition">¶</a></dt>
+<dd><p>ADVANCED Reset serial of object to newSerial, resetting parent link
+and the nextSerial of the parent.</p>
+<p>Raises ValueError for objects that do not have a serial
+(or, more precisely, where the _wrappedData does not have a serial).</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.splitIntFromChars">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">splitIntFromChars</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#splitIntFromChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.splitIntFromChars" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string with a leading integer optionally followed by characters

@@ -58,16 +58,16 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:38 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:43 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -83,7 +83,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">ListCompoundWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownListsForObjects</span> <span class="kn">import</span> <span class="n">ChemicalShiftListPulldown</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ColumnViewSettings</span><span class="p">,</span>  <span class="n">ObjectTableFilter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spacer</span> <span class="kn">import</span> <span class="n">Spacer</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
@@ -98,7 +98,6 @@
 <span class="sd">  This class implements the module by wrapping a NmrResidueTable instance</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">includeColumnsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
   <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
@@ -129,7 +128,7 @@
                                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                              <span class="n">vPolicy</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span>
                                              <span class="c1">#minimumWidths=(colwidth, 0, 0),</span>
-                                             <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="n">colwidth</span><span class="p">,</span> <span class="n">colwidth</span><span class="p">),</span>
+                                             <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">colwidth</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                                              <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                              <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Display(s):&#39;</span><span class="p">,</span>
                                              <span class="n">tipText</span> <span class="o">=</span> <span class="s1">&#39;SpectrumDisplay modules to respond to double-click&#39;</span><span class="p">,</span>
@@ -172,10 +171,6 @@
                                                <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                                                <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
     <span class="c1"># settingsWidget</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_CSTwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_CSTwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">chemicalShiftList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectChemicalShiftList</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="p">)</span>
@@ -200,20 +195,6 @@
         <span class="n">displays</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">getByGid</span><span class="p">(</span><span class="n">gid</span><span class="p">)</span> <span class="k">for</span> <span class="n">gid</span> <span class="ow">in</span> <span class="n">gids</span> <span class="k">if</span> <span class="n">gid</span> <span class="o">!=</span> <span class="n">ALL</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">displays</span>
 
-  <span class="k">def</span> <span class="nf">_getDisplayColumnWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: used to get displayColumnWidget</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
-
-  <span class="k">def</span> <span class="nf">_getSearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: used to get searchWidget</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span>
 
   <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -273,6 +254,7 @@
                                      <span class="c1"># first NmrChain in project (if present)</span>
                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
                                      <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                     <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContentsOnFirstShow</span><span class="p">,</span>
                                      <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionPulldownCallback</span>
                                      <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_widget</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
@@ -347,7 +329,6 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateSilence</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setColumns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CScolumns</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsWidgets</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ChemicalShiftTable.setUpdateSilence"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable.setUpdateSilence">[docs]</a>  <span class="k">def</span> <span class="nf">setUpdateSilence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">silence</span><span class="p">):</span>
@@ -459,17 +440,9 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cleanup the notifiers when the window is closed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clearNotifiers</span><span class="p">()</span></div>
 
-  <span class="k">def</span> <span class="nf">_updateSettingsWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: Update settings Widgets according with the new displayed table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getDisplayColumnWidget</span><span class="p">()</span>
-      <span class="n">displayColumnWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getSearchWidget</span><span class="p">()</span>
-    <span class="n">searchWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
 
 <span class="c1"># class ChemicalShiftTable(CcpnModule):</span>
 <span class="c1">#   def __init__(self, parent=None, chemicalShiftLists=None, name=&#39;Chemical Shift Table&#39;, **kw):</span>

@@ -25,14 +25,6 @@ ccpnmodel.ccpncore.lib.Io.Fasta module
     :undoc-members:
     :show-inheritance:
 
-ccpnmodel.ccpncore.lib.Io.FastaIo module
-----------------------------------------
-
-.. automodule:: ccpnmodel.ccpncore.lib.Io.FastaIo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpnmodel.ccpncore.lib.Io.Formats module
 ----------------------------------------
 

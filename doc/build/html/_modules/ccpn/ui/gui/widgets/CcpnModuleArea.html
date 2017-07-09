@@ -52,16 +52,16 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:07 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:51 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -76,9 +76,11 @@
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.Dock</span> <span class="kn">import</span> <span class="n">Dock</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.DockArea</span> <span class="kn">import</span> <span class="n">DockArea</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.dockarea.Container</span> <span class="kn">import</span> <span class="n">Container</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 <span class="n">ModuleArea</span> <span class="o">=</span> <span class="n">DockArea</span>
 <span class="n">Module</span> <span class="o">=</span> <span class="n">Dock</span>
+
 
 <div class="viewcode-block" id="CcpnModuleArea"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.CcpnModuleArea.CcpnModuleArea">[docs]</a><span class="k">class</span> <span class="nc">CcpnModuleArea</span><span class="p">(</span><span class="n">ModuleArea</span><span class="p">):</span>
 
@@ -135,6 +137,18 @@
     <span class="sd">&quot;&quot;&quot;With these settings the user can close all the modules from the label &#39;close module&#39; or pop up and</span>
 <span class="sd">     when re-add a new module it makes sure there is a container available.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># test that only one instance of the module is opened</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">):</span>
+      <span class="n">_alreadyOpened</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">_alreadyOpened</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_onlySingleInstance&#39;</span><span class="p">):</span>
+          <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Only one instance of </span><span class="si">%s</span><span class="s1"> allowed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+          <span class="k">return</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_alreadyOpened&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="s1">&#39;_currentModule&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>    <span class="c1"># remember the module</span>
+
     <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;No module given&#39;</span><span class="p">)</span>
 

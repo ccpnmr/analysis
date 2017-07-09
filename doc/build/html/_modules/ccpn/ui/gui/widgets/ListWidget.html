@@ -54,15 +54,21 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
-<span class="c1"># Last code modification:</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
@@ -94,7 +100,9 @@
                <span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">True</span>
                <span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span>
                <span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span>
-               <span class="p">,</span> <span class="n">sortOnDrop</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+               <span class="p">,</span> <span class="n">sortOnDrop</span><span class="o">=</span><span class="bp">False</span>
+               <span class="p">,</span> <span class="n">copyDrop</span><span class="o">=</span><span class="bp">True</span>
+               <span class="p">,</span>  <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
 
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
@@ -109,6 +117,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span> <span class="o">=</span> <span class="n">multiSelect</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="o">=</span> <span class="n">sortOnDrop</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">copyDrop</span> <span class="o">=</span> <span class="n">copyDrop</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">rightMouseCallback</span> <span class="o">=</span> <span class="n">rightMouseCallback</span>
     <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -288,8 +297,11 @@
       <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>  <span class="c1"># otherwise duplicates</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>                         <span class="c1"># allow event drops from anywhere</span>
-          <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropSource</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># allow event drops from anywhere</span>
+          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copyDrop</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">setDropAction</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="n">items</span><span class="p">)</span>
           <span class="nb">super</span><span class="p">(</span><span class="n">ListWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
           <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sortOnDrop</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
@@ -344,6 +356,8 @@
                <span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">True</span>
                <span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span>
                <span class="p">,</span> <span class="n">acceptDrops</span><span class="o">=</span><span class="bp">False</span>
+               <span class="p">,</span> <span class="n">showMoveArrows</span><span class="o">=</span><span class="bp">True</span>
+               <span class="p">,</span> <span class="n">showMoveText</span><span class="o">=</span><span class="bp">False</span>
                <span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Copy Items&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialise the pair of listWidgets</span>
@@ -377,14 +391,19 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">leftIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/yellow-arrow-left&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">rightIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/yellow-arrow-right&#39;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;move left&#39;</span><span class="p">,</span> <span class="s1">&#39;move right&#39;</span><span class="p">]</span>
-                             <span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">leftIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightIcon</span><span class="p">]</span>
-                             <span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_moveLeft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moveRight</span><span class="p">]</span>
-                             <span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span>
-                             <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
-    <span class="n">transparentStyle</span> <span class="o">=</span> <span class="s2">&quot;background-color: transparent; border: 0px solid transparent&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">transparentStyle</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">showMoveArrows</span><span class="p">:</span>
+      <span class="n">moveText</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">showMoveText</span><span class="p">:</span>
+        <span class="n">moveText</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;move left&#39;</span><span class="p">,</span> <span class="s1">&#39;move right&#39;</span><span class="p">]</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">moveText</span>
+                               <span class="p">,</span> <span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">leftIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightIcon</span><span class="p">]</span>
+                               <span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_moveLeft</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moveRight</span><span class="p">]</span>
+                               <span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span>
+                               <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">)</span>
+      <span class="n">transparentStyle</span> <span class="o">=</span> <span class="s2">&quot;background-color: transparent; border: 0px solid transparent&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">transparentStyle</span><span class="p">)</span>
 
     <span class="c1"># self.button = Button(self, text=&#39;&#39;</span>
     <span class="c1">#                          , icon=self.rightIcon</span>
@@ -395,17 +414,17 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">spacer1</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
                          <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
                          <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer2</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer2</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
                          <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
                          <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">spacer3</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spacer3</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
                          <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
                          <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spacer4</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span>
                          <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
                          <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">2</span><span class="p">]):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">cs</span><span class="p">)</span>
 
     <span class="c1"># self.showBorder=True</span>

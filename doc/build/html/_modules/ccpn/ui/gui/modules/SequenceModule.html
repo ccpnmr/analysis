@@ -59,24 +59,23 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:04 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -106,6 +105,10 @@
   <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
   <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+
+  <span class="n">_alreadyOpened</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">_onlySingleInstance</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">_currentModule</span> <span class="o">=</span> <span class="bp">None</span>
 
   <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SequenceModule&#39;</span>
 
@@ -195,7 +198,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="o">=</span> <span class="n">chain</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span>
-    <span class="c1">#print(&#39;&gt;&gt;&#39;, self.colourScheme)</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;#bec4f3&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
@@ -221,6 +224,39 @@
         <span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">newResidue</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">residueDict</span><span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">newResidue</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<span class="c1"># WB: TODO: this used to be in some util library but the</span>
+<span class="c1"># way drag and drop is done now has changed but</span>
+<span class="c1"># until someone figures out how to do it the new</span>
+<span class="c1"># way then we are stuck with the below</span>
+<span class="c1"># (looks like only first part of if below is needed)</span>
+<span class="k">def</span> <span class="nf">_interpretEvent</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Interpret drop event and return (type, data)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="kn">import</span> <span class="nn">json</span>
+  <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">ccpnmrJsonData</span>
+
+  <span class="n">mimeData</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">mimeData</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="n">ccpnmrJsonData</span><span class="p">):</span>
+    <span class="n">jsonData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">mimeData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">pids</span> <span class="o">=</span> <span class="n">jsonData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pids&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># internal data transfer - series of pids</span>
+      <span class="k">return</span> <span class="p">(</span><span class="n">pids</span><span class="p">,</span> <span class="s1">&#39;pids&#39;</span><span class="p">)</span>
+
+      <span class="c1"># NBNB TBD add here slots for between-applications transfer, and other types as needed</span>
+
+  <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
+    <span class="n">filePaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">urls</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">filePaths</span><span class="p">,</span> <span class="s1">&#39;urls&#39;</span><span class="p">)</span>
+
+  <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasText</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(),</span> <span class="s1">&#39;text&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GuiChainResidue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue">[docs]</a><span class="k">class</span> <span class="nc">GuiChainResidue</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
@@ -258,6 +294,9 @@
     <span class="n">position</span> <span class="o">=</span> <span class="n">labelPosition</span><span class="o">+</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">index</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">yPosition</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">residueNumber</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span>
+    <span class="c1"># WB: TODO: below is terrible code (the scene functions are trampled over and over)</span>
+    <span class="c1"># but somehow this seems to be the way it has to be done</span>
+    <span class="c1"># and this then means there is that awful itemAt(position) check in the drag functions</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">dragLeaveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragLeaveEvent</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">dragEnterEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragEnterEvent</span>
     <span class="n">scene</span><span class="o">.</span><span class="n">dropEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropEvent</span>
@@ -290,7 +329,14 @@
 <span class="sd">    of GuiChainResidues during drag-and-drop.</span>
 <span class="sd">    Required for processNmrChains to work properly.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+    <span class="c1"># WB: TODO: this is awful, having to check what item is at the position</span>
+    <span class="c1"># the trampling of the scene drag functions above means that self is always</span>
+    <span class="c1"># the last GuiChainResidue, and a much better way would be if self was the</span>
+    <span class="c1"># GuiChainResidue of interest, which would then eliminate this itemAt check</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">()</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="mi">25</span><span class="p">)</span> <span class="c1"># WB: TODO: -25 is a hack to take account of scrollbar height</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="c1">###item = self.scene.itemAt(event.scenePos())</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">GuiChainResidue</span><span class="p">):</span>
       <span class="n">item</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour3</span><span class="p">))</span>
     <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
@@ -306,12 +352,24 @@
       <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
       <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#666e98&#39;</span>
-    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">()</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="mi">25</span><span class="p">)</span> <span class="c1"># WB: TODO: -25 is a hack to take account of scrollbar height</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="c1">###item = self.scene.itemAt(event.scenePos())</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">GuiChainResidue</span><span class="p">):</span>
       <span class="n">item</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
     <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GuiChainResidue.processNmrChains"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.processNmrChains">[docs]</a>  <span class="k">def</span> <span class="nf">processNmrChains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+  <span class="c1"># WB: TODO: a version of this used to be in DropBase but that has</span>
+  <span class="c1"># been changed but it is not clear (to me) how to use this new</span>
+  <span class="c1"># system so stick with the old for now</span>
+<div class="viewcode-block" id="GuiChainResidue.dropEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.dropEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+    <span class="n">data</span><span class="p">,</span> <span class="n">dataType</span> <span class="o">=</span> <span class="n">_interpretEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;pids&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_processNmrChains</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_processNmrChains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and</span>
 <span class="sd">    all succeeding residues according to the length of the list.</span>
@@ -335,7 +393,7 @@
       <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residues</span><span class="p">):</span>
         <span class="n">guiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">residueDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)</span>
         <span class="n">guiResidue</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&quot;color: </span><span class="si">%s</span><span class="s1">; text-align: center;&quot;&gt;&lt;strong&gt;&#39;</span> <span class="o">%</span> <span class="n">colour</span> <span class="o">+</span>
-                             <span class="n">res</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/strong&gt;&lt;/div&gt;&#39;</span><span class="p">)</span></div></div>
+                             <span class="n">res</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/strong&gt;&lt;/div&gt;&#39;</span><span class="p">)</span></div>
     <span class="c1">#   if self._appBase is not None:</span>
     <span class="c1">#     appBase = self._appBase</span>
     <span class="c1">#   else:</span>

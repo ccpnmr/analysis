@@ -54,19 +54,18 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:22 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -244,7 +243,7 @@
 
   <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SequenceGraph&#39;</span>
 
-  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
   <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
@@ -300,6 +299,13 @@
                                                       <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Show peak assignments on display coloured by positiveContourColour&#39;</span><span class="p">,</span>
                                                       <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateShownAssignments</span><span class="p">,</span>
                                                       <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResiduesCheckBox</span> <span class="o">=</span> <span class="n">CheckBoxCompoundWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span>
+                                                      <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Show all NmrResidues:&#39;</span><span class="p">,</span>
+                                                      <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                                      <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Show all the NmrResidues in the NmrChain&#39;</span><span class="p">,</span>
+                                                      <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateShownAssignments</span><span class="p">,</span>
+                                                      <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">editingToolbar</span> <span class="o">=</span> <span class="n">ToolBar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">iconSizes</span><span class="o">=</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span><span class="mi">24</span><span class="p">))</span>
 
@@ -426,16 +432,24 @@
 <span class="sd">        elif self.current.nmrResidue is not None and self.current.nmrResidue in nmrChain.nmrResidues:</span>
 <span class="sd">          self.addResidue(self.current.nmrResidue, &#39;+1&#39;)</span>
 <span class="sd">&quot;&quot;&quot;</span>
-        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
-        <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-          <span class="k">while</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span><span class="p">:</span> <span class="c1"># go to start of connected stretch</span>
-            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
-        <span class="k">elif</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span> <span class="ow">or</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">chain</span><span class="p">:</span> <span class="c1"># either NC:# or NC:A type nmrChains but not NC:@</span>
-          <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">connectingLinesNeeded</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResiduesCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+          <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;+1&#39;</span><span class="p">)</span>
+              <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span><span class="p">:</span>
+                <span class="n">connectingLinesNeeded</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
+          <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span><span class="p">:</span> <span class="c1"># go to start of connected stretch</span>
+              <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
+          <span class="k">elif</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span> <span class="ow">or</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">chain</span><span class="p">:</span> <span class="c1"># either NC:# or NC:A type nmrChains but not NC:@</span>
+            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">while</span> <span class="n">nmrResidue</span><span class="p">:</span>  <span class="c1"># add all of connected stretch</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;+1&#39;</span><span class="p">)</span>
-          <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span>
+          <span class="k">while</span> <span class="n">nmrResidue</span><span class="p">:</span>  <span class="c1"># add all of connected stretch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="s1">&#39;+1&#39;</span><span class="p">)</span>
+            <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictedStretch</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">predictSequencePosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictedStretch</span><span class="p">)</span>
@@ -444,7 +458,8 @@
       <span class="c1">###  self._showBackboneAssignments(nmrChain)</span>
 
       <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_addConnectingLine</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lineColour</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResiduesCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">or</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">connectingLinesNeeded</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_addConnectingLine</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="p">[</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lineColour</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">assignmentsCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_getAssignmentsFromSpectra</span><span class="p">()</span>

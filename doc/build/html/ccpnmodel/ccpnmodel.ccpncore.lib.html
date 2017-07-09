@@ -66,7 +66,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#ccpnmodel-ccpncore-lib-io-api-module">ccpnmodel.ccpncore.lib.Io.Api module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#module-ccpnmodel.ccpncore.lib.Io.Fasta">ccpnmodel.ccpncore.lib.Io.Fasta module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#module-ccpnmodel.ccpncore.lib.Io.FastaIo">ccpnmodel.ccpncore.lib.Io.FastaIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#module-ccpnmodel.ccpncore.lib.Io.Formats">ccpnmodel.ccpncore.lib.Io.Formats module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#ccpnmodel-ccpncore-lib-io-pdb-module">ccpnmodel.ccpncore.lib.Io.Pdb module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpnmodel.ccpncore.lib.Io.html#module-ccpnmodel.ccpncore.lib.Io.PyMMLibPDB">ccpnmodel.ccpncore.lib.Io.PyMMLibPDB module</a></li>
@@ -231,20 +230,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</p>
 <li>CCPN website (<a class="reference external" href="http://www.ccpn.ac.uk">http://www.ccpn.ac.uk</a>)</li>
 <li>contact Rasmus Fogh (<a class="reference external" href="mailto:ccpn&#37;&#52;&#48;bioc&#46;cam&#46;ac&#46;uk">ccpn<span>&#64;</span>bioc<span>&#46;</span>cam<span>&#46;</span>ac<span>&#46;</span>uk</a>)</li>
 </ul>
-<blockquote>
-<div>&#8220;Simon P Skinner &amp; Geerten W Vuister&#8221;)</div></blockquote>
 <dl class="docutils">
-<dt>__licence__ = (&#8220;CCPN licence. See <a class="reference external" href="http://www.ccpn.ac.uk/v3-software/downloads/license">http://www.ccpn.ac.uk/v3-software/downloads/license</a>&#8220;</dt>
+<dt>__licence__ = (&#8220;CCPN licence. See <a class="reference external" href="http://www.ccpn.ac.uk/v3-software/downloads/license">http://www.ccpn.ac.uk/v3-software/downloads/license</a>&#8221;,</dt>
 <dd>&#8220;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&#8221;)</dd>
-<dt>__reference__ = (&#8220;For publications, please use reference from <a class="reference external" href="http://www.ccpn.ac.uk/v3-software/downloads/license">http://www.ccpn.ac.uk/v3-software/downloads/license</a>&#8220;</dt>
+<dt>__reference__ = (&#8220;For publications, please use reference from <a class="reference external" href="http://www.ccpn.ac.uk/v3-software/downloads/license">http://www.ccpn.ac.uk/v3-software/downloads/license</a>&#8221;,</dt>
 <dd>&#8220;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&#8221;)</dd>
 </dl>
 <p>#=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = &#8220;$modifiedBy: Ed Brooksbank $&#8221;
-__dateModified__ = &#8220;$dateModified: 2017-04-07 11:41:31 +0100 (Fri, April 07, 2017) $&#8221;
-__version__ = &#8220;$Revision: 3.0.b1 $&#8221;
+__modifiedBy__ = &#8220;$modifiedBy: CCPN $&#8221;
+__dateModified__ = &#8220;$dateModified: 2017-07-07 16:33:09 +0100 (Fri, July 07, 2017) $&#8221;
+__version__ = &#8220;$Revision: 3.0.b2 $&#8221;
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -406,16 +403,9 @@ and to run checkAllValid after it has been used.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup">
-<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">findIdentityResonanceGroup</code><span class="sig-paren">(</span><em>resonanceGroup</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#findIdentityResonanceGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>V2: find unique resonanceGroup linked as identical to teh input</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch">
-<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">findSpinSystemStretch</code><span class="sig-paren">(</span><em>spinSystem</em>, <em>direction=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#findSpinSystemStretch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch" title="Permalink to this definition">¶</a></dt>
-<dd><p>V2: Find unambiguous stretch of spin systems sequentially connected to the input one
-in direction +1/-1.</p>
+<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.findConnectedSpinSystems">
+<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">findConnectedSpinSystems</code><span class="sig-paren">(</span><em>spinSystem</em>, <em>delta=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#findConnectedSpinSystems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.findConnectedSpinSystems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find spin systems sequentially connected to the input one with given sequence offset.</p>
 <dl class="describe">
 <dt>
 <code class="descname">Input</code></dt>
@@ -424,6 +414,37 @@ in direction +1/-1.</p>
 <p>Nmr.ResonanceGroup, Int
 .. describe:: Output</p>
 <p>Nmr.ResonanceGroup</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup">
+<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">findIdentityResonanceGroup</code><span class="sig-paren">(</span><em>resonanceGroup</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#findIdentityResonanceGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>V2: find unique resonanceGroup linked as identical to teh input</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch">
+<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">findSpinSystemStretch</code><span class="sig-paren">(</span><em>resonanceGroup</em>, <em>excludedSpinSystems=set()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#findSpinSystemStretch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find (one of the) longest sequential spin system stretch(es) containing resonanceGroup</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.V2Upgrade.getSeqSpinSystemLinks">
+<code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">getSeqSpinSystemLinks</code><span class="sig-paren">(</span><em>spinSystem</em>, <em>delta=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#getSeqSpinSystemLinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.getSeqSpinSystemLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get any sequential spin system links (resonanceGroupProbs).
+An optional sequence offset may be specified.</p>
+<dl class="describe">
+<dt>
+<code class="descname">Input</code></dt>
+<dd></dd></dl>
+
+<p>Nmr.ResonanceGroup, Int</p>
+<dl class="describe">
+<dt>
+<code class="descname">Output</code></dt>
+<dd></dd></dl>
+
+<p>List of Nmr.ResonanceGroupProbs</p>
 </dd></dl>
 
 <dl class="function">

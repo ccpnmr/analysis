@@ -53,18 +53,17 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -894,77 +893,6 @@
 
   <span class="c1"># Library functions</span>
 
-  <span class="k">def</span> <span class="nf">_exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span>
-                <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
-                <span class="p">,</span> <span class="n">flags</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{}</span>
-                <span class="p">,</span> <span class="n">exclusionDict</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    first point in exporting a Nef file</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># TODO Merge this into Framework._exportNef, to keep the &#39;flags. confined to gui-near code</span>
-
-    <span class="c1"># flags are skipPrefixes, expandSelection</span>
-    <span class="n">skipPrefixes</span> <span class="o">=</span> <span class="n">flags</span><span class="p">[</span><span class="s1">&#39;skipPrefixes&#39;</span><span class="p">]</span>
-    <span class="n">expandSelection</span> <span class="o">=</span> <span class="n">flags</span><span class="p">[</span><span class="s1">&#39;expandSelection&#39;</span><span class="p">]</span>
-
-    <span class="c1"># ejb - to accommodate the new exclusion list</span>
-    <span class="c1"># convert exclusion to pidList and call the correct list</span>
-    <span class="c1"># this is the current list</span>
-    <span class="c1"># self.chains = []</span>
-    <span class="c1"># self.chemicalShiftLists = []</span>
-    <span class="c1"># self.restraintLists = []</span>
-    <span class="c1"># self.peakLists = []</span>
-    <span class="c1"># self.samples = []</span>
-    <span class="c1"># self.substances = []</span>
-    <span class="c1"># self.nmrChains = []</span>
-    <span class="c1"># self.dataSets = []</span>
-    <span class="c1"># self.complexes = []</span>
-    <span class="c1"># self.spectrumGroups = []</span>
-    <span class="c1"># self.notes = []</span>
-
-    <span class="n">checkList</span> <span class="o">=</span> <span class="p">[</span><span class="n">CHAINS</span><span class="p">,</span> <span class="n">CHEMICALSHIFTLISTS</span><span class="p">,</span> <span class="n">RESTRAINTLISTS</span><span class="p">,</span> <span class="n">PEAKLISTS</span>
-      <span class="p">,</span> <span class="n">SAMPLES</span><span class="p">,</span> <span class="n">SUBSTANCES</span><span class="p">,</span> <span class="n">NMRCHAINS</span>
-      <span class="p">,</span> <span class="n">DATASETS</span><span class="p">,</span> <span class="n">COMPLEXES</span><span class="p">,</span> <span class="n">SPECTRUMGROUPS</span><span class="p">,</span> <span class="n">NOTES</span><span class="p">]</span>
-
-    <span class="n">pidList</span> <span class="o">=</span> <span class="p">[]</span>                                <span class="c1"># start with an empty list</span>
-
-    <span class="c1"># go through the checkList above and add all objects to the list</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">checkList</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>                   <span class="c1"># just to be safe</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-          <span class="n">pidList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>                 <span class="c1"># append the found items to the list</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Name not found in project: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-
-    <span class="c1"># now remove those items that are not needed (some may be added later depending on flags)</span>
-    <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="n">exclusionDict</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="n">exclusionDict</span><span class="p">[</span><span class="n">ky</span><span class="p">]:</span>
-        <span class="c1"># exPidObj = self.getByPid(exPid)</span>
-        <span class="k">if</span> <span class="n">exPid</span> <span class="ow">in</span> <span class="n">pidList</span><span class="p">:</span>
-          <span class="n">pidList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">exPid</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">exportNef</span><span class="p">(</span><span class="n">path</span>
-                   <span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span>
-                   <span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span>
-                   <span class="p">,</span> <span class="n">expandSelection</span><span class="o">=</span><span class="n">expandSelection</span>
-                   <span class="p">,</span> <span class="n">pidList</span><span class="o">=</span><span class="n">pidList</span><span class="p">)</span>
-
-    <span class="c1"># need to sort this</span>
-    <span class="c1"># from ccpn.core.lib import CcpnNefIo</span>
-    <span class="c1">#</span>
-    <span class="c1"># t0 = time()</span>
-    <span class="c1">#</span>
-    <span class="c1"># # change exclusion list to list of pids</span>
-    <span class="c1">#</span>
-    <span class="c1"># CcpnNefIo.exportNef(self, path</span>
-    <span class="c1">#                     , overwriteExisting=overwriteExisting</span>
-    <span class="c1">#                     , skipPrefixes=skipPrefixes</span>
-    <span class="c1">#                     , expandSelection=expandSelection</span>
-    <span class="c1">#                     , exclusionDict=exclusionDict)</span>
-    <span class="c1"># t2 = time()</span>
-    <span class="c1"># getLogger().info(&#39;Exported NEF file, time = %.2fs &gt; %s&#39; %(t2-t0, path))</span>
-
 <div class="viewcode-block" id="Project.exportNef"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.exportNef">[docs]</a>  <span class="k">def</span> <span class="nf">exportNef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span>
                 <span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span>
                 <span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="o">=</span><span class="p">()</span>
@@ -973,19 +901,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Export selected contents of the project to a Nef file.</span>
 
-<span class="sd">    Flags is a dictionary of the form:</span>
+<span class="sd">      skipPrefixes: ( &#39;ccpn&#39;, ..., &lt;str&gt; )</span>
+<span class="sd">      expandSelection: &lt;bool&gt; }</span>
 
-<span class="sd">      { &#39;skipPrefixes&#39;: [ &#39;ccpn&#39;, ..., &lt;str&gt; ], &#39;expandSelection&#39;: &lt;bool&gt; }</span>
-
-<span class="sd">      Include &#39;ccpn&#39; in the flags will exclude ccpn specific items from the file</span>
+<span class="sd">      Include &#39;ccpn&#39; in the skipPrefixes list will exclude ccpn specific items from the file</span>
 <span class="sd">      expandSelection = True  will include all data from the project, this may not be data that</span>
 <span class="sd">                              is not defined in the Nef standard.</span>
 
 <span class="sd">    PidList is a list of &lt;str&gt;, e.g. &#39;NC:@-&#39;, obtained from the objects to be included.</span>
-<span class="sd">    The Nef file may also contain further dependent items necessary associated with the pidList.</span>
+<span class="sd">    The Nef file may also contain further dependent items associated with the pidList.</span>
 
 <span class="sd">    :param path: output path and filename</span>
-<span class="sd">    :param flags: output arguments</span>
+<span class="sd">    :param skipPrefixes: items to skip</span>
+<span class="sd">    :param expandSelection: expand the selection</span>
 <span class="sd">    :param pidList: a list of pids</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>

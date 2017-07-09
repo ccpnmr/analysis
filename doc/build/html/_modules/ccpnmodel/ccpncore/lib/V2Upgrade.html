@@ -54,24 +54,23 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:41:32 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:09 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -604,10 +603,75 @@
     <span class="n">constraintStore</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 
-<div class="viewcode-block" id="findSpinSystemStretch"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch">[docs]</a><span class="k">def</span> <span class="nf">findSpinSystemStretch</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+<div class="viewcode-block" id="findSpinSystemStretch"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findSpinSystemStretch">[docs]</a><span class="k">def</span> <span class="nf">findSpinSystemStretch</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="p">,</span> <span class="n">excludedSpinSystems</span><span class="o">=</span><span class="nb">set</span><span class="p">()):</span>
+  <span class="sd">&quot;&quot;&quot;Find (one of the) longest sequential spin system stretch(es) containing resonanceGroup</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># To avoid modifying external data</span>
+  <span class="n">excludedSpinSystems</span> <span class="o">=</span> <span class="n">excludedSpinSystems</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+  <span class="n">excludedSpinSystems</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="p">)</span>
+
+  <span class="n">stretches</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">for</span> <span class="n">delta</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="p">[</span><span class="n">resonanceGroup</span><span class="p">]</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="n">resonanceGroup</span><span class="p">:[]}</span>
+    <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">rg</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">rg2</span> <span class="ow">in</span> <span class="n">findConnectedSpinSystems</span><span class="p">(</span><span class="n">rg</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rg2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludedSpinSystems</span><span class="p">:</span>
+          <span class="n">excludedSpinSystems</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rg2</span><span class="p">)</span>
+          <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rg2</span><span class="p">)</span>
+          <span class="n">ll2</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">rg2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+          <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rg2</span><span class="p">)</span>
+
+    <span class="n">stretch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ll3</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">):</span>
+        <span class="n">stretch</span> <span class="o">=</span> <span class="n">ll3</span>
+    <span class="c1">#</span>
+    <span class="n">stretches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">stretches</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="p">[</span><span class="n">resonanceGroup</span><span class="p">]</span> <span class="o">+</span> <span class="n">stretches</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="getSeqSpinSystemLinks"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.getSeqSpinSystemLinks">[docs]</a><span class="k">def</span> <span class="nf">getSeqSpinSystemLinks</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  V2: Find unambiguous stretch of spin systems sequentially connected to the input one</span>
-<span class="sd">  in direction +1/-1.</span>
+<span class="sd">  Get any sequential spin system links (resonanceGroupProbs).</span>
+<span class="sd">  An optional sequence offset may be specified.</span>
+
+<span class="sd">  .. describe:: Input</span>
+
+<span class="sd">  Nmr.ResonanceGroup, Int</span>
+
+<span class="sd">  .. describe:: Output</span>
+
+<span class="sd">  List of Nmr.ResonanceGroupProbs</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">seqLinks</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllResonanceGroupProbs</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">sequenceOffset</span> <span class="o">==</span> <span class="n">delta</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">spinSystem</span><span class="o">.</span><span class="n">findAllFromResonanceGroups</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span> <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">sequenceOffset</span> <span class="o">==</span> <span class="o">-</span><span class="n">delta</span><span class="p">:</span>
+      <span class="n">seqLinks</span><span class="p">[</span><span class="n">link</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">return</span> <span class="n">seqLinks</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="findConnectedSpinSystems"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findConnectedSpinSystems">[docs]</a><span class="k">def</span> <span class="nf">findConnectedSpinSystems</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Find spin systems sequentially connected to the input one with given sequence offset.</span>
 
 <span class="sd">  .. describe:: Input</span>
 
@@ -617,27 +681,15 @@
 <span class="sd">  Nmr.ResonanceGroup</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">stretch</span> <span class="o">=</span> <span class="p">[</span><span class="n">spinSystem</span><span class="p">]</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-
-    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">findAllResonanceGroupProbs</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span>
-                                                       <span class="n">sequenceOffset</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span>
-                                                       <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">possibility</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">findAllFromResonanceGroups</span><span class="p">(</span><span class="n">linkType</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span>
-                                                       <span class="n">sequenceOffset</span><span class="o">=-</span><span class="n">direction</span><span class="p">,</span>
-                                                       <span class="n">isSelected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">stretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">getSeqSpinSystemLinks</span><span class="p">(</span><span class="n">spinSystem</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">delta</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">spinSystem</span> <span class="ow">is</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">possibility</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">break</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
   <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+  <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="findIdentityResonanceGroup"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.findIdentityResonanceGroup">[docs]</a><span class="k">def</span>  <span class="nf">findIdentityResonanceGroup</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="p">):</span>
@@ -699,7 +751,8 @@
         <span class="k">for</span> <span class="n">resonance2</span> <span class="ow">in</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">resonances</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">resonance2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">resonance</span><span class="p">:</span>
             <span class="n">resonance3</span> <span class="o">=</span> <span class="n">_getOnebondResonance</span><span class="p">(</span><span class="n">resonance2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">resonance3</span> <span class="ow">and</span> <span class="n">resonance3</span><span class="o">.</span><span class="n">resonanceSet</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">resonance3</span><span class="o">.</span><span class="n">resonanceSet</span><span class="o">.</span><span class="n">atomSets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">resonance3</span> <span class="ow">and</span> <span class="n">resonance3</span><span class="o">.</span><span class="n">resonanceSet</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">resonance3</span><span class="o">.</span><span class="n">resonanceSet</span><span class="o">.</span><span class="n">atomSets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)):</span>
               <span class="n">letter</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
             <span class="k">break</span>
 
@@ -925,7 +978,8 @@
         <span class="c1"># there are sister resonances</span>
         <span class="n">resons</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">reson</span> <span class="ow">in</span> <span class="n">resons</span><span class="p">:</span>
-          <span class="n">boundResons</span> <span class="o">=</span> <span class="n">_getBoundResonances</span><span class="p">(</span><span class="n">reson</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="n">contribs</span><span class="p">,</span> <span class="n">recursiveCall</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">boundResons</span> <span class="o">=</span> <span class="n">_getBoundResonances</span><span class="p">(</span><span class="n">reson</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">contribs</span><span class="o">=</span><span class="n">contribs</span><span class="p">,</span>
+                                            <span class="n">recursiveCall</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
           <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pairResonances</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">boundResons</span><span class="p">]</span>
           <span class="k">if</span> <span class="ow">not</span> <span class="n">ll</span><span class="p">:</span>
             <span class="c1"># One sister was bound to both. Incorrect data. Bind to both here too</span>

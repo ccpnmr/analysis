@@ -53,19 +53,18 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:31 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -223,14 +222,6 @@
     <span class="sd">&quot;&quot;&quot;Residue type string (e.g. &#39;ALA&#39;). Part of id. Use self.assignTo or</span>
 <span class="sd">    self.rename to reset the residueType&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
-
-    <span class="c1"># # The below is unnecessary - apiResidue is derived using self.residueType</span>
-    <span class="c1"># apiResonanceGroup = self._wrappedData</span>
-    <span class="c1"># apiResidue = apiResonanceGroup.assignedResidue</span>
-    <span class="c1"># if apiResidue is None:</span>
-    <span class="c1">#   return apiResonanceGroup.residueType or &#39;&#39;</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#   return apiResidue.code3Letter</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">relativeOffset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
@@ -440,11 +431,20 @@
 
         <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
           <span class="c1"># chop off end ResonanceGroup</span>
-          <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
-          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
-            <span class="c1"># delete one-element remaining chain</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># Chain gets removed</span>
+            <span class="k">for</span> <span class="n">resonanceGroup</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">stretch</span><span class="p">):</span>
+              <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
+            <span class="c1"># delete empty chain</span>
             <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+            <span class="n">nextNmrResidue</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">apiNmrChain</span><span class="p">]</span>
+            <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="n">nextNmrResidue</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
+            <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span>
           <span class="c1"># chop off end ResonanceGroup</span>
@@ -620,18 +620,13 @@
             <span class="c1"># delete one-element remaining chain</span>
             <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
-        <span class="k">elif</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-          <span class="c1"># chop off end ResonanceGroup</span>
-          <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
-
         <span class="k">else</span><span class="p">:</span>
-          <span class="c1"># make new connected NmrChain with rightmost ResonanceGroups</span>
-          <span class="n">newNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">isConnected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-          <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="n">stretch</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">rg</span> <span class="ow">is</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
-              <span class="k">break</span>
-            <span class="k">else</span><span class="p">:</span>
-              <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span>
+          <span class="c1"># Done with reverses because disconnectNext is easily undoable</span>
+          <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrChain</span>
+          <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
+          <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
 
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>
@@ -659,7 +654,7 @@
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
           <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">stretch</span><span class="p">):</span>
-            <span class="c1"># reversed to add residues back in proper order (they ar added to end)</span>
+            <span class="c1"># reversed to add residues back in proper order (they are added to end)</span>
             <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
           <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
@@ -679,8 +674,13 @@
             <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">disconnectPrevious</span><span class="p">()</span>
 
           <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">disconnectPrevious</span><span class="p">()</span>
-            <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">disconnectPrevious</span><span class="p">()</span>
+            <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrChain</span>
+            <span class="n">nr1</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">nr2</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">stretch</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="n">nr1</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
+            <span class="n">nr2</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
+            <span class="n">nmrChain</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>

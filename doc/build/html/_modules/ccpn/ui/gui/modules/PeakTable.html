@@ -54,30 +54,29 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:40 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
@@ -99,8 +98,7 @@
 <span class="sd">  This class implements the module by wrapping a PeakListTable instance</span>
 <span class="sd">  &#39;&#39;&#39;</span>
 
-  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">includeColumnsWidget</span> <span class="o">=</span> <span class="bp">False</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
   <span class="n">settingsPosition</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
@@ -120,12 +118,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">PeakListTableWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">moduleParent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                              <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
-    <span class="c1"># settingsWidget</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="n">ColumnViewSettings</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
     <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span>
 
@@ -135,18 +127,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span><span class="o">.</span><span class="n">_selectPeakList</span><span class="p">(</span><span class="n">peakList</span><span class="p">)</span></div>
 
-  <span class="k">def</span> <span class="nf">_getDisplayColumnWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: used to get displayColumnWidget</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayColumnWidget</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
-
-  <span class="k">def</span> <span class="nf">_getSearchWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s2">&quot; CCPN-INTERNAL: used to get searchWidget&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span>
 
   <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Re-implementation of closeModule function from CcpnModule to unregister notification &quot;&quot;&quot;</span>
@@ -164,13 +144,12 @@
 
   <span class="n">positionsUnit</span> <span class="o">=</span> <span class="n">UNITS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#default</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">moduleParent</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">updateSettingsWidgets</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">moduleParent</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span> <span class="o">=</span> <span class="n">moduleParent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settingWidgets</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_selectedPeakList</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">updateSettingsWidgets</span> <span class="o">=</span> <span class="n">updateSettingsWidgets</span>
     <span class="n">kwds</span><span class="p">[</span><span class="s1">&#39;setLayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1">## Assure we have a layout with the widget</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_widget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
@@ -184,7 +163,9 @@
                                      <span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
                                      <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gridHPos</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                                      <span class="p">,</span> <span class="n">showSelectName</span><span class="o">=</span><span class="bp">True</span>
-                                     <span class="p">,</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownPLcallback</span><span class="p">)</span>
+                                     <span class="p">,</span> <span class="n">minimumWidths</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+                                     <span class="p">,</span> <span class="n">sizeAdjustPolicy</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="o">.</span><span class="n">AdjustToContentsOnFirstShow</span>
+                                     <span class="p">,</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pulldownPLcallback</span><span class="p">)</span>
 
     <span class="c1">## create widgets for selection of position units</span>
     <span class="n">gridHPos</span><span class="o">+=</span><span class="mi">1</span>
@@ -258,8 +239,6 @@
   <span class="k">def</span> <span class="nf">_updateAllModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Updates the table and the settings widgets&#39;&#39;&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_updateTable</span><span class="p">()</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateSettingsWidgets</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsWidgets</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_updateTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useSelectedPeakList</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Display the peaks on the table for the selected PeakList.</span>
@@ -280,14 +259,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span> <span class="c1">#if not peaks, make the table empty</span>
-
-  <span class="k">def</span> <span class="nf">_updateSettingsWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; update settings Widgets according with the new displayed table &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">includeColumnsWidget</span><span class="p">:</span>
-      <span class="n">displayColumnWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getDisplayColumnWidget</span><span class="p">()</span>
-      <span class="n">displayColumnWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">searchWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleParent</span><span class="o">.</span><span class="n">_getSearchWidget</span><span class="p">()</span>
-    <span class="n">searchWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_selectPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

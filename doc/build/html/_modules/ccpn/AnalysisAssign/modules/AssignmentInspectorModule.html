@@ -58,24 +58,23 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan&quot;</span>
-               <span class="s2">&quot;Simon P Skinner &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
-<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Ed Brooksbank $&quot;</span>
-<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-04-07 11:40:21 +0100 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b1 $&quot;</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:21 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: geertenv $&quot;</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: geertenv $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -85,7 +84,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ColumnViewSettings</span><span class="p">,</span>  <span class="n">ObjectTableFilter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.peakUtils</span> <span class="kn">import</span> <span class="n">getPeakPosition</span><span class="p">,</span> <span class="n">getPeakAnnotation</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundWidgets</span> <span class="kn">import</span> <span class="n">CheckBoxCompoundWidget</span>
@@ -107,7 +106,6 @@
   <span class="c1"># overide in specific module implementations</span>
   <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;AssignmentInspectorModule&#39;</span>
   <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">includeColumnsWidget</span> <span class="o">=</span> <span class="bp">False</span>
   <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># states are defined as: 0: invisible, 1: both visible, 2: only settings visible</span>
   <span class="n">Position</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
 
@@ -138,7 +136,7 @@
                                              <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                              <span class="n">vPolicy</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span>
                                              <span class="c1">#minimumWidths=(colwidth, 0, 0),</span>
-                                             <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="n">colwidth</span><span class="p">,</span> <span class="n">colwidth</span><span class="p">),</span>
+                                             <span class="n">fixedWidths</span><span class="o">=</span><span class="p">(</span><span class="n">colwidth</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">colwidth</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
                                              <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span>
                                              <span class="n">labelText</span><span class="o">=</span><span class="s1">&#39;Display(s):&#39;</span><span class="p">,</span>
                                              <span class="n">tipText</span> <span class="o">=</span> <span class="s1">&#39;SpectrumDisplay modules to respond to double-click&#39;</span><span class="p">,</span>
@@ -203,11 +201,7 @@
     <span class="c1">#self.attachedNmrAtomsList.setFixedHeight(200)</span>
     <span class="c1">#self.assignedPeaksTable.setFixedHeight(200)</span>
 
-    <span class="c1"># settingsWidget</span>
-    <span class="c1"># if self.includeColumnsWidget:</span>
-    <span class="c1">#   self.displayColumnWidget = ColumnViewSettings(parent=self._AIwidget, table=self.assignedPeaksTable, grid=(4, 0))</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_AIwidget</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateModuleCallback</span><span class="p">,</span> <span class="s1">&#39;nmrResidues&#39;</span><span class="p">)</span>
     <span class="c1"># update if current.nmrResidue is defined</span>
@@ -254,7 +248,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsWidgets</span><span class="p">()</span>
       <span class="k">return</span>
 
     <span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="n">ALL</span><span class="p">:</span>
@@ -272,7 +265,6 @@
         <span class="c1"># highlight current.nmrAtom in the list widget</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attachedNmrAtomsList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Assigned peaks of NmrAtom: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateSettingsWidgets</span><span class="p">()</span>
 
 <div class="viewcode-block" id="AssignmentInspectorModule.getColumns"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.AssignmentInspectorModule.AssignmentInspectorModule.getColumns">[docs]</a>  <span class="k">def</span> <span class="nf">getColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="s2">&quot;get collumns for intialisation of table&quot;</span>
@@ -327,19 +319,13 @@
     <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
       <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%7.2E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">float</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">None</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">None</span></div>
 
   <span class="c1"># def _getSearchWidget(self):</span>
   <span class="c1">#   &quot;&quot;&quot;</span>
   <span class="c1">#   CCPN-INTERNAL: used to get searchWidget</span>
   <span class="c1">#   &quot;&quot;&quot;</span>
   <span class="c1">#   return self.searchWidget</span>
-
-  <span class="k">def</span> <span class="nf">_updateSettingsWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    CCPN-INTERNAL: Update settings Widgets according with the new displayed table</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">searchWidget</span><span class="o">.</span><span class="n">updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignedPeaksTable</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

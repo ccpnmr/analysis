@@ -370,14 +370,18 @@ class ExcelReader(object):
   def _setWrapperProperties(self, wrapperObject, properties, dataframe):
     for attr in properties:
       if attr == synonyms:
-        setattr(wrapperObject, attr, (self._getDFValue(attr, dataframe),))
+        value = self._getDFValue(attr, dataframe)
+        if value is not None:
+          setattr(wrapperObject, attr, (value,))
       else:
         try:
           if getattr(wrapperObject, attr) is None or getattr(wrapperObject, attr) == 0:
             setattr(wrapperObject, attr, self._getDFValue(attr, dataframe))
 
         except Exception: #wrapper needs a int
-          setattr(wrapperObject, attr, int(self._getDFValue(attr, dataframe)))
+          value = self._getDFValue(attr, dataframe)
+          if value is not None:
+            setattr(wrapperObject, attr, int(value))
 
         except:
           print( 'Value  not set for %s' %attr)

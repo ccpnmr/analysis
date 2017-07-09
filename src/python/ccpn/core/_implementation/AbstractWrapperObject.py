@@ -733,14 +733,14 @@ class AbstractWrapperObject():
                                         % (action, self, notifier))
             notifier(self)
 
-  def resetSerial(self, newSerial: int):
+  def resetSerial(self, newSerial:int):
     """ADVANCED Reset serial of object to newSerial, resetting parent link
     and the nextSerial of the parent.
 
     Raises ValueError for objects that do not have a serial
     (or, more precisely, where the _wrappedData does not have a serial)."""
 
-    commonUtil.resetSerial(self._wrappedData)
+    commonUtil.resetSerial(self._wrappedData, newSerial)
 
   def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger

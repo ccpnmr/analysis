@@ -45,7 +45,8 @@ def getPeakPosition(peak, dim, unit='ppm'):
       raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                      % unit)
 
-    return '%7.2f' % float(value)
+    if type(value) is int or type(value) is float:
+      return '%7.2f' % float(value)
 
 def getPeakAnnotation(peak, dim, separator=', '):
   if len(peak.dimensionNmrAtoms) > dim:

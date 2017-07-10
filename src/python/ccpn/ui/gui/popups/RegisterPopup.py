@@ -57,7 +57,7 @@ class RegisterPopup(CcpnDialog):
       self.setWindowModality(modality)
     self.setWindowTitle(title)
 
-    frame = Frame(self)
+    frame = Frame(self, setLayout=True, grid=(0, 0))
 
     message = '''To keep track of our users, which is important for grant applications,
 we would like you to register your contact details with us.

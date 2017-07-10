@@ -3460,10 +3460,11 @@ class CcpnNefReader:
     creatorFunc = project.newNmrChain
     for row in saveFrame[nmrChainLoopName].data:
       parameters = self._parametersFromLoopRow(row, map2)
-      nmrChain = creatorFunc(**parameters)
+      if parameters['shortName'] == '@-':
+        nmrChain = project.getNmrChain('@-')
+      else:
+        nmrChain = creatorFunc(**parameters)
       nmrChain.resetSerial(row['serial'])
-      # NB former call was BROKEN!
-      # modelUtil.resetSerial(nmrChain, row['serial'], 'nmrChains')
       nmrChains[parameters['shortName']] = nmrChain
 
     # read nmr_residue loop
@@ -3479,7 +3480,7 @@ class CcpnNefReader:
       nmrResidue.resetSerial(row['serial'])
       # NB former call was BROKEN!
       # modelUtil.resetSerial(nmrResidue, row['serial'], 'nmrResidues')
-      nmrResidues[(chainCode,parameters['sequenceCode'])] = nmrChain
+      nmrResidues[(chainCode,parameters['sequenceCode'])] = nmrResidue
 
     # read nmr_atom loop
     mapping = nef2CcpnMap[nmrAtomLoopName]

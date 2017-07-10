@@ -549,7 +549,7 @@ class GuiPipeline(CcpnModule, Pipeline):
       with open(self.savingDataPath, 'w') as fp:
         json.dump(self.jsonData, fp, indent=2)
         fp.close()
-        self.project._logger.info('File saved in: ', self.savingDataPath)
+        self.project._logger.info('File saved in: ' + self.savingDataPath)
     except:
       getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
 

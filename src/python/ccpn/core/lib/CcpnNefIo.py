@@ -3460,8 +3460,8 @@ class CcpnNefReader:
     creatorFunc = project.newNmrChain
     for row in saveFrame[nmrChainLoopName].data:
       parameters = self._parametersFromLoopRow(row, map2)
-      if parameters['shortName'] == '@-':
-        nmrChain = project.getNmrChain('@-')
+      if parameters['shortName'] == coreConstants.defaultNmrChainCode:
+        nmrChain = project.getNmrChain(coreConstants.defaultNmrChainCode)
       else:
         nmrChain = creatorFunc(**parameters)
       nmrChain.resetSerial(row['serial'])

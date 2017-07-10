@@ -147,9 +147,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     #CCPN INTERNAL - called in saveProject method of Framework
     """
-    from ccpn.util.GitTools import getAllRepositoriesGitCommit
-
-    commits = getAllRepositoriesGitCommit()
     windowTitle = '{}, {}'.format(self.application.applicationName, self.application.applicationVersion)
     self.setWindowTitle(windowTitle)
 

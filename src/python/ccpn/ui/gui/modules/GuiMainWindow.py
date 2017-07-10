@@ -150,10 +150,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from ccpn.util.GitTools import getAllRepositoriesGitCommit
 
     commits = getAllRepositoriesGitCommit()
-    windowTitle = '{}, {} (framework: {:.8s}, model: {:.8s})'.format(self.application.applicationName,
-                                                                     self.application.applicationVersion,
-                                                                     commits['analysis'],
-                                                                     commits['ccpnmodel'])
+    windowTitle = '{}, {}'.format(self.application.applicationName, self.application.applicationVersion)
     self.setWindowTitle(windowTitle)
 
   def getMenuAction(self, menuString, topMenuAction=None):

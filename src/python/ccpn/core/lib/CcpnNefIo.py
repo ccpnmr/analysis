@@ -4226,10 +4226,16 @@ if __name__ == '__main__':
   # testNefIo will read a NEF file and re-export it (with a .out.nef suffix),
   # producing a V3 project on disk as a byproduct if the original is a V2 project.
 
-  path = sys.argv[1]
+  if len(sys.argv) < 2 or sys.argv[1] in ('-h', '--help'):
+    print("CcpnNefIo exports a project as a NEF file. Usage:"
+          "\n\n One mandatory argument - the project directory to export")
+  else:
+    path = sys.argv[1]
+    nefpath = _exportToNef(path)
+
+
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
-  nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
   # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(nefpath, skipPrefixes=('ccpn',))

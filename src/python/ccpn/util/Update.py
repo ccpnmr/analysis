@@ -333,6 +333,6 @@ class UpdateAgent(object):
 
 if __name__ == '__main__':
 
-  applicationVersion = '3.0.b1'
+  applicationVersion = '3.0.b2'
   installUpdates(applicationVersion)
   

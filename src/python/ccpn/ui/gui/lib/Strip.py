@@ -173,7 +173,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
   nmrResidue = nmrResidue.mainNmrResidue
   strips = []
   if showSequentialResidues and nmrResidue.nmrChain.isConnected:
-    stripIndex = 0  # for now enforce this, o/w below woudl be more complicated
+    stripIndex = 0  # for now enforce this, o/w below would be more complicated
 
     previousNmrResidue = nmrResidue.previousNmrResidue
     nextNmrResidue = nmrResidue.nextNmrResidue

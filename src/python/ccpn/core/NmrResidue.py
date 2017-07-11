@@ -1052,7 +1052,7 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
 
   defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None)))
 
-  self._startCommandEchoBlock('fetchNmrResidue', values=locals(),
+  self._startCommandEchoBlock('fetchNmrResidue', values=locals(), defaults=defaults,
                               parName='newNmrResidue')
   try:
     if sequenceCode is None:

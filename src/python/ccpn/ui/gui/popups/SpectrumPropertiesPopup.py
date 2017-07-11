@@ -122,8 +122,11 @@ class SpectrumPropertiesPopup(CcpnDialog):
       If anything has been added to the undo queue then remove it with application.undo()
       repopulate the popup widgets
     """
-    tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
-    tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
+    # tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
+    # tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
+
+    # ejb - error above, need to set the tabs explicitly
+    tabs = (self._generalTab, self._dimensionsTab, self._contoursTab)
 
     applyAccept = False
     oldUndo = self.project._undo.numItems()
@@ -131,8 +134,9 @@ class SpectrumPropertiesPopup(CcpnDialog):
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       for t in tabs:
-        changes = t._changes
-        self._applyAllChanges(changes)
+        if t is not None:
+          changes = t._changes
+          self._applyAllChanges(changes)
 
       applyAccept = True
     except Exception as es:

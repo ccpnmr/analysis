@@ -247,7 +247,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
-    self._fillPluginsMenu()
+    #TODO:ED needs fixing
+    # self._fillPluginsMenu()     # ejb - nothing to show, and crash anyway
 
 
   def _createMenu(self, spec, targetMenu=None):

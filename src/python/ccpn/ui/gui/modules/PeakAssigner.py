@@ -23,12 +23,12 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import typing
 from functools import partial
 
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
 
 logger = getLogger()
@@ -193,12 +194,16 @@ class PeakAssigner(CcpnModule):
         self.listWidgets[dim].addItem(nmrAtom.pid)
         currentItem = self.listWidgets[dim].item(self.listWidgets[dim].count()-1)
       currentObject = self.project.getByPid(currentItem.text())
-      toAssign = dimNmrAtoms.index(currentObject)
 
-      dimNmrAtoms[toAssign] = nmrAtom
-      allAtoms = list(peak.dimensionNmrAtoms)
-      allAtoms[dim] = dimNmrAtoms
-      peak.dimensionNmrAtoms = allAtoms
+      try:
+        toAssign = dimNmrAtoms.index(currentObject)                   # error here..
+
+        dimNmrAtoms[toAssign] = nmrAtom
+        allAtoms = list(peak.dimensionNmrAtoms)
+        allAtoms[dim] = dimNmrAtoms
+        peak.dimensionNmrAtoms = allAtoms
+      except Exception as es:
+        showWarning(str(self.windowTitle()), str(es))
 
     self._updateInterface()
 

@@ -262,6 +262,9 @@ Use print(current) to get a list of attribute, value pairs')
 
       if len(set(value)) != len(value):
 
+        # TODO - replace with this call:
+        # value = commonUtil.uniquify(value)
+
         # ejb - remove duplicates here
         tempList = []
         for inL in value:

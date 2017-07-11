@@ -281,7 +281,7 @@ class Strip(AbstractWrapperObject):
     Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
     """
     # print('Strip.displaySpectrum>>> _finaliseDone', self._finaliseDone, spectrum)
-    getLogger().info('Strip.displaySpectrum>>> _finaliseDone '
+    getLogger().debug('Strip.displaySpectrum>>> _finaliseDone '
                       +str(self._finaliseDone)+' '
                       +str(spectrum))
     if not self._finaliseDone: return

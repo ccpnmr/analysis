@@ -107,6 +107,35 @@ class NmrStretchTest(WrapperTesting):
       self.chain = self.project.createChain(sequence='QWERTYIPASD', molType='protein',
                                             shortName='X')
 
+  def test_connect_nmr_residues_0(self):
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    self.assertEqual([x.id for x in nmrChain.nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
+
+    nmrResidues[0].connectPrevious(nmrResidues[1])
+    nmrResidues[1].connectPrevious(nmrResidues[2])
+    nmrResidues[4].connectNext(nmrResidues[3])
+    nmrResidues[4].connectPrevious(nmrResidues[0])
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
+                     ['#3.@3.GLY','#3.@2.VAL', '#3.@1.ALA', '#3.@5.GLN', '#3.@4.CYS', ])
+
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
+                     ['#3.@3.GLY','#3.@2.VAL', '#3.@1.ALA', '#3.@5.GLN', '#3.@4.CYS', ])
+
+
   def test_connect_nmr_residues_1(self):
     nmrChain = self.project.fetchNmrChain(shortName='@-')
     nmrResidues = []

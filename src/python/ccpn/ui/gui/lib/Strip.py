@@ -172,39 +172,69 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
 
   nmrResidue = nmrResidue.mainNmrResidue
   strips = []
-  if showSequentialResidues and nmrResidue.nmrChain.isConnected:
-    stripIndex = 0  # for now enforce this, o/w below would be more complicated
-
-    previousNmrResidue = nmrResidue.previousNmrResidue
-    nextNmrResidue = nmrResidue.nextNmrResidue
-    minNumStrips = 1
-    if previousNmrResidue:
-      minNumStrips += 1
-    if nextNmrResidue:
-      minNumStrips += 1
-
+  if showSequentialResidues and (nmrResidue.nmrChain.isConnected
+                                 or nmrResidue.residue is not None):
     # showing sequential strips
-    while len(display.strips) < minNumStrips:
+
+    # NB Rasmus 11/7/2017.
+    # For showSequentialResidues we want to show the exact number of strips,
+    # resetting what was there earlier, rather than keeping old ones around
+    # NB if we go back to showing long stretches, this will have to be changed.
+    # Meanwhile we ignore stripINdex in this branch of teh 'if' statement
+
+    # Previous code, kept for comparison :
+    # stripIndex = 0  # for now enforce this, o/w below would be more complicated
+    #
+    # previousNmrResidue = nmrResidue.previousNmrResidue
+    # nextNmrResidue = nmrResidue.nextNmrResidue
+    # minNumStrips = 1
+    # if previousNmrResidue:
+    #   minNumStrips += 1
+    # if nextNmrResidue:
+    #   minNumStrips += 1
+    #
+    # # showing sequential strips
+    # while len(display.strips) < minNumStrips:
+    #     display.addStrip()
+    #
+    # # display the previousNmrResidue if not None
+    # if previousNmrResidue is not None:
+    #   navigateToNmrAtomsInStrip(display.strips[stripIndex], previousNmrResidue.nmrAtoms,
+    #                             widths=None, markPositions=False, setNmrResidueLabel=True)
+    #   strips.append(display.strips[stripIndex])
+    #   stripIndex += 1
+    #
+    # if nmrResidue is not None: # this better be true or would hit Exception long before you get here
+    #   navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
+    #                             widths=None, markPositions=markPositions, setNmrResidueLabel=True)
+    #   strips.append(display.strips[stripIndex])
+    #   stripIndex += 1
+    #
+    # # display the nextNmrResidue if not None
+    # if nextNmrResidue is not None:
+    #   navigateToNmrAtomsInStrip(display.strips[stripIndex], nextNmrResidue.nmrAtoms,
+    #                             widths=None, markPositions=False, setNmrResidueLabel=True)
+    #   strips.append(display.strips[stripIndex]) now enforce this, o/w below would be more complicated
+
+    nmrResidues = []
+    previousNmrResidue = nmrResidue.previousNmrResidue
+    if previousNmrResidue:
+      nmrResidues.append(previousNmrResidue)
+    nmrResidues.append(nmrResidue)
+    nextNmrResidue = nmrResidue.nextNmrResidue
+    if nextNmrResidue:
+      nmrResidues.append(nextNmrResidue)
+
+    stripCount = len(nmrResidues)
+    while len(display.strips) < stripCount:
         display.addStrip()
+    for strip in display.strips[stripCount:]:
+      display.removeStrip(strip)
+    strips = display.strips
 
-    # display the previousNmrResidue if not None
-    if previousNmrResidue is not None:
-      navigateToNmrAtomsInStrip(display.strips[stripIndex], previousNmrResidue.nmrAtoms,
+    for ii,nr in enumerate(nmrResidues):
+      navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
                                 widths=None, markPositions=False, setNmrResidueLabel=True)
-      strips.append(display.strips[stripIndex])
-      stripIndex += 1
-
-    if nmrResidue is not None: # this better be true or would hit Exception long before you get here
-      navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
-                                widths=None, markPositions=markPositions, setNmrResidueLabel=True)
-      strips.append(display.strips[stripIndex])
-      stripIndex += 1
-
-    # display the nextNmrResidue if not None
-    if nextNmrResidue is not None:
-      navigateToNmrAtomsInStrip(display.strips[stripIndex], nextNmrResidue.nmrAtoms,
-                                widths=None, markPositions=False, setNmrResidueLabel=True)
-      strips.append(display.strips[stripIndex])
 
   else:
     # not showing sequential strips

@@ -163,12 +163,17 @@ class NefFileDialog(QtGui.QFileDialog):
         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
   def selectedFiles(self):
-    if self.result and not self.useNative:
-      return QtGui.QFileDialog.selectedFiles(self)
-    elif self.result and self.useNative:
-      return [self.result]
+    if self.useNative:
+      # return empty list if the native dialog
+      return None
     else:
-      return []
+      # the selectFile works and returns the file in the current directory
+      if self.result and not self.useNative:
+        return QtGui.QFileDialog.selectedFiles(self)
+      elif self.result and self.useNative:
+        return [self.result]
+      else:
+        return []
 
   def selectedFile(self):
     files = self.selectedFiles()

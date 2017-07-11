@@ -45,7 +45,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
-from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -184,10 +184,6 @@ class ExportNefPopup(CcpnDialog):
     self.pathEdited = True
     self.saveText.textEdited.connect(self._editPath)
 
-    if 'selectFile' in kw:
-      self.saveText.setText(kw['selectFile'])
-    else:
-      self.saveText.setText('None')
     self.spacer = Spacer(self.saveFrame, 13, 3
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
@@ -239,10 +235,10 @@ class ExportNefPopup(CcpnDialog):
                                         , selectFile = self._nefSelectFile
                                         , filter = self._nefFilter)
 
-    if 'selectFile':
+    if selectFile is not None:    # and self.application.preferences.general.useNative is False:
       self.saveText.setText(self.fileSaveDialog.selectedFile())
     else:
-      self.saveText.setText('None')
+      self.saveText.setText('')
     self.oldFilePath = self.saveText.text()       # set to the same for the minute
 
     self._saveState = True
@@ -265,6 +261,11 @@ class ExportNefPopup(CcpnDialog):
         yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFileName)
                             , 'Do you want to replace it?')
         if yes:
+          self.accept()
+      else:
+        if not self.exitFileName:
+          showWarning('FileName Error:', 'Filename is empty.')
+        else:
           self.accept()
 
   def _rejectDialog(self):

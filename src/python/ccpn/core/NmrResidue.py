@@ -28,17 +28,14 @@ import collections
 import typing
 from typing import Union
 
-from ccpn.util import Constants
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
-#from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
+from ccpn.core import _importOrder
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
@@ -116,6 +113,22 @@ class NmrResidue(AbstractWrapperObject):
   def _key(self) -> str:
     """Residue local ID"""
     return Pid.createId(self.sequenceCode, self.residueType)
+
+  @property
+  def _ccpnSortKey(self) -> tuple:
+    """Attibute used to sort objects.
+
+    Normally this is set on __init__  (for speed) and reset by self._resetIds
+    (which is caleld by teh rename finlaiser and by resetSerial).
+     But NmrResidue sorting order changes cynamically depending on
+     what other NmrResidues are iN the same NmrChain. So for this class
+     we need to set it dynamically, as a property"""
+
+    sortKey = self.nmrChain._ccpnSortKey[2:] + self._localCcpnSortKey
+    result = (id(self._project), _importOrder.index(self.className)) + sortKey
+    #
+    return result
+
 
   @property
   def _localCcpnSortKey(self) -> typing.Tuple:

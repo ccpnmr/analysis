@@ -167,7 +167,11 @@ class AbstractWrapperObject():
       _id = '%s%s%s' % (parent._id, Pid.IDSEP, self._key)
       sortKey = parent._ccpnSortKey[2:] + self._localCcpnSortKey
     self._id = _id
-    self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+
+    # A bit inelegant, but Nmrresidue is handled specially,
+    # with a _ccpnSortKey property
+    if className != 'NmrResidue':
+      self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
 
     # update pid:object mapping dictionary
     dd = project._pid2Obj.get(className)
@@ -599,13 +603,14 @@ class AbstractWrapperObject():
         undo.decreaseBlocking()
 
   def _getDirectChildren(self):
-    """Get list of objects that have self as a parent"""
+    """Get list of all objects that have self as a parent"""
 
     getDataObj = self._project._data2Obj.get
     result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
-    if self.className == 'NmrChain':
-      # Special case - NmrResidues must always be sorted
-      result.sort()
+    # Removed: Sorting is irrelevant for this function, thaat gives children of ALL classes
+    # if self.className == 'NmrChain':
+    #   # Special case - NmrResidues must always be sorted
+    #   result.sort()
 
     return result
 
@@ -741,6 +746,7 @@ class AbstractWrapperObject():
     (or, more precisely, where the _wrappedData does not have a serial)."""
 
     commonUtil.resetSerial(self._wrappedData, newSerial)
+    self._resetIds()
 
   def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger

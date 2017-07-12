@@ -56,6 +56,7 @@ class RegisterPopup(CcpnDialog):
       modality = QtCore.Qt.ApplicationModal
       self.setWindowModality(modality)
     self.setWindowTitle(title)
+    self.setMinimumSize(700,350)
 
     frame = Frame(self, setLayout=True, grid=(0,0))
 
@@ -75,7 +76,7 @@ This needs to be done once on every computer you use the programme on.
       self.entries.append(entry)
       row += 1
 
-    licenseFrame = Frame(frame, grid=(row, 0), gridSpan=(1,2))
+    licenseFrame = Frame(frame,setLayout=True, grid=(row, 0), gridSpan=(1,2))
     row += 1
 
     self.licenseCheckBox = CheckBox(licenseFrame,
@@ -84,7 +85,7 @@ This needs to be done once on every computer you use the programme on.
     self.licenseCheckBox.setChecked(False)
     button = Button(licenseFrame, text='Show License', callback=self._showLicense, grid=(0,1))
 
-    buttonFrame = Frame(frame, grid=(row,0), gridSpan=(1,2))
+    buttonFrame = Frame(frame,setLayout=True, grid=(row,0), gridSpan=(1,2))
     ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
     self.registerButton = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
     self.registerButton.setEnabled(False)

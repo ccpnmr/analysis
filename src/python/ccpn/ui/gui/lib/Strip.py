@@ -180,7 +180,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
     # For showSequentialResidues we want to show the exact number of strips,
     # resetting what was there earlier, rather than keeping old ones around
     # NB if we go back to showing long stretches, this will have to be changed.
-    # Meanwhile we ignore stripINdex in this branch of teh 'if' statement
+    # Meanwhile we ignore stripINdex in this branch of the 'if' statement
 
     # Previous code, kept for comparison :
     # stripIndex = 0  # for now enforce this, o/w below would be more complicated

@@ -54,7 +54,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrResidue import NmrResidue, NmrChain
 
 class GuiSpectrumDisplay(CcpnModule):
   """
@@ -251,6 +252,10 @@ class GuiSpectrumDisplay(CcpnModule):
       self._handlePeakList(obj)
     elif obj is not None and isinstance(obj, SpectrumGroup):
       self._handleSpectrumGroup(obj)
+    elif obj is not None and isinstance(obj, NmrAtom):
+      self._handleNmrAtom(obj)
+    elif obj is not None and isinstance(obj, NmrResidue):
+      self._handleNmrResidue(obj)
     else:
       showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup or PeakList')
     return success
@@ -275,6 +280,43 @@ class GuiSpectrumDisplay(CcpnModule):
       self.displaySpectrum(spectrum)
     if self.current.strip not in self.strips:
       self.current.strip = self.strips[0]
+
+  def _handleNmrResidue(self, nmrResidue):
+    """
+    Mark a list of nmrAtoms in the spectrum displays
+    """
+    # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
+
+    from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+
+    # get the strips
+    nmrResidue = nmrResidue.mainNmrResidue
+    nmrResidues = []
+    previousNmrResidue = nmrResidue.previousNmrResidue
+    if previousNmrResidue:
+      nmrResidues.append(previousNmrResidue)
+    nmrResidues.append(nmrResidue)
+    nextNmrResidue = nmrResidue.nextNmrResidue
+    if nextNmrResidue:
+      nmrResidues.append(nextNmrResidue)
+
+    nmrAtoms=[]
+
+    for nr in nmrResidues:
+      nmrAtoms.extend(nr.nmrAtoms)
+
+    if nmrAtoms:
+      markNmrAtoms(self.mainWindow, nmrAtoms)
+
+  def _handleNmrAtom(self, nmrAtom):
+    """
+    Mark an nmrAtom in the spectrum displays with horizontal/vertical bars
+    """
+    # showInfo(title='Mark nmrAtom "%s"' % nmrAtom.pid, message='mark nmrAtom in strips')
+
+    from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+
+    markNmrAtoms(self.mainWindow, [nmrAtom])
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
     "Set the scrolbar policies; convenience to expose to the user"

@@ -55,7 +55,8 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.NmrResidue import NmrResidue, NmrChain
+from ccpn.core.NmrResidue import NmrResidue
+
 
 class GuiSpectrumDisplay(CcpnModule):
   """
@@ -287,24 +288,27 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
 
-    from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+    from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromResidue, markNmrAtoms
 
     # get the strips
-    nmrResidue = nmrResidue.mainNmrResidue
-    nmrResidues = []
-    previousNmrResidue = nmrResidue.previousNmrResidue
-    if previousNmrResidue:
-      nmrResidues.append(previousNmrResidue)
-    nmrResidues.append(nmrResidue)
-    nextNmrResidue = nmrResidue.nextNmrResidue
-    if nextNmrResidue:
-      nmrResidues.append(nextNmrResidue)
+    # nmrResidue = nmrResidue.mainNmrResidue
+    # nmrResidues = []
+    # previousNmrResidue = nmrResidue.previousNmrResidue
+    # if previousNmrResidue:
+    #   nmrResidues.append(previousNmrResidue)
+    # nmrResidues.append(nmrResidue)
+    # nextNmrResidue = nmrResidue.nextNmrResidue
+    # if nextNmrResidue:
+    #   nmrResidues.append(nextNmrResidue)
+    #
+    # nmrAtoms=[]
+    #
+    # for nr in nmrResidues:
+    #   nmrAtoms.extend(nr.nmrAtoms)
 
-    nmrAtoms=[]
+    # ejb - just a test, could pass data: if data['shiftLeftMouse']: then clear marks first
 
-    for nr in nmrResidues:
-      nmrAtoms.extend(nr.nmrAtoms)
-
+    nmrAtoms = nmrAtomsFromResidue(nmrResidue)
     if nmrAtoms:
       markNmrAtoms(self.mainWindow, nmrAtoms)
 

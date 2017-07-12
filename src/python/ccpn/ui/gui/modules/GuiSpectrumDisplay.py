@@ -308,9 +308,28 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # ejb - just a test, could pass data: if data['shiftLeftMouse']: then clear marks first
 
-    nmrAtoms = nmrAtomsFromResidue(nmrResidue)
-    if nmrAtoms:
-      markNmrAtoms(self.mainWindow, nmrAtoms)
+    if '-1' in nmrResidue.pid:
+      # -1 residue so need to split the CA, CB from thr N, H
+      nmrAtomsMinus = nmrAtomsFromResidue(nmrResidue)
+      nmrAtomsCentre = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)
+
+      nmrAtoms = []
+      # this should check the experiment type and choose the correct atoms
+      for nac in nmrAtomsMinus:
+        if '..CA' in nac.pid or '..CB' in nac.pid:
+          nmrAtoms.append(nac)
+      for nac in nmrAtomsCentre:
+        if '..N' in nac.pid or '..H' in nac.pid:
+          nmrAtoms.append(nac)
+
+      markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)
+    else:
+      nmrAtoms = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)
+      markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)
+
+    # nmrAtoms = nmrAtomsFromResidue(nmrResidue)
+    # if nmrAtoms:
+    #   markNmrAtoms(self.mainWindow, nmrAtoms)
 
   def _handleNmrAtom(self, nmrAtom):
     """

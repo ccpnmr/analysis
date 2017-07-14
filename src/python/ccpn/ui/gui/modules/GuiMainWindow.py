@@ -12,7 +12,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -54,6 +53,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 
 
 #TODO:WAYNE: incorporate most functionality from GuiWindow and
@@ -181,7 +181,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                                       }
 
                                     """)
-
     # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,

@@ -355,6 +355,7 @@ class ViewBox(pg.ViewBox):
         continue
       for peakListView in spectrumView.peakListViews:
         if peakListView.isVisible():
+          # ejb - strange error AttributeError: 'IntegralList' object has no attribute 'peaks'
           for peak in peakListView.peakList.peaks:
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):

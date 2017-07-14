@@ -50,7 +50,7 @@ class NmrResiduePopup(CcpnDialog):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    self.setStyleSheet("border: 0px solid")
+    # self.setStyleSheet("border: 0px solid")
     self.parent = parent
     self.nmrAtom = nmrAtom
     self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 2))

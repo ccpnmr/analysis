@@ -10,14 +10,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,6 +36,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 
 
 class PeakFindPopup(CcpnDialog):
@@ -51,6 +50,15 @@ class PeakFindPopup(CcpnDialog):
     self.project = self.mainWindow.project
     self.application =  self.mainWindow.application
     self.current = self.application.current
+
+    if not self.current.strip.spectra[0].peakLists:
+      # ejb - if there is no peaklist then create a new one
+      self.current.strip.spectra[0].newPeakList()
+      showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
+                                        "New peakList '%s' inserted"
+                                        % (str(self.current.strip.spectra[0].pid)
+                                          , str(self.current.strip.spectra[0].peakLists[0].pid)))
+
     self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists

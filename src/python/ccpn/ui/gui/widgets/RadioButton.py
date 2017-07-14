@@ -23,8 +23,7 @@ class RadioButton(QtGui.QRadioButton, Base):
 
     self.setStyleSheet('''
     RadioButton::disabled {
-
-                            color: ##7f88ac;
+                            color: #7f88ac;
                             }
                             ''')
 

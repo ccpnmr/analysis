@@ -706,11 +706,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     mouseMovedDict = dict(strip=strip)
     for n, axisCode in enumerate(axisCodes):
       if n == 0:
-        pos = position.x()
+        xPos = pos = position.x()
       elif n == 1:
-        pos = position.y()
+        yPos = pos = position.y()
       else:
         pos = orderedAxes[n].position
       mouseMovedDict[axisCode] = pos
+
+    self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
 
     self._mouseMovedSignal.emit(mouseMovedDict)

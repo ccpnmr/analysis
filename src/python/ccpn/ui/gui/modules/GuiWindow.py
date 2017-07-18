@@ -190,20 +190,28 @@ class GuiWindow():
     """
     Toggles whether horizontal traces are displayed in the specified window.
     """
+    """ Only do it for current strip because otherwise conflicts with how right mouse menu works
     for spectrumDisplay in window.spectrumDisplays:
       if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
           strip.toggleHorizontalTrace()
+"""
+    if self.application.current.strip:
+      self.application.current.strip.toggleHorizontalTrace()
     
   def toggleVTrace(self, window:'GuiWindow'):
     """
     Toggles whether vertical traces are displayed in the specified window.
     """
+    """ Only do it for current strip because otherwise conflicts with how right mouse menu works
     for spectrumDisplay in window.spectrumDisplays:
       if not spectrumDisplay.is1D:
         for strip in spectrumDisplay.strips:
           strip.toggleVerticalTrace()
-    
+"""
+    if self.application.current.strip:
+      self.application.current.strip.toggleVerticalTrace()
+
   def togglePhaseConsole(self, window:'GuiWindow'):
     """
     Toggles whether the phasing console is displayed in the specified window.

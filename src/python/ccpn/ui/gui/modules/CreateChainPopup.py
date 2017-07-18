@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
+import string
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -38,6 +39,31 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 
+
+def _nextChainCode(project):
+  """This gives a "next" available chain code.
+     First does A-Z, then A1-Z1, then A2-Z2, etc.
+  """
+
+  possibleChainCodes = list(string.ascii_uppercase)
+  existingChainCodes = set([chain.shortName for chain in project.chains])
+
+  n = 0
+  code = possibleChainCodes[n]
+  while code in existingChainCodes and n < len(possibleChainCodes)-1:
+    n += 1
+    code = possibleChainCodes[n]
+
+  r = 0
+  while code in existingChainCodes:
+    r += 1
+    n = 0
+    code = '%s%d' % (possibleChainCodes[n], r)
+    while code in existingChainCodes and n < len(possibleChainCodes)-1:
+      n += 1
+      code = '%s%d' % (possibleChainCodes[n], r)
+
+  return code
 
 class CreateChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kw):
@@ -64,14 +90,15 @@ class CreateChainPopup(CcpnDialog):
     label4a = Label(self, 'Sequence Start', grid=(4, 0))
     lineEdit1a = Spinbox(self, grid=(4, 1), value=1, min=-1000000, max=1000000)
     label5a = Label(self, 'Chain code', grid=(4, 2))
-    lineEdit2a = LineEdit(self, grid=(4, 3), text='A')
+    code = _nextChainCode(self.project)
+    lineEdit2a = LineEdit(self, grid=(4, 3), text=code)
 
     # self.residueList = ListWidgetSelector(self, setLayout=True, grid=(5,0), gridSpan=(1,4), title='Residue Types')
 
     buttonBox = ButtonList(self, grid=(6, 3), texts=['Cancel', 'Ok'],
                            callbacks=[self.reject, self._okButton])
     self.sequenceStart = 1
-    self.chainCode = 'A'
+    self.chainCode = code
     self.sequence = self.sequenceEditor.toPlainText()
     self.moleculeName = None
     moleculeName.textChanged.connect(self._setMoleculeName)

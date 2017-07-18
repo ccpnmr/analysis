@@ -42,14 +42,11 @@ class ModuleTest(WrapperTesting):
     project = self.project
     undo = self.project._undo
     self.project.newUndoPoint()
-    task = project.tasks[0]
-    task2 = project.newTask('TestTask')
     window2 = project.newWindow(title='W2')
-    window2.task = task2
-    module1 = task.newModule('TestMod')
-    module2 = task.newModule('TestMod')
-    module3 = task2.newModule('TestMod', window=window2, title='MyOwn', comment='really?')
-    module4 = task.newModule('DifferentMod')
+    module1 = project.newModule('TestMod')
+    module2 = project.newModule('TestMod')
+    module3 = project.newModule('TestMod', window=window2, title='MyOwn', comment='really?')
+    module4 = project.newModule('DifferentMod')
     undo.undo()
     undo.undo()
     undo.undo()
@@ -60,10 +57,10 @@ class ModuleTest(WrapperTesting):
     undo.redo()
     undo.redo()
     undo.redo()
-    self.assertEquals(module1.pid, 'GM:user.View.TestMod')
-    self.assertEquals(module2.pid, 'GM:user.View.TestMod_1')
-    self.assertEquals(module3.pid, 'GM:user.TestTask.MyOwn')
-    self.assertEquals(module4.pid, 'GM:user.View.DifferentMod')
+    self.assertEquals(module1.pid, 'GM:TestMod')
+    self.assertEquals(module2.pid, 'GM:TestMod_1')
+    self.assertEquals(module3.pid, 'GM:MyOwn')
+    self.assertEquals(module4.pid, 'GM:DifferentMod')
     self.assertEquals(module1.window.pid, 'GW:Main')
     self.assertEquals(module2.window.pid, 'GW:Main')
     self.assertEquals(module3.window.pid, 'GW:W2')
@@ -78,11 +75,10 @@ class ModuleTest(WrapperTesting):
     project = self.project
     undo = self.project._undo
     self.project.newUndoPoint()
-    task2 = project.newTask('TestTask')
     window2 = project.newWindow(title='W2')
     undo.undo()
-    self.assertRaises(KeyError, undo.undo)
-    undo.redo()
+    # self.assertRaises(KeyError, undo.undo)
+    # undo.redo()
     undo.redo()
 
 
@@ -95,8 +91,8 @@ class ParameterTest(WrapperTesting):
   def test_parameters(self):
 
     project = self.project
-    task = project.newTask('TestTask')
-    module1 = task.newModule('TestMod')
+    # task = project.newTask('TestTask')
+    module1 = project.newModule('TestMod')
 
     testpars = collections.OrderedDict()
     for key,val in [
@@ -128,8 +124,8 @@ class ParameterTest(WrapperTesting):
   def test_numpy_parameter(self):
 
       project = self.project
-      task = project.newTask('TestTask')
-      module1 = task.newModule('TestMod')
+      # task = project.newTask('TestTask')
+      module1 = project.newModule('TestMod')
       undo = self.project._undo
       self.project.newUndoPoint()
       module1.setParameter('ndarray', numpy.ndarray((5,3,1)))
@@ -140,8 +136,8 @@ class ParameterTest(WrapperTesting):
   def test_tensor_parameter(self):
 
       project = self.project
-      task = project.newTask('TestTask')
-      module1 = task.newModule('TestMod')
+      # task = project.newTask('TestTask')
+      module1 = project.newModule('TestMod')
       undo = self.project._undo
       self.project.newUndoPoint()
       module1.setParameter('tensor', Tensor._fromDict({'orientationMatrix':numpy.identity(3),

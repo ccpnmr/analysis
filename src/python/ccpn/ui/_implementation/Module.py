@@ -28,7 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui._implementation.Task import Task
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
@@ -43,7 +42,7 @@ class Module(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Module'
 
-  _parentClass = Task
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'modules'
@@ -72,11 +71,11 @@ class Module(AbstractWrapperObject):
     return self._wrappedData.name
     
   @property
-  def _parent(self) -> Task:
-    """Task containing module."""
-    return self._project._data2Obj.get(self._wrappedData.guiTask)
+  def _parent(self) -> Project:
+    """Project containing module."""
+    return self._project
 
-  task = _parent
+  project = _parent
 
   @property
   def comment(self) -> str:
@@ -150,17 +149,21 @@ class Module(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:Task)-> list:
-    """get wrappedData (ccp.gui.Module) for all GenericModule children of parent Task"""
-    return [x for x in parent._wrappedData.sortedModules() if isinstance(x, ApiGenericModule)]
+  def _getAllWrappedData(cls, parent:Project)-> list:
+    """get wrappedData (ccp.gui.Module) for all GenericModule children of parent Project"""
+
+    apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                  parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiGenericModule)]
 
 
 # newModule functions
-def _newModule(self:Task, moduleType:str, title:str=None, window:Window=None, comment:str=None):
+def _newModule(self:Project, moduleType:str, title:str=None, window:Window=None, comment:str=None):
 
   window = self.getByPid(window) if isinstance(window, str) else window
 
-  apiTask = self._wrappedData
+  apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
 
   # set parameters for display
   apiWindow = window._wrappedData if window else apiTask.sortedWindows()[0]
@@ -189,7 +192,7 @@ def _newModule(self:Task, moduleType:str, title:str=None, window:Window=None, co
     self._endCommandEchoBlock()
 
   return result
-Task.newModule = _newModule
+Project.newModule = _newModule
 del _newModule
 
 

@@ -48,7 +48,7 @@ class ParameterTest(WrapperTesting):
     undo.undo()
     undo.redo()
 
-    dd = {'pid':'GD:user.View.HN', 'axisCodes':('H', 'N'), 'units':('ppm', 'ppm'),
+    dd = {'pid':'GD:HN', 'axisCodes':('H', 'N'), 'units':('ppm', 'ppm'),
           'stripDirection':'Y', 'is1D':False, 'title':'HN'}
 
     for tag, val in dd.items():

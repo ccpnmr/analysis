@@ -128,8 +128,9 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
   self._startCommandEchoBlock('newWindow', values=locals(), defaults=defaults,
                               parName='newWindow')
   try:
-
-    newApiWindow = apiWindowStore.newWindow(title=title)
+    apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
+            or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
+    newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
     if position:
       newApiWindow.position = position
     if size:

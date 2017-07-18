@@ -84,7 +84,7 @@ currentNefVersion = '1.1'
 minimumNefVersion = 1.1
 
 
-# TODO These should be consolidated with the sams constants in CcpnNefIo
+# TODO These should be consolidated with the same constants in NefIo
 # (and likely those in ExportNefPopup) and likely replaced wiht a list of classes
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
@@ -135,11 +135,36 @@ saveFrameWritingOrder = ([x for x in saveFrameReadingOrder if x.startswith('nef_
 #
 # Loops are entered as saveFrame contents with their category as tag and 'ccpn_tag' None
 # and at the top level under their category name
-# This relies on loop categories being unique, both at teh top level, and among the item
+# This relies on loop categories being unique, both at the top level, and among the item
 # names within a saveframe
 
 # Sentinel value - MUST evaluate as False
 _isALoop = ()
+
+
+# This dictionary is used directly to control what is read from and written to
+# NEF. The top level keys are the tags for saveframes and loops, which must
+# either have their own entries in the Reader 'imprters' dictionary, of (if loops)
+# be read directly by the parent samveframe).
+# The next level down desceibes saveframe attributes or loop elements.
+#
+# Each saveframe or loop row matches a wrapper object, and the nef2CcpnMap map
+# is used to read and write starting at that object.
+# There are several variants. Using nef_sequence as an example:
+#
+# ('residue_name','residueType') means that the NEF value is read AND written
+#  to residue.residueType.
+#
+# ('chain_code','chain.shortName') means that the NEF value is set (for writing) automatically,
+# but the code for reading from NEF and passing it into the project must be done by hand
+#
+# ('cis_peptide',None), means that the tag exists, but that both on reading and writing it
+# must be handled  explicitly.
+#
+# values _isALoop have an obvious meaning
+#
+# Note the _parametersFromSaveFrame and _parakmetersFromLoopRow functions
+# that make a parameters dictionary (for use in object creation), using these mappings
 nef2CcpnMap = {
   'nef_nmr_meta_data':OD((
     ('format_name',None),

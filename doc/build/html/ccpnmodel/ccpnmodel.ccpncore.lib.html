@@ -465,6 +465,9 @@ chainMap remaps chains to new ones with different chainCodes (for V2-V3 upgrade)
 <dt id="ccpnmodel.ccpncore.lib.V2Upgrade.mapUnAssignedFixedResonances">
 <code class="descclassname">ccpnmodel.ccpncore.lib.V2Upgrade.</code><code class="descname">mapUnAssignedFixedResonances</code><span class="sig-paren">(</span><em>nmrConstraintStore</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/V2Upgrade.html#mapUnAssignedFixedResonances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.V2Upgrade.mapUnAssignedFixedResonances" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map unassigned resonances for NmrConstraintStore</p>
+<p>NBNB This must be done AFTER assignments and resonances are done,
+as it transfers teh assignment of the attached NmrProject resonance (if any)
+to the fixedResonance</p>
 </dd></dl>
 
 <dl class="function">

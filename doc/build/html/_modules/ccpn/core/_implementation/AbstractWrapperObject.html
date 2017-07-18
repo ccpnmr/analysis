@@ -216,7 +216,11 @@
       <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
       <span class="n">sortKey</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">_ccpnSortKey</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localCcpnSortKey</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnSortKey</span> <span class="o">=</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">project</span><span class="p">),</span> <span class="n">_importOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">className</span><span class="p">))</span> <span class="o">+</span> <span class="n">sortKey</span>
+
+    <span class="c1"># A bit inelegant, but Nmrresidue is handled specially,</span>
+    <span class="c1"># with a _ccpnSortKey property</span>
+    <span class="k">if</span> <span class="n">className</span> <span class="o">!=</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnSortKey</span> <span class="o">=</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">project</span><span class="p">),</span> <span class="n">_importOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">className</span><span class="p">))</span> <span class="o">+</span> <span class="n">sortKey</span>
 
     <span class="c1"># update pid:object mapping dictionary</span>
     <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
@@ -648,13 +652,14 @@
         <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_getDirectChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get list of objects that have self as a parent&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get list of all objects that have self as a parent&quot;&quot;&quot;</span>
 
     <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;NmrChain&#39;</span><span class="p">:</span>
-      <span class="c1"># Special case - NmrResidues must always be sorted</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="c1"># Removed: Sorting is irrelevant for this function, thaat gives children of ALL classes</span>
+    <span class="c1"># if self.className == &#39;NmrChain&#39;:</span>
+    <span class="c1">#   # Special case - NmrResidues must always be sorted</span>
+    <span class="c1">#   result.sort()</span>
 
     <span class="k">return</span> <span class="n">result</span>
 
@@ -782,14 +787,15 @@
                                         <span class="o">%</span> <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">))</span>
             <span class="n">notifier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;ADVANCED Reset serial of object to newSerial, resetting parent link</span>
 <span class="sd">    and the nextSerial of the parent.</span>
 
 <span class="sd">    Raises ValueError for objects that do not have a serial</span>
 <span class="sd">    (or, more precisely, where the _wrappedData does not have a serial).&quot;&quot;&quot;</span>
 
-    <span class="n">commonUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">)</span>
+    <span class="n">commonUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_startCommandEchoBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Start block for command echoing, set undo waypoint, and echo command to ui and logger</span>

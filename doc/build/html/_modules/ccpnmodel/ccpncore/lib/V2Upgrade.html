@@ -133,7 +133,13 @@
 
 
 <div class="viewcode-block" id="mapUnAssignedFixedResonances"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.V2Upgrade.mapUnAssignedFixedResonances">[docs]</a><span class="k">def</span> <span class="nf">mapUnAssignedFixedResonances</span><span class="p">(</span><span class="n">nmrConstraintStore</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Map unassigned resonances for NmrConstraintStore&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Map unassigned resonances for NmrConstraintStore</span>
+
+<span class="sd">   NBNB This must be done AFTER assignments and resonances are done,</span>
+<span class="sd">   as it transfers teh assignment of the attached NmrProject resonance (if any)</span>
+<span class="sd">   to the fixedResonance&quot;&quot;&quot;</span>
+
+  <span class="n">nmrProject</span> <span class="o">=</span> <span class="n">nmrConstraintStore</span><span class="o">.</span><span class="n">nmrProject</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -144,23 +150,31 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSet</span><span class="p">:</span>
       <span class="c1"># unassigned - treat it</span>
 
-      <span class="n">name</span> <span class="o">=</span>  <span class="n">regularisedResonanceName</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
+      <span class="n">nmrResonance</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSerial</span><span class="p">)</span>
 
-      <span class="c1"># Add resonance serial to name, if it is not in the name already.</span>
-      <span class="n">separator</span> <span class="o">=</span> <span class="n">separator1</span>
-      <span class="c1"># use resonanceSerial if available</span>
-      <span class="n">serial</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSerial</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">serial</span><span class="p">:</span>
-        <span class="c1"># use FixedResonance.serial instead, and use &#39;@@&#39; to distinguish</span>
-        <span class="n">serial</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">serial</span>
-        <span class="n">separator</span> <span class="o">=</span> <span class="n">separator2</span>
+      <span class="k">if</span> <span class="n">nmrResonance</span><span class="p">:</span>
+        <span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">nmrResonance</span><span class="o">.</span><span class="n">resonanceGroup</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">resonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span>
+                             <span class="n">resonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="n">nmrResonance</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">separator1</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">ss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No resonance found - make name from fixedResonance info</span>
+        <span class="n">name</span> <span class="o">=</span>  <span class="n">regularisedResonanceName</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
 
-      <span class="c1">#</span>
-      <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="c1"># Add resonance serial to name, if it is not in the name already.</span>
+        <span class="n">separator</span> <span class="o">=</span> <span class="n">separator1</span>
+        <span class="c1"># use resonanceSerial if available</span>
+        <span class="n">serial</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSerial</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">serial</span><span class="p">:</span>
+          <span class="c1"># use FixedResonance.serial instead, and use &#39;@@&#39; to distinguish</span>
+          <span class="n">serial</span> <span class="o">=</span> <span class="n">resonance</span><span class="o">.</span><span class="n">serial</span>
+          <span class="n">separator</span> <span class="o">=</span> <span class="n">separator2</span>
+
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">separator1</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+          <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">resonance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
@@ -493,6 +507,10 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Set unique default name</span>
         <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elementCode</span><span class="p">,</span> <span class="n">resonance</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="n">resonanceName</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">resonance</span><span class="p">,</span> <span class="s1">&#39;resonanceSerial&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSerial</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elementCode</span><span class="p">,</span> <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSerial</span><span class="p">)</span>
+
 
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elementCode</span><span class="p">,</span> <span class="n">resonance</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>

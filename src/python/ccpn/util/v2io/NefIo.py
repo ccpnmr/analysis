@@ -1468,6 +1468,7 @@ class CcpnNefReader:
         resonanceGroup.ccpCode = residue.ccpCode
         resonanceGroup.linking = residue.linking
         resonanceGroup.descriptor = residue.descriptor
+        resonanceGroup.residue = residue
 
       seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
 

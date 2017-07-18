@@ -100,14 +100,13 @@ class GuiStrip1d(GuiStrip):
     GuiStrip.__init__(self, spectrumDisplay)
 
     self.viewBox.invertX()
-    self.plotWidget.showGrid(x=True, y=True)
+    self.plotWidget.showGrid(x=False, y=False)
     self.gridShown = True
-    self.crossHairShown = True
-    self.autoIntegration = True
     self.viewBox.menu = self._get1dContextMenu()
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
+    self._hideCrossHair()
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -122,13 +121,6 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addItem("Store Zoom", callback=self._storeZoom)
     self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom)
     self.contextMenu.addSeparator()
-    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self._toggleCrossHair,
-                                         checkable=True)
-    if self.crossHairShown:
-      self.crossHairAction.setChecked(True)
-    else:
-      self.crossHairAction.setChecked(False)
-    self.contextMenu.addAction(self.crossHairAction)
     self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
     if self.gridShown:
       self.gridAction.setChecked(True)

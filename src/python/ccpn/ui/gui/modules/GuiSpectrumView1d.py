@@ -111,7 +111,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.strip.hPhasingPivot.setVisible(True)
         self.strip.haveSetHPhasingPivot = True
       trace = pg.PlotDataItem()
-      self.strip.plotWidget.scene().addItem(trace)
+      self.strip.plotWidget.addItem(trace)
       self.hPhaseTrace = trace
       self._updatePhasing()
             

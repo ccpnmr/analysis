@@ -419,8 +419,10 @@ class Strip(AbstractWrapperObject):
     self._project.blankNotification()
     try:
       for spectrumView in self.spectrumViews:
-        if not spectrumView.peakListViews:
-          continue
+        if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
+          self._project.unblankNotification() # need this otherwise SideBar does not get updated
+          spectrumView.spectrum.newPeakList()
+          self._project.blankNotification()
         peakListView = spectrumView.peakListViews[0]
         # TODO: is there some way of specifying which peakListView
         if not peakListView.isVisible():
@@ -456,6 +458,10 @@ class Strip(AbstractWrapperObject):
       for spectrumView in self.spectrumViews:
         if not spectrumView.isVisible():
           continue
+        if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
+          self._project.unblankNotification() # need this otherwise SideBar does not get updated
+          spectrumView.spectrum.newPeakList()
+          self._project.blankNotification()
         peakListView = spectrumView.peakListViews[0]
         # TODO: is there some way of specifying which peakListView
         if not peakListView.isVisible():

@@ -338,6 +338,11 @@ class SideBar(QtGui.QTreeWidget, Base):
       if obj:
         obj.delete()
 
+  def _cloneObject(self, objs):
+    """Clones the specified objects"""
+    for obj in objs:
+      obj.clone()
+
   def _createItem(self, obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.
     Called by notifier when a new object is created or undeleted (so need to check for duplicates).
@@ -667,6 +672,13 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     if len(objs)>0:
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+      canBeCloned = True
+      for obj in objs:
+        if not hasattr(obj, 'clone'):  # TODO: possibly should check that is a method...
+          canBeCloned = False
+          break
+      if canBeCloned:
+        contextMenu.addAction('Clone', partial(self._cloneObject, objs))
       contextMenu.move(event.globalPos().x(), event.globalPos().y() + 10)
       contextMenu.exec()
 

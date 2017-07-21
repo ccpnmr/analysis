@@ -143,7 +143,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
   On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
   along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
   """
-  def __init__(self, parent, project, scene, position, chain, placeholder=None):
+  def __init__(self, sequenceModule, project, scene, position, chain, placeholder=None):
     QtGui.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
@@ -163,18 +163,25 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     if placeholder:
       self.text = 'No Chains in Project!'
     else:
-      self.text = chain.compoundName
-    self.parent = parent
+      self.text = '%s:%s' % (chain.compoundName, chain.shortName)
+    self.sequenceModule = sequenceModule
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
     self.setFont(textFontHuge)
     self.residueDict = {}
     i = 0
     if chain:
-      for residue in chain.residues:
+      for n, residue in enumerate(chain.residues):
         newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i, position[1])
         scene.addItem(newResidue)
         self.residueDict[residue.sequenceCode] = newResidue
         i += 1
+        if n % 10 == 9 and n < len(chain.residues) - 1:  # print out every 10 but don't put one at end
+          numberItem = QtGui.QGraphicsTextItem(residue.sequenceCode)
+          numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
+          xPosition = self.boundingRect().width() + (20 * i)
+          numberItem.setPos(QtCore.QPointF(xPosition, position[1]))
+          scene.addItem(numberItem)
+          i += 1
 
 
 # WB: TODO: this used to be in some util library but the
@@ -214,14 +221,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
   fontSize = 20
 
-  def __init__(self, parent, project, residue, scene, labelPosition, index, yPosition):
+  def __init__(self, guiChainLabel, project, residue, scene, labelPosition, index, yPosition):
 
     QtGui.QGraphicsTextItem.__init__(self)
     Base.__init__(self, acceptDrops=True)
 
     self.project = project
     self.residue = residue
-    self.parent = parent
+    self.guiChainLabel = guiChainLabel
 
     #font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
     #font.setStyleHint(QtGui.QFont.Monospace)
@@ -342,7 +349,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
         residues.append(next)
       nmrChain.assignConnectedResidues(guiRes.residue)
       for ii, res in enumerate(residues):
-        guiResidue = self.parent.residueDict.get(res.sequenceCode)
+        guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                              res.shortName+'</strong></div>')
     #   if self._appBase is not None:
@@ -355,7 +362,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     #     nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
     #
     #   event.accept()
-    # self.parent.parent.overlay.hide()
+    # self.guiChainLabel.sequenceModule.overlay.hide()
     # self.project._appBase.sequenceGraph.resetSequenceGraph()
 
 

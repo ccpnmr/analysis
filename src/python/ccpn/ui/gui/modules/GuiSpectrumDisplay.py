@@ -308,7 +308,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # ejb - just a test, could pass data: if data['shiftLeftMouse']: then clear marks first
 
-    # #TODO:ED currently same as
+    # the below commented code matches backboneassignment, but don't want to do this
+    # want to just show what's actually in the nmrResidue
     # if '-1' in nmrResidue.pid:
     #   # -1 residue so need to split the CA, CB from thr N, H
     #   nmrAtomsMinus = nmrAtomsFromResidue(nmrResidue)

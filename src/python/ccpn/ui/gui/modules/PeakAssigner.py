@@ -142,7 +142,7 @@ class PeakAssigner(CcpnModule):
     """
     listWidget = ListWidget(self, callback=partial(self._updateAssignmentWidget, dim),
                             rightMouseCallback=self._updateNmrAtomsFromListWidgets)
-    listWidget.setFixedWidth(120)
+    listWidget.setFixedWidth(145)   # ejb - a bit wider to see the longer atom pids
     listWidget.setFixedHeight(100)
     self.listWidgets.append(listWidget)
 

@@ -540,7 +540,7 @@ class AbstractWrapperObject():
           else:
             obj = factoryFunction(project, apiObj)
         obj._initializeAll()
-        getLogger().info(str(obj))   # ejb - temp
+        # getLogger().info(str(obj))   # ejb - temp
 
   def _unwrapAll(self):
     """remove wrapper from object and child objects

@@ -358,10 +358,12 @@ QTreeWidget::branch:closed::selected {
                   background-color: #666E98;
                   color: #F7FFFF;
 }
+
 QTreeWidget::branch:closed::hover {
                   background-color: #424A71;
                   color: #E4E15B;
                   }
+
 QTreeWidget::branch:open::selected {
                   background-color: #666E98;
                   color: #F7FFFF;
@@ -373,18 +375,17 @@ QTreeWidget::branch:open::hover {
                   }
 
 QTreeWidget::branch:closed:has-children {
-background-color: #0E1A3D;
-border-image: none;
-image: url(:/dark-side.png);
-padding-left: 10px;
+                  background-color: #0E1A3D;
+                  border-image: none;
+                  image: url(:/dark-side.png);
+                  padding-left: 10px;
 }
 
 QTreeWidget::branch:open {
-background-color: #0E1A3D;
-border-image: none;
-image: url(:/dark-down.png);
-padding-left: 10px;
-
+                  background-color: #0E1A3D;
+                  border-image: none;
+                  image: url(:/dark-down.png);
+                  padding-left: 10px;
 }
 
 
@@ -401,12 +402,12 @@ QTreeWidget::item::hover {
                   color: #e4e15b;
                   background-color: #424A71;
                   }
-
+/*
 QTreeView:branch:{
 color: #e4e15b;
 background-color: #0E1A3D;
 }
-
+*/
 
 QTabWidget QWidget { background: #020F31;
     }

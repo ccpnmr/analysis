@@ -65,6 +65,9 @@ class _StripLabel(Label):
     # disable any drop event callback's until explicitly defined later
     self.setDropEventCallback(None)
 
+    # self.setCursor(QtGui.QCursor(QtCore.Qt.DragCopyCursor))   # ejb - test or ForbiddenCursor
+                                                                # need to check the event though
+
   def _dragMoveEvent(self, event:QtGui.QMouseEvent):
     """
     Required function to enable dragging and dropping within the sidebar.
@@ -88,12 +91,29 @@ class _StripLabel(Label):
     mimeData.setText(itemData)
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
+
+    pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - will this work?
+    painter = QtGui.QPainter(pixmap)
+    painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 255))
+    painter.end()
+    drag.setPixmap(pixmap)
+    drag.setHotSpot(event.pos())
+
     drag.start(QtCore.Qt.MoveAction)
     # if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
     #     pass
     # else:
     #   self.show()
 
+  def dragEnterEvent(self, event):
+    # check whether the event can be handled and change the icon?
+    try:
+      mime = event.mimeData().text()
+      # print ('>>>dragEnterEvent %s' % str(json.loads(mime)))    # might be able to change the icon here
+    finally:
+      # super(_StripLabel, self).dragEnterEvent(event)
+      event.accept()
 
 #TODO:GEERTEN: complete this and replace
 class PlaneSelectorWidget(Widget):

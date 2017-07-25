@@ -76,7 +76,7 @@ class PlotWidget(pg.PlotWidget):
 
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
-      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+      self.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)   # ejb - .FullViewportUpdate)
 
     strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 

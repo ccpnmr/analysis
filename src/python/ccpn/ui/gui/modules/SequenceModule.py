@@ -15,7 +15,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -25,13 +24,11 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 import typing
 
@@ -43,6 +40,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import textFontHuge
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+from ccpn.util.Logging import getLogger
 
 
 class SequenceModule(CcpnModule):
@@ -343,15 +341,20 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
     result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id))
     if result:
-      for ii in range(len(toAssign)-1):
-        resid = residues[ii]
-        next = resid.nextResidue
-        residues.append(next)
-      nmrChain.assignConnectedResidues(guiRes.residue)
-      for ii, res in enumerate(residues):
-        guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-        guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                             res.shortName+'</strong></div>')
+
+      try:
+        for ii in range(len(toAssign)-1):
+          resid = residues[ii]
+          next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+          residues.append(next)
+        nmrChain.assignConnectedResidues(guiRes.residue)
+        for ii, res in enumerate(residues):
+          guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+          guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                               res.shortName+'</strong></div>')
+      except Exception as es:
+        getLogger().warning('Sequence Graph: %s' % str(es))
+
     #   if self._appBase is not None:
     #     appBase = self._appBase
     #   else:

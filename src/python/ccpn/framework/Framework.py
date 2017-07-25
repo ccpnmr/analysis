@@ -29,40 +29,36 @@ import platform
 import sys
 import tarfile
 import tempfile
-# from functools import partial
 
-from ccpnmodel.ccpncore.api.memops import Implementation
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+from PyQt4 import QtGui
 
+from ccpn.core.IntegralList import IntegralList
+from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
-from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
-
+from ccpn.framework import Version
+from ccpn.framework.Current import Current
+from ccpn.framework.Translation import languages, defaultLanguage
+from ccpn.framework.Translation import translator
+from ccpn.ui import interfaces, defaultInterface
+from ccpn.ui.gui.lib.Window import MODULE_DICT
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
-
-from ccpn.framework import Version
-from ccpn.framework.Current import Current
-from ccpn.framework.Translation import languages, defaultLanguage
-from ccpn.framework.Translation import translator
-from ccpn.framework.lib.misc import _checked
-
-from ccpn.ui import interfaces, defaultInterface
-from ccpn.ui.gui.modules.MacroEditor import MacroEditor
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, NefFileDialog
-from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Logging import getLogger
+from ccpnmodel.ccpncore.api.memops import Implementation
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
-from PyQt4 import QtGui
+# from functools import partial
 
 _DEBUG = False
 
@@ -1513,7 +1509,7 @@ class Framework:
     """
     Displays sequence creation popup.
     """
-    from ccpn.ui.gui.modules.CreateChainPopup import CreateChainPopup
+    from ui.gui.popups.CreateChainPopup import CreateChainPopup
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showCreateChainPopup()")
     getLogger().info("application.showCreateChainPopup()")
     popup = CreateChainPopup(mainWindow=self.ui.mainWindow).exec_()
@@ -1557,7 +1553,6 @@ class Framework:
 
   def hideSequenceModule(self):
     """Hides sequence module"""
-    from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
     if hasattr(self, 'sequenceModule'):
       self.sequenceModule.close()

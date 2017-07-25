@@ -16,7 +16,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
@@ -41,7 +41,6 @@ import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
-
 from PyQt4 import QtGui, QtCore
 
 
@@ -57,22 +56,23 @@ class _StripLabel(Label):
     """
     self.parent = parent
     self._dragKey = dragKey
-    self.mousePressEvent = self._mousePressEvent
-    self.dragMoveEvent= self._dragMoveEvent
+    # self.mousePressEvent = self._mousePressEvent
+    # self.dragMoveEvent = self._dragMoveEvent
+    self.eventFilter = self._eventFilter        # ejb - only need this one now
     self.setAcceptDrops(True)
-    #self.setDragEnabled(True) # not possile for Label
+    #self.setDragEnabled(True) # not possible for Label
+
+    self._source = None             # ejb
+    self.installEventFilter(self)   # ejb
 
     # disable any drop event callback's until explicitly defined later
     self.setDropEventCallback(None)
 
-    # self.setCursor(QtGui.QCursor(QtCore.Qt.DragCopyCursor))   # ejb - test or ForbiddenCursor
-                                                                # need to check the event though
-
-  def _dragMoveEvent(self, event:QtGui.QMouseEvent):
-    """
-    Required function to enable dragging and dropping within the sidebar.
-    """
-    event.accept()
+  # def _dragMoveEvent(self, event:QtGui.QMouseEvent):
+  #   """
+  #   Required function to enable dragging and dropping within the sidebar.
+  #   """
+  #   event.accept()
 
   def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """
@@ -92,10 +92,10 @@ class _StripLabel(Label):
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
 
-    pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - will this work?
-    painter = QtGui.QPainter(pixmap)
+    pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - set the pixmap to the image of the label
+    painter = QtGui.QPainter(pixmap)            #       replaces the block text
     painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 255))
+    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
     painter.end()
     drag.setPixmap(pixmap)
     drag.setHotSpot(event.pos())
@@ -106,14 +106,44 @@ class _StripLabel(Label):
     # else:
     #   self.show()
 
-  def dragEnterEvent(self, event):
-    # check whether the event can be handled and change the icon?
-    try:
-      mime = event.mimeData().text()
-      # print ('>>>dragEnterEvent %s' % str(json.loads(mime)))    # might be able to change the icon here
-    finally:
-      # super(_StripLabel, self).dragEnterEvent(event)
+  def _eventFilter(self, obj, event):
+    """
+    Replace all the events with a single filter process
+    Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
+    and allows changing of the cursor - ejb
+    """
+    if event.type() == QtCore.QEvent.MouseButtonPress:
+      self._mousePressEvent(event)                      # call the standard mouse event
+      return True
+
+    if event.type() == QtCore.QEvent.DragEnter:
+      self._source = event.source()
+      try:
+        if self._source != self:
+          mime = event.mimeData().text()
+          dataItem = json.loads(mime)
+          if 'text' in dataItem:
+            if dataItem['text'].startswith('NR'):  # only test NmrResidues
+              QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.DragCopyCursor))
+              # print('>>>DragEnterFilter %s' % dataItem['text'])  # might be able to change the icon here
+      finally:
+        event.accept()
+        return True
+
+    if event.type() == QtCore.QEvent.DragLeave:
+      QtGui.QApplication.restoreOverrideCursor()
+      # print('>>>DragLeaveFilter')
       event.accept()
+      return True
+
+    if event.type() == QtCore.QEvent.Drop:
+      QtGui.QApplication.restoreOverrideCursor()
+      # print(">>>DropFilter")
+      event.ignore()
+      # no return True, so BackboneAssignment._processDroppedItem still fires
+
+    return super(_StripLabel, self).eventFilter(obj,event)    # do the rest
+
 
 #TODO:GEERTEN: complete this and replace
 class PlaneSelectorWidget(Widget):

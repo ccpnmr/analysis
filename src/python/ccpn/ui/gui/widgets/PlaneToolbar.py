@@ -122,10 +122,10 @@ class _StripLabel(Label):
         if self._source != self:
           mime = event.mimeData().text()
           dataItem = json.loads(mime)
-          if 'text' in dataItem:
-            if dataItem['text'].startswith('NR'):  # only test NmrResidues
-              QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.DragCopyCursor))
-              # print('>>>DragEnterFilter %s' % dataItem['text'])  # might be able to change the icon here
+          if 'text' in dataItem and dataItem['text'].startswith('NR'):
+          # only test NmrResidues
+          # print('>>>DragEnterFilter %s' % dataItem['text'])
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
       finally:
         event.accept()
         return True
@@ -140,7 +140,7 @@ class _StripLabel(Label):
       QtGui.QApplication.restoreOverrideCursor()
       # print(">>>DropFilter")
       event.ignore()
-      # no return True, so BackboneAssignment._processDroppedItem still fires
+      # no return True needed, so BackboneAssignment._processDroppedItem still fires
 
     return super(_StripLabel, self).eventFilter(obj,event)    # do the rest
 

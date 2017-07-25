@@ -93,7 +93,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
     self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
     self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    self.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)    # ejb -.FullViewportUpdate)
     self.setInteractive(True)
     self.resetView()
     self.scene = QtGui.QGraphicsScene(self)

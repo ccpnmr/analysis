@@ -25,47 +25,41 @@ __date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 # Start of code
 #=========================================================================================
 
+import json
 from collections import OrderedDict
 
-import json
+from PyQt4 import QtCore, QtGui
 
-from PyQt4 import QtCore, QtGui, Qt
-
-
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
-from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core import _coreClassMap
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.ui.gui.widgets.Base import Base
-
-from ccpn.ui.gui.modules.CreateChainPopup import CreateChainPopup
-#from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
-
+from ccpn.ui.gui.guiSettings import sidebarFont
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
+from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
-from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
-from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
-from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-from ccpn.ui.gui.popups.IntegralListPopup import IntegralListPopup
-from ccpn.ui.gui.popups.NotesPopup import NotesPopup
-from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructurePopup import StructurePopup
+from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.guiSettings import sidebarFont
-
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
+from ui.gui.popups.CreateChainPopup import CreateChainPopup
+
+# from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra

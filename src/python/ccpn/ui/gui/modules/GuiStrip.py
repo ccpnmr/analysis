@@ -395,11 +395,12 @@ class GuiStrip(Frame):
     self._updateY()
     self._updatePhasing()
 
-    # the below updates the wrapper model
-    for ii, axis in enumerate(self.orderedAxes[:2]):
-      viewRange = self.viewBox.viewRange()[ii]
-      axis.position = 0.5*(viewRange[0] + viewRange[1])
-      axis.width = viewRange[1] - viewRange[0]
+    # FIXME fails on newer OSX. It causes the displays to shrink
+    # the below updates the wrapper model.
+    # for ii, axis in enumerate(self.orderedAxes[:2]):
+    #   viewRange = self.viewBox.viewRange()[ii]
+    #   axis.position = 0.5*(viewRange[0] + viewRange[1])
+    #   axis.width = viewRange[1] - viewRange[0]
 
   def _updateY(self):
 

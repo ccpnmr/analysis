@@ -45,16 +45,37 @@ def getExperimentClassifications(project:Project) -> dict:
   return getExpClassificationDict(project._wrappedData)
 
 
-def _estimateNoiseLevel1D(x, y, factor=3):
-  '''
-  :param x,y:  spectrum.positions, spectrum.intensities
-  :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
-  :return: float of estimated noise threshold
-  '''
+# def _estimateNoiseLevel1D(x, y, factor=3):
+#   '''
+#   :param x,y:  spectrum.positions, spectrum.intensities
+#   :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
+#   :return: float of estimated noise threshold
+#   '''
+#
+#   data = np.array([x, y])
+#   dataStd = np.std(data)
+#   data = np.array(data, np.float32)
+#   data = data.clip(-dataStd, dataStd)
+#   value = factor * np.std(data)
+#   return value
 
-  data = np.array([x, y])
-  dataStd = np.std(data)
-  data = np.array(data, np.float32)
-  data = data.clip(-dataStd, dataStd)
-  value = factor * np.std(data)
-  return value
+
+def _estimateNoiseLevel1D(y, factor=0.5):
+  '''
+  Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+  only noise is present. To increase the threshold value: increase the factor.
+  return:  float of estimated noise threshold
+  '''
+  if y is not None:
+    return max(y[:int(len(y)/20)]) * factor
+  else:
+    return 0
+
+
+def _calibrateX1D(spectrum, currentPosition, newPosition):
+  shift = newPosition - currentPosition
+  spectrum.positions = spectrum.positions+shift
+
+def _calibrateY1D(spectrum, currentPosition, newPosition):
+  shift = newPosition - currentPosition
+  spectrum.intensities = spectrum.intensities+shift

@@ -67,13 +67,21 @@ class Plugin(ABC):
   guiModule = None  # Specify subclass of CcpnModule here OR
   params = None  # Populate this to have an auto-generated gui
   settings = None  # Break out the settings into another variable so pipelines are portable
-
+  widgetsState = None
+  UiPlugin = False
 
   @property
   @abstractmethod
   def PLUGINNAME(self):
     return str()
 
+  @classmethod
+  def register(cls):
+    """
+    method to register the pipe in the loaded pipes to appear in the pipeline
+    """
+    from ccpn.plugins import loadedPlugins
+    loadedPlugins.append(cls)
 
   def __init__(self, application=None):
     self.guiModule = self.__class__.guiModule

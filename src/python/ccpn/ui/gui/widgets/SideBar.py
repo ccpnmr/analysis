@@ -456,6 +456,18 @@ class SideBar(QtGui.QTreeWidget, Base):
         for xx in objects[1:]:
           self._createItem(xx)
 
+    # QTreeWidgetItem* item = this->currentItem();      # ejb
+    # int row  = this->currentIndex().row();
+    # if (item && row > 0)
+    # {
+    # 	QTreeWidgetItem* parent = item->parent();
+    # 	int index = parent->indexOfChild(item);
+    # 	QTreeWidgetItem* child = parent->takeChild(index);
+    # 	parent->insertChild(index-1, child);
+    # 	parent->setExpanded(true);
+    # 	child->setExpanded(true);
+    # }
+
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
 

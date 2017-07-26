@@ -34,31 +34,75 @@ from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.lib.GuiGenerator import AUTOGEN_TAG
 from ccpn.ui.gui.widgets.Button import Button
 
-widgetGetters = {'CheckBox': 'get',  #returns Bool
-                 'PulldownList':  'get'               ,
-                 'LineEdit':      'get'               ,
-                 'Label':         'get'               ,
-                 'ListWidget':   'getSelectedObjects',  #returns list. Not Tested
-                 'DoubleSpinbox': 'value'             ,
-                 'Spinbox':       'value'             ,
-                 'Slider':        'get'               ,
-                 'RadioButton':   'isChecked'         ,  #returns Bool
-                 'RadioButtons':  'getIndex'          ,  # returns int index of the checked RB
-                 'ObjectTable':   'getSelectedObjects',  # returns int
-                 'TextEditor':    'getText'           ,
-                 'ToolButton':    'getText'           ,
-                 }
+from ccpn.ui.gui.lib.GuiGenerator import generateWidget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
+from ccpn.ui.gui.widgets.Icon import Icon
+
+from ccpn.framework.lib.Pipeline import Pipeline
+from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
+
+commonWidgets =           {
+                            CheckBox.__name__:              ('get',         'setChecked'),
+                            ColourDialog.__name__:          ('getColor',    'setColor'  ),
+                            DoubleSpinbox.__name__:         ('value',       'setValue'  ),
+                            Label.__name__:                 ('get',         'setText'   ),
+                            LineEdit.__name__:              ('get',         'setText'   ),
+                            LineEditButtonDialog.__name__:  ('get',         'setText'   ),
+                            PulldownList.__name__:          ('currentText', 'set'       ),
+                            RadioButton.__name__:           ('get',         'set'       ),
+                            RadioButtons.__name__:          ('get',         'set'       ),
+                            Slider.__name__:                ('get',         'setValue'  ),
+                            Spinbox.__name__:               ('value',       'set'       ),
+                            TextEditor.__name__:            ('get',         'setText'   ),
+                            TargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
+                            ExcludeRegions.__name__:        ('_getExcludedRegions', '_set' ),
+                            # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
+                          }
+
+# widgetGetters = {'CheckBox':      'get',  #returns Bool
+#                  'PulldownList':  'get'               ,
+#                  'LineEdit':      'get'               ,
+#                  'Label':         'get'               ,
+#                  'ListWidget':    'getSelectedObjects',  #returns list. Not Tested
+#                  'DoubleSpinbox': 'value'             ,
+#                  'Spinbox':       'value'             ,
+#                  'Slider':        'get'               ,
+#                  'RadioButton':   'isChecked'         ,  #returns Bool
+#                  'RadioButtons':  'getIndex'          ,  # returns int index of the checked RB
+#                  'ObjectTable':   'getSelectedObjects',  # returns int
+#                  'TextEditor':    'getText'           ,
+#                  'ToolButton':    'getText'           ,
+#                  }
 
 class PluginModule(CcpnModule):
 
-  def __init__(self, interactor, mainWindow, *args, **kwargs):
-    self.interactor = interactor
-    self._kwargs = {}
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsPosition = 'top'
 
+  className = 'PluginModule'
+
+  def __init__(self, mainWindow=None, interactor=None, application=None):
     if interactor.settings is not None:
       self.includeSettingsWidget = True
 
-    super().__init__(mainWindow=mainWindow, name=interactor.PLUGINNAME)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=interactor.PLUGINNAME)
+
+    self.interactor = interactor
+    self._kwargs = {}
 
     self._populateMainWidget()
     if interactor.settings is not None:
@@ -66,7 +110,7 @@ class PluginModule(CcpnModule):
 
 
   def _populateMainWidget(self):
-    generateWidget(self.interactor.widgetsState, widget=self.mainWidget, argsDict=self._kwargs)
+    generateWidget(self.interactor.params, widget=self.mainWidget, argsDict=self._kwargs)
     self.addRunButton()
 
 
@@ -81,27 +125,44 @@ class PluginModule(CcpnModule):
 
 
   def _runButtonCallback(self):
-    autogenTagLength = len(AUTOGEN_TAG)
-    mainWidgetChildren = self.mainWidget.children()
-    settingsWidgetChildren = self.settingsWidget.children()
-    parameters = {}
-    for widget in (mainWidgetChildren, settingsWidgetChildren):
-      for child in widget:
-        for subchild in child.children():
-          n = subchild.objectName()
-          if n.startswith(AUTOGEN_TAG):
-            widgetType = subchild.__class__.__name__
-            val = getattr(subchild, widgetGetters[widgetType])()
-            parameters[n[autogenTagLength:]] = val
-    # for k,v in parameters.items():
-    #   print(k,v)
-    self.interactor.run(**parameters)
-    # self.interactor.run(**self._kwargs)
+    self.interactor.run(**self.widgetsState)
 
 
   def issueMessage(self, message):
     raise NotImplemented('Messages are not implemented yet.')
 
+  @property
+  def widgetsState(self):
+    return self._widgetsState
+
+  # @widgetsState.setter
+  # def widgetsState(self, value):
+  #   self._widgetsState = value
+
+  @widgetsState.getter
+  def widgetsState(self):
+    '''return  {"variableName":"value"}  of all gui Variables  '''
+    widgetsState = {}
+    for varName, varObj in vars(self.mainWidget).items():
+      if varObj.__class__.__name__ in commonWidgets.keys():
+        try:  # try because widgets can be dynamically deleted
+          widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        except Exception as e:
+          print('Error',e)
+    self._kwargs = widgetsState
+    return widgetsState
+
+
+  def restoreWidgetsState(self, **widgetsState):
+    'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
+    for variableName, value in widgetsState.items():
+      try:
+        widget = getattr(self, str(variableName))
+        if widget.__class__.__name__ in commonWidgets.keys():
+          setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
+          setWidget(value)
+      except Exception as e:
+        print('Impossible to restore %s value for %s.' % (variableName, self.interactor.PLUGINNAME), e)
 
 
 ##################### Qt Testing code #########################
@@ -292,9 +353,9 @@ if __name__ == '__main__':
   #                             , application=application
   #                             , mainWindow=application.mainWindow)
 
-  pluginModule = PluginModule(interactor=interactor
-                              , application=application
-                              , mainWindow=qtTestHarness.qtMainWindow)
+  pluginModule = PluginModule(mainWindow=qtTestHarness.qtMainWindow
+                              , interactor=interactor
+                              , application=application)
   qtTestHarness.showWidget(pluginModule)
 
   # pluginModule.show()

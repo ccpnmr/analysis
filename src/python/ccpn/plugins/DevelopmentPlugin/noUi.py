@@ -5,3 +5,5 @@ class NoUiDevPlugin(Plugin):
 
   def run(self):
     print('Run')
+
+NoUiDevPlugin.register() # Registers the pipe in the pluginList

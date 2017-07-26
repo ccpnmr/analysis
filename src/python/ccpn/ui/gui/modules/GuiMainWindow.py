@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
+from collections import OrderedDict
 
 
 #TODO:WAYNE: incorporate most functionality from GuiWindow and
@@ -247,7 +248,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
     #TODO:ED needs fixing
-    # self._fillPluginsMenu()     # ejb - nothing to show, and crash anyway
+    self._fillPluginsMenu()     # ejb - nothing to show, and crash anyway
 
 
   def _createMenu(self, spec, targetMenu=None):
@@ -441,19 +442,35 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
     from ccpn.framework.PathsAndUrls import pluginPath
 
+    from ccpn.plugins import loadedPlugins
+
     pluginsMenu = self.getMenuAction('Plugins')
     pluginsMenu.clear()
 
-    Plugins = getPlugins(pluginPath)
-    Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-    for Plugin in Plugins:
+    # Plugins = getPlugins(pluginPath)        # ejb - original
+    # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    # for Plugin in Plugins:
+    #   self._addPluginSubMenu(Plugin)
+    #
+    # pluginsMenu.addSeparator()
+    # Plugins = getPlugins(self.application.preferences.general.userPluginPath)
+    # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    # for Plugin in Plugins:
+    #   self._addPluginSubMenu(Plugin)
+
+    # Plugins = getPlugins(pluginPath)                      # already a set
+    # Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    # # for Plugin in Plugins:
+    # #   self._addPluginSubMenu(Plugin)
+    #
+    # Plugins2 = getPlugins(self.application.preferences.general.userPluginPath)
+    # Plugins2 = sorted(Plugins2, key=lambda p:p.PLUGINNAME)
+    #
+    # Plugins += Plugins2
+
+    for Plugin in loadedPlugins:
       self._addPluginSubMenu(Plugin)
 
-    pluginsMenu.addSeparator()
-    Plugins = getPlugins(self.application.preferences.general.userPluginPath)
-    Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-    for Plugin in Plugins:
-      self._addPluginSubMenu(Plugin)
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                       callback=self._fillPluginsMenu))
@@ -463,13 +480,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     plugin = Plugin(application=self.application)
     self.application.plugins.append(plugin)
     if plugin.guiModule is None:
-      if plugin.widgetsState is None:
+      if not plugin.UiPlugin:
         plugin.run()
         return
       else:
         from ccpn.ui.gui.modules.PluginModule import PluginModule
-        pluginModule = PluginModule(interactor=plugin, application=self.application
-                                    , mainWindow=self)   # ejb
+        pluginModule = PluginModule(mainWindow=self
+                                    , interactor=plugin
+                                    , application=self.application)   # ejb
     else:
       pluginModule = plugin.guiModule(name=plugin.PLUGINNAME, parent=self,
                                       interactor=plugin, application=self.application

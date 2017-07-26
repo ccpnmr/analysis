@@ -239,6 +239,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     separated, Framework should be able to call a method to set the menus.
     """
 
+    self._sequenceModuleAction = None # used in SequenceModule to make sure check is off when module is closed with x
+
     self._menuBar = MenuBar(self)
     for m in self.application._menuSpec:
       self._createMenu(m)
@@ -279,8 +281,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         for k,v in kwDict.items():
           if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
             kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
-        menu.addAction(Action(self, action[0], callback=action[1], **kwDict))
-
+        menuAction = Action(self, action[0], callback=action[1], **kwDict)
+        menu.addAction(menuAction)
+        if menu.title() == 'View' and action[0] == 'Show Sequence':
+          # above conditions slightly dangerous but other options even more dangerous
+          self._sequenceModuleAction = menuAction
 
   def _queryCloseProject(self, title, phrase):
 

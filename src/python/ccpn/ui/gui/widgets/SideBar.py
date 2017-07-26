@@ -231,6 +231,9 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     self.setDragDropMode(self.DragDrop)
     self.setAcceptDrops(True)
+    # self.eventFilter = self._eventFilter        # ejb - doesn't work
+    # self.installEventFilter(self)   # ejb
+
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self._processDroppedItems)
@@ -569,13 +572,13 @@ class SideBar(QtGui.QTreeWidget, Base):
     """
     Required function to enable dragging and dropping within the sidebar.
     """
-    super(SideBar, self).dragMoveEvent(event)
+    # super(SideBar, self).dragMoveEvent(event)
     event.accept()
 
-  def dragLeaveEvent(self, event):
-    # print ('>>>dragLeaveEvent %s' % str(event.type()))
-    # super(SideBar, self).dragLeaveEvent(event)
-    event.accept()
+  # def dragLeaveEvent(self, event):
+  #   # print ('>>>dragLeaveEvent %s' % str(event.type()))
+  #   super(SideBar, self).dragLeaveEvent(event)
+  #   # event.accept()
 
   def _mouseMoveEvent(self, event):
     event.accept()
@@ -629,7 +632,7 @@ class SideBar(QtGui.QTreeWidget, Base):
     #     super(SideBar, self).mousePressEvent(event)
 
     # else:
-    QtGui.QTreeWidget.mousePressEvent(self, event)
+    super(SideBar, self).mousePressEvent(event)
 
   def _mouseReleaseEvent(self, event):
     """

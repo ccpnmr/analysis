@@ -571,11 +571,12 @@ class SideBar(QtGui.QTreeWidget, Base):
     """
     Required function to enable dragging and dropping within the sidebar.
     """
+    super(SideBar, self).dragMoveEvent(event)
     event.accept()
 
   def dragLeaveEvent(self, event):
     # print ('>>>dragLeaveEvent %s' % str(event.type()))
-    super(SideBar, self).dragLeaveEvent(event)
+    # super(SideBar, self).dragLeaveEvent(event)
     event.accept()
 
   def _mouseMoveEvent(self, event):
@@ -642,14 +643,6 @@ class SideBar(QtGui.QTreeWidget, Base):
       event.accept()
     else:
       QtGui.QTreeWidget.mouseReleaseEvent(self, event)
-
-  def enterEvent(self, event):
-    # print ('>>>enterEvent')
-    super(SideBar, self).enterEvent(event)
-
-  def leaveEvent(self, event):
-    # print ('>>>leaveEvent')
-    super(SideBar, self).leaveEvent(event)
 
   def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """

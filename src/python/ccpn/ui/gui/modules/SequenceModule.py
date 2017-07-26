@@ -37,7 +37,7 @@ from PyQt4 import QtCore, QtGui
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.guiSettings import textFontHuge
+from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthHugeFont
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
@@ -64,7 +64,7 @@ class SequenceModule(CcpnModule):
   def __init__(self, mainWindow, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closable=False)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.project = mainWindow.application.project
     self.colourScheme = mainWindow.application.colourScheme
@@ -91,16 +91,19 @@ class SequenceModule(CcpnModule):
     self.chainLabels = []
     self.widgetHeight = 0 # dynamically calculated from the number of chains
     if not self.project.chains:
-      self._addChainLabel(placeholder=True)
+      self._addChainLabel(chain=None, placeholder=True)
     else:
       for chain in self.project.chains:
-        self._addChainLabel(chain)
+        self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
     #GWV: removed fixed height restrictions but maximum height instead
     #self.setFixedHeight(2*self.widgetHeight)
     #self.scrollContents.setFixedHeight(2*self.widgetHeight)
     self.setMaximumHeight(100)
     self.scrollContents.setMaximumHeight(100)
+
+    # comment back in when residue creation notifers are called in sequence instead of random order
+    ###self._registerNotifiers()
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
@@ -125,14 +128,42 @@ class SequenceModule(CcpnModule):
                            residue.shortName+'</div>')
 
 
-  def _addChainLabel(self, chain:Chain=None, placeholder=False):
+  def _addChainLabel(self, chain:Chain, placeholder=False, tryToUseSequenceCodes=False):
     """
     Creates and adds a GuiChainLabel to the sequence module.
     """
-    chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, position=[0, self.widgetHeight], chain=chain, placeholder=placeholder)
-    self.scrollArea.scene.addItem(chainLabel)
-    self.chainLabels.append(chainLabel)
-    self.widgetHeight += (0.8*(chainLabel.boundingRect().height()))
+    if len(self.project.chains) == 1 and len(self.chainLabels) == 1:
+      # first new chain created so get rid of placeholder label
+      self.chainLabels = []
+      self.scrollArea.scene.removeItem(self.chainLabel)
+      self.widgetHeight = 0
+
+    self.chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, position=[0, self.widgetHeight],
+                                    chain=chain, placeholder=placeholder, tryToUseSequenceCodes=tryToUseSequenceCodes)
+    self.scrollArea.scene.addItem(self.chainLabel)
+    self.chainLabels.append(self.chainLabel)
+    self.widgetHeight += (0.8*(self.chainLabel.boundingRect().height()))
+
+  def _addChainResidue(self, residue):
+    if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
+      return
+    number = residue.chain.residues.index(residue)
+    self.chainLabel._addResidue(number, residue)
+
+  def _registerNotifiers(self):
+    self.project.registerNotifier('Chain', 'create', self._addChainLabel)
+    self.project.registerNotifier('Residue', 'create', self._addChainResidue)
+
+  def _unRegisterNotifiers(self):
+    self.project.unRegisterNotifier('Chain', 'create', self._addChainLabel)
+    self.project.unRegisterNotifier('Residue', 'create', self._addChainResidue)
+
+  def _closeModule(self):
+    # comment back in when residue creation notifers are called in sequence instead of random order
+    ###self._unRegisterNotifiers()
+    SequenceModule._alreadyOpened = False
+    self.mainWindow._sequenceModuleAction.setChecked(False)
+    super(SequenceModule, self)._closeModule()
 
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
@@ -141,7 +172,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
   On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
   along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
   """
-  def __init__(self, sequenceModule, project, scene, position, chain, placeholder=None):
+  def __init__(self, sequenceModule, project, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
     QtGui.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
@@ -164,22 +195,47 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
       self.text = '%s:%s' % (chain.compoundName, chain.shortName)
     self.sequenceModule = sequenceModule
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
-    self.setFont(textFontHuge)
+    self.setFont(fixedWidthHugeFont)
     self.residueDict = {}
-    i = 0
+    self.project = project
+    self.currentIndex = 0
+    self.scene = scene
+    self.labelPosition = self.boundingRect().width()
+    self.yPosition = position[1]
     if chain:
+      useSequenceCode = False
+      if tryToUseSequenceCodes:
+        # mark residues where sequence is multiple of 10 when you can
+        # simple rules: sequenceCodes must be integers and consecutive
+        prevCode = None
+        for residue in chain.residues:
+          try:
+            code = int(residue.sequenceCode)
+            if prevCode and code != (prevCode+1):
+              break
+            prevCode = code
+          except: # not an integer
+            break
+        else:
+          useSequenceCode = True
       for n, residue in enumerate(chain.residues):
-        newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i, position[1])
-        scene.addItem(newResidue)
-        self.residueDict[residue.sequenceCode] = newResidue
-        i += 1
-        if n % 10 == 9 and n < len(chain.residues) - 1:  # print out every 10 but don't put one at end
-          numberItem = QtGui.QGraphicsTextItem(residue.sequenceCode)
-          numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
-          xPosition = self.boundingRect().width() + (20 * i)
-          numberItem.setPos(QtCore.QPointF(xPosition, position[1]))
-          scene.addItem(numberItem)
-          i += 1
+        self._addResidue(n, residue, useSequenceCode)
+
+  def _addResidue(self, number, residue, useSequenceCode=False):
+    newResidue = GuiChainResidue(self, self.project, residue, self.scene,
+                                 self.labelPosition, self.currentIndex, self.yPosition)
+    self.scene.addItem(newResidue)
+    self.residueDict[residue.sequenceCode] = newResidue
+    self.currentIndex += 1
+    value = int(residue.sequenceCode)-1 if useSequenceCode else number
+    if value % 10 == 9:  # print out every 10
+      numberItem = QtGui.QGraphicsTextItem(residue.sequenceCode)
+      numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
+      numberItem.setFont(fixedWidthFont)
+      xPosition = self.labelPosition + (20 * self.currentIndex)
+      numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
+      self.scene.addItem(numberItem)
+      self.currentIndex += 1
 
 
 # WB: TODO: this used to be in some util library but the
@@ -231,7 +287,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     #font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
     #font.setStyleHint(QtGui.QFont.Monospace)
     #self.setFont(font)
-    self.setFont(textFontHuge)
+    self.setFont(fixedWidthHugeFont)
     self.colourScheme = project._appBase.colourScheme
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'  # un-assigned
@@ -367,7 +423,6 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     #   event.accept()
     # self.guiChainLabel.sequenceModule.overlay.hide()
     # self.project._appBase.sequenceGraph.resetSequenceGraph()
-
 
 
 

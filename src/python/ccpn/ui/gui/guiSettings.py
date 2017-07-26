@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Font import Font
 
 # fonts
 monaco12              = Font('Monaco', 12)
+monaco20              = Font('Monaco', 20)
 
 helvetica10           = Font('Helvetica', 10)
 helveticaItalic10     = Font('Helvetica', 10, italic=True)
@@ -63,6 +64,7 @@ textFontHuge    = helvetica20        # general text font huge
 textFontHugeBold = helveticaBold20   # general text font huge bold
 
 fixedWidthFont  = monaco12           # for TextEditor, ipythonconsole
+fixedWidthHugeFont = monaco20
 moduleLabelFont = helvetica12        # for text of left-label of modules
 sidebarFont     = lucidaGrande12     # sidebar
 menuFont        = lucidaGrande14     # Menus

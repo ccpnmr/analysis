@@ -1004,6 +1004,12 @@ Use axisCodes to set magnetisation transfers instead.""")
       
     return self._intensities
 
+  @intensities.setter
+  def intensities(self, value):
+    self._intensities = value
+    for spectrumView in self.spectrumViews:
+      spectrumView.refreshData()
+
   @property
   def positions(self) -> numpy.ndarray:
     """ spectral region in ppm as NumPy array for 1D spectra """
@@ -1019,6 +1025,14 @@ Use axisCodes to set magnetisation transfers instead.""")
       self._positions = spectrumLimits[1] + scale*numpy.arange(pointCount, dtype='float32')
       
     return self._positions
+
+  @positions.setter
+  def positions(self, value):
+    self._positions = value
+    for spectrumView in self.spectrumViews:
+      spectrumView.refreshData()
+
+
 
   # Implementation functions
 

@@ -45,6 +45,8 @@ from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
 
+Estimated = 'Estimated'
+Manual = 'Manual'
 
 class ExcludeRegions(Widget,Base):
   '''This creates a widget group to exclude Regions from the Spectrum when automatically peak picking '''
@@ -234,10 +236,16 @@ class PickPeak1DPopup(CcpnDialog):
 
     self.noiseLevelLabel = Label(self, text='Noise Level Threshold')
     self.noiseLevelRadioButtons = RadioButtons(self,
-                                               texts=['Estimated', 'Manual'],
+                                               texts=[Estimated, Manual],
                                                selectedInd=0,
                                                callback=self._noiseLevelCallBack,
                                                tipTexts=None)
+
+    self.noiseLevelFactorLabel = Label(self, text='Noise Level Factor')
+    self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=3.0, min=0.01, step=0.1)
+
+
+
     self.noiseLevelSpinbox = DoubleSpinbox(self)
     self.noiseLevelSpinbox.hide()
     self.noiseLevelSpinbox.setValue(10000)
@@ -266,6 +274,8 @@ class PickPeak1DPopup(CcpnDialog):
     self.tabGeneralSetupLayout.addWidget(self.scrollArea, 1, 0, 1, 2)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelLabel, 2, 0)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelRadioButtons, 2, 1)
+    self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorLabel, 3, 0)
+    self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorSpinbox, 3, 1)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelSpinbox, 3, 1)
 
     self.tabGeneralSetupLayout.addWidget(self.maximumFilterSize, 4, 0)
@@ -295,10 +305,14 @@ class PickPeak1DPopup(CcpnDialog):
 
   def _noiseLevelCallBack(self):
     selected = self.noiseLevelRadioButtons.get()
-    if selected == 'Estimated':
+    if selected == Estimated:
       self.noiseLevelSpinbox.hide()
+      self.noiseLevelFactorSpinbox.show()
+      self.noiseLevelFactorLabel.show()
     else:
       self.noiseLevelSpinbox.show()
+      self.noiseLevelFactorSpinbox.hide()
+      self.noiseLevelFactorLabel.hide()
 
   def _addSpectrumCheckBoxes(self):
     self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All',grid=(0, 0))
@@ -369,8 +383,10 @@ class PickPeak1DPopup(CcpnDialog):
     mode = self.maximumFilterModePulldownList.getText()
     ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
     noiseThreshold = self._getNoiseThreshold()
+    noiseThresholdFactor = self.noiseLevelFactorSpinbox.value()
     for spectrum in spectra:
       spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
+                                                factor=noiseThresholdFactor,
                                                 positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()
 

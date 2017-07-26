@@ -285,7 +285,7 @@ class PeakList(AbstractWrapperObject):
     return peaks
 
 
-  def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', excludeRegions=None,
+  def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', factor=2, excludeRegions=None,
                           positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True):
     """
     Pick 1D peaks form data in  self.spectrum
@@ -304,14 +304,13 @@ class PeakList(AbstractWrapperObject):
       data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
       if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
-        positiveNoiseThreshold = spectrum.estimateNoise() * 5
-        print(positiveNoiseThreshold, 'positiveNoiseThreshold')
+        positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
-          positiveNoiseThreshold = _estimateNoiseLevel1D(data[0], data[1])
+          positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
           negativeNoiseThreshold = -positiveNoiseThreshold
 
       if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
-        negativeNoiseThreshold = -spectrum.estimateNoise() * 5
+        negativeNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
           negativeNoiseThreshold = -positiveNoiseThreshold
 

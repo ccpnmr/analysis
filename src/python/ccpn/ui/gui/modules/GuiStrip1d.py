@@ -33,6 +33,7 @@ from ccpn.core.PeakList import PeakList
 
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.widgets.Menu import Menu
+import numpy as np
 
 class GuiStrip1d(GuiStrip):
   """
@@ -107,6 +108,9 @@ class GuiStrip1d(GuiStrip):
     self.spectrumIndex = 0
     self.peakItems = {}
     self._hideCrossHair()
+    self.calibrateX1DWidgets = None
+    self.calibrateY1DWidgets = None
+    self.offsetWidget = None
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -121,6 +125,14 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addItem("Store Zoom", callback=self._storeZoom)
     self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom)
     self.contextMenu.addSeparator()
+    self.contextMenu.addItem("Calibrate X...", callback=self._toggleCalibrateXSpectrum)
+    self.contextMenu.addItem("Calibrate Y...", callback=self._toggleCalibrateYSpectrum)
+    self.contextMenu.addSeparator()
+    self.stackAction = QtGui.QAction("Stack Spectra", self, triggered=self.toggleStack, checkable=True)
+    self.stackAction.setChecked(False)
+    self.contextMenu.addAction(self.stackAction)
+    self.contextMenu.addSeparator()
+
     self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
     if self.gridShown:
       self.gridAction.setChecked(True)
@@ -168,5 +180,75 @@ class GuiStrip1d(GuiStrip):
         #self.peakListViewDict[peakList] = peakListView
         return peakListView
 
+  def _addCalibrateSpectrumWidget(self):
+    from ccpn.ui.gui.widgets.CalibrateSpectrum1DWidget import Calibrate1DWidgets
+    sdWid = self.spectrumDisplay.mainWidget
+    self.calibrateX1DWidgets = Calibrate1DWidgets(sdWid, mainWindow=self.mainWindow, grid=(2, 0))
+    self.calibrateX1DWidgets.setVisible(True)
+
+  def _toggleCalibrateXSpectrum(self):
+    ''' calibrate the spectra in the strip to the new point '''
+
+    if self.calibrateX1DWidgets is None:
+      self._addCalibrateSpectrumWidget()
+    else:
+      self.calibrateX1DWidgets.setVisible(not self.calibrateX1DWidgets.isVisible())
+      self.calibrateX1DWidgets._toggleLines()
 
 
+  def _addCalibrateYSpectrumWidget(self):
+    from ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget import CalibrateY1DWidgets
+    sdWid = self.spectrumDisplay.mainWidget
+    self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, grid=(3, 0))
+    self.calibrateY1DWidgets.setVisible(True)
+
+  def _toggleCalibrateYSpectrum(self):
+    ''' calibrate the spectra in the strip to the new point '''
+
+    if self.calibrateY1DWidgets is None:
+      self._addCalibrateYSpectrumWidget()
+    else:
+      self.calibrateY1DWidgets.setVisible(not self.calibrateY1DWidgets.isVisible())
+      self.calibrateY1DWidgets._toggleLines()
+
+  def toggleOffsetWidget(self):
+    from ccpn.ui.gui.widgets.Stack1DWidget import Offset1DWidget
+
+    if self.offsetWidget is None:
+      sdWid = self.spectrumDisplay.mainWidget
+      self.offsetWidget = Offset1DWidget(sdWid, mainWindow=self.mainWindow, strip1D=self, grid=(2, 0))
+      self.offsetWidget.setVisible(True)
+    else:
+      self.offsetWidget.setVisible(not self.offsetWidget.isVisible())
+
+
+  def toggleStack(self):
+
+
+    if self.stackAction.isChecked():
+      self._stack1DSpectra()
+      self.toggleOffsetWidget()
+
+    else:
+      self._restoreStacked1DSpectra()
+      self.toggleOffsetWidget()
+
+
+  def _stack1DSpectra(self, offSet=None):
+    for i, spectrumView in enumerate(self.spectrumViews):
+      sp = spectrumView.spectrum
+      x = sp.positions
+      y = sp.intensities
+      if offSet is None:
+        offSet = np.std(y)
+      spectrumView.plot.curve.setData(x, y +(i*offSet))
+      for peakListView in self.peakListViews:
+        peakListView.setVisible(False)
+
+
+
+  def _restoreStacked1DSpectra(self):
+    for spectrumView in self.spectrumViews:
+      spectrumView.plot.curve.setData(spectrumView.spectrum.positions, spectrumView.spectrum.intensities)
+    for peakListView in self.peakListViews:
+      peakListView.setVisible(True)

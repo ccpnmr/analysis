@@ -103,7 +103,7 @@ class SequenceModule(CcpnModule):
     self.scrollContents.setMaximumHeight(100)
 
     # comment back in when residue creation notifers are called in sequence instead of random order
-    ###self._registerNotifiers()
+    self._registerNotifiers()
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
@@ -160,7 +160,7 @@ class SequenceModule(CcpnModule):
 
   def _closeModule(self):
     # comment back in when residue creation notifers are called in sequence instead of random order
-    ###self._unRegisterNotifiers()
+    self._unRegisterNotifiers()
     SequenceModule._alreadyOpened = False
     self.mainWindow._sequenceModuleAction.setChecked(False)
     super(SequenceModule, self)._closeModule()

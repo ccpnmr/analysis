@@ -67,7 +67,7 @@ from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 
 _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'Sample', 'SampleComponent', 'Substance', 'Complex', 'Chain',
-                        'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
+                        'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
 # TODO Add Residue

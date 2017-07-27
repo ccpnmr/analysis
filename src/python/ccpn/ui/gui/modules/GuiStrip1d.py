@@ -111,6 +111,8 @@ class GuiStrip1d(GuiStrip):
     self.calibrateX1DWidgets = None
     self.calibrateY1DWidgets = None
     self.offsetWidget = None
+    self.offsetValue = 0
+    self.widgetIndex = 2 #start adding widgets from row 2
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -180,17 +182,19 @@ class GuiStrip1d(GuiStrip):
         #self.peakListViewDict[peakList] = peakListView
         return peakListView
 
-  def _addCalibrateSpectrumWidget(self):
+  def _addCalibrate1DXSpectrumWidget(self):
     from ccpn.ui.gui.widgets.CalibrateSpectrum1DWidget import Calibrate1DWidgets
     sdWid = self.spectrumDisplay.mainWidget
-    self.calibrateX1DWidgets = Calibrate1DWidgets(sdWid, mainWindow=self.mainWindow, grid=(2, 0))
+    self.widgetIndex+=1
+    self.calibrateX1DWidgets = Calibrate1DWidgets(sdWid, mainWindow=self.mainWindow,strip=self,
+                                                  grid=(self.widgetIndex, 0))
     self.calibrateX1DWidgets.setVisible(True)
 
   def _toggleCalibrateXSpectrum(self):
     ''' calibrate the spectra in the strip to the new point '''
 
     if self.calibrateX1DWidgets is None:
-      self._addCalibrateSpectrumWidget()
+      self._addCalibrate1DXSpectrumWidget()
     else:
       self.calibrateX1DWidgets.setVisible(not self.calibrateX1DWidgets.isVisible())
       self.calibrateX1DWidgets._toggleLines()
@@ -199,7 +203,9 @@ class GuiStrip1d(GuiStrip):
   def _addCalibrateYSpectrumWidget(self):
     from ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget import CalibrateY1DWidgets
     sdWid = self.spectrumDisplay.mainWidget
-    self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, grid=(3, 0))
+    self.widgetIndex += 1
+    self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow,strip=self,
+                                                   grid=(self.widgetIndex, 0))
     self.calibrateY1DWidgets.setVisible(True)
 
   def _toggleCalibrateYSpectrum(self):
@@ -216,7 +222,8 @@ class GuiStrip1d(GuiStrip):
 
     if self.offsetWidget is None:
       sdWid = self.spectrumDisplay.mainWidget
-      self.offsetWidget = Offset1DWidget(sdWid, mainWindow=self.mainWindow, strip1D=self, grid=(2, 0))
+      self.widgetIndex += 1
+      self.offsetWidget = Offset1DWidget(sdWid, mainWindow=self.mainWindow, strip1D=self, grid=(self.widgetIndex, 0))
       self.offsetWidget.setVisible(True)
     else:
       self.offsetWidget.setVisible(not self.offsetWidget.isVisible())
@@ -241,6 +248,7 @@ class GuiStrip1d(GuiStrip):
       y = sp.intensities
       if offSet is None:
         offSet = np.std(y)
+        self.offsetValue = offSet
       spectrumView.plot.curve.setData(x, y +(i*offSet))
       for peakListView in self.peakListViews:
         peakListView.setVisible(False)

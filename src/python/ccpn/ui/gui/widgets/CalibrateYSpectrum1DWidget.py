@@ -39,7 +39,7 @@ ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse
           'position to the new position '
 
 class CalibrateY1DWidgets(Frame):
-  def __init__(self, parent=None, mainWindow=None,  **kw):
+  def __init__(self, parent=None, mainWindow=None, strip=None,  **kw):
     Frame.__init__(self, parent, setLayout=True, **kw)
 
     if mainWindow is None:  # This allows opening the popup for graphical tests
@@ -51,8 +51,9 @@ class CalibrateY1DWidgets(Frame):
       self.application = self.mainWindow.application
       self.current = self.application.current
 
-    self.originalPosition = None
+    self.strip = strip
     self.newPosition = None
+
 
     i=0
     self.labelOriginalPosition = Label(self, OP,grid=(0, i))
@@ -79,12 +80,12 @@ class CalibrateY1DWidgets(Frame):
 
   def _initLines(self):
     if self.mainWindow is not None:
-      if self.current.strip is not None:
-        self.current.strip.plotWidget.addItem(self.infiniteLine)
-        self.current.strip.plotWidget.addItem(self.originalPosInfiniteLine)
+      if self.strip is not None:
+        self.strip.plotWidget.addItem(self.infiniteLine)
+        self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
 
-      if len(self.current.cursorPosition)>0:
-        self.originalPosition = self.current.cursorPosition[1]
+      if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
+        self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[1]
         self.infiniteLine.setValue(self.originalPosition)
         self.originalPosInfiniteLine.setValue(self.originalPosition)
         self.boxOriginalPosition.setValue(round(self.originalPosition,3))
@@ -111,9 +112,9 @@ class CalibrateY1DWidgets(Frame):
 
   def _removeLines(self):
     if self.mainWindow is not None:
-      if self.current.strip is not None:
-        self.current.strip.plotWidget.removeItem(self.infiniteLine)
-        self.current.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
+      if self.strip is not None:
+        self.strip.plotWidget.removeItem(self.infiniteLine)
+        self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
 
 
   def _toggleLines(self):
@@ -125,8 +126,8 @@ class CalibrateY1DWidgets(Frame):
   def _calibrateSpectra(self):
 
     if self.mainWindow is not None:
-      if self.current.strip is not None:
-        for spectrumView in self.current.strip.spectrumViews:
+      if self.strip is not None:
+        for spectrumView in self.strip.spectrumViews:
           if spectrumView.plot.isVisible():
             spectrum = spectrumView.spectrum
             _calibrateY1D(spectrum, self.originalPosition, self.newPosition)

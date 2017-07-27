@@ -99,7 +99,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.moduleArea.setGeometry(0, 0, 1000, 800)
     self.setCentralWidget(self.moduleArea)
 
-
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()

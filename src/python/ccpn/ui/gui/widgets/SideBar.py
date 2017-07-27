@@ -295,6 +295,8 @@ class SideBar(QtGui.QTreeWidget, Base):
   def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
     """
+    list = self._saveExpandedState()
+
     for spectrum in self.project.spectra:
       # self._removeItem( self.project, spectrum)
       self._removeItem(spectrum)
@@ -302,10 +304,14 @@ class SideBar(QtGui.QTreeWidget, Base):
       for obj in spectrum.peakLists + spectrum.integralLists:
         self._createItem(obj)
 
+    self._restoreExpandedState(list)
+
   def _refreshParentNmrChain(self, nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
     Replaces normal _createItem notifier for NmrResidues"""
+
+    list = self._saveExpandedState()
 
     nmrChain = nmrResidue._parent
 
@@ -318,6 +324,8 @@ class SideBar(QtGui.QTreeWidget, Base):
       self._createItem(nr)
       for nmrAtom in nr.nmrAtoms:
         self._createItem(nmrAtom)
+
+    self._restoreExpandedState(list)
 
     # nmrChain = nmrResidue._parent     # ejb - just insert the 1 item
     # for nr in nmrChain.nmrResidues:
@@ -457,7 +465,7 @@ class SideBar(QtGui.QTreeWidget, Base):
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
 
-    list = self.saveExpandedState()
+    list = self._saveExpandedState()
 
     import sip
     newPid = obj.pid
@@ -479,44 +487,25 @@ class SideBar(QtGui.QTreeWidget, Base):
         for xx in objects[1:]:
           self._createItem(xx)
 
-  def saveExpandedState(self):
+    self._restoreExpandedState(list)
+
+  def _saveExpandedState(self):
     list = {}
+    items = self.findItems(':', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive, 0)
+    for item in items:
+      list[item.text(0)] = item.isExpanded()
+    return list
 
-    # def iterItems(self, root):
-    #   if root is not None:
-    #     stack = [root]
-    #     while stack:
-    #       parent = stack.pop(0)
-    #       for row in range(parent.rowCount()):
-    #         for column in range(parent.columnCount()):
-    #           child = parent.child(row, column)
-    #           yield child
-    #           if child.hasChildren():
-    #             stack.append(child)
-    #
-    # root = self.model().invisibleRootItem()
-    # for item in self.iterItems(root):
-    #   list[item.text()] = item.isExpanded()
-    #
-    # return list
-
-    def iterItems(self, root):
-      def recurse(parent):
-        if root is not None:
-          for row in range(parent.rowCount()):
-            for column in range(parent.columnCount()):
-              child = parent.child(row, column)
-              yield child
-              if child.hasChildren():
-                for item in recurse(child):
-                  yield item
-
-      return recurse(root)
+  def _restoreExpandedState(self, list):
+    for lItem in list:
+      items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
+      for item in items:
+        self.setItemExpanded(item, list[lItem])
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
 
-    list = self.saveExpandedState()
+    list = self._saveExpandedState()
 
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location
@@ -532,6 +521,8 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     # for item in self._findItems(oldPid):
     #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
+
+    self._restoreExpandedState(list)
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.

@@ -84,7 +84,7 @@ class SequenceModule(CcpnModule):
                           QScrollArea QScrollBar::vertical{max-width:20px;}
                       """)
     self.residueCount = 0
-    self.layout.addWidget(self.scrollArea)
+    self.mainWidget.layout().addWidget(self.scrollArea)
     # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
     # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
@@ -159,6 +159,9 @@ class SequenceModule(CcpnModule):
     SequenceModule._alreadyOpened = False
     self.mainWindow._sequenceModuleAction.setChecked(False)
     super(SequenceModule, self)._closeModule()
+
+  def close(self):
+    self._closeModule()     # ejb - needed when closing/opening project
 
   def _refreshChainLabels(self, *args, **kw):
     for chainLabel in self.chainLabels:

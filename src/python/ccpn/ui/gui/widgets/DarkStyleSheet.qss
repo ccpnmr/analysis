@@ -402,12 +402,12 @@ QTreeWidget::item::hover {
                   color: #e4e15b;
                   background-color: #424A71;
                   }
-/*
+
 QTreeView:branch:{
 color: #e4e15b;
 background-color: #0E1A3D;
 }
-*/
+
 
 QTabWidget QWidget { background: #020F31;
     }

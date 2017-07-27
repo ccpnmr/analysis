@@ -135,6 +135,12 @@ class Gui(Ui):
     project._registerApiNotifier(GuiSpectrumDisplay._deletedSpectrumView,
                                  'ccpnmr.gui.Task.SpectrumView', 'preDelete')
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # TODO:ED   added so that some modules are cleared on changing projects
+
+    from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+    SequenceModule._alreadyOpened = False
+
   def start(self):
 
     self.mainWindow._fillMacrosMenu()

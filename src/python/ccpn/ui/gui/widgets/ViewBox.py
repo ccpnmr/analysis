@@ -193,6 +193,7 @@ class ViewBox(pg.ViewBox):
     self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
 
     self.peakWidthPixels = 20  # for ND peaks
+    self.contextMenuPosition = None #we need this because current.position is not always the best choice for everything!
 
   def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """
@@ -217,6 +218,7 @@ class ViewBox(pg.ViewBox):
           self.menu.navigateToMenu.addAction(spectrumDisplay.pid,
                 partial(navigateToPositionInStrip, strip, self.current.cursorPosition, axisCodes))
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
+    self.contextMenuPosition = self.current.cursorPosition
 
   def _getMenu(self):
     if self.menu is None:

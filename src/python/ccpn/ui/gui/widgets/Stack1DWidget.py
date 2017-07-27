@@ -56,11 +56,10 @@ class Offset1DWidget(Frame):
     self.labelOffset = Label(self, Offset ,grid=(0, i))
     i += 1
     self.boxOffset = DoubleSpinbox(self, step=1000, grid=(0, i))
-    # i += 1
-    # self.okButtons = ButtonList(self, ['Apply'], callbacks=[self._applyOffset],
-    #                             grid=(0,i))
 
 
+    if self.strip1D is not None:
+      self.boxOffset.setValue(self.strip1D.offsetValue)
     self.boxOffset.valueChanged.connect(self._applyOffset)
 
 

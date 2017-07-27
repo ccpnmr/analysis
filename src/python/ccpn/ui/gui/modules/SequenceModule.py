@@ -89,12 +89,7 @@ class SequenceModule(CcpnModule):
     # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
-    self.widgetHeight = 0 # dynamically calculated from the number of chains
-    if not self.project.chains:
-      self._addChainLabel(chain=None, placeholder=True)
-    else:
-      for chain in self.project.chains:
-        self._addChainLabel(chain, tryToUseSequenceCodes=True)
+    self._refreshChainLabels()
 
     #GWV: removed fixed height restrictions but maximum height instead
     #self.setFixedHeight(2*self.widgetHeight)
@@ -102,7 +97,6 @@ class SequenceModule(CcpnModule):
     self.setMaximumHeight(100)
     self.scrollContents.setMaximumHeight(100)
 
-    # comment back in when residue creation notifers are called in sequence instead of random order
     self._registerNotifiers()
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
@@ -153,17 +147,32 @@ class SequenceModule(CcpnModule):
   def _registerNotifiers(self):
     self.project.registerNotifier('Chain', 'create', self._addChainLabel)
     self.project.registerNotifier('Residue', 'create', self._addChainResidue)
+    self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
 
   def _unRegisterNotifiers(self):
     self.project.unRegisterNotifier('Chain', 'create', self._addChainLabel)
     self.project.unRegisterNotifier('Residue', 'create', self._addChainResidue)
+    self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
 
   def _closeModule(self):
-    # comment back in when residue creation notifers are called in sequence instead of random order
     self._unRegisterNotifiers()
     SequenceModule._alreadyOpened = False
     self.mainWindow._sequenceModuleAction.setChecked(False)
     super(SequenceModule, self)._closeModule()
+
+  def _refreshChainLabels(self, *args, **kw):
+    for chainLabel in self.chainLabels:
+      for item in chainLabel.items:
+        self.scrollArea.scene.removeItem(item)
+      chainLabel.items = [] # probably don't need to do this
+    self.chainLabels = []
+    self.widgetHeight = 0 # dynamically calculated from the number of chains
+
+    if not self.project.chains:
+      self._addChainLabel(chain=None, placeholder=True)
+    else:
+      for chain in self.project.chains:
+        self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
@@ -176,6 +185,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     QtGui.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
+    self.items = [self]  # keeps track of items specific to this chainLabel
 
     self.colourScheme = project._appBase.colourScheme
 
@@ -225,6 +235,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     newResidue = GuiChainResidue(self, self.project, residue, self.scene,
                                  self.labelPosition, self.currentIndex, self.yPosition)
     self.scene.addItem(newResidue)
+    self.items.append(newResidue)
     self.residueDict[residue.sequenceCode] = newResidue
     self.currentIndex += 1
     value = int(residue.sequenceCode)-1 if useSequenceCode else number
@@ -235,6 +246,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
       xPosition = self.labelPosition + (20 * self.currentIndex)
       numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
       self.scene.addItem(numberItem)
+      self.items.append(numberItem)
       self.currentIndex += 1
 
 

@@ -457,6 +457,8 @@ class SideBar(QtGui.QTreeWidget, Base):
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
 
+    list = self.saveExpandedState()
+
     import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
@@ -477,20 +479,44 @@ class SideBar(QtGui.QTreeWidget, Base):
         for xx in objects[1:]:
           self._createItem(xx)
 
-    # QTreeWidgetItem* item = this->currentItem();      # ejb
-    # int row  = this->currentIndex().row();
-    # if (item && row > 0)
-    # {
-    # 	QTreeWidgetItem* parent = item->parent();
-    # 	int index = parent->indexOfChild(item);
-    # 	QTreeWidgetItem* child = parent->takeChild(index);
-    # 	parent->insertChild(index-1, child);
-    # 	parent->setExpanded(true);
-    # 	child->setExpanded(true);
-    # }
+  def saveExpandedState(self):
+    list = {}
+
+    # def iterItems(self, root):
+    #   if root is not None:
+    #     stack = [root]
+    #     while stack:
+    #       parent = stack.pop(0)
+    #       for row in range(parent.rowCount()):
+    #         for column in range(parent.columnCount()):
+    #           child = parent.child(row, column)
+    #           yield child
+    #           if child.hasChildren():
+    #             stack.append(child)
+    #
+    # root = self.model().invisibleRootItem()
+    # for item in self.iterItems(root):
+    #   list[item.text()] = item.isExpanded()
+    #
+    # return list
+
+    def iterItems(self, root):
+      def recurse(parent):
+        if root is not None:
+          for row in range(parent.rowCount()):
+            for column in range(parent.columnCount()):
+              child = parent.child(row, column)
+              yield child
+              if child.hasChildren():
+                for item in recurse(child):
+                  yield item
+
+      return recurse(root)
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
+
+    list = self.saveExpandedState()
 
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location

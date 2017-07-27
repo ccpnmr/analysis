@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
-from ui.gui.popups.CreateChainPopup import CreateChainPopup
+from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
@@ -239,6 +239,25 @@ class SideBar(QtGui.QTreeWidget, Base):
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self._processDroppedItems)
+
+    self.itemDoubleClicked.connect(self._raiseObjectProperties)
+
+  def _raiseObjectProperties(self, item):
+    """get object from Pid and dispatch call depending on type
+
+    NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
+    dataPid = item.data(0, QtCore.Qt.DisplayRole)
+    project = self.project
+    obj = project.getByPid(dataPid)
+
+    if obj is not None:
+      self.raisePopup(obj, item)
+    elif item.data(0, QtCore.Qt.DisplayRole).startswith('<New'):
+      self._createNewObject(item)
+
+    else:
+      project._logger.error("Double-click activation not implemented for Pid %s, object %s"
+                            % (dataPid, obj))
 
   #TODO:RASMUS: assure that there is a save query first before loading a project onto an existing roject
   #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up

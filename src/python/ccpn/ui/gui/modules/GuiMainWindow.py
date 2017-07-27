@@ -211,7 +211,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 # """ + self.pythonConsole.ipythonWidget.__doc__
 
     self.sideBar = SideBar(parent=self)
-    self.sideBar.itemDoubleClicked.connect(self._raiseObjectProperties)
 
     # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
     self._horizontalSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -317,24 +316,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
       if projectDir:
         self.application.loadProject(projectDir)
-
-
-  def _raiseObjectProperties(self, item):
-    """get object from Pid and dispatch call depending on type
-
-    NBNB TBD How about refactoring so that we have a shortClassName:Popup dictionary?"""
-    dataPid = item.data(0, QtCore.Qt.DisplayRole)
-    project = self._project
-    obj = project.getByPid(dataPid)
-
-    if obj is not None:
-      self.sideBar.raisePopup(obj, item)
-    elif item.data(0, QtCore.Qt.DisplayRole).startswith('<New'):
-      self.sideBar._createNewObject(item)
-
-    else:
-      project._logger.error("Double-click activation not implemented for Pid %s, object %s"
-                            % (dataPid, obj))
 
 
   def _fillRecentProjectsMenu(self):

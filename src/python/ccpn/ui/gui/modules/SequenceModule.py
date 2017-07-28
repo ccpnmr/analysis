@@ -152,7 +152,7 @@ class SequenceModule(CcpnModule):
   def _unRegisterNotifiers(self):
     self.project.unRegisterNotifier('Chain', 'create', self._addChainLabel)
     self.project.unRegisterNotifier('Residue', 'create', self._addChainResidue)
-    self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
+    self.project.unRegisterNotifier('Chain', 'delete', self._refreshChainLabels)
 
   def _closeModule(self):
     self._unRegisterNotifiers()

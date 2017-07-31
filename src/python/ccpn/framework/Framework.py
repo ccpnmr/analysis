@@ -1548,6 +1548,10 @@ class Framework:
       self.sequenceModule = SequenceModule(mainWindow=mainWindow)
       mainWindow.moduleArea.addModule(self.sequenceModule,
                                       position=position, relativeTo=relativeTo)
+      action = self._findMenuAction('View', 'Show Sequence')
+      if action: # should be True
+        action.setChecked(True)
+
     return self.sequenceModule
 
 
@@ -1740,8 +1744,8 @@ class Framework:
       self.current.strip.resetZoom()
 
   def _findMenuAction(self, menubarText, menuText):
-
     # not sure if this function will be needed more widely or just in console context
+    # CCPN internal: now also used in SequenceModule._closeModule
 
     for menuBarAction in self.ui.mainWindow._menuBar.actions():
       if menuBarAction.text() == menubarText:

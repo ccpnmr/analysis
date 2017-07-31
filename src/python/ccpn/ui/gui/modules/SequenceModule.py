@@ -157,7 +157,9 @@ class SequenceModule(CcpnModule):
   def _closeModule(self):
     self._unRegisterNotifiers()
     SequenceModule._alreadyOpened = False
-    self.mainWindow._sequenceModuleAction.setChecked(False)
+    action = self.mainWindow.application._findMenuAction('View', 'Show Sequence')
+    if action: # should be True
+      action.setChecked(False)
     super(SequenceModule, self)._closeModule()
 
   def close(self):

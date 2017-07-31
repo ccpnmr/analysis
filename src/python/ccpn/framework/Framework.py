@@ -618,9 +618,10 @@ class Framework:
       # Get list of command strings
       commands = []
       for parameter, value in sorted(objectParameters.items()):
-        if not isinstance(value, str):
-          value = value.pid
-        commands.append("%s = project.getByPid(%s)" % (parameter, repr(value)))
+        if value is not None:
+          if not isinstance(value, str):
+            value = value.pid
+          commands.append("%s = project.getByPid(%s)" % (parameter, repr(value)))
       commands.append(command)
 
       # echo command strings
@@ -882,7 +883,8 @@ class Framework:
       ("Tutorials",([
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),
-        ("Backbone Tutorial", self.showBackboneTutorial)
+        ("Backbone Tutorial", self.showBackboneTutorial),
+        ("Screen Tutorial", self.showScreenTutorial)
       ])),
       ("Show Shortcuts", self.showShortcuts),
       ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
@@ -1888,6 +1890,10 @@ class Framework:
   def showBackboneTutorial(self):
     from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
     self._systemOpen(backboneAssignmentTutorialPath)
+
+  def showScreenTutorial(self):
+    from ccpn.framework.PathsAndUrls import screenTutorialPath
+    self._systemOpen(screenTutorialPath)
 
   def showVersion3Documentation(self):
     """Displays CCPN wrapper documentation in a module."""

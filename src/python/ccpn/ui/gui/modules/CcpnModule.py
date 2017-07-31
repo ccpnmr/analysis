@@ -89,11 +89,11 @@ class CcpnModule(Dock):
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
     #TODO:GEERTEN: make mainWindow actually do something
-    area = None
+    self.area = None
     if mainWindow is not None:
-      area = mainWindow.moduleArea
+      self.area = mainWindow.moduleArea
 
-    Dock.__init__(self, name=name, area=area,
+    Dock.__init__(self, name=name, area=self.area,
                    autoOrientation=False,
                    closable=closable)#, **kwds)   # ejb
 
@@ -194,21 +194,31 @@ class CcpnModule(Dock):
     if isinstance(source, CcpnModule):
       if event.type() == QtCore.QEvent.DragEnter:
         self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+        # self._transparentAllModules(False)
         # print ('>>>CcpnModule - dragEnterEvent')
 
       elif event.type() == QtCore.QEvent.Leave:
         self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+        # self._transparentAllModules(True)
         # print ('>>>CcpnModule - leaveEvent')
 
       elif event.type() == QtCore.QEvent.Drop:
         self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+        # self._transparentAllModules(True)
         # print ('>>>CcpnModule - dropEvent')
     else:
       if event.type() == QtCore.QEvent.DragLeave:
         self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+        # self._transparentAllModules(True)
         # print ('>>>CcpnModule - dragLeaveEvent')
 
     return super(CcpnModule, self).eventFilter(source,event)
+
+  # def _transparentAllModules(self, transparency:bool=True):
+  #   if self.area:
+  #     areaList = self.area.findAll()
+  #     for modInArea in areaList:
+  #       modInArea.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparency)
 
   def resizeEvent(self, event):
     # self.setOrientation(self.labelOrientation, force=True)
@@ -265,26 +275,6 @@ class CcpnModule(Dock):
       args[0].ignore()
       return
 
-  # def dragEnterEvent(self, event):
-  #   t = event.type()    # DragEnter so okay
-  #   pass
-
-  # def dragEnterEvent(self, event):
-  #   if isinstance(event.widget(), CcpnModule):
-  #     self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-  #   print ('>>>CcpnModule - dragEnterEvent')
-  #   super(CcpnModule, self).dragEnterEvent(event)
-  #
-  # def dragLeaveEvent(self, event):
-  #   if isinstance(event.widget(), CcpnModule):
-  #     self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-  #   print ('>>>CcpnModule - dragLeaveEvent')
-  #   super(CcpnModule, self).dragLeaveEvent(event)
-
-      # def dragMoveEvent(self, *args):
-  #   cursor = QtGui.QCursor()
-  #   print('>>> CcpnModule %s' % cursor.pos())
-  #   super(CcpnModule, self).dragMoveEvent(*args)
 
 
 class CcpnModuleLabel(DockLabel):

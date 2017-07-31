@@ -76,7 +76,7 @@ class PlotWidget(pg.PlotWidget):
 
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
-      self.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)   # ejb - .FullViewportUpdate)
+      self.setViewportUpdateMode(QtGui.QGraphicsView.NoViewportUpdate)#.BoundingRectViewportUpdate)   # ejb - .FullViewportUpdate)
 
     strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 
@@ -107,7 +107,7 @@ class PlotWidget(pg.PlotWidget):
 
     # add grid
     self.grid = CcpnGridItem(gridColour=self.gridColour)
-    self.addItem(self.grid)
+    self.addItem(self.grid, ignoreBounds=False)
 
     # Add two crosshairs
     self.crossHair1 = CrossHair(self, show=True, colour=self.foreground)

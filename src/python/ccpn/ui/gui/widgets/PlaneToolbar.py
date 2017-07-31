@@ -119,7 +119,7 @@ class _StripLabel(Label):
     if event.type() == QtCore.QEvent.DragEnter:
       self._source = event.source()
       try:
-        if self._source != self:
+        if isinstance(obj,_StripLabel) and self._source != self:
           mime = event.mimeData().text()
           dataItem = json.loads(mime)
           if 'text' in dataItem and dataItem['text'].startswith('NR'):
@@ -135,6 +135,12 @@ class _StripLabel(Label):
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
+
+    if event.type() == QtCore.QEvent.MouseMove:
+      if not isinstance(obj,_StripLabel):
+        QtGui.QApplication.restoreOverrideCursor()
+        event.accept()
+        return True
 
     if event.type() == QtCore.QEvent.Drop:
       QtGui.QApplication.restoreOverrideCursor()

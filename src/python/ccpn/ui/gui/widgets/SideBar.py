@@ -233,8 +233,9 @@ class SideBar(QtGui.QTreeWidget, Base):
 
     self.setDragDropMode(self.DragDrop)
     self.setAcceptDrops(True)
-    # self.eventFilter = self._eventFilter        # ejb - doesn't work
-    # self.installEventFilter(self)   # ejb
+
+    self.eventFilter = self._eventFilter        # ejb - doesn't work
+    self.installEventFilter(self)   # ejb
 
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
@@ -576,6 +577,9 @@ class SideBar(QtGui.QTreeWidget, Base):
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # mouse events
 
+  def _eventFilter(self, obj, event):
+    return super(SideBar, self).eventFilter(obj,event)
+
   def _dragEnterEvent(self, event, enter=True):
     # if event.mimeData().hasFormat(ccpnmrJsonData):
     #   data = event.mimeData().data(ccpnmrJsonData)
@@ -682,6 +686,8 @@ class SideBar(QtGui.QTreeWidget, Base):
     #     super(SideBar, self).mousePressEvent(event)
 
     # else:
+    # if self.multiSelect:
+    #   self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     super(SideBar, self).mousePressEvent(event)
 
   def _mouseReleaseEvent(self, event):

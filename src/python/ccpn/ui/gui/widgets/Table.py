@@ -1364,6 +1364,7 @@ class ObjectTableFilter(Widget):
     self.searchButtons.buttons[1].setEnabled(False)
 
   def hideSearch(self):
+    self.restoreTable(self.table)
     if self.table.searchWidget is not None:
       self.table.searchWidget.hide()
 

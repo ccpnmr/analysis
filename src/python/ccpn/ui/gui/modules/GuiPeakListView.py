@@ -916,7 +916,13 @@ def _upDateAssignmentsPeakDimContrib(project:Project,
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes
 def _refreshPeakPosition(peak:Peak):
+  if peak.isDeleted:
+    return
+  if peak.peakList.isDeleted:
+    return
   for peakListView in peak.peakList.peakListViews:
+    if peakListView.isDeleted:
+      continue
     peakItem = peakListView.peakItems.get(peak)
     if peakItem:
       spectrumIndices = peakListView.spectrumView._displayOrderSpectrumDimensionIndices

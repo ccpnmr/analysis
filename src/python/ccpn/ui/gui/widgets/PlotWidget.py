@@ -76,7 +76,10 @@ class PlotWidget(pg.PlotWidget):
 
     if useOpenGL:
       self.setViewport(QtOpenGL.QGLWidget())
-      self.setViewportUpdateMode(QtGui.QGraphicsView.NoViewportUpdate)#.BoundingRectViewportUpdate)   # ejb - .FullViewportUpdate)
+      # need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom
+      # (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)
+      # (NoViewportUpdate might work if you could explicitly get the view to repaint when needed)
+      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
     strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 

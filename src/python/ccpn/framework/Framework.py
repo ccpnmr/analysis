@@ -1099,7 +1099,7 @@ class Framework:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self.ui.mainWindow._fillRecentProjectsMenu()
-      self._saveLayout()
+      # self._saveLayout()
 
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
 

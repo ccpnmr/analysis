@@ -106,9 +106,6 @@ class CcpnModuleArea(ModuleArea):
     if position is None:
       position = 'top'
 
-    if position == 'bottom':
-      self.checkPythonConsole()
-
     neededContainer = {
         'bottom': 'vertical',
         'top': 'vertical',
@@ -198,18 +195,12 @@ class CcpnModuleArea(ModuleArea):
       if self.home:
         self.home.removeTempArea(self)
 
-  def checkPythonConsole(self):
-    if 'PYTHON CONSOLE' in self.findAll()[1]:
-      pythonConsole = self.findAll()[1]['PYTHON CONSOLE']
-      # for c in self.findAll()[0]:
-      #   if c and pythonConsole is not None:
-      #     print(c, 'Testing')
-
   def _closeAll(self):
     for module in self.currentModules:
       module._closeModule()
 
   def saveState(self):
+    # FIXME. Crashes if no modules
     """
     Return a serialized (storable) representation of the state of
     all Docks in this DockArea."""

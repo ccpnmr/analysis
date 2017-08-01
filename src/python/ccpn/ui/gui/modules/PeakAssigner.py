@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+import numpy as np
 from functools import partial
 
 from PyQt4 import QtGui
@@ -49,6 +50,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
+
 
 logger = getLogger()
 
@@ -182,6 +184,9 @@ class PeakAssigner(CcpnModule):
     """
     Assigns dimensionNmrAtoms to peak dimension when called using Assign Button in assignment widget.
     """
+    # FIXME Potential Bug: no error checks for dim. It can give easily an IndexError
+
+
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
@@ -307,6 +312,7 @@ class PeakAssigner(CcpnModule):
 
     for dim, label in zip(range(Ndimensions), self.labels):
       positions = [peak.position[dim] for peak in self.current.peaks]
+      # FIXME Bug: could be ZERO DIVISION!
       avgPos = round(sum(positions)/len(positions), 3)
       axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
       text = 'Axis "%s": %.3f' % (axisCode, avgPos)
@@ -441,8 +447,12 @@ class PeakAssigner(CcpnModule):
         if shift:
           position = peak.position[dim]
           deltas.append(abs(shift.value-position))
-    average = sum(deltas)/len(deltas)
-    return '%6.3f' % average
+    # average = sum(deltas)/len(deltas) #Bug: ZERO DIVISION!
+
+    if len(deltas)>0:
+      return '%6.3f' % np.mean(deltas)
+    else:
+      return ''
 
   def _getShift(self, nmrAtom:NmrAtom) -> float:
     """

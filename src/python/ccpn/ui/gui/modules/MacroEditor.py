@@ -60,8 +60,8 @@ class MacroEditor(CcpnModule):
     widget = self.mainWidget
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)
-    widget.layout().setSpacing(0)
-    widget.layout().setContentsMargins(0,0,0,0)
+    widget.layout().setSpacing(5)
+    widget.layout().setContentsMargins(10,10,10,10)
     widget.layout().addWidget(self.label1,    0, 0, 1, 1)
     widget.layout().addWidget(self.lineEdit1, 0, 1, 1, 3)
     widget.layout().addWidget(self.button,    0, 4, 1, 1)

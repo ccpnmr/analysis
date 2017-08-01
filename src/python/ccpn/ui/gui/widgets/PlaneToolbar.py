@@ -136,6 +136,12 @@ class _StripLabel(Label):
       event.accept()
       return True
 
+    if event.type() == QtCore.QEvent.Leave:
+      QtGui.QApplication.restoreOverrideCursor()
+      # print('>>>DragLeaveFilter')
+      event.accept()
+      return True
+
     if event.type() == QtCore.QEvent.MouseMove:
       if not isinstance(obj,_StripLabel):
         QtGui.QApplication.restoreOverrideCursor()

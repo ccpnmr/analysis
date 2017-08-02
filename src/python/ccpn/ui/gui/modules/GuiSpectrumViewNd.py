@@ -660,9 +660,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
       
       xTile0 = xClipPoint0 // xTotalPointCount
-      xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
+      xTile1 = 1 + (xClipPoint1-1) // xTotalPointCount
       yTile0 = yClipPoint0 // yTotalPointCount
-      yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
+      yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
       
       GL.glEnable(GL.GL_CLIP_PLANE0)
       GL.glEnable(GL.GL_CLIP_PLANE1)

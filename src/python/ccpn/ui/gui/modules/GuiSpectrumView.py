@@ -32,7 +32,7 @@ import collections
 
 from ccpn.util import Colour
 
-import pyqtgraph as pg
+#import pyqtgraph as pg
 
 #from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
 #from ccpn.ui.gui.modules.spectrumPane.IntegralListItem import IntegralListItem

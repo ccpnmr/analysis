@@ -27,29 +27,29 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
-from PyQt4 import QtGui, QtCore
+#from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.ui.gui.widgets.Icon import Icon
+#from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
-import typing
+#import typing
 
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import Frame #, ScrollableFrame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
-from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
+#from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
-from ccpn.ui.gui.widgets.BasePopup import BasePopup
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
+#from ccpn.ui.gui.widgets.BasePopup import BasePopup
+#from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 

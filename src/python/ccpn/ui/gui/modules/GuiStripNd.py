@@ -60,7 +60,7 @@ from ccpn.core.PeakList import PeakList
 # from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar, PlaneSelectorWidget
+from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
 

@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import datetime
+#import datetime
 import json
 import os
 from functools import partial
@@ -53,8 +53,8 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
-from ccpn.util.Logging import getLogger
-from collections import OrderedDict
+#from ccpn.util.Logging import getLogger
+#from collections import OrderedDict
 
 
 #TODO:WAYNE: incorporate most functionality from GuiWindow and

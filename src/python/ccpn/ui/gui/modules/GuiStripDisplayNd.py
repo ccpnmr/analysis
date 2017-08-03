@@ -33,7 +33,7 @@ from ccpn.ui.gui.modules import GuiPeakListView
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
+#from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 
 from ccpn.util.Logging import getLogger
 

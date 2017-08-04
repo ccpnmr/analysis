@@ -14,6 +14,7 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,7 +34,6 @@ from PyQt4 import QtCore, QtGui
 
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-from pyqtgraph.widgets.LayoutWidget import LayoutWidget   # ejb - allows better dropping
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
@@ -89,14 +89,12 @@ class CcpnModule(Dock):
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
     #TODO:GEERTEN: make mainWindow actually do something
-    self.area = None
+    area = None
     if mainWindow is not None:
-      self.area = mainWindow.moduleArea
+      area = mainWindow.moduleArea
 
-    Dock.__init__(self, name=name, area=self.area,
-                   autoOrientation=False,
-                   closable=closable)#, **kwds)   # ejb
-
+    super(CcpnModule, self).__init__(name=name, area=area,
+                                     closable=closable)#, **kwds)   # ejb
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
     Logging.getLogger().debug('module:"%s"' % (name,))
@@ -110,22 +108,12 @@ class CcpnModule(Dock):
     self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
-
     ###self.label.show()
-    # self.autoOrientation = False
-    self.setOrientation(o='horizontal')
-    self.widgetArea = LayoutWidget()    # ejb - transparent, make normal drops better
-
-    # ejb - below, True allows normal drops from outside and spectra, False for DockArea drops
-    self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-
-    # ejb - add eventFilter for toggling WA_TransparentForMouseEvents
-    self.eventFilter = self._eventFilter
-    self.installEventFilter(self)
+    self.autoOrientation = False
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=self, setLayout=True)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=self.widgetArea, setLayout=True)  #QtGui.QWidget(self)
     #self.mainWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     # optional settings widget area
@@ -185,46 +173,9 @@ class CcpnModule(Dock):
   #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
   #   return self.name()
 
-    self.update()     # ejb - make sure that the widgetArea starts the correct size
-
-  def _eventFilter(self, source, event):
-    """
-    CCPNInternal
-    """
-    if isinstance(source, CcpnModule):
-      if event.type() == QtCore.QEvent.DragEnter:
-        self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-        # self._transparentAllModules(False)
-        # print ('>>>CcpnModule - dragEnterEvent')
-
-      elif event.type() == QtCore.QEvent.Leave:
-        self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-        # self._transparentAllModules(True)
-        # print ('>>>CcpnModule - leaveEvent')
-
-      elif event.type() == QtCore.QEvent.Drop:
-        self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-        # self._transparentAllModules(True)
-        # print ('>>>CcpnModule - dropEvent')
-    else:
-      if event.type() == QtCore.QEvent.DragLeave:
-        self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-        # self._transparentAllModules(True)
-        # print ('>>>CcpnModule - dragLeaveEvent')
-
-    return super(CcpnModule, self).eventFilter(source,event)
-
-  # def _transparentAllModules(self, transparency:bool=True):
-  #   if self.area:
-  #     areaList = self.area.findAll()
-  #     for modInArea in areaList:
-  #       modInArea.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparency)
-
   def resizeEvent(self, event):
-    # self.setOrientation(self.labelOrientation, force=True)
-    newSize = self.size()
-    self.resizeOverlay(newSize)
-    self.widgetArea.resize(newSize)   # ejb - to make the DropArea work properly
+    self.setOrientation(self.labelOrientation, force=True)
+    self.resizeOverlay(self.size())
 
     # override the default dock settings
     # self.widgetArea.setStyleSheet("""
@@ -265,16 +216,13 @@ class CcpnModule(Dock):
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
   def dropEvent(self, *args):
-    self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
     source = args[0].source()
 
     if hasattr(source, 'implements') and source.implements('dock'):
       DockDrop.dropEvent(self, *args)
-      # super(CcpnModule, self).dropEvent(*args)    # ejb?
     else:
       args[0].ignore()
       return
-
 
 
 class CcpnModuleLabel(DockLabel):
@@ -438,4 +386,7 @@ class CcpnModuleLabel(DockLabel):
       if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtGui.QApplication.startDragDistance():
         self.dock.startDrag()
       ev.accept()
+
+
+
 

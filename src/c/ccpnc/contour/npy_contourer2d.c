@@ -40,6 +40,8 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 */
 
 #include "Python.h"
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION  // so that warnings avoided
 #include "arrayobject.h"
 
 #include "npy_defns.h"

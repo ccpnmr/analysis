@@ -42,7 +42,7 @@ endif
 
 # === C Compiler Options =======
 ifndef C_OPTIONS
-  C_OPTIONS = -ansi $(OPT_FLAG) $(M32_FLAG) $(M64_FLAG) -c
+  C_OPTIONS = -ansi $(FPIC_FLAG) $(OPT_FLAG) $(M32_FLAG) $(M64_FLAG) -c
   ifndef C_SO_OPTIONS
     C_SO_OPTIONS = $(FPIC_FLAG) $(M32_FLAG) $(M64_FLAG)
   endif

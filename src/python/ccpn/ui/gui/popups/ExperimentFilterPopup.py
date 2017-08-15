@@ -43,7 +43,7 @@ class ExperimentFilterPopup(CcpnDialog):
     detectionBox = GroupBox(self, grid=(0, 0), gridSpan=(1, 4))
     filterBox = GroupBox(self, grid=(1, 0), gridSpan=(2, 4))
     selectionBox = GroupBox(self, grid=(3, 0), gridSpan=(1, 4))
-
+    self.expType = None
     self.transferSwitches = []
 
     self.experimentClassification = application.experimentClassifications
@@ -112,8 +112,8 @@ class ExperimentFilterPopup(CcpnDialog):
 
 
   def _setExperimentType(self):
-    expType = self.experimentPulldown.currentText()
-    self.expType = expType
+
+    self.expType = self.experimentPulldown.currentText()
     self.accept()
 
   def close(self):

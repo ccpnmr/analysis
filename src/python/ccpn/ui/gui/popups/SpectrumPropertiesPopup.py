@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.popups.ExperimentTypePopup import  _getExperimentTypes
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -273,15 +274,22 @@ class GeneralTab(QtGui.QWidget, Base):
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
                             callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
       Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(8, 0))
-      spectrumType = PulldownList(self, vAlign='t', grid=(8, 1))
-      spectrumType.addItems(SPECTRA)
+      self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(8, 1))
+      spButton = Button(self, grid=(8, 2),
+                        callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                        hPolicy='fixed', icon='icons/applications-system')
+      experimentTypes = _getExperimentTypes(spectrum.project, spectrum)
+      self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
       # Added to account for renaming of experiments
-      text = spectrumType.findText(spectrum.experimentName)
-      text = priorityNameRemapping.get(text, text)
-      spectrumType.setCurrentIndex(spectrumType.findText(str(text)))
+      self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
+      if spectrum.experimentType is not None:
+        self.spectrumType.select(spectrum.experimentType)
+
       Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(9, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(9, 1))
+
+
       self.spectrumScalingData.textChanged.connect(self._queueSpectrumScaleChange)
 
       Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
@@ -299,15 +307,22 @@ class GeneralTab(QtGui.QWidget, Base):
       else:
         self.noiseLevelData.setText('None')
     else:
-      Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(7, 0))
+      Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
       self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(7, 1))
-      axisCodes = []
-      for isotopeCode in spectrum.isotopeCodes:
-        axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
+      spButton = Button(self, grid=(7, 2),
+                        callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                        hPolicy='fixed', icon='icons/applications-system')
+      experimentTypes = _getExperimentTypes(spectrum.project, spectrum)
+      self.spectrumType.setData(texts = list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
-      self.atomCodes = tuple(sorted(axisCodes))
-      itemsList = list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())
-      self.spectrumType.addItems(itemsList)
+
+      # axisCodes = []
+      # for isotopeCode in spectrum.isotopeCodes:
+      #   axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
+      #
+      # self.atomCodes = tuple(sorted(axisCodes))
+      # itemsList = list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())
+      # self.spectrumType.addItems(itemsList)
       # Get the text that was used in the pulldown from the refExperiment
       # NBNB This could possibly give unpredictable results
       # if there is an experiment with experimentName (user settable!)
@@ -318,7 +333,7 @@ class GeneralTab(QtGui.QWidget, Base):
       # or (too ugly for words) to have a third attribute in parallel with
       # spectrum.experimentName and spectrum.experimentType
       text = spectrum.experimentName
-      if text not in itemsList:
+      if text not in experimentTypes:
         text = spectrum.experimentType
       # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
       # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
@@ -411,6 +426,19 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       self._changes['chemicalShiftList'] = partial(self._setChemicalShiftList, item)
 
+  def _raiseExperimentFilterPopup(self, spectrum):
+    from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
+    popup = ExperimentFilterPopup(spectrum=spectrum, application=spectrum.project._appBase)
+    popup.exec_()
+    self.spectrumType.select(popup.expType)
+
+
+    #
+    # expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(popup.expType)
+    #
+    # if expType is not None:
+    #   spectrum.experimentType = expType
+
   def _setNewChemicalShiftList(self, listLen):
     newChemicalShiftList = self.spectrum.project.newChemicalShiftList()
     insertionIndex = listLen - 1
@@ -444,7 +472,10 @@ class GeneralTab(QtGui.QWidget, Base):
     self._changes['spectrumType'] = partial(self._setSpectrumType, value)
 
   def _setSpectrumType(self, value):
-    expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
+
+    # expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
+    expType = self.spectrumType.getObject()
+    print(expType)
     self.spectrum.experimentType = expType
     self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
     self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)

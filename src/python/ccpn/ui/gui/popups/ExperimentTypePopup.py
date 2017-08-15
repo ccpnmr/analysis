@@ -34,6 +34,15 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 from functools import partial
 
+def _getExperimentTypes(project, spectrum):
+  ''' CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets'''
+  axisCodes = []
+  for isotopeCode in spectrum.isotopeCodes:
+    axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()]))
+  atomCodes = tuple(sorted(axisCodes))
+  return project._experimentTypeMap[spectrum.dimensionCount].get(atomCodes)
+  # return list(project._experimentTypeMap[spectrum.dimensionCount].get(atomCodes).keys())
+
 class ExperimentTypePopup(CcpnDialog):
   def __init__(self, parent=None, project=None, title:str='Experiment Type Selection', **kw):
 
@@ -49,6 +58,7 @@ class ExperimentTypePopup(CcpnDialog):
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
 
     for spectrumIndex, spectrum in enumerate(spectra):
       axisCodes = []

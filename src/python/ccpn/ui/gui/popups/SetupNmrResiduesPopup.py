@@ -63,6 +63,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
 
 
   def _setupNmrResidues(self):
+    # FIXME Why just 15N ?
     self.project._startCommandEchoBlock('_setupNmrResidues')
     try:
       peakList = self.project.getByPid(self.peakListPulldown.currentText())

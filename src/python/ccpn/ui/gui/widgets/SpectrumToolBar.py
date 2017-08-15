@@ -69,15 +69,34 @@ class SpectrumToolBar(ToolBar):
     if not keys: # if you click on >> button which shows more spectra
       return None
     key = keys[0]
+    allPlAction = contextMenu.addAction('All PL')
+    allPlAction.setCheckable(True)
+    allPlAction.setChecked(True)
+    allPlAction.toggled.connect(partial(self._allPeakLists, contextMenu , button))
+
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
         action = contextMenu.addAction(peakListView.peakList.id)
         action.setCheckable(True)
         if peakListView.isVisible():
           action.setChecked(True)
+        else:
+          allPlAction.setChecked(False)
         action.toggled.connect(peakListView.setVisible)
-    contextMenu.addAction('Remove', partial(self._removeSpectrum, button))
+    contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu
+
+  def _allPeakLists(self, contextMenu,  button):
+    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    for peakListView in self.widget.peakListViews:
+      if peakListView.spectrumView._apiDataSource == key:
+        for action in contextMenu.actions():
+          if action is not self.sender():
+            if action.isChecked():
+              action.setChecked(False)
+              action.toggled.connect(peakListView.setVisible)
+
+
 
   def _removeSpectrum(self, button:QtGui.QToolButton):
     """

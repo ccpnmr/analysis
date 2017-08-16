@@ -243,7 +243,7 @@ class PreferencesPopup(CcpnDialog):
     self.preferences.general.userExtensionPath = newPath
 
   def _changeLanguage(self, value):
-    self.preferences.general.language = (LANGUAGES[value])
+    self.preferences.general.language = (languages[value])
 
   def _changeColourScheme(self, value):
     self.preferences.general.colourScheme = (COLOUR_SCHEMES[value])

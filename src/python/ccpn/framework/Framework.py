@@ -128,8 +128,7 @@ def defineProgramArguments():
   #                                               help='Show %s component' % component.lower())
   parser.add_argument('--language',
                       help=('Language for menus, etc.; valid options = (%s); default=%s' %
-                            ('|'.join(languages), defaultLanguage)),
-                      default=defaultLanguage)
+                            ('|'.join(languages), defaultLanguage)))
   parser.add_argument('--interface',
                       help=('User interface, to use; one of  = (%s); default=%s' %
                             ('|'.join(interfaces), defaultInterface)),
@@ -426,8 +425,10 @@ class Framework:
     # Language, check for command line override, or use preferences
     if self.args.language:
       language = self.args.language
-    else:
+    elif self.preferences.general.language:
       language = self.preferences.general.language
+    else:
+      language = defaultLanguage
     if not translator.setLanguage(language):
       self.preferences.general.language = language
     # translator.setDebug(True)

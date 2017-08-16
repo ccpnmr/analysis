@@ -30,12 +30,13 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
 
 class CcpnDialog(QtGui.QDialog, Base):
-  def __init__(self, parent=None, windowTitle='', setLayout=False, **kw):
+  def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200,100), **kw):
     QtGui.QDialog.__init__(self, parent)
     Base.__init__(self, setLayout=setLayout, **kw)
 
     self.setWindowTitle(windowTitle)
     self.setContentsMargins(15, 15, 15, 15)
+    self.resize(*size)
 
     # self.mainLayout = QtGui.QGridLayout()   # ejb - handled inside Base
     # self.setLayout(self.mainLayout)

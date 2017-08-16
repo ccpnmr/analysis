@@ -815,7 +815,8 @@ class Framework:
       ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                         ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
                          )),
-      ("Copy PeakList", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
+      ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
+      ("Copy Peaks",       self.showCopyPeaks),
 
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
@@ -1502,6 +1503,16 @@ class Framework:
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
       CopyPeakListPopup(parent=self.ui.mainWindow).exec_()
+
+  def showCopyPeaks(self):
+    if not self.project.peakLists:
+      getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+      return
+    else:
+      from ccpn.ui.gui.modules.CopyPeaksModule import CopyPeaksModule
+      cpModule = CopyPeaksModule(mainWindow=self.ui.mainWindow)
+      self.ui.mainWindow.moduleArea.addModule(cpModule)
 
 
   ################################################################################################

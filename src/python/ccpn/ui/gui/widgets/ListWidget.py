@@ -137,10 +137,13 @@ class ListWidget(QtGui.QListWidget, Base):
     return [i.text() for i in items]
 
   def selectObject(self, obj):
-    for item in self.items:
-      itemObject = item.data(QtCore.Qt.UserRole)
-      if obj == itemObject:
-        item.setSelected(True)
+    try:
+      for item in self.items:
+        itemObject = item.data(QtCore.Qt.UserRole)
+        if obj == itemObject:
+          item.setSelected(True)
+    except:
+      pass
 
   def selectObjects(self, objs):
     self.clearSelection()

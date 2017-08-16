@@ -59,7 +59,7 @@ class PreferencesPopup(CcpnDialog):
 
     self.mainLayout = self.getLayout()
     self._setTabs()
-    self._setWidgets()
+    self._addMainWidgets()
 
 
   def _setTabs(self):
@@ -71,27 +71,24 @@ class PreferencesPopup(CcpnDialog):
     self.tabWidget = QtGui.QTabWidget()
 
     ## 1 Tab
-    self.appearanceTabFrame = Frame(self, setLayout=True, )
+    self.appearanceTabFrame = Frame(self, setLayout=True)
+    self._setAppearanceTabWidgets(parent=self.appearanceTabFrame)
     self.tabWidget.addTab(self.appearanceTabFrame, 'Appearance')
 
     ## 2 Tab
     self.pathsTabFrame = Frame(self, setLayout=True)
+    self._setPathsTabWidgets(parent=self.pathsTabFrame)
     self.tabWidget.addTab(self.pathsTabFrame, 'Paths')
 
     ## 3 Tab
     self.miscellaneousTabFrame = Frame(self, setLayout=True)
+    self._setMiscellaneousTabWidgets(parent=self.miscellaneousTabFrame)
     self.tabWidget.addTab(self.miscellaneousTabFrame, 'Miscellaneous')
 
 
-  def _setWidgets(self):
+  def _addMainWidgets(self):
 
-    ''' sets all widgets:
-        Tabs and Close button are in the mainLayout.
-        All  other widgets are children contained in tabs (Frame)
-    '''
-    self._setPathsTabWidgets(parent=self.pathsTabFrame)
-    self._setAppearanceTabWidgets(parent=self.appearanceTabFrame)
-    self._setMiscellaneousTabWidgets(parent=self.miscellaneousTabFrame)
+    ''' Tabs and Close button are added in the mainLayout. '''
 
     buttonBox = Button(self.miscellaneousTabFrame, text='Close', callback=self.accept)
     self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 3)
@@ -143,7 +140,7 @@ class PreferencesPopup(CcpnDialog):
 
 
   def _setAppearanceTabWidgets(self, parent):
-    ''' Insert a widget in here to appear in the Appearance Tab. Parent is the Frame obj where the widget should live'''
+    ''' Insert a widget in here to appear in the Appearance Tab. Parent = the Frame obj where the widget should live'''
 
     row = 0
     self.languageLabel = Label(parent, text="Language", grid=(row, 0))

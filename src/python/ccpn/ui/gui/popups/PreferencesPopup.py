@@ -40,6 +40,7 @@ from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.Tabs import Tabs
 
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
@@ -64,7 +65,8 @@ class PreferencesPopup(CcpnDialog):
 
     self.mainLayout = self.getLayout()
     self._setTabs()
-    self._addMainWidgets()
+
+    self.buttonBox = Button(self, text='Close', callback=self.accept, grid=(1,2))
 
 
   def _setTabs(self):
@@ -73,7 +75,7 @@ class PreferencesPopup(CcpnDialog):
      Each frame will be the widgets parent. 
      Tabs are displayed by the order how appear here. '''
 
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = Tabs(self, grid=(0,0), gridSpan=(1,3))
 
     ## 1 Tab
     self.generalTabFrame = Frame(self, setLayout=True)
@@ -89,15 +91,6 @@ class PreferencesPopup(CcpnDialog):
     # self.miscellaneousTabFrame = Frame(self, setLayout=True)
     # self._setMiscellaneousTabWidgets(parent=self.miscellaneousTabFrame)
     # self.tabWidget.addTab(self.miscellaneousTabFrame, 'Miscellaneous')
-
-
-  def _addMainWidgets(self):
-
-    ''' Tabs and Close button are added in the mainLayout. '''
-
-    buttonBox = Button(self, text='Close', callback=self.accept)
-    self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 3)
-    self.mainLayout.addWidget(buttonBox, 1, 2)
 
 
   def _setGeneralTabWidgets(self, parent):
@@ -215,7 +208,7 @@ class PreferencesPopup(CcpnDialog):
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
 
     row += 1
-    self.showDoubleCursorLabel = Label(parent, text="Show DoubleCursor: ", grid=(row, 0))
+    self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
     self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
     # TODO enable DoubleCursor
     self.showDoubleCursorBox.setDisabled(True)

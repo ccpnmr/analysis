@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -97,8 +97,6 @@ class CopyPeaks(CcpnDialog):
       self.inputPeaksListWidget.setObjects(self.project.peakLists, name='pid')
 
 
-    # self.inputPeaksListWidget.setObjects(self.project.peakLists, name='pid')
-
   def _refreshInputPeaksWidget(self, *args):
     self._populatePeakWidget()
 
@@ -117,8 +115,9 @@ class CopyPeaks(CcpnDialog):
         for peak in peaks:
           for peakList in peakLists:
             peak.copyTo(peakList)
-    self.project._logger.warn('Peaks copied. Finished')
-    self._deregisterNotifiers()
+
+    getLogger().info('Peaks copied. Finished')
+    self._closePopup()
 
 
   def _selectPeaks(self, peaks):

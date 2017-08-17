@@ -25,24 +25,20 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
-class CopyPeaksModule(CcpnModule):
+class CopyPeaks(CcpnDialog):
 
-  includeSettingsWidget = False
-  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-  settingsPosition = 'top'
-  className = 'CopyPeaksModule'
+  def __init__(self, parent=None,  mainWindow=None, title='Copy Peaks to PeakLists', **kw):
+    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(300, 500), **kw)
 
-  def __init__(self, mainWindow, name='Copy Peaks to PeakLists', **kw):
-    super(CopyPeaksModule, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name )
-
+    self.mainWindow = mainWindow
     self.application = mainWindow.application
+    self.current = self.application.current
     self.project = mainWindow.project
 
     self._createWidgets()
@@ -52,27 +48,28 @@ class CopyPeaksModule(CcpnModule):
 
     tipText = ' Select peaks and peakLists to be copied over then click copy'
 
-    self.mainWidget.setContentsMargins(20, 20, 20, 20)
+    self.getLayout().setContentsMargins(10,10,10,10)
     row =  0
-    self.spectraLabel1 = Label(self.mainWidget, 'Select Origin Spectra', grid=(row, 0), hAlign='l')
-    self.spectraLabel2 = Label(self.mainWidget, 'Select Destination Spectra', grid=(row, 1),  hAlign='l')
+    self.spectraLabel1 = Label(self, 'Select Origin Spectra', grid=(row, 0), hAlign='l')
+    self.spectraLabel2 = Label(self, 'Select Destination Spectra', grid=(row, 1),  hAlign='l')
     row += 1
-    self.selectFromPullDown = PulldownList(self.mainWidget, texts=['All'], callback=self._populatePeakWidget, grid=(row, 0))
-    self.selectToPullDown = PulldownList(self.mainWidget,texts=['All'], callback=self._populatePeakListsWidget,  grid=(row, 1))
+    self.selectFromPullDown = PulldownList(self, texts=['All'], callback=self._populatePeakWidget, grid=(row, 0))
+    self.selectToPullDown = PulldownList(self,texts=['All'], callback=self._populatePeakListsWidget,  grid=(row, 1))
     row += 1
-    self.inputPeaksWidgetLabel = Label(self.mainWidget, 'Select Peaks To Copy', grid=(row, 0),  hAlign='l')
-    self.outputPeakListsWidgetLabel = Label(self.mainWidget, 'Select Destination PeakLists',  grid=(row, 1),  hAlign='l')
+    self.inputPeaksWidgetLabel = Label(self, 'Select Peaks To Copy', grid=(row, 0),  hAlign='l')
+    self.outputPeakListsWidgetLabel = Label(self, 'Select Destination PeakLists',  grid=(row, 1),  hAlign='l')
     row += 1
-    self.inputPeaksWidget = ListWidget(self.mainWidget, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 0))
-    self.inputPeaksListWidget = ListWidget(self.mainWidget, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 1))
+    self.inputPeaksWidget = ListWidget(self, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 0))
+    self.inputPeaksListWidget = ListWidget(self, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 1))
     row += 1
-    self.copyButtons = ButtonList(self.mainWidget, texts=['Clear All', ' Copy '],
-                                  callbacks=[self.clearSelections, self._copyButton],
-                                  tipTexts=['Clear All Selections', tipText],  grid=(row, 1))
+    self.copyButtons = ButtonList(self, texts=['Close','Clear All', ' Copy '],
+                                  callbacks=[self._closePopup, self.clearSelections, self._copyButton],
+                                  tipTexts=['Close','Clear All Selections', tipText],  grid=(row, 1))
 
     self._populatePeakWidget()
     self._populatePeakListsWidget()
     self._setPullDownData()
+
 
   def _setPullDownData(self):
     for spectrum in self.project.spectra:
@@ -108,39 +105,41 @@ class CopyPeaksModule(CcpnModule):
   def _refreshInputPeaksListWidget(self, *args):
     self._populatePeakListsWidget()
 
+  def _selectSpectrum(self, spectrum):
+    self.selectFromPullDown.select(spectrum)
+
 
   def _copyButton(self):
-      peakLists = self.inputPeaksListWidget.getSelectedObjects()
-      peaks = self.inputPeaksWidget.getSelectedObjects()
-      if len(peaks)>0:
-        if len(peakLists) > 0:
-          for peak in peaks:
-            for peakList in peakLists:
-              peak.copyTo(peakList)
-      self.project._logger.warn('Peaks copied. Finished')
+    peakLists = self.inputPeaksListWidget.getSelectedObjects()
+    peaks = self.inputPeaksWidget.getSelectedObjects()
+    if len(peaks)>0:
+      if len(peakLists) > 0:
+        for peak in peaks:
+          for peakList in peakLists:
+            peak.copyTo(peakList)
+    self.project._logger.warn('Peaks copied. Finished')
+    self._deregisterNotifiers()
 
-  def _selectCurrentPeaks(self, peaks):
-    if len(peaks) >0:
-      self.inputPeaksWidget.selectObjects(peaks)
 
+  def _selectPeaks(self, peaks):
+    self.inputPeaksWidget.selectObjects(peaks)
 
   def clearSelections(self):
     self.inputPeaksWidget.clearSelection()
     self.inputPeaksListWidget.clearSelection()
 
-  def _closeModule(self):
+  def _closePopup(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification
     """
     self._deregisterNotifiers()
-    super(CopyPeaksModule, self)._closeModule()
+    self.reject()
 
 
   def _registerNotifiers(self):
 
     self._peakNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Peak', self._refreshInputPeaksWidget)
     self._peakListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'PeakList', self._refreshInputPeaksListWidget)
-    self.application.current.registerNotify(self._selectCurrentPeaks, 'peaks')
 
 
   def _deregisterNotifiers(self):
@@ -148,4 +147,3 @@ class CopyPeaksModule(CcpnModule):
       self._peakNotifier.unRegister()
     if self._peakListNotifier:
       self._peakListNotifier.unRegister()
-    self.application.current.unRegisterNotify(self._selectCurrentPeaks, 'peaks')

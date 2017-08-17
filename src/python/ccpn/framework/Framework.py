@@ -1510,9 +1510,10 @@ class Framework:
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
       return
     else:
-      from ccpn.ui.gui.modules.CopyPeaksModule import CopyPeaksModule
-      cpModule = CopyPeaksModule(mainWindow=self.ui.mainWindow)
-      self.ui.mainWindow.moduleArea.addModule(cpModule)
+      from ui.gui.popups.CopyPeaksPopup import CopyPeaks
+      popup = CopyPeaks(mainWindow=self.ui.mainWindow)
+      popup.exec()
+      popup.raise_()
 
 
   ################################################################################################

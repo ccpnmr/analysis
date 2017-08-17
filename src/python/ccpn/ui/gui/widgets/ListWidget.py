@@ -97,6 +97,7 @@ class ListWidget(QtGui.QListWidget, Base):
       if hasattr(obj, name):
         item = QtGui.QListWidgetItem(getattr(obj, name), self)
         item.setData(QtCore.Qt.UserRole, obj)
+        obj.item = item
         self.addItem(item)
         self.items.append(item)
 
@@ -138,12 +139,11 @@ class ListWidget(QtGui.QListWidget, Base):
 
   def selectObject(self, obj):
     try:
-      for item in self.items:
-        itemObject = item.data(QtCore.Qt.UserRole)
-        if obj == itemObject:
-          item.setSelected(True)
-    except:
+      obj.item.setSelected(True)
+    except Exception as e:
+      # Error wrapped C/C++ object of type QListWidgetItem has been deleted
       pass
+
 
   def selectObjects(self, objs):
     self.clearSelection()

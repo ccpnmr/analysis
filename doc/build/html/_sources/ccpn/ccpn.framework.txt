@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
 
     ccpn.framework.languages
+    ccpn.framework.lib
     ccpn.framework.update
 
 Submodules

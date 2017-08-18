@@ -2371,9 +2371,9 @@ title of PeakList (not used in PID).</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.core.Project">
-<span id="ccpn-core-project-module"></span><h2>ccpn.core.Project module<a class="headerlink" href="#module-ccpn.core.Project" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="ccpn-core-project-module">
+<h2>ccpn.core.Project module<a class="headerlink" href="#ccpn-core-project-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.Project"></span><dl class="class">
 <dt id="ccpn.core.Project.Project">
 <em class="property">class </em><code class="descclassname">ccpn.core.Project.</code><code class="descname">Project</code><span class="sig-paren">(</span><em>wrappedData: ccpnmodel.ccpncore.api.ccp.nmr.Nmr.NmrProject</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
@@ -2824,12 +2824,6 @@ number fo cases, e.g. for NmrResidues</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.core.Project.Project.getTask">
-<code class="descname">getTask</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Task.Task<a class="headerlink" href="#ccpn.core.Project.Project.getTask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get contained &#8216;ccpn.ui._implementation.Task.Task object by relative ID</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ccpn.core.Project.Project.getWindow">
 <code class="descname">getWindow</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Window.Window<a class="headerlink" href="#ccpn.core.Project.Project.getWindow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.ui._implementation.Window.Window object by relative ID</p>
@@ -2910,6 +2904,33 @@ name of Project</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Project.Project.newMark">
+<code class="descname">newMark</code><span class="sig-paren">(</span><em>colour: str, positions: Sequence[float], axisCodes: Sequence[T_co], style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Mark.Mark<a class="headerlink" href="#ccpn.core.Project.Project.newMark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Mark</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>colour</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark colour</li>
+<li><strong>positions</strong> (<em>tuple/list</em>) &#8211; Position in unit (default ppm) of all lines in the mark</li>
+<li><strong>axisCodes</strong> (<em>tuple/list</em>) &#8211; Axis codes for all lines in the mark</li>
+<li><strong>style</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark drawing style (dashed line etc.) default: full line (&#8216;simple&#8217;)</li>
+<li><strong>units</strong> (<em>tuple/list</em>) &#8211; Axis units for all lines in the mark, Default: all ppm</li>
+<li><strong>labels</strong> (<em>tuple/list</em>) &#8211; Ruler labels for all lines in the mark. Default: None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.newModule">
+<code class="descname">newModule</code><span class="sig-paren">(</span><em>moduleType: str</em>, <em>title: str = None</em>, <em>window: ccpn.ui._implementation.Window.Window = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.newModule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Project.Project.newNmrChain">
 <code class="descname">newNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em>, <em>isConnected: bool = False</em>, <em>label: str = '?'</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="headerlink" href="#ccpn.core.Project.Project.newNmrChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new NmrChain. Setting isConnected=True produces a connected NmrChain.</p>
@@ -2942,11 +2963,38 @@ name of Project</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Project.Project.newSimpleMark">
+<code class="descname">newSimpleMark</code><span class="sig-paren">(</span><em>colour: str</em>, <em>position: float</em>, <em>axisCode: str</em>, <em>style: str = 'simple'</em>, <em>unit: str = 'ppm'</em>, <em>label: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Mark.Mark<a class="headerlink" href="#ccpn.core.Project.Project.newSimpleMark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new child Mark with a single line</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>colour</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark colour</li>
+<li><strong>position</strong> (<em>tuple/list</em>) &#8211; Position in unit (default ppm)</li>
+<li><strong>axisCode</strong> (<em>tuple/list</em>) &#8211; Axis code</li>
+<li><strong>style</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; Mark drawing style (dashed line etc.) default: full line (&#8216;simple&#8217;)</li>
+<li><strong>unit</strong> (<em>tuple/list</em>) &#8211; Axis unit. Default: all ppm</li>
+<li><strong>label</strong> (<em>tuple/list</em>) &#8211; Line label. Default: None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Project.Project.newSpectrum">
 <code class="descname">newSpectrum</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Spectrum.Spectrum<a class="headerlink" href="#ccpn.core.Project.Project.newSpectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creation of new Spectrum NOT IMPLEMENTED.
 Use Project.loadData or Project.createDummySpectrum instead</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.newSpectrumDisplay">
+<code class="descname">newSpectrumDisplay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.Project.Project.newSpectrumDisplay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSpectrumGroup">
@@ -2966,12 +3014,6 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 <dd><p>Create new substance WITHOUT storing the sequence internally
 (and hence not suitable for making chains). SubstanceType defaults to &#8216;Molecule&#8217;.</p>
 <p>ADVANCED alternatives are &#8216;Cell&#8217; and &#8216;Material&#8217;</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Project.Project.newTask">
-<code class="descname">newTask</code><span class="sig-paren">(</span><em>name: str</em>, <em>nameSpace: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.ui._implementation.Task.Task<a class="headerlink" href="#ccpn.core.Project.Project.newTask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new Task</p>
 </dd></dl>
 
 <dl class="method">
@@ -3228,12 +3270,6 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dt id="ccpn.core.Project.Project.suspendNotification">
 <code class="descname">suspendNotification</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.suspendNotification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.suspendNotification" title="Permalink to this definition">¶</a></dt>
 <dd><p>Suspend notifier execution and accumulate notifiers for later execution</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Project.Project.tasks">
-<code class="descname">tasks</code><a class="headerlink" href="#ccpn.core.Project.Project.tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Task.Task,)</em>  - contained Task objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -5692,7 +5728,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-note-module">ccpn.core.Note module</a></li>
 <li><a class="reference internal" href="#ccpn-core-peak-module">ccpn.core.Peak module</a></li>
 <li><a class="reference internal" href="#ccpn-core-peaklist-module">ccpn.core.PeakList module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.Project">ccpn.core.Project module</a></li>
+<li><a class="reference internal" href="#ccpn-core-project-module">ccpn.core.Project module</a></li>
 <li><a class="reference internal" href="#ccpn-core-pseudodimension-module">ccpn.core.PseudoDimension module</a></li>
 <li><a class="reference internal" href="#ccpn-core-residue-module">ccpn.core.Residue module</a></li>
 <li><a class="reference internal" href="#ccpn-core-restraint-module">ccpn.core.Restraint module</a></li>

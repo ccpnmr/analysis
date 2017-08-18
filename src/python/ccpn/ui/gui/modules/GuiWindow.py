@@ -267,14 +267,14 @@ class GuiWindow():
     Creates a mark at the current cursor position in the current strip.
     """
     strip = self.application.current.strip
-    if strip and self.task:
-      strip._createMarkAtCursorPosition(self.task)
+    if strip:
+      strip._createMarkAtCursorPosition()
     
   def clearMarks(self):
     """
     Clears all marks in all windows for the current task.
     """
-    for mark in self.task.marks[:]:
+    for mark in self.project.marks[:]:
       mark.delete()
 
   def markPositions(self, axisCodes, chemicalShifts):
@@ -287,8 +287,6 @@ class GuiWindow():
     project = self.application.project
     project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
     try:
-      task = self.task
-
       colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
       for ii, axisCode in enumerate(axisCodes):
         for chemicalShift in chemicalShifts[ii]:
@@ -296,9 +294,9 @@ class GuiWindow():
           # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
           colour = colourDict.get(atomName[:min(2,len(atomName))])
           if colour:
-            task.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
+            project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
           else:
-            task.newMark('white', [chemicalShift.value], [axisCode])
+            project.newMark('white', [chemicalShift.value], [axisCode])
 
     finally:
       project._endCommandEchoBlock()

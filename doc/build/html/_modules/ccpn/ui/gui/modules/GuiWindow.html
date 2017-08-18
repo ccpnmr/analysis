@@ -308,14 +308,14 @@
 <span class="sd">    Creates a mark at the current cursor position in the current strip.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
-    <span class="k">if</span> <span class="n">strip</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">:</span>
-      <span class="n">strip</span><span class="o">.</span><span class="n">_createMarkAtCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_createMarkAtCursorPosition</span><span class="p">()</span></div>
     
 <div class="viewcode-block" id="GuiWindow.clearMarks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.clearMarks">[docs]</a>  <span class="k">def</span> <span class="nf">clearMarks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clears all marks in all windows for the current task.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">marks</span><span class="p">[:]:</span>
+    <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">marks</span><span class="p">[:]:</span>
       <span class="n">mark</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="GuiWindow.markPositions"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiWindow.GuiWindow.markPositions">[docs]</a>  <span class="k">def</span> <span class="nf">markPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">chemicalShifts</span><span class="p">):</span>
@@ -328,8 +328,6 @@
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
     <span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;markPositions&#39;</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">chemicalShifts</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
-
       <span class="n">colourDict</span> <span class="o">=</span> <span class="n">guiSettings</span><span class="o">.</span><span class="n">MARK_LINE_COLOUR_DICT</span>  <span class="c1"># maps atomName --&gt; colour</span>
       <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">chemicalShift</span> <span class="ow">in</span> <span class="n">chemicalShifts</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
@@ -337,9 +335,9 @@
           <span class="c1"># TODO: the below fails, for example, if nmrAtom.name = &#39;Hn&#39;, can that happen?</span>
           <span class="n">colour</span> <span class="o">=</span> <span class="n">colourDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomName</span><span class="p">[:</span><span class="nb">min</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">atomName</span><span class="p">))])</span>
           <span class="k">if</span> <span class="n">colour</span><span class="p">:</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="n">atomName</span><span class="p">])</span>
+            <span class="n">project</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="n">colour</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="n">atomName</span><span class="p">])</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">])</span>
+            <span class="n">project</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">chemicalShift</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="p">[</span><span class="n">axisCode</span><span class="p">])</span>
 
     <span class="k">finally</span><span class="p">:</span>
       <span class="n">project</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span></div>

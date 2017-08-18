@@ -212,12 +212,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;QFileDialog QWidget {color: #464e76; }&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NefFileDialog.selectedFiles"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.selectedFiles">[docs]</a>  <span class="k">def</span> <span class="nf">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+      <span class="c1"># return empty list if the native dialog</span>
+      <span class="k">return</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">[]</span></div>
+      <span class="c1"># the selectFile works and returns the file in the current directory</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useNative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="NefFileDialog.selectedFile"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.FileDialog.NefFileDialog.selectedFile">[docs]</a>  <span class="k">def</span> <span class="nf">selectedFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>

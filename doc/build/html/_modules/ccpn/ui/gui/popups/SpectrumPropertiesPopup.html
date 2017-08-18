@@ -171,8 +171,11 @@
 <span class="sd">      If anything has been added to the undo queue then remove it with application.undo()</span>
 <span class="sd">      repopulate the popup widgets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tabs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStackedWidget</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">children</span><span class="p">()</span>
-    <span class="n">tabs</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tabs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStackedLayout</span><span class="p">)]</span>
+    <span class="c1"># tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()</span>
+    <span class="c1"># tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]</span>
+
+    <span class="c1"># ejb - error above, need to set the tabs explicitly</span>
+    <span class="n">tabs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generalTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensionsTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contoursTab</span><span class="p">)</span>
 
     <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
@@ -180,8 +183,9 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tabs</span><span class="p">:</span>
-        <span class="n">changes</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">_changes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="n">changes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">changes</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">_changes</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_applyAllChanges</span><span class="p">(</span><span class="n">changes</span><span class="p">)</span>
 
       <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>

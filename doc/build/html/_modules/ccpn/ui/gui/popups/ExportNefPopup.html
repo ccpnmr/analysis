@@ -94,7 +94,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidgetPair</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showYesNoWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showYesNoWarning</span><span class="p">,</span> <span class="n">showWarning</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
@@ -233,10 +233,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">pathEdited</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">textEdited</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_editPath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="s1">&#39;selectFile&#39;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">kw</span><span class="p">[</span><span class="s1">&#39;selectFile&#39;</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spacer</span> <span class="o">=</span> <span class="n">Spacer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveFrame</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">3</span>
                          <span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span>
                          <span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
@@ -288,10 +284,10 @@
                                         <span class="p">,</span> <span class="n">selectFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefSelectFile</span>
                                         <span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nefFilter</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="s1">&#39;selectFile&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">selectFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>    <span class="c1"># and self.application.preferences.general.useNative is False:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileSaveDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">oldFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>       <span class="c1"># set to the same for the minute</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_saveState</span> <span class="o">=</span> <span class="bp">True</span>
@@ -314,6 +310,11 @@
         <span class="n">yes</span> <span class="o">=</span> <span class="n">showYesNoWarning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> already exists.&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">)</span>
                             <span class="p">,</span> <span class="s1">&#39;Do you want to replace it?&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">yes</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitFileName</span><span class="p">:</span>
+          <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;FileName Error:&#39;</span><span class="p">,</span> <span class="s1">&#39;Filename is empty.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_rejectDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

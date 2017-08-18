@@ -196,13 +196,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    #CCPN INTERNAL - called in saveProject method of Framework</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.util.GitTools</span> <span class="kn">import</span> <span class="n">getAllRepositoriesGitCommit</span>
-
-    <span class="n">commits</span> <span class="o">=</span> <span class="n">getAllRepositoriesGitCommit</span><span class="p">()</span>
-    <span class="n">windowTitle</span> <span class="o">=</span> <span class="s1">&#39;{}, {} (framework: {:.8s}, model: {:.8s})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationName</span><span class="p">,</span>
-                                                                     <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">,</span>
-                                                                     <span class="n">commits</span><span class="p">[</span><span class="s1">&#39;analysis&#39;</span><span class="p">],</span>
-                                                                     <span class="n">commits</span><span class="p">[</span><span class="s1">&#39;ccpnmodel&#39;</span><span class="p">])</span>
+    <span class="n">windowTitle</span> <span class="o">=</span> <span class="s1">&#39;{}, {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">windowTitle</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GuiMainWindow.getMenuAction"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.getMenuAction">[docs]</a>  <span class="k">def</span> <span class="nf">getMenuAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menuString</span><span class="p">,</span> <span class="n">topMenuAction</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -302,7 +296,8 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_fillRecentProjectsMenu</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_fillRecentMacrosMenu</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_fillPluginsMenu</span><span class="p">()</span>
+    <span class="c1">#TODO:ED needs fixing</span>
+    <span class="c1"># self._fillPluginsMenu()     # ejb - nothing to show, and crash anyway</span>
 
 
   <span class="k">def</span> <span class="nf">_createMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">targetMenu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>

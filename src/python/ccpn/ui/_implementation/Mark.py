@@ -31,7 +31,6 @@ from typing import Sequence, Tuple
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui._implementation.Task import Task
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
@@ -47,7 +46,7 @@ class Mark(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Mark'
 
-  _parentClass = Task
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'marks'
@@ -75,9 +74,9 @@ class Mark(AbstractWrapperObject):
     return self._wrappedData.serial
 
   @property
-  def _parent(self) -> Task:
+  def _parent(self) -> Project:
     """Task containing Mark."""
-    return  self._project._data2Obj[self._wrappedData.guiTask]
+    return  self._project._data2Obj[self._wrappedData.guiTask.nmrProject]
 
   task = _parent
 
@@ -159,14 +158,16 @@ class Mark(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:Task)-> list:
+  def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
 
-    return parent._wrappedData.sortedMarks()
+    apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                  parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    return apiGuiTask.sortedMarks()
 
 
 # newMark functions
-def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequence,
+def _newMark(self:Project, colour:str, positions:Sequence[float], axisCodes:Sequence,
              style:str='simple', units:Sequence[str]=(), labels:Sequence[str]=()) -> Mark:
   """Create new Mark
 
@@ -177,13 +178,16 @@ def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequenc
   :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
   :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
 
+  apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+
   defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
                                      ('labels', ())))
 
   self._startCommandEchoBlock('newMark', colour, positions, axisCodes, values=locals(),
                               defaults=defaults, parName='newMark')
   try:
-    apiMark = self._wrappedData.newMark(colour=colour, style=style)
+    apiMark = apiGuiTask.newMark(colour=colour, style=style)
 
     for ii,position in enumerate(positions):
       dd = {'position':position, 'axisCode':axisCodes[ii]}
@@ -197,14 +201,14 @@ def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequenc
          dd['label'] = label
       apiRuler = apiMark.newRuler(**dd)
     #
-    result =  self._project._data2Obj.get(apiMark)
+    result =  self._data2Obj.get(apiMark)
   finally:
     self._endCommandEchoBlock()
 
   return result
-Task.newMark = _newMark
+Project.newMark = _newMark
 
-def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:str='simple',
+def _newSimpleMark(self:Project, colour:str, position:float, axisCode:str, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
   """Create new child Mark with a single line
 
@@ -215,6 +219,9 @@ def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:st
   :param tuple/list unit: Axis unit. Default: all ppm
   :param tuple/list label: Line label. Default: None"""
 
+  apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+
   defaults = collections.OrderedDict((('style', 'simple'), ('unit', 'ppm'),
                                      ('label', None)))
 
@@ -222,19 +229,19 @@ def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:st
                               defaults=defaults, parName='newMark')
   try:
 
-    apiMark = self._wrappedData.newMark(colour=colour, style=style)
+    apiMark = apiGuiTask.newMark(colour=colour, style=style)
     if unit is None:
       unit = 'ppm'
     apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
     #
-    result =  self._project._data2Obj.get(apiMark)
+    result =  self._data2Obj.get(apiMark)
   finally:
     self._endCommandEchoBlock()
 
   return result
 
 
-Task.newSimpleMark = _newSimpleMark
+Project.newSimpleMark = _newSimpleMark
 
 # Notifiers:
 # Mark changes when rulers are created or deleted

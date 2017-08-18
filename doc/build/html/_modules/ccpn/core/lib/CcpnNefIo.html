@@ -3509,10 +3509,11 @@
     <span class="n">creatorFunc</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newNmrChain</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">nmrChainLoopName</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
-      <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">creatorFunc</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;shortName&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">:</span>
+        <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getNmrChain</span><span class="p">(</span><span class="n">coreConstants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">creatorFunc</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
       <span class="n">nmrChain</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span>
-      <span class="c1"># NB former call was BROKEN!</span>
-      <span class="c1"># modelUtil.resetSerial(nmrChain, row[&#39;serial&#39;], &#39;nmrChains&#39;)</span>
       <span class="n">nmrChains</span><span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;shortName&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nmrChain</span>
 
     <span class="c1"># read nmr_residue loop</span>
@@ -3528,7 +3529,7 @@
       <span class="n">nmrResidue</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span>
       <span class="c1"># NB former call was BROKEN!</span>
       <span class="c1"># modelUtil.resetSerial(nmrResidue, row[&#39;serial&#39;], &#39;nmrResidues&#39;)</span>
-      <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">chainCode</span><span class="p">,</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">nmrChain</span>
+      <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">chainCode</span><span class="p">,</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">nmrResidue</span>
 
     <span class="c1"># read nmr_atom loop</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">nef2CcpnMap</span><span class="p">[</span><span class="n">nmrAtomLoopName</span><span class="p">]</span>
@@ -4274,10 +4275,16 @@
   <span class="c1"># testNefIo will read a NEF file and re-export it (with a .out.nef suffix),</span>
   <span class="c1"># producing a V3 project on disk as a byproduct if the original is a V2 project.</span>
 
-  <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;--help&#39;</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;CcpnNefIo exports a project as a NEF file. Usage:&quot;</span>
+          <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"> One mandatory argument - the project directory to export&quot;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+
   <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(path)</span>
-  <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
   <span class="c1"># _testNefIo(nefpath)</span>
   <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(nefpath, skipPrefixes=(&#39;ccpn&#39;,))</span>

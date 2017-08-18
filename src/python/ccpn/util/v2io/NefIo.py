@@ -93,8 +93,8 @@ defaultNmrResidueCode = '@'
 saveFrameReadingOrder = [
   # 'nef_nmr_meta_data',  # Nowhere to put information. Ignored.
   'nef_molecular_system',
-  # 'ccpn_sample',     # Supported, but reading postponed (indefinitely?)
-  # 'ccpn_substance',  # Supported, but reading postponed (indefinitely?)
+  # 'ccpn_sample',     # Could be supported, but reading postponed (indefinitely?)
+  # 'ccpn_substance',  # Could be supported, but reading postponed (indefinitely?)
   'ccpn_assignment',
   'nef_chemical_shift_list',
   # 'ccpn_dataset',    # No supported information - no use or need.
@@ -695,8 +695,8 @@ class CcpnNefReader:
           fixedResonances.append(
             tuple(ConstraintBasic.getFixedResonance(nmrConstraintStore,x) for x in resonances)
           )
-        # NB We maek only one restraint, as we otehrwise mess up the restraint serials.
-        # Anyway the risk of a diedral restraint involving an ambiguous atom set is minuscule.
+        # NB We make only one restraint, as we otherwise mess up the restraint serials.
+        # Anyway the risk of a dihedral restraint involving an ambiguous atom set is minuscule.
         tt = list(itertools.product(*fixedResonances))[0]
         restraint = newRestraintFunc(resonances=tt, **dd)
         # Must be reset after the fact, as serials cannot be passed in normally
@@ -1371,17 +1371,23 @@ class CcpnNefReader:
     if atomMap is None:
       # we have no preceding map. Make one, but we clearly can have only simple atoms,
       # with no atomSets or provision for prochirals etc.
+      namesplit = name.split('@')
       if '*' in name:
         fixedName = nameForSetting = name.replace('%','*')  # convert pseudoatom marker
 
-      elif len(name.split('@')) == 2:
+      elif len(namesplit) == 2:
         if serial and name == '%s@%s' % (elementSymbol, serial):
           fixedName = name
           nameForSetting = None
-        elif name.split('@')[1].isdigit():
-          # Name does not match serial number, so we must change it
-          # - names like H@123 are reserved
-          fixedName = nameForSetting = name.replace('@', '__')
+        elif namesplit[1].isdigit():
+          if serial is None:
+            serial = int(namesplit[1])
+            fixedName = name
+            nameForSetting = None
+          else:
+            # Name does not match serial number, so we must change it
+            # - names like H@123 are reserved
+            fixedName = nameForSetting = name.replace('@', '__')
       else:
         nameForSetting = fixedName = name
       atomMap = atomMappings[name] = {'name':fixedName, 'mappingType':'simple',
@@ -1462,6 +1468,7 @@ class CcpnNefReader:
         resonanceGroup.ccpCode = residue.ccpCode
         resonanceGroup.linking = residue.linking
         resonanceGroup.descriptor = residue.descriptor
+        resonanceGroup.residue = residue
 
       seqCode, seqInsertCode, offset = commonUtil.parseSequenceCode(sequenceCode)
 

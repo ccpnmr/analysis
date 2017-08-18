@@ -33,7 +33,6 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui._implementation.Task import Task
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
@@ -41,7 +40,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 logger = getLogger()
 
@@ -53,7 +51,7 @@ class SpectrumDisplay(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumDisplay'
 
-  _parentClass = Task
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumDisplays'
@@ -81,18 +79,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     (corresponds to its name, but the name 'name' is taken by PyQt"""
     return self._wrappedData.name
 
-  # def getName(self):
-  #   """Return name of self; alternative for name as GuiSpectrumDisplay is subclassed
-  #   from this wrapper object and from CcpnModule
-  #   """
-  #   return self._wrappedData.name
-
   @property
-  def _parent(self) -> Task:
-    """Task containing spectrumDisplay."""
-    return self._project._data2Obj.get(self._wrappedData.guiTask)
+  def _parent(self) -> Project:
+    """Project containing spectrumDisplay."""
+    return self._project
 
-  task = _parent
+  project = _parent
 
   @property
   def stripDirection(self) -> str:
@@ -220,9 +212,12 @@ class SpectrumDisplay(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:Task)-> list:
-    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent Task"""
-    return [x for x in parent._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+  def _getAllWrappedData(cls, parent:Project)-> list:
+    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
+
+    apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                  parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
   # CCPN functions
   def resetAxisOrder(self):
@@ -238,23 +233,10 @@ class SpectrumDisplay(AbstractWrapperObject):
     """Find axis """
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-  #TODO:RASMUS;
-  #TODO:ED: not a wrapper method; move to Gui class - moved
-  # def displaySpectrum(self, spectrum, axisOrder:(str,)=()):
-  #   """Display additional spectrum, with spectrum axes ordered according ton axisOrder
-  #   """
-  #   spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-  #
-  #   self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
-  #                               defaults={'axisOrder':()})
-  #   try:
-  #     self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
-  #   finally:
-  #     self._endCommandEchoBlock()
 
 
 # newSpectrumDisplay functions
-def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
+def _newSpectrumDisplay(self:Project, axisCodes:(str,), stripDirection:str='Y',
                         title:str=None, window:Window=None, comment:str=None,
                        independentStrips=False, nmrResidue=None):
 
@@ -265,7 +247,8 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
   window = self.getByPid(window) if isinstance(window, str) else window
   nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
 
-  apiTask = self._wrappedData
+  apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+             self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
 
   if len(axisCodes) <2:
     raise ValueError("New SpectrumDisplay must have at least two axisCodes")
@@ -330,7 +313,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     self._endCommandEchoBlock()
 
   return result
-Task.newSpectrumDisplay = _newSpectrumDisplay
+Project.newSpectrumDisplay = _newSpectrumDisplay
 del _newSpectrumDisplay
 
 
@@ -365,9 +348,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
 
   dataSource = spectrum._wrappedData
 
-  task = window.task
-  if task is None:
-    raise ValueError("Window %s is not attached to any Task" % window)
+  project = window._project
 
   spectrumAxisCodes = spectrum.axisCodes
 
@@ -417,7 +398,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
   window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
                                 defaults=defaults, parName='newSpectrumDisplay')
   try:
-    display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
+    display = project.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
                                       independentStrips=independentStrips,
                                       title=title)
 

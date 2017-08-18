@@ -448,7 +448,7 @@ class GuiStrip(Frame):
     # TBD: the naive approach below should be improved
     return axisCode #if axisCode[0].isupper() else axisCode
 
-  def _createMarkAtCursorPosition(self, task):
+  def _createMarkAtCursorPosition(self):
     # TODO: this creates a mark in all dims, is that what we want??
 
     if not self._finaliseDone: return
@@ -456,12 +456,12 @@ class GuiStrip(Frame):
     axisPositionDict = self.axisPositionDict
     axisCodes = [axis.code for axis in self.orderedAxes]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-    task.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
+    self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
 
   # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
   def _initRulers(self):
     
-    for mark in self.spectrumDisplay.mainWindow.task.marks:
+    for mark in self._project.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self.plotWidget._addRulerLine(apiRuler)
@@ -664,14 +664,12 @@ def _axisRegionChanged(axis:'Axis'):
 
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """Notifier function for creating rulers"""
-  task = project._data2Obj[apiRuler.mark.guiTask]
-  for strip in task.strips:
+  for strip in project.strips:
     strip.plotWidget._addRulerLine(apiRuler)
 
 def _rulerDeleted(project:Project, apiRuler:ApiRuler):
   """Notifier function for deleting rulers"""
-  task = project._data2Obj[apiRuler.mark.guiTask]
-  for strip in task.strips:
+  for strip in project.strips:
     strip.plotWidget._removeRulerLine(apiRuler)
 
 # Add notifier functions to Project

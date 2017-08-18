@@ -103,6 +103,8 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiNotifier</span> <span class="kn">import</span> <span class="n">GuiNotifier</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 
 
 <div class="viewcode-block" id="GuiSpectrumDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumDisplay</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -300,6 +302,10 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_handlePeakList</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SpectrumGroup</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_handleSpectrumGroup</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">NmrAtom</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_handleNmrAtom</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">NmrResidue</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_handleNmrResidue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Dropped item &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="s1">&#39;Wrong kind; drop Spectrum, SpectrumGroup or PeakList&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">success</span>
@@ -324,6 +330,66 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_handleNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mark a list of nmrAtoms in the spectrum displays</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># showInfo(title=&#39;Mark nmrResidue &quot;%s&quot;&#39; % nmrResidue.pid, message=&#39;mark nmrResidue in strips&#39;)</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.BackboneAssignmentModule</span> <span class="kn">import</span> <span class="n">nmrAtomsFromResidue</span><span class="p">,</span> <span class="n">markNmrAtoms</span>
+
+    <span class="c1"># get the strips</span>
+    <span class="c1"># nmrResidue = nmrResidue.mainNmrResidue</span>
+    <span class="c1"># nmrResidues = []</span>
+    <span class="c1"># previousNmrResidue = nmrResidue.previousNmrResidue</span>
+    <span class="c1"># if previousNmrResidue:</span>
+    <span class="c1">#   nmrResidues.append(previousNmrResidue)</span>
+    <span class="c1"># nmrResidues.append(nmrResidue)</span>
+    <span class="c1"># nextNmrResidue = nmrResidue.nextNmrResidue</span>
+    <span class="c1"># if nextNmrResidue:</span>
+    <span class="c1">#   nmrResidues.append(nextNmrResidue)</span>
+    <span class="c1">#</span>
+    <span class="c1"># nmrAtoms=[]</span>
+    <span class="c1">#</span>
+    <span class="c1"># for nr in nmrResidues:</span>
+    <span class="c1">#   nmrAtoms.extend(nr.nmrAtoms)</span>
+
+    <span class="c1"># ejb - just a test, could pass data: if data[&#39;shiftLeftMouse&#39;]: then clear marks first</span>
+
+    <span class="c1"># #TODO:ED currently same as</span>
+    <span class="c1"># if &#39;-1&#39; in nmrResidue.pid:</span>
+    <span class="c1">#   # -1 residue so need to split the CA, CB from thr N, H</span>
+    <span class="c1">#   nmrAtomsMinus = nmrAtomsFromResidue(nmrResidue)</span>
+    <span class="c1">#   nmrAtomsCentre = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   nmrAtoms = []</span>
+    <span class="c1">#   # this should check the experiment type and choose the correct atoms</span>
+    <span class="c1">#   for nac in nmrAtomsMinus:</span>
+    <span class="c1">#     if &#39;..CA&#39; in nac.pid or &#39;..CB&#39; in nac.pid:</span>
+    <span class="c1">#       nmrAtoms.append(nac)</span>
+    <span class="c1">#   for nac in nmrAtomsCentre:</span>
+    <span class="c1">#     if &#39;..N&#39; in nac.pid or &#39;..H&#39; in nac.pid:</span>
+    <span class="c1">#       nmrAtoms.append(nac)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   nmrAtoms = nmrAtomsFromResidue(nmrResidue.mainNmrResidue)</span>
+    <span class="c1">#   markNmrAtoms(mainWindow=self.mainWindow, nmrAtoms=nmrAtoms)</span>
+
+    <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="n">nmrAtomsFromResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+      <span class="n">markNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_handleNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mark an nmrAtom in the spectrum displays with horizontal/vertical bars</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># showInfo(title=&#39;Mark nmrAtom &quot;%s&quot;&#39; % nmrAtom.pid, message=&#39;mark nmrAtom in strips&#39;)</span>
+
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.BackboneAssignmentModule</span> <span class="kn">import</span> <span class="n">markNmrAtoms</span>
+
+    <span class="n">markNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="p">[</span><span class="n">nmrAtom</span><span class="p">])</span>
 
 <div class="viewcode-block" id="GuiSpectrumDisplay.setScrollbarPolicies"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.setScrollbarPolicies">[docs]</a>  <span class="k">def</span> <span class="nf">setScrollbarPolicies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizontal</span><span class="o">=</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="s1">&#39;asNeeded&#39;</span><span class="p">):</span>
     <span class="s2">&quot;Set the scrolbar policies; convenience to expose to the user&quot;</span>

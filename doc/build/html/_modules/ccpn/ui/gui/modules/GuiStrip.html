@@ -495,7 +495,7 @@
     <span class="c1"># TBD: the naive approach below should be improved</span>
     <span class="k">return</span> <span class="n">axisCode</span> <span class="c1">#if axisCode[0].isupper() else axisCode</span>
 
-  <span class="k">def</span> <span class="nf">_createMarkAtCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_createMarkAtCursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># TODO: this creates a mark in all dims, is that what we want??</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseDone</span><span class="p">:</span> <span class="k">return</span>
@@ -503,12 +503,12 @@
     <span class="n">axisPositionDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisPositionDict</span>
     <span class="n">axisCodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">]</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">axisPositionDict</span><span class="p">[</span><span class="n">axisCode</span><span class="p">]</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">]</span>
-    <span class="n">task</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span> <span class="c1"># the &#39;white&#39; is overridden in PlotWidget._addRulerLine()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newMark</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span> <span class="c1"># the &#39;white&#39; is overridden in PlotWidget._addRulerLine()</span>
 
   <span class="c1"># TODO: remove apiRuler (when notifier at bottom of module gets rid of it)</span>
   <span class="k">def</span> <span class="nf">_initRulers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     
-    <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">marks</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">marks</span><span class="p">:</span>
       <span class="n">apiMark</span> <span class="o">=</span> <span class="n">mark</span><span class="o">.</span><span class="n">_wrappedData</span>
       <span class="k">for</span> <span class="n">apiRuler</span> <span class="ow">in</span> <span class="n">apiMark</span><span class="o">.</span><span class="n">rulers</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">_addRulerLine</span><span class="p">(</span><span class="n">apiRuler</span><span class="p">)</span>
@@ -711,14 +711,12 @@
 
 <span class="k">def</span> <span class="nf">_rulerCreated</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiRuler</span><span class="p">:</span><span class="n">ApiRuler</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Notifier function for creating rulers&quot;&quot;&quot;</span>
-  <span class="n">task</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiRuler</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">guiTask</span><span class="p">]</span>
-  <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
     <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">_addRulerLine</span><span class="p">(</span><span class="n">apiRuler</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_rulerDeleted</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiRuler</span><span class="p">:</span><span class="n">ApiRuler</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Notifier function for deleting rulers&quot;&quot;&quot;</span>
-  <span class="n">task</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiRuler</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">guiTask</span><span class="p">]</span>
-  <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
     <span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">_removeRulerLine</span><span class="p">(</span><span class="n">apiRuler</span><span class="p">)</span>
 
 <span class="c1"># Add notifier functions to Project</span>

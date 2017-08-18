@@ -70,6 +70,8 @@ _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
+# TODO Add Residue
+
 # ll = [_coreClassMap[x] for x in _classNamesInSidebar]
 # classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
 classesInSideBar = OrderedDict(((x.shortClassName, x) for x in _coreClassMap.values()

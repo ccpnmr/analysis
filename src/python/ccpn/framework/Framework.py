@@ -815,8 +815,8 @@ class Framework:
       ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                         ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
                          )),
-      ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
-      ("Copy Peaks",       self.showCopyPeaks),
+      ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
+      ("Copy Peaks...",    self.showCopyPeaks, [('shortcut', 'cp')]),
 
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
@@ -1512,6 +1512,8 @@ class Framework:
     else:
       from ui.gui.popups.CopyPeaksPopup import CopyPeaks
       popup = CopyPeaks(mainWindow=self.ui.mainWindow)
+      peaks = self.current.peaks
+      popup._selectPeaks(peaks)
       popup.exec()
       popup.raise_()
 

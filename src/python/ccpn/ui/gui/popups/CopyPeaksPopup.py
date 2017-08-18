@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 class CopyPeaks(CcpnDialog):
 
   def __init__(self, parent=None,  mainWindow=None, title='Copy Peaks to PeakLists', **kw):
-    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(300, 500), **kw)
+    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -43,6 +43,8 @@ class CopyPeaks(CcpnDialog):
 
     self._createWidgets()
     self._registerNotifiers()
+
+    self._enableButtons()
 
   def _createWidgets(self):
 
@@ -59,12 +61,19 @@ class CopyPeaks(CcpnDialog):
     self.inputPeaksWidgetLabel = Label(self, 'Select Peaks To Copy', grid=(row, 0),  hAlign='l')
     self.outputPeakListsWidgetLabel = Label(self, 'Select Destination PeakLists',  grid=(row, 1),  hAlign='l')
     row += 1
-    self.inputPeaksWidget = ListWidget(self, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 0))
-    self.inputPeaksListWidget = ListWidget(self, multiSelect= True, callback=None, tipText=tipText,  grid=(row, 1))
+    self.inputPeaksWidget = ListWidget(self, multiSelect= True, callback=self._activateCopy, tipText=tipText,  grid=(row, 0))
+    self.inputPeaksListWidget = ListWidget(self, multiSelect= True, callback=self._activateCopy, tipText=tipText,  grid=(row, 1))
     row += 1
-    self.copyButtons = ButtonList(self, texts=['Close','Clear All', ' Copy '],
-                                  callbacks=[self._closePopup, self.clearSelections, self._copyButton],
-                                  tipTexts=['Close','Clear All Selections', tipText],  grid=(row, 1))
+    self.selectButtons = ButtonList(self, texts=['Select Current Peaks', 'Clear All'],
+                                    callbacks=[self._selectCurrentPeaks, self.clearSelections],
+                                    tipTexts=['Select on the list all the current Peaks',
+                                              'Clear All Selections'], grid=(row, 0))
+
+    self.copyButtons = ButtonList(self, texts=['Close', ' Copy '],
+                                  callbacks=[self._closePopup,  self._copyButton],
+                                  tipTexts=['Close popup', tipText],  grid=(row, 1))
+
+    self.copyButtons.buttons[1].setDisabled(True)
 
     self._populatePeakWidget()
     self._populatePeakListsWidget()
@@ -106,6 +115,9 @@ class CopyPeaks(CcpnDialog):
   def _selectSpectrum(self, spectrum):
     self.selectFromPullDown.select(spectrum)
 
+  def _activateCopy(self):
+    if len(self.inputPeaksListWidget.getSelectedObjects())>0 and len(self.inputPeaksWidget.getSelectedObjects())>0:
+      self.copyButtons.buttons[1].setDisabled(False)
 
   def _copyButton(self):
     peakLists = self.inputPeaksListWidget.getSelectedObjects()
@@ -126,6 +138,18 @@ class CopyPeaks(CcpnDialog):
   def clearSelections(self):
     self.inputPeaksWidget.clearSelection()
     self.inputPeaksListWidget.clearSelection()
+    self.copyButtons.buttons[1].setDisabled(True)
+
+  def _selectCurrentPeaks(self):
+    self.inputPeaksWidget.clearSelection()
+    peaks = self.current.peaks
+    self._selectPeaks(peaks)
+
+  def _enableButtons(self):
+    if len(self.current.peaks)>0:
+      self.selectButtons.buttons[0].setDisabled(False)
+    else:
+      self.selectButtons.buttons[0].setDisabled(True)
 
   def _closePopup(self):
     """

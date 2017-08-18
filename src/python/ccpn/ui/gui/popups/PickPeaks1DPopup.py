@@ -252,9 +252,7 @@ class PickPeak1DPopup(CcpnDialog):
     self.noiseLevelSpinbox.setMaximum(10000000)
 
     self.maximumFilterSize = Label(self, text="Select Maximum Filter Size")
-    self.maximumFilterSizeSpinbox = Spinbox(self)
-    self.maximumFilterSizeSpinbox.setValue(5)
-    self.maximumFilterSizeSpinbox.setMaximum(15)
+    self.maximumFilterSizeSpinbox = Spinbox(self, value=5.0, min=0, max=100)
 
     modes = ['wrap','reflect', 'constant', 'nearest', 'mirror' ]
     self.maximumFilterMode = Label(self, text="Select Maximum Filter Mode")

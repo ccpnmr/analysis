@@ -44,7 +44,7 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
         # print('@2', (negativeNoiseThreshold, positiveNoiseThreshold))
         return (negativeNoiseThreshold, positiveNoiseThreshold)
       else:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
         negativeNoiseThreshold = -positiveNoiseThreshold
         spectrum.noiseLevel = positiveNoiseThreshold
         # print('@3', (negativeNoiseThreshold, positiveNoiseThreshold))
@@ -59,7 +59,7 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
 
   if spectrum.noiseLevel == 0.0 or spectrum.noiseLevel is None:
     # print('@5', (negativeNoiseThreshold, positiveNoiseThreshold))
-    positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.positions), np.array(spectrum.intensities))
+    positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
     negativeNoiseThreshold = - positiveNoiseThreshold
     spectrum.noiseLevel = positiveNoiseThreshold
     # print('@6', (negativeNoiseThreshold, positiveNoiseThreshold))

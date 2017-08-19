@@ -84,7 +84,7 @@ class Translation:
       module = importlib.import_module(translationModuleName)
     except ImportError as e:
       logger = Logging.getLogger()
-      logger.warning('translation for language "%s" not available' % (language))
+      logger.warning('Translation for language "%s" not available' % (language))
       return True
 
     try:

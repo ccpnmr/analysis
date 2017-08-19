@@ -98,6 +98,7 @@ class PeakListTableWidget(ObjectTable):
   def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
     self._project = application.project
     self._current = application.current
+    self._mainWindow = application.ui.mainWindow
     self.moduleParent = moduleParent
     self.settingWidgets = None
     self._selectedPeakList = None
@@ -129,6 +130,8 @@ class PeakListTableWidget(ObjectTable):
     # TODO set notifier to trigger only for the selected peakList.
     self._peakListDeleteNotifier = Notifier(self._project, [Notifier.CREATE, Notifier.DELETE], 'PeakList', self._peakListNotifierCallback)
     self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak', self._peakNotifierNotifierCallback)
+
+    self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
     ## populate the table if there are peaklists in the project
     if peakList is not None:
@@ -259,6 +262,17 @@ class PeakListTableWidget(ObjectTable):
 
   def _pulldownPLcallback(self, data):
     self._updateAllModule()
+
+  def _copyPeaks(self):
+    from ui.gui.popups.CopyPeaksPopup import CopyPeaks
+    popup = CopyPeaks(mainWindow=self._mainWindow)
+    self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
+    if self._selectedPeakList is not None:
+      spectrum = self._selectedPeakList.spectrum
+      popup._selectSpectrum(spectrum)
+      popup._selectPeaks(self._current.peaks)
+    popup.exec()
+    popup.raise_()
 
   ##################   Notifiers callbacks  ##################
 

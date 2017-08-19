@@ -79,6 +79,9 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
+
+
 
   def setUserShortcuts(self, preferences=None):
 
@@ -162,6 +165,17 @@ class GuiWindow():
       undo.decreaseBlocking()
       undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
                    redoArgs=[peaks, self._getPeaksParams(peaks)])
+
+  def selectAllPeaks(self):
+    '''selects all peaks in the current strip if the spectrum is toggled on'''
+    if self.application.current.strip:
+      if self.application.current.strip.spectrumDisplay:
+        spectra = [spectrumView.spectrum for spectrumView in
+                   self.application.current.strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
+        peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
+        self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
+
+
 
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):

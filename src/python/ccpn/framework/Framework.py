@@ -128,8 +128,7 @@ def defineProgramArguments():
   #                                               help='Show %s component' % component.lower())
   parser.add_argument('--language',
                       help=('Language for menus, etc.; valid options = (%s); default=%s' %
-                            ('|'.join(languages), defaultLanguage)),
-                      default=defaultLanguage)
+                            ('|'.join(languages), defaultLanguage)))
   parser.add_argument('--interface',
                       help=('User interface, to use; one of  = (%s); default=%s' %
                             ('|'.join(interfaces), defaultInterface)),
@@ -426,8 +425,10 @@ class Framework:
     # Language, check for command line override, or use preferences
     if self.args.language:
       language = self.args.language
-    else:
+    elif self.preferences.general.language:
       language = self.preferences.general.language
+    else:
+      language = defaultLanguage
     if not translator.setLanguage(language):
       self.preferences.general.language = language
     # translator.setDebug(True)
@@ -814,7 +815,8 @@ class Framework:
       ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
                         ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
                          )),
-      ("Copy PeakList", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
+      ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
+      ("Copy Peaks...",    self.showCopyPeaks, [('shortcut', 'cp')]),
 
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
@@ -1501,6 +1503,19 @@ class Framework:
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
       CopyPeakListPopup(parent=self.ui.mainWindow).exec_()
+
+  def showCopyPeaks(self):
+    if not self.project.peakLists:
+      getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+      return
+    else:
+      from ui.gui.popups.CopyPeaksPopup import CopyPeaks
+      popup = CopyPeaks(mainWindow=self.ui.mainWindow)
+      peaks = self.current.peaks
+      popup._selectPeaks(peaks)
+      popup.exec()
+      popup.raise_()
 
 
   ################################################################################################

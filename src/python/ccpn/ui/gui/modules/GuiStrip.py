@@ -454,7 +454,7 @@ class GuiStrip(Frame):
     if not self._finaliseDone: return
 
     axisPositionDict = self.axisPositionDict
-    axisCodes = [axis.code for axis in self.orderedAxes]
+    axisCodes = [axis.code for axis in self.orderedAxes[:2]]
     positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
     self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
 

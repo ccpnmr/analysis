@@ -241,14 +241,23 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setDragDropMode(self.InternalMove)
     self.setDropIndicatorShown(True)
 
+    self.searchWidget = None
+    self._setHeaderContextMenu()
+    self._setContextMenu()
+
+  def _setHeaderContextMenu(self):
     headers = self.horizontalHeader()
     headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    headers.customContextMenuRequested.connect(self.headerContextMenu)
+    headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
+  def _setContextMenu(self):
+    self.tableMenu = QtGui.QMenu()
+    self.tableMenu.addAction("Export Table", self.exportDialog )
+    self.tableMenu.addAction("Delete", self.deleteObjFromTable)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    self.customContextMenuRequested.connect(self.tableContextMenu)
+    self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
-    self.searchWidget = None
+
 
 
   def clearTable(self):
@@ -615,18 +624,18 @@ class ObjectTable(QtGui.QTableView, Base):
 
     QtGui.QTableView.destroy(self, *args)
 
-  def headerContextMenu(self, pos):
+  def _raiseHeaderContextMenu(self, pos):
     if self.searchWidget is None:
       self._addSearchWidget()
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
-    menu = QtGui.QMenu()
-    columnsSettings = menu.addAction("Columns Settings...")
+    self.headerContextMenumenu = QtGui.QMenu()
+    columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
     searchSettings = None
     if self.searchWidget is not None:
-      searchSettings = menu.addAction("Search")
-    action = menu.exec_(self.mapToGlobal(pos))
+      searchSettings = self.headerContextMenumenu.addAction("Search")
+    action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
     if action == columnsSettings:
       settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
@@ -660,18 +669,9 @@ class ObjectTable(QtGui.QTableView, Base):
     if self.searchWidget is not None:
       self.searchWidget.show()
 
-  def tableContextMenu(self, pos):
-    pos = QtCore.QPoint(pos.x(), pos.y() + 10)
-    menu = QtGui.QMenu()
-    # copyMenu =  menu.addAction("Copy Selected")
-    exportMenu = menu.addAction("Export Table")
-    deleteMenu = menu.addAction("Delete")
-    action = menu.exec_(self.mapToGlobal(pos))
-
-    if action == exportMenu:
-      self.exportDialog()
-    if action == deleteMenu:
-      self.deleteObjFromTable()
+  def _raiseTableContextMenu(self, pos):
+    pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
+    action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
   def exportDialog(self):
 

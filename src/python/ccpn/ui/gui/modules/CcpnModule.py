@@ -14,7 +14,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -89,12 +88,14 @@ class CcpnModule(Dock):
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
     #TODO:GEERTEN: make mainWindow actually do something
-    area = None
+    self.area = None
     if mainWindow is not None:
-      area = mainWindow.moduleArea
+      self.area = mainWindow.moduleArea
 
-    super(CcpnModule, self).__init__(name=name, area=area,
-                                     closable=closable)#, **kwds)   # ejb
+    Dock.__init__(self, name=name, area=self.area,
+                   autoOrientation=False,
+                   closable=closable)#, **kwds)   # ejb
+
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
     Logging.getLogger().debug('module:"%s"' % (name,))
@@ -102,18 +103,35 @@ class CcpnModule(Dock):
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
 
+    self.widgetArea.setContentsMargins(0,0,0,0)
     # hide original dock label and generate a new CCPN one
-    self._originalLabel = self.label
-    self._originalLabel.hide()
+    # self._originalLabel = self.label
+    # self._originalLabel.hide()
+
+    self.topLayout.removeWidget(self.label)   # remove old label, redefine
+    del self.label
     self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
-    ###self.label.show()
-    self.autoOrientation = False
+    self.topLayout.addWidget(self.label, 0, 1)   # ejb - swap out the old widget, keeps hierarchy
+
+
+
+    self.setOrientation(o='horizontal')
+    # self.widgetArea = LayoutWidget()    # ejb - transparent, make normal drops better
+    self.setAutoFillBackground(False)
+
+
+    # ejb - below, True allows normal drops from outside and spectra, False for DockArea drops
+    # self.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+    # ejb - add eventFilter for toggling WA_TransparentForMouseEvents
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=self.widgetArea, setLayout=True)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=None, setLayout=True)  #QtGui.QWidget(self)
+    self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
     #self.mainWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
     # optional settings widget area
@@ -160,6 +178,9 @@ class CcpnModule(Dock):
       self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
 
+    self.eventFilter = self._eventFilter
+    self.installEventFilter(self)
+
     # always explicitly show the mainWidget
     self.mainWidget.show()
 
@@ -173,9 +194,46 @@ class CcpnModule(Dock):
   #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
   #   return self.name()
 
-  def resizeEvent(self, event):
-    self.setOrientation(self.labelOrientation, force=True)
-    self.resizeOverlay(self.size())
+    self.update()     # ejb - make sure that the widgetArea starts the correct size
+
+  def _eventFilter(self, source, event):
+    """
+    CCPNInternal
+    """
+    if isinstance(source, CcpnModule):
+      if event.type() == QtCore.QEvent.DragEnter:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
+      elif event.type() == QtCore.QEvent.Leave:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+      elif event.type() == QtCore.QEvent.Drop:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+    else:
+      if event.type() == QtCore.QEvent.DragLeave:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+      if event.type() == QtCore.QEvent.Enter:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+      if event.type() == QtCore.QEvent.Leave:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+    return super(CcpnModule, self).eventFilter(source,event)
+
+  # def _transparentAllModules(self, transparency:bool=True):
+  #   if self.area:
+  #     areaList = self.area.findAll()
+  #     for modInArea in areaList:
+  #       modInArea.widgetArea.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparency)
+
+  # def resizeEvent(self, event):
+  #   # self.setOrientation(self.labelOrientation, force=True)
+  #   newSize = self.size()
+  #   self.resizeOverlay(newSize)
+  #   self.widgetArea.resize(newSize)   # ejb - to make the DropArea work properly
+  #   self.mainWidget.resize(newSize)   # ejb - to make the DropArea work properly
 
     # override the default dock settings
     # self.widgetArea.setStyleSheet("""
@@ -216,6 +274,7 @@ class CcpnModule(Dock):
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
   def dropEvent(self, *args):
+    self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
     source = args[0].source()
 
     if hasattr(source, 'implements') and source.implements('dock'):

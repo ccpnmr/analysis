@@ -177,6 +177,8 @@ class GuiPipeline(CcpnModule, Pipeline):
     if self.project is not None:
       self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputDataFromNotifier)
 
+    # show settings on startup
+    self._settingsCallback()
 
 
   def _getGuiFromPipes(self, pipes):

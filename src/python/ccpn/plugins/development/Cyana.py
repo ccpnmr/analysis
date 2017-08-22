@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 
@@ -81,8 +82,16 @@ class CyanaGuiPlugin(PluginModule):
     self.notesLabel = Label(self.mainWidget, 'Notes', grid=(row, 0))
     self.notes = TextEditor(self.mainWidget,  grid=(row, 1))
 
+    # Buttons
+
+    row += 1
+    self.buttons = ButtonList(self.mainWidget, texts=['Run'], callbacks=[self._run], grid=(row, 1))
 
 
+
+  def _run(self):
+
+    self.plugin.run(**self.widgetsState)
 
   def _manageWidgets(self):
     pass

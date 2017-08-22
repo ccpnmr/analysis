@@ -69,6 +69,7 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
                     , ChemicalShiftList._pluralLinkName
                     , RestraintList._pluralLinkName
                     , NmrChain._pluralLinkName
+                    , PeakList._pluralLinkName
 
                     ]
 
@@ -96,9 +97,12 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
             child.setText(0, obj.pid)
             child.setCheckState(0, QtCore.Qt.Unchecked)
 
+
           item.setCheckState(0, QtCore.Qt.Checked)
           item.setExpanded(False)
           item.setDisabled(name not in ProjectTreeCheckBoxes.selectableItems)
+
+    self.itemClicked.connect(self._clicked)
 
 
   def getSelectedObjects(self):
@@ -110,8 +114,22 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
           selectedObjects += [obj]
     return selectedObjects
 
+  def getSelectedObjectsPids(self):
+    pids = []
+    for item in self.getSelectedObjects():
+      pids += [item.pid]
+    return pids
+
   def selectObjects(self, pids):
     for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
       for pid in pids:
         if item.text(0) == pid:
           item.setCheckState(0, QtCore.Qt.Checked)
+
+  def _clicked(self, *args):
+    pass
+
+  def _uncheckAll(self):
+    for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+      for i in range(itemTree.childCount()):
+        itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)

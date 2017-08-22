@@ -22,7 +22,8 @@ __date__ = "$Date: 2017-08-22 10:28:42 +0000 (Tue, Aug 22, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+import os
+from PyQt4 import QtCore
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.Label import Label
@@ -41,6 +42,8 @@ class CyanaGuiPlugin(PluginModule):
   def __init__(self, mainWindow=None, plugin=None, application=None, **kw):
     super(CyanaGuiPlugin, self)
     PluginModule.__init__(self,mainWindow=mainWindow, plugin=plugin, application=application)
+    self.userPluginPath = self.application.preferences.general.userPluginPath
+    self._checkCyanaPath()
 
     self.mainWidget.setContentsMargins(20,20,20,20)
     # Run name
@@ -57,6 +60,8 @@ class CyanaGuiPlugin(PluginModule):
     self.inputLabel = Label(self.mainWidget, 'Input', grid=(row, 0))
     ProjectTreeCheckBoxes.checkList = ProjectTreeCheckBoxes.checkList[:4]
     self.treeView = ProjectTreeCheckBoxes(self.mainWidget, project=self.project, grid=(row, 1))
+    self.treeView.itemChanged.connect(self._restrictChemicalShiftListSelection)
+    self.treeView._uncheckAll()
 
     # Tollerances
     row += 1
@@ -70,7 +75,7 @@ class CyanaGuiPlugin(PluginModule):
     # Steps
     row += 1
     self.stepsLabel = Label(self.mainWidget, 'Steps', grid=(row, 0))
-    self.stepsSpinBox = Spinbox(self.mainWidget, value=100000,  grid=(row, 1))
+    self.stepsSpinBox = Spinbox(self.mainWidget, value=1e5, max=1e10, grid=(row, 1))
 
     # Assignments
     row += 1
@@ -80,21 +85,39 @@ class CyanaGuiPlugin(PluginModule):
     # Notes
     row += 1
     self.notesLabel = Label(self.mainWidget, 'Notes', grid=(row, 0))
-    self.notes = TextEditor(self.mainWidget,  grid=(row, 1))
+    self.notes = LineEdit(self.mainWidget,  grid=(row, 1))
 
     # Buttons
 
     row += 1
     self.buttons = ButtonList(self.mainWidget, texts=['Run'], callbacks=[self._run], grid=(row, 1))
 
-
+  def _checkCyanaPath(self):
+    self.cyanaPath = self.userPluginPath+'Cyana/'
+    if not os.path.exists(self.cyanaPath):
+      os.makedirs(self.cyanaPath)
 
   def _run(self):
-
+    pids = self.treeView.getSelectedObjectsPids()
+    self.project.exportNef(str(self.nefPath+self.runNameLineEdit.get()), pidList=self.treeView.getSelectedObjectsPids())
     self.plugin.run(**self.widgetsState)
 
   def _manageWidgets(self):
     pass
+
+
+
+  def _restrictChemicalShiftListSelection(self, item):
+    '''Restrict selection of one chemical shift list per Calculation. Remove this when Cyana can handle multiple CSL '''
+    from ccpn.core.ChemicalShiftList import ChemicalShiftList
+    if item:
+      if item.parent():
+        if item.parent().text(0) == str(ChemicalShiftList._pluralLinkName):
+          for itemTree in self.treeView.findItems(str(ChemicalShiftList._pluralLinkName),
+                                              QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            for i in range(itemTree.childCount()):
+              if itemTree.child(i) != item:
+                itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
 
 
 

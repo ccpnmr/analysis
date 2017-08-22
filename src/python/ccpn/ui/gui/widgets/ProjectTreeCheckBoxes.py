@@ -77,7 +77,7 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
     QtGui.QTreeWidget.__init__(self, parent)
     Base.__init__(self, setLayout=False, **kw)
 
-    self.setMaximumSize(*maxSize)
+    # self.setMaximumSize(*maxSize)
     self.headerItem = QtGui.QTreeWidgetItem()
     self.item = QtGui.QTreeWidgetItem()
     self.project = project
@@ -92,19 +92,26 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
           for obj in getattr(self.project, name):
             child = QtGui.QTreeWidgetItem(item)
             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+            child.setData(1, 0, obj)
             child.setText(0, obj.pid)
-            child.setData(0, 0, obj)
             child.setCheckState(0, QtCore.Qt.Unchecked)
 
           item.setCheckState(0, QtCore.Qt.Checked)
           item.setExpanded(False)
           item.setDisabled(name not in ProjectTreeCheckBoxes.selectableItems)
 
+
   def getSelectedObjects(self):
     selectedObjects = []
     for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
       if item.checkState(0) == QtCore.Qt.Checked:
-        obj = item.data(0,0)
+        obj = item.data(1,0)
         if hasattr(obj, 'pid'):
           selectedObjects += [obj]
     return selectedObjects
+
+  def selectObjects(self, pids):
+    for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+      for pid in pids:
+        if item.text(0) == pid:
+          item.setCheckState(0, QtCore.Qt.Checked)

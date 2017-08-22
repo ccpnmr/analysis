@@ -46,18 +46,9 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 
-from ccpn.core.Chain import Chain
-from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.RestraintList import RestraintList
-from ccpn.core.PeakList import PeakList
-from ccpn.core.Sample import Sample
-from ccpn.core.Substance import Substance
-from ccpn.core.NmrChain import NmrChain
-from ccpn.core.DataSet import DataSet
-from ccpn.core.Complex import Complex
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.Note import Note
+from ccpn.ui.gui.widgets.Base import Base
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
 # (and likely those in Project)
@@ -71,22 +62,6 @@ EXPANDSELECTION = 'expandSelection'
 
 class ExportNefPopup(CcpnDialog):
 
-  checkList = [Chain._pluralLinkName
-              , ChemicalShiftList._pluralLinkName
-              , RestraintList._pluralLinkName
-              , PeakList._pluralLinkName
-              , Sample._pluralLinkName
-              , Substance._pluralLinkName
-              , NmrChain._pluralLinkName
-              , DataSet._pluralLinkName
-              , Complex._pluralLinkName
-              , SpectrumGroup._pluralLinkName
-              , Note._pluralLinkName]
-
-  selectList = [Chain._pluralLinkName
-              , ChemicalShiftList._pluralLinkName
-              , RestraintList._pluralLinkName
-              , NmrChain._pluralLinkName]
 
   def __init__(self, parent=None, mainWindow=None, title='Export to Nef File'
                , fileMode=FileDialog.AnyFile
@@ -167,7 +142,8 @@ class ExportNefPopup(CcpnDialog):
     #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
     #                      , grid=(7,0), gridSpan=(1,1))
 
-    self._addTreeWidget(grid=(3,0))
+    self.treeView = ProjectTreeCheckBoxes(self, project=self.project, grid=(3,0))
+    # self._addTreeWidget(grid=(3,0))
 
     # file directory options here
     self.openPathIcon = Icon('icons/directory')
@@ -371,54 +347,52 @@ class ExportNefPopup(CcpnDialog):
   def _editPath(self):
     self.pathEdited = True      # user has manually changed the path
 
-  def _addTreeWidget(self, grid=None):
-
-    self.treeView = QtGui.QTreeWidget()
-    self.headerItem = QtGui.QTreeWidgetItem()
-    self.item = QtGui.QTreeWidgetItem()
-
-    self.treeView.header().hide()
-
-    for name in ExportNefPopup.checkList:
-      if hasattr(self.project, name):                   # just to be safe
-
-        parent = QtGui.QTreeWidgetItem(self.treeView)
-        parent.setText(0, name)
-        parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-
-        for obj in getattr(self.project, name):
-
-          child = QtGui.QTreeWidgetItem(parent)
-          child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-          child.setText(0, obj.pid)
-          child.setCheckState(0, QtCore.Qt.Unchecked)
-
-        parent.setCheckState(0, QtCore.Qt.Checked)
-        parent.setExpanded(False)
-        parent.setDisabled(name not in ExportNefPopup.selectList)
-
-    #       self.pidList.append(obj.pid)                 # append the found items to the list
-    #
-    # for i in range(3):
-    #     parent = QtGui.QTreeWidgetItem(self.treeView)
-    #     parent.setText(0, "Parent {}".format(i))
-    #     parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-    #     for x in range(5):
-    #         child = QtGui.QTreeWidgetItem(parent)
-    #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-    #         child.setText(0, "Child {}".format(x))
-    #         child.setCheckState(0, QtCore.Qt.Unchecked)
-
-    self.layout().addWidget(self.treeView, grid[0], grid[1])
+  # def _addTreeWidget(self, grid=None):
+  #
+  #   self.treeView = QtGui.QTreeWidget()
+  #   self.headerItem = QtGui.QTreeWidgetItem()
+  #   self.item = QtGui.QTreeWidgetItem()
+  #
+  #   self.treeView.header().hide()
+  #
+  #   for name in ExportNefPopup.checkList:
+  #     if hasattr(self.project, name):                   # just to be safe
+  #
+  #       parent = QtGui.QTreeWidgetItem(self.treeView)
+  #       parent.setText(0, name)
+  #       parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+  #
+  #       for obj in getattr(self.project, name):
+  #
+  #         child = QtGui.QTreeWidgetItem(parent)
+  #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+  #         child.setText(0, obj.pid)
+  #         child.setCheckState(0, QtCore.Qt.Unchecked)
+  #
+  #       parent.setCheckState(0, QtCore.Qt.Checked)
+  #       parent.setExpanded(False)
+  #       parent.setDisabled(name not in ExportNefPopup.selectList)
+  #
+  #   #       self.pidList.append(obj.pid)                 # append the found items to the list
+  #   #
+  #   # for i in range(3):
+  #   #     parent = QtGui.QTreeWidgetItem(self.treeView)
+  #   #     parent.setText(0, "Parent {}".format(i))
+  #   #     parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+  #   #     for x in range(5):
+  #   #         child = QtGui.QTreeWidgetItem(parent)
+  #   #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+  #   #         child.setText(0, "Child {}".format(x))
+  #   #         child.setCheckState(0, QtCore.Qt.Unchecked)
+  #
+  #   self.layout().addWidget(self.treeView, grid[0], grid[1])
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.popups.Dialog import CcpnDialog
   app = TestApplication()
-  dialog = ExportNefPopup(fileMode=FileDialog.AnyFile
-                          , text="Export to Nef File"
-                          , acceptMode=FileDialog.AcceptSave
-                          , filter='*.nef')
-  dialog.show()
+  dialog = CcpnDialog()
 
+  dialog.exec()
+  dialog.raise_()
 

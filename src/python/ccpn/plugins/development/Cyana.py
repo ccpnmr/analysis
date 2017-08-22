@@ -26,7 +26,8 @@ __date__ = "$Date: 2017-08-22 10:28:42 +0000 (Tue, Aug 22, 2017) $"
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.Label import Label
-
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 
 class CyanaGuiPlugin(PluginModule):
 
@@ -36,6 +37,8 @@ class CyanaGuiPlugin(PluginModule):
     super(CyanaGuiPlugin, self)
     PluginModule.__init__(self,mainWindow=mainWindow, plugin=plugin, application=application)
 
+    self.treeView = ProjectTreeCheckBoxes(self.mainWidget, project=self.project, grid=(0,0))
+
 
 
 
@@ -44,6 +47,10 @@ class CyanaGuiPlugin(PluginModule):
 class CyanaPlugin(Plugin):
   PLUGINNAME = 'Cyana'
   guiModule = CyanaGuiPlugin
+
+  def run(self, **kwargs):
+    ''' Insert here the script for running Cyana '''
+    print('Running Cyana')
 
 
 

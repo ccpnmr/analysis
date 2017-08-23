@@ -136,4 +136,4 @@ class CyanaPlugin(Plugin):
 
 
 
-CyanaPlugin.register() # Registers the pipe in the pluginList
+# CyanaPlugin.register() # Registers the pipe in the pluginList

@@ -332,6 +332,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
 
+
 # Functions for notifiers
 
 # We are not currently using Free strips

@@ -44,7 +44,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from PyQt4 import QtGui, QtCore
 
 # import math
@@ -63,13 +62,12 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
-
-
 import typing
 
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+
 
 class GuiStripNd(GuiStrip):
   """
@@ -236,6 +234,64 @@ class GuiStripNd(GuiStrip):
     self.gridAction.setChecked(self.gridIsVisible)
 
     return self.contextMenu
+
+  def flipXYAxis(self):
+    """
+    Flip the X and Y axes
+    """
+    nDim = len(self.axisOrder)
+    if nDim < 2:
+      getLogger().warning('Too few dimensions for XY flip')
+    else:
+      axisOrder = [self.axisOrder[1], self.axisOrder[0]]
+      if nDim > len(axisOrder):
+        axisOrder.extend(self.axisOrder[2:])
+
+      # create a new spectrum display with the new axis order
+      newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+      for spectrum in self.spectra:
+        newDisplay.displaySpectrum(spectrum)
+
+  def flipXZAxis(self):
+    """
+    Flip the X and Z axes
+    """
+    nDim = len(self.axisOrder)
+    if nDim < 3:
+      getLogger().warning('Too few dimensions for XZ flip')
+    else:
+      axisOrder = [self.axisOrder[2], self.axisOrder[1], self.axisOrder[0]]
+
+      # add any remaining axes of the strip to the list
+      if nDim > len(axisOrder):
+        axisOrder.extend(self.axisOrder[3:])
+
+      # create a new spectrum display with the new axis order
+      newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+      for spectrum in self.spectra:         # [1:]:
+        newDisplay.displaySpectrum(spectrum)
+
+  def flipYZAxis(self):
+    """
+    Flip the Y and Z axes
+    """
+    nDim = len(self.axisOrder)
+    if nDim < 3:
+      getLogger().warning('Too few dimensions for YZ flip')
+    else:
+      axisOrder = [self.axisOrder[0], self.axisOrder[2], self.axisOrder[1]]
+
+      # add any remaining axes of the strip to the list
+      if nDim > len(axisOrder):
+        axisOrder.extend(self.axisOrder[3:])
+
+      # create a new spectrum display with the new axis order
+      newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+      for spectrum in self.spectra:
+        newDisplay.displaySpectrum(spectrum)
+
+  def reorderSpectra(self):
+    pass
 
   def resetZoom(self, axis=None):
     """

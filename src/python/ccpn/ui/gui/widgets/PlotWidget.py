@@ -10,20 +10,17 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-__date__ = "$Date: 2017-07-07 15:29:34 +0000 (Fri, July 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -174,6 +171,8 @@ class PlotWidget(pg.PlotWidget):
     if not strip._finaliseDone: return
 
     axes = strip.orderedAxes
+
+    # TODO:ED sometimes set to None
     xPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
     yPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
     #print('>>', strip, xPos, yPos)

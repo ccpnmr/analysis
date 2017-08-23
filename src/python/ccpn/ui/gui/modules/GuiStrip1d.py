@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -34,6 +32,8 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
+from ccpn.util.Logging import getLogger
+
 
 class GuiStrip1d(GuiStrip):
   """
@@ -168,6 +168,23 @@ class GuiStrip1d(GuiStrip):
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setXRange(x2, x1, padding=padding)
 
+  def flipXYAxis(self):
+    """
+    Flip the X and Y axes
+    """
+    getLogger().warning('Function not permitted on 1D spectra')
+
+  def flipXZAxis(self):
+    """
+    Flip the X and Y axes
+    """
+    getLogger().warning('Function not permitted on 1D spectra')
+
+  def flipYZAxis(self):
+    """
+    Flip the X and Y axes
+    """
+    getLogger().warning('Function not permitted on 1D spectra')
 
   def _findPeakListView(self, peakList:PeakList):
 

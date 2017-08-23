@@ -855,8 +855,12 @@ class Framework:
       (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
-                   ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')])
-                  )),
+                   ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
+                   (),
+                   ("Flip X-Y Axis", self.flipXYAxis, [('shortcut', 'xy')]),
+                   ("Flip X-Z Axis", self.flipXZAxis, [('shortcut', 'xz')]),
+                   ("Flip Y-Z Axis", self.flipYZAxis, [('shortcut', 'yz')])
+                   )),
       (),
       ("Notes Table", self.showNotesEditor, [('shortcut', 'no')]),
       (),
@@ -1759,6 +1763,18 @@ class Framework:
   def resetZoom(self):
     if self.current.strip is not None:
       self.current.strip.resetZoom()
+
+  def flipXYAxis(self):
+    if self.current.strip is not None:
+      self.current.strip.flipXYAxis()
+
+  def flipXZAxis(self):
+    if self.current.strip is not None:
+      self.current.strip.flipXZAxis()
+
+  def flipYZAxis(self):
+    if self.current.strip is not None:
+      self.current.strip.flipYZAxis()
 
   def _findMenuAction(self, menubarText, menuText):
     # not sure if this function will be needed more widely or just in console context

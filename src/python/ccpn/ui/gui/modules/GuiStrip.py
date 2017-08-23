@@ -82,10 +82,10 @@ class GuiStrip(Frame):
     ###self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
     #self.setContentsMargins(5, 0, 5, 0)
-    self.setContentsMargins(2, 0, 2, 0)
+    self.setContentsMargins(0, 0, 0, 0)
     #self.setMinimumWidth(250)
-    self.setMinimumWidth(200)
-    self.setMinimumHeight(200)
+    self.setMinimumWidth(100)
+    self.setMinimumHeight(100)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
                                  showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)

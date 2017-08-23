@@ -1506,7 +1506,7 @@ class Framework:
       return
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-      CopyPeakListPopup(parent=self.ui.mainWindow).exec_()
+      CopyPeakListPopup(application=self).exec_()
 
   def showCopyPeaks(self):
     if not self.project.peakLists:

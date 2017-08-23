@@ -269,8 +269,12 @@ class GuiSpectrumDisplay(CcpnModule):
       not True: # peakList.spectrum.axisCodes match
       showWarning('Dropped PeakList "%s"' % peakList.pid, 'Cannot copy: Axes do not match')
       return
-    #TODO:implement
-    showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
+    else:
+      from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+      popup = CopyPeakListPopup(application=self.application)
+      popup.sourcePeakListPullDown.select(peakList.pid)
+      popup.exec_()
+    # showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 
   def _handleSpectrumGroup(self, spectrumGroup):
     '''

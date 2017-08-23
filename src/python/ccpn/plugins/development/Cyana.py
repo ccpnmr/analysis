@@ -99,8 +99,11 @@ class CyanaGuiPlugin(PluginModule):
 
   def _run(self):
     pids = self.treeView.getSelectedObjectsPids()
-    self.project.exportNef(str(self.nefPath+self.runNameLineEdit.get()), pidList=self.treeView.getSelectedObjectsPids())
-    self.plugin.run(**self.widgetsState)
+    try:
+      self.project.exportNef(str(self.cyanaPath+self.runNameLineEdit.get()), pidList=self.treeView.getSelectedObjectsPids())
+      self.plugin.run(**self.widgetsState)
+    except Exception as e:
+      showWarning(message=str(e), title='Error')
 
   def _manageWidgets(self):
     pass

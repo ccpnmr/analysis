@@ -42,9 +42,8 @@ class CyanaGuiPlugin(PluginModule):
   def __init__(self, mainWindow=None, plugin=None, application=None, **kw):
     super(CyanaGuiPlugin, self)
     PluginModule.__init__(self,mainWindow=mainWindow, plugin=plugin, application=application)
-    self.userPluginPath = self.application.preferences.general.userPluginPath
-    self._checkCyanaPath()
-
+    # self.userPluginPath = self.application.preferences.general.userPluginPath
+    self.outputPath = self.application.preferences.general.dataPath
     self.mainWidget.setContentsMargins(20,20,20,20)
     # Run name
     row = 0
@@ -92,15 +91,17 @@ class CyanaGuiPlugin(PluginModule):
     row += 1
     self.buttons = ButtonList(self.mainWidget, texts=['Run'], callbacks=[self._run], grid=(row, 1))
 
-  def _checkCyanaPath(self):
-    self.cyanaPath = self.userPluginPath+'Cyana/'
-    if not os.path.exists(self.cyanaPath):
-      os.makedirs(self.cyanaPath)
+
+
+  # def _checkCyanaPath(self):
+  #   self.cyanaPath = self.userPluginPath+'Cyana/'
+  #   if not os.path.exists(self.cyanaPath):
+  #     os.makedirs(self.cyanaPath)
 
   def _run(self):
     pids = self.treeView.getSelectedObjectsPids()
     try:
-      self.project.exportNef(str(self.cyanaPath+self.runNameLineEdit.get()), pidList=self.treeView.getSelectedObjectsPids())
+      self.project.exportNef(str(self.cyanaPath+self.runNameLineEdit.get()), pidList=pids)
       self.plugin.run(**self.widgetsState)
     except Exception as e:
       showWarning(message=str(e), title='Error')

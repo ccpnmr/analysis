@@ -53,7 +53,8 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     
-    QtGui.QGraphicsItem.__init__(self, scene=self.strip.plotWidget.scene())
+    QtGui.QGraphicsItem.__init__(self)    #, scene=self.strip.plotWidget.scene())
+    self.scene = self.strip.plotWidget.scene
 
     self._apiDataSource = self._wrappedData.spectrumView.dataSource
     self.spectrumGroupsToolBar = None
@@ -93,7 +94,14 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
 
   # mandatory function to override for QGraphicsItem
   def boundingRect(self):  # seems necessary to have
-    return QtCore.QRectF(0, 0, 100, 150)  # TBD: remove hardwiring
+    if self.strip:
+      w = self.strip.plotWidget.width()
+      h = self.strip.plotWidget.height()
+      return QtCore.QRectF(0, 0, w, h)  # TBD: remove hardwiring
+    else:
+      return QtCore.QRectF(0, 0, 0, 0)  # TBD: remove hardwiring
+
+    return QtCore.QRectF(0, 0, 500, 150)  # TBD: remove hardwiring
                                           # Earlier versions too large value (~1400,1000);
     # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
     # to give less flicker in Scrolled Strips.

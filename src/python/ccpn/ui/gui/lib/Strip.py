@@ -232,14 +232,16 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
       display.removeStrip(strip)
     strips = display.strips
 
+    # widths = ['default'] * len(display.strips)
     for ii,nr in enumerate(nmrResidues):
       navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
-                                widths=None, markPositions=False, setNmrResidueLabel=True)
+                                widths=widths, markPositions=False, setNmrResidueLabel=True)
 
   else:
     # not showing sequential strips
+    # widths = ['default'] * len(display.strips)
     navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
-                              widths=None, markPositions=markPositions, setNmrResidueLabel=True)
+                              widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
     strips.append(display.strips[stripIndex])
 
   return strips

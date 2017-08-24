@@ -1755,26 +1755,38 @@ class Framework:
   def toggleToolbar(self):
     if self.current.strip is not None:
       self.current.strip.spectrumDisplay.toggleToolbar()
+    else:
+      getLogger().warning('No strip selected')
 
   def togglePhaseConsole(self):
     if self.current.strip is not None:
       self.current.strip.spectrumDisplay.togglePhaseConsole()
+    else:
+      getLogger().warning('No strip selected')
 
   def resetZoom(self):
     if self.current.strip is not None:
       self.current.strip.resetZoom()
+    else:
+      getLogger().warning('No strip selected')
 
   def flipXYAxis(self):
     if self.current.strip is not None:
       self.current.strip.flipXYAxis()
+    else:
+      getLogger().warning('No strip selected')
 
   def flipXZAxis(self):
     if self.current.strip is not None:
       self.current.strip.flipXZAxis()
+    else:
+      getLogger().warning('No strip selected')
 
   def flipYZAxis(self):
     if self.current.strip is not None:
       self.current.strip.flipYZAxis()
+    else:
+      getLogger().warning('No strip selected')
 
   def _findMenuAction(self, menubarText, menuText):
     # not sure if this function will be needed more widely or just in console context

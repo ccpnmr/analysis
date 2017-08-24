@@ -160,6 +160,9 @@ class GuiStripNd(GuiStrip):
     # test
     #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
 
+    if len(self.orderedAxes) < 3:         # hide if only 2D
+      self._stripToolBarWidget.setFixedHeight(0)
+
     #self.mouseDragEvent = self._mouseDragEvent
     self.updateRegion = self._updateRegion
 
@@ -268,7 +271,7 @@ class GuiStripNd(GuiStrip):
 
       # create a new spectrum display with the new axis order
       newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
-      for spectrum in self.spectra:         # [1:]:
+      for spectrum in self.spectra:         #[1:]:
         newDisplay.displaySpectrum(spectrum)
 
   def flipYZAxis(self):

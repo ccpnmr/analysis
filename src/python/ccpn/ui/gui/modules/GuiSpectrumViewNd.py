@@ -65,7 +65,7 @@ def _getLevels(count:int, base:float, factor:float)->list:
 
 
 class GuiSpectrumViewNd(GuiSpectrumView):
-  
+
   ###PeakListItemClass = PeakListNdItem
   
   #sigClicked = QtCore.Signal(object, object)
@@ -139,8 +139,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.strip.viewBox.addItem(self)
 
     self._setupTrace()
+    # self.drawContoursCounter = 0
 
-  # override of Qt setVisible
+    # override of Qt setVisible
 
   def setVisible(self, visible):
     GuiSpectrumView.setVisible(self, visible)
@@ -620,8 +621,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #def drawContours(self, painter, guiStrip):
   def _drawContours(self, painter):
     
-    ##self.drawContoursCounter += 1
-    ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
+    # self.drawContoursCounter += 1
+    # print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
     if self.spectrum.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
@@ -664,43 +665,50 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       yTile0 = yClipPoint0 // yTotalPointCount
       yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
       
-      GL.glEnable(GL.GL_CLIP_PLANE0)
+      # GL.glEnable(GL.GL_CLIP_PLANE0)
       GL.glEnable(GL.GL_CLIP_PLANE1)
       GL.glEnable(GL.GL_CLIP_PLANE2)
-      GL.glEnable(GL.GL_CLIP_PLANE3)
-      
-      for xTile in range(xTile0, xTile1):
-        for yTile in range(yTile0, yTile1):
-          
-          GL.glLoadIdentity()
-          GL.glPushMatrix()
+      # GL.glEnable(GL.GL_CLIP_PLANE3)
 
-          # the below is because the y axis goes from top to bottom
-          GL.glScale(1.0, -1.0, 1.0)
-          GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
-      
-          # the below makes sure that spectrum points get mapped to screen pixels correctly
-          GL.glTranslate(xTranslate, yTranslate, 0.0)
-          GL.glScale(xScale, yScale, 1.0)
-      
-          GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
-          GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
-          GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
-          GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
-          GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+      # TODO:ED - why am I displaying a series of tiles?
+      # xTile1 = 1
+      # yTile1 = 1
+
+      # for xTile in range(xTile0, xTile1):
+      #   for yTile in range(yTile0, yTile1):
           
-          for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
-                                                 (negColour, negLevels, self.negDisplayLists)):
-            for n, level in enumerate(levels):
-              GL.glColor4f(*colour)
-              # TBD: scaling, translating, etc.
-              GL.glCallList(displayLists[n])
-          GL.glPopMatrix()
+      xTile = 0   # ejb - temp to only draw one set
+      yTile = 0
+
+      GL.glLoadIdentity()
+      GL.glPushMatrix()
+
+      # the below is because the y axis goes from top to bottom
+      GL.glScale(1.0, -1.0, 1.0)
+      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+
+      # the below makes sure that spectrum points get mapped to screen pixels correctly
+      GL.glTranslate(xTranslate, yTranslate, 0.0)
+      GL.glScale(xScale, yScale, 1.0)
+
+      GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+      # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
+      GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
+      GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
+      # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+
+      for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
+                                             (negColour, negLevels, self.negDisplayLists)):
+        for n, level in enumerate(levels):
+          GL.glColor4f(*colour)
+          # TBD: scaling, translating, etc.
+          GL.glCallList(displayLists[n])
+      GL.glPopMatrix()
       
-      GL.glDisable(GL.GL_CLIP_PLANE0)
+      # GL.glDisable(GL.GL_CLIP_PLANE0)
       GL.glDisable(GL.GL_CLIP_PLANE1)
       GL.glDisable(GL.GL_CLIP_PLANE2)
-      GL.glDisable(GL.GL_CLIP_PLANE3)
+      # GL.glDisable(GL.GL_CLIP_PLANE3)
 
     finally:
       

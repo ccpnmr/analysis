@@ -357,7 +357,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                                hAlign='c')
     self.goButton.buttons[0].hide()
     self.goButton.buttons[1].hide()
-    self.goButton.setStyleSheet(transparentStyle)
+    # self.goButton.setStyleSheet(transparentStyle)
     self.goAreaLayout.addWidget(self.goButton, )
     self.goAreaLayout.addStretch(1)
     self.goButton.setEnabled(False)
@@ -416,7 +416,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _runPipeline(self):
-
+    self.project._logger.info('Pipeline: Started.')
     self.queue = []
     if self.inputData:
       if len(self.pipelineArea.findAll()[1]) > 0:
@@ -433,6 +433,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     if self.updateInputData:
       self._updateGuiInputData()
+
+    self.project._logger.info('Pipeline: Finished.')
 
   def _openAllPipes(self):
     'Testing Only. Opens all the pipe in once with default name'

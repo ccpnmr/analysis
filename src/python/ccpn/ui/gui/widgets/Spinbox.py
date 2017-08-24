@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class Spinbox(QtGui.QSpinBox, Base):
 
-  def __init__(self, parent, value=None, min=None, max=None, showButtons=True, **kw):
+  def __init__(self, parent, value=None,step=None, min=None, max=None, showButtons=True, **kw):
 
     QtGui.QSpinBox.__init__(self, parent)
     if min is not None:
@@ -42,9 +42,24 @@ class Spinbox(QtGui.QSpinBox, Base):
       self.setMaximum(max)
     if value is not None: #set Value only after you set min and max
       self.setValue(value)
+    if step is not None:
+      self.setSingleStep(step)
     Base.__init__(self, **kw)
 
     if showButtons is False:
       self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
 
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+
+  app = TestApplication()
+  popup = CcpnDialog()
+  sb = Spinbox(popup, step=10, grid=(0,0))
+
+  popup.show()
+  popup.raise_()
+
+  app.start()
 

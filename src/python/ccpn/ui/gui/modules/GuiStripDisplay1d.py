@@ -143,21 +143,21 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 
 # Functions for notifiers
 
-def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
-  getDataObj = project._data2Obj.get
-  spectrum = getDataObj(apiDataSource)
-
-  for task in project.tasks:
-    if task.status == 'active':
-      for spectrumDisplay in task.spectrumDisplays:
-        if spectrumDisplay.is1D:
-          spectrumDisplay._updatePlotColour(spectrum)
-
-def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumView):
-  getDataObj = project._data2Obj.get
-  spectrum = getDataObj(apiSpectrumView.dataSource)
-  if spectrum:
-    spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
-    if spectrumDisplay.is1D:
-      spectrumDisplay._updatePlotColour(spectrum)
+# def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
+#   getDataObj = project._data2Obj.get
+#   spectrum = getDataObj(apiDataSource)
+#
+#   for task in project.tasks:
+#     if task.status == 'active':
+#       for spectrumDisplay in task.spectrumDisplays:
+#         if spectrumDisplay.is1D:
+#           spectrumDisplay._updatePlotColour(spectrum)
+#
+# def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumView):
+#   getDataObj = project._data2Obj.get
+#   spectrum = getDataObj(apiSpectrumView.dataSource)
+#   if spectrum:
+#     spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
+#     if spectrumDisplay.is1D:
+#       spectrumDisplay._updatePlotColour(spectrum)
 

@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,12 +19,12 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from PyQt4 import QtCore, QtGui
 
 import collections
@@ -55,6 +54,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     
     QtGui.QGraphicsItem.__init__(self)    #, scene=self.strip.plotWidget.scene())
     self.scene = self.strip.plotWidget.scene
+    self._currentBoundingRect = self.strip.plotWidget.sceneRect()
 
     self._apiDataSource = self._wrappedData.spectrumView.dataSource
     self.spectrumGroupsToolBar = None
@@ -92,17 +92,16 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
   def paint(self, painter, option, widget=None):
     pass
 
+  def updateGeometryChange(self):   # ejb - can we call this?
+    self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+    self.prepareGeometryChange()
+    # print ('>>>prepareGeometryChange', self._currentBoundingRect)
+
   # mandatory function to override for QGraphicsItem
   def boundingRect(self):  # seems necessary to have
-    if self.strip:
-      w = self.strip.plotWidget.width()
-      h = self.strip.plotWidget.height()
-      return QtCore.QRectF(0, 0, w, h)  # TBD: remove hardwiring
-    else:
-      return QtCore.QRectF(0, 0, 0, 0)  # TBD: remove hardwiring
+    return self._currentBoundingRect
 
-    return QtCore.QRectF(0, 0, 500, 150)  # TBD: remove hardwiring
-                                          # Earlier versions too large value (~1400,1000);
+    # Earlier versions too large value (~1400,1000);
     # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
     # to give less flicker in Scrolled Strips.
 

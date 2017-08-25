@@ -111,10 +111,10 @@ class GuiStrip(Frame):
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
-    self._stripIdLabel = Label(parent=self._labelWidget,
-                               text='.'.join(self.id.split('.')[2:]), margins=[0,0,0,0],
-                               grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
-    self._stripIdLabel.setFont(textFontSmall)
+    # self._stripIdLabel = Label(parent=self._labelWidget,
+    #                            text='.'.join(self.id.split('.')[2:]), margins=[0,0,0,0],
+    #                            grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
+    # self._stripIdLabel.setFont(textFontSmall)
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
@@ -127,10 +127,12 @@ class GuiStrip(Frame):
     # A label to display the cursor positions (updated by _showMousePosition)
     self._cursorLabel = Label(parent=self._labelWidget,
                                text='',
-                               grid=(0,2), gridSpan=(1,2), margins=[0,0,0,0],
+                               # grid=(0,2), gridSpan=(1,2), margins=[0,0,0,0],
+                               grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
                                hAlign='right', vAlign='center', hPolicy='minimum')#, vPolicy='expanding')
+
     self._cursorLabel.setFont(textFontSmall)
-    self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel
+    # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem

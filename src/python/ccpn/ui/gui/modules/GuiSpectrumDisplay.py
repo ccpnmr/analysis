@@ -151,22 +151,22 @@ class GuiSpectrumDisplay(CcpnModule):
     # self.project = mainWindow.application.project
 
     # self.mainWidget will be the parent of all the subsequent widgets
-    qtParent = self.mainWidget
+    self.qtParent = self.mainWidget
 
     # GWV: Not sure what the widget argument is for
     # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
-    self.spectrumToolBar = SpectrumToolBar(parent=qtParent, widget=self,
+    self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
                                            grid=(0, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
 
     # spectrumGroupsToolBar
-    self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=qtParent, spectrumDisplay=self,
+    self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
                                                   grid=(0, 0), gridSpan=(1, 6))
     self.spectrumGroupToolBar.setFixedHeight(30)
     self.spectrumGroupToolBar.hide()
 
     # Utilities Toolbar; filled in Nd/1d classes
-    self.spectrumUtilToolBar = ToolBar(parent=qtParent, iconSizes=(24,24),
+    self.spectrumUtilToolBar = ToolBar(parent=self.qtParent, iconSizes=(24,24),
                                        grid=(0, 6), gridSpan=(1, 1),
                                        hPolicy='minimal', hAlign='right')
     #self.spectrumUtilToolBar.setFixedWidth(150)
@@ -181,18 +181,18 @@ class GuiSpectrumDisplay(CcpnModule):
     if useScrollArea:
       # scroll area for strips
       # This took a lot of sorting-out; better leave as is or test thoroughly
-      self._stripFrameScrollArea = ScrollArea(parent=qtParent, setLayout=False,
+      self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=False,
                                               scrollBarPolicies = ('always', 'asNeeded'),
                                               acceptDrops=True
                                               )
       self._stripFrameScrollArea.setWidget(self.stripFrame)
       self._stripFrameScrollArea.setWidgetResizable(True)
-      qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
+      self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
     else:
-      qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
+      self.qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
 
     includeDirection = not self.is1D
-    self.phasingFrame = PhasingFrame(parent=qtParent,
+    self.phasingFrame = PhasingFrame(parent=self.qtParent,
                                      showBorder=True,
                                      includeDirection=includeDirection,
                                      callback=self._updatePhasing,
@@ -431,8 +431,12 @@ class GuiSpectrumDisplay(CcpnModule):
       showWarning('Remove strip', 'Last strip of SpectrumDisplay "%s" cannot be removed' \
                   % (self.pid,))
       return
+
     strip._unregisterStrip()
+    self.setColumnStretches(stretchValue=False)      # set to 0 so they disappear
+    strip.setParent(None)           # need to remove the rogue widget from the widgetArea
     strip.delete()
+    self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
 
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"
@@ -452,11 +456,29 @@ class GuiSpectrumDisplay(CcpnModule):
     Creates a new strip by cloning strip with index (default the last) in the display.
     """
     newStrip = self.strips[stripIndex].clone()
+
+    # do setColumnStretches here or in Gui.py (422)
+    self.setColumnStretches(True)
+
     mainWindow = self.mainWindow
     mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
     getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
                      % (self.pid, stripIndex))
     return newStrip
+
+  def setColumnStretches(self, stretchValue=False):
+    # crude routine to set the stretch of all columns upto the last widget to stretchValue
+    widgets = self.stripFrame.children()
+    if widgets:
+      thisLayout = self.stripFrame.layout()
+      maxCol = 0
+      for wid in widgets[1:]:
+        index = thisLayout.indexOf(wid)
+        row, column, cols, rows = thisLayout.getItemPosition(index)
+        maxCol = max(maxCol, column)
+
+      for col in range(0, maxCol+1):
+        thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""

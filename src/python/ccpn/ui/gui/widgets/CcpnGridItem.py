@@ -21,6 +21,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from PyQt4 import QtGui, QtCore
 from pyqtgraph.graphicsItems.UIGraphicsItem import UIGraphicsItem
 import numpy as np

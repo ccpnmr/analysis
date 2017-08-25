@@ -436,6 +436,8 @@ class StripNd(coreClass, _GuiStripNd):
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)
     self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
+    self.spectrumDisplay.setColumnStretches(True)        # ejb - set the columns
+
 def _factoryFunction(project:Project, wrappedData) -> coreClass:
   """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
   apiSpectrumDisplay = wrappedData.spectrumDisplay

@@ -332,7 +332,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
 
-
 # Functions for notifiers
 
 # We are not currently using Free strips
@@ -346,3 +345,4 @@ def _changedBoundDisplayAxisOrdering(project:Project, apiDisplay:ApiBoundDisplay
   """Used (and works) for either BoundDisplay of FreeStrip"""
   for strip in project._data2Obj[apiDisplay].strips:
     strip._setZWidgets()
+

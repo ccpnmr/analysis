@@ -536,3 +536,8 @@ class GuiStripNd(GuiStrip):
           return peakListView
             
     return None
+
+  def resizeEvent(self, event):
+    super(GuiStripNd, self).resizeEvent(event)
+    for spectrumView in self.spectrumViews:
+      spectrumView.updateGeometryChange()

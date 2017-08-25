@@ -76,7 +76,9 @@ class LinearRegionsPlot(LinearRegionItem):
 
     LinearRegionItem.__init__(self, values=values, orientation=orientation, brush=brush, movable=movable, bounds=bounds)
 
-
+  def setLines(self, values):
+    self.lines[0].setPos(min(values))
+    self.lines[1].setPos(max(values))
 
 
 class TargetButtonSpinBoxes(Widget, Base):

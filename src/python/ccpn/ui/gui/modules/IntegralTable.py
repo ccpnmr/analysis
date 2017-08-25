@@ -29,6 +29,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
@@ -165,6 +166,13 @@ class IntegralTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
 
+    self.linearRegions = LinearRegionsPlot(values=[0,0], orientation='v', bounds=None,
+                                           brush=None, colour='purple', movable=True)
+    for line in self.linearRegions.lines:
+      line.sigPositionChanged.connect(self._lineMoved)
+
+
+
     self._integralListNotifier = None
     self._integralNotifier = None
 
@@ -233,14 +241,22 @@ class IntegralTable(ObjectTable):
     """
     if integrals is None:
       self._current.clearIntegrals()
+      self._clearLines()
     else:
       self._current.integrals = integrals
 
 
-  def _actionCallback(self, *kw):
+  def _actionCallback(self, integral, *kw):
     """
     Notifier DoubleClick action on item in table
     """
+    self._showLines(integral)
+    self._navigateToPosition(integral)
+    print(integral)
+
+
+
+
     logger.debug(str(NotImplemented))
 
   def _selectionPulldownCallback(self, item):
@@ -253,6 +269,52 @@ class IntegralTable(ObjectTable):
         self.displayTableForIntegralList(self.integralList)
       else:
         self.clearTable()
+
+
+  ##### Action callback: Lines on plot
+
+  def _showLines(self, integral):
+
+    if self._application is not None:
+      self.strip = self._current.strip
+      if self.strip is not None:
+        self.plotWidget = self.strip.plotWidget
+        if len(integral.limits) == 1:
+          self.linearRegions.setLines(integral.limits[0])
+        self.plotWidget.addItem(self.linearRegions)
+
+  def _clearLines(self):
+    if self._application is not None:
+      self.strip = self._current.strip
+      if self.strip is not None:
+        self.plotWidget = self.strip.plotWidget
+        self.plotWidget.removeItem(self.linearRegions)
+
+  def _lineMoved(self):
+    integral = self._current.integral
+    values = []
+    for line in self.linearRegions.lines:
+        values.append(line.pos().x())
+    if integral is not None:
+      integral.limits = [values]
+
+
+  def _navigateToPosition(self, integral):
+    ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+
+    if self._current.strip is not None:
+      widths = None
+      try:
+        widths = _getCurrentZoomRatio(self._current.strip.viewBox.viewRange())
+        if len(integral.limits) == 1:
+          positions=integral.limits[0]
+          navigateToPositionInStrip(strip=self._current.strip, positions=positions, widths=widths)
+      except Exception as e:
+        logger.warning('Impossible to navigate to peak position.', e)
+    else:
+      logger.warning('Impossible to navigate to peak position. Set a current strip first')
+
 
 
   @staticmethod
@@ -328,6 +390,7 @@ class IntegralTable(ObjectTable):
     Cleanup the notifiers when the window is closed
     """
     self._clearNotifiers()
+    self._clearLines()
 
 
 

@@ -207,8 +207,8 @@ class IntegralList(AbstractWrapperObject):
         lineWidth = abs(i[0] - i[1])
         if lineWidth > minimalLineWidth:
           index01 = np.where((x <= i[0]) & (x >= i[1]))
-          integral = trapz(index01)
-          integrals.append(self.newIntegral(value= float(integral), limits=[[min(i), max(i)],]))
+          # integral = trapz(index01)
+          integrals.append(self.newIntegral(value= None, limits=[[min(i), max(i)],]))
 
     finally:
       self._project.resumeNotification()

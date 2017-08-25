@@ -32,6 +32,8 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Sequence, List
+import numpy as np
+from scipy.integrate import trapz
 
 class Integral(AbstractWrapperObject):
   """n-dimensional Integral, with integration region and value.
@@ -191,6 +193,11 @@ class Integral(AbstractWrapperObject):
       else:
         peakDim.value = 0.5 * (limit1 + limit2)
         peakDim.boxWidth = abs((limit1 - limit2)/ dataDimRef.valuePerPoint)
+
+      # automatically calculates Volume given the limits
+      x = self.integralList.spectrum.positions
+      index01 = np.where((x <= limit2) & (x >= limit1))
+      self.value = float(trapz(index01))
 
   @property
   def pointlimits(self) -> List[Tuple[float,float]]:

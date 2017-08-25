@@ -10,14 +10,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -148,6 +146,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
 def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
   getDataObj = project._data2Obj.get
   spectrum = getDataObj(apiDataSource)
+
   for task in project.tasks:
     if task.status == 'active':
       for spectrumDisplay in task.spectrumDisplays:

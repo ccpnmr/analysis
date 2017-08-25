@@ -234,3 +234,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
     # self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded
     self.data = self.spectrum.positions, self.spectrum.intensities
     self.update()
+
+  def setSliceColour(self):
+    self.plot.curve.setPen(self.spectrum.sliceColour)

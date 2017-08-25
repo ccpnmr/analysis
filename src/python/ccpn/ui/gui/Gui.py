@@ -120,13 +120,13 @@ class Gui(Ui):
     project._registerApiNotifier(GuiStripDisplayNd._changedBoundDisplayAxisOrdering,
                                  GuiStripDisplayNd.ApiBoundDisplay, 'axisOrder')
 
-
-    from ccpn.ui.gui.modules import GuiStripDisplay1d
-    project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumPlotColour,
-                                 GuiStripDisplay1d.ApiDataSource, 'setSliceColour')
-
-    project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumViewPlotColour,
-                                 GuiStripDisplay1d.ApiSpectrumView, 'setSliceColour')
+    # # TODO:ED remove if not needed
+    # from ccpn.ui.gui.modules import GuiStripDisplay1d
+    # project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumPlotColour,
+    #                              GuiStripDisplay1d.ApiDataSource, 'setSliceColour')
+    #
+    # project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumViewPlotColour,
+    #                              GuiStripDisplay1d.ApiSpectrumView, 'setSliceColour')
 
     project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
     project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')

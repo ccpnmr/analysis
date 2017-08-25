@@ -211,6 +211,9 @@ class CcpnModule(Dock):
       elif event.type() == QtCore.QEvent.Drop:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
+      elif event.type() == QtCore.QEvent.MouseButtonRelease:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
     else:
       if event.type() == QtCore.QEvent.DragLeave:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
@@ -219,6 +222,9 @@ class CcpnModule(Dock):
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
       if event.type() == QtCore.QEvent.Leave:
+        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
+      elif event.type() == QtCore.QEvent.MouseButtonRelease:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
     return super(CcpnModule, self).eventFilter(source,event)

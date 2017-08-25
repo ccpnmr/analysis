@@ -66,6 +66,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
+    self.spectrum = spectrum
 
     # layout = QtGui.QGridLayout()
     # self.setLayout(layout)
@@ -270,7 +271,7 @@ class GeneralTab(QtGui.QWidget, Base):
         pix.fill(QtGui.QColor(item[0]))
         self.colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
       self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.sliceColour))
-      self.colourBox.currentIndexChanged.connect(partial(self._changedColourComboIndex, spectrum))
+      self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
                             callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
       Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(8, 0))
@@ -548,30 +549,29 @@ class GeneralTab(QtGui.QWidget, Base):
       shortenedPath = apiDataStore.fullPath
     self.pathData.setText(shortenedPath)
 
-
   def _queueSetSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
-    pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-    pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(spectrumColours.items())+1)
-    self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-    self.colourBox.setCurrentIndex(int(newIndex)-1)
-    self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
+    if newColour:
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(newColour))
+      newIndex = str(len(spectrumColours.items())+1)
+      self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      self.colourBox.setCurrentIndex(int(newIndex)-1)
+      self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
 
   def _setSpectrumColour(self, spectrum, newColour):
     spectrum._apiDataSource.setSliceColour(newColour.name())
     self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
-    # spectrum.guiSpectrumView.plot.setPen(spectrum._apiDataSource.sliceColour)
 
+  def _queueChangeSliceComboIndex(self, spectrum, value):
+    self._changes['sliceComboIndex'] = partial(self._changedSliceComboIndex, spectrum, value)
 
-  # TODO: 1D Only.  Fix this when fixing 1D!
-  def _changedColourComboIndex(self, spectrum, value):
-    spectrum.sliceColour = list(spectrumColours.keys())[value]
-    pix = QtGui.QPixmap(60, 10)
-    pix.fill(QtGui.QColor(spectrum.sliceColour))
+  def _changedSliceComboIndex(self, spectrum, value):
+    newColour = list(spectrumColours.keys())[value]
+    spectrum.sliceColour = newColour
     self._writeLoggingMessage("spectrum.sliceColour = '%s'" % list(spectrumColours.keys())[value])
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % list(spectrumColours.keys())[value], spectrum=self.spectrum)
 
@@ -768,7 +768,7 @@ class ContoursTab(QtGui.QWidget, Base):
 
     self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
                                        icon='icons/colours', hPolicy='fixed')
-    self.positiveColourButton.clicked.connect(partial(self._changePosSpectrumColour, spectrum))
+    self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, spectrum))
 
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='c', hAlign='l')
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
@@ -818,7 +818,7 @@ class ContoursTab(QtGui.QWidget, Base):
     )
     self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                        vAlign='t', hAlign='l')
-    self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))
+    self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, spectrum))
 
   def _repopulate(self):
     # don't need anything here as can't generate any errors
@@ -914,44 +914,34 @@ class ContoursTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
     self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %d" % int(value), spectrum=spectrum)
 
-
+  # change colours using comboboxes and colour buttons
   def _queueChangePosSpectrumColour(self, spectrum):
-    self._changes['positiveSpectrumColour'] = partial(self._changePosSpectrumColour, spectrum)
-
-  def _changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
     if newColour is not None:
-      spectrum.positiveContourColour = newColour.name()
-      self._writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour.name())
-      self.pythonConsole.writeConsoleCommand("spectrum.positiveContourColour = '%s'" % newColour.name(), spectrum=spectrum)
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
       spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+
+      # spawns combobox change event below
       self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
 
-
   def _queueChangeNegSpectrumColour(self, spectrum):
-    self._changes['negativeSpectrumColour'] = partial(self._changeNegSpectrumColour, spectrum)
-
-  def _changeNegSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
     if newColour is not None:
-      spectrum.negativeContourColour = newColour.name()
-      self._writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour.name())
-      self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour.name(), spectrum=spectrum)
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
       spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-      self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
+      # spawns combobox change event below
+      self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
   def _queueChangePosColourComboIndex(self, spectrum, value):
     self._changes['positiveColourComboIndex'] = partial(self._changePosColourComboIndex, spectrum, value)

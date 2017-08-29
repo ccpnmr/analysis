@@ -283,6 +283,14 @@ class NmrResidueTable(ObjectTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
+  def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1):
+    """
+    Convenience to add a widget to the top of the table; col >= 2
+    """
+    if col < 2:
+      raise RuntimeError('Col has to be >= 2')
+    self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
+
   def _selectNmrChain(self, nmrChain=None):
     """
     Manually select a NmrChain from the pullDown

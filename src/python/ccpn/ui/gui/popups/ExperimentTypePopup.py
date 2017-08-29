@@ -59,7 +59,6 @@ class ExperimentTypePopup(CcpnDialog):
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-
     for spectrumIndex, spectrum in enumerate(spectra):
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
@@ -101,7 +100,9 @@ class ExperimentTypePopup(CcpnDialog):
                            callback=self.accept, hAlign='r', vAlign='b')
 
     self.setWindowTitle(title)
-
+    self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+    self.setMinimumHeight(200)
+    self.setMinimumWidth(450)
 
   def _setExperimentType(self, spectrum, atomCodes, item):
     expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)

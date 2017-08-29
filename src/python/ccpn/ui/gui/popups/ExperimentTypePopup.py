@@ -34,6 +34,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 from functools import partial
 
+
 def _getExperimentTypes(project, spectrum):
   ''' CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets'''
   axisCodes = []

@@ -50,6 +50,7 @@ class GuiWindow():
   
   def __init__(self, application):
     self.application = application
+    self.current = self.application.current
 
   def _setShortcuts(self):
     """
@@ -77,6 +78,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("p, i"), self, self.addIntegral1D, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
@@ -146,6 +148,20 @@ class GuiWindow():
       peak.height = height
       peak.position = position
       peak.lineWidths = lineWidths
+
+  def addIntegral1D(self):
+    strip = self.current.strip
+    if strip is not None:
+      cursorPosition = self.current.cursorPosition
+      if cursorPosition is not None:
+        limits = [cursorPosition[0], cursorPosition[0]+0.005]
+        for spectrumView in strip.spectrumViews:
+          if not len(spectrumView.spectrum.integralLists) >0:
+            spectrumView.spectrum.newIntegralList()
+          integral = spectrumView.spectrum.integralLists[-1].newIntegral(value=None, limits=[limits,])
+          self.current.integrals += (integral,)
+          strip.plotWidget.viewBox._showIntegralLines()
+
 
   def refitCurrentPeaks(self):
     peaks = self.application.current.peaks

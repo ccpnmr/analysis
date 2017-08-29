@@ -27,8 +27,6 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.Notifiers import Notifier
@@ -166,10 +164,10 @@ class IntegralTable(ObjectTable):
                          grid=(3, 0), gridSpan=(1, 6)
                          )
 
-    self.linearRegions = LinearRegionsPlot(values=[0,0], orientation='v', bounds=None,
-                                           brush=None, colour='purple', movable=True)
-    for line in self.linearRegions.lines:
-      line.sigPositionChanged.connect(self._lineMoved)
+    # self.linearRegions = LinearRegionsPlot(values=[0,0], orientation='v', bounds=None,
+    #                                        brush=None, colour='purple', movable=True)
+    # for line in self.linearRegions.lines:
+    #   line.sigPositionChanged.connect(self._lineMoved)
 
 
 
@@ -233,15 +231,23 @@ class IntegralTable(ObjectTable):
     """
     self._updateSilence = silence
 
+  def _clearRegions(self):
+    strip = self._current.strip
+    if strip:
+      strip.plotWidget.viewBox._clearIntegralRegions()
 
+  def _showRegions(self):
+    strip = self._current.strip
+    if strip:
+      strip.plotWidget.viewBox._showIntegralLines()
 
   def _selectionCallback(self, integrals, *args):
     """
     set as current the selected integrals on the table
     """
+    self._clearRegions()
     if integrals is None:
       self._current.clearIntegrals()
-      self._clearLines()
     else:
       self._current.integrals = integrals
 
@@ -250,11 +256,8 @@ class IntegralTable(ObjectTable):
     """
     Notifier DoubleClick action on item in table
     """
-    self._showLines(integral)
-    self._navigateToPosition(integral)
-    print(integral)
-
-
+    self._showRegions()
+    self._navigateToPosition()
 
 
     logger.debug(str(NotImplemented))
@@ -270,39 +273,52 @@ class IntegralTable(ObjectTable):
       else:
         self.clearTable()
 
+  def _selectOnTableCurrentIntegralsNotifierCallback(self,  data):
+    '''callback from a notifier to select the current Integrals  '''
+    currentIntegrals = data['value']
+    self._selectOnTableCurrentIntegrals(currentIntegrals)
+
+  def _selectOnTableCurrentIntegrals(self, currentIntegrals):
+    ''' highlight current peaks on the opened peak table '''
+
+    print(currentIntegrals)
+    if len(currentIntegrals) > 0:
+      self._highLightObjs(currentIntegrals)
+    else:
+      self.clearSelection()
 
   ##### Action callback: Lines on plot
 
-  def _showLines(self, integral):
+  # def _showLines(self, integral):
+  #
+  #   if self._application is not None:
+  #     self.strip = self._current.strip
+  #     if self.strip is not None:
+  #       self.plotWidget = self.strip.plotWidget
+  #       if len(integral.limits) == 1:
+  #         self.linearRegions.setLines(integral.limits[0])
+  #       self.plotWidget.addItem(self.linearRegions)
 
-    if self._application is not None:
-      self.strip = self._current.strip
-      if self.strip is not None:
-        self.plotWidget = self.strip.plotWidget
-        if len(integral.limits) == 1:
-          self.linearRegions.setLines(integral.limits[0])
-        self.plotWidget.addItem(self.linearRegions)
-
-  def _clearLines(self):
-    if self._application is not None:
-      self.strip = self._current.strip
-      if self.strip is not None:
-        self.plotWidget = self.strip.plotWidget
-        self.plotWidget.removeItem(self.linearRegions)
-
-  def _lineMoved(self):
-    integral = self._current.integral
-    values = []
-    for line in self.linearRegions.lines:
-        values.append(line.pos().x())
-    if integral is not None:
-      integral.limits = [values]
+  # def _clearLines(self):
+  #   if self._application is not None:
+  #     self.strip = self._current.strip
+  #     if self.strip is not None:
+  #       self.plotWidget = self.strip.plotWidget
+  #       self.plotWidget.removeItem(self.linearRegions)
+  #
+  # def _lineMoved(self):
+  #   integral = self._current.integral
+  #   values = []
+  #   for line in self.linearRegions.lines:
+  #       values.append(line.pos().x())
+  #   if integral is not None:
+  #     integral.limits = [[min(values),max(values)],]
 
 
-  def _navigateToPosition(self, integral):
+  def _navigateToPosition(self):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
-
+    integral = self._current.integral
     if self._current.strip is not None:
       widths = None
       try:
@@ -322,6 +338,7 @@ class IntegralTable(ObjectTable):
     """
     Returns HigherLimit
     """
+    # FIXME Wrapper? BUG if limits is None
     if integral is not None:
       if len(integral.limits)>0:
         limits = integral.limits[0]
@@ -366,7 +383,10 @@ class IntegralTable(ObjectTable):
     rename calls on name
     change calls on any other attribute
     """
-    self._clearNotifiers()
+    # self._clearNotifiers()
+    self._selectOnTableCurrentIntegralsNotifier = Notifier(self._current, [Notifier.CURRENT], targetName='integrals',
+                                                           callback=self._selectOnTableCurrentIntegralsNotifierCallback)
+
     self._integralListNotifier = Notifier(self._project
                                            , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                            , IntegralList.__name__
@@ -376,6 +396,9 @@ class IntegralTable(ObjectTable):
                                        , Integral.__name__
                                        , self._updateCallback)
 
+
+
+
   def _clearNotifiers(self):
     """
     clean up the notifiers
@@ -384,13 +407,15 @@ class IntegralTable(ObjectTable):
       self._integralListNotifier.unRegister()
     if self._integralNotifier is not None:
       self._integralNotifier.unRegister()
+    if self._selectOnTableCurrentIntegralsNotifier is not None:
+      self._selectOnTableCurrentIntegralsNotifier.unRegister()
 
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
     self._clearNotifiers()
-    self._clearLines()
+    self._clearRegions()
 
 
 

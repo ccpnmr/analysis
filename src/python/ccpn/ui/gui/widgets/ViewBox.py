@@ -82,7 +82,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
   leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
-
+from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 
 class CrossHair:
   "class to implement a cross-hair"
@@ -190,6 +190,11 @@ class ViewBox(pg.ViewBox):
     self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
     self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
 
+    self.integralRegions = LinearRegionsPlot(values=[0, 0], orientation='v', bounds=None,
+                                             brush=None, colour='purple', movable=True)
+    for line in self.integralRegions.lines:
+      line.sigPositionChanged.connect(self._integralRegionsMoved)
+
     self.peakWidthPixels = 20  # for ND peaks
     self.contextMenuPosition = None #we need this because current.position is not always the best choice for everything!
 
@@ -286,6 +291,8 @@ class ViewBox(pg.ViewBox):
       self._resetBoxes()
       # self._deselectPeaks()
       self.current.clearPeaks()
+      self.current.clearIntegrals()
+      self._clearIntegralRegions()
       self._selectPeak(xPosition, yPosition)
 
     elif shiftRightMouse(event):
@@ -602,6 +609,27 @@ class ViewBox(pg.ViewBox):
     #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
 
 
+  ##### Action callback: Lines on plot
+
+  def _showIntegralLines(self):
+    integral = self.current.integral
+    if integral is not None:
+      self.integralRegions.setLines(integral.limits[0])
+      self.addItem(self.integralRegions)
+
+  def _clearIntegralRegions(self):
+     self.removeItem(self.integralRegions)
+
+  def _integralRegionsMoved(self):
+    integrals = self.current.integrals
+    values = []
+    for line in self.integralRegions.lines:
+        values.append(line.pos().x())
+    for integral in integrals:
+      if integral is not None:
+        integral.limits = [[min(values),max(values)],]
+
+
 def _peaksVisibleInStrip(peaks, strip):
 
   peakListToIndicesDict = {}
@@ -640,3 +668,5 @@ def _peaksVisibleInStrip(peaks, strip):
         peaksVisible.append(peak)
 
   return peaksVisible, peakListToIndicesDict
+
+

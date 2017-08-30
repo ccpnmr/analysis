@@ -280,10 +280,6 @@ class PulldownList(QtGui.QComboBox, Base):
         self.callback(self.texts[index])
 
 
-
-
-
-
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
@@ -317,7 +313,7 @@ if __name__ == '__main__':
   #policyDict = {}
 
   pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
-                              objects=objects, callback=callback, addHeader=True, grid=(0,0), **policyDict
+                              objects=objects, callback=callback, grid=(0,0), **policyDict
                               )
   pulldownList.insertSeparator(2)
   pulldownList.clearEditText()

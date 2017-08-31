@@ -35,6 +35,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -361,9 +362,22 @@ class SideBar(QtGui.QTreeWidget, Base):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
+    from ccpnmodel.ccpncore.memops.ApiError import ApiError
+
     for obj in objs:
       if obj:
-        obj.delete()
+        try:
+          if isinstance(obj, Spectrum):
+            # need to delete all PealLists and Intergral Lists first
+            for peakList in obj.peakLists:
+              peakList.delete()
+            for integralList in obj.integralLists:
+              integralList.delete()
+            obj.delete()
+          else:
+            obj.delete()
+        except ApiError:
+          showWarning('Delete', 'Object %s cannot be deleted' % obj.pid)
 
   def _cloneObject(self, objs):
     """Clones the specified objects"""

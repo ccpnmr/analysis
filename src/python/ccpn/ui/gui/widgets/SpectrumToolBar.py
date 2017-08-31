@@ -77,10 +77,8 @@ class SpectrumToolBar(ToolBar):
     if not keys: # if you click on >> button which shows more spectra
       return None
     key = keys[0]
-    allPlAction = contextMenu.addAction('All PL')
-    allPlAction.setCheckable(True)
-    allPlAction.setChecked(True)
-    allPlAction.toggled.connect(partial(self._allPeakLists, contextMenu , button))
+    allPlAction = contextMenu.addAction('Show All PL', partial(self._allPeakLists, contextMenu, button))
+    noPlAction = contextMenu.addAction('Hide All PL', partial(self._noPeakLists, contextMenu, button))
 
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
@@ -88,13 +86,23 @@ class SpectrumToolBar(ToolBar):
         action.setCheckable(True)
         if peakListView.isVisible():
           action.setChecked(True)
-        else:
-          allPlAction.setChecked(False)
+        # else:
+        #   allPlAction.setChecked(False)
         action.toggled.connect(peakListView.setVisible)
     contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu
 
-  def _allPeakLists(self, contextMenu,  button):
+  def _allPeakLists(self, contextMenu, button):
+    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    for peakListView in self.widget.peakListViews:
+      if peakListView.spectrumView._apiDataSource == key:
+        for action in contextMenu.actions():
+          if action is not self.sender():
+            if not action.isChecked():
+              action.setChecked(True)
+              action.toggled.connect(peakListView.setVisible)
+
+  def _noPeakLists(self, contextMenu, button):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
     for peakListView in self.widget.peakListViews:
       if peakListView.spectrumView._apiDataSource == key:

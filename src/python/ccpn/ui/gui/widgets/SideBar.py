@@ -368,12 +368,20 @@ class SideBar(QtGui.QTreeWidget, Base):
       if obj:
         try:
           if isinstance(obj, Spectrum):
-            # need to delete all PealLists and Intergral Lists first
-            for peakList in obj.peakLists:
-              peakList.delete()
-            for integralList in obj.integralLists:
-              integralList.delete()
-            obj.delete()
+
+            # need to delete all peakLists and integralLists first, treat as single undo
+            self.project._startCommandEchoBlock('_deleteSpectrum')
+            try:
+              for peakList in obj.peakLists:
+                peakList.delete()
+              for integralList in obj.integralLists:
+                integralList.delete()
+              obj.delete()
+            except Exception as es:
+              showWarning('Delete', str(es))
+            finally:
+              self.project._endCommandEchoBlock()
+
           else:
             obj.delete()
         except ApiError:

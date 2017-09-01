@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -51,6 +50,7 @@ from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
 
 from ccpnmodel.ccpncore.memops import Notifiers
+
 
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
 # attributes

@@ -618,7 +618,8 @@ class ViewBox(pg.ViewBox):
       self.addItem(self.integralRegions)
 
   def _clearIntegralRegions(self):
-     self.removeItem(self.integralRegions)
+    if self.integralRegions in self.addedItems:
+      self.removeItem(self.integralRegions)
 
   def _integralRegionsMoved(self):
     integrals = self.current.integrals

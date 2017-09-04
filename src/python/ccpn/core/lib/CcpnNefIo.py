@@ -2150,10 +2150,21 @@ class CcpnNefReader:
     self.mainDataSetSerial = None
     self.defaultChemicalShiftList = None
 
-
   def getNefData(self, path:str):
     """Get NEF data structure from file"""
     nmrDataExtent = StarIo.parseNefFile(path)
+    dataBlocks = list(nmrDataExtent.values())
+    dataBlock = dataBlocks[0]
+
+    # Initialise afresh for every file read
+    self._dataSet2ItemMap = {}
+    self._nmrResidueMap = {}
+    #
+    return dataBlock
+
+  def getNMRStarData(self, path:str):
+    """Get NEF data structure from file"""
+    nmrDataExtent = StarIo.parseNmrStarFile(path)
     dataBlocks = list(nmrDataExtent.values())
     dataBlock = dataBlocks[0]
 
@@ -2255,6 +2266,91 @@ class CcpnNefReader:
       print ('====> ', msg)
     self.project = None
 
+  def importNewNMRStarProject(self, project:Project, dataBlock:StarIo.NmrDataBlock,
+                       projectIsEmpty:bool=True):
+    """Import entire project from dataBlock into empty Project"""
+
+    t0 = time.time()
+
+    # TODO:ED Add error handling
+
+    self.warnings = []
+    self.project = project
+    self.defaultChainCode = None
+
+    saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
+
+    # TODO:ED this is technically the same as what Tom is doing
+
+
+    # these sections below check each of the saveframes, extract the relevant information
+    # and then discard if they are no longer required
+    # the following saveframes can then be checked to find the corrct one holding the
+    # chemical shift list information
+
+    # # Load metadata and molecular system first
+    # metaDataFrame = dataBlock['nef_nmr_meta_data']
+    # self.saveFrameName = 'nef_nmr_meta_data'
+    # self.load_nef_nmr_meta_data(project, metaDataFrame)
+    # del saveframeOrderedDict['nef_nmr_meta_data']
+    #
+    # saveFrame = dataBlock.get('nef_molecular_system')
+    # if saveFrame:
+    #   self.saveFrameName = 'nef_molecular_system'
+    #   self.load_nef_molecular_system(project, saveFrame)
+    # del saveframeOrderedDict['nef_molecular_system']
+    #
+    # # Load assignments, or preload from shiftlists
+    # # to make sure '@' and '#' identifiers match the right serials
+    # saveFrame = dataBlock.get('ccpn_assignment')
+    # if saveFrame:
+    #   self.saveFrameName = 'ccpn_assignment'
+    #   self.load_ccpn_assignment(project, saveFrame)
+    #   del saveframeOrderedDict['ccpn_assignment']
+    # else:
+    #   self.preloadAssignmentData(dataBlock)
+
+    # t1 = time.time()
+    # print ('@~@~ NEF load starting frames', t1-t0)
+
+    for sf_category, saveFrames in saveframeOrderedDict.items():
+      for saveFrame in saveFrames:
+        saveFrameName = self.saveFrameName = saveFrame.name
+
+        importer = self.importers.get(sf_category)
+        if importer is None:
+          print ("WARNING, unknown saveframe category", sf_category, saveFrameName)
+        else:
+          # NB - newObject may be project, for some saveframes.
+          result = importer(self, project, saveFrame)
+          if isinstance(result, AbstractWrapperObject):
+            self.frameCode2Object[saveFrameName] = result
+          # elif not isinstance(result, list):
+          #   self.warning("Unexpected return %s while reading %s" %
+          #                (result, saveFrameName))
+
+          # Handle unmapped elements
+          extraTags = [x for x in saveFrame
+                       if x not in nef2CcpnMap[sf_category]
+                       and x not in ('sf_category', 'sf_framecode')]
+          if extraTags:
+            print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
+            # TODO put here function that stashes data in object, or something
+            # ues newObject here
+          # t2 = time.time()
+          # print('@~@~ loaded', saveFrameName, t2-t1)
+          # t1 = t2
+
+    # Put metadata in main dataset
+    # self.updateMetaData(metaDataFrame)
+
+
+    t2 = time.time()
+    getLogger().debug('Loaded NEF file, time = %.2fs' %(t2-t0))
+
+    for msg in self.warnings:
+      print ('====> ', msg)
+    self.project = None
 
   def load_nef_nmr_meta_data(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
     """load nef_nmr_meta_data saveFrame"""

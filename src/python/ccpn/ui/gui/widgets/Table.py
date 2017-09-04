@@ -153,8 +153,10 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from functools import partial
 
 from collections import OrderedDict
+from ccpn.util.Logging import getLogger
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
+
 
 class ObjectTable(QtGui.QTableView, Base):
 
@@ -732,9 +734,20 @@ class ObjectTable(QtGui.QTableView, Base):
     title = 'Delete Item%s' % ('' if n == 1 else 's')
     msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
     if MessageDialog.showYesNo(title, msg):
-      for obj in selected:
-        if hasattr(obj, 'pid'):
-          obj.delete()
+
+      thisProject = selected[0].project
+      thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
+      try:
+
+        for obj in selected:
+          if hasattr(obj, 'pid'):
+
+              obj.delete()
+
+      except Exception as es:
+        getLogger().warning(str(es))
+      finally:
+        thisProject._endCommandEchoBlock()
 
 
   def filterRows(self):

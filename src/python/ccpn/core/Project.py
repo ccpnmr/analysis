@@ -1069,7 +1069,7 @@ class Project(AbstractWrapperObject):
     """Load project from file into application and return the new project"""
 
     # if subType == ioFormats.CCPN:
-    if subType in (ioFormats.CCPN, ioFormats.NEF):
+    if subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR):
       return self._appBase.loadProject(path)
     else:
       raise ValueError("Project file type %s is not recognised" % subType)

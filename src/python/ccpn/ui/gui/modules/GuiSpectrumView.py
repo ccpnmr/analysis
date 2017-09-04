@@ -108,8 +108,9 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
   # override of Qt setVisible
   def setVisible(self, visible):
     QtGui.QGraphicsItem.setVisible(self, visible)
-    for peakListView in self.peakListViews:
-      peakListView.setVisible(visible)
+    if self:                                        # ejb - ?? crashes on table update otherwise
+      for peakListView in self.peakListViews:
+        peakListView.setVisible(visible)
 
   """
   def setDimMapping(self, dimMapping=None):

@@ -960,7 +960,7 @@ class Framework:
         return
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)
-    if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF):
+    if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR):
 
       if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
         if self.project is not None:
@@ -974,6 +974,11 @@ class Framework:
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default
+        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+
+      elif subType == ioFormats.NMRSTAR:
+        sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
+        project = self._loadNMRStarFile(path, makeNewProject=True)   # RHF - new by default
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
 
 
@@ -1009,6 +1014,29 @@ class Framework:
 
     try:
       self.nefReader.importNewProject(self.project, dataBlock)
+    finally:
+      self.project._wrappedData.shiftAveraging = True
+      self._echoBlocking -= 1
+      self.project._undo.decreaseBlocking()
+
+    return self.project
+
+  def _loadNMRStarFile(self, path:str, makeNewProject=True) -> Project:
+    """Load Project from NEF file at path, and do necessary setup"""
+
+    dataBlock = self.nefReader.getNMRStarData(path)
+
+    if makeNewProject:
+      if self.project is not None:
+        self._closeProject()
+      self.project = self.newProject(dataBlock.name)
+
+    self._echoBlocking += 1
+    self.project._undo.increaseBlocking()
+    self.project._wrappedData.shiftAveraging = False
+
+    try:
+      self.nefReader.importNewNMRStarProject(self.project, dataBlock)
     finally:
       self.project._wrappedData.shiftAveraging = True
       self._echoBlocking -= 1

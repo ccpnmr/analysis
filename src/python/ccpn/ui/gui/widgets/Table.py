@@ -933,8 +933,15 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self._syncFilterObjects(applyFilter)
     self.setupHeaderStretch()
-    if self.autoResize:
-      self.resizeColumnsToContents()
+    # if self.autoResize:
+
+    self.setVisible(False)
+    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+    self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.resizeColumnsToContents()
+    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.setVisible(True)
 
   def setColumns(self, columns):
 

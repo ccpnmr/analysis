@@ -167,6 +167,7 @@ class ObjectTable(QtGui.QTableView, Base):
                objects=None,
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
+               enableExport=True, enableDelete=True,
                **kw):
 
     QtGui.QTableView.__init__(self, parent)
@@ -245,22 +246,21 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self.searchWidget = None
     self._setHeaderContextMenu()
-    self._setContextMenu()
+    self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
 
   def _setHeaderContextMenu(self):
     headers = self.horizontalHeader()
     headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
-  def _setContextMenu(self):
+  def _setContextMenu(self, enableExport=True, enableDelete=True):
     self.tableMenu = QtGui.QMenu()
-    self.tableMenu.addAction("Export Table", self.exportDialog )
-    self.tableMenu.addAction("Delete", self.deleteObjFromTable)
+    if enableExport:
+      self.tableMenu.addAction("Export Table", self.exportDialog )
+    if enableDelete:
+      self.tableMenu.addAction("Delete", self.deleteObjFromTable)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self._raiseTableContextMenu)
-
-
-
 
   def clearTable(self):
     "remove all objects from the table"
@@ -735,20 +735,26 @@ class ObjectTable(QtGui.QTableView, Base):
     msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
     if MessageDialog.showYesNo(title, msg):
 
-      thisProject = selected[0].project
-      thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
-      try:
+      if hasattr(selected[0], 'project'):
+        thisProject = selected[0].project
+        thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
+        try:
 
+          for obj in selected:
+            if hasattr(obj, 'pid'):
+
+                obj.delete()
+
+        except Exception as es:
+          getLogger().warning(str(es))
+        finally:
+          thisProject._endCommandEchoBlock()
+      else:
+
+        # TODO:ED this is deleting from PandasTable, check for another way to get project
         for obj in selected:
           if hasattr(obj, 'pid'):
-
-              obj.delete()
-
-      except Exception as es:
-        getLogger().warning(str(es))
-      finally:
-        thisProject._endCommandEchoBlock()
-
+            obj.delete()
 
   def filterRows(self):
 

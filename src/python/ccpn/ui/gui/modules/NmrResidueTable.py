@@ -259,7 +259,7 @@ class NmrResidueTable(ObjectTable):
                          columns=self.NMRcolumns, objects = [],
                          autoResize=True,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
-                         grid = (3, 0), gridSpan = (1, 6)
+                         grid = (3, 0), gridSpan = (1, 6), enableDelete=False
                          )
 
     # Notifier object to update the table if the nmrChain changes

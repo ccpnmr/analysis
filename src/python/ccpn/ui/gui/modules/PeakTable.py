@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -106,8 +104,10 @@ class PeakListTableWidget(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
 
     ## create peakList table widget
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[], autoResize=True, multiSelect=True,
-                         actionCallback=self._actionCallback, selectionCallback=self._selectionCallback, grid=(1, 0), gridSpan=(1, 6))
+    ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[]
+                         , autoResize=True, multiSelect=True
+                         , actionCallback=self._actionCallback, selectionCallback=self._selectionCallback
+                         , grid=(1, 0), gridSpan=(1, 6))
 
     ## create Pulldown for selection of peakList
     gridHPos = 0

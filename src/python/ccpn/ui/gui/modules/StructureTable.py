@@ -305,12 +305,12 @@ class StructureTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=self.STcolumns, objects = [],
-                         autoResize=True,
-                         selectionCallback=self._selectionCallback,
-                         actionCallback=self._actionCallback,
-                         grid = (3, 0), gridSpan = (1, 6)
+    ObjectTable.__init__(self, parent=self._widget, setLayout=True
+                         , columns=self.STcolumns, objects = []
+                         , autoResize=True, multiSelect=True
+                         , selectionCallback=self._selectionCallback
+                         , actionCallback=self._actionCallback
+                         , grid = (3, 0), gridSpan = (1, 6)
                          )
 
     self._ensembleNotifier = None

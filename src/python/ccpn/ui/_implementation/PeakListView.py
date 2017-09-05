@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -39,6 +37,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStrip
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
 
 class PeakListView(AbstractWrapperObject):
   """Peak List View for 1D or nD PeakList"""
@@ -168,10 +167,13 @@ class PeakListView(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent:SpectrumView)-> list:
+  def _getAllWrappedData(cls, parent:SpectrumView)-> typing.Optional[list]:
     """get wrappedData (ccpnmr.gui.Task.PeakListView) in serial number order"""
-    return sorted(parent._wrappedData.stripPeakListViews,
+    if hasattr(parent._wrappedData, 'stripPeakListViews'):
+      return sorted(parent._wrappedData.stripPeakListViews,
                   key=operator.attrgetter('peakListView.peakListSerial'))
+    else:
+      return None
 
   #CCPN functions
 

@@ -740,14 +740,20 @@ class ObjectTable(QtGui.QTableView, Base):
         thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
         try:
 
+          self.blockSignals(True)
+
           for obj in selected:
             if hasattr(obj, 'pid'):
 
-                obj.delete()
+              print ('>>> deleting', obj)
+              obj.delete()
 
         except Exception as es:
           getLogger().warning(str(es))
         finally:
+
+          self.blockSignals(False)
+
           thisProject._endCommandEchoBlock()
       else:
 
@@ -865,7 +871,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
   def setObjectsAndColumns(self, objects, columns):
     self._silenceCallback = True
-    self.setObjects([])
+    # self.setObjects([])
     self.setColumns(columns)
     self.setObjects(objects)
     self._silenceCallback = False
@@ -936,11 +942,16 @@ class ObjectTable(QtGui.QTableView, Base):
     # if self.autoResize:
 
     self.setVisible(False)
-    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-    self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    # self.setEnabled(False)
+    self.blockSignals(True)
+    # self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+    # self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    # print ('  >>>setObjects')
     self.resizeColumnsToContents()
-    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
     self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.blockSignals(False)
+    # self.setEnabled(True)
     self.setVisible(True)
 
   def setColumns(self, columns):

@@ -207,7 +207,8 @@ class NmrResidueTable(ObjectTable):
   """
   columnDefs = [
     ('#',          lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-    ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+    ('Index',      lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+    # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
 #    ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
     ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
     ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
@@ -223,6 +224,16 @@ class NmrResidueTable(ObjectTable):
 
   OBJECT = 'object'
   TABLE = 'table'
+
+  @staticmethod
+  def _nmrIndex(nmrRes):
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      return nmrRes.nmrChain.nmrResidues.index(nmrRes)
+    except:
+      return None
 
   def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
     """
@@ -259,7 +270,7 @@ class NmrResidueTable(ObjectTable):
                          columns=self.NMRcolumns, objects = [],
                          autoResize=True,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
-                         grid = (3, 0), gridSpan = (1, 6), enableDelete=False
+                         grid = (3, 0), gridSpan = (1, 6), enableDelete=True
                          )
 
     # Notifier object to update the table if the nmrChain changes
@@ -413,7 +424,8 @@ class NmrResidueTable(ObjectTable):
     self._residueNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                       , NmrResidue.__name__
-                                      , self._updateCallback)
+                                      , self._updateCallback
+                                      , onceOnly=True)
 
   def _clearNotifiers(self):
     """

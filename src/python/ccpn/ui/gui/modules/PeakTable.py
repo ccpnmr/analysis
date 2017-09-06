@@ -117,7 +117,7 @@ class PeakListTableWidget(ObjectTable):
                                      , showSelectName=True
                                      , minimumWidths=(0, 100)
                                      , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
-                                     ,callback=self._pulldownPLcallback)
+                                     , callback=self._pulldownPLcallback)
 
     ## create widgets for selection of position units
     gridHPos+=1
@@ -126,10 +126,20 @@ class PeakListTableWidget(ObjectTable):
     self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
 
     ## set notifiers
-    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current,[Notifier.CURRENT], targetName='peaks',callback=self._selectOnTableCurrentPeaksNotifierCallback)
+    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current
+                                                       , [Notifier.CURRENT]
+                                                       , targetName='peaks'
+                                                       , callback=self._selectOnTableCurrentPeaksNotifierCallback)
     # TODO set notifier to trigger only for the selected peakList.
-    self._peakListDeleteNotifier = Notifier(self._project, [Notifier.CREATE, Notifier.DELETE], 'PeakList', self._peakListNotifierCallback)
-    self._peakNotifier =  Notifier(self._project,[Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE], 'Peak', self._peakNotifierNotifierCallback)
+
+    self._peakListDeleteNotifier = Notifier(self._project
+                                            , [Notifier.CREATE, Notifier.DELETE]
+                                            , 'PeakList'
+                                            , self._peakListNotifierCallback)
+    self._peakNotifier =  Notifier(self._project
+                                   , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
+                                   , 'Peak', self._peakNotifierNotifierCallback
+                                   , onceOnly=True)
 
     self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
@@ -198,7 +208,7 @@ class PeakListTableWidget(ObjectTable):
     '''Display the peaks on the table for the selected PeakList.
     Obviously, If the peak has not been previously deleted and flagged isDeleted'''
 
-    self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
+    # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
     if useSelectedPeakList:
       if self._selectedPeakList is not None:

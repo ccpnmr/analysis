@@ -122,7 +122,12 @@ class Notifier(object):
 
   _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
 
-  def __init__(self, theObject:Any, triggers:list, targetName:str, callback:Callable[..., str], *args, **kwargs):
+  def __init__(self, theObject:Any
+               , triggers:list
+               , targetName:str
+               , callback:Callable[..., str]
+               , onceOnly=False
+               , *args, **kwargs):
     """
     Create Notifier object; 
     The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
@@ -214,7 +219,10 @@ class Notifier(object):
         self._value = getattr(theObject, targetName)
 
         notifier = (trigger, targetName, triggerForTheObject)
-        func = self._project.registerNotifier(theObject.className, Notifier.CHANGE, partial(self, notifier=notifier))
+        func = self._project.registerNotifier(theObject.className
+                                              , Notifier.CHANGE
+                                              , partial(self, notifier=notifier)
+                                              , onceOnly=onceOnly)
         self._notifiers.append(notifier)
         self._unregister.append((theObject.className, Notifier.CHANGE, func))
         if self._debug:
@@ -239,7 +247,10 @@ class Notifier(object):
           raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
         notifier = (trigger, targetName, triggerForTheObject)
-        func = self._project.registerNotifier(targetName, trigger, partial(self, notifier=notifier))
+        func = self._project.registerNotifier(targetName
+                                              , trigger
+                                              , partial(self, notifier=notifier)
+                                              , onceOnly=onceOnly)
         self._notifiers.append(notifier)
         self._unregister.append((targetName,trigger,func))
         if self._debug:

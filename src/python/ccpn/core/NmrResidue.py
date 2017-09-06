@@ -36,6 +36,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
+from ccpn.util.Logging import getLogger
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
@@ -360,6 +361,8 @@ class NmrResidue(AbstractWrapperObject):
           apiResonanceGroup.directNmrChain = newApiNmrChain
           value._wrappedData.directNmrChain = newApiNmrChain
         result = value.nmrChain
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
     #
@@ -375,56 +378,58 @@ class NmrResidue(AbstractWrapperObject):
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
     self._startCommandEchoBlock('disconnectNext')
-    # try:
+    try:
 
-    if apiNmrChain is None:
-      # offset residue: no-op
-      return
-
-    elif self.residue is not None:
-      # Assigned residue with successor residue - error
-      raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
-
-    if apiNmrChain.isConnected:
-      # Connected stretch - break stretch, keeping first half in the NmrChain
-      stretch = apiNmrChain.mainResonanceGroups
-
-      if apiResonanceGroup is stretch[-1]:
+      if apiNmrChain is None:
+        # offset residue: no-op
         return
 
-      if apiResonanceGroup is stretch[0]:
-        # chop off end ResonanceGroup
-        if len(stretch) <= 2:
-          # Chain gets removed
-          for resonanceGroup in reversed(stretch):
-            resonanceGroup.directNmrChain = defaultChain
-          # delete empty chain
-          apiNmrChain.delete()
-        else:
-          #
-          data2Obj = self._project._data2Obj
-          nextNmrResidue = data2Obj[stretch[1]]
-          nmrChain = data2Obj[apiNmrChain]
-          nmrChain.reverse()
-          nextNmrResidue.disconnectNext()
-          nmrChain.reverse()
+      elif self.residue is not None:
+        # Assigned residue with successor residue - error
+        raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
-      elif apiResonanceGroup is stretch[-2]:
-        # chop off end ResonanceGroup
-        stretch[-1].directNmrChain = defaultChain
+      if apiNmrChain.isConnected:
+        # Connected stretch - break stretch, keeping first half in the NmrChain
+        stretch = apiNmrChain.mainResonanceGroups
 
-      else:
-        # make new connected NmrChain with rightmost ResonanceGroups
-        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-        for rg in reversed(stretch):
-          if rg is apiResonanceGroup:
-            break
+        if apiResonanceGroup is stretch[-1]:
+          return
+
+        if apiResonanceGroup is stretch[0]:
+          # chop off end ResonanceGroup
+          if len(stretch) <= 2:
+            # Chain gets removed
+            for resonanceGroup in reversed(stretch):
+              resonanceGroup.directNmrChain = defaultChain
+            # delete empty chain
+            apiNmrChain.delete()
           else:
-            rg.directNmrChain = newNmrChain
-        newNmrChain.__dict__['mainResonanceGroups'].reverse()
+            #
+            data2Obj = self._project._data2Obj
+            nextNmrResidue = data2Obj[stretch[1]]
+            nmrChain = data2Obj[apiNmrChain]
+            nmrChain.reverse()
+            nextNmrResidue.disconnectNext()
+            nmrChain.reverse()
 
-    # finally:
-    #   self._endCommandEchoBlock()
+        elif apiResonanceGroup is stretch[-2]:
+          # chop off end ResonanceGroup
+          stretch[-1].directNmrChain = defaultChain
+
+        else:
+          # make new connected NmrChain with rightmost ResonanceGroups
+          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          for rg in reversed(stretch):
+            if rg is apiResonanceGroup:
+              break
+            else:
+              rg.directNmrChain = newNmrChain
+          newNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+    except Exception as es:
+      getLogger().warning(str(es))
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def previousNmrResidue(self) -> typing.Optional['NmrResidue']:
@@ -544,6 +549,9 @@ class NmrResidue(AbstractWrapperObject):
           value._wrappedData.directNmrChain = newApiNmrChain
           apiResonanceGroup.directNmrChain = newApiNmrChain
         result = value.nmrChain
+
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
     #
@@ -591,7 +599,8 @@ class NmrResidue(AbstractWrapperObject):
           self.disconnectNext()
           nmrChain.reverse()
 
-
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
 
@@ -648,6 +657,8 @@ class NmrResidue(AbstractWrapperObject):
           else:
             self.disconnectNext()
             apiResonanceGroup.directNmrChain = defaultChain
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
 
@@ -696,6 +707,8 @@ class NmrResidue(AbstractWrapperObject):
       apiResonanceGroup = self._apiResonanceGroup
       apiResonanceGroup.sequenceCode = None
       apiResonanceGroup.resetResidueType(None)
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
 
@@ -731,6 +744,8 @@ class NmrResidue(AbstractWrapperObject):
     try:
       apiResonanceGroup.sequenceCode = sequenceCode
       apiResonanceGroup.resetResidueType(residueType)
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
 
@@ -758,6 +773,8 @@ class NmrResidue(AbstractWrapperObject):
     self._startCommandEchoBlock('moveToNmrChain', values=values)
     try:
       apiResonanceGroup.moveToNmrChain(apiNmrChain)
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
 
@@ -894,6 +911,8 @@ class NmrResidue(AbstractWrapperObject):
                                       % (oldPid, result.longPid))
         if undo is not None:
           undo.clear()
+    except Exception as es:
+      getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
     #
@@ -1040,6 +1059,8 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
       #tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)
       if tt is not None:
         obj.molType, obj.ccpCode = tt
+  except Exception as es:
+    getLogger().warning(str(es))
   finally:
     self._project.unblankNotification()
     self._endCommandEchoBlock()
@@ -1099,6 +1120,8 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
           raise ValueError(
             "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
           )
+  except Exception as es:
+    getLogger().warning(str(es))
   finally:
     self._endCommandEchoBlock()
   #

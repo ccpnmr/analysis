@@ -205,7 +205,7 @@ class ChemicalShiftTable(ObjectTable):
                                      # first NmrChain in project (if present)
                                      grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
-                                     sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow,
+                                     sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents,
                                      callback=self._selectionPulldownCallback
                                      )
     self.spacer = Spacer(self._widget, 5, 5
@@ -374,7 +374,8 @@ class ChemicalShiftTable(ObjectTable):
     self._chemicalShiftNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                       , ChemicalShift.__name__
-                                      , self._updateCallback)
+                                      , self._updateCallback
+                                      , onceOnly=True)
 
   def _clearNotifiers(self):
     """

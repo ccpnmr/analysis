@@ -370,60 +370,61 @@ class NmrResidue(AbstractWrapperObject):
     Does nothing if nextNmrResidue is empty;
     Raises ValueError for assigned NmrResidues"""
 
-
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
     self._startCommandEchoBlock('disconnectNext')
-    try:
-      if apiNmrChain is None:
-        # offset residue: no-op
+    # try:
+
+    if apiNmrChain is None:
+      # offset residue: no-op
+      return
+
+    elif self.residue is not None:
+      # Assigned residue with successor residue - error
+      raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
+
+    if apiNmrChain.isConnected:
+      # Connected stretch - break stretch, keeping first half in the NmrChain
+      stretch = apiNmrChain.mainResonanceGroups
+
+      if apiResonanceGroup is stretch[-1]:
         return
 
-      elif self.residue is not None:
-        # Assigned residue with successor residue - error
-        raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
-
-      if apiNmrChain.isConnected:
-        # Connected stretch - break stretch, keeping first half in the NmrChain
-        stretch = apiNmrChain.mainResonanceGroups
-
-        if apiResonanceGroup is stretch[-1]:
-          return
-
-        if apiResonanceGroup is stretch[0]:
-          # chop off end ResonanceGroup
-          if len(stretch) <= 2:
-            # Chain gets removed
-            for resonanceGroup in reversed(stretch):
-              resonanceGroup.directNmrChain = defaultChain
-            # delete empty chain
-            apiNmrChain.delete()
-          else:
-            #
-            data2Obj = self._project._data2Obj
-            nextNmrResidue = data2Obj[stretch[1]]
-            nmrChain = data2Obj[apiNmrChain]
-            nmrChain.reverse()
-            nextNmrResidue.disconnectNext()
-            nmrChain.reverse()
-
-        elif apiResonanceGroup is stretch[-2]:
-          # chop off end ResonanceGroup
-          stretch[-1].directNmrChain = defaultChain
-
+      if apiResonanceGroup is stretch[0]:
+        # chop off end ResonanceGroup
+        if len(stretch) <= 2:
+          # Chain gets removed
+          for resonanceGroup in reversed(stretch):
+            resonanceGroup.directNmrChain = defaultChain
+          # delete empty chain
+          apiNmrChain.delete()
         else:
-          # make new connected NmrChain with rightmost ResonanceGroups
-          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-          for rg in reversed(stretch):
-            if rg is apiResonanceGroup:
-              break
-            else:
-              rg.directNmrChain = newNmrChain
-          newNmrChain.__dict__['mainResonanceGroups'].reverse()
-    finally:
-      self._endCommandEchoBlock()
+          #
+          data2Obj = self._project._data2Obj
+          nextNmrResidue = data2Obj[stretch[1]]
+          nmrChain = data2Obj[apiNmrChain]
+          nmrChain.reverse()
+          nextNmrResidue.disconnectNext()
+          nmrChain.reverse()
+
+      elif apiResonanceGroup is stretch[-2]:
+        # chop off end ResonanceGroup
+        stretch[-1].directNmrChain = defaultChain
+
+      else:
+        # make new connected NmrChain with rightmost ResonanceGroups
+        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+        for rg in reversed(stretch):
+          if rg is apiResonanceGroup:
+            break
+          else:
+            rg.directNmrChain = newNmrChain
+        newNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+    # finally:
+    #   self._endCommandEchoBlock()
 
   @property
   def previousNmrResidue(self) -> typing.Optional['NmrResidue']:

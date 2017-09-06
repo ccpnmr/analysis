@@ -260,6 +260,13 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     "Convenience: Set item in Pulldown; works with text or item"
     return self.pulldownList.select(item)
 
+  def modifyTextList(self, texts):
+    "Retain the current selection"
+    current = self.getText()
+    self.pulldownList.clear()
+    self.pulldownList.setData(texts=texts)
+    self.select(current)
+
   def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
     """
     Define a notifier to update the pulldown list by calling func(theObj, *args, **kwds) 
@@ -294,26 +301,30 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         tempPulldown = self.pulldownList.texts
         if item in tempPulldown:
           tempPulldown.remove(item)
-          self.pulldownList.clear()
-          self.pulldownList.setData(texts=tempPulldown)
+          # self.pulldownList.clear()
+          # self.pulldownList.setData(texts=tempPulldown)
+          self.modifyTextList(texts=tempPulldown)
       elif trigger==Notifier.CREATE:                               # ejb - fix pulldownList create
         item = getattr(object, Notifier.GETPID)
         tempPulldown = self.pulldownList.texts
         if item not in tempPulldown:
           tempPulldown.append(item)
-          self.pulldownList.clear()
-          self.pulldownList.setData(texts=tempPulldown)
+          # self.pulldownList.clear()
+          # self.pulldownList.setData(texts=tempPulldown)
+          self.modifyTextList(texts=tempPulldown)
       elif trigger == Notifier.RENAME:                            # ejb - fix pulldownList create
         item = getattr(object, Notifier.GETPID)
         tempPulldown = self.pulldownList.texts
         if item not in tempPulldown:
           tempPulldown.remove(callbackDict[Notifier.OLDPID])
           tempPulldown.append(item)
-          self.pulldownList.clear()
-          self.pulldownList.setData(texts=tempPulldown)
+          # self.pulldownList.clear()
+          # self.pulldownList.setData(texts=tempPulldown)
+          self.modifyTextList(texts=tempPulldown)
       else:
-        self.pulldownList.clear()
-        self.pulldownList.setData(texts=texts)
+        # self.pulldownList.clear()
+        # self.pulldownList.setData(texts=texts)
+        self.modifyTextList(texts=texts)
     except:
       pass
 

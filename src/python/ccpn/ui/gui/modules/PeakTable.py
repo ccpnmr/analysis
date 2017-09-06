@@ -116,7 +116,7 @@ class PeakListTableWidget(ObjectTable):
                                      , grid=(0, gridHPos), gridSpan=(1, 1)
                                      , showSelectName=True
                                      , minimumWidths=(0, 100)
-                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
+                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
                                      , callback=self._pulldownPLcallback)
 
     ## create widgets for selection of position units

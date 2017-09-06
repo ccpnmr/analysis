@@ -12,7 +12,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -24,7 +23,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -48,26 +46,30 @@ class _Pulldown(PulldownListCompoundWidget):
     def __init__( self, parent, project,
                   showBorder=False, orientation='left', minimumWidths=None, labelText=None,
                   showSelectName=False, callback=None, default=None,
-                  sizeAdjustPolicy=None, **kwds):
+                  sizeAdjustPolicy=None, *args, **kwds):
         """
         Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects
         in project; not to be used directly, used as a base class for the specific classes for 
         the different V3 objects
-      
-    
+
         :param parent: parent widget
+        :param project: containing project
         :param showBorder: flag to display the border of Frame (True, False)
         :param orientation: flag to determine the orientation of the labelText relative to the pulldown widget.
                             Allowed values: 'left', 'right', 'top', 'bottom'
         :param minimumWidths: tuple of two values specifying the minimum width of the Label and Pulldown widget, respectively
         :param labelText: (optional) text for the Label
         :param texts: (optional) iterable generating text values for the Pulldown
+        :param showSelectName: (optional) insert <Select> at the top of the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param default: (optional) initially selected element of the Pulldown (text or index)
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
       
         :return: PulldownListCompoundWidget instance
         """
+        self.project = project
+        self.showSelectName = showSelectName
+
         if labelText is None:
             labelText = self.className + ':'
 
@@ -79,20 +81,34 @@ class _Pulldown(PulldownListCompoundWidget):
         else:
           self.textList = getPids(project, self.attributeName)  # ejb
 
-        PulldownListCompoundWidget.__init__(self, parent=parent, showBorder=showBorder,
-                                            orientation=orientation, minimumWidths=minimumWidths,
-                                            labelText=labelText,
-                                            texts=self.textList,
-                                            sizeAdjustPolicy=sizeAdjustPolicy,
-                                            callback=callback, default=default, **kwds)
+        super(_Pulldown, self).__init__(parent=parent, showBorder=showBorder,
+        # self.PulldownListCompoundWidget.__init__(self, parent=parent, showBorder=showBorder,
+                                                orientation=orientation, minimumWidths=minimumWidths,
+                                                labelText=labelText,
+                                                texts=self.textList,
+                                                sizeAdjustPolicy=sizeAdjustPolicy,
+                                                callback=callback, default=default, **kwds)
         # add a notifier to update the pulldown list
         self.updatePulldownList(project
                                 , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                 , self.className
-                                , getPids, self.attributeName)
+                                , self._getPids)
+                                # , getPids, self.attributeName)
 
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className
+
+    def _getPids(self, data):
+      "Get a list of pids 'self.attributeName' from project or None on error"
+      if not hasattr(self, 'attributeName'):
+          return None
+
+      if self.showSelectName:
+        self.textList = ['<Select>'] + getPids(self.project, self.attributeName)
+      else:
+        self.textList = getPids(self.project, self.attributeName)
+
+      return self.textList
 
 
 class NmrChainPulldown(_Pulldown):

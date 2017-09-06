@@ -150,7 +150,7 @@ class IntegralTable(ObjectTable):
                                          , project=self._project, default=0
                                          , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
                                          , showSelectName=True
-                                         , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContentsOnFirstShow
+                                         , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
                                          , callback= self._selectionPulldownCallback)
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed

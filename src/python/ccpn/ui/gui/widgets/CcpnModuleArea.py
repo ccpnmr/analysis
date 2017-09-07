@@ -78,6 +78,16 @@ class CcpnModuleArea(ModuleArea):
     is the stase as pyqtGraph  '''
     return [self.currentModulesDict, self.saveState()]
 
+  def repopulateModules(self):
+    """
+    Repopulate all modules to globally refresh all pulldowns, etc.
+    """
+    modules = self.currentModules
+    for module in modules:
+      if hasattr(module, '_repopulateModule'):
+        module._repopulateModule()
+    pass
+
   def switchModule(self, module1, module2):
     """
     switch the new module into the blankDisplay

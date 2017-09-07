@@ -86,9 +86,9 @@ class Peak(AbstractWrapperObject):
   def _parent(self) -> Optional[PeakList]:
     """PeakList containing Peak."""
     #TODO:ED trap that the Peak is no longer attached due to deletion
-    if hasattr(self._wrappedData, 'peakList'):
+    try:
       return  self._project._data2Obj[self._wrappedData.peakList]
-    else:
+    except:
       return None
   
   peakList = _parent

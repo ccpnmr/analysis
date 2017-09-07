@@ -322,7 +322,7 @@ class Undo(deque):
 
     # TBD: what should we do if redoMethod() throws an exception?
 
-    if self.nextIndex > len(self):
+    if self.nextIndex >= len(self):
       return
 
     elif self.maxWaypoints:
@@ -377,7 +377,7 @@ class Undo(deque):
 
   def canRedo(self) -> bool:
     """True if a redo operation can be performed"""
-    return self.nextIndex <= len(self)
+    return self.nextIndex < len(self)
 
   def numItems(self):
     return len(self)

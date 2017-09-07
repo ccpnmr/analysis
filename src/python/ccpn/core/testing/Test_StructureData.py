@@ -104,7 +104,10 @@ class TestPandasData(WrapperTesting):
 
     self.undo.undo()      # ejb - undo addition of 'x'
 
-    with self.assertRaisesRegexp(KeyError, 'x'):      # should raise KeyError as deleted
+    # with self.assertRaisesRegexp(KeyError, 'x'):      # should raise KeyError as deleted
+    #   self.assertEqual(list(self.data['x']), None)
+
+    with self.assertRaisesRegex(KeyError, 'x'):      # should raise KeyError as deleted
       self.assertEqual(list(self.data['x']), None)
 
     self.UndoState = (self.undo.maxWaypoints# = maxWaypoints
@@ -134,6 +137,8 @@ class TestPandasData(WrapperTesting):
     self.undo.undo()
     self.undo.redo()
     self.undo.redo()
+    self.undo.redo()    # check
+    self.undo.redo()    # check
 
     self.data['chainCode'] = ['B','B','A','A','B','B','A','A'] * 2
     self.data['sequenceId'] = [2,1,2,1,2,1,2,1] * 2
@@ -150,7 +155,8 @@ class TestPandasData(WrapperTesting):
     self.undo.redo()
     self.assertEqual(len(self.data), 17)
 
-    self.assertEquals(list(self.data.loc[17])[3:],  [None] * 7)
+    # self.assertEquals(list(self.data.loc[17])[3:],  [None] * 7)
+    self.assertEqual(list(self.data.loc[17])[3:], [None] * 7)
     self.assertTrue(all(math.isnan(x) for x in self.data.loc[17][:3]))
     self.data.addRow()
     self.assertEqual(len(self.data), 18)

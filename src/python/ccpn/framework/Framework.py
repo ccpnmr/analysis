@@ -608,9 +608,9 @@ class Framework:
        peak=peakOrPid)"""
 
     undo = self.project._undo
-    if undo:     # ejb changed from if undo:
+    if undo is not None:                # ejb - changed from if undo:
       # set undo step
-      undo.newWaypoint()     # DO NOT CHANGE
+      undo.newWaypoint()                # DO NOT CHANGE
       undo.increaseWaypointBlocking()
     if not self._echoBlocking:
 
@@ -641,7 +641,7 @@ class Framework:
 
     getLogger().debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
-    if undo:
+    if undo is not None:                # ejb - changed from if undo:
       undo.decreaseWaypointBlocking()
 
     if self._echoBlocking > 0:

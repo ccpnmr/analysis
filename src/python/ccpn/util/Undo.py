@@ -153,15 +153,11 @@ class Undo(deque):
   def increaseWaypointBlocking(self):
     """Set one more level of blocking"""
     self._waypointBlockingLevel += 1
-    print ('increaseBlocking', self._waypointBlockingLevel)
 
   def decreaseWaypointBlocking(self):
     """Reduce level of blocking - when level reaches zero, undo is unblocked"""
     if self.waypointBlocking:
       self._waypointBlockingLevel -= 1
-      print ('decreaseBlocking', self._waypointBlockingLevel)
-    else:
-      print('decreaseBlocking ***')
 
   def newWaypoint(self):
     """Start new waypoint"""

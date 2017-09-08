@@ -282,8 +282,6 @@ class NmrResidue(AbstractWrapperObject):
 
     project = self._project
 
-    print('>>>connectNext')
-
     if value is None:
       raise ValueError("Cannot connect to value: None")
     elif isinstance(value, str):
@@ -373,7 +371,6 @@ class NmrResidue(AbstractWrapperObject):
   def disconnectNext(self):
     self._startCommandEchoBlock('disconnectNext')
     try:
-      print ('>>>disconnectNext')
       self._disconnectNext()
     except Exception as es:
       getLogger().warning(str(es))
@@ -484,8 +481,6 @@ class NmrResidue(AbstractWrapperObject):
 
     project = self._project
 
-    print('>>>connectPrevious')
-
     if value is None:
       raise ValueError("Cannot connect to value: None")
 
@@ -573,7 +568,6 @@ class NmrResidue(AbstractWrapperObject):
   def disconnectPrevious(self):
     self._startCommandEchoBlock('disconnectPrevious')
     try:
-      print ('>>>disconnectPrevious')
       self._disconnectPrevious()
     except Exception as es:
       getLogger().warning(str(es))
@@ -630,7 +624,6 @@ class NmrResidue(AbstractWrapperObject):
   def disconnect(self):
     self._startCommandEchoBlock('disconnect')
     try:
-      print ('>>>disconnect')
       self._disconnect()
     except Exception as es:
       getLogger().warning(str(es))

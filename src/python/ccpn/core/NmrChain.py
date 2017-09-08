@@ -235,7 +235,7 @@ class NmrChain(AbstractWrapperObject):
     Illegal for assigned NmrChains, and only relevant for connected NmrChains.
     Serves mainly as building block to make disconnections easier to undo"""
 
-    print ('>>>reverse')
+    # print ('>>>reverse')
     if self.chain is not None:
       raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
                        % self.chain.longPid)

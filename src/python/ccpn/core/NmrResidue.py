@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import typing
-from typing import Union
 
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
@@ -268,7 +267,7 @@ class NmrResidue(AbstractWrapperObject):
     #
     return result
 
-  def connectNext(self, value:Union['NmrResidue', str]) -> NmrChain:
+  def connectNext(self, value:typing.Union['NmrResidue', str]) -> NmrChain:
     """Connect free end of self to free end of next residue in sequence,
     and return resulting connected NmrChain
 
@@ -368,16 +367,17 @@ class NmrResidue(AbstractWrapperObject):
     #
     return result
 
-  def disconnectNext(self):
+  def disconnectNext(self) -> typing.Optional['NmrChain']:
     self._startCommandEchoBlock('disconnectNext')
     try:
-      self._disconnectNext()
+      newNmrChain = self._disconnectNext()
     except Exception as es:
       getLogger().warning(str(es))
     finally:
       self._endCommandEchoBlock()
+      return newNmrChain
 
-  def _disconnectNext(self):
+  def _disconnectNext(self) -> typing.Optional['NmrChain']:
     """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary
     Does nothing if nextNmrResidue is empty;
     Raises ValueError for assigned NmrResidues"""
@@ -433,6 +433,8 @@ class NmrResidue(AbstractWrapperObject):
           else:
             rg.directNmrChain = newNmrChain
         newNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+        return newNmrChain    # need this when using disconnectPrevious
 
     # except Exception as es:
     #   getLogger().warning(str(es))
@@ -613,8 +615,10 @@ class NmrResidue(AbstractWrapperObject):
         # Done with reverses because disconnectNext is easily undoable
         nmrChain = self.nmrChain
         nmrChain.reverse()
-        self.disconnectNext()
+        newNmrChain = self.disconnectNext()
         nmrChain.reverse()
+        # newNmrChain.reverse()
+        newNmrChain.__dict__['mainResonanceGroups'].reverse()
 
     # except Exception as es:
     #   getLogger().warning(str(es))
@@ -776,7 +780,7 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
-  def moveToNmrChain(self, newNmrChain:Union['NmrChain', str]=None):
+  def moveToNmrChain(self, newNmrChain:typing.Union['NmrChain', str]=None):
     """Reset NmrChain, breaking connected NmrChain if necessary.
 
     If set to None resets to NmrChain '@-'
@@ -805,7 +809,7 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
-  def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
+  def assignTo(self, chainCode:str=None, sequenceCode:typing.Union[int,str]=None,
                residueType:str=None, mergeToExisting:bool=False) -> 'NmrResidue':
 
     """Assign NmrResidue to new assignment, as defined by the naming parameters
@@ -1015,7 +1019,7 @@ NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belongi
 del getter
 del setter
 
-def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None,
+def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, residueType:str=None,
                    comment:str=None) -> NmrResidue:
   """Create new NmrResidue within NmrChain.
   If NmrChain is connected, append the new NmrResidue to the end of the stretch."""
@@ -1101,7 +1105,7 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
   return result
 
 
-def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
+def _fetchNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None,
                      residueType:str=None) -> NmrResidue:
   """Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
   creating it if necessary.

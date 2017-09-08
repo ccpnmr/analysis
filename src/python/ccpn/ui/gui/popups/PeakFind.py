@@ -51,42 +51,45 @@ class PeakFindPopup(CcpnDialog):
     self.application =  self.mainWindow.application
     self.current = self.application.current
 
-    if not self.current.strip.spectra[0].peakLists:
-      # ejb - if there is no peaklist then create a new one
-      self.current.strip.spectra[0].newPeakList()
-      showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
-                                        "New peakList '%s' inserted"
-                                        % (str(self.current.strip.spectra[0].pid)
-                                          , str(self.current.strip.spectra[0].peakLists[0].pid)))
+    if self.current.strip:
+      if not self.current.strip.spectra[0].peakLists:
+        # ejb - if there is no peaklist then create a new one
+        self.current.strip.spectra[0].newPeakList()
+        showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
+                                          "New peakList '%s' inserted"
+                                          % (str(self.current.strip.spectra[0].pid)
+                                            , str(self.current.strip.spectra[0].peakLists[0].pid)))
 
-    self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
-    self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
-    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
-                                   if peakList.spectrum.dimensionCount != 1])
-    if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra)>0:
-      self.peakListPulldown.select(self.current.strip.spectra[0].peakLists[0].pid)
-    self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
-    self.checkBoxWidget = QtGui.QWidget()
-    layout = QtGui.QGridLayout()
-    self.checkBoxWidget.setLayout(layout)
-    self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
-    self.checkBox1 = RadioButton(self)
-    self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
-    self.checkBox1Label = Label(self, 'Positive only')
-    self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
-    self.checkBox2 = RadioButton(self)
-    self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
-    self.checkBox2Label = Label(self, 'Negative only')
-    self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
-    self.checkBox3 = RadioButton(self)
-    self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
-    self.checkBox3Label = Label(self, 'Both')
-    self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
-    self.checkBox3.setChecked(True)
-    self._updateContents()
+      self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
+      self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
+      self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
+                                     if peakList.spectrum.dimensionCount != 1])
+      if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra)>0:
+        self.peakListPulldown.select(self.current.strip.spectra[0].peakLists[0].pid)
+      self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
+      self.checkBoxWidget = QtGui.QWidget()
+      layout = QtGui.QGridLayout()
+      self.checkBoxWidget.setLayout(layout)
+      self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
+      self.checkBox1 = RadioButton(self)
+      self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
+      self.checkBox1Label = Label(self, 'Positive only')
+      self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
+      self.checkBox2 = RadioButton(self)
+      self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
+      self.checkBox2Label = Label(self, 'Negative only')
+      self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
+      self.checkBox3 = RadioButton(self)
+      self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
+      self.checkBox3Label = Label(self, 'Both')
+      self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
+      self.checkBox3.setChecked(True)
+      self._updateContents()
 
-    self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
-                                callbacks=[self.reject, self._pickPeaks])
+      self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
+                                  callbacks=[self.reject, self._pickPeaks])
+    else:
+      self.close()
 
   def _selectPeakList(self, item):
     self.peakList = self.project.getByPid(item)

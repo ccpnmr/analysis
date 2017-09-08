@@ -135,6 +135,17 @@ class TestPandasData(WrapperTesting):
 
     self.undo.undo()
     self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.undo()      # test with plenty
+
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
+    self.undo.redo()
     self.undo.redo()
     self.undo.redo()
     self.undo.redo()    # check

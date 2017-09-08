@@ -754,6 +754,11 @@ class AbstractWrapperObject():
     parameter string - see the documentation of commandParameterString for details
     """
 
+    # if not hasattr(self, 'blockindent'):
+    #   self.blockindent = 1
+    # getLogger().info('.'*self.blockindent+'>>>start_'+str(funcName))
+    # self.blockindent+=4
+
     #CCPNINTERNAL
 
     project = self._project
@@ -772,6 +777,12 @@ class AbstractWrapperObject():
 
   def _endCommandEchoBlock(self):
     """End block for command echoing"""
+    # self.blockindent-=4
+    # if self.blockindent<0:
+    #   print ('****')
+    #   self.blockindent=0
+    # getLogger().info('..'+'.'*self.blockindent+'>>>end_')
+
     self._project._appBase._endCommandBlock()
 
 

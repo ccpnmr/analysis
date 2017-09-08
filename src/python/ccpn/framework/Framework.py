@@ -608,7 +608,7 @@ class Framework:
        peak=peakOrPid)"""
 
     undo = self.project._undo
-    if undo:
+    if undo:     # ejb changed from if undo:
       # set undo step
       undo.newWaypoint()     # DO NOT CHANGE
       undo.increaseWaypointBlocking()

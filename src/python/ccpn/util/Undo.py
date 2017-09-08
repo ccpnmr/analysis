@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from functools import partial
+from functools import partial, update_wrapper
 from collections import deque
 
 # def deleteAll(objects):
@@ -128,6 +128,21 @@ class Undo(deque):
       self._blockingLevel -= 1
 
   @property
+  def undoList(self):
+    undoState = (self.maxWaypoints
+                , self.maxOperations
+                , self.nextIndex
+                , self.waypoints
+                , self._blocked
+                , self.blocking
+                , len(self)
+                , self[-1]
+                , [(undoFunc[0].__name__, undoFunc[1].__name__) for undoFunc in self]
+                , [undoFunc[0].__name__ for undoFunc in self]
+                , [undoFunc[1].__name__ for undoFunc in self])
+    return undoState
+
+  @property
   def waypointBlocking(self):
     """Undo blocking. If true (non-zero) undo setting is blocked.
     Allows multiple external functions to set blocking without trampling each other
@@ -138,13 +153,15 @@ class Undo(deque):
   def increaseWaypointBlocking(self):
     """Set one more level of blocking"""
     self._waypointBlockingLevel += 1
+    print ('increaseBlocking', self._waypointBlockingLevel)
 
   def decreaseWaypointBlocking(self):
     """Reduce level of blocking - when level reaches zero, undo is unblocked"""
-    if self._waypointBlockingLevel > 0:
+    if self.waypointBlocking:
       self._waypointBlockingLevel -= 1
-
-
+      print ('decreaseBlocking', self._waypointBlockingLevel)
+    else:
+      print('decreaseBlocking ***')
 
   def newWaypoint(self):
     """Start new waypoint"""
@@ -156,7 +173,7 @@ class Undo(deque):
     if self.nextIndex < 1:
       return
 
-    elif self._blocked or self._blockingLevel > 0 or self._waypointBlockingLevel > 0:   # ejb - added self._blocked 9/6/17
+    elif self._blocked or self._blockingLevel > 0 or self.waypointBlocking:   # ejb - added self._blocked 9/6/17
       return
 
     elif waypoints and waypoints[-1] == self.nextIndex -1:  # don't need to add a new waypoint
@@ -180,6 +197,11 @@ class Undo(deque):
       #   del waypoints[0]
 
     # waypoints.append(self.nextIndex-1)
+
+  def _wrappedPartial(self, func, *args, **kwargs):
+    partial_func = partial(func, *args, **kwargs)
+    update_wrapper(partial_func, func)
+    return partial_func
 
   def newItem(self, undoMethod, redoMethod, undoArgs=None, undoKwargs=None,
               redoArgs=None, redoKwargs=None):
@@ -208,13 +230,13 @@ class Undo(deque):
 
     # add new data
     if undoKwargs is None:
-      undoCall = partial(undoMethod, *undoArgs)
+      undoCall = self._wrappedPartial(undoMethod, *undoArgs)
     else:
-      undoCall = partial(undoMethod, *undoArgs, **undoKwargs)
+      undoCall = self._wrappedPartial(undoMethod, *undoArgs, **undoKwargs)
     if redoKwargs is None:
-      redoCall = partial(redoMethod, *redoArgs)
+      redoCall = self._wrappedPartial(redoMethod, *redoArgs)
     else:
-      redoCall = partial(redoMethod, *redoArgs, **redoKwargs)
+      redoCall = self._wrappedPartial(redoMethod, *redoArgs, **redoKwargs)
     self.append((undoCall, redoCall))
 
     # fix waypoints:
@@ -279,6 +301,7 @@ class Undo(deque):
     # print('@~@~ Undo.undo', self.nextIndex, self.maxWaypoints, self.waypoints, self._debug)
 
     if self.nextIndex == 0:
+      # print ('>>> NOTHING TO UNDO')
       return
 
     elif self.maxWaypoints:
@@ -323,6 +346,7 @@ class Undo(deque):
     # TBD: what should we do if redoMethod() throws an exception?
 
     if self.nextIndex >= len(self):
+      # print ('>>> NOTHING TO REDO')
       return
 
     elif self.maxWaypoints:

@@ -43,6 +43,7 @@ from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
 ALL = '<all>'
 
+
 class StructureTableModule(CcpnModule):
   """
   This class implements the module by wrapping a StructureTable instance

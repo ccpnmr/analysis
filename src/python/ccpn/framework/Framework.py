@@ -1543,9 +1543,13 @@ class Framework:
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-      popup = PeakFindPopup(mainWindow=self.ui.mainWindow)
-      popup.exec_()
-      popup.raise_()
+      if self.current.strip:
+        popup = PeakFindPopup(mainWindow=self.ui.mainWindow)
+        popup.exec_()
+        popup.raise_()
+      else:
+        getLogger().warning('Pick Nd Peaks, no strip selected')
+        MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
 
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:

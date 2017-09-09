@@ -671,7 +671,8 @@ class StructureTable(ObjectTable):
     self._ensembleNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                       , StructureEnsemble.__name__
-                                      , self._updateCallback)
+                                      , self._updateCallback
+                                      , onceOnly=True)
 
   def _clearNotifiers(self):
     """

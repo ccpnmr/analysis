@@ -1342,7 +1342,7 @@ def pdb2df(filename:str) -> pd.DataFrame:
         pdbString.append(l)
     df = _pdbStringToDf(pdbString, modelNumber)
     if dfs is None:
-      print('new dfs')
+      # print('new dfs')
       dfs = df
     else:
       dfs = dfs.append(df)

@@ -268,7 +268,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     # ejb - added these but don't think they are needed
     # self.tableMenu.addAction("Select All", self.selectAllObjects)
-    # self.tableMenu.addAction("Clear Selection", self.clearSelection)
+    self.tableMenu.addAction("Clear Selection", self.clearSelection)
 
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self._raiseTableContextMenu)

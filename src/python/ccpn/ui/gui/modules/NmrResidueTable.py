@@ -346,10 +346,10 @@ class NmrResidueTable(ObjectTable):
     Update the table with NmrResidues of nmrChain
     """
     if not self._updateSilence:
-      objs = self.getSelectedObjects()
+      # objs = self.getSelectedObjects()
       self.setColumns(self.NMRcolumns)
       self.setObjects(nmrChain.nmrResidues)
-      self._highLightObjs(objs)
+      # self._highLightObjs(objs)
       self.show()
 
   def setUpdateSilence(self, silence):

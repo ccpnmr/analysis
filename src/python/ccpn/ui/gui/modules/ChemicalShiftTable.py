@@ -228,6 +228,8 @@ class ChemicalShiftTable(ObjectTable):
     self._updateSilence = False  # flag to silence updating of the table
     self._setNotifiers()
 
+    self.setColumns(self.CScolumns)   # ejb - moved here but doesn't allow changing of the columns
+
     if chemicalShiftList is not None:
         self._selectChemicalShiftList(chemicalShiftList)
 
@@ -278,8 +280,17 @@ class ChemicalShiftTable(ObjectTable):
     Update the table
     """
     if not self._updateSilence:
-      self.setColumns(self.CScolumns)
+      selectedObjects = self.getSelectedObjects()  # get current selection
+
+      # setColumns commented out as it fires a callback that changes the selected item of the table
+      # so it changes when you change an item in the peak assigner
+      # the item does get sorted into its correct position in the table though
+
+      # self.setColumns(self.CScolumns)
       self.setObjects(chemicalShiftList.chemicalShifts)
+
+      # ejb - doing it twice?
+      self._highLightObjs(selectedObjects)  # set back again if possible
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -301,7 +312,7 @@ class ChemicalShiftTable(ObjectTable):
     self._current.chemicalShift = obj
     ChemicalShiftTableModule._currentCallback = {'object':self.chemicalShiftList, 'table':self}
 
-    #FIXME:ED - this is copied form the original version below
+    #FIXME:ED - this is copied from the original version below
     if obj: # should presumably always be the case
       chemicalShift = obj
       self._current.nmrAtom = chemicalShift.nmrAtom

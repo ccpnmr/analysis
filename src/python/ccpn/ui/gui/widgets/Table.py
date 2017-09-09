@@ -248,6 +248,12 @@ class ObjectTable(QtGui.QTableView, Base):
     self._setHeaderContextMenu()
     self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
 
+  def mousePressEvent(self, event):
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+    else:
+      super(ObjectTable, self).mousePressEvent(event)
+
   def _setHeaderContextMenu(self):
     headers = self.horizontalHeader()
     headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -259,6 +265,11 @@ class ObjectTable(QtGui.QTableView, Base):
       self.tableMenu.addAction("Export Table", self.exportDialog )
     if enableDelete:
       self.tableMenu.addAction("Delete", self.deleteObjFromTable)
+
+    # ejb - added these but don't think they are needed
+    # self.tableMenu.addAction("Select All", self.selectAllObjects)
+    # self.tableMenu.addAction("Clear Selection", self.clearSelection)
+
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
@@ -728,6 +739,9 @@ class ObjectTable(QtGui.QTableView, Base):
     dataFrame.apply(pd.to_numeric, errors='ignore')
     return dataFrame
 
+  def selectAllObjects(self):
+    self.selectAll()
+
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
     n = len(selected)
@@ -745,7 +759,7 @@ class ObjectTable(QtGui.QTableView, Base):
           for obj in selected:
             if hasattr(obj, 'pid'):
 
-              print ('>>> deleting', obj)
+              # print ('>>> deleting', obj)
               obj.delete()
 
         except Exception as es:
@@ -882,6 +896,8 @@ class ObjectTable(QtGui.QTableView, Base):
       if self.searchWidget is not None:
         self.searchWidget.updateSearchWidgets(self)
 
+    selectedObjects = self.getSelectedObjects()    # get current selection
+
     model = self.model
     sourceModel = model.sourceModel()
     selected = set(self.getSelectedObjects())
@@ -950,6 +966,9 @@ class ObjectTable(QtGui.QTableView, Base):
     self.resizeColumnsToContents()
     self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
     self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+
+    self._highLightObjs(selectedObjects)           # set back again if possible
+
     self.blockSignals(False)
     # self.setEnabled(True)
     self.setVisible(True)

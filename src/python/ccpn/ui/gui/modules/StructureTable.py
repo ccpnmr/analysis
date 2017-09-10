@@ -284,6 +284,8 @@ class StructureTable(ObjectTable):
     self.thisObj = None
     self.thisDataSet = None
 
+    StructureTable._project = self._project
+
     # create the column objects
     self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
@@ -585,6 +587,7 @@ class StructureTable(ObjectTable):
     """
     # structure.comment = value
     # ejb - need to use PandasMethod, value is an AtomRecordTuple
+    StructureTable._project.blankNotification()
 
     index = structure.Index
     setKw = {column: value}
@@ -611,6 +614,8 @@ class StructureTable(ObjectTable):
 
       tuples = thisData.as_namedtuples()           # populate the table
       thisTable.setObjects(tuples)
+
+    StructureTable._project.unblankNotification()
 
       #FIXME:ED need to spawn a change event on the other tables - forced with changing comment
       # thisTable._clearNotifiers()

@@ -53,7 +53,8 @@ def getPeakAnnotation(peak, dim, separator=', '):
     return separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim]])
 
 def getPeakLinewidth(peak, dim):
-  lw = peak.lineWidths[dim]
-  if lw:
-    return float(lw)
+  if dim < len(peak.lineWidths):
+    lw = peak.lineWidths[dim]
+    if lw:
+      return float(lw)
 

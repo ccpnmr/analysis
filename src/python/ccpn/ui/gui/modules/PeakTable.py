@@ -98,6 +98,8 @@ class PeakListTableWidget(ObjectTable):
     self._current = application.current
     self._mainWindow = application.ui.mainWindow
     self.moduleParent = moduleParent
+    PeakListTableWidget._project = self._project
+
     self.settingWidgets = None
     self._selectedPeakList = None
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
@@ -333,7 +335,9 @@ class PeakListTableWidget(ObjectTable):
 
   @staticmethod
   def _setComment(peak, value):
+    PeakListTableWidget._project.blankNotification()
     peak.comment = value
+    PeakListTableWidget._project.unblankNotification()
 
   def _setPositionUnit(self, value):
     if value in UNITS:

@@ -192,6 +192,8 @@ class RestraintTable(ObjectTable):
     self._application = application
     self._project = application.project
     self._current = application.current
+    RestraintTable._project = self._project
+
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
     self.restraintList = None
@@ -369,7 +371,9 @@ class RestraintTable(ObjectTable):
     """
     CCPN-INTERNAL: Insert a comment into ObjectTable
     """
+    RestraintTable._project.blankNotification()
     chemicalShift.comment = value
+    RestraintTable._project.unblankNotification()
 
   def _setNotifiers(self):
     """

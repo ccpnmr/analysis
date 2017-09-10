@@ -134,6 +134,8 @@ class IntegralTable(ObjectTable):
     self._application = application
     self._project = application.project
     self._current = application.current
+    IntegralTable._project = self._project
+
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
     self.integralList = None
@@ -375,7 +377,9 @@ class IntegralTable(ObjectTable):
     """
     CCPN-INTERNAL: Insert a comment into ObjectTable
     """
+    IntegralTable._project.blankNotification()
     integral.comment = value
+    IntegralTable._project.unblankNotification()
 
   def _setNotifiers(self):
     """

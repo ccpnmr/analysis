@@ -193,6 +193,8 @@ class ChemicalShiftTable(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
     self.chemicalShiftList = None
 
+    ChemicalShiftTable._project = self._project
+
     # create the column objects
     self.CScolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
@@ -358,7 +360,9 @@ class ChemicalShiftTable(ObjectTable):
     """
     CCPN-INTERNAL: Insert a comment into ObjectTable
     """
+    ChemicalShiftTable._project.blankNotification()
     chemicalShift.comment = value
+    ChemicalShiftTable._project.unblankNotification()
 
   @staticmethod
   def _stLamFloat(row, name):

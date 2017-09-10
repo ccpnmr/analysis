@@ -246,6 +246,8 @@ class NmrResidueTable(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
     self.nmrChain = None
 
+    NmrResidueTable._project = self._project
+
     # create the column objects
     self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
@@ -394,7 +396,9 @@ class NmrResidueTable(ObjectTable):
     """
     CCPN-INTERNAL: Insert a comment into ObjectTable
     """
+    NmrResidueTable._project.blankNotification()
     nmrResidue.comment = value
+    NmrResidueTable._project.unblankNotification()
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):

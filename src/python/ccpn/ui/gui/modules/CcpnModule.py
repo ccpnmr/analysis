@@ -115,7 +115,7 @@ class CcpnModule(Dock):
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
     self.topLayout.addWidget(self.label, 0, 1)   # ejb - swap out the old widget, keeps hierarchy
-
+                                                  # except it doesn't work properly
 
 
     self.setOrientation(o='horizontal')

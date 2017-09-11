@@ -372,7 +372,8 @@ class NmrResidue(AbstractWrapperObject):
     try:
       newNmrChain = self._disconnectNext()
     except Exception as es:
-      getLogger().warning(str(es))
+      # getLogger().warning(str(es))
+      raise es
     finally:
       self._endCommandEchoBlock()
       return newNmrChain
@@ -572,7 +573,8 @@ class NmrResidue(AbstractWrapperObject):
     try:
       self._disconnectPrevious()
     except Exception as es:
-      getLogger().warning(str(es))
+      # getLogger().warning(str(es))
+      raise es
     finally:
       self._endCommandEchoBlock()
 
@@ -593,6 +595,7 @@ class NmrResidue(AbstractWrapperObject):
       return
 
     elif self.residue is not None:
+    # elif self.mainNmrResidue is not None:
       # Assigned residue with successor residue - error
       raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
@@ -617,8 +620,9 @@ class NmrResidue(AbstractWrapperObject):
         nmrChain.reverse()
         newNmrChain = self.disconnectNext()
         nmrChain.reverse()
-        # newNmrChain.reverse()
-        newNmrChain.__dict__['mainResonanceGroups'].reverse()
+
+        if newNmrChain:             # why is this crashing now?
+          newNmrChain.__dict__['mainResonanceGroups'].reverse()
 
     # except Exception as es:
     #   getLogger().warning(str(es))
@@ -630,7 +634,8 @@ class NmrResidue(AbstractWrapperObject):
     try:
       self._disconnect()
     except Exception as es:
-      getLogger().warning(str(es))
+      # getLogger().warning(str(es))
+      raise es
     finally:
       self._endCommandEchoBlock()
 

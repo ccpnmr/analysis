@@ -211,6 +211,167 @@ def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   return
 
 
+# testing simple progress/busy popup
+
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtCore import Qt
+from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.Label import Label
+from contextlib import contextmanager
+from time import sleep, time
+
+class progressPopup(CcpnDialog):
+  """
+  Open a small popup to allow changing the name of a Note
+  """
+  def __init__(self, parent=None, mainWindow=None, title='busy', busyFunc=None, progressMax=1, **kw):
+    """
+    Initialise the widget
+    """
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='busy', **kw)
+
+    # self.mainWindow = mainWindow
+    # self.application = mainWindow.application
+    # self.project = mainWindow.application.project
+    # self.current = mainWindow.application.current
+
+    self.busyFunc = busyFunc
+
+    # progress bar
+    self.progressbar = QtGui.QProgressBar()
+    self.progressbar.reset()  # resets the progress bar
+    self.progressbar.setAlignment(Qt.AlignCenter)  # centers the text
+    # 'valueChanged()' signal
+    self.progressbar.valueChanged.connect(self.progress_changed)
+    self.progressbar.setMinimum(0)
+    self.progressbar.setMaximum(progressMax)
+    # # 'start' button
+    # self.btn_start = QtGui.QPushButton('Start')
+    # # 'clicked()' signal
+    # self.btn_start.clicked.connect(self.start)
+    #
+    # timer
+    self.timer = QtCore.QTimer()
+    # 'timeout()' signal
+    self.timer.timeout.connect(self.progress_simulation)
+
+    self.label = Label(self, title, grid=(0, 0))
+    self.layout().addWidget(self.progressbar)
+
+    # vlayout.addWidget(self.btn_start)
+    # vlayout.addStretch()
+    # self.setLayout(vlayout)
+
+    self.setMinimumHeight(80)
+    self.setMinimumWidth(250)
+
+    self.show()
+    self.raise_()
+
+  # 'progress_simulation()' slot
+  @pyqtSlot()
+  def progress_simulation(self):
+      value = self.progressbar.value()  # gets the current value of the progress bar
+      self.progressbar.setValue(value + 1)  # adds 1 to the current value
+      self.progressbar.update()
+
+  # 'start()' slot
+  # @pyqtSlot()
+  # def start(self):
+  #     self.progressbar.reset()  # resets the progress bar
+  #     self.timer.start(40)  # interval of 40 milliseconds
+
+  # 'progress_changed()' slot
+  @pyqtSlot(int)
+  def progress_changed(self, value):
+      # stops the timer if the progress bar reaches its maximum value
+      if value == self.progressbar.maximum():
+          self.timer.stop()
+
+@contextmanager
+def progressManager(title=None, progressMax=100):
+  thisProg = progressPopup(title=title, progressMax=progressMax)
+  try:
+    thisProg.progress_simulation()
+    thisProg.update()
+    QtGui.QApplication.processEvents()    # hopefully it will redraw the popup
+
+    yield     # yield control to the main process
+
+  finally:
+    thisProg.update()
+    QtGui.QApplication.processEvents()    # hopefully it will redraw the popup
+    thisProg.close()
+
+import math, sys
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import *
+
+class busyOverlay(QWidget):
+  def __init__(self, parent = None):
+
+    QWidget.__init__(self, parent)
+    palette = QPalette(self.palette())
+    palette.setColor(palette.Background, Qt.transparent)
+    self.setPalette(palette)
+
+  def paintEvent(self, event):
+
+    painter = QPainter()
+    painter.begin(self)
+    painter.setRenderHint(QPainter.Antialiasing)
+    painter.fillRect(event.rect(), QBrush(QColor(255, 255, 255, 127)))
+    painter.setPen(QPen(Qt.NoPen))
+
+    for i in range(6):
+      if (self.counter / 5) % 6 == i:
+        painter.setBrush(QBrush(QColor(127 + (self.counter % 5)*32, 127, 127)))
+      else:
+        painter.setBrush(QBrush(QColor(127, 127, 127)))
+      painter.drawEllipse(
+        self.width()/2 + 30 * math.cos(2 * math.pi * i / 6.0) - 10,
+        self.height()/2 + 30 * math.sin(2 * math.pi * i / 6.0) - 10,
+        20, 20)
+
+      painter.end()
+
+  def showEvent(self, event):
+    self.timer = self.startTimer(50)
+    self.counter = 0
+
+  def timerEvent(self, event):
+    self.counter += 1
+    self.update()
+    if self.counter == 60:
+      self.killTimer(self.timer)
+      self.hide()
+
+ # class MainWindow(QMainWindow):
+ #
+ #   def __init__(self, parent = None):
+ #
+ #        QMainWindow.__init__(self, parent)
+ #
+ #       widget = QWidget(self)
+ #       self.editor = QTextEdit()
+ #       self.editor.setPlainText("0123456789"*100)
+ #       layout = QGridLayout(widget)
+ #       layout.addWidget(self.editor, 0, 0, 1, 3)
+ #       button = QPushButton("Wait")
+ #       layout.addWidget(button, 1, 1, 1, 1)
+ #
+ #       self.setCentralWidget(widget)
+ #       self.overlay = Overlay(self.centralWidget())
+ #       self.overlay.hide()
+ #       button.clicked.connect(self.overlay.show)
+ #
+ #   def resizeEvent(self, event):
+ #
+ #       self.overlay.resize(event.size())
+ #       event.accept()
+
 if __name__ == '__main__':
 
   import sys
@@ -228,7 +389,13 @@ if __name__ == '__main__':
     print(showWarning('Test', 'Warning message'))
  
   app = TestApplication()
-  popup = BasePopup(title='Test MessageReporter')
+  # popup = BasePopup(title='Test MessageReporter')
   #popup.setSize(200,30)
-  button = Button(popup, text='hit me', callback=callback)
+  # button = Button(popup, text='hit me', callback=callback)
+
+  popup = progressPopup(busyFunc=callback)
+
+  popup.show()
+  popup.raise_()
+
   app.start()

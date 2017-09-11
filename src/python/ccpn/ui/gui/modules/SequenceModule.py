@@ -337,11 +337,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     """
     A convenience function for applying the correct styling to GuiChainResidues depending on their state.
     """
-    if self.residue.nmrResidue is not None:
-      self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
-                   self.residue.shortName+'</strong></div>')
-    else:
-      self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
+    try:
+      if self.residue.nmrResidue is not None:
+        self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
+                     self.residue.shortName+'</strong></div>')
+      else:
+        self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
+    except:
+      self.setHtml('<div style="color: %s; "text-align: center;">' % self.colour1 + '</div')
 
   def _setFontBold(self):
     """

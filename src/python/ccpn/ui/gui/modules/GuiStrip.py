@@ -85,7 +85,7 @@ class GuiStrip(Frame):
     self.setContentsMargins(0, 0, 0, 0)
     #self.setMinimumWidth(250)
     self.setMinimumWidth(100)
-    self.setMinimumHeight(100)
+    self.setMinimumHeight(150)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
                                  showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)

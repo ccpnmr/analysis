@@ -1,12 +1,41 @@
-from PyQt4 import QtGui
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
+               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: CCPN $"
+__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
+__version__ = "$Revision: 3.0.b2 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.guiSettings import fixedWidthFont
 
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
-
 
 
 class IpythonConsole(Widget, Base):
@@ -32,8 +61,7 @@ class IpythonConsole(Widget, Base):
         self.ipythonWidget.kernel_client = km.client()
         #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
         #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
-        consoleLayout = QtGui.QGridLayout()
-        buttonLayout = QtGui.QGridLayout()
+
         self.setMinimumHeight(100)
 
         self.textEditor = TextEditor(self)
@@ -44,24 +72,39 @@ class IpythonConsole(Widget, Base):
         ###self.ipythonWidget.kernel_client.start_channels()
 
         self.layout().setSpacing(1)
-        self.layout().addWidget(self.textEditor, 0, 0)
-        self.layout().addLayout(consoleLayout, 1, 0)
-        self.layout().addLayout(buttonLayout, 2, 0)
 
-        consoleLayout.addWidget(self.ipythonWidget)
+        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.splitter.addWidget(self.textEditor)
+
+        self.consoleFrame = Frame(self, setLayout=True)
+        self.splitter.addWidget(self.consoleFrame)
+        # self.consoleFrame.addLayout(consoleLayout, 1, 0)
+        # self.consoleFrame.addLayout(buttonLayout, 2, 0)
+
+        self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
+
+        # runMacroButton = QtGui.QPushButton()
+        # runMacroButton.clicked.connect(self._runMacro)
+        # runMacroButton.setText('Run Macro')
+        # buttonLayout.addWidget(runMacroButton)
+        #
+        # historyButton = QtGui.QPushButton()
+        # historyButton.clicked.connect(self._showHistory)
+        # historyButton.setText('Show History')
+        # buttonLayout.addWidget(historyButton, 0, 1)
+
+        self.buttons = ButtonList(self.consoleFrame
+                                , texts=['Run Macro', 'Show History']
+                                , callbacks=[self._runMacro, self._showHistory]
+                                , direction='H', hAlign='c'
+                                , grid=(1,0))
+
+        self.splitter.setStretchFactor(1,8)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
+        self.layout().addWidget(self.splitter)
 
         namespace['runMacro'] = self._runMacro
-
-
-        runMacroButton = QtGui.QPushButton()
-        runMacroButton.clicked.connect(self._runMacro)
-        runMacroButton.setText('Run Macro')
-        buttonLayout.addWidget(runMacroButton)
-
-        historyButton = QtGui.QPushButton()
-        historyButton.clicked.connect(self._showHistory)
-        historyButton.setText('Show History')
-        buttonLayout.addWidget(historyButton, 0, 1)
         km.kernel.shell.push(namespace)
 
 

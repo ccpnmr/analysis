@@ -94,6 +94,7 @@ class NmrResidueTableModule(CcpnModule):
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                              )
     self.displaysWidget.setFixedHeigths((None, None, 40))
+    self.displaysWidget.pulldownList.set(ALL)
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
                                              self._NTSwidget,

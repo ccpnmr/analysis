@@ -369,6 +369,7 @@ class NmrResidue(AbstractWrapperObject):
 
   def disconnectNext(self) -> typing.Optional['NmrChain']:
     self._startCommandEchoBlock('disconnectNext')
+    newNmrChain = None
     try:
       newNmrChain = self._disconnectNext()
     except Exception as es:
@@ -396,6 +397,10 @@ class NmrResidue(AbstractWrapperObject):
     elif self.residue is not None:
       # Assigned residue with successor residue - error
       raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
+
+      # TODO:ED need to deassign the chain here
+
+
 
     if apiNmrChain.isConnected:
       # Connected stretch - break stretch, keeping first half in the NmrChain

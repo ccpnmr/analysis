@@ -258,15 +258,13 @@ class progressPopup(CcpnDialog):
     self.timer.timeout.connect(self.progress_simulation)
 
     self.label = Label(self, title, grid=(0, 0))
-    self.layout().addWidget(self.progressbar)
+    # self.layout().addWidget(self.progressbar)
 
     # vlayout.addWidget(self.btn_start)
     # vlayout.addStretch()
     # self.setLayout(vlayout)
 
-    self.setMinimumHeight(80)
-    self.setMinimumWidth(250)
-
+    self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
     self.show()
     self.raise_()
 
@@ -296,7 +294,8 @@ def progressManager(title=None, progressMax=100):
   try:
     thisProg.progress_simulation()
     thisProg.update()
-    QtGui.QApplication.processEvents()    # hopefully it will redraw the popup
+    QtGui.QApplication.processEvents()    # still doesn't catch all the paint events
+    sleep(1)
 
     yield     # yield control to the main process
 

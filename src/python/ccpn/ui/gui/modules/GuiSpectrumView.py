@@ -25,12 +25,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
 
 import collections
-
 from ccpn.util import Colour
-
+from PyQt4 import QtCore, QtGui
+from ccpn.util.Logging import getLogger
 #import pyqtgraph as pg
 
 #from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
@@ -41,6 +40,7 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'minAliasedFrequency',
                                                                    'maxAliasedFrequency',
                                                                    'dataDim'))
+
 
 class GuiSpectrumView(QtGui.QGraphicsItem):
 
@@ -108,9 +108,12 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
   # override of Qt setVisible
   def setVisible(self, visible):
     QtGui.QGraphicsItem.setVisible(self, visible)
-    if self:                                        # ejb - ?? crashes on table update otherwise
-      for peakListView in self.peakListViews:
-        peakListView.setVisible(visible)
+    try:
+      if self:                                        # ejb - ?? crashes on table update otherwise
+        for peakListView in self.peakListViews:
+          peakListView.setVisible(visible)
+    except:
+      getLogger().warning('No visible peaklists')
 
   """
   def setDimMapping(self, dimMapping=None):

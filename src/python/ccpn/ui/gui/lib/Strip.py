@@ -235,7 +235,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
     # widths = ['default'] * len(display.strips)
     for ii,nr in enumerate(nmrResidues):
       navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
-                                widths=widths, markPositions=False, setNmrResidueLabel=True)
+                                widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
 
   else:
     # not showing sequential strips

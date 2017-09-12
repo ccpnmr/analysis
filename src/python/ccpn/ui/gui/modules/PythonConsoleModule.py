@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Luca $"
 __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 #=========================================================================================

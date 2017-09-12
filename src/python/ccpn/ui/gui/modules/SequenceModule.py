@@ -41,6 +41,7 @@ from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthHugeFont
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 
 class SequenceModule(CcpnModule):
@@ -418,18 +419,20 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id))
     if result:
 
-      try:
-        for ii in range(len(toAssign)-1):
-          resid = residues[ii]
-          next = resid.nextResidue    #TODO:ED may not have a .nextResidue
-          residues.append(next)
-        nmrChain.assignConnectedResidues(guiRes.residue)
-        for ii, res in enumerate(residues):
-          guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-          guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                               res.shortName+'</strong></div>')
-      except Exception as es:
-        getLogger().warning('Sequence Graph: %s' % str(es))
+      with progressManager('Assigning %s to residue %s' % (toAssign[0].id, residues[0].id)):
+
+        try:
+          for ii in range(len(toAssign)-1):
+            resid = residues[ii]
+            next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+            residues.append(next)
+          nmrChain.assignConnectedResidues(guiRes.residue)
+          for ii, res in enumerate(residues):
+            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+            guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                                 res.shortName+'</strong></div>')
+        except Exception as es:
+          getLogger().warning('Sequence Graph: %s' % str(es))
 
     #   if self._appBase is not None:
     #     appBase = self._appBase

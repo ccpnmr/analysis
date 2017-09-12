@@ -746,6 +746,11 @@ class PeakNd(QtGui.QGraphicsItem):
 
       ###self.setSelected(self.peak in self.application.current.peaks)
       # self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
+      if self.peak._isSelected:
+        colour = self.peakListView.spectrumView.strip.plotWidget.highlightColour
+      else:
+        colour = self.peakListView.peakList.symbolColour
+
       if self._isInPlane:
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
@@ -766,7 +771,7 @@ class PeakNd(QtGui.QGraphicsItem):
         ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
         ###yPpm = peak.position[yDim]
         ###self.setPos(xPpm, yPpm)
-        colour = self.peakListView.peakList.symbolColour
+        #colour = self.peakListView.peakList.symbolColour
         if widget:
           painter.setPen(QtGui.QColor(colour))
           # if self.colourScheme == 'light':
@@ -797,7 +802,7 @@ class PeakNd(QtGui.QGraphicsItem):
         #   painter.drawRect(-r,-r,w,w)
 
       elif self._isInFlankingPlane:
-        colour = self.peakListView.peakList.symbolColour
+        #colour = self.peakListView.peakList.symbolColour
         pen = QtGui.QPen(QtGui.QColor(colour))
         pen.setStyle(QtCore.Qt.DotLine)
         painter.setPen(pen)

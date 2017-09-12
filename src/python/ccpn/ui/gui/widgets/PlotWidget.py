@@ -82,6 +82,7 @@ class PlotWidget(pg.PlotWidget):
 
     #TODO:GEERTEN: Fix with proper stylesheet
     # Also used in AxisTextItem
+    # NOTE: self.highlightColour is also being used in GuiPeakListView for selected peaks
     if strip.spectrumDisplay.mainWindow.application.colourScheme == 'light':
       self.background = '#f7ffff'
       self.foreground = '#080000'

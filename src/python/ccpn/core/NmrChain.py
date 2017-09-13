@@ -229,14 +229,14 @@ class NmrChain(AbstractWrapperObject):
     finally:
      self._endCommandEchoBlock()
 
-  def reverse(self):
+  def reverse(self, _force=False):
     """Reverse order of NmrResidues within NmrChain
 
     Illegal for assigned NmrChains, and only relevant for connected NmrChains.
     Serves mainly as building block to make disconnections easier to undo"""
 
     # print ('>>>reverse')
-    if self.chain is not None:
+    if self.chain is not None and _force is False:
       raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
                        % self.chain.longPid)
 

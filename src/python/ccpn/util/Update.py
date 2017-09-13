@@ -360,6 +360,6 @@ class UpdateAgent(object):
 
 if __name__ == '__main__':
 
-  applicationVersion = __version__          # ejb - read from the header
+  applicationVersion = __version__.split()[1]          # ejb - read from the header
   installUpdates(applicationVersion)
   

@@ -25,9 +25,9 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
+
 
 class CcpnDialog(QtGui.QDialog, Base):
   def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200,100), **kw):

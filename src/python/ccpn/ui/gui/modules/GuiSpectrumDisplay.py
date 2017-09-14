@@ -349,7 +349,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def setScrollbarPolicies(self, horizontal='asNeeded', vertical='asNeeded'):
     "Set the scrolbar policies; convenience to expose to the user"
-    from ccpn.ui.gui.widgets.Frame import SCROLLBAR_POLICY_DICT
+    from ccpn.ui.gui.widgets.ScrollArea import SCROLLBAR_POLICY_DICT
 
     if horizontal not in SCROLLBAR_POLICY_DICT or \
        vertical not in SCROLLBAR_POLICY_DICT:

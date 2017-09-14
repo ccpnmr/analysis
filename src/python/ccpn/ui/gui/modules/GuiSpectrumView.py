@@ -250,6 +250,9 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
       action.toggled.connect(self.plot.setVisible)
     action.toggled.connect(self.setVisible)
 
+    scene = self.strip.plotWidget.scene()
+    if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
+      scene.addItem(self)
 
   def _deletedSpectrumView(self):
     """Update interface when a spectrumView is deleted"""

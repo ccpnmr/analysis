@@ -1566,7 +1566,7 @@ class Framework:
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
       return
     else:
-      from ui.gui.popups.CopyPeaksPopup import CopyPeaks
+      from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
       popup = CopyPeaks(mainWindow=self.ui.mainWindow)
       peaks = self.current.peaks
       popup._selectPeaks(peaks)

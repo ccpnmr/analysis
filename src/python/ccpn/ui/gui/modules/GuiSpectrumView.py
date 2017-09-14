@@ -218,8 +218,8 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     spectrum = self.spectrum
 
     # Set Z widgets for nD strips
+    strip = self.strip
     if not spectrumDisplay.is1D:
-      strip = self.strip
       if not strip.haveSetupZWidgets:
         strip._setZWidgets()
 
@@ -253,6 +253,8 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     scene = self.strip.plotWidget.scene()
     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
       scene.addItem(self)
+      if spectrumDisplay.is1D:
+        strip.viewBox.addItem(self.plot)
 
   def _deletedSpectrumView(self):
     """Update interface when a spectrumView is deleted"""

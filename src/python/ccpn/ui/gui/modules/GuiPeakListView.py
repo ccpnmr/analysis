@@ -216,6 +216,10 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     if action:
       action.toggled.connect(self.setVisible) # TBD: need to undo this if peakListView removed
 
+    if not self.scene(): # this happens after an undo of a spectrum/peakList deletion
+      spectrumView.strip.plotWidget.scene().addItem(self)
+      spectrumView.strip.viewBox.addItem(self)
+
     strip = spectrumView.strip
     for peakList in spectrum.peakLists:
       strip.showPeaks(peakList)

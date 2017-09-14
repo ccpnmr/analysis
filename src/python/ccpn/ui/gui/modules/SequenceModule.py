@@ -36,6 +36,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthHugeFont
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -146,14 +147,30 @@ class SequenceModule(CcpnModule):
     self.chainLabel._addResidue(number, residue)
 
   def _registerNotifiers(self):
-    self.project.registerNotifier('Chain', 'create', self._addChainLabel)
-    self.project.registerNotifier('Residue', 'create', self._addChainResidue)
-    self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
+    # self.project.registerNotifier('Chain', 'create', self._addChainLabel)
+    # self.project.registerNotifier('Residue', 'create', self._addChainResidue)
+    # self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
+
+    self._chainNotifier = Notifier(self.project
+                                  , [Notifier.CREATE]
+                                  , 'Chain'
+                                  , self._addChainLabel)
+    self._residueNotifier = Notifier(self.project
+                                  , [Notifier.CREATE]
+                                  , 'Residue'
+                                  , self._addChainResidue)
+    self._chainDeleteNotifier = Notifier(self.project
+                                  , [Notifier.DELETE]
+                                  , 'Chain'
+                                  , self._refreshChainLabels)
 
   def _unRegisterNotifiers(self):
-    self.project.unRegisterNotifier('Chain', 'create', self._addChainLabel)
-    self.project.unRegisterNotifier('Residue', 'create', self._addChainResidue)
-    self.project.unRegisterNotifier('Chain', 'delete', self._refreshChainLabels)
+    if self._chainNotifier:
+      self._chainNotifier.unRegister()
+    if self._residueNotifier:
+      self._residueNotifier.unRegister()
+    if self._chainDeleteNotifier:
+      self._chainDeleteNotifier.unRegister()
 
   def _closeModule(self):
     self._unRegisterNotifiers()

@@ -597,12 +597,11 @@ class Project(AbstractWrapperObject):
       # This is right, it just looks strange. But if target is not an action it is
       # another className, and if so the names must be sorted.
       tt = tuple(sorted([className, target]))
-    od = self._context2Notifiers.get((tt), {})
     try:
+      od = self._context2Notifiers.get((tt), {})
       del od[notifier]
     except KeyError:
       self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
-
 
   def removeNotifier(self, notifier:typing.Callable[..., None]):
     """Unregister the the notifier from all places where it appears."""

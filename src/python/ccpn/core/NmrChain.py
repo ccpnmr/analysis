@@ -223,9 +223,14 @@ class NmrChain(AbstractWrapperObject):
     # If we get here we are OK - assign residues and delete NmrChain
     self._startCommandEchoBlock('assignConnectedResidues', firstResidue)
     try:
+
       for ii,res in enumerate(residues):
         apiStretch[ii].assignedResidue = res._wrappedData
       apiNmrChain.delete()
+
+      # for zz in zip(self.mainNmrResidues, residues):
+      #   print (zz)
+
     finally:
      self._endCommandEchoBlock()
 

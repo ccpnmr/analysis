@@ -433,10 +433,10 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     nmrChain = self.project.getByPid(data[0])
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id))
+    result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
     if result:
 
-      with progressManager('Assigning %s to residue %s' % (toAssign[0].id, residues[0].id)):
+      with progressManager('Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
         try:
           for ii in range(len(toAssign)-1):

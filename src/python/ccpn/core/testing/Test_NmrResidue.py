@@ -517,12 +517,22 @@ class NmrStretchTest(WrapperTesting):
                                             sequenceCode=residues[2].sequenceCode,
                                             mergeToExisting=True)
     self.assertIs(mergedResidue, nmrResidues[2])
-    self.undo.undo()
-    self.assertEqual([x.id for x in sorted(self.project.getByPid('NC:X').nmrResidues)],
+    self.undo.undo()      # undo - assignTo
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                      ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
+
+    self.undo.undo()      # undo - assignConnectedResidues
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.6.TYR',])
+    self.assertEqual([x.id for x in self.project.getByPid('NC:#2').nmrResidues],
+                     ['#2.@2.VAL', '#2.@3.GLY', '#2.@4.CYS', '#2.@5.GLN',])
+
     self.undo.redo()
-    self.assertEqual([x.id for x in sorted(self.project.getByPid('NC:X').nmrResidues)],
-                     ['X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
 
 
 class NmrResidueTest(WrapperTesting):

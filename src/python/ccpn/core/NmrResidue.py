@@ -397,10 +397,22 @@ class NmrResidue(AbstractWrapperObject):
 
     if nmrList:
       if len(nmrList) > 1:
-        for nmr in nmrList:
+
+        apiNmrChain = self._wrappedData.directNmrChain
+        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+
+        for nmr in reversed(nmrList):
+          # nmr.moveToNmrChain()
+          # nmr.deassign()
+
+          nmr._wrappedData.directNmrChain = newNmrChain
           nmr.deassign()
+
+          print('>>> ', nmr)
         for i in range(len(nmrList)-1):
-          nmrList[i].connectNext(nmrList[i+1])
+          # nmrList[i].connectNext(nmrList[i+1])
+          # nmrList[i+1].connectNext(nmrList[i])
+          pass
       else:
         nmrList[0].deassign()
         nmrList[0].moveToNmrChain()
@@ -781,8 +793,10 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
   def _disconnectAssigned(self):
-    self._disconnectAssignedPrevious()
-    self._disconnectAssignedNext()
+    # change to only pull out the middle one
+    # self._disconnectAssignedPrevious()
+    # self._disconnectAssignedNext()
+    print ('>>> CHANGE')
 
   def _disconnect(self):
     """Move NmrResidue from connected NmrChain to default chain,

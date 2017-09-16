@@ -433,21 +433,9 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
   def _disconnectAssignedAll(self, assigned=False):
-    nmrList = []
-    nmr = self.mainNmrResidue
-    while nmr.previousNmrResidue:
-      nmr = nmr.previousNmrResidue
-
-    # nmr = self.mainNmrResidue.nextNmrResidue    # start with the next one
-    while nmr:
-      if nmrList:
-        nmrList.append(nmr)
-      else:
-        nmrList = [nmr]
-      nmr = nmr.nextNmrResidue
-
-    for nmr in reversed(nmrList[:-1]):
-      nmr.disconnectNext()
+    # disconnect all and return to the @- chain
+    for nmr in self._getAllConnectedList():
+      nmr._disconnectSingle()
 
   def disconnectNext(self) -> typing.Optional['NmrChain']:
     self._startCommandEchoBlock('disconnectNext')
@@ -468,14 +456,7 @@ class NmrResidue(AbstractWrapperObject):
 
   def _disconnectAssignedNext(self) -> typing.Optional['NmrChain']:
     """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary"""
-    nmrList = []
-    nmr = self.mainNmrResidue.nextNmrResidue    # start with the next one
-    while nmr:
-      if nmrList:
-        nmrList.append(nmr)
-      else:
-        nmrList = [nmr]
-      nmr = nmr.nextNmrResidue
+    nmrList = self._getNextConnectedList()
 
     if nmrList:
       if len(nmrList) > 1:
@@ -484,14 +465,11 @@ class NmrResidue(AbstractWrapperObject):
         for i in range(len(nmrList)-1):
           nmrList[i].connectNext(nmrList[i+1])      # easy :)
       else:
-        nmrList[0].deassign()
-        nmrList[0].moveToNmrChain()                 # move to default chain
+        nmrList[0]._disconnectSingle()
 
     if not self.mainNmrResidue.previousNmrResidue:
       # a single residue so return to the default
-      self.deassign()
-      self.moveToNmrChain()  # move to default chain
-
+      self._disconnectSingle()
     return None
 
   def _disconnectNext(self) -> typing.Optional['NmrChain']:
@@ -701,29 +679,20 @@ class NmrResidue(AbstractWrapperObject):
 
   def _disconnectAssignedPrevious(self) -> typing.Optional['NmrChain']:
     """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary"""
-    nmrList = []
-    nmr = self.mainNmrResidue.previousNmrResidue  # start with the next one
-    while nmr:
-      if nmrList:
-        nmrList.append(nmr)
-      else:
-        nmrList = [nmr]
-      nmr = nmr.previousNmrResidue
+    nmrList = self._getPreviousConnectedList()
 
     if nmrList:
       if len(nmrList) > 1:
         for nmr in nmrList:
           nmr.deassign()
         for i in range(len(nmrList) - 1):
-          nmrList[i].connectPrevious(nmrList[i + 1])  # easy :)
+          nmrList[i].connectPrevious(nmrList[i + 1])
       else:
-        nmrList[0].deassign()
-        nmrList[0].moveToNmrChain()  # move to default chain
+        nmrList[0]._disconnectSingle()
 
     if not self.mainNmrResidue.nextNmrResidue:
       # a single residue so return to the default
-      self.deassign()
-      self.moveToNmrChain()  # move to default chain
+      self._disconnectSingle()
 
     return None
 
@@ -792,11 +761,55 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
+  def _disconnectSingle(self):
+    # disconnect a single residue - return to @- chain
+    # apiResonanceGroup = nmrResidue._wrappedData
+    # apiNmrChain = apiResonanceGroup.directNmrChain
+    # defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
+    #
+    # if apiNmrChain:
+    #   apiResonanceGroup.directNmrChain = defaultChain
+    #   nmrResidue.deassign()
+    self.moveToNmrChain()
+    self.deassign()
+
+  def _getPreviousConnectedList(self):
+    # generate a list of the previous connected nmrResidues
+    nmrListPrevious = []
+    nmr = self.mainNmrResidue
+    while nmr.previousNmrResidue:
+      nmr = nmr.previousNmrResidue
+      nmrListPrevious.insert(0, nmr)
+    return nmrListPrevious
+
+  def _getNextConnectedList(self):
+    # generate a list of the next connected nmrResidues
+    nmrListNext = []
+    nmr = self.mainNmrResidue
+    while nmr.nextNmrResidue:
+      nmr = nmr.nextNmrResidue
+      nmrListNext.append(nmr)
+    return nmrListNext
+
+  def _getAllConnectedList(self):
+    # generate a list of all the connected nmrResidues
+    nmrList = []
+    nmr = self.mainNmrResidue
+    while nmr.previousNmrResidue:
+      nmr = nmr.previousNmrResidue
+    while nmr:
+      nmrList.append(nmr)
+      nmr = nmr.nextNmrResidue
+    return nmrList
+
   def _disconnectAssigned(self):
-    # change to only pull out the middle one
-    # self._disconnectAssignedPrevious()
-    # self._disconnectAssignedNext()
-    print ('>>> CHANGE')
+    nmrListPrev = self._getPreviousConnectedList()
+    nmrListNext = self._getNextConnectedList()
+    self._disconnectSingle()
+    if len(nmrListPrev) == 1:
+      nmrListPrev[0]._disconnectSingle()
+    if len(nmrListNext) == 1:
+      nmrListNext[0]._disconnectSingle()
 
   def _disconnect(self):
     """Move NmrResidue from connected NmrChain to default chain,

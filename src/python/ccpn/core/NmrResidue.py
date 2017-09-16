@@ -390,7 +390,7 @@ class NmrResidue(AbstractWrapperObject):
         apiNmrChain = self._wrappedData.directNmrChain
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
 
-        for nmr in reversed(nmrList):
+        for nmr in nmrList:
           nmr._wrappedData.directNmrChain = newNmrChain
           nmr.deassign()
       else:

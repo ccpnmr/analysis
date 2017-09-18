@@ -228,8 +228,6 @@ class NmrChain(AbstractWrapperObject):
         apiStretch[ii].assignedResidue = res._wrappedData
       apiNmrChain.delete()
 
-      # for zz in zip(self.mainNmrResidues, residues):
-      #   print (zz)
 
     finally:
      self._endCommandEchoBlock()

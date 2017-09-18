@@ -386,18 +386,34 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
   def _deassignNmrChain(self):
+    # nmrList = self._getAllConnectedList()
+    # if nmrList:
+    #   if len(nmrList) > 1:
+    #
+    #     apiNmrChain = self._wrappedData.directNmrChain
+    #     newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+    #
+    #     for nmr in nmrList:
+    #       nmr._wrappedData.directNmrChain = newNmrChain
+    #       nmr.deassign()
+    #   else:
+    #     nmrList[0]._deassignSingle()
+
     nmrList = self._getAllConnectedList()
+
     if nmrList:
       if len(nmrList) > 1:
-
-        apiNmrChain = self._wrappedData.directNmrChain
-        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-
         for nmr in nmrList:
-          nmr._wrappedData.directNmrChain = newNmrChain
           nmr.deassign()
+        for i in range(len(nmrList)-1):
+          nmrList[i].connectNext(nmrList[i+1])
       else:
         nmrList[0]._deassignSingle()
+
+    if not self.mainNmrResidue.previousNmrResidue:
+      # a single residue so return to the default
+      self._deassignSingle()
+    return None
 
   def disconnectAll(self):
     self._startCommandEchoBlock('disconnectAll')

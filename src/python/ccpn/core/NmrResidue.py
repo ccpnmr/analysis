@@ -326,12 +326,15 @@ class NmrResidue(AbstractWrapperObject):
             for rg in apiValueNmrChain.mainResonanceGroups:
               rg.directNmrChain = apiNmrChain
             apiValueNmrChain.delete()
+            if undo is not None:
+              undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
+
           finally:
             if undo is not None:
               undo.decreaseBlocking()
 
-          if undo is not None:
-            undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
+          # if undo is not None:
+          #   undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
         else:
           value._wrappedData.directNmrChain = apiNmrChain
         result = self.nmrChain
@@ -394,7 +397,7 @@ class NmrResidue(AbstractWrapperObject):
           nmr._wrappedData.directNmrChain = newNmrChain
           nmr.deassign()
       else:
-        nmrList[0]._disconnectSingle()
+        nmrList[0]._deassignSingle()
 
   def disconnectAll(self):
     self._startCommandEchoBlock('disconnectAll')
@@ -414,7 +417,7 @@ class NmrResidue(AbstractWrapperObject):
   def _disconnectAssignedAll(self, assigned=False):
     # disconnect all and return to the @- chain
     for nmr in self._getAllConnectedList():
-      nmr._disconnectSingle()
+      nmr._deassignSingle()
 
   def disconnectNext(self) -> typing.Optional['NmrChain']:
     self._startCommandEchoBlock('disconnectNext')
@@ -444,17 +447,33 @@ class NmrResidue(AbstractWrapperObject):
         for i in range(len(nmrList)-1):
           nmrList[i].connectNext(nmrList[i+1])
       else:
-        nmrList[0]._disconnectSingle()
+        nmrList[0]._deassignSingle()
 
     if not self.mainNmrResidue.previousNmrResidue:
       # a single residue so return to the default
-      self._disconnectSingle()
+      self._deassignSingle()
     return None
 
   def _disconnectNext(self) -> typing.Optional['NmrChain']:
     """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary
     Does nothing if nextNmrResidue is empty;
     Raises ValueError for assigned NmrResidues"""
+
+    # nmrList = self._getNextConnectedList()
+    #
+    # if nmrList:
+    #   if len(nmrList) > 1:
+    #     for nmr in reversed(nmrList):
+    #       nmr.moveToNmrChain()
+    #     for i in range(len(nmrList)-1):
+    #       nmrList[i].connectNext(nmrList[i+1])
+    #   else:
+    #     nmrList[0].moveToNmrChain()
+    #
+    # if not self.mainNmrResidue.previousNmrResidue:
+    #   # a single residue so return to the default
+    #   self.moveToNmrChain()
+    # return None
 
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
@@ -665,21 +684,37 @@ class NmrResidue(AbstractWrapperObject):
         for nmr in nmrList:
           nmr.deassign()
         for i in range(len(nmrList) - 1):
-          nmrList[i].connectPrevious(nmrList[i + 1])
+          nmrList[i].connectNext(nmrList[i+1])
       else:
-        nmrList[0]._disconnectSingle()
+        nmrList[0]._deassignSingle()
 
     if not self.mainNmrResidue.nextNmrResidue:
       # a single residue so return to the default
-      self._disconnectSingle()
+      self._deassignSingle()
 
     return None
 
   def _disconnectPrevious(self):
     """Cut connected NmrChain before NmrResidue, creating new connected NmrChain if necessary
     Does nothing if previousNmrResidue is empty;
-    Deletes one-NmrResidue NmrChains  if generated
     Raises ValueError for assigned NmrResidues"""
+
+    # nmrList = self._getPreviousConnectedList()
+    #
+    # if nmrList:
+    #   if len(nmrList) > 1:
+    #     for nmr in nmrList:
+    #       nmr.moveToNmrChain()
+    #     for i in range(len(nmrList)-1):
+    #       nmrList[i].connectNext(nmrList[i+1])
+    #   else:
+    #     nmrList[0].moveToNmrChain()
+    #
+    # if not self.mainNmrResidue.nextNmrResidue:
+    #   # a single residue so return to the default
+    #   self.moveToNmrChain()
+    # return None
+
 
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
@@ -740,7 +775,7 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
-  def _disconnectSingle(self):
+  def _deassignSingle(self):
     # disconnect a single residue - return to @- chain
     # apiResonanceGroup = nmrResidue._wrappedData
     # apiNmrChain = apiResonanceGroup.directNmrChain
@@ -784,11 +819,11 @@ class NmrResidue(AbstractWrapperObject):
   def _disconnectAssigned(self):
     nmrListPrev = self._getPreviousConnectedList()
     nmrListNext = self._getNextConnectedList()
-    self._disconnectSingle()
+    self._deassignSingle()
     if len(nmrListPrev) == 1:
-      nmrListPrev[0]._disconnectSingle()
+      nmrListPrev[0]._deassignSingle()
     if len(nmrListNext) == 1:
-      nmrListNext[0]._disconnectSingle()
+      nmrListNext[0]._deassignSingle()
 
   def _disconnect(self):
     """Move NmrResidue from connected NmrChain to default chain,
@@ -1104,6 +1139,20 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
     return result
+
+  def _rebuildAssignedChains(self):
+    self._startCommandEchoBlock('_rebuildAssignedChains')
+    try:
+      assignedChain = self._project.fetchNmrChain('A')
+      while assignedChain.nmrResidues:
+        startNmrResidue = assignedChain.nmrResidues[0].mainNmrResidue
+        startNmrResidue._deassignNmrChain()
+        startNmrResidue.nmrChain.reverse()
+
+    except Exception as es:
+      getLogger().warning(str(es))
+    finally:
+      self._endCommandEchoBlock()
 
 
   # Implementation functions

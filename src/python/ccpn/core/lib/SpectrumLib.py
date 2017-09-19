@@ -67,7 +67,7 @@ def _estimateNoiseLevel1D(y, factor=0.5):
   return:  float of estimated noise threshold
   '''
   if y is not None:
-    print('_estimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
+    # print('_estimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
     return max(y[:int(len(y)/20)]) * factor
   else:
     return 0

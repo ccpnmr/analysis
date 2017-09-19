@@ -242,7 +242,7 @@ class PickPeak1DPopup(CcpnDialog):
                                                tipTexts=None)
 
     self.noiseLevelFactorLabel = Label(self, text='Noise Level Factor')
-    self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=3.0, min=0.01, step=0.1)
+    self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=10.0, min=0.01, step=0.1)
 
 
 

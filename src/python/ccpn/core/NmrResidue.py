@@ -766,7 +766,7 @@ class NmrResidue(AbstractWrapperObject):
         nmrChain = self.nmrChain
         nmrChain.reverse()
         newNmrChain = self.disconnectNext()
-        nmrChain.reverse()
+        nmrChain.reverse(_force=True)
 
         if newNmrChain:             # why is this crashing now?
           newNmrChain.__dict__['mainResonanceGroups'].reverse()

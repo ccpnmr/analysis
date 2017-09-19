@@ -525,9 +525,9 @@ class NmrResidue(AbstractWrapperObject):
           # data2Obj = self._project._data2Obj
           nextNmrResidue = data2Obj[stretch[1]]
           nmrChain = data2Obj[apiNmrChain]
-          nmrChain.reverse(_force=True)                # ejb - why?
+          nmrChain.reverse()                # ejb - why?
           nextNmrResidue._disconnectNext()
-          nmrChain.reverse(_force=True)
+          nmrChain.reverse()
 
       elif apiResonanceGroup is stretch[-2]:
         # chop off end ResonanceGroup
@@ -764,9 +764,9 @@ class NmrResidue(AbstractWrapperObject):
       else:
         # Done with reverses because disconnectNext is easily undoable
         nmrChain = self.nmrChain
-        nmrChain.reverse(_force=True)
+        nmrChain.reverse()
         newNmrChain = self.disconnectNext()
-        nmrChain.reverse(_force=True)
+        nmrChain.reverse()
 
         if newNmrChain:             # why is this crashing now?
           newNmrChain.__dict__['mainResonanceGroups'].reverse()
@@ -887,10 +887,10 @@ class NmrResidue(AbstractWrapperObject):
           nmrChain = self.nmrChain
           nr1 = data2Obj[stretch[1]]
           nr2 = data2Obj[stretch[2]]
-          nmrChain.reverse(_force=True)
+          nmrChain.reverse()
           nr1._disconnectNext()
           nr2._disconnectNext()
-          nmrChain.reverse(_force=True)
+          nmrChain.reverse()
         else:
           self.disconnectNext()
           apiResonanceGroup.directNmrChain = defaultChain

@@ -239,7 +239,7 @@ class NmrChain(AbstractWrapperObject):
     Serves mainly as building block to make disconnections easier to undo"""
 
     # print ('>>>reverse')
-    if self.chain is not None and _force is False:
+    if self.chain is not None:      # and _force is False:
       raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
                        % self.chain.longPid)
 

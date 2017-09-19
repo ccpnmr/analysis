@@ -1,3 +1,5 @@
+PYTHON_DIR = <pythonDir, edit or inserted from compileCCode>
+
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
 # general rules:
@@ -46,13 +48,16 @@ COPY_LIBRARIES = sh copySharedObjs
 MATH_LIB = -lm
 
 # Python
-PYTHON_DIR = /Users/wb104/anaconda/envs/py3k
+
+PYTHON_VERNUM = 3.5
+PYTHON_VER = python$(PYTHON_VERNUM)
+
 # for Unix do not seem to need PYTHON_LIB
 # for Windows seem to need below (or similar)
-PYTHON_LIB = -lpython3.3m
-PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python3.3m -I$(PYTHON_DIR)/lib/python3.3/site-packages/numpy/core/include/numpy
+PYTHON_LIB = -l$(PYTHON_VER)m
+PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/$(PYTHON_VER)m -I$(PYTHON_DIR)/lib/$(PYTHON_VER)/site-packages/numpy/core/include/numpy
 # for Unix do not seem to need PYTHON_LIB_FLAGS
-PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python3.3/config-3.3m
+PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/$(PYTHON_VER)/config-$(PYTHON_VERNUM)m
 # for Windows seem to need below (or similar)
 # PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
 

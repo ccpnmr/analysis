@@ -9,17 +9,15 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-09-20 17:23:40 +0100 (Wed, September 20, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -28,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import operator
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
@@ -351,8 +349,11 @@ class NmrAtom(AbstractWrapperObject):
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
     return parent._wrappedData.sortedResonances()
 
-def getter(self:Atom) -> NmrAtom:
-  return self._project.getNmrAtom(self._id)
+def getter(self:Atom) -> Optional[NmrAtom]:
+  try:
+    return self._project.getNmrAtom(self._id)
+  except:
+    return None
 
 def setter(self:Atom, value:NmrAtom):
   oldValue = self.nmrAtom

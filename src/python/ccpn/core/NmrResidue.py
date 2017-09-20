@@ -12,9 +12,9 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1178,8 +1178,11 @@ class NmrResidue(AbstractWrapperObject):
     return parent._wrappedData.sortedResonanceGroups()
 
 
-def getter(self:Residue) -> NmrResidue:
-  return self._project.getNmrResidue(self._id)
+def getter(self:Residue) -> typing.Optional[NmrResidue]:
+  try:
+    return self._project.getNmrResidue(self._id)
+  except:
+    return None
 
 def setter(self:Residue, value:NmrResidue):
   oldValue = self.nmrResidue

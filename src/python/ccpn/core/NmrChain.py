@@ -12,9 +12,9 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $"
+__version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -302,8 +302,11 @@ class NmrChain(AbstractWrapperObject):
     return parent._wrappedData.sortedNmrChains()
 
 
-def getter(self:Chain) -> NmrChain:
-  return self._project.getNmrChain(self._id)
+def getter(self:Chain) -> typing.Optional[NmrChain]:
+  try:
+    return self._project.getNmrChain(self._id)
+  except:
+    return None
 
 def setter(self:Chain, value:NmrChain):
   if value is None:

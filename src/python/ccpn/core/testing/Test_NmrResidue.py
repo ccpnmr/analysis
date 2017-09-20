@@ -14,7 +14,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-09-20 11:03:55 +0100 (Wed, September 20, 2017) $"
+__dateModified__ = "$dateModified: 2017-09-20 11:04:13 +0100 (Wed, September 20, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-
 
 
 class ResidueAllNmrResiduesTest(WrapperTesting):

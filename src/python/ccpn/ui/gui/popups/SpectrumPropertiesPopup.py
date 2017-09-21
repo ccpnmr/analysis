@@ -359,6 +359,12 @@ class GeneralTab(QtGui.QWidget, Base):
       else:
         self.noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
 
+      doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
+      doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
+      doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
+      self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
+      doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
+
   def _repopulate(self):
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
@@ -419,6 +425,15 @@ class GeneralTab(QtGui.QWidget, Base):
   def _setNoiseLevelData(self, noise):
     self.spectrum.noiseLevel = float(noise)
     self._writeLoggingMessage("spectrum.noiseLevel = %s" % self.noiseLevelData.text())
+
+  def _queueChangePositiveContourDisplay(self, state):
+    self._changes['positiveContourDisplay'] = partial(self._changePositiveContourDisplay, state)
+
+  def _queueChangeDoubleCrosshair(self, state):
+    flag = (state == QtCore.Qt.Checked)
+    self.spectrum.showDoubleCrosshair = flag
+    self.logger.info("spectrum = ui.getByGid('%s')" % self.spectrum.pid)
+    self.logger.info("spectrum.showDoubleCrosshair = %s" % flag)
 
   def _queueChemicalShiftListChange(self, item):
     if item == '<New>':
@@ -603,6 +618,7 @@ class DimensionsTab(QtGui.QWidget, Base):
     self.spectralReferencingData = [i for i in range(dimensions)]           # ejb - not sure how else to get the lineEdits
     self.spectralReferencingDataPoints = [i for i in range(dimensions)]
     self.spectralAssignmentToleranceData = [i for i in range(dimensions)]
+    self.spectralDoubleCursorOffset = [i for i in range(dimensions)]
 
     for i in range(dimensions):
       Label(self, text="Axis Code ", grid=(2, 0), vAlign='t', hAlign='l')
@@ -650,6 +666,14 @@ class DimensionsTab(QtGui.QWidget, Base):
         # self.spectralAssignmentToleranceData[i].setText('<None>' if value is None else str("%.3f" % value))
       # self.spectralAssignmentToleranceDataList.append(spectralAssignmentToleranceData)
 
+      Label(self, text="Second cursor offset (Hz) ", grid=(10, 0), hAlign='l')
+      value = spectrum.doubleCrosshairOffsets[i]
+      self.spectralDoubleCursorOffset[i] = LineEdit(self,
+                                                     text='0' if value is None else str("%.3f" % value),
+                                                     grid=(10, i + 1), hAlign='l')
+      self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset,
+                                                                      self.spectralDoubleCursorOffset[i].text, i))
+
   def _repopulate(self):
     for i in range(self.dimensions):
       value = self.spectrum.referenceValues[i]
@@ -676,6 +700,18 @@ class DimensionsTab(QtGui.QWidget, Base):
     spectrum.assignmentTolerances = assignmentTolerances
     self.pythonConsole.writeConsoleCommand("spectrum.assignmentTolerances = {0}".format(assignmentTolerances), spectrum=spectrum)
     self._writeLoggingMessage("spectrum.assignmentTolerances = {0}".format(assignmentTolerances))
+
+
+  def _queueSetDoubleCursorOffset(self, valueGetter, dim):
+    self._changes['doubleCursorOffset{}'.format(dim)] = partial(self._setDoubleCursorOffset,
+                                                                  self.spectrum, dim, valueGetter())
+
+  def _setDoubleCursorOffset(self, spectrum, dim, value):
+    doubleCrosshairOffsets = list(spectrum.doubleCrosshairOffsets)
+    doubleCrosshairOffsets[dim] = float(value)
+    spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
+    self.pythonConsole.writeConsoleCommand("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets), spectrum=spectrum)
+    self._writeLoggingMessage("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets))
 
 
   def _queueSetDimensionReferencing(self, valueGetter, dim):

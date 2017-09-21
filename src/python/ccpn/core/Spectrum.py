@@ -105,6 +105,9 @@ class Spectrum(AbstractWrapperObject):
 
     super().__init__(project, wrappedData)
 
+    self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
+    self.showDoubleCrosshair = False
+
   # CCPN properties
   @property
   def _apiDataSource(self) -> Nmr.DataSource:

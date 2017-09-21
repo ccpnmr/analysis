@@ -45,7 +45,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 #TODO:WAYNE: should this inherit from Base??
 class PlotWidget(pg.PlotWidget):
 
-  def __init__(self, strip, useOpenGL=False, showDoubleCrosshair=False):
+  def __init__(self, strip, useOpenGL=False):
+#def __init__(self, strip, useOpenGL=False, showDoubleCrosshair=False):
 
     # Be sure to use explicit arguments to ViewBox as the call order is different in the __init__
     self.viewBox = ViewBox(strip)
@@ -112,7 +113,7 @@ class PlotWidget(pg.PlotWidget):
 
     # Add two crosshairs
     self.crossHair1 = CrossHair(self, show=True, colour=self.foreground)
-    self.crossHair2 = CrossHair(self, show=showDoubleCrosshair, colour=self.foreground)
+    self.crossHair2 = CrossHair(self, show=False, colour=self.foreground)
 
   def highlightAxes(self, state=False):
     "Highlight the axes on/of"
@@ -183,9 +184,32 @@ class PlotWidget(pg.PlotWidget):
     strip.axisPositionDict[axes[1].code] = yPos
 
     #TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum
-    xPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
-    yPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
-    self.crossHair2.setPosition(xPos, yPos)
+    #xPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
+    #yPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
+    #self.crossHair2.setPosition(xPos, yPos)
+    if strip.spectra:
+      spectrumView = strip.spectrumViews[0]  # use the first spectrum
+      spectrum = spectrumView.spectrum
+      if spectrum.showDoubleCrosshair:
+      #if strip.spectrumDisplay.mainWindow.application.preferences.general.doubleCrossHair:
+        offsets = spectrum.doubleCrosshairOffsets
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        xOffset = offsets[displayIndices[0]]
+        yOffset = offsets[displayIndices[1]]
+        if xPos is None or xOffset == 0:
+          self.crossHair2.vLine.hide()
+        else:
+          # TBD: below assumes that axis is in ppm
+          xOffset /= spectrum.spectrometerFrequencies[displayIndices[0]] # convert from Hz to ppm
+          self.crossHair2.setVline(xPos + xOffset)
+          self.crossHair2.vLine.show()
+        if yPos is None or yOffset == 0:
+          self.crossHair2.hLine.hide()
+        else:
+          # TBD: below assumes that axis is in ppm
+          yOffset /= spectrum.spectrometerFrequencies[displayIndices[1]] # convert from Hz to ppm
+          self.crossHair2.setHline(yPos + yOffset)
+          self.crossHair2.hLine.show()
 
   # NBNB TODO code uses API object. REFACTOR
 

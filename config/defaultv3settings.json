@@ -11,7 +11,6 @@
         "colourScheme": "dark",
         "license": "",
         "dataPath": "",
-        "doubleCrossHair": true,
         "useNative": false,
         "useNativeWebbrowser": false,
         "showToolbar": true,

@@ -87,8 +87,8 @@ class GuiStrip(Frame):
     self.setMinimumWidth(100)
     self.setMinimumHeight(150)
 
-    self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL,
-                                 showDoubleCrosshair=self.application.preferences.general.doubleCrossHair)
+    self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
+                                 #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
@@ -138,7 +138,6 @@ class GuiStrip(Frame):
     self.plotItem = self.plotWidget.plotItem
     self.viewBox = self.plotItem.vb
 
-    self.showDoubleCrossHair = self.application.preferences.general.doubleCrossHair
     self._showCrossHair()
     # callbacks
     ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
@@ -426,19 +425,19 @@ class GuiStrip(Frame):
   def _toggleCrossHair(self):
     " Toggles whether crosshair is visible"
     self.plotWidget.crossHair1.toggle()
-    if self.showDoubleCrossHair:
+    if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.toggle()
 
   def _showCrossHair(self):
     "Displays crosshair in strip"
     self.plotWidget.crossHair1.show()
-    if self.showDoubleCrossHair:
+    if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.show()
 
   def _hideCrossHair(self):
     "Hides crosshair in strip."
     self.plotWidget.crossHair1.hide()
-    if self.showDoubleCrossHair:
+    if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.hide()
 
   def toggleGrid(self):

@@ -271,7 +271,7 @@ class NmrResidue(AbstractWrapperObject):
     """Connect free end of self to free end of next residue in sequence,
     and return resulting connected NmrChain
 
-    Raises error if self is assigned, of if either self or value is offset.
+    Raises error if self is assigned, or if either self or value is offset.
 
     NB Undoing a connection between two connected stretches
     will get back a 'value' stretch with a new shortName"""
@@ -326,15 +326,15 @@ class NmrResidue(AbstractWrapperObject):
             for rg in apiValueNmrChain.mainResonanceGroups:
               rg.directNmrChain = apiNmrChain
             apiValueNmrChain.delete()
-            if undo is not None:
-              undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
+            # if undo is not None:
+            #   undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
 
           finally:
             if undo is not None:
               undo.decreaseBlocking()
 
-          # if undo is not None:
-          #   undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
+          if undo is not None:
+            undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
         else:
           value._wrappedData.directNmrChain = apiNmrChain
         result = self.nmrChain
@@ -351,6 +351,7 @@ class NmrResidue(AbstractWrapperObject):
             # Move self from last to first in target NmrChain
             ll = apiValueNmrChain.__dict__['mainResonanceGroups']
             ll.insert(0, ll.pop())
+
           finally:
             if undo is not None:
               undo.decreaseBlocking()

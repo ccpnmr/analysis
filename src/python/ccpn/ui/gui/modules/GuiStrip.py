@@ -107,29 +107,29 @@ class GuiStrip(Frame):
                                      hPolicy='expanding', vAlign='center',
                                      grid=(0, 0)
                                     )
-    self._labelWidget.setFixedHeight(34)
+    # self._labelWidget.setFixedHeight(34)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
-    # self._stripIdLabel = Label(parent=self._labelWidget,
-    #                            text='.'.join(self.id.split('.')[2:]), margins=[0,0,0,0],
-    #                            grid=(0,0), hAlign='left', vAlign='center', hPolicy='minimum')
-    # self._stripIdLabel.setFont(textFontSmall)
+    self._stripIdLabel = Label(parent=self._labelWidget,
+                               text='.'.join(self.id.split('.')), margins=[0,0,0,0],
+                               grid=(0,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
+    self._stripIdLabel.setFont(textFontSmall)
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='test',
-                                   grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='center', hPolicy='minimum')
+                                   grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
     self.hideStripLabel()
 
     # A label to display the cursor positions (updated by _showMousePosition)
     self._cursorLabel = Label(parent=self._labelWidget,
                                text='',
-                               # grid=(0,2), gridSpan=(1,2), margins=[0,0,0,0],
-                               grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
-                               hAlign='right', vAlign='center', hPolicy='minimum')#, vPolicy='expanding')
+                               grid=(1,0), gridSpan=(1,3), margins=[0,0,0,0],
+                               # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
+                               hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
 
     self._cursorLabel.setFont(textFontSmall)
     # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel

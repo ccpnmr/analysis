@@ -1281,33 +1281,36 @@ class Framework:
 
   def undo(self):
     if self.project._undo.canUndo():
-      self.ui.echoCommands(['application.undo()'])
-      self._echoBlocking += 1
-      self.project._undo.undo()
+      with MessageDialog.progressManager('performing Undo'):
 
-      # TODO:ED this is a hack until guiNotifiers are working
-      try:
-        self.ui.mainWindow.moduleArea.repopulateModules()
-      except:
-        getLogger().info('application has no Gui')
+        self.ui.echoCommands(['application.undo()'])
+        self._echoBlocking += 1
+        self.project._undo.undo()
 
-      self._echoBlocking -= 1
+        # TODO:ED this is a hack until guiNotifiers are working
+        try:
+          self.ui.mainWindow.moduleArea.repopulateModules()
+        except:
+          getLogger().info('application has no Gui')
+
+        self._echoBlocking -= 1
     else:
       getLogger().warning('nothing to undo')
 
   def redo(self):
     if self.project._undo.canRedo():
-      self.ui.echoCommands(['application.redo()'])
-      self._echoBlocking += 1
-      self.project._undo.redo()
+      with MessageDialog.progressManager('performing Redo'):
+        self.ui.echoCommands(['application.redo()'])
+        self._echoBlocking += 1
+        self.project._undo.redo()
 
-      # TODO:ED this is a hack until guiNotifiers are working
-      try:
-        self.ui.mainWindow.moduleArea.repopulateModules()
-      except:
-        getLogger().info('application has no Gui')
+        # TODO:ED this is a hack until guiNotifiers are working
+        try:
+          self.ui.mainWindow.moduleArea.repopulateModules()
+        except:
+          getLogger().info('application has no Gui')
 
-      self._echoBlocking -= 1
+        self._echoBlocking -= 1
     else:
       getLogger().warning('nothing to redo.')
 

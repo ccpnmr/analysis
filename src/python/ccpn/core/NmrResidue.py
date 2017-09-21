@@ -351,6 +351,9 @@ class NmrResidue(AbstractWrapperObject):
             # Move self from last to first in target NmrChain
             ll = apiValueNmrChain.__dict__['mainResonanceGroups']
             ll.insert(0, ll.pop())
+            # if undo is not None:
+            #   undo.newItem(apiResonanceGroup.setDirectNmrChain,
+            #                self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
 
           finally:
             if undo is not None:
@@ -649,13 +652,17 @@ class NmrResidue(AbstractWrapperObject):
               value._wrappedData.directNmrChain = apiNmrChain
               # Move value from last to first in target NmrChain
               ll.insert(0, ll.pop())
-              if undo is not None:
-                undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
-                             undoArgs=(apiValueNmrChain,), redoArgs=(value,))
+              # if undo is not None:
+              #   undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
+              #                undoArgs=(apiValueNmrChain,), redoArgs=(value,))
 
           finally:
             if undo is not None:
               undo.decreaseBlocking()
+
+          if undo is not None:
+            undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
+                         undoArgs=(apiValueNmrChain,), redoArgs=(value,))
 
           result = self.nmrChain
 
@@ -676,6 +683,32 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
     #
     return result
+
+  def unlinkPreviousNmrResidue(self):
+    self._startCommandEchoBlock('UnlinkPrevious')
+    try:
+
+      if self.residue is not None:  # assigned to chain
+        self._disconnectAssignedPrevious()
+
+    except Exception as es:
+      # getLogger().warning(str(es))
+      raise es
+    finally:
+      self._endCommandEchoBlock()
+
+  def unlinkNextNmrResidue(self):
+    self._startCommandEchoBlock('unlinkNext')
+    try:
+
+      if self.residue is not None:  # assigned to chain
+        self._disconnectAssignedNext()
+
+    except Exception as es:
+      # getLogger().warning(str(es))
+      raise es
+    finally:
+      self._endCommandEchoBlock()
 
   def disconnectPrevious(self):
     self._startCommandEchoBlock('disconnectPrevious')
@@ -767,7 +800,7 @@ class NmrResidue(AbstractWrapperObject):
         nmrChain = self.nmrChain
         nmrChain.reverse()
         newNmrChain = self.disconnectNext()
-        nmrChain.reverse(_force=True)
+        nmrChain.reverse()
 
         if newNmrChain:             # why is this crashing now?
           newNmrChain.__dict__['mainResonanceGroups'].reverse()

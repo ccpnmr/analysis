@@ -605,7 +605,7 @@ class NmrResidueTest(WrapperTesting):
     self.assertEqual(nr1.id, "A.999.TYR")
 
     with self.assertRaises(ValueError):
-      nr2 = nr2.assignTo(sequenceCode=15)
+      nr2 = nr2.assignTo(sequenceCode=15)     # ejb - error not raised now
 
     nr2 = nr2.assignTo(sequenceCode=515, residueType='XXX')
     self.assertEqual(nr2.id, 'A.515.XXX')

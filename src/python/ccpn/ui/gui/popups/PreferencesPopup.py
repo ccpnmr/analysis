@@ -207,12 +207,12 @@ class PreferencesPopup(CcpnDialog):
     self.spectrumBorderBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
 
-    row += 1
-    self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
-    self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
+    #row += 1
+    #self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
+    #self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
     # TODO enable DoubleCursor
-    self.showDoubleCursorBox.setDisabled(True)
-    # self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
+    #self.showDoubleCursorBox.setDisabled(True)
+    ## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
 
 
   def _setMiscellaneousTabWidgets(self, parent):

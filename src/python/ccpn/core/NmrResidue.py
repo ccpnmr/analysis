@@ -642,8 +642,25 @@ class NmrResidue(AbstractWrapperObject):
 
               # Value is last NmrResidue in a connected NmrChain
               for rg in reversed(apiValueNmrChain.mainResonanceGroups):
+                # rg.__dict__['insertAtHead'] = True  # ejb = fix
                 rg.directNmrChain = apiNmrChain
+                # del rg.__dict__['insertAtHead']
+                #
+                # if undo is not None:
+                #   undo.decreaseBlocking()
+                #   undo.newItem(rg.setDirectNmrChain,        rg.setDirectNmrChain,
+                #                undoArgs=(apiValueNmrChain,), redoArgs=(apiNmrChain,))
+                #
+                #
                 ll.insert(0, ll.pop())
+
+                if undo is not None:
+                  undo.increaseBlocking()
+                if undo is not None:
+                  undo.decreaseBlocking()
+                  undo.newItem(self._bubbleTail, self._bubbleHead,
+                               undoArgs=(ll, ), redoArgs=(ll, ))
+
               apiValueNmrChain.delete()
 
               # if undo is not None:
@@ -651,17 +668,17 @@ class NmrResidue(AbstractWrapperObject):
 
               # if undo is not None:
               #   undo.newItem(self.disconnectPrevious,
-                             # self.connectPrevious, redoArgs=(value,))
+              #                self.connectPrevious, redoArgs=(value,))
             else:
 
               if undo is not None:
                 undo.increaseBlocking()
               #
-              value._wrappedData.__dict__['insertAtHead'] = True    # ejb = fix
+              # value._wrappedData.__dict__['insertAtHead'] = True    # ejb = fix
               value._wrappedData.directNmrChain = apiNmrChain
-              del value._wrappedData.__dict__['insertAtHead']
+              # del value._wrappedData.__dict__['insertAtHead']
               # Move value from last to first in target NmrChain
-              # ll.insert(0, ll.pop())
+              ll.insert(0, ll.pop())
 
               #
               if undo is not None:
@@ -699,11 +716,11 @@ class NmrResidue(AbstractWrapperObject):
     #
     return result
 
-  def _insertAtHeadFix(self, undoChain):
-    # undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
-    #              undoArgs=(apiValueNmrChain,), redoArgs=(value,))
-    apiValueNmrChain = value._wrappedData.nmrChain
+  def _bubbleHead(self, ll):
+    ll.insert(0, ll.pop())
 
+  def _bubbleTail(self, ll):
+    ll.append(ll.pop(0))
 
   def unlinkPreviousNmrResidue(self):
     self._startCommandEchoBlock('UnlinkPrevious')

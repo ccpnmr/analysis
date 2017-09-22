@@ -481,6 +481,10 @@ class Peak(AbstractWrapperObject):
 
     LibPeak.snapToExtremum(self._apiPeak)
 
+  def fitPositionHeightLineWidths(self):
+
+    LibPeak.fitPositionHeightLineWidths(self._apiPeak)
+
   # Implementation functions
 
   @classmethod

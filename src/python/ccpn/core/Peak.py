@@ -35,7 +35,8 @@ from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.lib import Util as modelUtil
+#from ccpnmodel.ccpncore.lib import Util as modelUtil
+from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence
 
 
@@ -475,6 +476,10 @@ class Peak(AbstractWrapperObject):
       # change values to the order appropriate for spectrum
       values = self.reorderValues(values, axisCodes)
     setattr(self, attributeName, values)
+
+  def snapToExtremum(self):
+
+    LibPeak.snapToExtremum(self._apiPeak)
 
   # Implementation functions
 

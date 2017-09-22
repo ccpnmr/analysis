@@ -116,6 +116,10 @@ class NmrStretchTest(WrapperTesting):
 
     nmrResidues[0].connectPrevious(nmrResidues[1])
     nmrResidues[1].connectPrevious(nmrResidues[2])
+    self.undo.undo()
+    self.undo.undo()
+    self.undo.redo()
+    self.undo.redo()
     nmrResidues[4].connectNext(nmrResidues[3])
     nmrResidues[4].connectPrevious(nmrResidues[0])
     self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],

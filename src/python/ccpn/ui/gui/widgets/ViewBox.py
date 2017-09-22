@@ -541,7 +541,7 @@ class ViewBox(pg.ViewBox):
         # start of move
         project.newUndoPoint()
         undo.increaseBlocking()
-        #project.blankNotification() # if you have this then the position is only updated at the end
+        # project.blankNotification()
 
       try:
         if not hasattr(peak, 'startPosition'):
@@ -554,12 +554,12 @@ class ViewBox(pg.ViewBox):
 
       except:
           undo.decreaseBlocking()
-          #project.unblankNotification()
+          # project.unblankNotification()
 
       else:
         if event.isFinish():
           undo.decreaseBlocking()
-          #project.unblankNotification()
+          # project.unblankNotification()
           if hasattr(peak, 'startPosition'):
             undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
                          redoArgs=[peak, 'position', peak.position])

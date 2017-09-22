@@ -115,11 +115,9 @@ class NmrStretchTest(WrapperTesting):
                      ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
 
     nmrResidues[0].connectPrevious(nmrResidues[1])
+    # self.undo.undo()
+    # self.undo.redo()
     nmrResidues[1].connectPrevious(nmrResidues[2])
-    self.undo.undo()
-    self.undo.undo()
-    self.undo.redo()
-    self.undo.redo()
     nmrResidues[4].connectNext(nmrResidues[3])
     nmrResidues[4].connectPrevious(nmrResidues[0])
     self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
@@ -608,8 +606,9 @@ class NmrResidueTest(WrapperTesting):
     # This is a no-op
     self.assertEqual(nr1.id, "A.999.TYR")
 
+    # TODO:ED this does not raise an error now!
     with self.assertRaises(ValueError):
-      nr2 = nr2.assignTo(sequenceCode=15)     # ejb - error not raised now
+      nr2 = nr2.assignTo(sequenceCode=15)
 
     nr2 = nr2.assignTo(sequenceCode=515, residueType='XXX')
     self.assertEqual(nr2.id, 'A.515.XXX')

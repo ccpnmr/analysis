@@ -318,21 +318,20 @@ class NmrResidue(AbstractWrapperObject):
       if apiNmrChain.isConnected:
         # At this point, self must be the last NmrResidue in a connected chain
         if apiValueNmrChain.isConnected:
+
           undo = project._undo
-          # if undo is not None:
-          #   undo.increaseBlocking()
+          if undo is not None:
+            undo.increaseBlocking()
           try:
             # Value is first NmrResidue in a connected NmrChain
             for rg in apiValueNmrChain.mainResonanceGroups:
               rg.directNmrChain = apiNmrChain
             apiValueNmrChain.delete()
-            # if undo is not None:
-            #   undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
-
+          except:
+            print ('>>> error here')
           finally:
-            # if undo is not None:
-            #   undo.decreaseBlocking()
-            pass
+            if undo is not None:
+              undo.decreaseBlocking()
 
           if undo is not None:
             undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
@@ -345,21 +344,17 @@ class NmrResidue(AbstractWrapperObject):
         if apiValueNmrChain.isConnected:
           # At this point value must be the first NmrResidue in a connected NmrChain
           undo = apiValueNmrChain.root._undo
-          # if undo is not None:
-          #   undo.increaseBlocking()
+
+          if undo is not None:
+            undo.increaseBlocking()
           try:
             apiResonanceGroup.directNmrChain = apiValueNmrChain
             # Move self from last to first in target NmrChain
             ll = apiValueNmrChain.__dict__['mainResonanceGroups']
             ll.insert(0, ll.pop())
-            # if undo is not None:
-            #   undo.newItem(apiResonanceGroup.setDirectNmrChain,
-            #                self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
-
           finally:
-            # if undo is not None:
-            #   undo.decreaseBlocking()
-            pass
+            if undo is not None:
+              undo.decreaseBlocking()
 
           if undo is not None:
             undo.newItem(apiResonanceGroup.setDirectNmrChain,
@@ -637,39 +632,50 @@ class NmrResidue(AbstractWrapperObject):
       if apiNmrChain.isConnected:
         # At this point, self must be the first NmrResidue in a connected chain
           undo = apiValueNmrChain.root._undo
-          # if undo is not None:
-          #   undo.increaseBlocking()
           try:
+
             ll = apiNmrChain.__dict__['mainResonanceGroups']
             if apiValueNmrChain.isConnected:
+
+              # if undo is not None:
+              #   undo.increaseBlocking()
+
               # Value is last NmrResidue in a connected NmrChain
               for rg in reversed(apiValueNmrChain.mainResonanceGroups):
                 rg.directNmrChain = apiNmrChain
                 ll.insert(0, ll.pop())
               apiValueNmrChain.delete()
-              if undo is not None:
-                undo.newItem(self.disconnectPrevious,
-                             self.connectPrevious, redoArgs=(value,))
+
+              # if undo is not None:
+              #   undo.decreaseBlocking()
+
+              # if undo is not None:
+              #   undo.newItem(self.disconnectPrevious,
+                             # self.connectPrevious, redoArgs=(value,))
             else:
+
+              if undo is not None:
+                undo.increaseBlocking()
+              #
+              value._wrappedData.__dict__['insertAtHead'] = True    # ejb = fix
               value._wrappedData.directNmrChain = apiNmrChain
+              del value._wrappedData.__dict__['insertAtHead']
               # Move value from last to first in target NmrChain
-              ll.insert(0, ll.pop())
+              # ll.insert(0, ll.pop())
+
+              #
+              if undo is not None:
+                undo.decreaseBlocking()
+
               if undo is not None:
                 undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
                              undoArgs=(apiValueNmrChain,), redoArgs=(value,))
 
+                # undo.newItem(value._wrappedData.setDirectNmrChain, value._wrappedData.setDirectNmrChain,
+                #              undoArgs=(apiValueNmrChain,), redoArgs=(apiNmrChain,))
+
           finally:
-            # if undo is not None:
-            #   undo.decreaseBlocking()
-            pass
-
-          # if undo is not None:
-          #   undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
-          #                undoArgs=(apiValueNmrChain,), redoArgs=(value,))
-            # undo.newItem(self.disconnectPrevious, self.connectPrevious,
-            #              redoArgs=(value,))
-
-          result = self.nmrChain
+            result = self.nmrChain
 
       else:
         # self is unassigned, unconnected NmrResidue
@@ -677,12 +683,13 @@ class NmrResidue(AbstractWrapperObject):
           # At this point value must be the last NmrResidue in a connected NmrChain
           apiResonanceGroup.directNmrChain = apiValueNmrChain
         else:
+
           newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
           value._wrappedData.directNmrChain = newApiNmrChain
+          # newApiNmrChain.__dict__['mainResonanceGroups'].reverse()
           # apiResonanceGroup.directNmrChain = newApiNmrChain
           apiResonanceGroup.moveToNmrChain(newApiNmrChain)
 
-          # newNmrChain.__dict__['mainResonanceGroups'].reverse()
         result = value.nmrChain
 
     except Exception as es:
@@ -691,6 +698,12 @@ class NmrResidue(AbstractWrapperObject):
       self._endCommandEchoBlock()
     #
     return result
+
+  def _insertAtHeadFix(self, undoChain):
+    # undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
+    #              undoArgs=(apiValueNmrChain,), redoArgs=(value,))
+    apiValueNmrChain = value._wrappedData.nmrChain
+
 
   def unlinkPreviousNmrResidue(self):
     self._startCommandEchoBlock('UnlinkPrevious')

@@ -1,10 +1,9 @@
-"""GUI Display Strip class
-
+"""
+GUI Display Strip class
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -138,12 +137,26 @@ class Strip(AbstractWrapperObject):
 
     # NB - echoing should be done normally, through the delete command
 
+    # delete = self.delete
+    # _undo = self.project._undo
+    # self._startCommandEchoBlock('deleteStrip')
+    #
+    # if _undo is not None:
+    #   _undo.increaseBlocking()
+
     ccpnStrip = self._wrappedData
     n = len(ccpnStrip.spectrumDisplay.strips)
     if n > 1:
+      #
+      # try:
+      #   print('>>> deleting strip')
+
       index = ccpnStrip.index
       spectrumDisplay = self.spectrumDisplay
       layout = spectrumDisplay.stripFrame.layout()
+
+      stripOldLayout = None
+
       if layout: # should always be the case but play safe
         # remove the item for this strip from the layout
         # and shuffle "higher" items down in the layout
@@ -155,7 +168,9 @@ class Strip(AbstractWrapperObject):
               item = layout.itemAtPosition(r, m)
               if m > index:
                 items.append(item)
-              layout.removeItem(item)
+
+              stripOldLayout = layout.removeItem(item)
+
             for m, item in enumerate(items):
               layout.addItem(item, r, m+index)
           elif spectrumDisplay.stripDirection == 'X':
@@ -163,29 +178,56 @@ class Strip(AbstractWrapperObject):
               item = layout.itemAtPosition(m, 0)
               if m > index:
                 items.append(item)
-              layout.removeItem(item)
+
+              stripOldLayout = layout.removeItem(item)
+
             for m, item in enumerate(items):
               layout.addItem(item, m+index, 0)
       self.plotWidget.deleteLater()
       ###self.spinSystemLabel.deleteLater()
       if hasattr(self, 'planeToolbar'):
         self.planeToolbar.deleteLater()
+
+
+      # TODO:ED delete undo/redo is okay - need to check recover of layout
       ccpnStrip.delete()
 
-      #self.deleteLater()  # Qt call, is this needed???
-      
+      # self.setParent(None)      # ejb - from spectrumDisplay.removeStrip
+        #self.deleteLater()  # Qt call, is this needed???
+
+      # finally:
+      #   self._endCommandEchoBlock()
+      #
+      # if _undo is not None:
+      #   print ('>>>endDelete')
+      #   _undo.decreaseBlocking()
+      #   # _undo.newItem(self.spectrumDisplay.removeStrip, self.clone, undoArgs=(newStrip,))
+      #   # _undo.newItem(spectrumDisplay.addStrip, delete)
     else:
       raise  ValueError("The last strip in a display cannot be deleted")
 
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
-    self._startCommandEchoBlock('clone')
+    _undo = self.project._undo
+    self._startCommandEchoBlock('cloneStrip')
+
+    if _undo is not None:
+      _undo.increaseBlocking()
+    stripPos = self.spectrumDisplay.strips.index(self)
+    if stripPos == self.spectrumDisplay.stripCount-1:
+      stripPos = -1
+
     try:
       newStrip = self._project._data2Obj.get(self._wrappedData.clone())
     finally:
       self._endCommandEchoBlock()
-    
+
+    if _undo is not None:
+      _undo.decreaseBlocking()
+      _undo.newItem(self.spectrumDisplay._removeIndexStrip, self.spectrumDisplay.addStrip
+                    , undoArgs=(-1,))
+
     return newStrip
 
   def moveTo(self, newIndex:int):

@@ -35,6 +35,10 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
   # if widths is None:
   #   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())
 
+  # _undo = strip.project._undo     # ejb - just a temporary fix
+  # if _undo is not None:
+  #   _undo.increaseBlocking()
+
   for ii, axisCode in enumerate(axisCodes):
     try:
       stripAxisIndex = strip.axisCodes.index(axisCode)
@@ -43,6 +47,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
     if len(positions)>ii: # this used to say 1 rather than ii (coupled with the else below)
       if positions[ii]:
         strip.orderedAxes[stripAxisIndex].position = positions[ii]
+
     #else: # what in the world is the case this is trying to deal with??
            # why would you want to set all the positions to the same thing??
     #  strip.orderedAxes[stripAxisIndex].position = positions[0]
@@ -66,6 +71,9 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
                 strip.orderedAxes[stripAxisIndex].width = 0.5
       except:
         continue
+
+  # if _undo is not None:
+  #   _undo.decreaseBlocking()
 
 
 def matchAxesAndNmrAtoms(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom]):

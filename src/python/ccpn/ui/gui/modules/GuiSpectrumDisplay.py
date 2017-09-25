@@ -415,6 +415,9 @@ class GuiSpectrumDisplay(CcpnModule):
     CcpnModule._closeModule(self)
     self.delete()
 
+  def _removeIndexStrip(self, value):
+    self.removeStrip(self.strips[value])
+
   def removeStrip(self, strip):
     "Remove strip if it belongs to self"
 
@@ -432,11 +435,28 @@ class GuiSpectrumDisplay(CcpnModule):
                   % (self.pid,))
       return
 
-    strip._unregisterStrip()
-    self.setColumnStretches(stretchValue=False)      # set to 0 so they disappear
-    strip.setParent(None)           # need to remove the rogue widget from the widgetArea
-    strip.delete()
-    self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
+    _undo = self.project._undo
+    self._startCommandEchoBlock('removeStrip')
+    stripPos = self.strips.index(strip)
+
+    if _undo is not None:
+      _undo.increaseBlocking()
+
+    try:
+      strip._unregisterStrip()
+      self.setColumnStretches(stretchValue=False)      # set to 0 so they disappear
+      strip.setParent(None)           # need to remove the rogue widget from the widgetArea
+      strip.delete()
+      self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
+
+    finally:
+      self._endCommandEchoBlock()
+
+    if _undo is not None:
+      _undo.decreaseBlocking()
+
+      # TODO:ED this may not be the correct strip to Redo:remove
+      _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
 
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"
@@ -451,11 +471,29 @@ class GuiSpectrumDisplay(CcpnModule):
   #   """
   #   newStrip = self.strips[-1].clone()
 
-  def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
+  # def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
+  def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
     """
+    stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
+
+    # do setColumnStretches here or in Gui.py (422)
+    self.setColumnStretches(True)
+
+    mainWindow = self.mainWindow
+    mainWindow.pythonConsole.writeConsoleCommand("strip.clone()", strip=newStrip)
+    getLogger().info("spectrumDisplay = ui.getByGid(%r); spectrumDisplay.addStrip(%d)" \
+                     % (self.pid, stripIndex))
+    return newStrip
+
+  def _addObjStrip(self, strip=None) -> 'GuiStripNd':
+    """
+    Creates a new strip by cloning strip with index (default the last) in the display.
+    """
+    stripIndex = self.strips.index(strip)
+    newStrip = strip.clone()
 
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)

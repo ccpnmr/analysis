@@ -50,10 +50,12 @@ def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[Nmr
     # Make sure there are enough strips to display nmrAtomPairs
     if numberOfStrips < len(nmrAtomPairs):
       for ii in range(numberOfStrips, len(nmrAtomPairs)):
-        spectrumDisplay.strips[-1].clone()
+        # spectrumDisplay.strips[-1].clone()
+        spectrumDisplay.addStrip()
     else:  # numberOfStrips >= len(nmrAtomPairs):  # too many strips if >
       for ii in range(len(nmrAtomPairs), numberOfStrips):
-        spectrumDisplay.removeStrip(spectrumDisplay.strips[-1])
+        # spectrumDisplay.removeStrip(spectrumDisplay.strips[-1])
+        spectrumDisplay.removeLastStrip()
 
     # loop through strips and navigate to appropriate position in strip
     for ii, strip in enumerate(spectrumDisplay.strips):

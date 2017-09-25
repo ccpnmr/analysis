@@ -369,7 +369,7 @@ class GuiWindow():
     if self.current.strip:
       self.current.strip._moveToNextSpectrumView()
     else:
-      print('No current strip')
+      getLogger().warning('No current strip. Select a strip first.')
 
   def moveToPreviousSpectrum(self):
     """
@@ -378,7 +378,7 @@ class GuiWindow():
     if self.current.strip:
       self.current.strip._moveToPreviousSpectrumView()
     else:
-      print('No current strip')
+      getLogger().warning('No current strip. Select a strip first.')
 
   def snapCurrentPeaksToExtremum(self, parent=None):
     """
@@ -395,4 +395,4 @@ class GuiWindow():
         for peak in peaks:
           peak.snapToExtremum()
     else:
-      getLogger().warning('No selected peak/s')
+      getLogger().warning('No selected peak/s. Select a peak first.')

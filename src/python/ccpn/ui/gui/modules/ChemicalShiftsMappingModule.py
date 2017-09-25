@@ -14,160 +14,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
-
-
-class InputWidget(Widget):
-  def __init__(self, **kw):
-    super(InputWidget, self).__init__()
-    self.params = {}
-    l = QtGui.QHBoxLayout()
-    self.setLayout(l)
-
-    self.peakListInput = PulldownList(None, ['Select'])
-    self.sb = DoubleSpinbox(None)
-    self.sb.setSingleStep(0.01)
-    self.closeIcon = Icon('icons/window-close')
-    self.deleteButton = Button(None, '',icon=self.closeIcon)
-    self.deleteButton.setStyleSheet("background-color: transparent; border: 0px;")
-    self.deleteButton.setMaximumWidth(20)
-    l.addWidget(self.peakListInput)
-    l.addWidget(self.sb)
-    l.addWidget(self.deleteButton)
-
-  def getParams(self):
-    return {self.peakListInput.getObject(): self.sb.value()}
-
-  def setParams(self, names, peakListObjs, select=None, value=None):
-    self.peakListInput.setData(names, peakListObjs)
-    if select is not None:
-      self.peakListInput.select(select)
-    if value is not None:
-      self.sb.setValue(float(value))
-
-
-
-class SettingWidget(Widget):
-  def __init__(self, parent=None, **kw):
-    super(SettingWidget, self).__init__()
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
-    self.project = self.application.project
-    if parent is not None:
-      self.parent = parent
-    self.inputWidgetList = []
-
-    self.inputDataBoundary = InputDataBoundary(self.application)
-    self.mainLayout = QtGui.QVBoxLayout(self)
-    self.initUIinputWidget()
-    self.applyButtons = ButtonList(None, texts=['Save', 'Update', 'Apply'],
-                                   callbacks=[None, None, self._sendDataToPlot],
-                                   tipTexts=['', '', ''], direction='h',
-                                   hAlign='r')
-
-    self.mainLayout.addStretch(1)
-    self.mainLayout.addWidget(self.applyButtons)
-
-    self._setInputWidgetData()
-    self.__registerNotifiers()
-
-  def initUIinputWidget(self):
-    mygroupbox = GroupBox(None)
-    self.myform = QtGui.QFormLayout()
-
-    for i in range(3):
-      self.addInputWidget()
-
-    self.myform.addWidget(Button(None, 'Add Input', callback=self.addInputWidget))
-    mygroupbox.setLayout(self.myform)
-    scroll = ScrollArea(None)
-    scroll.setWidget(mygroupbox)
-    scroll.setWidgetResizable(True)
-    self.mainLayout.addWidget(scroll)
-
-  def getInputPeakLists(self):
-    if self.project:
-      if self.project.peakLists:
-        return [pl for pl in self.project.peakLists]
-      else:
-        print('No peakList Found')
-        return False
-
-
-
-  def addInputWidget(self):
-    rc = self.myform.rowCount()
-    iw = InputWidget()
-
-    self.inputWidgetList.append(iw)
-    self.myform.insertRow(rc-1, iw)
-    iw.deleteButton.clicked.connect(partial(self.deleteInputWidget, iw))
-    self._setInputWidgetData()
-
-  def _setInputWidgetData(self, *args):
-    if self.inputWidgetList:
-      for iw in self.inputWidgetList:
-
-        if self.getInputPeakLists():
-          pids =[pl.pid for pl in self.getInputPeakLists()]
-          pls = self.getInputPeakLists()
-          oldSelection = list(iw.getParams().keys())[0]
-          if oldSelection is not None:
-            iw.setParams(names=pids, peakListObjs=pls, select=oldSelection, value=None)
-          else:
-            iw.setParams(names=pids, peakListObjs=pls, value=None)
-
-
-
-  def deleteInputWidget(self, iw):
-    if iw in self.inputWidgetList:
-      self.inputWidgetList.remove(iw)
-    iw.deleteLater()
-
-  def _getDataToPlot(self):
-    sources = {}
-    pName = None
-    for iw in self.inputWidgetList:
-      iwParams = iw.getParams()
-      sources.update(iwParams)
-    for key in sources.keys():
-      if isinstance(key, PeakList):
-
-        self.inputDataBoundary.sources = sources
-        dataFrame = self.inputDataBoundary._setDataFrame()
-
-        shifts = self.inputDataBoundary.calculateChemicalShift(dataFrame, pName)
-        cs = self.inputDataBoundary.getChemicalShifts(shifts)
-        pids = cs['pid'].values.tolist()
-        objs = [self.project.getByPid(pid) for pid in pids]
-        xValues = [int(x) for x in cs['numb'].values.tolist()]
-        yValues = [float(y) for y in cs['value'].values.tolist()]
-        return xValues, yValues, objs
-      else:
-        return False
-    return False
-
-
-  def _sendDataToPlot(self):
-    data = self._getDataToPlot()
-    if data:
-      xValues, yValues, objs = data
-
-      self.parent.barGraphWidget._updateGraph()
-      self.parent.barGraphWidget.setValue(xValues=xValues, yValues=yValues, objects=objs)
-      self.parent.barGraphWidget.addBarItems()
-
-
-  def __registerNotifiers(self):
-    self.project.registerNotifier('PeakList', 'create', self._setInputWidgetData)
-    self.project.registerNotifier('PeakList', 'modify', self._setInputWidgetData)
-    self.project.registerNotifier('PeakList', 'rename', self._setInputWidgetData)
-    self.project.registerNotifier('PeakList', 'delete', self._setInputWidgetData)
-
-
-  def __deregisterNotifiers(self):
-    self.project.unRegisterNotifier('PeakList', 'create', self._setInputWidgetData)
-    self.project.unRegisterNotifier('PeakList', 'modify', self._setInputWidgetData)
-    self.project.unRegisterNotifier('PeakList', 'rename', self._setInputWidgetData)
-    self.project.unRegisterNotifier('PeakList', 'delete', self._setInputWidgetData)
+from ccpn.ui.gui.widgets.Base import Base
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -177,17 +24,40 @@ class ChemicalShiftsMapping(CcpnModule):
   settingsPosition = 'top'
   className = 'ChemicalShiftsMapping'
 
-  def __init__(self, mainWindow, name='Chemical Shifts Mapping', **kw):
+  def __init__(self, mainWindow, name='Chemical Shifts Mapping', nmrChain= None, **kw):
     # super(ChemicalShiftsMapping, self)
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name,  settingButton=True)
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
     self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application = self.mainWindow.application
+    if mainWindow is not None:
+      self.project = self.mainWindow.project
+      self.application = self.mainWindow.application
 
-    self.barGraphWidget = BarGraphWidget()
-    self.settingWidget = SettingWidget(parent=self)
-    self.addWidget(self.settingWidget, 0,0)
-    self.addWidget(self.barGraphWidget, 0,1)
+
+
+
+  def setNmrChain(self, nmrChain):
+    if nmrChain:
+      shifts = []
+      sequenceCode = []
+      nmrResidues = []
+      for nmrResidue in nmrChain.nmrResidues:
+        shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue), ]
+        sequenceCode += [int(nmrResidue.sequenceCode), ]
+        nmrResidues += [nmrResidue, ]
+
+      self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=sequenceCode, yValues=shifts, objects=nmrResidues, grid=(0, 0))
+
+
+  def _getMeanNmrResiduePeaksShifts(self, nmrResidue):
+    import numpy as np
+    deltas = []
+    peaks = nmrResidue.nmrAtoms[0].assignedPeaks
+    for i, peak in enumerate(peaks):
+      deltas += [
+        (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
+    if not None in deltas and deltas:
+      return round(float(np.mean(deltas)),3)
+    return
 
   def _closeModule(self):
     """
@@ -199,18 +69,21 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
 
-class BarGraphWidget(Widget):
+class BarGraphWidget(Widget, Base):
 
-  def __init__(self,xValues=None, yValues=None, objects=None, **kw):
-    super(BarGraphWidget, self).__init__()
-
+  def __init__(self, parent, xValues=None, yValues=None, colour='r', objects=None, **kw):
+    Widget.__init__(self, parent)
+    Base.__init__(self, **kw)
     self._setViewBox()
     self._setLayout()
+    self.xLine = None
 
     self.xValues = xValues
     self.yValues = yValues
     self.objects = objects
+    self.colour = colour
     self.addBarItems()
+
 
     self._addExtraItems()
 
@@ -241,23 +114,58 @@ class BarGraphWidget(Widget):
   def updateViewBoxLimits(self):
     '''Updates with default paarameters. Minimum values to show the data only'''
     if self.xValues and self.yValues:
-      self.customViewBox.setLimits(xMin=min(self.xValues), xMax=max(self.xValues) + (max(self.xValues) * 0.5),
-                                   yMin=min(self.yValues),yMax=max(self.yValues) + (max(self.yValues) * 0.5))
+      self.customViewBox.setLimits(xMin=min(self.xValues)/2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
+                                   yMin=min(self.yValues)/2 ,yMax=max(self.yValues) + (max(self.yValues) * 0.5))
 
   def addBarItems(self):
-    bg = BarGraph(viewBox=self.customViewBox, xValues=self.xValues, yValues=self.yValues, objects=self.objects, brush = 'r')
+    bg = BarGraph(viewBox=self.customViewBox, xValues=self.xValues, yValues=self.yValues, objects=self.objects, brush = self.colour)
     self.customViewBox.addItem(bg)
-    self.updateViewBoxLimits()
+    # self.updateViewBoxLimits()
+
+  def _clearAll(self):
+    self.customViewBox.clear()
 
   def addThresholdLine(self):
-    self.xLine = pg.InfiniteLine(pos=1, angle=0, movable=True, pen='b')
-    self.customViewBox.addItem(self.xLine)
 
-  def showThresholdLine(self, value:True):
+    self.xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
+    self.customViewBox.addItem(self.xLine)
+    if self.yValues is not None:
+      if len(self.yValues)>0:
+        self.xLine.setPos(min(self.yValues))
+    self.showThresholdLine(True)
+    self.xLine.sigPositionChangeFinished.connect(self._lineMoved)
+  def showThresholdLine(self, value=True):
     if value:
       self.xLine.show()
     else:
       self.xLine.hide()
+
+  def _lineMoved(self):
+    self._clearAll()
+
+    aboveX = []
+    aboveY = []
+    belowX = []
+    belowY = []
+
+    pos = self.xLine.pos().y()
+    for x,y, in zip(self.xValues, self.yValues):
+      if y > pos:
+        aboveY.append(y)
+        aboveX.append(x)
+      else:
+        belowX.append(x)
+        belowY.append(y)
+
+
+    aboveThreshold = BarGraph(viewBox=self.customViewBox, xValues=aboveX, yValues=aboveY, objects=None,
+                  brush='g')
+    belowTrheshold = BarGraph(viewBox=self.customViewBox, xValues=belowX, yValues=belowY, objects=None,
+                  brush='r')
+    self.customViewBox.addItem(aboveThreshold)
+    self.customViewBox.addItem(belowTrheshold)
+    # self.updateViewBoxLimits()
+
 
   def addLegend(self):
     self.legendItem = pg.LegendItem((100, 60), offset=(70, 30))  # args are (size, offset)
@@ -279,121 +187,26 @@ class BarGraphWidget(Widget):
 
 
 
-
-import pandas as pd
-
-
-class InputDataBoundary:
-  ''' Converts CCPN objects into dataFrame'''
-  # from ccpn.core.peakList import PeakList
-
-  def __init__(self, application ):
-
-    self.sources = {None: (None, None)}  #{'peakList':('param','value')}
-
-    self.application = application
-    self.project = application.project
-
-
-  def getSources(self):
-    return self.sources
-
-  def setSources(self, peakList, param:str, value:float or int ):
-    self.sources.update({peakList:(param,value)})
-
-  def _setDataFrame(self) -> pd.DataFrame:
-    'create a dataframe from sources'
-
-    dfs = []
-    for pl, t in self.sources.items():
-      if pl is not None:
-        d = self.createPeakListDF(pl, 'temp', t)
-        dfs.append(d)
-    if dfs:
-      dataFrame = pd.concat(dfs)
-      return  dataFrame
-
-  def createPeakListDF(self,peakList, paramName, value):
-    '''
-    :param peakList: ccpnPeakList obj
-    :param paramName: str.  EG. Temperature, Concentration
-    :param value: parameter value
-    :return: dataframe of 'residueNumber', 'Nh', 'Hn', 'Hpos', 'Npos', 'height', 'paramValue'
-    '''
-
-    items = []
-    columns = ['residueNumber', 'Hn', 'Nh', 'Hpos', 'Npos', 'height', str(paramName)]
-    if peakList.peaks is not None:
-      for peak in peakList.peaks:
-        if peak.assignedNmrAtoms is not None:
-          if len(peak.assignedNmrAtoms) > 0:
-            residueNumber = peak.assignedNmrAtoms[0][0].nmrResidue.sequenceCode
-            Hn = peak.assignedNmrAtoms[0][0].pid
-            Nh = peak.assignedNmrAtoms[0][1].pid
-            HnPos = str(peak.position[0])
-            NhPos = str(peak.position[1])
-            height = str(peak.height)
-            param = value
-
-            items.append([residueNumber, Hn, Nh, HnPos, NhPos, height, param])
-
-    dataFrame = pd.DataFrame(items, columns=columns)
-    dataFrame['residue number'] = dataFrame.index.astype('int')
-
-    dataFrame.index = dataFrame['residueNumber']
-
-    return dataFrame
-
-  def calculateChemicalShift(self, data, paramName):
-
-    sel = data['Hn'].str.endswith('H')
-    sel = sel & data['Nh'].str.endswith('N')
-    data = data[sel]
-
-    data['Hpos'] = data['Hpos'].astype('float64')
-    data['Npos'] = data['Npos'].astype('float64')
-
-    shifts = {}
-    for r, pid in zip(data['residueNumber'].unique(), data['Hn']):
-      d = data[data['residueNumber'] == r]
-      d.index = d.temp
-      minParm = d['temp'].min()
-      print(minParm, 'min')
-
-      start_H = float(d.loc[minParm, 'Hpos'])
-      start_N = float(d.loc[minParm, 'Npos'])
-
-      delta = (((d['Hpos'] - start_H) * 7) ** 2 + (d['Npos'] - start_N) ** 2) ** 0.5
-      delta.name = pid
-      shifts[int(r)] = delta.sort_index()
-
-    max_shift = 0
-    for shift in shifts.values():
-      if shift.max() > max_shift:
-        max_shift = shift.max()
-    return shifts
-
-  def getChemicalShifts(self, shifts):
-    d = []
-    for n, i in sorted(shifts.items()):
-      max_index = shifts[n].index.max()
-      d.append([i.name, str(n), str(shifts[n].loc[max_index])])
-    g = pd.DataFrame(d, columns = ['pid', 'numb','value'])
-    return g
+#################################### _________ RUN GUI TESTING ____________ ####################################
 
 
 
 
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
-class InputDataInteractor:
-  from typing import Tuple
-  def __init__(self):
-    self.sources = ()
+  app = TestApplication()
+  win = QtGui.QMainWindow()
 
-  @property
-  def sources(self)-> Tuple[pd.DataFrame, ...]:
-    return self.__sources
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, xValues=[21,25,23], yValues=[0.555, 0.566, 0.588])
+  moduleArea.addModule(chemicalShiftsMapping)
+  # pipeline._openAllPipes()
 
-  @sources.setter
-  def sources(self, value):
-    self.__sources = value
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
+  win.show()
+
+  app.start()

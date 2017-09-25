@@ -15,7 +15,7 @@ selectedLabelColor = 'g'
 #TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed
 
 class BarGraph(pg.BarGraphItem):
-  def __init__(self,viewBox = None, xValues=None, yValues=None, objects=None, brush=None, **kw):
+  def __init__(self,application = None, viewBox = None, xValues=None, yValues=None, objects=None, brush=None, **kw):
     super(BarGraph, self).__init__(**kw)
     '''
     This class allows top draw bars with or without objects.It Needs only xValues and yValues.
@@ -33,7 +33,8 @@ class BarGraph(pg.BarGraphItem):
     self.brush = brush
     self.clicked = None
     self.objects = objects or []
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.application = application
+    # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
     self.opts = dict(                # setting for BarGraphItem
                     x=self.xValues,
@@ -102,7 +103,7 @@ class BarGraph(pg.BarGraphItem):
       for label in self.labels:
         if label.text() == str(self.clicked):
           print(label.data(self.clicked))
-          self.application.current.nmrResidue = label.data(self.clicked)
+          # self.application.current.nmrResidue = label.data(self.clicked)
           label.setSelected(True)
       event.accept()
 
@@ -128,7 +129,7 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
   """ A text annotation of a bar.
       """
 
-  def __init__(self, text):
+  def __init__(self, text, application=None):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self)
 
@@ -141,8 +142,9 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
     self.setToolTip(text)
 
     self.customObject = self.data(int(self.text()))
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
+    self.application = application
 
 
   def setCustomObject(self, obj):
@@ -170,11 +172,11 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
 
 
 class CustomViewBox(pg.ViewBox):
-  def __init__(self, *args, **kwds):
+  def __init__(self, application=None, *args, **kwds):
     pg.ViewBox.__init__(self, *args, **kwds)
     self.exportDialog = None
     self.addSelectionBox()
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.application = application
 
 
 
@@ -199,8 +201,8 @@ class CustomViewBox(pg.ViewBox):
       # ev.accept()
 
     elif event.button() == QtCore.Qt.LeftButton :
-      if self.application.current.nmrResidues:
-        self.application.current.clearNmrresidues()
+      # if self.application.current.nmrResidues:
+      #   self.application.current.clearNmrresidues()
       event.accept()
       # self.deselectLabels()
 
@@ -419,10 +421,13 @@ for x, y in zip(x1,y1):
 # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
 #
 # customViewBox.setMenuEnabled(enableMenu=False)
-
+#
 # plotWidget.show()
 #
 #
+# 
+
+
 #
 # # Start Qt event
 # if __name__ == '__main__':
@@ -431,4 +436,4 @@ for x, y in zip(x1,y1):
 #     QtGui.QApplication.instance().exec_()
 #
 #
-#
+

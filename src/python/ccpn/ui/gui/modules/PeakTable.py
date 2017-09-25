@@ -252,7 +252,7 @@ class PeakListTableWidget(ObjectTable):
 
     if self._current.strip is not None:
       widths = None
-      if peak.peakList.spectrum.dimensionCount == 1:
+      if peak.peakList.spectrum.dimensionCount <= 2:
         widths = _getCurrentZoomRatio(self._current.strip.viewBox.viewRange())
       navigateToPositionInStrip(strip = self._current.strip, positions=peak.position, widths=widths)
     else:

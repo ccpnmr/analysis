@@ -46,6 +46,7 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from PyQt4 import QtGui
 from ccpn.util.Logging import getLogger
+import numpy as np
 
 logger = getLogger()
 ALL = '<all>'
@@ -216,6 +217,8 @@ class NmrResidueTable(ObjectTable):
     ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
     ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
                   , 'Number of peaks assigned to NmrResidue', None),
+    ('Peaks Shifts', lambda nmrResidue: NmrResidueTable._getMeanNmrResiduePeaksShifts(nmrResidue)
+     , '', None),
     ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
      lambda nmr, value:NmrResidueTable._setComment(nmr, value))
   ]
@@ -280,9 +283,9 @@ class NmrResidueTable(ObjectTable):
     self._chainNotifier = None
     self._residueNotifier = None
 
-    #TODO: see how to handle peaks as this is too costly at present
+    # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
-    self._peaksNotifier = None
+    self._peakNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
     self._setNotifiers()
 
@@ -334,6 +337,7 @@ class NmrResidueTable(ObjectTable):
     Notifier callback for updating the table
     """
     thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+
     if self.nmrChain in thisChainList:
       self.displayTableForNmrChain(self.nmrChain)
     else:
@@ -341,8 +345,8 @@ class NmrResidueTable(ObjectTable):
 
       # nmrChain = data['theObject']
     logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
-      # if nmrChain is not None:
-      #   self._update(nmrChain)
+    # if nmrChain is not None:
+    #   self._update(nmrChain)
 
   def _update(self, nmrChain):
     """
@@ -417,6 +421,17 @@ class NmrResidueTable(ObjectTable):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
+  @staticmethod
+  def _getMeanNmrResiduePeaksShifts(nmrResidue):
+    deltas = []
+    peaks = nmrResidue.nmrAtoms[0].assignedPeaks
+    for i, peak in enumerate(peaks):
+      deltas += [
+        (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
+    if not None in deltas and deltas:
+      return round(float(np.mean(deltas)),3)
+    return
+
   def _setNotifiers(self):
     """
     Set a Notifier to call when an object is created/deleted/renamed/changed
@@ -433,6 +448,13 @@ class NmrResidueTable(ObjectTable):
                                       , NmrResidue.__name__
                                       , self._updateCallback
                                       , onceOnly=True)
+    # very slow
+    # self._peakNotifier = Notifier(self._project
+    #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
+    #                               , 'Peak'
+    #                               , self._updateCallback
+    #                               , onceOnly = True
+    #                               )
 
   def _clearNotifiers(self):
     """
@@ -442,8 +464,8 @@ class NmrResidueTable(ObjectTable):
       self._chainNotifier.unRegister()
     if self._residueNotifier is not None:
       self._residueNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
+    if self._peakNotifier is not None:
+      self._peakNotifier.unRegister()
 
   def _close(self):
     """

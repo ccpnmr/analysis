@@ -81,7 +81,10 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("i, 1"), self, self.addIntegral1D, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
+
 
 
 
@@ -345,3 +348,20 @@ class GuiWindow():
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay.toggleGrid()
 
+  def moveToNextSpectrum(self):
+    """
+    moves to next spectrum on the current strip, Toggling off the currently displayed spectrum. 
+    """
+    if self.current.strip:
+      self.current.strip._moveToNextSpectrumView()
+    else:
+      print('No current strip')
+
+  def moveToPreviousSpectrum(self):
+    """
+    moves to next spectrum on the current strip, Toggling off the currently displayed spectrum. 
+    """
+    if self.current.strip:
+      self.current.strip._moveToPreviousSpectrumView()
+    else:
+      print('No current strip')

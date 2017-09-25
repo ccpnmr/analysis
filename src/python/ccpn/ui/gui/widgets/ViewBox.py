@@ -569,8 +569,7 @@ class ViewBox(pg.ViewBox):
             ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
 
-    elif middleMouse(event) or \
-         shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
+    elif shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
       # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
       event.accept()
       if not event.isFinish():

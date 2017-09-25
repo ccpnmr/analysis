@@ -595,6 +595,39 @@ class GuiStrip(Frame):
     """
     pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
+  def _moveToNextSpectrumView(self):
+    spectrumViews = self.spectrumViews
+    countSpvs = len(spectrumViews)
+    if countSpvs > 0:
+      visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+      if len(visibleSpectrumViews) == 1:
+        currentIndex = spectrumViews.index(visibleSpectrumViews[0])
+        if countSpvs > currentIndex + 1:
+          visibleSpectrumViews[0].setVisible(False)
+          spectrumViews[currentIndex + 1].setVisible(True)
+        elif countSpvs == currentIndex + 1: #starts again from the first
+          visibleSpectrumViews[0].setVisible(False)
+          spectrumViews[0].setVisible(True)
+      else:
+        print('Option available if only one spectrum per time is toggled on')
+    else:
+      print('No spectra displayed')
+
+  def _moveToPreviousSpectrumView(self):
+    spectrumViews = self.spectrumViews
+    countSpvs = len(spectrumViews)
+    if countSpvs > 0:
+      visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+      if len(visibleSpectrumViews) == 1:
+        currentIndex = spectrumViews.index(visibleSpectrumViews[0])
+        # if countSpvs > currentIndex + 1:
+        visibleSpectrumViews[0].setVisible(False)
+        spectrumViews[currentIndex - 1].setVisible(True)
+      else:
+        print('Option available if only one spectrum per time is toggled on')
+    else:
+      print('No spectra displayed')
+
 
 # Notifiers:
 def _axisRegionChanged(axis:'Axis'):

@@ -110,6 +110,8 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     QtGui.QGraphicsItem.setVisible(self, visible)
     try:
       if self:                                        # ejb - ?? crashes on table update otherwise
+        action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
+        action.setChecked(visible)
         for peakListView in self.peakListViews:
           peakListView.setVisible(visible)
     except:

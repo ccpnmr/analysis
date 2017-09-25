@@ -81,6 +81,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
 
@@ -378,3 +379,20 @@ class GuiWindow():
       self.current.strip._moveToPreviousSpectrumView()
     else:
       print('No current strip')
+
+  def snapCurrentPeaksToExtremum(self, parent=None):
+    """
+       Snaps selected peaks. If more then one, pops up a Yes/No. 
+    """
+    peaks = self.current.peaks
+    n = len(peaks)
+    if n == 1:
+      peaks[0].snapToExtremum()
+    elif n > 1:
+      title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
+      msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+      if MessageDialog.showYesNo(title, msg, parent):
+        for peak in peaks:
+          peak.snapToExtremum()
+    else:
+      getLogger().warning('No selected peak/s')

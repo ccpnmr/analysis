@@ -151,9 +151,15 @@ class Strip(AbstractWrapperObject):
       raise ValueError("The last strip in a display cannot be deleted")
 
   def _removeFromLayout(self):
+
     ccpnStrip = self._wrappedData
     n = len(ccpnStrip.spectrumDisplay.strips)
     if n > 1:
+
+      _undo = self.project._undo
+      if _undo is not None:
+        _undo.increaseBlocking()
+
       index = ccpnStrip.index
       spectrumDisplay = self.spectrumDisplay
       layout = spectrumDisplay.stripFrame.layout()
@@ -171,6 +177,8 @@ class Strip(AbstractWrapperObject):
         currentPlotWidget = None
         currentToolbar = None
         currentParent = None
+        currentScene = None
+        currentViewBox = None
 
         for r in range(layout.rowCount()):
           items = []
@@ -210,39 +218,123 @@ class Strip(AbstractWrapperObject):
             for m, item in enumerate(items):        # re-insert them one above
               layout.addItem(item, m + index, 0)
 
-        self.plotWidget.deleteLater()
-        # currentPlotWidget = self.plotWidget
+        currentScene = self.plotWidget.scene()
+        # self.plotWidget.deleteLater()
+        currentPlotWidget = self.plotWidget
         # self.plotWidget = None
+        currentViewBox = self.viewBox
+        # self.viewBox = None
 
         ###self.spinSystemLabel.deleteLater()
         if hasattr(self, 'planeToolbar'):
-          self.planeToolbar.deleteLater()
-          # currentToolbar = self.planeToolbar
+          # self.planeToolbar.deleteLater()
+          currentToolbar = self.planeToolbar
           # self.planeToolbar = None
 
         _stripDeleteDict = {'currentRow': currentRow
                             , 'currentIndex': currentIndex
                             , 'currentStripDirection': currentStripDirection
                             , 'currentPlotWidget': currentPlotWidget
+                            , 'currentScene': currentScene
                             , 'currentStripWidget': currentStripWidget
                             , 'currentParent': currentParent
-                            , 'currentToolbar':currentToolbar }
+                            , 'currentToolbar':currentToolbar
+                            , 'currentViewBox':currentViewBox}
 
         # store the old information
         ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
         if currentStripWidget:
+          print ('>>> removeFromLayout')
           print ('>>> ', currentRow)
           print ('>>> ', currentIndex)
           print ('>>> ', currentStripDirection)
           print ('>>> ', currentPlotWidget)
+          print ('>>> ', currentScene)
           print ('>>> ', currentStripWidget)
           print ('>>> ', currentParent)
           print ('>>> ', currentToolbar)
+          print ('>>> ', currentViewBox)
+
+      _undo = self.project._undo
+      if _undo is not None:
+        _undo.decreaseBlocking()
+
     else:
       raise ValueError("The last strip in a display cannot be deleted")
 
   def _restoreToLayout(self):
-    pass
+    ccpnStrip = self._wrappedData
+    n = len(ccpnStrip.spectrumDisplay.strips)
+
+    index = ccpnStrip.index
+    spectrumDisplay = self.spectrumDisplay
+    layout = spectrumDisplay.stripFrame.layout()
+
+    if layout:
+
+      _undo = self.project._undo
+      if _undo is not None:
+        _undo.increaseBlocking()
+
+      _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
+
+      currentStripWidget = _stripDeleteDict['currentStripWidget']
+      currentStripDirection = _stripDeleteDict['currentStripDirection']
+      currentRow = _stripDeleteDict['currentRow']
+      currentIndex = _stripDeleteDict['currentIndex']
+      currentPlotWidget = _stripDeleteDict['currentPlotWidget']
+      currentScene = _stripDeleteDict['currentScene']
+      currentToolbar = _stripDeleteDict['currentToolbar']
+      currentParent = _stripDeleteDict['currentParent']
+      currentViewBox = _stripDeleteDict['currentViewBox']
+
+      if currentStripWidget:
+        print('>>> RestoreFromLayout')
+        print('>>> ', currentRow)
+        print('>>> ', currentIndex)
+        print('>>> ', currentStripDirection)
+        print('>>> ', currentPlotWidget)
+        print('>>> ', currentStripWidget)
+        print('>>> ', currentParent)
+        print('>>> ', currentToolbar)
+        print('>>> ', currentViewBox)
+
+      for r in range(layout.rowCount()):
+        items = []
+        if spectrumDisplay.stripDirection == 'Y' and currentStripDirection == 'Y':
+
+          for m in range(currentIndex, n):
+            item = layout.itemAtPosition(r, m)
+            if m >= index:
+              items.append(item)
+            layout.removeItem(item)               # remove items to the right
+          for m, item in enumerate(items):        # re-insert them one to the left
+            layout.addItem(item, r, m + index + 1)
+          layout.addItem(currentStripWidget, currentRow, currentIndex)
+          currentStripWidget.setParent(currentParent)
+
+        elif spectrumDisplay.stripDirection == 'X' and currentStripDirection == 'X':
+
+          for m in range(currentIndex, n):
+            item = layout.itemAtPosition(m, 0)
+            if m >= index:
+              items.append(item)
+            layout.removeItem(item)               # remove items below
+          for m, item in enumerate(items):        # re-insert them one above
+            layout.addItem(item, m + index + 1, 0)
+          layout.addItem(currentStripWidget, currentRow, currentIndex)
+          currentStripWidget.setParent(currentParent)
+
+      self.plotWidget = currentPlotWidget
+      ###self.spinSystemLabel.deleteLater()
+      if hasattr(self, 'planeToolbar'):
+        self.planeToolbar = currentToolbar
+      self.viewBox = currentViewBox
+      self.plotWidget.setScene(currentScene)
+
+      _undo = self.project._undo
+      if _undo is not None:
+        _undo.decreaseBlocking()
 
   #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
   #TODO:ED: confer with rasmus and me to refactor while writing tests
@@ -260,11 +352,11 @@ class Strip(AbstractWrapperObject):
       if layout:  # should always be the case but play safe
         self._removeFromLayout()
 
-        # _undo = self.project._undo
-        # if _undo is not None:
-        #   _undo.newItem(self._restoreToLayout, self._removeFromLayout())
-
+        _undo = self.project._undo
+        if _undo is not None:
+          _undo.newItem(self._restoreToLayout, self._removeFromLayout)
         ccpnStrip.delete()
+
     else:
       raise  ValueError("The last strip in a display cannot be deleted")
 
@@ -289,6 +381,8 @@ class Strip(AbstractWrapperObject):
       _undo.decreaseBlocking()
       _undo.newItem(self.spectrumDisplay._removeIndexStrip, self.spectrumDisplay.addStrip
                     , undoArgs=(-1,))
+
+      # _undo.newItem(newStrip._removeFromLayout, newStrip._restoreToLayout)
 
     return newStrip
 

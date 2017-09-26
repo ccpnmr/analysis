@@ -437,10 +437,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
     _undo = self.project._undo
     self._startCommandEchoBlock('removeStrip')
-    stripPos = self.strips.index(strip)
 
-    if _undo is not None:
-      _undo.increaseBlocking()
+    # if _undo is not None:
+    #   _undo.increaseBlocking()
 
     try:
       strip._unregisterStrip()
@@ -453,11 +452,11 @@ class GuiSpectrumDisplay(CcpnModule):
     finally:
       self._endCommandEchoBlock()
 
-    if _undo is not None:
-      _undo.decreaseBlocking()
-
-      # TODO:ED this may not be the correct strip to Redo:remove
-      _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
+    # if _undo is not None:
+    #   _undo.decreaseBlocking()
+    #
+    #   # TODO:ED this may not be the correct strip to Redo:remove
+    #   _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
 
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"

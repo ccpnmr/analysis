@@ -311,6 +311,8 @@ class Strip(AbstractWrapperObject):
           for m, item in enumerate(items):        # re-insert them one to the left
             layout.addItem(item, r, m + index + 1)
           layout.addItem(currentStripWidget, currentRow, currentIndex)
+
+          #TODO:ED Caught the creation error here!!!!!
           currentStripWidget.setParent(currentParent)
 
         elif spectrumDisplay.stripDirection == 'X' and currentStripDirection == 'X':

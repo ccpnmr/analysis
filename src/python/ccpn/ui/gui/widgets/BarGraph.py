@@ -96,16 +96,36 @@ class BarGraph(pg.BarGraphItem):
 
 
   def mouseClickEvent(self, event):
-    position = event.pos().x()
+    pass
+    # position = event.pos().x()
+    #
+    # self.clicked = int(position)
+    # if event.button() == QtCore.Qt.LeftButton:
+    #   for label in self.labels:
+    #     if label.text() == str(self.clicked):
+    #       print(label.data(self.clicked))
+    #       # self.application.current.nmrResidue = label.data(self.clicked)
+    #       label.setSelected(True)
+    #
+    #   event.accept()
 
-    self.clicked = int(position)
-    if event.button() == QtCore.Qt.LeftButton:
-      for label in self.labels:
-        if label.text() == str(self.clicked):
-          print(label.data(self.clicked))
-          # self.application.current.nmrResidue = label.data(self.clicked)
-          label.setSelected(True)
-      event.accept()
+  def mouseDoubleClickEvent(self, event):
+    pass
+    # position = event.pos().x()
+    #
+    # self.doubleclicked = int(position)
+    # if event.button() == QtCore.Qt.LeftButton:
+    #   for label in self.labels:
+    #     if label.text() == str(self.doubleclicked):
+    #       print(label.text() , label.data(self.doubleclicked))
+    #
+    # event.accept()
+
+    # QtGui.QGraphicsScene.mouseDoubleClickEvent(self, ev)
+    #
+    # if self.mouseGrabberItem() is None:  ## nobody claimed press; we are free to generate drag/click events
+    #
+    #   self.clickEvents.append(MouseClickEvent(ev, double=True))
 
   def drawLabels(self):
     '''
@@ -396,57 +416,55 @@ for x, y in zip(x1,y1):
 #######################################################################################################
 #################################### Start Application ################################################
 #######################################################################################################
-# #
-# app = pg.mkQApp()
 #
-# customViewBox = CustomViewBox()
-# #
-# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-# customViewBox.setParent(plotWidget)
+app = pg.mkQApp()
+
+customViewBox = CustomViewBox()
 #
-#
-#
-# xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
-# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
-# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
-#
-# print('MMMM', xLow.xValues)
-#
-# customViewBox.addItem(xLow)
-# customViewBox.addItem(xMid)
-# customViewBox.addItem(xHigh)
-#
-# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-# customViewBox.addItem(xLine)
-#
-# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-# l.setParentItem(customViewBox.graphicsItem())
-#
-# c1 = plotWidget.plot(pen='r', name='low')
-# c2 = plotWidget.plot(pen='b', name='mid')
-# c3 = plotWidget.plot(pen='g', name='high')
-#
-# l.addItem(c1, 'low')
-# l.addItem(c2, 'mid')
-# l.addItem(c3, 'high')
-#
-# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-#
-# customViewBox.setMenuEnabled(enableMenu=False)
-#
-# plotWidget.show()
-#
-#
-#
-#
-#
-#
-# # Start Qt event
-# if __name__ == '__main__':
-#   import sys
-#   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-#     QtGui.QApplication.instance().exec_()
-#
-#
-#
-#
+plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+customViewBox.setParent(plotWidget)
+
+
+
+xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
+xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
+xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
+
+
+customViewBox.addItem(xLow)
+customViewBox.addItem(xMid)
+customViewBox.addItem(xHigh)
+
+xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+customViewBox.addItem(xLine)
+
+l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+l.setParentItem(customViewBox.graphicsItem())
+
+c1 = plotWidget.plot(pen='r', name='low')
+c2 = plotWidget.plot(pen='b', name='mid')
+c3 = plotWidget.plot(pen='g', name='high')
+
+l.addItem(c1, 'low')
+l.addItem(c2, 'mid')
+l.addItem(c3, 'high')
+
+customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+
+customViewBox.setMenuEnabled(enableMenu=False)
+
+plotWidget.show()
+
+
+
+
+
+
+# Start Qt event
+if __name__ == '__main__':
+  import sys
+  if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+    QtGui.QApplication.instance().exec_()
+
+
+

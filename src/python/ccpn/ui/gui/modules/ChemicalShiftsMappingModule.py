@@ -16,6 +16,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.core.lib.Notifiers import Notifier
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -32,16 +33,27 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.mainWindow is not None:
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
+      self.current = self.application.current
 
     if nmrChain is not None:
       self.setNmrChain(nmrChain)
 
     self._setWidgets()
 
+    self._selectCurrentNmrResiduesNotifier = Notifier(self.current
+                                                             , [Notifier.CURRENT]
+                                                             , targetName='nmrResidues'
+                                                             ,
+                                                             callback=self._selectCurrentNmrResiduesNotifierCallback)
+
+    BarGraph.mouseClickEvent = self._mouseClickEvent
+    BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+
   def _setWidgets(self):
-    self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
+    # self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
     if self.application:
       self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
+
 
 
 
@@ -51,15 +63,22 @@ class ChemicalShiftsMapping(CcpnModule):
       sequenceCode = []
       nmrResidues = []
       for nmrResidue in nmrChain.nmrResidues:
-        if not nmrResidue.peaksShifts:
-          shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue),]
-        else:
-          shifts += [nmrResidue.peaksShifts]
+        shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue),]
         sequenceCode += [int(nmrResidue.sequenceCode), ]
         nmrResidues += [nmrResidue, ]
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=sequenceCode, yValues=shifts, objects=nmrResidues, grid=(0, 0))
 
+  def _selectCurrentNmrResiduesNotifierCallback(self, data):
+    for bar in self.barGraphWidget.barGraphs:
+      for label in bar.labels:
+        if label.data(int(label.text())) is not None:
+          if self.application is not None:
+
+            if label.data(int(label.text())) in self.current.nmrResidues:
+              label.setSelected(True)
+            else:
+              label.setSelected(False)
 
   def _getMeanNmrResiduePeaksShifts(self, nmrResidue):
     import numpy as np
@@ -72,12 +91,56 @@ class ChemicalShiftsMapping(CcpnModule):
       return round(float(np.mean(deltas)),3)
     return
 
+  def _mouseClickEvent(self, event):
+
+    position = event.pos().x()
+    self.clicked = int(position)
+    if event.button() == QtCore.Qt.LeftButton:
+      for bar in self.barGraphWidget.barGraphs:
+        for label in bar.labels:
+          if label.text() == str(self.clicked):
+            print(label.data(self.clicked))
+            self.current.nmrResidue = label.data(self.clicked)
+            label.setSelected(True)
+
+      event.accept()
+
+  def _mouseDoubleClickEvent(self, event):
+    from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+
+    self.application.ui.mainWindow.clearMarks()
+    position = event.pos().x()
+    self.doubleclicked = int(position)
+    if event.button() == QtCore.Qt.LeftButton:
+      for bar in self.barGraphWidget.barGraphs:
+        for label in bar.labels:
+          if label.text() == str(self.doubleclicked):
+           nmrResidue =  label.data(self.doubleclicked)
+           if nmrResidue:
+
+             if self.current.strip is not None:
+               strip = self.current.strip
+               navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
+                                             widths=['default'] * len(strip.axisCodes))
+
+             else:
+               print('Impossible to navigate to peak position. Set a current strip first')
+
+
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()
+
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
-    # FIXME __deregisterNotifiers
-    # self.settingWidget.__deregisterNotifiers()
+    if self._selectCurrentNmrResiduesNotifier is not None:
+      self._selectCurrentNmrResiduesNotifier.unRegister()
+
     super(ChemicalShiftsMapping, self)._closeModule()
 
 

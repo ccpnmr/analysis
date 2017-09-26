@@ -43,6 +43,8 @@ class TextExporter(Exporter):
         if x is not None:
           if len(x) > 0:
             data.append((x,y))
+      if isinstance(i, pg.BarGraphItem):
+        data.append((i.xValues, i.yValues))
     return data
 
   def _createDataframe(self, data):
@@ -69,10 +71,10 @@ class TextExporter(Exporter):
     data = self.getPlottedData()
     if data:
       df = self._createDataframe(data)
-    if self.params['separator'] == '*.csv':
-      df.to_csv(fileName)
-    else:
-      df.to_csv(fileName, sep='\t')
+      if self.params['separator'] == '*.csv':
+        df.to_csv(fileName)
+      else:
+        df.to_csv(fileName, sep='\t')
 
 
 

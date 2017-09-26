@@ -437,7 +437,7 @@ class GuiStripNd(GuiStrip):
       if maxAliasedFrequency is not None:
         planeLabel.setMaximum(maxAliasedFrequency)
 
-      planeLabel.setValue(zAxis.position)
+      planeLabel.setData(zAxis.position)
 
       if minAliasedFrequency is not None:
         planeLabel.setMinimum(minAliasedFrequency)

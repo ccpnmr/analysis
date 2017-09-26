@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -24,14 +25,23 @@ class ChemicalShiftsMapping(CcpnModule):
   settingsPosition = 'top'
   className = 'ChemicalShiftsMapping'
 
-  def __init__(self, mainWindow, name='Chemical Shifts Mapping', nmrChain= None, **kw):
-    # super(ChemicalShiftsMapping, self)
+  def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kw):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
     self.mainWindow = mainWindow
-    if mainWindow is not None:
+    self.application = None
+    if self.mainWindow is not None:
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
 
+    if nmrChain is not None:
+      self.setNmrChain(nmrChain)
+
+    self._setWidgets()
+
+  def _setWidgets(self):
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
+    if self.application:
+      self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
 
 
 
@@ -41,7 +51,10 @@ class ChemicalShiftsMapping(CcpnModule):
       sequenceCode = []
       nmrResidues = []
       for nmrResidue in nmrChain.nmrResidues:
-        shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue), ]
+        if not nmrResidue.peaksShifts:
+          shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue),]
+        else:
+          shifts += [nmrResidue.peaksShifts]
         sequenceCode += [int(nmrResidue.sequenceCode), ]
         nmrResidues += [nmrResidue, ]
 
@@ -76,16 +89,19 @@ class BarGraphWidget(Widget, Base):
     Base.__init__(self, **kw)
     self._setViewBox()
     self._setLayout()
+
     self.xLine = None
+    self.barGraphs = []
 
     self.xValues = xValues
     self.yValues = yValues
     self.objects = objects
     self.colour = colour
-    self.addBarItems()
+    self.setData(xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
 
 
     self._addExtraItems()
+    self.updateViewBoxLimits()
 
   def _setViewBox(self):
     self.customViewBox = CustomViewBox()
@@ -99,14 +115,24 @@ class BarGraphWidget(Widget, Base):
     hbox.addWidget(self.plotWidget)
 
   def _addExtraItems(self):
-    self.addLegend()
+    # self.addLegend()
     self.addThresholdLine()
 
 
-  def setValue(self, xValues, yValues, objects):
+  def setData(self, xValues, yValues, objects, colour, replace=True):
+    if replace:
+      self.barGraphs = []
+      self.customViewBox.clear()
+
+    self.barGraph = BarGraph(viewBox=self.customViewBox, xValues=xValues, yValues=yValues, objects=objects,
+                  brush=colour)
+    self.barGraphs.append(self.barGraph)
+    self.customViewBox.addItem(self.barGraph)
     self.xValues = xValues
     self.yValues = yValues
     self.objects = objects
+
+    # self._lineMoved()
 
   def setViewBoxLimits(self, xMin, xMax, yMin, yMax):
     self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
@@ -117,13 +143,13 @@ class BarGraphWidget(Widget, Base):
       self.customViewBox.setLimits(xMin=min(self.xValues)/2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
                                    yMin=min(self.yValues)/2 ,yMax=max(self.yValues) + (max(self.yValues) * 0.5))
 
-  def addBarItems(self):
-    bg = BarGraph(viewBox=self.customViewBox, xValues=self.xValues, yValues=self.yValues, objects=self.objects, brush = self.colour)
-    self.customViewBox.addItem(bg)
-    # self.updateViewBoxLimits()
 
-  def _clearAll(self):
-    self.customViewBox.clear()
+
+  def clearBars(self):
+    self.barGraphs = []
+    for item in self.customViewBox.addedItems:
+      if not isinstance(item, pg.InfiniteLine):
+        self.customViewBox.removeItem(item)
 
   def addThresholdLine(self):
 
@@ -132,8 +158,10 @@ class BarGraphWidget(Widget, Base):
     if self.yValues is not None:
       if len(self.yValues)>0:
         self.xLine.setPos(min(self.yValues))
-    self.showThresholdLine(True)
+    self.showThresholdLine(False)
+    self._lineMoved()
     self.xLine.sigPositionChangeFinished.connect(self._lineMoved)
+
   def showThresholdLine(self, value=True):
     if value:
       self.xLine.show()
@@ -141,31 +169,41 @@ class BarGraphWidget(Widget, Base):
       self.xLine.hide()
 
   def _lineMoved(self):
-    self._clearAll()
+    self.clearBars()
 
     aboveX = []
     aboveY = []
+    aboveObjects = []
     belowX = []
     belowY = []
+    belowObjects = []
 
     pos = self.xLine.pos().y()
-    for x,y, in zip(self.xValues, self.yValues):
-      if y > pos:
-        aboveY.append(y)
-        aboveX.append(x)
-      else:
-        belowX.append(x)
-        belowY.append(y)
+    if self.xValues:
+      for x,y,obj in zip(self.xValues, self.yValues, self.objects):
+        if y > pos:
+          aboveY.append(y)
+          aboveX.append(x)
+          aboveObjects.append(obj)
+        else:
+          belowX.append(x)
+          belowY.append(y)
+          belowObjects.append(obj)
 
 
-    aboveThreshold = BarGraph(viewBox=self.customViewBox, xValues=aboveX, yValues=aboveY, objects=None,
-                  brush='g')
-    belowTrheshold = BarGraph(viewBox=self.customViewBox, xValues=belowX, yValues=belowY, objects=None,
-                  brush='r')
-    self.customViewBox.addItem(aboveThreshold)
-    self.customViewBox.addItem(belowTrheshold)
-    # self.updateViewBoxLimits()
 
+      self.aboveThreshold = BarGraph(viewBox=self.customViewBox, xValues=aboveX, yValues=aboveY, objects=aboveObjects,
+                    brush='g')
+      self.belowTrheshold = BarGraph(viewBox=self.customViewBox, xValues=belowX, yValues=belowY, objects=belowObjects,
+                    brush='r')
+      self.customViewBox.addItem(self.aboveThreshold)
+      self.customViewBox.addItem(self.belowTrheshold)
+      self.barGraphs.append(self.aboveThreshold)
+      self.barGraphs.append(self.belowTrheshold)
+      self.updateViewBoxLimits()
+
+    for bar in self.barGraphs:
+      bar.viewBox.showAboveThreshold()
 
   def addLegend(self):
     self.legendItem = pg.LegendItem((100, 60), offset=(70, 30))  # args are (size, offset)
@@ -187,7 +225,24 @@ class BarGraphWidget(Widget, Base):
 
 
 
-#################################### _________ RUN GUI TESTING ____________ ####################################
+
+#######################################################################################################
+####################################      Mock DATA TESTING    ########################################
+#######################################################################################################
+
+from collections import namedtuple
+import random
+
+nmrResidues = []
+for i in range(30):
+  nmrResidue = namedtuple('nmrResidue', ['sequenceCode','peaksShifts'])
+  nmrResidue.__new__.__defaults__ = (0,)
+  nmrResidue.sequenceCode = i
+  nmrResidue.peaksShifts = random.uniform(1.5, 3.9)
+  nmrResidues.append(nmrResidue)
+
+nmrChain = namedtuple('nmrChain', ['nmrResidues'])
+nmrChain.nmrResidues = nmrResidues
 
 
 
@@ -200,9 +255,11 @@ if __name__ == '__main__':
   win = QtGui.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
-  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, xValues=[21,25,23], yValues=[0.555, 0.566, 0.588])
+  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
   moduleArea.addModule(chemicalShiftsMapping)
-  # pipeline._openAllPipes()
+
+
+
 
   win.setCentralWidget(moduleArea)
   win.resize(1000, 500)

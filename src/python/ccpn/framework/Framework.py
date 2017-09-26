@@ -852,6 +852,9 @@ class Framework:
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       (),
+      ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
+      (),
+      # (),
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       ###(),
@@ -1910,6 +1913,10 @@ class Framework:
       mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
       mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
+  def showChemicalShiftMapping(self):
+    from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
+    cs = ChemicalShiftsMapping(mainWindow=self.ui.mainWindow)
+    self.ui.mainWindow.moduleArea.addModule(cs)
 
   #################################################################################################
   ## MENU callbacks:  Macro

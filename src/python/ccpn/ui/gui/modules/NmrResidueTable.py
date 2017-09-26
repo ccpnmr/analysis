@@ -129,7 +129,6 @@ class NmrResidueTableModule(CcpnModule):
     # main window
     self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, setLayout=True,
                                            application=self.application,
-                                           moduleParent=self,
                                            actionCallback=self.navigateToNmrResidue,
                                            grid=(0,0))
     # settingsWidget
@@ -239,16 +238,17 @@ class NmrResidueTable(ObjectTable):
     except:
       return None
 
-  def __init__(self, parent, application, moduleParent, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
     """
     Initialise the widgets for the module.
     """
-    self.moduleParent = moduleParent
     self._application = application
     self._project = application.project
     self._current = application.current
     self._widget = Widget(parent=parent, **kwds)
     self.nmrChain = None
+    if actionCallback is None:
+      actionCallback = self.defaultActionCallback
 
     NmrResidueTable._project = self._project
 
@@ -282,6 +282,8 @@ class NmrResidueTable(ObjectTable):
     # Notifier object to update the table if the nmrChain changes
     self._chainNotifier = None
     self._residueNotifier = None
+    self._selectOnTableCurrentNmrResiduesNotifier = None
+
 
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
@@ -325,6 +327,22 @@ class NmrResidueTable(ObjectTable):
             self.nmrChain = nmrChain
             self.ncWidget.select(self.nmrChain.pid)
 
+  def defaultActionCallback(self, nmrResidue, *args):
+
+    '''default Action Callback if not defined in the parent Module 
+    If current strip contains the double clicked nmrResidue will navigateToPositionInStrip '''
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+
+    self._application.ui.mainWindow.clearMarks()
+    if self._current.strip is not None:
+        strip = self._current.strip
+        navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
+
+                                      widths=['default'] * len(strip.axisCodes))
+
+    else:
+      logger.warning('Impossible to navigate to peak position. Set a current strip first')
+
   def displayTableForNmrChain(self, nmrChain):
     """
     Display the table for all NmrResidue's of nmrChain
@@ -357,6 +375,7 @@ class NmrResidueTable(ObjectTable):
       self.setColumns(self.NMRcolumns)
       self.setObjects(nmrChain.nmrResidues)
       # self._highLightObjs(objs)
+      self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
       self.show()
 
   def setUpdateSilence(self, silence):
@@ -382,6 +401,18 @@ class NmrResidueTable(ObjectTable):
       self.displayTableForNmrChain(self.nmrChain)
     else:
       self.clearTable()
+
+  def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
+    '''callback from a notifier to select the current NmrResidue  '''
+    currentNmrResidues = data['value']
+    self._selectOnTableCurrentNmrResidues(currentNmrResidues)
+
+  def _selectOnTableCurrentNmrResidues(self, currentNmrResidues):
+    ''' highlight  current NmrResidues on the opened  table '''
+    if len(currentNmrResidues)>0:
+      self._highLightObjs(currentNmrResidues)
+    else:
+      self.clearSelection()
 
   @staticmethod
   def _getCommentText(nmrResidue):
@@ -456,6 +487,11 @@ class NmrResidueTable(ObjectTable):
     #                               , onceOnly = True
     #                               )
 
+    self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self._current
+                                                       , [Notifier.CURRENT]
+                                                       , targetName='nmrResidues'
+                                                       , callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
+
   def _clearNotifiers(self):
     """
     clean up the notifiers
@@ -466,6 +502,8 @@ class NmrResidueTable(ObjectTable):
       self._residueNotifier.unRegister()
     if self._peakNotifier is not None:
       self._peakNotifier.unRegister()
+    if self._selectOnTableCurrentNmrResiduesNotifier is not None:
+      self._selectOnTableCurrentNmrResiduesNotifier.unRegister()
 
   def _close(self):
     """

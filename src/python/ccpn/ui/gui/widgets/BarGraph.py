@@ -291,14 +291,13 @@ class CustomViewBox(pg.ViewBox):
     from pyqtgraph.graphicsItems.ViewBox.ViewBoxMenu import ViewBoxMenu
 
     self.contextMenu = Menu('', None, isFloatWidget=True)
-
+    self.contextMenu.addAction('Reset View', self.autoRange)
     self.addLabelMenu()
-    self.viewBoxMenu = ViewBoxMenu(self)
-    self.contextMenu._addQMenu(self.viewBoxMenu)
-
+    self.contextMenu.addAction('ThresholdLine', self._toggleThresholdLine,)
     self.contextMenu.addSeparator()
     self.contextMenu.addAction('Export', self.showExportDialog)
     self.contextMenu.exec_(ev.screenPos().toPoint())
+
 
   def addLabelMenu(self):
     self.labelMenu = Menu(parent=self.contextMenu, title='Label Menu')
@@ -310,6 +309,17 @@ class CustomViewBox(pg.ViewBox):
                            checked=False, checkable=True, )
 
     self.contextMenu._addQMenu(self.labelMenu)
+
+  def _toggleThresholdLine(self):
+    tls = self.getthreshouldLine()
+    if len(tls)>0 and not None in tls:
+      for tl in tls:
+        tl.setVisible(not tl.isVisible())
+
+
+
+
+
 
 
   def getthreshouldLine(self):
@@ -337,10 +347,10 @@ class CustomViewBox(pg.ViewBox):
             label.hide()
 
   def showExportDialog(self):
-      if self.exportDialog is None:
-          ### parent() is the graphicsScene
-          self.exportDialog = CustomExportDialog(self.scene())
-      self.exportDialog.show(self)
+    if self.exportDialog is None:
+      ### parent() is the graphicsScene
+      self.exportDialog = CustomExportDialog(self.scene(), titleName='Exporting', spectrumDimension='1D')
+    self.exportDialog.show(self)
 
 
 
@@ -386,11 +396,11 @@ for x, y in zip(x1,y1):
 #######################################################################################################
 #################################### Start Application ################################################
 #######################################################################################################
-#
+# #
 # app = pg.mkQApp()
 #
 # customViewBox = CustomViewBox()
-#
+# #
 # plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
 # customViewBox.setParent(plotWidget)
 #
@@ -399,6 +409,8 @@ for x, y in zip(x1,y1):
 # xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
 # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
 # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
+#
+# print('MMMM', xLow.xValues)
 #
 # customViewBox.addItem(xLow)
 # customViewBox.addItem(xMid)
@@ -425,9 +437,9 @@ for x, y in zip(x1,y1):
 # plotWidget.show()
 #
 #
-# 
-
-
+#
+#
+#
 #
 # # Start Qt event
 # if __name__ == '__main__':
@@ -436,4 +448,5 @@ for x, y in zip(x1,y1):
 #     QtGui.QApplication.instance().exec_()
 #
 #
-
+#
+#

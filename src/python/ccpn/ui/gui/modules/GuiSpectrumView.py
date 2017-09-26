@@ -260,10 +260,11 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
 
   def _deletedSpectrumView(self):
     """Update interface when a spectrumView is deleted"""
-    scene = self.strip.plotWidget.scene()
-    scene.removeItem(self)
-    if hasattr(self, 'plot'):  # 1d
-      scene.removeItem(self.plot)
+    if self.strip.plotWidget:
+      scene = self.strip.plotWidget.scene()
+      scene.removeItem(self)
+      if hasattr(self, 'plot'):  # 1d
+        scene.removeItem(self.plot)
 
   def refreshData(self):
 

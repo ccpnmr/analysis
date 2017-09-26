@@ -445,7 +445,8 @@ class GuiSpectrumDisplay(CcpnModule):
     try:
       strip._unregisterStrip()
       self.setColumnStretches(stretchValue=False)      # set to 0 so they disappear
-      strip.setParent(None)           # need to remove the rogue widget from the widgetArea
+      # this removes it too early
+      # strip.setParent(None)           # need to remove the rogue widget from the widgetArea
       strip.delete()
       self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
 

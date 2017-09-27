@@ -25,11 +25,9 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
 
-import decimal
 from functools import partial
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -44,6 +42,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 
 Estimated = 'Estimated'
 Manual = 'Manual'
@@ -189,10 +188,10 @@ class PickPeak1DPopup(CcpnDialog):
   def __init__(self, mainWindow, title='Pick 1D Peak', **kw):
     CcpnDialog.__init__(self, parent=mainWindow, setLayout=False, windowTitle=title, **kw)
 
-    if mainWindow is None: #This allows opening the popup for graphical tests
+    self.mainWindow = mainWindow
+    if self.mainWindow is None: #This allows opening the popup for graphical tests
       self.project = None
     else:
-      self.mainWindow = mainWindow
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
 
@@ -214,26 +213,11 @@ class PickPeak1DPopup(CcpnDialog):
     self.excludedRegionsTab = ExcludeRegions(self)
     self.tabWidget.addTab(self.tabGeneralSetup, 'General')
     self.tabWidget.addTab(self.excludedRegionsTab, 'Exclude Regions')
-    self._setSelectionScrollArea()
 
-  def _setSelectionScrollArea(self):
-
-    self.scrollArea = ScrollArea(self, setLayout=False)
-    self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
-    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
   def _setWidgets(self):
 
-    self.selectSpectraOption = RadioButtons(self,
-                                              texts=['Spectra', 'Groups'],
-                                              selectedInd=0,
-                                              callback=self.showSpectraOption,
-                                              tipTexts=None)
-    self._addSpectrumCheckBoxes()
-    self._addSpectrumGroupsCheckBoxes()
-
-
+    self.spectraSelectionWidget = SpectraSelectionWidget(self, mainWindow=self.mainWindow)
     self.noiseLevelLabel = Label(self, text='Noise Level Threshold')
     self.noiseLevelRadioButtons = RadioButtons(self,
                                                texts=[Estimated, Manual],
@@ -268,8 +252,7 @@ class PickPeak1DPopup(CcpnDialog):
 
   def _addWidgetsToLayout(self):
     self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
-    self.tabGeneralSetupLayout.addWidget(self.selectSpectraOption, 0, 0)
-    self.tabGeneralSetupLayout.addWidget(self.scrollArea, 1, 0, 1, 2)
+    self.tabGeneralSetupLayout.addWidget(self.spectraSelectionWidget, 1, 0, 1, 2)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelLabel, 2, 0)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelRadioButtons, 2, 1)
     self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorLabel, 3, 0)
@@ -284,22 +267,6 @@ class PickPeak1DPopup(CcpnDialog):
     self.tabGeneralSetupLayout.addWidget(self.pickNegativeCheckBox, 6, 1)
     self.mainLayout.addWidget(self.pickCancelButtons, 10, 1)
 
-  def showSpectraOption(self):
-    if self.selectSpectraOption.get() == 'Spectra':
-      self.spectrumCheckBox.show()
-      self.spGroupsCheckBox.hide()
-      for cb in self.allCheckBoxes:
-        cb.show()
-      for sg in self.allSG_CheckBoxes:
-        sg.hide()
-
-    else:
-      self.spectrumCheckBox.hide()
-      for cb in self.allCheckBoxes:
-        cb.hide()
-      for sg in self.allSG_CheckBoxes:
-        sg.show()
-      self.spGroupsCheckBox.show()
 
   def _noiseLevelCallBack(self):
     selected = self.noiseLevelRadioButtons.get()
@@ -312,59 +279,6 @@ class PickPeak1DPopup(CcpnDialog):
       self.noiseLevelFactorSpinbox.hide()
       self.noiseLevelFactorLabel.hide()
 
-  def _addSpectrumCheckBoxes(self):
-    self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All',grid=(0, 0))
-    self.spectrumCheckBox.stateChanged.connect(self._checkAllSpectra)
-    self.allCheckBoxes = []
-    if self.project is not None:
-      for i, spectrum in enumerate(self.project.spectra):
-        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 0))
-        self.allCheckBoxes.append(self.spectrumCheckBox)
-
-  def _addSpectrumGroupsCheckBoxes(self):
-    self.spGroupsCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All SG', grid=(0, 0))
-    self.spGroupsCheckBox.hide()
-    self.spGroupsCheckBox.stateChanged.connect(self._checkAllSpectrumGroups)
-    self.allSG_CheckBoxes = []
-    if self.project is not None:
-      for i, sg in enumerate(self.project.spectrumGroups):
-        self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid), grid=(i + 1, 0))
-        self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
-        self.spectrumGroupCheckBox.hide()
-
-
-  def _checkAllSpectrumGroups(self, state):
-    if len(self.allCheckBoxes) > 0:
-      for sg in self.allSG_CheckBoxes:
-        if state == QtCore.Qt.Checked:
-          sg.setChecked(True)
-        else:
-          sg.setChecked(False)
-
-  def _checkAllSpectra(self, state):
-    if len(self.allCheckBoxes)>0:
-        for cb in self.allCheckBoxes:
-          if state == QtCore.Qt.Checked:
-            cb.setChecked(True)
-          else:
-            cb.setChecked(False)
-
-  def _getSelectedSpectra(self):
-    spectra = []
-    for cb in self.allCheckBoxes:
-      if cb.isChecked():
-        spectrum = self.project.getByPid('SP:'+str(cb.text()))
-        spectra.append(spectrum)
-    return spectra
-
-  def _getSpectrumGroupsSpectra(self):
-    spectra = []
-    for sg in self.allSG_CheckBoxes:
-      if sg.isChecked():
-        spectrumGroup = self.project.getByPid(str(sg.text()))
-        spectra += spectrumGroup.spectra
-    return spectra
-
 
   def _getNoiseThreshold(self):
     selected = self.noiseLevelRadioButtons.get()
@@ -375,7 +289,7 @@ class PickPeak1DPopup(CcpnDialog):
 
   def _pickFromSelectedSpectra(self):
 
-    spectra = list(set(self._getSelectedSpectra()+self._getSpectrumGroupsSpectra()))
+    spectra = list(set(self.spectraSelectionWidget._getSelectedSpectra()+self.spectraSelectionWidget._getSpectrumGroupsSpectra()))
     negativePeaks = self.pickNegativeCheckBox.get()
     size = self.maximumFilterSizeSpinbox.value()
     mode = self.maximumFilterModePulldownList.getText()

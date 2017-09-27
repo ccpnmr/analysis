@@ -60,43 +60,43 @@ class SpectraSelectionWidget(Widget,Base):
       self.project = mainWindow.application.project
       self.current = mainWindow.application.current
 
-    self.allSpectraCheckBoxes = []
-    self.allSG_CheckBoxes = []
-    self.positions = []
-    self._setSelectionScrollArea()
-    self._setWidgets()
+      self.allSpectraCheckBoxes = []
+      self.allSG_CheckBoxes = []
+      self._setWidgets()
 
 
-  def _setSelectionScrollArea(self):
-
-    self.scrollArea = ScrollArea(self, setLayout=False, grid=(1,0),)
-    self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
-    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-    # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
   def _setWidgets(self):
+    i = 0
 
     self.selectSpectraOption = RadioButtons(self,
                                               texts=['Spectra', 'Groups'],
                                               selectedInd=0,
                                               callback=self.showSpectraOption,
                                               tipTexts=None,
-                                              grid=(0,0))
+                                              grid=(i,0))
+    i += 1
     if self.project is not None:
       if len(self.project.spectra)>0:
         # self.selectAllcheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All', grid=(0, 0), hAlign='c', vAlign='t')
-        self.selectAllSpectraCheckBox = CheckBox(self.scrollAreaWidgetContents, checked=True, text='Select All Spectra ', grid=(0, 0), hAlign='l',
+        self.selectAllSpectraCheckBox = CheckBox(self, checked=True, text='Select All Spectra ', grid=(i, 0), hAlign='l',
                                                  vAlign='t')
 
-        self.selectAllSpectrumGroupsCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All SpectrumGroups ', grid=(0, 0),
+        self.selectAllSpectrumGroupsCheckBox = CheckBox(self, text='Select All SpectrumGroups ', grid=(i, 0),
                                                  hAlign='l',
                                                  vAlign='t')
-        self.selectFromCurrentStrip = Button(self.scrollAreaWidgetContents,
-                                               text='Select From Current Strip', grid=(0,1), callback=self._checkSpectraFromCurrentStrip,
+        self.selectFromCurrentStrip = Button(self,
+                                               text='Select From Current Strip', grid=(i, 1), callback=self._checkSpectraFromCurrentStrip,
                                                hAlign='l',
                                                vAlign='t')
+      i += 1
+      self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
+      self.scrollArea.setWidgetResizable(True)
+      self.scrollAreaWidgetContents = Frame(self, setLayout=True)
+      self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+      self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
 
       self._addSpectrumCheckBoxes()
       self._addSpectrumGroupsCheckBoxes()

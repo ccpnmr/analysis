@@ -18,7 +18,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.util.Colour import spectrumColours
 
 class ChemicalShiftsMapping(CcpnModule):
 
@@ -57,7 +57,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
 
   def _setSettingsWidgets(self):
-    self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    # self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
     #   inputData
     i = 0
     self.inputLabel = Label(self.settingsWidget, text='Select input', grid=(i, 0), vAlign='t')
@@ -71,8 +71,26 @@ class ChemicalShiftsMapping(CcpnModule):
     self.nAtomCheckBox = CheckBox(self.settingsWidget, text='NE1', checked=False, grid=(i, 1))
     i += 1
     self.hAtomCheckBox = CheckBox(self.settingsWidget, text='HE1', checked=False, grid=(i, 1))
+    i += 1
+    self.caAtomCheckBox = CheckBox(self.settingsWidget, text='CA', checked=False, grid=(i, 1))
+    i += 1
+    self.cbAtomCheckBox = CheckBox(self.settingsWidget, text='CB', checked=False, grid=(i, 1))
+    i += 1
 
+    self.aboveThresholdColourLabel =  Label(self.settingsWidget,text='Above Threshold Colour', grid=(i,0))
+    self.aboveThresholdColourBox = PulldownList(self.settingsWidget,  grid=(i, 1))
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
 
+    i += 1
+    self.belowThresholdColourLabel = Label(self.settingsWidget, text='Below Threshold Colour', grid=(i, 0))
+    self.belowThresholdColourBox = PulldownList(self.settingsWidget, grid=(i, 1))
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
 
   def setNmrChain(self, nmrChain):
     if nmrChain:

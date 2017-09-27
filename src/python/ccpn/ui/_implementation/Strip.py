@@ -195,7 +195,8 @@ class Strip(AbstractWrapperObject):
             for m in range(index, n):
               item = layout.itemAtPosition(r, m)
               if m > index:
-                items.append(item)
+                if item:
+                  items.append(item)
               layout.removeItem(item)               # remove items to the right
             for m, item in enumerate(items):        # re-insert them one to the left
               layout.addItem(item, r, m + index)
@@ -213,7 +214,8 @@ class Strip(AbstractWrapperObject):
             for m in range(index, n):
               item = layout.itemAtPosition(m, 0)
               if m > index:
-                items.append(item)
+                if item:
+                  items.append(item)
               layout.removeItem(item)               # remove items below
             for m, item in enumerate(items):        # re-insert them one above
               layout.addItem(item, m + index, 0)
@@ -306,14 +308,16 @@ class Strip(AbstractWrapperObject):
           for m in range(currentIndex, n):
             item = layout.itemAtPosition(r, m)
             if m >= index:
-              items.append(item)
+              if item:
+                items.append(item)
+              print ('>>> moving', m, item)
             layout.removeItem(item)               # remove items to the right
-          for m, item in enumerate(items):        # re-insert them one to the left
-            layout.addItem(item, r, m + index + 1)
-          layout.addItem(currentStripWidget, currentRow, currentIndex)
+          # for m, item in enumerate(items):        # re-insert them one to the left
+          #   layout.addItem(item, r, m + index + 1)
+          # layout.addItem(currentStripWidget, currentRow, currentIndex)
 
           #TODO:ED Caught the creation error here!!!!!
-          currentStripWidget.setParent(currentParent)
+          # currentStripWidget.setParent(currentParent)
 
         elif spectrumDisplay.stripDirection == 'X' and currentStripDirection == 'X':
 
@@ -325,7 +329,7 @@ class Strip(AbstractWrapperObject):
           for m, item in enumerate(items):        # re-insert them one above
             layout.addItem(item, m + index + 1, 0)
           layout.addItem(currentStripWidget, currentRow, currentIndex)
-          currentStripWidget.setParent(currentParent)
+          # currentStripWidget.setParent(currentParent)
 
       self.plotWidget = currentPlotWidget
       ###self.spinSystemLabel.deleteLater()

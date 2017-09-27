@@ -59,7 +59,7 @@ PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python$(PYTHON_VERSION)m -I$(PYTH
 PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
 
 # for Windows seem to need below (or similar)
-# PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
+#PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs
 
 # shared library flags
 # use below for Linux or Irix

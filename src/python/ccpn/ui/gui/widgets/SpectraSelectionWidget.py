@@ -60,6 +60,9 @@ class SpectraSelectionWidget(Widget,Base):
       self.project = mainWindow.application.project
       self.current = mainWindow.application.current
 
+    self.allSpectraCheckBoxes = []
+    self.allSG_CheckBoxes = []
+    self.positions = []
     self._setSelectionScrollArea()
     self._setWidgets()
 
@@ -70,6 +73,8 @@ class SpectraSelectionWidget(Widget,Base):
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+    # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
 
   def _setWidgets(self):
 
@@ -82,12 +87,16 @@ class SpectraSelectionWidget(Widget,Base):
     if self.project is not None:
       if len(self.project.spectra)>0:
         # self.selectAllcheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All', grid=(0, 0), hAlign='c', vAlign='t')
-        self.selectAllSpectraCheckBox = CheckBox(self.scrollAreaWidgetContents, checked=True, text='Select All Spectra ', grid=(0, 0), hAlign='c',
+        self.selectAllSpectraCheckBox = CheckBox(self.scrollAreaWidgetContents, checked=True, text='Select All Spectra ', grid=(0, 0), hAlign='l',
                                                  vAlign='t')
 
         self.selectAllSpectrumGroupsCheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All SpectrumGroups ', grid=(0, 0),
-                                                 hAlign='c',
+                                                 hAlign='l',
                                                  vAlign='t')
+        self.selectFromCurrentStrip = Button(self.scrollAreaWidgetContents,
+                                               text='Select From Current Strip', grid=(0,1), callback=self._checkSpectraFromCurrentStrip,
+                                               hAlign='l',
+                                               vAlign='t')
 
       self._addSpectrumCheckBoxes()
       self._addSpectrumGroupsCheckBoxes()
@@ -97,22 +106,65 @@ class SpectraSelectionWidget(Widget,Base):
         self._checkAllSpectra(QtCore.Qt.Checked)
       self.showSpectraOption()
 
+  def updateWidgets(self):
+    self._deleteAllCheckBoxes()
+    self._addSpectrumCheckBoxes()
+    self._addSpectrumGroupsCheckBoxes()
+
   def _addSpectrumCheckBoxes(self):
 
     self.allSpectraCheckBoxes = []
     if self.project is not None:
-      for i, spectrum in enumerate(self.project.spectra):
-        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.id), grid=(i+1, 1), callback=self._toggleCheckBoxSelectAllSpectra, hAlign='l',vAlign='t')
+      for i, spectrum in enumerate(self.project.spectra, start=2):
+        self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.pid), grid=(i, 0), callback=self._toggleCheckBoxSelectAllSpectra, hAlign='l',vAlign='t')
         self.allSpectraCheckBoxes.append(self.spectrumCheckBox)
 
+  def _checkSpectraFromCurrentStrip(self):
+    if self.current.strip is not None:
+      self.selectAllSpectraCheckBox.setCheckState(0)
+      self.selectAllSpectrumGroupsCheckBox.setCheckState(0)
+      if not self.current.strip.spectrumDisplay.isGrouped:
+        for spView in self.current.strip.spectrumDisplay.spectrumViews:
+          if spView is not None:
+            if self.selectSpectraOption.getIndex() == 0:
+              for checkBox in self.allSpectraCheckBoxes:
+                if checkBox.text() == spView.spectrum.pid:
+                  checkBox.setChecked(True)
+      else:
+        if len(self.allSG_CheckBoxes)>0:
+          for checkBox in self.allSG_CheckBoxes:
+            if checkBox.text() in  [sg.pid for sg in self.current.strip.spectrumDisplay.spectrumGroupToolBar._spectrumGroups]:
+              checkBox.setChecked(True)
+
+    else:
+      print('Select Current strip first')
+      self._checkAllSpectra(0)
+    self._toggleCheckBoxSelectAllSpectra()
+
+
+  def _deleteAllCheckBoxes(self):pass
+    # while self.scrollAreaWidgetContents.getLayout().count():
+    #   item = self.scrollAreaWidgetContents.getLayout().takeAt(0)
+    #   # if item in self.allSG_CheckBoxes or self.allSpectraCheckBoxes:
+    #   print(item)
+    #   item.widget().deleteLater()
+
+  def clearLayout(self, layout):
+    if layout != None:
+      while layout.count():
+        child = layout.takeAt(0)
+        if child.widget() is not None:
+          child.widget().deleteLater()
+        elif child.layout() is not None:
+          self.clearLayout(child.layout())
 
   def _addSpectrumGroupsCheckBoxes(self):
 
     self.allSG_CheckBoxes = []
     if self.project is not None:
-      for i, sg in enumerate(self.project.spectrumGroups):
+      for i, sg in enumerate(self.project.spectrumGroups, start=2):
         self.spectrumGroupCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(sg.pid),callback=self._toggleCheckBoxSelectAllSpectrumGroup,
-                                              grid=(i + 1, 1),  hAlign='l',vAlign='t')
+                                              grid=(i, 0),  hAlign='l',vAlign='t')
         self.allSG_CheckBoxes.append(self.spectrumGroupCheckBox)
 
   def _toggleCheckBoxSelectAllSpectra(self):
@@ -127,6 +179,7 @@ class SpectraSelectionWidget(Widget,Base):
         self.selectAllSpectraCheckBox.setTristate(False)
 
   def _toggleCheckBoxSelectAllSpectrumGroup(self):
+      # self.selectFromCurrentStrip.setChecked(False)
       allChecked = [checkBox.isChecked() for checkBox in self.allSG_CheckBoxes]
       if False in allChecked:
         self.selectAllSpectrumGroupsCheckBox.setCheckState(1)
@@ -139,6 +192,7 @@ class SpectraSelectionWidget(Widget,Base):
 
 
   def _checkAllSpectrumGroups(self, state):
+    # self.selectFromCurrentStrip.setChecked(False)
     if self.selectAllSpectrumGroupsCheckBox.checkState() != 1:
       self.selectAllSpectrumGroupsCheckBox.setTristate(False)
 
@@ -152,6 +206,7 @@ class SpectraSelectionWidget(Widget,Base):
           continue
 
   def _checkAllSpectra(self, state):
+    self.selectFromCurrentStrip.setChecked(False)
     if self.selectAllSpectraCheckBox.checkState() != 1:
       self.selectAllSpectraCheckBox.setTristate(False)
 
@@ -168,7 +223,7 @@ class SpectraSelectionWidget(Widget,Base):
     spectra = []
     for cb in self.allSpectraCheckBoxes:
       if cb.isChecked():
-        spectrum = self.project.getByPid('SP:'+str(cb.text()))
+        spectrum = self.project.getByPid(str(cb.text()))
         spectra.append(spectrum)
     return spectra
 

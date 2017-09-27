@@ -10,8 +10,9 @@ from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.GroupBox import GroupBox
-from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -23,11 +24,15 @@ class ChemicalShiftsMapping(CcpnModule):
 
   includeSettingsWidget = True
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-  settingsPosition = 'top'
+  settingsPosition = 'left'
   className = 'ChemicalShiftsMapping'
 
   def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kw):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
+
+    BarGraph.mouseClickEvent = self._mouseClickEvent
+    BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+
     self.mainWindow = mainWindow
     self.application = None
     if self.mainWindow is not None:
@@ -39,21 +44,33 @@ class ChemicalShiftsMapping(CcpnModule):
       self.setNmrChain(nmrChain)
 
     self._setWidgets()
+    self._setSettingsWidgets()
 
-    self._selectCurrentNmrResiduesNotifier = Notifier(self.current
-                                                             , [Notifier.CURRENT]
-                                                             , targetName='nmrResidues'
-                                                             ,
-                                                             callback=self._selectCurrentNmrResiduesNotifierCallback)
+    self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
+                                                     , callback=self._selectCurrentNmrResiduesNotifierCallback)
 
-    BarGraph.mouseClickEvent = self._mouseClickEvent
-    BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+
 
   def _setWidgets(self):
     # self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
     if self.application:
       self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
 
+  def _setSettingsWidgets(self):
+    self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    #   inputData
+    i = 0
+    self.inputLabel = Label(self.settingsWidget, text='Select input', grid=(i, 0), vAlign='t')
+    self.spectraSelectionWidget = SpectraSelectionWidget(self.settingsWidget, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
+    i += 1
+    self.atomLabel = Label(self.settingsWidget,text='Select atoms', grid=(i,0))
+    self.nAtomCheckBox = CheckBox(self.settingsWidget, text='N', checked=True, grid=(i,1))
+    i += 1
+    self.hAtomCheckBox = CheckBox(self.settingsWidget, text='H', checked=True, grid=(i, 1))
+    i += 1
+    self.nAtomCheckBox = CheckBox(self.settingsWidget, text='NE1', checked=False, grid=(i, 1))
+    i += 1
+    self.hAtomCheckBox = CheckBox(self.settingsWidget, text='HE1', checked=False, grid=(i, 1))
 
 
 

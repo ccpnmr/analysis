@@ -218,6 +218,7 @@ class PickPeak1DPopup(CcpnDialog):
   def _setWidgets(self):
 
     self.spectraSelectionWidget = SpectraSelectionWidget(self, mainWindow=self.mainWindow)
+
     self.noiseLevelLabel = Label(self, text='Noise Level Threshold')
     self.noiseLevelRadioButtons = RadioButtons(self,
                                                texts=[Estimated, Manual],

@@ -333,17 +333,23 @@ class Strip(AbstractWrapperObject):
           self.setParent(currentParent)
 
           widgets = [oS for oS in self.spectrumDisplay.orderedStrips]
-          widgets.insert(currentIndex, self)
+          widgets.insert(index, self)
           while layout.count():  # clear the layout
             layout.takeAt(0)
           for m, widgStrip in enumerate(widgets):  # make again
             layout.addWidget(widgStrip, r, m)
 
           # reinsert back into the orderedStrips
-          newTuple = tuple([st for st in widgets])
-          newApiTuple = tuple([st._wrappedData for st in widgets])
-          ccpnStrip.spectrumDisplay.setOrderedStrips = newApiTuple
-          self.spectrumDisplay.orderedStrips = newTuple
+          # self.spectrumDisplay.stripCount += 1
+          # self.spectrumDisplay.orderedStrips = widgets
+
+          count = ccpnStrip.spectrumDisplay.__dict__
+          field = ccpnStrip.spectrumDisplay._fieldNames
+          strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
+          print ('>>> count')
+          print ('>>> orderedStrips')
+          ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in widgets]
+          # self.spectrumDisplay.orderedStrips = widgets
 
             # # TODO:ED check why columnCount is too big
           # # col = layout.columnCount()

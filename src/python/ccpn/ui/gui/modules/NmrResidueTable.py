@@ -216,8 +216,6 @@ class NmrResidueTable(ObjectTable):
     ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
     ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
                   , 'Number of peaks assigned to NmrResidue', None),
-    ('Peaks Shifts', lambda nmrResidue: NmrResidueTable._getMeanNmrResiduePeaksShifts(nmrResidue)
-     , '', None),
     ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
      lambda nmr, value:NmrResidueTable._setComment(nmr, value))
   ]
@@ -452,16 +450,16 @@ class NmrResidueTable(ObjectTable):
     l1 = [peak for atom in nmrResidue.nmrAtoms for peak in atom.assignedPeaks]
     return len(set(l1))
 
-  @staticmethod
-  def _getMeanNmrResiduePeaksShifts(nmrResidue):
-    deltas = []
-    peaks = nmrResidue.nmrAtoms[0].assignedPeaks
-    for i, peak in enumerate(peaks):
-      deltas += [
-        (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
-    if not None in deltas and deltas:
-      return round(float(np.mean(deltas)),3)
-    return
+  # @staticmethod
+  # def _getMeanNmrResiduePeaksShifts(nmrResidue):
+  #   deltas = []
+  #   peaks = nmrResidue.nmrAtoms[0].assignedPeaks
+  #   for i, peak in enumerate(peaks):
+  #     deltas += [
+  #       (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
+  #   if not None in deltas and deltas:
+  #     return round(float(np.mean(deltas)),3)
+  #   return
 
   def _setNotifiers(self):
     """

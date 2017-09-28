@@ -19,6 +19,23 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours
+from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+
+
+class CustomNmrResidueTable(NmrResidueTable):
+  ''' Custon nmrResidue Table with extra Delta Shifts column'''
+  deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: NmrResidueTable._getMeanNmrResiduePeaksShifts(nmrResidue)
+                       , '', None)
+  columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
+  columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
+
+  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+
+    NmrResidueTable.__init__(self, parent=parent, application=application,
+                             actionCallback=actionCallback, selectionCallback=selectionCallback, nmrChain=nmrChain, **kwds)
+    self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
+                       colName, func, tipText, editValue in self.columnDefs]
+
 
 class ChemicalShiftsMapping(CcpnModule):
 
@@ -35,10 +52,17 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.mainWindow = mainWindow
     self.application = None
+    self.atoms = set()
     if self.mainWindow is not None:
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
       self.current = self.application.current
+
+      if len(self.project.nmrResidues):
+
+        for i in self.project.nmrResidues:
+          for j in i.nmrAtoms:
+            self.atoms.add(j.name)
 
     if nmrChain is not None:
       self.setNmrChain(nmrChain)
@@ -54,7 +78,10 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
     # self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
     if self.application:
-      self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
+
+      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
+
+
 
   def _setSettingsWidgets(self):
     # self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
@@ -64,17 +91,20 @@ class ChemicalShiftsMapping(CcpnModule):
     self.spectraSelectionWidget = SpectraSelectionWidget(self.settingsWidget, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
     i += 1
     self.atomLabel = Label(self.settingsWidget,text='Select atoms', grid=(i,0))
-    self.nAtomCheckBox = CheckBox(self.settingsWidget, text='N', checked=True, grid=(i,1))
-    i += 1
-    self.hAtomCheckBox = CheckBox(self.settingsWidget, text='H', checked=True, grid=(i, 1))
-    i += 1
-    self.nAtomCheckBox = CheckBox(self.settingsWidget, text='NE1', checked=False, grid=(i, 1))
-    i += 1
-    self.hAtomCheckBox = CheckBox(self.settingsWidget, text='HE1', checked=False, grid=(i, 1))
-    i += 1
-    self.caAtomCheckBox = CheckBox(self.settingsWidget, text='CA', checked=False, grid=(i, 1))
-    i += 1
-    self.cbAtomCheckBox = CheckBox(self.settingsWidget, text='CB', checked=False, grid=(i, 1))
+    for atom in sorted(self.atoms):
+      self.nAtomCheckBox = CheckBox(self.settingsWidget, text=atom, checked=True, grid=(i,1))
+      i += 1
+    # self.hAtomCheckBox = CheckBox(self.settingsWidget, text='H', checked=True, grid=(i, 1))
+    # i += 1
+    # self.nAtomCheckBox = CheckBox(self.settingsWidget, text='NE1', checked=False, grid=(i, 1))
+    # i += 1
+    # self.hAtomCheckBox = CheckBox(self.settingsWidget, text='HE1', checked=False, grid=(i, 1))
+    # i += 1
+    # self.caAtomCheckBox = CheckBox(self.settingsWidget, text='CA', checked=False, grid=(i, 1))
+    # self.caAtomCheckBox.setEnabled(False)
+    # i += 1
+    # self.cbAtomCheckBox = CheckBox(self.settingsWidget, text='CB', checked=False, grid=(i, 1))
+    # self.cbAtomCheckBox.setEnabled(False)
     i += 1
 
     self.aboveThresholdColourLabel =  Label(self.settingsWidget,text='Above Threshold Colour', grid=(i,0))

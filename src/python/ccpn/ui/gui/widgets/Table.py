@@ -398,6 +398,8 @@ class ObjectTable(QtGui.QTableView, Base):
   def hideColumnName(self, name):
     self.hideColumn(self.getColumnInt(columnName=name))
 
+  def showColumnName(self, name):
+    self.showColumn(self.getColumnInt(columnName=name))
 
   def getCurrentIndex(self):
 
@@ -583,6 +585,11 @@ class ObjectTable(QtGui.QTableView, Base):
     for i, column in enumerate(self.columns):
       if column.heading == columnName:
         return i
+
+  def getColumn(self, columnName):
+    for column in self.columns:
+      if column.heading == columnName:
+        return column
 
   def setupHeaderStretch(self):
 

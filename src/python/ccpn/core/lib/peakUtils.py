@@ -58,3 +58,20 @@ def getPeakLinewidth(peak, dim):
     if lw:
       return float(lw)
 
+
+def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra):
+  '''
+  
+  :param nmrResidue: 
+  :param nmrAtoms: nmr Atoms to compare. str 'H' , 'N' , 'CA' etc
+  :param spectra: compare peaks only from given spectra
+  :return: 
+  '''
+  deltas = []
+  peaks = nmrResidue.nmrAtoms[0].assignedPeaks
+  for i, peak in enumerate(peaks):
+    deltas += [
+      (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
+  if not None in deltas and deltas:
+    return round(float(np.mean(deltas)),3)
+  return

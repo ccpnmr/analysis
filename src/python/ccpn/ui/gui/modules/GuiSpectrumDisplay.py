@@ -415,6 +415,14 @@ class GuiSpectrumDisplay(CcpnModule):
     CcpnModule._closeModule(self)
     self.delete()
 
+  def _unDelete(self, strip):
+    _undo = self.project._undo
+    self._startCommandEchoBlock('removeStrip')
+    try:
+      strip._unDelete()
+    finally:
+      self._endCommandEchoBlock()
+
   def _removeIndexStrip(self, value):
     self.removeStrip(self.strips[value])
 

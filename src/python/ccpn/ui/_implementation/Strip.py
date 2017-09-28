@@ -153,132 +153,51 @@ class Strip(AbstractWrapperObject):
   def _removeFromLayout(self):
 
     ccpnStrip = self._wrappedData
-    n = len(ccpnStrip.spectrumDisplay.orderedStrips)
-    if n > 1:
+    # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
+    index = ccpnStrip.index
+    spectrumDisplay = self.spectrumDisplay
+    layout = spectrumDisplay.stripFrame.layout()
+    n = layout.count()
 
+    if n > 1 and layout:
       _undo = self.project._undo
       if _undo is not None:
         _undo.increaseBlocking()
 
-      index = ccpnStrip.index
-      spectrumDisplay = self.spectrumDisplay
-      layout = spectrumDisplay.stripFrame.layout()
+      currentStripItem = self
+      currentRow = 0
+      currentIndex = index
+      currentParent = self.parent()
+      currentStripDirection = spectrumDisplay.stripDirection
+      currentWrapped = ccpnStrip
 
-      if layout:  # should always be the case but play safe
-        # remove the item for this strip from the layout
-        # and shuffle "higher" items down in the layout
-        # (by removing them and then adding them back in)
+      self._widgets = []
+      while layout.count():                             # clear the layout and store
+        self._widgets.append(layout.takeAt(0).widget())
+      self._widgets.remove(self)
 
-        lRows = layout.rowCount()
-        currentStripItem = None   # use these for undelete
-        currentStripDirection = None
-        currentRow = 0
-        currentIndex = 0
-        currentPlotWidget = None
-        currentToolbar = None
-        currentParent = None
-        currentScene = None
-        currentViewBox = None
+      if spectrumDisplay.stripDirection == 'Y':
+        for m, widgStrip in enumerate(self._widgets):   # build layout again
+          layout.addWidget(widgStrip, 0, m)
+          layout.setColumnStretch(m, 1)
+      elif spectrumDisplay.stripDirection == 'X':
+        for m, widgStrip in enumerate(self._widgets):   # build layout again
+          layout.addWidget(widgStrip, m, 0)
+        layout.setColumnStretch(0, 1)
 
-        for r in range(layout.rowCount()):
-          self._widgets = []
-          if spectrumDisplay.stripDirection == 'Y':
+      # move to widget store
+      self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
+      # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
+      self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
-            currentStripItem = self
-            currentRow = r
-            currentIndex = index
-            currentParent = self.parent()
-            currentStripDirection = spectrumDisplay.stripDirection
-
-            widgets = [oS for oS in self.spectrumDisplay.orderedStrips]
-            widgets.remove(self)
-            while layout.count():     # clear the layout
-              layout.takeAt(0)
-            for m, widgStrip in enumerate(widgets):   # make again
-              layout.addWidget(widgStrip, r, m)
-            self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
-            self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
-
-            # currentStripItem = layout.itemAtPosition(r, index)    # hmm, should be None
-            # if currentStripItem:
-            #   currentParent = self.parent()
-            #   # self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
-            #   # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)              # completely remove from layout
-            #
-            #   currentRow = r
-            #   currentIndex = index
-            #   currentStripDirection = spectrumDisplay.stripDirection
-            #   layout.removeItem(currentStripItem)
-            #   self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(currentStripItem.widget())
-            #   self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
-            #
-            # for m in range(index, n):
-            #   item = layout.itemAtPosition(r, m)
-            #   if m > index and item:
-            #     self._widgets.append(item.widget())
-            #     layout.removeItem(item)               # remove items to the right
-            # for m, widg in enumerate(self._widgets):        # re-insert them one to the left
-            #   layout.addWidget(widg, r, m + index)
-            #   # layout.addWidget(item.widget(), r, m + index)
-
-          elif spectrumDisplay.stripDirection == 'X':
-            pass
-
-            # currentStripItem = layout.itemAtPosition(index, 0)
-            # self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
-            # if currentStripItem:
-            #
-            #   # TODO:ED this needs to match above
-            #   currentParent = currentStripItem.parent()
-            #   currentRow = index
-            #   currentIndex = 0
-            #   currentStripDirection = spectrumDisplay.stripDirection
-            #
-            # for m in range(index, n):
-            #   item = layout.itemAtPosition(m, 0)
-            #   if m > index:
-            #     if item:
-            #       items.append(item)
-            #   layout.removeItem(item)               # remove items below
-            # for m, item in enumerate(items):        # re-insert them one above
-            #   layout.addItem(item, m + index, 0)
-
-        # currentScene = self.plotWidget.scene()
-        # # self.plotWidget.setScene(None)
-        # currentPlotWidget = self.plotWidget
-        # # self.plotWidget = None
-        # currentViewBox = self.viewBox
-        # # self.viewBox = None
-
-        ###self.spinSystemLabel.deleteLater()
-        # if hasattr(self, 'planeToolbar'):
-        #   # self.planeToolbar.deleteLater()
-        #   currentToolbar = self.planeToolbar
-        #   self.planeToolbar = None
-
-        _stripDeleteDict = {'currentRow': currentRow
-                            , 'currentIndex': currentIndex
-                            , 'currentStripDirection': currentStripDirection
-                            , 'currentPlotWidget': currentPlotWidget
-                            , 'currentScene': currentScene
-                            , 'currentStripItem': currentStripItem
-                            , 'currentParent': currentParent
-                            , 'currentToolbar':currentToolbar
-                            , 'currentViewBox':currentViewBox}
-
-        # store the old information
-        ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
-        if currentStripItem:
-          print ('>>> removeFromLayout')
-          print ('>>> currentRow:           ', currentRow)
-          print ('>>> currentIndex:         ', currentIndex)
-          print ('>>> currentStripDirection:', currentStripDirection)
-          print ('>>> currentPlotWidget:    ', currentPlotWidget)
-          print ('>>> currentScene:         ', currentScene)
-          print ('>>> currentStripItem:     ', currentStripItem)
-          print ('>>> currentParent:        ', currentParent)
-          print ('>>> currentToolbar:       ', currentToolbar)
-          print ('>>> currentViewBox:       ', currentViewBox)
+      # store the old information
+      _stripDeleteDict = {'currentRow': currentRow
+                          , 'currentIndex': currentIndex
+                          , 'currentStripDirection': currentStripDirection
+                          , 'currentStripItem': currentStripItem
+                          , 'currentParent': currentParent
+                          , 'currentWrapped': currentWrapped}
+      ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
 
       _undo = self.project._undo
       if _undo is not None:
@@ -289,114 +208,49 @@ class Strip(AbstractWrapperObject):
 
   def _restoreToLayout(self):
     ccpnStrip = self._wrappedData
-    n = len(ccpnStrip.spectrumDisplay.orderedStrips)
+    # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
 
     index = ccpnStrip.index
     spectrumDisplay = self.spectrumDisplay
     layout = spectrumDisplay.stripFrame.layout()
+    n = layout.count()
 
     if layout:
-
       _undo = self.project._undo
       if _undo is not None:
         _undo.increaseBlocking()
 
       _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
-
       currentStripItem = _stripDeleteDict['currentStripItem']
       currentStripDirection = _stripDeleteDict['currentStripDirection']
       currentRow = _stripDeleteDict['currentRow']
       currentIndex = _stripDeleteDict['currentIndex']
-      currentPlotWidget = _stripDeleteDict['currentPlotWidget']
-      currentScene = _stripDeleteDict['currentScene']
-      currentToolbar = _stripDeleteDict['currentToolbar']
       currentParent = _stripDeleteDict['currentParent']
-      currentViewBox = _stripDeleteDict['currentViewBox']
+      currentWrapped = _stripDeleteDict['currentWrapped']
 
-      if currentStripItem:
-        print('>>> RestoreFromLayout')
-        print('>>> currentRow:           ', currentRow)
-        print('>>> currentIndex:         ', currentIndex)
-        print('>>> currentStripDirection:', currentStripDirection)
-        print('>>> currentPlotWidget:    ', currentPlotWidget)
-        print('>>> currentScene:         ', currentScene)
-        print('>>> currentStripItem:     ', currentStripItem)
-        print('>>> currentParent:        ', currentParent)
-        print('>>> currentToolbar:       ', currentToolbar)
-        print('>>> currentViewBox:       ', currentViewBox)
+      self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
+      # self.setParent(currentParent)
+      self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
-      for r in range(layout.rowCount()):
-        self._widgets = []
-        if spectrumDisplay.stripDirection == 'Y' and currentStripDirection == 'Y':
+      self._widgets = []
+      while layout.count():                             # clear the layout and store
+        self._widgets.append(layout.takeAt(0).widget())
+      self._widgets.insert(currentIndex, self)
 
-          self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
-          self.setParent(currentParent)
+      if spectrumDisplay.stripDirection == 'Y':
+        for m, widgStrip in enumerate(self._widgets):   # build layout again
+          layout.addWidget(widgStrip, 0, m)
+          layout.setColumnStretch(m, 1)
+      elif spectrumDisplay.stripDirection == 'X':
+        for m, widgStrip in enumerate(self._widgets):   # build layout again
+          layout.addWidget(widgStrip, m, 0)
+        layout.setColumnStretch(0, 1)
 
-          widgets = [oS for oS in self.spectrumDisplay.orderedStrips]
-          widgets.insert(index, self)
-          while layout.count():  # clear the layout
-            layout.takeAt(0)
-          for m, widgStrip in enumerate(widgets):  # make again
-            layout.addWidget(widgStrip, r, m)
-
-          # reinsert back into the orderedStrips
-          # self.spectrumDisplay.stripCount += 1
-          # self.spectrumDisplay.orderedStrips = widgets
-
-          count = ccpnStrip.spectrumDisplay.__dict__
-          field = ccpnStrip.spectrumDisplay._fieldNames
-          strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
-          print ('>>> count')
-          print ('>>> orderedStrips')
-          ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in widgets]
-          # self.spectrumDisplay.orderedStrips = widgets
-
-            # # TODO:ED check why columnCount is too big
-          # # col = layout.columnCount()
-          # for m in range(currentIndex, n):
-          #   item = layout.itemAtPosition(r, m)
-          #   if item:
-          #     self._widgets.append(item.widget())
-          #     print ('>>> moving', m, item)
-          #     layout.removeItem(item)               # remove items to the right
-          # for m, item in reversed(list(enumerate(self._widgets))):
-          #   # layout.addItem(item, r, m + index + 1)
-          #   layout.addWidget(item, r, m + index + 1)
-          #
-          # # layout.addItem(currentStripItem, r, m+index)
-          # # textLabel = QtGui.QLabel(text="HERE")
-          # # currentStripItem.setWidget(textLabel)
-          #
-          # widgetStore = self._project._appBase.ui.mainWindow._TESTFRAME.layout()
-          # currentStripWidget = widgetStore.itemAt(widgetStore.count()-1).widget()
-          # layout.addWidget(currentStripWidget, currentRow, currentIndex)
-          # self.setParent(currentParent)
-
-          #TODO:ED error here?
-          # currentStripItem.setParent(currentParent)
-
-        elif spectrumDisplay.stripDirection == 'X' and currentStripDirection == 'X':
-
-          for m in range(currentIndex, n):
-            item = layout.itemAtPosition(m, 0)
-            if item:
-              items.append(item)
-              print ('>>> moving', m, item)
-              layout.removeItem(item)               # remove items below
-          for m, item in reversed(list(enumerate(items))):
-            layout.addItem(item, m + index + 1, 0)
-          layout.addItem(currentStripItem, currentRow, currentIndex)
-
-          #TODO:ED error here?
-          # currentStripItem.setParent(currentParent)
-
-      # self.plotWidget = currentPlotWidget
-      # ###self.spinSystemLabel.deleteLater()
-      # if hasattr(self, 'planeToolbar'):
-      #   self.planeToolbar = currentToolbar
-      # self.viewBox = currentViewBox
-      # self.plotWidget.setScene(currentScene)
-      # # self.setParent(currentParent)
+      # count = ccpnStrip.spectrumDisplay.__dict__
+      # field = ccpnStrip.spectrumDisplay._fieldNames
+      # strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
+      # ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in self._widgets]
+      self.moveTo(currentIndex)
 
       _undo = self.project._undo
       if _undo is not None:
@@ -427,17 +281,38 @@ class Strip(AbstractWrapperObject):
     else:
       raise  ValueError("The last strip in a display cannot be deleted")
 
+  def _unDelete(self):
+    """Overrides normal delete"""
+    # currentStripItem = self._getWidgetFromLayout()
+    # self.setParent(None)
+
+    self._recoverApiObject()
+    ccpnStrip = self._wrappedData
+
+    n = len(ccpnStrip.spectrumDisplay.strips)
+    if n > 1:
+      spectrumDisplay = self.spectrumDisplay
+      layout = spectrumDisplay.stripFrame.layout()
+
+      if layout:  # should always be the case but play safe
+
+        self._restoreToLayout()  # adds nothing to the undo stack, so add it below
+
+        _undo = self.project._undo
+        if _undo is not None:
+          _undo.newItem(self._removeFromLayout, self._restoreToLayout)
+
+    else:
+      raise ValueError("The last strip in a display cannot be deleted")
+
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
-    _undo = self.project._undo
     self._startCommandEchoBlock('cloneStrip')
 
+    _undo = self.project._undo
     if _undo is not None:
       _undo.increaseBlocking()
-    stripPos = self.spectrumDisplay.strips.index(self)
-    if stripPos == self.spectrumDisplay.stripCount-1:
-      stripPos = -1
 
     try:
       newStrip = self._project._data2Obj.get(self._wrappedData.clone())
@@ -446,11 +321,9 @@ class Strip(AbstractWrapperObject):
 
     if _undo is not None:
       _undo.decreaseBlocking()
-      _undo.newItem(self.spectrumDisplay._removeIndexStrip, self.spectrumDisplay.addStrip
-                    , undoArgs=(-1,))
-
-      # TODO:ED could include ccpnStrip.delete, ccpnStrip._undelete
-      # _undo.newItem(self._wrappedData.delete, self._wrappedData._singleUnDelete)
+      # _undo.newItem(newStrip.delete, newStrip._unDelete)
+      _undo.newItem(self.spectrumDisplay._removeIndexStrip, self.spectrumDisplay._unDelete
+                    , undoArgs=(-1,), redoArgs=(newStrip,))
 
     return newStrip
 
@@ -781,6 +654,78 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
+  def _recoverApiObject(self):
+    # TODO:ED This is a hack to recover a deleted object in reverse redo/undo
+
+    dataDict = self.__dict__
+    topObject = dataDict.get('topObject')
+    notInConstructor = not (dataDict.get('inConstructor'))
+
+    root = dataDict.get('memopsRoot')
+    notOverride = not (root.__dict__.get('override'))
+    notIsReading = not (topObject.__dict__.get('isReading'))
+    notOverride = (notOverride and notIsReading)
+
+    # objects to be deleted
+    # This implementation could be greatly improve, but meanwhile this should work
+    from ccpn.util.OrderedSet import OrderedSet
+    from ccpnmodel.ccpncore.memops.ApiError import ApiError
+
+    objsToBeDeleted = OrderedSet()
+    # objects still to be checked for cascading delete (each object to be deleted gets checked)
+    objsToBeChecked = list()
+    # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
+    linkCounter = {}
+
+    # topObjects to check if modifiable
+    topObjectsToCheck = set()
+
+    objsToBeChecked.append(self)
+    while len(objsToBeChecked) > 0:
+      obj = objsToBeChecked.pop()
+      obj._checkDelete(objsToBeDeleted, objsToBeChecked, linkCounter, topObjectsToCheck)
+
+    if (notInConstructor):
+      for topObjectToCheck in topObjectsToCheck:
+        if (not (topObjectToCheck.__dict__.get('isModifiable'))):
+          raise ApiError("""%s.delete:
+           Storage not modifiable""" % self.qualifiedName
+                         + ": %s" % (topObjectToCheck,)
+                         )
+
+    if (dataDict.get('isDeleted')):
+      raise ApiError("""%s.delete:
+       called on deleted object""" % self.qualifiedName
+                     )
+
+    if ((notInConstructor and notOverride)):
+
+      for notify in self.__class__._notifies.get('startDeleteBlock', ()):
+        notify(self)
+
+      for obj in reversed(objsToBeDeleted):
+        for notify in obj.__class__._notifies.get('preDelete', ()):
+          notify(obj)
+
+    for obj in reversed(objsToBeDeleted):
+      obj._singleDelete(objsToBeDeleted)
+
+    # doNotifies
+
+    if ((notInConstructor and notOverride)):
+
+      for obj in reversed(objsToBeDeleted):
+        for notify in obj.__class__._notifies.get('delete', ()):
+          notify(obj)
+
+      for notify in self.__class__._notifies.get('endDeleteBlock', ()):
+        notify(self)
+
+    if ((not (dataDict.get('inConstructor')) and notIsReading)):
+      # register Undo functions
+
+        # _undo.newItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
+      root._unDelete(objsToBeDeleted, topObjectsToCheck)
 
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips

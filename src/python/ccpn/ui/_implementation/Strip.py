@@ -181,64 +181,80 @@ class Strip(AbstractWrapperObject):
         currentViewBox = None
 
         for r in range(layout.rowCount()):
-          items = []
+          self._widgets = []
           if spectrumDisplay.stripDirection == 'Y':
 
-            currentStripItem = layout.itemAtPosition(r, index)    # hmm, should be None
+            currentStripItem = self
+            currentRow = r
+            currentIndex = index
+            currentParent = self.parent()
+            currentStripDirection = spectrumDisplay.stripDirection
 
-            if currentStripItem:
-              currentParent = self.parent()
-              # self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
-              # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)              # completely remove from layout
+            widgets = [oS for oS in self.spectrumDisplay.orderedStrips]
+            widgets.remove(self)
+            while layout.count():     # clear the layout
+              layout.takeAt(0)
+            for m, widgStrip in enumerate(widgets):   # make again
+              layout.addWidget(widgStrip, r, m)
+            self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
+            self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
 
-              currentRow = r
-              currentIndex = index
-              currentStripDirection = spectrumDisplay.stripDirection
-              layout.removeItem(currentStripItem)
-              self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(currentStripItem.widget())
-              # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
-
-            for m in range(index, n):
-              item = layout.itemAtPosition(r, m)
-              if m > index and item:
-                items.append(item)
-                layout.removeItem(item)               # remove items to the right
-            for m, item in enumerate(items):        # re-insert them one to the left
-              layout.addItem(item, r, m + index)
+            # currentStripItem = layout.itemAtPosition(r, index)    # hmm, should be None
+            # if currentStripItem:
+            #   currentParent = self.parent()
+            #   # self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
+            #   # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)              # completely remove from layout
+            #
+            #   currentRow = r
+            #   currentIndex = index
+            #   currentStripDirection = spectrumDisplay.stripDirection
+            #   layout.removeItem(currentStripItem)
+            #   self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(currentStripItem.widget())
+            #   self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
+            #
+            # for m in range(index, n):
+            #   item = layout.itemAtPosition(r, m)
+            #   if m > index and item:
+            #     self._widgets.append(item.widget())
+            #     layout.removeItem(item)               # remove items to the right
+            # for m, widg in enumerate(self._widgets):        # re-insert them one to the left
+            #   layout.addWidget(widg, r, m + index)
+            #   # layout.addWidget(item.widget(), r, m + index)
 
           elif spectrumDisplay.stripDirection == 'X':
+            pass
 
-            currentStripItem = layout.itemAtPosition(index, 0)
-            self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
-            if currentStripItem:
+            # currentStripItem = layout.itemAtPosition(index, 0)
+            # self._project._appBase.ui.mainWindow._TESTFRAME.layout().addItem(currentStripItem)
+            # if currentStripItem:
+            #
+            #   # TODO:ED this needs to match above
+            #   currentParent = currentStripItem.parent()
+            #   currentRow = index
+            #   currentIndex = 0
+            #   currentStripDirection = spectrumDisplay.stripDirection
+            #
+            # for m in range(index, n):
+            #   item = layout.itemAtPosition(m, 0)
+            #   if m > index:
+            #     if item:
+            #       items.append(item)
+            #   layout.removeItem(item)               # remove items below
+            # for m, item in enumerate(items):        # re-insert them one above
+            #   layout.addItem(item, m + index, 0)
 
-              # TODO:ED this needs to match above
-              currentParent = currentStripItem.parent()
-              currentRow = index
-              currentIndex = 0
-              currentStripDirection = spectrumDisplay.stripDirection
-
-            for m in range(index, n):
-              item = layout.itemAtPosition(m, 0)
-              if m > index:
-                if item:
-                  items.append(item)
-              layout.removeItem(item)               # remove items below
-            for m, item in enumerate(items):        # re-insert them one above
-              layout.addItem(item, m + index, 0)
-
-        currentScene = self.plotWidget.scene()
-        # self.plotWidget.setScene(None)
-        currentPlotWidget = self.plotWidget
-        # self.plotWidget = None
-        currentViewBox = self.viewBox
-        # self.viewBox = None
+        # currentScene = self.plotWidget.scene()
+        # # self.plotWidget.setScene(None)
+        # currentPlotWidget = self.plotWidget
+        # # self.plotWidget = None
+        # currentViewBox = self.viewBox
+        # # self.viewBox = None
 
         ###self.spinSystemLabel.deleteLater()
-        if hasattr(self, 'planeToolbar'):
-          # self.planeToolbar.deleteLater()
-          currentToolbar = self.planeToolbar
-          self.planeToolbar = None
+        # if hasattr(self, 'planeToolbar'):
+        #   # self.planeToolbar.deleteLater()
+        #   currentToolbar = self.planeToolbar
+        #   self.planeToolbar = None
 
         _stripDeleteDict = {'currentRow': currentRow
                             , 'currentIndex': currentIndex
@@ -310,27 +326,45 @@ class Strip(AbstractWrapperObject):
         print('>>> currentViewBox:       ', currentViewBox)
 
       for r in range(layout.rowCount()):
-        items = []
+        self._widgets = []
         if spectrumDisplay.stripDirection == 'Y' and currentStripDirection == 'Y':
 
-          # TODO:ED check why columnCount is too big
-          # col = layout.columnCount()
-          for m in range(currentIndex, n):
-            item = layout.itemAtPosition(r, m)
-            if item:
-              items.append(item)
-              print ('>>> moving', m, item)
-              layout.removeItem(item)               # remove items to the right
-          for m, item in reversed(list(enumerate(items))):
-            layout.addItem(item, r, m + index + 1)
-
-          # layout.addItem(currentStripItem, r, m+index)
-          # textLabel = QtGui.QLabel(text="HERE")
-          # currentStripItem.setWidget(textLabel)
-
-          self._project._appBase.ui.mainWindow._TESTFRAME.layout().itemAt(0)
-          layout.addWidget(currentStripItem.widget(), r, m+index)
+          self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
           self.setParent(currentParent)
+
+          widgets = [oS for oS in self.spectrumDisplay.orderedStrips]
+          widgets.insert(currentIndex, self)
+          while layout.count():  # clear the layout
+            layout.takeAt(0)
+          for m, widgStrip in enumerate(widgets):  # make again
+            layout.addWidget(widgStrip, r, m)
+
+          # reinsert back into the orderedStrips
+          newTuple = tuple([st for st in widgets])
+          newApiTuple = tuple([st._wrappedData for st in widgets])
+          ccpnStrip.spectrumDisplay.setOrderedStrips = newApiTuple
+          self.spectrumDisplay.orderedStrips = newTuple
+
+            # # TODO:ED check why columnCount is too big
+          # # col = layout.columnCount()
+          # for m in range(currentIndex, n):
+          #   item = layout.itemAtPosition(r, m)
+          #   if item:
+          #     self._widgets.append(item.widget())
+          #     print ('>>> moving', m, item)
+          #     layout.removeItem(item)               # remove items to the right
+          # for m, item in reversed(list(enumerate(self._widgets))):
+          #   # layout.addItem(item, r, m + index + 1)
+          #   layout.addWidget(item, r, m + index + 1)
+          #
+          # # layout.addItem(currentStripItem, r, m+index)
+          # # textLabel = QtGui.QLabel(text="HERE")
+          # # currentStripItem.setWidget(textLabel)
+          #
+          # widgetStore = self._project._appBase.ui.mainWindow._TESTFRAME.layout()
+          # currentStripWidget = widgetStore.itemAt(widgetStore.count()-1).widget()
+          # layout.addWidget(currentStripWidget, currentRow, currentIndex)
+          # self.setParent(currentParent)
 
           #TODO:ED error here?
           # currentStripItem.setParent(currentParent)

@@ -3,7 +3,6 @@ from functools import partial
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 
-from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
@@ -20,14 +19,29 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
+from ccpn.core.lib import CcpnSorting
 
+DefaultAtoms = ['H', 'N']
 
 class CustomNmrResidueTable(NmrResidueTable):
   ''' Custon nmrResidue Table with extra Delta Shifts column'''
-  deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: NmrResidueTable._getMeanNmrResiduePeaksShifts(nmrResidue)
-                       , '', None)
-  columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
-  columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
+  deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None)
+
+  columnDefs = [
+    ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+    ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+    ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+    ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+    ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+    ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+     , 'Number of spectra selected for calculating the delta shift', None),
+    ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
+    ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+  ]
+
+  # columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
+  # columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
 
   def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
 
@@ -36,6 +50,29 @@ class CustomNmrResidueTable(NmrResidueTable):
     self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
                        colName, func, tipText, editValue in self.columnDefs]
 
+
+
+  @staticmethod
+  def _getNmrResidueSpectraCount(nmrResidue):
+
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      return nmrResidue.spectraCount
+    except:
+      return None
+
+  @staticmethod
+  def _getSelectedNmrAtomNames(nmrResidue):
+
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      return ', '.join(nmrResidue.selectedNmrAtomNames)
+    except:
+      return None
 
 class ChemicalShiftsMapping(CcpnModule):
 
@@ -50,9 +87,11 @@ class ChemicalShiftsMapping(CcpnModule):
     BarGraph.mouseClickEvent = self._mouseClickEvent
     BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
 
+
     self.mainWindow = mainWindow
     self.application = None
     self.atoms = set()
+    self.atomCheckBoxes = []
     if self.mainWindow is not None:
       self.project = self.mainWindow.project
       self.application = self.mainWindow.application
@@ -80,33 +119,28 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.application:
 
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
+      self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
+
 
 
 
   def _setSettingsWidgets(self):
     # self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
-    #   inputData
     i = 0
     self.inputLabel = Label(self.settingsWidget, text='Select input', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.settingsWidget, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
     i += 1
     self.atomLabel = Label(self.settingsWidget,text='Select atoms', grid=(i,0))
-    for atom in sorted(self.atoms):
-      self.nAtomCheckBox = CheckBox(self.settingsWidget, text=atom, checked=True, grid=(i,1))
+    for atom in sorted(self.atoms, key=CcpnSorting.stringSortKey):
+      self.atomCheckBox = CheckBox(self.settingsWidget, text=atom, checked=True, grid=(i,1))
+      if atom in DefaultAtoms:
+        self.atomCheckBox.setChecked(True)
+      else:
+        self.atomCheckBox.setChecked(False)
+      self.atomCheckBoxes.append(self.atomCheckBox)
       i += 1
-    # self.hAtomCheckBox = CheckBox(self.settingsWidget, text='H', checked=True, grid=(i, 1))
-    # i += 1
-    # self.nAtomCheckBox = CheckBox(self.settingsWidget, text='NE1', checked=False, grid=(i, 1))
-    # i += 1
-    # self.hAtomCheckBox = CheckBox(self.settingsWidget, text='HE1', checked=False, grid=(i, 1))
-    # i += 1
-    # self.caAtomCheckBox = CheckBox(self.settingsWidget, text='CA', checked=False, grid=(i, 1))
-    # self.caAtomCheckBox.setEnabled(False)
-    # i += 1
-    # self.cbAtomCheckBox = CheckBox(self.settingsWidget, text='CB', checked=False, grid=(i, 1))
-    # self.cbAtomCheckBox.setEnabled(False)
-    i += 1
 
+    # i += 1
     self.aboveThresholdColourLabel =  Label(self.settingsWidget,text='Above Threshold Colour', grid=(i,0))
     self.aboveThresholdColourBox = PulldownList(self.settingsWidget,  grid=(i, 1))
     for item in spectrumColours.items():
@@ -122,13 +156,42 @@ class ChemicalShiftsMapping(CcpnModule):
       pix.fill(QtGui.QColor(item[0]))
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
 
+    i += 1
+    self.updateButton = Button(self.settingsWidget, text='refresh', callback=self.updateModule, grid=(i, 0))
+
+  def updateTable(self, nmrChain):
+    self.nmrResidueTable.ncWidget.select(nmrChain.pid)
+    self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
+
+    self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._deltaShift])
+    self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+
+  def _displayTableForNmrChain(self, nmrChain):
+    self.updateModule()
+    self.updateTable(nmrChain)
+
+
+  def updateModule(self):
+
+    selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
+
+
+    if self.nmrResidueTable.nmrChain:
+      for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
+        spectra = self.spectraSelectionWidget.getSelections()
+        nmrResidue.spectraCount = len(spectra)
+        nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+        nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+        nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra)
+      self.updateTable(self.nmrResidueTable.nmrChain)
+
   def setNmrChain(self, nmrChain):
     if nmrChain:
       shifts = []
       sequenceCode = []
       nmrResidues = []
       for nmrResidue in nmrChain.nmrResidues:
-        shifts += [self._getMeanNmrResiduePeaksShifts(nmrResidue),]
+        shifts += [nmrResidue._deltaShift,]
         sequenceCode += [int(nmrResidue.sequenceCode), ]
         nmrResidues += [nmrResidue, ]
 
@@ -145,16 +208,6 @@ class ChemicalShiftsMapping(CcpnModule):
             else:
               label.setSelected(False)
 
-  def _getMeanNmrResiduePeaksShifts(self, nmrResidue):
-    import numpy as np
-    deltas = []
-    peaks = nmrResidue.nmrAtoms[0].assignedPeaks
-    for i, peak in enumerate(peaks):
-      deltas += [
-        (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
-    if not None in deltas and deltas:
-      return round(float(np.mean(deltas)),3)
-    return
 
   def _mouseClickEvent(self, event):
 

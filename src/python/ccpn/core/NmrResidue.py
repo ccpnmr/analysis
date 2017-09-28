@@ -91,7 +91,7 @@ class NmrResidue(AbstractWrapperObject):
   _apiClassQualifiedName = ApiResonanceGroup._metaclass.qualifiedName()
 
   # used in chemical shift mapping
-  _peaksShifts = None
+  _deltaShift = 0
 
   # CCPN properties  
   @property

@@ -86,10 +86,10 @@ class SpectraSelectionWidget(Widget,Base):
         self.selectAllSpectrumGroupsCheckBox = CheckBox(self, text='Select All SpectrumGroups ', grid=(i, 0),
                                                  hAlign='l',
                                                  vAlign='t')
-        self.selectFromCurrentStrip = Button(self,
-                                               text='Select From Current Strip', grid=(i, 1), callback=self._checkSpectraFromCurrentStrip,
-                                               hAlign='l',
-                                               vAlign='t')
+        # self.selectFromCurrentStrip = Button(self,
+        #                                        text='Select From Current Strip', grid=(i, 1), callback=self._checkSpectraFromCurrentStrip,
+        #                                        hAlign='l',
+        #                                        vAlign='t')
       i += 1
       self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
       self.scrollArea.setWidgetResizable(True)
@@ -206,7 +206,6 @@ class SpectraSelectionWidget(Widget,Base):
           continue
 
   def _checkAllSpectra(self, state):
-    self.selectFromCurrentStrip.setChecked(False)
     if self.selectAllSpectraCheckBox.checkState() != 1:
       self.selectAllSpectraCheckBox.setTristate(False)
 
@@ -235,6 +234,11 @@ class SpectraSelectionWidget(Widget,Base):
         spectra += spectrumGroup.spectra
     return spectra
 
+  def getSelections(self):
+    if self.selectSpectraOption.getIndex() == 0:
+      return self._getSelectedSpectra()
+    else:
+      return list(set(self._getSpectrumGroupsSpectra()))
 
 
   def showSpectraOption(self):

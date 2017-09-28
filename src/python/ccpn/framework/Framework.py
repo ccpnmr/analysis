@@ -1915,7 +1915,7 @@ class Framework:
 
   def showChemicalShiftMapping(self):
     from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
-    cs = ChemicalShiftsMapping(mainWindow=self.ui.mainWindow, nmrChain=self.project.nmrChains[1])
+    cs = ChemicalShiftsMapping(mainWindow=self.ui.mainWindow)
     self.ui.mainWindow.moduleArea.addModule(cs)
 
   #################################################################################################

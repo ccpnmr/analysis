@@ -67,11 +67,61 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra):
   :param spectra: compare peaks only from given spectra
   :return: 
   '''
+  import numpy as np
   deltas = []
-  peaks = nmrResidue.nmrAtoms[0].assignedPeaks
-  for i, peak in enumerate(peaks):
-    deltas += [
-      (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
-  if not None in deltas and deltas:
+  peaks = []
+
+  if len(nmrAtoms) == 2:
+    nmrAtom1 = nmrResidue.getNmrAtom(str(nmrAtoms[0]))
+    nmrAtom2 = nmrResidue.getNmrAtom(str(nmrAtoms[1]))
+
+    if nmrAtom1 and nmrAtom2 is not None:
+      peaks = [p for p in nmrAtom1.assignedPeaks if p.peakList.spectrum in spectra]
+      peaks += [p for p in nmrAtom2.assignedPeaks if p.peakList.spectrum in spectra and not peaks]
+
+  if len(peaks)>0:
+    for i, peak in enumerate(peaks):
+      if peak.peakList.spectrum in spectra:
+        if len(peak.position) == 2:
+          deltas += [(((peak.position[0] - list(peaks)[0].position[0]) * 7) ** 2 + (peak.position[1] - list(peaks)[0].position[1]) ** 2) ** 0.5,]
+  if deltas and not None in deltas:
     return round(float(np.mean(deltas)),3)
   return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

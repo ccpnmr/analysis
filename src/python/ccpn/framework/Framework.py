@@ -844,6 +844,7 @@ class Framework:
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
+      ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       (),
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
@@ -1782,6 +1783,29 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()\n")
     getLogger().info("application.showRestraintTable()")
     return self.restraintTableModule
+
+  def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
+    """Displays Structure Table"""
+    from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+
+    mainWindow = self.ui.mainWindow
+
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.structureTableModule = StructureTableModule(mainWindow=mainWindow
+                                                , structureEnsemble=structureEnsemble)
+
+    # self.project.newModule(moduleType=self.structureTableModule.className
+    #                        , title=None
+    #                        , window=mainWindow
+    #                        , comment='')
+
+    mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
+
+    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
+    getLogger().info("application.showStructureTable()")
+    return self.structureTableModule
 
   def showNotesEditor(self, position:str='bottom', relativeTo:CcpnModule=None, note=None):
     """

@@ -183,6 +183,9 @@ class Project(AbstractWrapperObject):
     self._initializeAll()
 
   def _close(self):
+    self.close()
+
+  def close(self):
     """Clean up the wrapper project previous to deleting or replacing
 
     Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
@@ -200,7 +203,9 @@ class Project(AbstractWrapperObject):
     self.__dict__.clear()
 
   # This is all we want to happen
-  delete = _close
+  # delete = _close
+  def delete(self):
+    print("This function is deprecated; use .close()")
 
   def __repr__(self):
     """String representation"""

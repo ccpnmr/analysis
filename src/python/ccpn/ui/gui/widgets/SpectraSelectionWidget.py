@@ -70,15 +70,16 @@ class SpectraSelectionWidget(Widget,Base):
   def _setWidgets(self):
     i = 0
 
-    self.selectSpectraOption = RadioButtons(self,
-                                              texts=['Spectra', 'Groups'],
-                                              selectedInd=0,
-                                              callback=self.showSpectraOption,
-                                              tipTexts=None,
-                                              grid=(i,0))
-    i += 1
     if self.project is not None:
       if len(self.project.spectra)>0:
+        self.selectSpectraOption = RadioButtons(self,
+                                                texts=['Spectra', 'Groups'],
+                                                selectedInd=0,
+                                                callback=self.showSpectraOption,
+                                                tipTexts=None,
+                                                hAlign='l',
+                                                grid=(i, 0))
+        i += 1
         # self.selectAllcheckBox = CheckBox(self.scrollAreaWidgetContents, text='Select All', grid=(0, 0), hAlign='c', vAlign='t')
         self.selectAllSpectraCheckBox = CheckBox(self, checked=True, text='Select All Spectra ', grid=(i, 0), hAlign='l',
                                                  vAlign='t')
@@ -90,21 +91,21 @@ class SpectraSelectionWidget(Widget,Base):
         #                                        text='Select From Current Strip', grid=(i, 1), callback=self._checkSpectraFromCurrentStrip,
         #                                        hAlign='l',
         #                                        vAlign='t')
-      i += 1
-      self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
-      self.scrollArea.setWidgetResizable(True)
-      self.scrollAreaWidgetContents = Frame(self, setLayout=True)
-      self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-      self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        i += 1
+        self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 0), )
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = Frame(self, setLayout=True)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
-      self._addSpectrumCheckBoxes()
-      self._addSpectrumGroupsCheckBoxes()
-      self.selectAllSpectraCheckBox.stateChanged.connect(self._checkAllSpectra)
-      self.selectAllSpectrumGroupsCheckBox.stateChanged.connect(self._checkAllSpectrumGroups)
-      if self.selectAllSpectraCheckBox.isChecked():
-        self._checkAllSpectra(QtCore.Qt.Checked)
-      self.showSpectraOption()
+        self._addSpectrumCheckBoxes()
+        self._addSpectrumGroupsCheckBoxes()
+        self.selectAllSpectraCheckBox.stateChanged.connect(self._checkAllSpectra)
+        self.selectAllSpectrumGroupsCheckBox.stateChanged.connect(self._checkAllSpectrumGroups)
+        if self.selectAllSpectraCheckBox.isChecked():
+          self._checkAllSpectra(QtCore.Qt.Checked)
+        self.showSpectraOption()
 
   def updateWidgets(self):
     self._deleteAllCheckBoxes()

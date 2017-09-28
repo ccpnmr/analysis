@@ -7,7 +7,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -103,8 +103,6 @@ class ChemicalShiftsMapping(CcpnModule):
           for j in i.nmrAtoms:
             self.atoms.add(j.name)
 
-    if nmrChain is not None:
-      self.setNmrChain(nmrChain)
 
     self._setWidgets()
     self._setSettingsWidgets()
@@ -115,7 +113,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setWidgets(self):
-    # self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
     if self.application:
 
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
@@ -125,14 +123,24 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setSettingsWidgets(self):
+    self.settingFrame = Frame(self, setLayout=False)
+    self.settingWidgetsLayout = QtGui.QGridLayout()
+    self.settingFrame.setLayout(self.settingWidgetsLayout)
+    self.settingsWidget.getLayout().addWidget(self.settingFrame)
+    self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
+    self.settingsWidget.getLayout().setContentsMargins(1, 1, 1, 1)
+    self.settingWidgetsLayout.setContentsMargins(10, 10, 1, 15) #l,t,r,b
+    self.settingFrame.setMaximumWidth(340)
+    self._settingsScrollArea.setMaximumWidth(340)
+
     # self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
     i = 0
-    self.inputLabel = Label(self.settingsWidget, text='Select input', grid=(i, 0), vAlign='t')
-    self.spectraSelectionWidget = SpectraSelectionWidget(self.settingsWidget, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
+    self.inputLabel = Label(self.settingFrame, text='Select Data Input', grid=(i, 0), vAlign='t')
+    self.spectraSelectionWidget = SpectraSelectionWidget(self.settingFrame, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
     i += 1
-    self.atomLabel = Label(self.settingsWidget,text='Select atoms', grid=(i,0))
+    self.atomLabel = Label(self.settingFrame,text='Select Atoms', grid=(i,0))
     for atom in sorted(self.atoms, key=CcpnSorting.stringSortKey):
-      self.atomCheckBox = CheckBox(self.settingsWidget, text=atom, checked=True, grid=(i,1))
+      self.atomCheckBox = CheckBox(self.settingFrame, text=atom, checked=True, grid=(i,1))
       if atom in DefaultAtoms:
         self.atomCheckBox.setChecked(True)
       else:
@@ -141,23 +149,24 @@ class ChemicalShiftsMapping(CcpnModule):
       i += 1
 
     # i += 1
-    self.aboveThresholdColourLabel =  Label(self.settingsWidget,text='Above Threshold Colour', grid=(i,0))
-    self.aboveThresholdColourBox = PulldownList(self.settingsWidget,  grid=(i, 1))
+    self.aboveThresholdColourLabel =  Label(self.settingFrame,text='Above Threshold Colour', grid=(i,0))
+    self.aboveThresholdColourBox = PulldownList(self.settingFrame,  grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
       self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    self.aboveThresholdColourBox.select(list(spectrumColours.values())[-1])
 
     i += 1
-    self.belowThresholdColourLabel = Label(self.settingsWidget, text='Below Threshold Colour', grid=(i, 0))
-    self.belowThresholdColourBox = PulldownList(self.settingsWidget, grid=(i, 1))
+    self.belowThresholdColourLabel = Label(self.settingFrame, text='Below Threshold Colour', grid=(i, 0))
+    self.belowThresholdColourBox = PulldownList(self.settingFrame, grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-
+    self.belowThresholdColourBox.setCurrentIndex(0)
     i += 1
-    self.updateButton = Button(self.settingsWidget, text='refresh', callback=self.updateModule, grid=(i, 0))
+    self.updateButton = Button(self.settingFrame, text='Update All', callback=self.updateModule, grid=(i, 1))
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
@@ -169,13 +178,54 @@ class ChemicalShiftsMapping(CcpnModule):
   def _displayTableForNmrChain(self, nmrChain):
     self.updateModule()
     self.updateTable(nmrChain)
+    self.updateBarGraph()
+
+  def updateBarGraph(self):
+    self.barGraphWidget.barGraphs = []
+    aboveX = []
+    aboveY = []
+    aboveObjects = []
+    belowX = []
+    belowY = []
+    belowObjects = []
+
+    pos = self.barGraphWidget.xLine.pos().y()
+    for nmrResidue in self.nmrResidueTable.objects:
+      x = int(nmrResidue.sequenceCode)
+      y = float(nmrResidue._deltaShift)
+      aboveX.append(x)
+      aboveY.append(y)
+      aboveObjects.append(nmrResidue)
+    self.barGraphWidget.setData(xValues=aboveX, yValues=aboveY, objects=aboveObjects, colour='r', replace=True)
+
+    #   if y > pos:
+    #     aboveY.append(y)
+    #     aboveX.append(x)
+    #     aboveObjects.append(nmrResidue)
+    #   else:
+    #     belowX.append(x)
+    #     belowY.append(y)
+    #     belowObjects.append(nmrResidue)
+    #
+    # self.aboveThresholdBarGraph = BarGraph(viewBox=self.barGraphWidget.customViewBox, xValues=aboveX, yValues=aboveY, objects=aboveObjects,
+    #                                brush='g')
+    # self.belowTrhesholdBarGraph = BarGraph(viewBox=self.barGraphWidget.customViewBox, xValues=belowX, yValues=belowY, objects=belowObjects,
+    #                                brush='r')
+    # self.barGraphWidget.customViewBox.addItem(self.aboveThresholdBarGraph)
+    # self.barGraphWidget.customViewBox.addItem(self.belowTrhesholdBarGraph)
+    # self.barGraphWidget.barGraphs.append(self.aboveThresholdBarGraph)
+    # self.barGraphWidget.barGraphs.append(self.belowTrhesholdBarGraph)
+    # self.barGraphWidget.updateViewBoxLimits()
+
+
+
+
+
 
 
   def updateModule(self):
 
     selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
-
-
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
         spectra = self.spectraSelectionWidget.getSelections()
@@ -184,18 +234,8 @@ class ChemicalShiftsMapping(CcpnModule):
         nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
         nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra)
       self.updateTable(self.nmrResidueTable.nmrChain)
+      self.updateBarGraph()
 
-  def setNmrChain(self, nmrChain):
-    if nmrChain:
-      shifts = []
-      sequenceCode = []
-      nmrResidues = []
-      for nmrResidue in nmrChain.nmrResidues:
-        shifts += [nmrResidue._deltaShift,]
-        sequenceCode += [int(nmrResidue.sequenceCode), ]
-        nmrResidues += [nmrResidue, ]
-
-      self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=sequenceCode, yValues=shifts, objects=nmrResidues, grid=(0, 0))
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):
     for bar in self.barGraphWidget.barGraphs:
@@ -240,7 +280,6 @@ class ChemicalShiftsMapping(CcpnModule):
                strip = self.current.strip
                navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
                                              widths=['default'] * len(strip.axisCodes))
-
              else:
                print('Impossible to navigate to peak position. Set a current strip first')
 
@@ -270,7 +309,7 @@ class BarGraphWidget(Widget, Base):
     Base.__init__(self, **kw)
     self._setViewBox()
     self._setLayout()
-
+    self.setContentsMargins(1, 1, 1, 1)
     self.xLine = None
     self.barGraphs = []
 
@@ -294,6 +333,7 @@ class BarGraphWidget(Widget, Base):
     hbox = QtGui.QHBoxLayout()
     self.setLayout(hbox)
     hbox.addWidget(self.plotWidget)
+    hbox.setContentsMargins(1, 1, 1, 1)
 
   def _addExtraItems(self):
     # self.addLegend()

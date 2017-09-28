@@ -221,6 +221,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._TESTFRAME = Frame(setLayout=False)
     self._tempLayout = QtGui.QVBoxLayout()
     self._TESTFRAME.setLayout(self._tempLayout)
+    self._TESTFRAME.hide()
 
     # GWV: do not understand this order
     # self._verticalSplitter.addWidget(self.sideBar)

@@ -175,6 +175,7 @@ class Strip(AbstractWrapperObject):
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.remove(self)
+      print ('>>> removeFromLayout', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
@@ -187,7 +188,7 @@ class Strip(AbstractWrapperObject):
 
       # move to widget store
       self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
-      # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
+      self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
       # store the old information
@@ -229,13 +230,14 @@ class Strip(AbstractWrapperObject):
       currentWrapped = _stripDeleteDict['currentWrapped']
 
       self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
-      # self.setParent(currentParent)
+      self.setParent(currentParent)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
       self._widgets = []
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.insert(currentIndex, self)
+      print ('>>> restoreToLayout', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
@@ -276,6 +278,7 @@ class Strip(AbstractWrapperObject):
         _undo = self.project._undo
         if _undo is not None:
           _undo.newItem(self._restoreToLayout, self._removeFromLayout)
+        self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(ccpnStrip)
         ccpnStrip.delete()
 
     else:
@@ -286,7 +289,8 @@ class Strip(AbstractWrapperObject):
     # currentStripItem = self._getWidgetFromLayout()
     # self.setParent(None)
 
-    self._recoverApiObject()
+    # TODO:ED check this hack
+    self._unDeleteCall(*self._unDeleteArgs)
     ccpnStrip = self._wrappedData
 
     n = len(ccpnStrip.spectrumDisplay.strips)
@@ -654,6 +658,7 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
+  @staticmethod
   def _recoverApiObject(self):
     # TODO:ED This is a hack to recover a deleted object in reverse redo/undo
 
@@ -661,7 +666,7 @@ class Strip(AbstractWrapperObject):
     topObject = dataDict.get('topObject')
     notInConstructor = not (dataDict.get('inConstructor'))
 
-    root = dataDict.get('memopsRoot')
+    root = dataDict.get('topObject').__dict__.get('memopsRoot')
     notOverride = not (root.__dict__.get('override'))
     notIsReading = not (topObject.__dict__.get('isReading'))
     notOverride = (notOverride and notIsReading)
@@ -698,34 +703,39 @@ class Strip(AbstractWrapperObject):
        called on deleted object""" % self.qualifiedName
                      )
 
-    if ((notInConstructor and notOverride)):
-
-      for notify in self.__class__._notifies.get('startDeleteBlock', ()):
-        notify(self)
-
-      for obj in reversed(objsToBeDeleted):
-        for notify in obj.__class__._notifies.get('preDelete', ()):
-          notify(obj)
-
-    for obj in reversed(objsToBeDeleted):
-      obj._singleDelete(objsToBeDeleted)
+    # if ((notInConstructor and notOverride)):
+    #
+    #   for notify in self.__class__._notifies.get('startDeleteBlock', ()):
+    #     notify(self)
+    #
+    #   for obj in reversed(objsToBeDeleted):
+    #     for notify in obj.__class__._notifies.get('preDelete', ()):
+    #       notify(obj)
+    #
+    # for obj in reversed(objsToBeDeleted):
+    #   obj._singleDelete(objsToBeDeleted)
 
     # doNotifies
 
-    if ((notInConstructor and notOverride)):
+    # if ((notInConstructor and notOverride)):
+    #
+    #   for obj in reversed(objsToBeDeleted):
+    #     for notify in obj.__class__._notifies.get('delete', ()):
+    #       notify(obj)
+    #
+    #   for notify in self.__class__._notifies.get('endDeleteBlock', ()):
+    #     notify(self)
+    #
 
-      for obj in reversed(objsToBeDeleted):
-        for notify in obj.__class__._notifies.get('delete', ()):
-          notify(obj)
-
-      for notify in self.__class__._notifies.get('endDeleteBlock', ()):
-        notify(self)
-
-    if ((not (dataDict.get('inConstructor')) and notIsReading)):
-      # register Undo functions
+    # if ((not (dataDict.get('inConstructor')) and notIsReading)):
+    #   # register Undo functions
+    #
+    #   _undo = root._undo
+    #   if _undo is not None:
 
         # _undo.newItem(root._unDelete, self.delete, undoArgs=(objsToBeDeleted, topObjectsToCheck))
-      root._unDelete(objsToBeDeleted, topObjectsToCheck)
+    return (root._unDelete, (objsToBeDeleted, topObjectsToCheck))
+
 
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips

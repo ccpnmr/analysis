@@ -394,94 +394,94 @@ class CustomViewBox(pg.ViewBox):
 #######################################################################################################
 ####################################      Mock DATA    ################################################
 #######################################################################################################
-
-from collections import namedtuple
-import random
-
-nmrResidues = []
-for i in range(30):
-  nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
-  nmrResidue.__new__.__defaults__ = (0,)
-  nmrResidue.sequenceCode = int(random.randint(1,300))
-  nmrResidues.append(nmrResidue)
-
-x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
-y1 = [(i**random.random())/10 for i in range(len(x1))]
-
-
-xLows = []
-yLows = []
-
-xMids = []
-yMids = []
-
-xHighs = []
-yHighs = []
-
-
-for x, y in zip(x1,y1):
-    if y <= 0.5:
-        xLows.append(x)
-        yLows.append(y)
-    if y > 0.5 and y <= 1:
-        xMids.append(x)
-        yMids.append(y)
-    if y > 1:
-        xHighs.append(x)
-        yHighs.append(y)
-
-######################################################################################################
-################################### Start Application ################################################
-######################################################################################################
 #
-app = pg.mkQApp()
-
-customViewBox = CustomViewBox()
+# from collections import namedtuple
+# import random
 #
-plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-customViewBox.setParent(plotWidget)
-
-
-
-xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
-xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
-xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
-
-
-customViewBox.addItem(xLow)
-customViewBox.addItem(xMid)
-customViewBox.addItem(xHigh)
-
-xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-customViewBox.addItem(xLine)
-
-l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-l.setParentItem(customViewBox.graphicsItem())
-
-c1 = plotWidget.plot(pen='r', name='low')
-c2 = plotWidget.plot(pen='b', name='mid')
-c3 = plotWidget.plot(pen='g', name='high')
-
-l.addItem(c1, 'low')
-l.addItem(c2, 'mid')
-l.addItem(c3, 'high')
-
-customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-
-customViewBox.setMenuEnabled(enableMenu=False)
-
-plotWidget.show()
-
-
-
-
-
-
-# Start Qt event
-if __name__ == '__main__':
-  import sys
-  if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-    QtGui.QApplication.instance().exec_()
-
-
-
+# nmrResidues = []
+# for i in range(30):
+#   nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
+#   nmrResidue.__new__.__defaults__ = (0,)
+#   nmrResidue.sequenceCode = int(random.randint(1,300))
+#   nmrResidues.append(nmrResidue)
+#
+# x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
+# y1 = [(i**random.random())/10 for i in range(len(x1))]
+#
+#
+# xLows = []
+# yLows = []
+#
+# xMids = []
+# yMids = []
+#
+# xHighs = []
+# yHighs = []
+#
+#
+# for x, y in zip(x1,y1):
+#     if y <= 0.5:
+#         xLows.append(x)
+#         yLows.append(y)
+#     if y > 0.5 and y <= 1:
+#         xMids.append(x)
+#         yMids.append(y)
+#     if y > 1:
+#         xHighs.append(x)
+#         yHighs.append(y)
+#
+# ######################################################################################################
+# ################################### Start Application ################################################
+# ######################################################################################################
+# #
+# app = pg.mkQApp()
+#
+# customViewBox = CustomViewBox()
+# #
+# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+# customViewBox.setParent(plotWidget)
+#
+#
+#
+# xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
+# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
+# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
+#
+#
+# customViewBox.addItem(xLow)
+# customViewBox.addItem(xMid)
+# customViewBox.addItem(xHigh)
+#
+# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+# customViewBox.addItem(xLine)
+#
+# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+# l.setParentItem(customViewBox.graphicsItem())
+#
+# c1 = plotWidget.plot(pen='r', name='low')
+# c2 = plotWidget.plot(pen='b', name='mid')
+# c3 = plotWidget.plot(pen='g', name='high')
+#
+# l.addItem(c1, 'low')
+# l.addItem(c2, 'mid')
+# l.addItem(c3, 'high')
+#
+# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+#
+# customViewBox.setMenuEnabled(enableMenu=False)
+#
+# plotWidget.show()
+#
+#
+#
+#
+#
+#
+# # Start Qt event
+# if __name__ == '__main__':
+#   import sys
+#   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+#     QtGui.QApplication.instance().exec_()
+#
+#
+#

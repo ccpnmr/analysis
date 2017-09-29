@@ -23,6 +23,7 @@ from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
 
 DefaultAtoms = ['H', 'N']
+DefaultThreshould = 0.1
 
 class CustomNmrResidueTable(NmrResidueTable):
   ''' Custon nmrResidue Table with extra Delta Shifts column'''
@@ -104,7 +105,8 @@ class ChemicalShiftsMapping(CcpnModule):
         for i in self.project.nmrResidues:
           for j in i.nmrAtoms:
             self.atoms.add(j.name)
-    # self.updated = False
+
+    self.thresholdLinePos = DefaultThreshould
 
     self._setWidgets()
     self._setSettingsWidgets()
@@ -117,6 +119,7 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
     self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, xValues=[0],
                                          yValues=[0], objects=[0], grid=(0, 0))
+    self.barGraphWidget.xLine.setPos(DefaultThreshould)
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     if self.application:
 
@@ -152,7 +155,9 @@ class ChemicalShiftsMapping(CcpnModule):
       self.atomCheckBoxes.append(self.atomCheckBox)
       i += 1
 
-    # i += 1
+    self.thresholdLAbel = Label(self.settingFrame, text='Threshold value', grid=(i, 0))
+    self.thresholdSpinBox = DoubleSpinbox(self.settingFrame, value=DefaultThreshould, decimals=3, grid=(i, 1))
+    i += 1
     self.aboveThresholdColourLabel =  Label(self.settingFrame,text='Above Threshold Colour', grid=(i,0))
     self.aboveThresholdColourBox = PulldownList(self.settingFrame,  grid=(i, 1))
     for item in spectrumColours.items():
@@ -197,9 +202,10 @@ class ChemicalShiftsMapping(CcpnModule):
     belowObjects = []
     aboveBrush = 'g'
     belowBrush = 'r'
+    thresholdPos = self.thresholdSpinBox.value()
 
     if self.barGraphWidget.xLine:
-      thresholdLinePos =  self.barGraphWidget.xLine.pos().x()
+      self.thresholdLinePos = self.barGraphWidget.xLine.pos().y()
 
       for nmrResidue in self.nmrResidueTable.objects:
         x = int(nmrResidue.sequenceCode)
@@ -207,7 +213,7 @@ class ChemicalShiftsMapping(CcpnModule):
         xs.append(x)
         ys.append(y)
         obs.append(nmrResidue)
-        if y > thresholdLinePos:
+        if y > self.thresholdLinePos:
           aboveY.append(y)
           aboveX.append(x)
           aboveObjects.append(nmrResidue)
@@ -226,11 +232,16 @@ class ChemicalShiftsMapping(CcpnModule):
       if name == selectedNameColourB:
         belowBrush = code
 
+
     self.barGraphWidget.deleteLater()
     self.barGraphWidget = None
     self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
-                                         xValues=xs, yValues=ys, objects=obs, grid=(0, 0))
+                                         xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
+                                         grid=(0, 0))
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
+    self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
+
+
     self.barGraphWidget._lineMoved(aboveX=aboveX,
                                    aboveY=aboveY,
                                    aboveObjects=aboveObjects,
@@ -242,6 +253,9 @@ class ChemicalShiftsMapping(CcpnModule):
                                    )
 
 
+  def _updateThreshold(self):
+    self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
+    self.barGraphWidget._lineMoved()
 
   def _viewboxMouseClickEvent(self, event):
 
@@ -256,7 +270,6 @@ class ChemicalShiftsMapping(CcpnModule):
       event.accept()
 
   def updateModule(self):
-    print('updateModule')
     selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
@@ -335,7 +348,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 class BarGraphWidget(Widget, Base):
 
-  def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', objects=None, **kw):
+  def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', objects=None, threshouldLine=0.01, **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.application = application
@@ -351,6 +364,7 @@ class BarGraphWidget(Widget, Base):
     self.colour = colour
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
+    self.threshouldLine = threshouldLine
 
 
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
@@ -387,13 +401,7 @@ class BarGraphWidget(Widget, Base):
     self.yValues = yValues
     self.objects = objects
     self.updateViewBoxLimits()
-    # if yValues:
-    #   if len(yValues) > 0:
-    #     print(self.xLine.pos().y())
-    #     self.xLine.setPos(0.1)
-    #     self.showThresholdLine(True)
 
-    # self._lineMoved()
 
   def setViewBoxLimits(self, xMin, xMax, yMin, yMax):
     self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
@@ -415,11 +423,10 @@ class BarGraphWidget(Widget, Base):
   def addThresholdLine(self):
 
     self.xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
-    print('self.customViewBox ..', self.customViewBox, )
     self.customViewBox.addItem(self.xLine)
     if self.yValues is not None:
       if len(self.yValues)>0:
-        self.xLine.setPos(min(self.yValues))
+        self.xLine.setPos(self.threshouldLine)
     self.showThresholdLine(True)
     self.xLine.sigPositionChangeFinished.connect(self._lineMoved)
 

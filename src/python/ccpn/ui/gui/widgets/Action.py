@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,12 +19,12 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -61,5 +60,3 @@ class Action(QtGui.QAction, Base):
 
     self.setEnabled(enabled)
     # Base.__init__(self, **kw)
-
-

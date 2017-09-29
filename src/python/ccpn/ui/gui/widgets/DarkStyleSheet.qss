@@ -288,8 +288,6 @@ QLineEdit {
         font-size: 1.5em;
         }
 
-
-
 Dock  {
           background-color: #2a3358;
           border: 0px solid #2a3358;

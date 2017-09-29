@@ -41,6 +41,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Splitter import Splitter
 
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
@@ -137,17 +138,15 @@ class CcpnModule(Dock):
     # self._originalLabel.hide()
 
     self.topLayout.removeWidget(self.label)   # remove old label, redefine
-    del self.label
+    self.label.deleteLater()
     self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
     self.topLayout.addWidget(self.label, 0, 1)   # ejb - swap out the old widget, keeps hierarchy
                                                   # except it doesn't work properly
-
-
     self.setOrientation(o='horizontal')
     # self.widgetArea = LayoutWidget()    # ejb - transparent, make normal drops better
-    self.setAutoFillBackground(False)
+    self.setAutoFillBackground(True)
 
 
     # ejb - below, True allows normal drops from outside and spectra, False for DockArea drops
@@ -202,6 +201,42 @@ class CcpnModule(Dock):
 
       self._settingsScrollArea.hide()
 
+      # testing a splitter to improve settings
+      # self._splitter.setChildrenCollapsible(False)
+      self.layout.removeWidget(self._settingsScrollArea)
+      self.layout.removeWidget(self.mainWidget)
+      self._splitter = Splitter(QtCore.Qt.Horizontal, setLayout=True)
+      self._splitter.addWidget(self._settingsScrollArea)
+      self._splitter.addWidget(self.mainWidget)
+      self.addWidget(self._splitter)
+
+      #another fix for the stylesheet
+      self.colourScheme = mainWindow.application.colourScheme
+      if self.colourScheme == 'dark':
+        self.setStyleSheet("""QSplitter{
+                                    background-color: #2a3358;
+                              }
+                              QSplitter::handle:horizontal {
+                                    width: 3px;
+                              }
+                              QSplitter::handle:vertical {
+                                    height: 3px;
+                              }
+                              QSplitter::handle { background-color: LightGray }
+                              """)
+      elif self.colourScheme == 'light':
+        self.setStyleSheet("""QSplitter{
+                                    background-color: #FBF4CC;
+                              }
+                              QSplitter::handle:horizontal {
+                                    width: 3px;
+                              }
+                              QSplitter::handle:vertical {
+                                    height: 3px;
+                              }
+                              QSplitter::handle { background-color: DarkGray }
+                              """)
+
     else:
       self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
@@ -216,6 +251,7 @@ class CcpnModule(Dock):
     if self.mainWindow is not None:
       self.setParent(self.mainWindow.moduleArea)   # ejb
     self.widgetArea.setParent(self)
+
 
   # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
   # def getName(self):

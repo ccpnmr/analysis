@@ -52,6 +52,12 @@ class Splitter(QtGui.QSplitter, Base):
 
     return eventResult
 
+  def mouseDoubleClickEvent(self, event):
+    # double-click to retrieve a lost splitter bar
+    self.setSizes([1, 1])
+
+    event.accept()
+
 class SplitterHandle(QtGui.QSplitterHandle):
 
   def __init__(self, parent, orientation):

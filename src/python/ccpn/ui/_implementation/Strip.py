@@ -175,12 +175,13 @@ class Strip(AbstractWrapperObject):
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.remove(self)
-      print ('>>> removeFromLayout', self._widgets)
+      print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
           layout.addWidget(widgStrip, 0, m)
           layout.setColumnStretch(m, 1)
+          layout.setColumnStretch(m+1, 0)
       elif spectrumDisplay.stripDirection == 'X':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
           layout.addWidget(widgStrip, m, 0)
@@ -188,8 +189,16 @@ class Strip(AbstractWrapperObject):
 
       # move to widget store
       self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
-      self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
+      # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
+      # # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips - not sure if needed here
+      # if self not in ccpnStrip.spectrumDisplay.orderedStrips:
+      #   # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
+      #   # childrenDict[n] = ccpnStrip
+      #   for order, cStrip in enumerate(self._widgets):
+      #     cStrip._wrappedData.__dict__['index'] = order
+      #     # ccpnStrip.__dict__['index'] = currentIndex-1
 
       # store the old information
       _stripDeleteDict = {'currentRow': currentRow
@@ -230,14 +239,14 @@ class Strip(AbstractWrapperObject):
       currentWrapped = _stripDeleteDict['currentWrapped']
 
       self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
-      self.setParent(currentParent)
+      # self.setParent(currentParent)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
       self._widgets = []
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.insert(currentIndex, self)
-      print ('>>> restoreToLayout', self._widgets)
+      print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
@@ -248,11 +257,18 @@ class Strip(AbstractWrapperObject):
           layout.addWidget(widgStrip, m, 0)
         layout.setColumnStretch(0, 1)
 
-      # count = ccpnStrip.spectrumDisplay.__dict__
-      # field = ccpnStrip.spectrumDisplay._fieldNames
-      # strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
+      count = ccpnStrip.spectrumDisplay.__dict__
+      field = ccpnStrip.spectrumDisplay._fieldNames
+      strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
       # ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in self._widgets]
-      self.moveTo(currentIndex)
+
+      # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips
+      if self not in ccpnStrip.spectrumDisplay.orderedStrips:
+        # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
+        # childrenDict[n] = ccpnStrip
+        for order, cStrip in enumerate(self._widgets):
+          cStrip._wrappedData.__dict__['index'] = order   # this is the api creation of orderedStrips
+          # ccpnStrip.__dict__['index'] = currentIndex-1
 
       _undo = self.project._undo
       if _undo is not None:
@@ -290,7 +306,8 @@ class Strip(AbstractWrapperObject):
     # self.setParent(None)
 
     # TODO:ED check this hack
-    self._unDeleteCall(*self._unDeleteArgs)
+    self._unDeleteCall(*self._unDeleteArgs)     # recover the deleted apiStrip
+
     ccpnStrip = self._wrappedData
 
     n = len(ccpnStrip.spectrumDisplay.strips)

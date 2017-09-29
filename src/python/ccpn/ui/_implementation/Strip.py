@@ -175,7 +175,7 @@ class Strip(AbstractWrapperObject):
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.remove(self)
-      print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
+      # print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
@@ -246,7 +246,7 @@ class Strip(AbstractWrapperObject):
       while layout.count():                             # clear the layout and store
         self._widgets.append(layout.takeAt(0).widget())
       self._widgets.insert(currentIndex, self)
-      print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
+      # print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
 
       if spectrumDisplay.stripDirection == 'Y':
         for m, widgStrip in enumerate(self._widgets):   # build layout again
@@ -343,8 +343,8 @@ class Strip(AbstractWrapperObject):
     if _undo is not None:
       _undo.decreaseBlocking()
       # _undo.newItem(newStrip.delete, newStrip._unDelete)
-      _undo.newItem(self.spectrumDisplay._removeIndexStrip, self.spectrumDisplay._unDelete
-                    , undoArgs=(-1,), redoArgs=(newStrip,))
+      _undo.newItem(self.spectrumDisplay.removeStrip, self.spectrumDisplay._unDelete
+                    , undoArgs=(newStrip,), redoArgs=(newStrip,))
 
     return newStrip
 

@@ -1,7 +1,9 @@
+
 QWidget {
     padding: 0;
     margin: 0px 0px 0px 0px;
     border: 0px;
+    border-radius: 0px;
 }
 
 
@@ -252,6 +254,11 @@ Dock {
          border: 0px solid #FBF4CC;
 }
 
+GuiMainWindow {
+         background-color: #FFFFFF;
+         border: 0px solid #FBF4CC;
+}
+
 Dock DockLabel  {
           background-color : #8087B3;
           color : #FDFDFC;
@@ -289,6 +296,7 @@ SequenceGraph QWidget { background-color: #FBF4CC;
 
 Dock ScrollArea QWidget { background-color: #FBF4CC;
                           padding: 0px;
+                          border-radius: 0px;
         }
 
 Dock > QWidget QScrollArea { background-color: #FBF4CC;
@@ -298,10 +306,6 @@ Dock > QWidget QScrollArea { background-color: #FBF4CC;
 Dock > QWidget { background-color: #FBF4CC;
                  padding: 0px;
         }
-
-
-
-
 
 Dock QPushButton::pressed {
                           color: #fdfdfc;

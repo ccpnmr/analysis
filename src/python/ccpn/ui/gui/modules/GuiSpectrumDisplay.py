@@ -198,7 +198,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                      callback=self._updatePhasing,
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
-                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top')
+                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top',
+                                     margins=(0,0,0,0), spacing=(0,0))
     self.phasingFrame.setVisible(False)
 
     self.stripFrame.setAcceptDrops(True)

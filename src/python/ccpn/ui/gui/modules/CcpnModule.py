@@ -97,6 +97,33 @@ class CcpnModule(Dock):
                    autoOrientation=False,
                    closable=closable)#, **kwds)   # ejb
 
+    self.hStyle = """
+                  Dock > QWidget {
+                      border: 0px solid #000;
+                      border-radius: 0px;
+                      border-top-left-radius: 0px;
+                      border-top-right-radius: 0px;
+                      border-top-width: 0px;
+                  }"""
+    self.vStyle = """
+                  Dock > QWidget {
+                      border: 0px solid #000;
+                      border-radius: 0px;
+                      border-top-left-radius: 0px;
+                      border-bottom-left-radius: 0px;
+                      border-left-width: 0px;
+                  }"""
+    self.nStyle = """
+                  Dock > QWidget {
+                      border: 0px solid #000;
+                      border-radius: 0px;
+                  }"""
+    self.dragStyle = """
+                  Dock > QWidget {
+                      border: 4px solid #00F;
+                      border-radius: 0px;
+                  }"""
+
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
     Logging.getLogger().debug('module:"%s"' % (name,))

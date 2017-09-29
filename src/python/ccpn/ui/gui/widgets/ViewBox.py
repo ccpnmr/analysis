@@ -440,7 +440,31 @@ class ViewBox(pg.ViewBox):
           for n in orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
 
-        peaks = self.current.strip.peakPickRegion(selectedRegion)
+        # TBD: Should be using onceOnly=True notifiers and suspend/resumeNotification but that is not working.
+        # So instead turn off notifications (so that they all get ignored) with blankNotification, and then
+        # at the end turn them back on again. This means have to update the relevant parts of the code which
+        # needs to know about new peaks. This is not a good way to do it.
+
+        project = self.current.strip.project
+        project.blankNotification()
+
+        try:
+          peaks = self.current.strip.peakPickRegion(selectedRegion)
+        finally:
+          project.unblankNotification()
+
+        # update strips which have the above peaks in them
+        # (could check for visibility...)
+        peakLists = set([peak.peakList for peak in peaks])
+        for peakList in peakLists:
+          for peakListView in peakList.peakListViews:
+            peakListView.spectrumView.strip.showPeaks(peakList)
+
+        # update peak table
+        # limitation: this will only update the first peak table
+        if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):
+          self.current.strip.spectrumDisplay.mainWindow.application.peakTableModule.peakListTable._updateTable()
+
         self.current.peaks = peaks
 
     elif controlLeftMouse(event):

@@ -2,7 +2,10 @@ import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
 
-import ccpn.ui.gui.widgets.ViewBox as spectrumViewbox
+from ccpn.ui.gui.lib.mouseEvents import \
+  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -91,41 +94,33 @@ class BarGraph(pg.BarGraphItem):
 
   def getValueDict(self):
     for x, y in zip(self.xValues, self.yValues):
-      print(x,y)
       self.allValues.update({x:y})
 
 
   def mouseClickEvent(self, event):
-    pass
-    # position = event.pos().x()
-    #
-    # self.clicked = int(position)
-    # if event.button() == QtCore.Qt.LeftButton:
-    #   for label in self.labels:
-    #     if label.text() == str(self.clicked):
-    #       print(label.data(self.clicked))
-    #       # self.application.current.nmrResidue = label.data(self.clicked)
-    #       label.setSelected(True)
-    #
-    #   event.accept()
+
+    position = event.pos().x()
+
+    self.clicked = int(position)
+    if event.button() == QtCore.Qt.LeftButton:
+      for label in self.labels:
+        if label.text() == str(self.clicked):
+          print(label.data(self.clicked))
+          label.setSelected(True)
+
+      event.accept()
 
   def mouseDoubleClickEvent(self, event):
-    pass
-    # position = event.pos().x()
-    #
-    # self.doubleclicked = int(position)
-    # if event.button() == QtCore.Qt.LeftButton:
-    #   for label in self.labels:
-    #     if label.text() == str(self.doubleclicked):
-    #       print(label.text() , label.data(self.doubleclicked))
-    #
-    # event.accept()
 
-    # QtGui.QGraphicsScene.mouseDoubleClickEvent(self, ev)
-    #
-    # if self.mouseGrabberItem() is None:  ## nobody claimed press; we are free to generate drag/click events
-    #
-    #   self.clickEvents.append(MouseClickEvent(ev, double=True))
+    position = event.pos().x()
+
+    self.doubleclicked = int(position)
+    if event.button() == QtCore.Qt.LeftButton:
+      for label in self.labels:
+        if label.text() == str(self.doubleclicked):
+          print(label.text() , label.data(self.doubleclicked))
+
+    event.accept()
 
   def drawLabels(self):
     '''
@@ -209,6 +204,17 @@ class CustomViewBox(pg.ViewBox):
     self.addItem(self.selectionBox, ignoreBounds=True)
     self.selectionBox.hide()
 
+  def _updateSelectionBox(self, p1:float, p2:float):
+    """
+    Updates drawing of selection box as mouse is moved.
+    """
+    r = QtCore.QRectF(p1, p2)
+    r = self.childGroup.mapRectFromParent(r)
+    self.selectionBox.setPos(r.topLeft())
+    self.selectionBox.resetTransform()
+    self.selectionBox.scale(r.width(), r.height())
+    self.selectionBox.show()
+
 
   def mouseClickEvent(self, event):
 
@@ -216,15 +222,10 @@ class CustomViewBox(pg.ViewBox):
       event.accept()
       self._raiseContextMenu(event)
 
-    # elif controlLeftMouse(ev):
-      # Control-left-click; (de-)select peak and add/remove to selection
-      # ev.accept()
-
     elif event.button() == QtCore.Qt.LeftButton :
-      # if self.application.current.nmrResidues:
-      #   self.application.current.clearNmrresidues()
+
       event.accept()
-      # self.deselectLabels()
+
 
 
 
@@ -240,38 +241,51 @@ class CustomViewBox(pg.ViewBox):
     yStartPosition = self.mapSceneToView(event.buttonDownPos()).y()
     yEndPosition = self.mapSceneToView(event.pos()).y()
 
+    print('self: ',self)
 
-    if spectrumViewbox.leftMouse(event):
+    if leftMouse(event):
       # Left-drag: Panning of the view
       pg.ViewBox.mouseDragEvent(self, event)
-    elif spectrumViewbox.controlLeftMouse(event):
+    elif controlLeftMouse(event):
+      self._updateSelectionBox(event.buttonDownPos(), event.pos())
       labels = [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
       # Control(Cmd)+left drag: selects label
+      self.selectionBox.show()
       for label in labels:
         if int(label.pos().x()) in range(int(xStartPosition), int(xEndPosition)):
           if self.inYRange(label.pos().y(), yEndPosition, yStartPosition, ):
-            self.application.current.addNmrresidue(label.data(int(label.pos().x())))
+            if self.application is not None:
+              obj = label.data(int(label.pos().x()))
+              if obj:
+                try:
+                  addObjToCurrent = getattr(self.application.current, 'add'+obj.className)
+                  addObjToCurrent(obj)
+                except:
+                  pass
+
+
+
+            # self.application.current.addNmrresidue(label.data(int(label.pos().x())))
             # label.setSelected(True)
 
 
       event.accept()
       if not event.isFinish():
-        self._resetBoxes()
-        spectrumViewbox.ViewBox._updateSelectionBox(self, p1=event.buttonDownPos(), p2=event.pos())
+        self._updateSelectionBox(event.buttonDownPos(), event.pos())
+      #   self._resetBoxes()
       else:
         self._resetBoxes()
-
-    elif spectrumViewbox.middleMouse(event) or \
-        spectrumViewbox.shiftLeftMouse(event) or spectrumViewbox.shiftMiddleMouse(event) \
-        or spectrumViewbox.shiftRightMouse(event):
-      event.accept()
-      if not event.isFinish():
-        self._resetBoxes()
-        self.updateScaleBox(event.buttonDownPos(), event.pos())
-      else:
-        self._resetBoxes()
-        spectrumViewbox.ViewBox._setView(self, point1=Point(event.buttonDownPos()), point2=Point(event.pos()))
-
+    #
+    # elif middleMouse(event) or \
+    #     shiftLeftMouse(event) or shiftMiddleMouse(event) \
+    #     or shiftRightMouse(event):
+    #   event.accept()
+    #   if not event.isFinish():
+    #     self._resetBoxes()
+    #     self.updateScaleBox(event.buttonDownPos(), event.pos())
+    #   else:
+    #     self._resetBoxes()
+    #
     else:
       self._resetBoxes()
       event.ignore()
@@ -357,6 +371,7 @@ class CustomViewBox(pg.ViewBox):
 
   def showAboveThreshold(self):
     if self.getthreshouldLine():
+      print(self.getthreshouldLine())
       tl = self.getthreshouldLine()[0]
       yTlPos = tl.pos().y()
       if self.getLabels():
@@ -365,6 +380,8 @@ class CustomViewBox(pg.ViewBox):
             label.show()
           else:
             label.hide()
+    else:
+      print('NOT FOUND')
 
   def showExportDialog(self):
     if self.exportDialog is None:
@@ -413,58 +430,58 @@ for x, y in zip(x1,y1):
         xHighs.append(x)
         yHighs.append(y)
 
-#######################################################################################################
-#################################### Start Application ################################################
-#######################################################################################################
-# #
-# app = pg.mkQApp()
+######################################################################################################
+################################### Start Application ################################################
+######################################################################################################
 #
-# customViewBox = CustomViewBox()
-# #
-# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-# customViewBox.setParent(plotWidget)
+app = pg.mkQApp()
+
+customViewBox = CustomViewBox()
 #
-#
-#
-# xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
-# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
-# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
-#
-#
-# customViewBox.addItem(xLow)
-# customViewBox.addItem(xMid)
-# customViewBox.addItem(xHigh)
-#
-# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-# customViewBox.addItem(xLine)
-#
-# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-# l.setParentItem(customViewBox.graphicsItem())
-#
-# c1 = plotWidget.plot(pen='r', name='low')
-# c2 = plotWidget.plot(pen='b', name='mid')
-# c3 = plotWidget.plot(pen='g', name='high')
-#
-# l.addItem(c1, 'low')
-# l.addItem(c2, 'mid')
-# l.addItem(c3, 'high')
-#
-# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-#
-# customViewBox.setMenuEnabled(enableMenu=False)
-#
-# plotWidget.show()
-#
-#
-#
-#
-#
-#
-# # Start Qt event
-# if __name__ == '__main__':
-#   import sys
-#   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-#     QtGui.QApplication.instance().exec_()
-#
-#
-#
+plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+customViewBox.setParent(plotWidget)
+
+
+
+xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
+xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
+xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
+
+
+customViewBox.addItem(xLow)
+customViewBox.addItem(xMid)
+customViewBox.addItem(xHigh)
+
+xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+customViewBox.addItem(xLine)
+
+l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+l.setParentItem(customViewBox.graphicsItem())
+
+c1 = plotWidget.plot(pen='r', name='low')
+c2 = plotWidget.plot(pen='b', name='mid')
+c3 = plotWidget.plot(pen='g', name='high')
+
+l.addItem(c1, 'low')
+l.addItem(c2, 'mid')
+l.addItem(c3, 'high')
+
+customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+
+customViewBox.setMenuEnabled(enableMenu=False)
+
+plotWidget.show()
+
+
+
+
+
+
+# Start Qt event
+if __name__ == '__main__':
+  import sys
+  if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+    QtGui.QApplication.instance().exec_()
+
+
+

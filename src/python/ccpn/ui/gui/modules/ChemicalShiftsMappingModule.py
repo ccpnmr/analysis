@@ -45,10 +45,12 @@ class CustomNmrResidueTable(NmrResidueTable):
 
   def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
 
-    NmrResidueTable.__init__(self, parent=parent, application=application,
-                             actionCallback=actionCallback, selectionCallback=selectionCallback, nmrChain=nmrChain, **kwds)
+    NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
+                             selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
     self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
                        colName, func, tipText, editValue in self.columnDefs]
+    self.multiSelect = True
+
 
 
 
@@ -102,7 +104,7 @@ class ChemicalShiftsMapping(CcpnModule):
         for i in self.project.nmrResidues:
           for j in i.nmrAtoms:
             self.atoms.add(j.name)
-
+    # self.updated = False
 
     self._setWidgets()
     self._setSettingsWidgets()
@@ -113,7 +115,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setWidgets(self):
-    self.barGraphWidget = BarGraphWidget(self.mainWidget, xValues=None, yValues=None, objects=None, grid=(0, 0))
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, xValues=[0],
+                                         yValues=[0], objects=[0], grid=(0, 0))
+    self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     if self.application:
 
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
@@ -176,55 +180,83 @@ class ChemicalShiftsMapping(CcpnModule):
     self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
+
     self.updateModule()
-    self.updateTable(nmrChain)
-    self.updateBarGraph()
+    # self.updateTable(nmrChain)
+    # self.updateBarGraph()
 
   def updateBarGraph(self):
-    self.barGraphWidget.barGraphs = []
+    xs = []
+    ys = []
+    obs = []
     aboveX = []
     aboveY = []
     aboveObjects = []
     belowX = []
     belowY = []
     belowObjects = []
+    aboveBrush = 'g'
+    belowBrush = 'r'
 
-    pos = self.barGraphWidget.xLine.pos().y()
-    for nmrResidue in self.nmrResidueTable.objects:
-      x = int(nmrResidue.sequenceCode)
-      y = float(nmrResidue._deltaShift)
-      aboveX.append(x)
-      aboveY.append(y)
-      aboveObjects.append(nmrResidue)
-    self.barGraphWidget.setData(xValues=aboveX, yValues=aboveY, objects=aboveObjects, colour='r', replace=True)
+    if self.barGraphWidget.xLine:
+      thresholdLinePos =  self.barGraphWidget.xLine.pos().x()
 
-    #   if y > pos:
-    #     aboveY.append(y)
-    #     aboveX.append(x)
-    #     aboveObjects.append(nmrResidue)
-    #   else:
-    #     belowX.append(x)
-    #     belowY.append(y)
-    #     belowObjects.append(nmrResidue)
-    #
-    # self.aboveThresholdBarGraph = BarGraph(viewBox=self.barGraphWidget.customViewBox, xValues=aboveX, yValues=aboveY, objects=aboveObjects,
-    #                                brush='g')
-    # self.belowTrhesholdBarGraph = BarGraph(viewBox=self.barGraphWidget.customViewBox, xValues=belowX, yValues=belowY, objects=belowObjects,
-    #                                brush='r')
-    # self.barGraphWidget.customViewBox.addItem(self.aboveThresholdBarGraph)
-    # self.barGraphWidget.customViewBox.addItem(self.belowTrhesholdBarGraph)
-    # self.barGraphWidget.barGraphs.append(self.aboveThresholdBarGraph)
-    # self.barGraphWidget.barGraphs.append(self.belowTrhesholdBarGraph)
-    # self.barGraphWidget.updateViewBoxLimits()
+      for nmrResidue in self.nmrResidueTable.objects:
+        x = int(nmrResidue.sequenceCode)
+        y = float(nmrResidue._deltaShift)
+        xs.append(x)
+        ys.append(y)
+        obs.append(nmrResidue)
+        if y > thresholdLinePos:
+          aboveY.append(y)
+          aboveX.append(x)
+          aboveObjects.append(nmrResidue)
+        else:
+          belowX.append(x)
+          belowY.append(y)
+          belowObjects.append(nmrResidue)
+
+    selectedNameColourA = self.aboveThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourA:
+        aboveBrush = code
+
+    selectedNameColourB = self.belowThresholdColourBox.getText()
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourB:
+        belowBrush = code
+
+    self.barGraphWidget.deleteLater()
+    self.barGraphWidget = None
+    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
+                                         xValues=xs, yValues=ys, objects=obs, grid=(0, 0))
+    self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
+    self.barGraphWidget._lineMoved(aboveX=aboveX,
+                                   aboveY=aboveY,
+                                   aboveObjects=aboveObjects,
+                                   belowX=belowX,
+                                   belowY=belowY,
+                                   belowObjects=belowObjects,
+                                   belowBrush=belowBrush,
+                                   aboveBrush=aboveBrush
+                                   )
 
 
 
+  def _viewboxMouseClickEvent(self, event):
 
+    if event.button() == QtCore.Qt.RightButton:
+      event.accept()
+      self.barGraphWidget.customViewBox._raiseContextMenu(event)
+      self.barGraphWidget.customViewBox._resetBoxes()
 
-
+    elif event.button() == QtCore.Qt.LeftButton:
+      self.barGraphWidget.customViewBox._resetBoxes()
+      self.application.current.clearNmrResidues()
+      event.accept()
 
   def updateModule(self):
-
+    print('updateModule')
     selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
@@ -257,7 +289,6 @@ class ChemicalShiftsMapping(CcpnModule):
       for bar in self.barGraphWidget.barGraphs:
         for label in bar.labels:
           if label.text() == str(self.clicked):
-            print(label.data(self.clicked))
             self.current.nmrResidue = label.data(self.clicked)
             label.setSelected(True)
 
@@ -304,9 +335,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
 class BarGraphWidget(Widget, Base):
 
-  def __init__(self, parent, xValues=None, yValues=None, colour='r', objects=None, **kw):
+  def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', objects=None, **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, **kw)
+    self.application = application
     self._setViewBox()
     self._setLayout()
     self.setContentsMargins(1, 1, 1, 1)
@@ -317,14 +349,16 @@ class BarGraphWidget(Widget, Base):
     self.yValues = yValues
     self.objects = objects
     self.colour = colour
-    self.setData(xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
+    self.aboveBrush = 'g'
+    self.belowBrush = 'r'
 
 
+    self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
     self._addExtraItems()
-    self.updateViewBoxLimits()
+    # self.updateViewBoxLimits()
 
   def _setViewBox(self):
-    self.customViewBox = CustomViewBox()
+    self.customViewBox = CustomViewBox(application = self.application)
     self.customViewBox.setMenuEnabled(enableMenu=False)  # override pg default context menu
     self.plotWidget = pg.PlotWidget(viewBox=self.customViewBox, background='w')
     self.customViewBox.setParent(self.plotWidget)
@@ -340,18 +374,24 @@ class BarGraphWidget(Widget, Base):
     self.addThresholdLine()
 
 
-  def setData(self, xValues, yValues, objects, colour, replace=True):
+  def setData(self,viewBox, xValues, yValues, objects, colour, replace=True):
     if replace:
       self.barGraphs = []
       self.customViewBox.clear()
 
-    self.barGraph = BarGraph(viewBox=self.customViewBox, xValues=xValues, yValues=yValues, objects=objects,
-                  brush=colour)
+    self.barGraph = BarGraph(viewBox=viewBox, application = self.application,
+                             xValues=xValues, yValues=yValues, objects=objects, brush=colour)
     self.barGraphs.append(self.barGraph)
     self.customViewBox.addItem(self.barGraph)
     self.xValues = xValues
     self.yValues = yValues
     self.objects = objects
+    self.updateViewBoxLimits()
+    # if yValues:
+    #   if len(yValues) > 0:
+    #     print(self.xLine.pos().y())
+    #     self.xLine.setPos(0.1)
+    #     self.showThresholdLine(True)
 
     # self._lineMoved()
 
@@ -375,12 +415,12 @@ class BarGraphWidget(Widget, Base):
   def addThresholdLine(self):
 
     self.xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
+    print('self.customViewBox ..', self.customViewBox, )
     self.customViewBox.addItem(self.xLine)
     if self.yValues is not None:
       if len(self.yValues)>0:
         self.xLine.setPos(min(self.yValues))
-    self.showThresholdLine(False)
-    self._lineMoved()
+    self.showThresholdLine(True)
     self.xLine.sigPositionChangeFinished.connect(self._lineMoved)
 
   def showThresholdLine(self, value=True):
@@ -389,39 +429,52 @@ class BarGraphWidget(Widget, Base):
     else:
       self.xLine.hide()
 
-  def _lineMoved(self):
+  def _lineMoved(self, **args):
+
     self.clearBars()
+    if len(args)>0:
+        aboveX = args['aboveX']
+        aboveY =  args['aboveY']
+        aboveObjects = args['aboveObjects']
+        belowX =  args['belowX']
+        belowY =  args['belowY']
+        belowObjects =  args['belowObjects']
+        self.aboveBrush = args['aboveBrush']
+        self.belowBrush = args['belowBrush']
 
-    aboveX = []
-    aboveY = []
-    aboveObjects = []
-    belowX = []
-    belowY = []
-    belowObjects = []
-
-    pos = self.xLine.pos().y()
-    if self.xValues:
-      for x,y,obj in zip(self.xValues, self.yValues, self.objects):
-        if y > pos:
-          aboveY.append(y)
-          aboveX.append(x)
-          aboveObjects.append(obj)
-        else:
-          belowX.append(x)
-          belowY.append(y)
-          belowObjects.append(obj)
+    else:
+      aboveX = []
+      aboveY = []
+      aboveObjects = []
+      belowX = []
+      belowY = []
+      belowObjects = []
 
 
+      pos = self.xLine.pos().y()
+      if self.xValues:
+        for x,y,obj in zip(self.xValues, self.yValues, self.objects):
+          if y > pos:
+            aboveY.append(y)
+            aboveX.append(x)
+            aboveObjects.append(obj)
+          else:
+            belowX.append(x)
+            belowY.append(y)
+            belowObjects.append(obj)
 
-      self.aboveThreshold = BarGraph(viewBox=self.customViewBox, xValues=aboveX, yValues=aboveY, objects=aboveObjects,
-                    brush='g')
-      self.belowTrheshold = BarGraph(viewBox=self.customViewBox, xValues=belowX, yValues=belowY, objects=belowObjects,
-                    brush='r')
-      self.customViewBox.addItem(self.aboveThreshold)
-      self.customViewBox.addItem(self.belowTrheshold)
-      self.barGraphs.append(self.aboveThreshold)
-      self.barGraphs.append(self.belowTrheshold)
-      self.updateViewBoxLimits()
+
+
+    self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application = self.application,
+                                   xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
+    self.belowTrheshold = BarGraph(viewBox=self.customViewBox, application = self.application,
+                                   xValues=belowX, yValues=belowY, objects=belowObjects,brush=self.belowBrush)
+
+    self.customViewBox.addItem(self.aboveThreshold)
+    self.customViewBox.addItem(self.belowTrheshold)
+    self.barGraphs.append(self.aboveThreshold)
+    self.barGraphs.append(self.belowTrheshold)
+    self.updateViewBoxLimits()
 
     for bar in self.barGraphs:
       bar.viewBox.showAboveThreshold()

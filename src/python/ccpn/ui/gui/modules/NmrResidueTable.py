@@ -236,7 +236,8 @@ class NmrResidueTable(ObjectTable):
     except:
       return None
 
-  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None,  multiSelect = False,
+               **kwds):
     """
     Initialise the widgets for the module.
     """
@@ -272,7 +273,7 @@ class NmrResidueTable(ObjectTable):
                          , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=self.NMRcolumns, objects = [],
-                         autoResize=True,
+                         autoResize=True,  multiSelect = multiSelect,
                          actionCallback=actionCallback, selectionCallback=selectionCallback,
                          grid = (3, 0), gridSpan = (1, 6), enableDelete=True
                          )
@@ -370,11 +371,12 @@ class NmrResidueTable(ObjectTable):
     """
     if not self._updateSilence:
       # objs = self.getSelectedObjects()
-      self.setColumns(self.NMRcolumns)
-      self.setObjects(nmrChain.nmrResidues)
+      self.setObjectsAndColumns(nmrChain.nmrResidues,self.NMRcolumns)
+      # self.setColumns(self.NMRcolumns)
+      # self.setObjects(nmrChain.nmrResidues)
       # self._highLightObjs(objs)
       self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
-      self.show()
+      # self.show()
 
   def setUpdateSilence(self, silence):
     """
@@ -382,12 +384,20 @@ class NmrResidueTable(ObjectTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, nmrResidue, row, col):
+  def _selectionCallback(self, selected, row, col):
     """
     Notifier Callback for selecting a row in the table
     """
-    self._current.nmrResidue = nmrResidue
+    if selected is not None:
+      if self.multiSelect: #In this case selected is a List!!
+        if isinstance(selected, list):
+          self._current.nmrResidues = selected
+      else:
+        self._current.nmrResidue = selected
+    else:
+      self._current.clearNmrResidues()
     NmrResidueTableModule._currentCallback = {'object':self.nmrChain, 'table':self}
+
 
   def _selectionPulldownCallback(self, item):
     """

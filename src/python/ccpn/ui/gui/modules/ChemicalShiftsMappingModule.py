@@ -22,6 +22,7 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
 
+
 DefaultAtoms = ['H', 'N']
 DefaultThreshould = 0.1
 
@@ -240,6 +241,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                          grid=(0, 0))
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
+    self.barGraphWidget.customViewBox.addSelectionBox()
 
 
     self.barGraphWidget._lineMoved(aboveX=aboveX,
@@ -304,6 +306,8 @@ class ChemicalShiftsMapping(CcpnModule):
           if label.text() == str(self.clicked):
             self.current.nmrResidue = label.data(self.clicked)
             label.setSelected(True)
+            # label.setBrush( QtGui.QColor('#3333ff') )
+
 
       event.accept()
 

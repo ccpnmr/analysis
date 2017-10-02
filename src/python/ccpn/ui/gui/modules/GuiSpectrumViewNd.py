@@ -653,66 +653,66 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
 
-    painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
+    if self.strip.plotWidget:
+      painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 
-    try:
+      try:
 
-      xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
-      yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
-      
-      xTile0 = xClipPoint0 // xTotalPointCount
-      xTile1 = 1 + (xClipPoint1-1) // xTotalPointCount
-      yTile0 = yClipPoint0 // yTotalPointCount
-      yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
-      
-      # GL.glEnable(GL.GL_CLIP_PLANE0)
-      GL.glEnable(GL.GL_CLIP_PLANE1)
-      GL.glEnable(GL.GL_CLIP_PLANE2)
-      # GL.glEnable(GL.GL_CLIP_PLANE3)
+        xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
+        yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
 
-      # TODO:ED - why am I displaying a series of tiles?
-      # xTile1 = 1
-      # yTile1 = 1
+        xTile0 = xClipPoint0 // xTotalPointCount
+        xTile1 = 1 + (xClipPoint1-1) // xTotalPointCount
+        yTile0 = yClipPoint0 // yTotalPointCount
+        yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
 
-      # for xTile in range(xTile0, xTile1):
-      #   for yTile in range(yTile0, yTile1):
-          
-      xTile = 0   # ejb - temp to only draw one set
-      yTile = 0
+        # GL.glEnable(GL.GL_CLIP_PLANE0)
+        GL.glEnable(GL.GL_CLIP_PLANE1)
+        GL.glEnable(GL.GL_CLIP_PLANE2)
+        # GL.glEnable(GL.GL_CLIP_PLANE3)
 
-      GL.glLoadIdentity()
-      GL.glPushMatrix()
+        # TODO:ED - why am I displaying a series of tiles?
+        # xTile1 = 1
+        # yTile1 = 1
 
-      # the below is because the y axis goes from top to bottom
-      GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+        # for xTile in range(xTile0, xTile1):
+        #   for yTile in range(yTile0, yTile1):
 
-      # the below makes sure that spectrum points get mapped to screen pixels correctly
-      GL.glTranslate(xTranslate, yTranslate, 0.0)
-      GL.glScale(xScale, yScale, 1.0)
+        xTile = 0   # ejb - temp to only draw one set
+        yTile = 0
 
-      GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
-      # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
-      GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
-      GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
-      # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+        GL.glLoadIdentity()
+        GL.glPushMatrix()
 
-      for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
-                                             (negColour, negLevels, self.negDisplayLists)):
-        for n, level in enumerate(levels):
-          GL.glColor4f(*colour)
-          # TBD: scaling, translating, etc.
-          GL.glCallList(displayLists[n])
-      GL.glPopMatrix()
-      
-      # GL.glDisable(GL.GL_CLIP_PLANE0)
-      GL.glDisable(GL.GL_CLIP_PLANE1)
-      GL.glDisable(GL.GL_CLIP_PLANE2)
-      # GL.glDisable(GL.GL_CLIP_PLANE3)
+        # the below is because the y axis goes from top to bottom
+        GL.glScale(1.0, -1.0, 1.0)
+        GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
 
-    finally:
-      
-      painter.endNativePainting()
+        # the below makes sure that spectrum points get mapped to screen pixels correctly
+        GL.glTranslate(xTranslate, yTranslate, 0.0)
+        GL.glScale(xScale, yScale, 1.0)
+
+        GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+        # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
+        GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
+        GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
+        # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+
+        for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
+                                               (negColour, negLevels, self.negDisplayLists)):
+          for n, level in enumerate(levels):
+            GL.glColor4f(*colour)
+            # TBD: scaling, translating, etc.
+            GL.glCallList(displayLists[n])
+        GL.glPopMatrix()
+
+        # GL.glDisable(GL.GL_CLIP_PLANE0)
+        GL.glDisable(GL.GL_CLIP_PLANE1)
+        GL.glDisable(GL.GL_CLIP_PLANE2)
+        # GL.glDisable(GL.GL_CLIP_PLANE3)
+
+      finally:
+        painter.endNativePainting()
       
   def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list
@@ -1017,39 +1017,42 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         
     strip = self.strip
     plotWidget = strip.plotWidget
-    plotItem = plotWidget.plotItem
-    viewBox = strip.viewBox
-    viewRegion = plotWidget.viewRange()
-    region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
+    if plotWidget:
+      plotItem = plotWidget.plotItem
+      viewBox = strip.viewBox
+      viewRegion = plotWidget.viewRange()
+      region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
 
-    if pixelViewBox0 is None: # should then also have pixelViewBox1 = None
-      if ind == 0:
-        pixelCount = plotWidget.width()
-        pixelViewBox0 = plotItem.getAxis('left').width()
-        pixelViewBox1 = pixelViewBox0 + viewBox.width()
-      else:
-        pixelCount = plotWidget.height()
-        pixelViewBox0 = plotItem.getAxis('bottom').height()
-        pixelViewBox1 = pixelViewBox0 + viewBox.height()
+      if pixelViewBox0 is None: # should then also have pixelViewBox1 = None
+        if ind == 0:
+          pixelCount = plotWidget.width()
+          pixelViewBox0 = plotItem.getAxis('left').width()
+          pixelViewBox1 = pixelViewBox0 + viewBox.width()
+        else:
+          pixelCount = plotWidget.height()
+          pixelViewBox0 = plotItem.getAxis('bottom').height()
+          pixelViewBox1 = pixelViewBox0 + viewBox.height()
 
-    # -1 below because points start at 1 in data model
-    firstPoint = valueToPoint(region0) - 1
-    lastPoint = valueToPoint(region1) - 1
-    # (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
+      # -1 below because points start at 1 in data model
+      firstPoint = valueToPoint(region0) - 1
+      lastPoint = valueToPoint(region1) - 1
+      # (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
 
-    scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
-    translate = pixelViewBox0 - firstPoint * scale
+      scale = (pixelViewBox1-pixelViewBox0) / (lastPoint-firstPoint)
+      translate = pixelViewBox0 - firstPoint * scale
 
-    # dataDim2 should be same as dataDim
-    # position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
-    #   self._getSpectrumViewParams(ind))
-    viewParams = self._getSpectrumViewParams(ind)
-    
-    # -1 below because points start at 1 in data model
-    clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(viewParams.maxAliasedFrequency)-1)))
-    clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
+      # dataDim2 should be same as dataDim
+      # position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
+      #   self._getSpectrumViewParams(ind))
+      viewParams = self._getSpectrumViewParams(ind)
 
-    return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+      # -1 below because points start at 1 in data model
+      clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(viewParams.maxAliasedFrequency)-1)))
+      clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
+
+      return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+    else:
+      return [None, None, None, None, None]
 
   def refreshData(self):
 

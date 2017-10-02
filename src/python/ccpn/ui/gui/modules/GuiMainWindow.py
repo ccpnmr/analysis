@@ -49,6 +49,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 from ccpn.util.Common import uniquify
@@ -216,6 +217,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
     # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
+    self._verticalTEMPSPLIT = QtGui.QSplitter(QtCore.Qt.Vertical)
+    self._TESTFRAME = Frame(setLayout=False)
+    self._tempLayout = QtGui.QVBoxLayout()
+    self._TESTFRAME.setLayout(self._tempLayout)
+    self._TESTFRAME.hide()
+
     # GWV: do not understand this order
     # self._verticalSplitter.addWidget(self.sideBar)
     # self._horizontalSplitter.addWidget(self._verticalSplitter)
@@ -224,7 +231,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # GWV: there is no need for the above as the moduleArea generates its splitter
     # when required
-    self._horizontalSplitter.addWidget(self.sideBar)
+
+    self._horizontalSplitter.addWidget(self._verticalTEMPSPLIT)
+
+    self._verticalTEMPSPLIT.addWidget(self.sideBar)
+    self._verticalTEMPSPLIT.addWidget(self._TESTFRAME)
+
     self._horizontalSplitter.addWidget(self.moduleArea)
     self.setCentralWidget(self._horizontalSplitter)
 

@@ -84,8 +84,8 @@ class GuiStrip(Frame):
     #self.setContentsMargins(5, 0, 5, 0)
     self.setContentsMargins(0, 0, 0, 0)
     #self.setMinimumWidth(250)
-    self.setMinimumWidth(100)
-    self.setMinimumHeight(150)
+    self.setMinimumWidth(75)
+    self.setMinimumHeight(200)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
                                  #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
@@ -93,33 +93,36 @@ class GuiStrip(Frame):
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
     self.getLayout().addWidget(self.plotWidget, 1, 0)
+    self.layout().setHorizontalSpacing(0)
+    self.layout().setVerticalSpacing(0)
 
     # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
     # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
     self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                       hPolicy='expanding',
-                                      grid=(2, 0)
-                                      )
-    self._stripToolBarWidget.setFixedHeight(30)
+                                      grid=(2, 0), spacing=(5,5))
+    # self._stripToolBarWidget.setFixedHeight(30)
 
     # Widgets for _stripIdLabel and _stripLabel
     self._labelWidget = Widget(parent=self, setLayout=True,
                                      hPolicy='expanding', vAlign='center',
-                                     grid=(0, 0)
-                                    )
+                                     grid=(0, 0), spacing=(0,0))
+    self._labelWidget.layout().setHorizontalSpacing(0)
+    self._labelWidget.layout().setVerticalSpacing(0)
+
     # self._labelWidget.setFixedHeight(34)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
     self._stripIdLabel = Label(parent=self._labelWidget,
-                               text='.'.join(self.id.split('.')), margins=[0,0,0,0],
-                               grid=(0,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
+                               text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
+                               grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripIdLabel.setFont(textFontSmall)
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='test',
+                                   text='.', spacing=(0,0),
                                    grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
     self.hideStripLabel()
@@ -127,9 +130,16 @@ class GuiStrip(Frame):
     # A label to display the cursor positions (updated by _showMousePosition)
     self._cursorLabel = Label(parent=self._labelWidget,
                                text='',
-                               grid=(1,0), gridSpan=(1,3), margins=[0,0,0,0],
+                               grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
                                # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
                                hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
+
+    # self._cursorLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+    # self._cursorLabel.setAutoFillBackground(False)
+    # self._stripIdLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+    # self._stripIdLabel.setAutoFillBackground(False)
+    # self._stripLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+    # self._stripLabel.setAutoFillBackground(False)
 
     self._cursorLabel.setFont(textFontSmall)
     # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel

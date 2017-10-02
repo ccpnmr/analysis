@@ -243,13 +243,14 @@ class GuiPeakListView(QtGui.QGraphicsItem):
       peakItem = peakItemDict[apiPeak]
       peakItems.add(peakItem)
 
-    scene = strip.plotWidget.scene()
-    for peakItem in peakItems:
-      scene.removeItem(peakItem.annotation)
-      if spectrumDisplay.is1D:
-        scene.removeItem(peakItem.symbol)
-      scene.removeItem(peakItem)
-    scene.removeItem(self)
+    if strip.plotWidget:
+      scene = strip.plotWidget.scene()
+      for peakItem in peakItems:
+        scene.removeItem(peakItem.annotation)
+        if spectrumDisplay.is1D:
+          scene.removeItem(peakItem.symbol)
+        scene.removeItem(peakItem)
+      scene.removeItem(self)
 
     del spectrumDisplay.activePeakItemDict[self]
     del spectrumDisplay.inactivePeakItemDict[self]

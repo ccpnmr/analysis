@@ -198,7 +198,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                      callback=self._updatePhasing,
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
-                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top')
+                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top',
+                                     margins=(0,0,0,0), spacing=(0,0))
     self.phasingFrame.setVisible(False)
 
     self.stripFrame.setAcceptDrops(True)
@@ -415,6 +416,14 @@ class GuiSpectrumDisplay(CcpnModule):
     CcpnModule._closeModule(self)
     self.delete()
 
+  def _unDelete(self, strip):
+    _undo = self.project._undo
+    self._startCommandEchoBlock('removeStrip')
+    try:
+      strip._unDelete()
+    finally:
+      self._endCommandEchoBlock()
+
   def _removeIndexStrip(self, value):
     self.removeStrip(self.strips[value])
 
@@ -437,26 +446,27 @@ class GuiSpectrumDisplay(CcpnModule):
 
     _undo = self.project._undo
     self._startCommandEchoBlock('removeStrip')
-    stripPos = self.strips.index(strip)
 
-    if _undo is not None:
-      _undo.increaseBlocking()
+    # if _undo is not None:
+    #   _undo.increaseBlocking()
 
     try:
-      strip._unregisterStrip()
+      # strip._unregisterStrip()
+      self.current.strip = None
       self.setColumnStretches(stretchValue=False)      # set to 0 so they disappear
-      strip.setParent(None)           # need to remove the rogue widget from the widgetArea
+      # this removes it too early
+      # strip.setParent(None)           # need to remove the rogue widget from the widgetArea
       strip.delete()
       self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
 
     finally:
       self._endCommandEchoBlock()
 
-    if _undo is not None:
-      _undo.decreaseBlocking()
-
-      # TODO:ED this may not be the correct strip to Redo:remove
-      _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
+    # if _undo is not None:
+    #   _undo.decreaseBlocking()
+    #
+    #   # TODO:ED this may not be the correct strip to Redo:remove
+    #   _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
 
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"

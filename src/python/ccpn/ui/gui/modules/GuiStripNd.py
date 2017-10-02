@@ -539,5 +539,8 @@ class GuiStripNd(GuiStrip):
 
   def resizeEvent(self, event):
     super(GuiStripNd, self).resizeEvent(event)
-    for spectrumView in self.spectrumViews:
-      spectrumView.updateGeometryChange()
+
+    # TODO:ED temporary test because spectrumViews have been deleted at this point
+    if hasattr(self, 'spectrumViews'):
+      for spectrumView in self.spectrumViews:
+        spectrumView.updateGeometryChange()

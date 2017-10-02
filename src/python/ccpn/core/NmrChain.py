@@ -181,6 +181,34 @@ class NmrChain(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
+  def assignSingleResidue(self, thisNmrResidue:typing.Union['NmrResidue'], firstResidue:typing.Union[Residue, str]):
+    """Assign a single unconnected residue from the default '@-' chain"""
+
+    project = self._project
+
+    if self.isConnected:
+      raise ValueError("assignSingleResidue only allowed for single nmrResidue")
+
+    # make sure that object exists
+    if isinstance(firstResidue, str):
+      xx = project.getByPid(firstResidue)
+      if xx is None:
+        raise ValueError("No object found matching Pid %s" % firstResidue)
+      else:
+        firstResidue = xx
+
+    # check that it isn't already connected
+    if firstResidue.nmrResidue is not None:
+      raise ValueError("Cannot assign %s: Residue %s is already assigned"
+                       % (thisNmrResidue.id, firstResidue.id))
+
+    # If we get here we are OK - assign residues and delete NmrChain
+    self._startCommandEchoBlock('assignSingleResidue', firstResidue)
+    try:
+      thisNmrResidue._wrappedData.assignedResidue = firstResidue._wrappedData
+    finally:
+     self._endCommandEchoBlock()
+
   def assignConnectedResidues(self, firstResidue:typing.Union[Residue, str]):
     """Assign all NmrResidues in connected NmrChain sequentially,
     with the first NmrResidue assigned to firstResidue.

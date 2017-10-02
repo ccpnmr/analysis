@@ -198,7 +198,7 @@ class CustomViewBox(pg.ViewBox):
     self.addSelectionBox()
     self.application = application
     self.allLabelsShown = False
-
+    self.lastRange = self.viewRange()[0]
 
 
 
@@ -209,6 +209,17 @@ class CustomViewBox(pg.ViewBox):
     self.selectionBox.setZValue(1e9)
     self.addItem(self.selectionBox, ignoreBounds=True)
     # self.selectionBox.hide()
+
+  def wheelEvent(self, ev, axis=None):
+    if (self.viewRange()[0][1] - self.viewRange()[0][0]) <= 10+0.0001:
+      self.lastXRange = self.viewRange()[0]
+    if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
+      ev.ignore()
+      self.setRange(xRange=self.lastXRange)
+    else:
+      self.lastRange = self.viewRange()
+      super(CustomViewBox, self).wheelEvent(ev, axis=None)
+
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """
@@ -473,7 +484,7 @@ l.addItem(c2, 'mid')
 l.addItem(c3, 'high')
 
 # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-customViewBox.setRange(xRange=[10,20], yRange=[0.01,1],)
+customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
 customViewBox.setMenuEnabled(enableMenu=False)
 
 plotWidget.show()

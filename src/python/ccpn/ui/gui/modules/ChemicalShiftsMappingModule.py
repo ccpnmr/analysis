@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
+from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -25,6 +25,9 @@ from ccpn.core.lib import CcpnSorting
 
 DefaultAtoms = ['H', 'N']
 DefaultThreshould = 0.1
+LightColourSchemeCurrentLabel = '#3333ff'
+DarkColourSchemeCurrentLabel = '#00ff00'
+
 
 class CustomNmrResidueTable(NmrResidueTable):
   ''' Custon nmrResidue Table with extra Delta Shifts column'''
@@ -124,8 +127,11 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     if self.application:
 
-      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,  setLayout=True, grid=(1, 0))
+      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
+                                                   actionCallback= self._customActionCallBack,
+                                                   setLayout=True, grid=(1, 0))
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
+
 
 
 
@@ -271,6 +277,13 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application.current.clearNmrResidues()
       event.accept()
 
+  def _customActionCallBack(self, obj, *args):
+    if obj:
+      xPos = int(obj.sequenceCode)
+      yPos = obj._deltaShift
+      self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
+      self.nmrResidueTable.defaultActionCallback(obj, args)
+
   def updateModule(self):
     selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
     if self.nmrResidueTable.nmrChain:
@@ -291,9 +304,20 @@ class ChemicalShiftsMapping(CcpnModule):
           if self.application is not None:
 
             if label.data(int(label.text())) in self.current.nmrResidues:
+
+              if self.application.colourScheme == 'light':
+                highlightColour = '#3333ff'
+              else:
+                highlightColour = '#00ff00'
+              label.setBrush(QtGui.QColor(highlightColour))
+              label.setVisible(True)
               label.setSelected(True)
+
             else:
               label.setSelected(False)
+              label.setBrush(QtGui.QColor(bar.brush))
+              if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
+                label.setVisible(False)
 
 
   def _mouseClickEvent(self, event):
@@ -306,7 +330,8 @@ class ChemicalShiftsMapping(CcpnModule):
           if label.text() == str(self.clicked):
             self.current.nmrResidue = label.data(self.clicked)
             label.setSelected(True)
-            # label.setBrush( QtGui.QColor('#3333ff') )
+
+
 
 
       event.accept()
@@ -352,10 +377,21 @@ class ChemicalShiftsMapping(CcpnModule):
 
 class BarGraphWidget(Widget, Base):
 
+
   def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', objects=None, threshouldLine=0.01, **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.application = application
+    # set background from application
+    if self.application:
+      if self.application.colourScheme == 'light':
+        self.backgroundColour = '#f7ffff'
+      else:
+        self.backgroundColour = '#080000'
+    else:
+      self.backgroundColour = 'w'
+    self.thresholdLineColour = 'b'
+
     self._setViewBox()
     self._setLayout()
     self.setContentsMargins(1, 1, 1, 1)
@@ -371,6 +407,7 @@ class BarGraphWidget(Widget, Base):
     self.threshouldLine = threshouldLine
 
 
+
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
     self._addExtraItems()
     # self.updateViewBoxLimits()
@@ -378,7 +415,7 @@ class BarGraphWidget(Widget, Base):
   def _setViewBox(self):
     self.customViewBox = CustomViewBox(application = self.application)
     self.customViewBox.setMenuEnabled(enableMenu=False)  # override pg default context menu
-    self.plotWidget = pg.PlotWidget(viewBox=self.customViewBox, background='w')
+    self.plotWidget = pg.PlotWidget(viewBox=self.customViewBox, background=self.backgroundColour)
     self.customViewBox.setParent(self.plotWidget)
 
   def _setLayout(self):
@@ -414,7 +451,8 @@ class BarGraphWidget(Widget, Base):
     '''Updates with default paarameters. Minimum values to show the data only'''
     if self.xValues and self.yValues:
       self.customViewBox.setLimits(xMin=min(self.xValues)/2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
-                                   yMin=min(self.yValues)/2 ,yMax=max(self.yValues) + (max(self.yValues) * 0.5))
+                                   yMin=min(self.yValues)/2 ,yMax=max(self.yValues) + (max(self.yValues) * 0.5),
+                                   )
 
 
 
@@ -426,13 +464,25 @@ class BarGraphWidget(Widget, Base):
 
   def addThresholdLine(self):
 
-    self.xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
+    self.xLine = pg.InfiniteLine(angle=0, movable=True, pen=self.thresholdLineColour)
     self.customViewBox.addItem(self.xLine)
+
+    # self.thresholdValueTextItem = pg.TextItem(str(self.xLine.pos().y()), anchor=(self.customViewBox.viewRange()[0][0], 1.0),)
+    # self.thresholdValueTextItem.setParentItem(self.xLine)
+    # self.thresholdValueTextItem.setBrush(QtGui.QColor(self.thresholdLineColour))
     if self.yValues is not None:
       if len(self.yValues)>0:
         self.xLine.setPos(self.threshouldLine)
     self.showThresholdLine(True)
     self.xLine.sigPositionChangeFinished.connect(self._lineMoved)
+    # self.xLine.setToolTip(str(round(self.xLine.pos().y(), 4)))
+    print(str(round(self.xLine.pos().y(), 4)))
+    self.xLine.sigPositionChanged.connect(self._updateTextLabel)
+
+  def _updateTextLabel(self):
+    # self.thresholdValueTextItem.setText(str(round(self.xLine.pos().y(),3)))#, color=self.thresholdLineColour)
+
+    self.xLine.setToolTip(str(round(self.xLine.pos().y(), 4)))
 
   def showThresholdLine(self, value=True):
     if value:

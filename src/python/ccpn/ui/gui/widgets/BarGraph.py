@@ -12,8 +12,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 current = []
 
-labelsColor = 'b'
-selectedLabelColor = 'g'
+
 
 #TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed
 
@@ -60,6 +59,8 @@ class BarGraph(pg.BarGraphItem):
 
       self.setObjects(self.objects)
 
+
+
   def setValues(self, xValues, yValues):
       opts = dict(  # setting for BarGraphItem
           x=xValues,
@@ -87,8 +88,9 @@ class BarGraph(pg.BarGraphItem):
                 if str(nmrResidue.sequenceCode) == label.text():
                   label.setData(int(nmrResidue.sequenceCode), object)
 
-        else:
-          print('Impossible to set this object to its label. Function implemented only for NmrResidue')
+        # else:
+          # pass
+          # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
 
 
 
@@ -157,6 +159,7 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
     self.setFont(font)
     self.setFlag(self.ItemIgnoresTransformations+self.ItemIsSelectable)
     self.setToolTip(text)
+    self.isBelowThreshold = False
 
     self.customObject = self.data(int(self.text()))
     # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
@@ -194,6 +197,7 @@ class CustomViewBox(pg.ViewBox):
     self.exportDialog = None
     self.addSelectionBox()
     self.application = application
+    self.allLabelsShown = False
 
 
 
@@ -365,13 +369,14 @@ class CustomViewBox(pg.ViewBox):
         label.hide()
 
   def showAllLAbels(self):
+    self.allLabelsShown = True
     if self.getLabels():
       for label in self.getLabels():
         label.show()
 
   def showAboveThreshold(self):
+    self.allLabelsShown = False
     if self.getthreshouldLine():
-      print(self.getthreshouldLine())
       tl = self.getthreshouldLine()[0]
       yTlPos = tl.pos().y()
       if self.getLabels():
@@ -380,6 +385,7 @@ class CustomViewBox(pg.ViewBox):
             label.show()
           else:
             label.hide()
+            label.isBelowThreshold = True
     else:
       print('NOT FOUND')
 
@@ -432,7 +438,7 @@ for x, y in zip(x1,y1):
 
 ######################################################################################################
 ################################### Start Application ################################################
-######################################################################################################
+# ######################################################################################################
 #
 app = pg.mkQApp()
 
@@ -443,9 +449,9 @@ customViewBox.setParent(plotWidget)
 
 
 
-xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r')
-xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b')
-xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g')
+xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r', widht=1)
+xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
+xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
 
 
 customViewBox.addItem(xLow)
@@ -466,8 +472,8 @@ l.addItem(c1, 'low')
 l.addItem(c2, 'mid')
 l.addItem(c3, 'high')
 
-customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-
+# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+customViewBox.setRange(xRange=[10,20], yRange=[0.01,1],)
 customViewBox.setMenuEnabled(enableMenu=False)
 
 plotWidget.show()

@@ -431,6 +431,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
       colour = '#666e98'
     guiRes = self.scene.itemAt(event.scenePos())
     nmrChain = self.project.getByPid(data[0])
+    selectedNmrResidue = self.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
     result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
@@ -439,11 +440,15 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
       with progressManager('Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
         try:
-          for ii in range(len(toAssign)-1):
-            resid = residues[ii]
-            next = resid.nextResidue    #TODO:ED may not have a .nextResidue
-            residues.append(next)
-          nmrChain.assignConnectedResidues(guiRes.residue)
+          if nmrChain.id == '@-':
+            # assume that it is the only one
+            nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
+          else:
+            for ii in range(len(toAssign)-1):
+              resid = residues[ii]
+              next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+              residues.append(next)
+            nmrChain.assignConnectedResidues(guiRes.residue)
           for ii, res in enumerate(residues):
             guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
             guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +

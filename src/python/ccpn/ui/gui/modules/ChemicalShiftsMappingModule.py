@@ -330,14 +330,16 @@ class ChemicalShiftsMapping(CcpnModule):
           if label.text() == str(self.clicked):
             self.current.nmrResidue = label.data(self.clicked)
             label.setSelected(True)
-
-
-
-
       event.accept()
 
   def _mouseDoubleClickEvent(self, event):
+
     from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+    self.nmrResidueTable.scrollToSelectedIndex()
+    # h = self.nmrResidueTable.horizontalHeader()
+    # for i in range(h.count()):
+    #   if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
+    #     self.nmrResidueTable.scrollTo(self.nmrResidueTable.model.index(self.nmrResidueTable.getSelectedRows()[0],i), self.nmrResidueTable.PositionAtCenter)
 
     self.application.ui.mainWindow.clearMarks()
     position = event.pos().x()

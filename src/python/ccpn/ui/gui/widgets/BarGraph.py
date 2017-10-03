@@ -216,6 +216,7 @@ class CustomViewBox(pg.ViewBox):
     if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
       ev.ignore()
       self.setRange(xRange=self.lastXRange)
+
     else:
       self.lastRange = self.viewRange()
       super(CustomViewBox, self).wheelEvent(ev, axis=None)
@@ -451,54 +452,54 @@ for x, y in zip(x1,y1):
 ################################### Start Application ################################################
 # ######################################################################################################
 #
-app = pg.mkQApp()
-
-customViewBox = CustomViewBox()
+# app = pg.mkQApp()
 #
-plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-customViewBox.setParent(plotWidget)
-
-
-
-xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r', widht=1)
-xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
-xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
-
-
-customViewBox.addItem(xLow)
-customViewBox.addItem(xMid)
-customViewBox.addItem(xHigh)
-
-xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-customViewBox.addItem(xLine)
-
-l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-l.setParentItem(customViewBox.graphicsItem())
-
-c1 = plotWidget.plot(pen='r', name='low')
-c2 = plotWidget.plot(pen='b', name='mid')
-c3 = plotWidget.plot(pen='g', name='high')
-
-l.addItem(c1, 'low')
-l.addItem(c2, 'mid')
-l.addItem(c3, 'high')
-
-# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
-customViewBox.setMenuEnabled(enableMenu=False)
-
-plotWidget.show()
-
-
-
-
-
-
-# Start Qt event
-if __name__ == '__main__':
-  import sys
-  if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-    QtGui.QApplication.instance().exec_()
-
-
-
+# customViewBox = CustomViewBox()
+# #
+# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+# customViewBox.setParent(plotWidget)
+#
+#
+#
+# xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r', widht=1)
+# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
+# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
+#
+#
+# customViewBox.addItem(xLow)
+# customViewBox.addItem(xMid)
+# customViewBox.addItem(xHigh)
+#
+# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+# customViewBox.addItem(xLine)
+#
+# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+# l.setParentItem(customViewBox.graphicsItem())
+#
+# c1 = plotWidget.plot(pen='r', name='low')
+# c2 = plotWidget.plot(pen='b', name='mid')
+# c3 = plotWidget.plot(pen='g', name='high')
+#
+# l.addItem(c1, 'low')
+# l.addItem(c2, 'mid')
+# l.addItem(c3, 'high')
+#
+# # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+# customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
+# customViewBox.setMenuEnabled(enableMenu=False)
+#
+# plotWidget.show()
+#
+#
+#
+#
+#
+#
+# # Start Qt event
+# if __name__ == '__main__':
+#   import sys
+#   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+#     QtGui.QApplication.instance().exec_()
+#
+#
+#

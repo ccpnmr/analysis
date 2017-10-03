@@ -105,7 +105,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._setupMenus()
     self._initProject()
     self._setShortcuts()
-    self._setUserShortcuts(self.application.preferences, mainWindow=self)
+    self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
 
     # do not need an unRegisterNotify because those removed when mainWindow / project destroyed
     self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')

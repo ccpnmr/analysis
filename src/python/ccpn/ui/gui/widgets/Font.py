@@ -25,11 +25,11 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
-# from ccpn.framework.PathsAndUrls import fontsPath
-# QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
+#from ccpn.framework.PathsAndUrls import fontsPath
+#QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
 
 
 class Font(QtGui.QFont):

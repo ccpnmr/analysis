@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .Base import Base
 
@@ -36,7 +36,7 @@ if __name__ == '__main__':
   signalMapper = QtCore.QSignalMapper(app)
   
   for text, keys in actionData:
-    action = QtGui.QAction(text, popup, shortcut=keys)
+    action = QtWidgets.QAction(text, popup, shortcut=keys)
     signalMapper.setMapping(action, text)
     action.triggered.connect(signalMapper.map)
     toolBar.addAction(action)

@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
@@ -9,14 +9,14 @@ PEN = QtGui.QColor('#000000')
 BRUSH = QtGui.QColor(255, 255, 255, 128)
 
 
-class Slider(QtGui.QSlider, Base):
+class Slider(QtWidgets.QSlider, Base):
 
   def __init__(self, parent, startVal=0, endVal=100, value=None,
                direction='h', step=1, bigStep=None, callback=None,
                tracking=True, showNumber=True, tickInterval=None,
                tickPosition=None, listener=None, **kw):
     
-    QtGui.QSlider.__init__(self, parent)
+    QtWidgets.QSlider.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.callback = callback
@@ -82,7 +82,7 @@ class Slider(QtGui.QSlider, Base):
     rect = QtCore.QRect(x, y, 12, self.height())
     
     event2 = QtGui.QPaintEvent(rect)
-    retVal = QtGui.QSlider.paintEvent(self, event2)
+    retVal = QtWidgets.QSlider.paintEvent(self, event2)
     
     if self.showNumber and self.isSliderDown():
       painter = QPainter()
@@ -127,11 +127,11 @@ class Slider(QtGui.QSlider, Base):
     if startVal <= value <= endVal:
       callback = self.callback
       self.callback = None
-      QtGui.QSlider.setRange(self, startVal, endVal)
+      QtWidgets.QSlider.setRange(self, startVal, endVal)
       self.callback = callback
     
     else:
-      QtGui.QSlider.setRange(self, startVal, endVal)
+      QtWidgets.QSlider.setRange(self, startVal, endVal)
   
   def setStep(self, step, bigStep=None):
   
@@ -180,7 +180,7 @@ class FloatSlider(Slider):
                tracking=True, showNumber=True, tickInterval=None,
                tickPosition=None, listener=None, decimals=2, **kw):
 
-    QtGui.QSlider.__init__(self, parent)
+    QtWidgets.QSlider.__init__(self, parent)
     Base.__init__(self, parent, **kw)
 
     assert 0 <= decimals < 5
@@ -272,7 +272,7 @@ if __name__ == '__main__':
 
   app = Application()
 
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
   
   s1 = Slider(window, 10, 1, tracking=False)
   s2 = Slider(window, 1, 10, 7, showNumber=False)

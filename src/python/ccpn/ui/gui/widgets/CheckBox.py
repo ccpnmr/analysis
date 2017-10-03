@@ -28,15 +28,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 
-class CheckBox(QtGui.QCheckBox, Base):
+class CheckBox(QtWidgets.QCheckBox, Base):
 
   def __init__(self, parent=None, checked=False, text='', callback=None, **kw):
 
-    QtGui.QCheckBox.__init__(self, parent)
+    QtWidgets.QCheckBox.__init__(self, parent)
     self.setChecked(checked)
     if text:
       self.setText(text)

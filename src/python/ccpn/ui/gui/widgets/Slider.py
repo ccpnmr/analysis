@@ -22,17 +22,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
-class Slider(QtGui.QSlider, Base):
+
+class Slider(QtWidgets.QSlider, Base):
   def __init__(self, parent, startVal=0, endVal=100, value=None,
                direction='h', step=1, bigStep=None, callback=None,
                tracking=True, showNumber=True, tickInterval=None,
                tickPosition=None, listener=None, spinbox=False, **kw):
 
-    QtGui.QSlider.__init__(self, parent)
+    QtWidgets.QSlider.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.callback = callback
@@ -107,11 +108,11 @@ class Slider(QtGui.QSlider, Base):
     if startVal <= value <= endVal:
       callback = self.callback
       self.callback = None
-      QtGui.QSlider.setRange(self, startVal, endVal)
+      QtWidgets.QSlider.setRange(self, startVal, endVal)
       self.callback = callback
 
     else:
-      QtGui.QSlider.setRange(self, startVal, endVal)
+      QtWidgets.QSlider.setRange(self, startVal, endVal)
 
   def setStep(self, step, bigStep=None):
 

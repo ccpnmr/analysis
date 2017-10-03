@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
@@ -6,11 +6,11 @@ PEN = QtCore.Qt.black
 QPainter = QtGui.QPainter
 Antialiasing = QPainter.Antialiasing
 
-class Divider(QtGui.QFrame, Base):
+class Divider(QtWidgets.QFrame, Base):
 
   def __init__(self, parent, text=None, direction='h', minSize=8, **kw):
   
-    QtGui.QFrame.__init__(self, parent)
+    QtWidgets.QFrame.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.text = text
@@ -34,14 +34,14 @@ class Divider(QtGui.QFrame, Base):
     h = rect.height()   
     
     if 'h' in direction.lower():
-      self.setFrameShape(QtGui.QFrame.HLine)
+      self.setFrameShape(QtWidgets.QFrame.HLine)
       self.setFrameRect(QtCore.QRect(x+minSize/2+indent,y,w-minSize-indent,h))
     else:
-      self.setFrameShape(QtGui.QFrame.VLine)
+      self.setFrameShape(QtWidgets.QFrame.VLine)
       self.setFrameRect(QtCore.QRect(x,y+minSize/2,w,h-minSize))
       
     self.setMinimumSize(minSize, max(minSize, textHeight))
-    self.setFrameShadow(QtGui.QFrame.Raised)
+    self.setFrameShadow(QtWidgets.QFrame.Raised)
     self.setMidLineWidth(3)
     self.setLineWidth(0)
   
@@ -57,7 +57,7 @@ class Divider(QtGui.QFrame, Base):
     
     self.bbox = self.fontMetric.tightBoundingRect(text)
     indent = self.bbox.width() + self.minSize
-    self.setFrameShape(QtGui.QFrame.HLine)
+    self.setFrameShape(QtWidgets.QFrame.HLine)
     self.setFrameRect(QtCore.QRect(x+self.minSize/2+indent,y,w-self.minSize-indent,h))
   
   def paintEvent(self, event):   
@@ -77,7 +77,7 @@ class Divider(QtGui.QFrame, Base):
  
       painter.end()
       
-    QtGui.QFrame.paintEvent(self, event)
+    QtWidgets.QFrame.paintEvent(self, event)
 
 if __name__ == '__main__':
 

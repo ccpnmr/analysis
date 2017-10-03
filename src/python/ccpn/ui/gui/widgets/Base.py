@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore, Qt
+from PyQt5 import QtGui, QtWidgets, QtCore, Qt
 
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -57,13 +57,13 @@ VALIGN_DICT = {
 }
 
 POLICY_DICT = {
-  'fixed': QtGui.QSizePolicy.Fixed,
-  'minimum': QtGui.QSizePolicy.Minimum,
-  'maximum': QtGui.QSizePolicy.Maximum,
-  'preferred': QtGui.QSizePolicy.Preferred,
-  'expanding': QtGui.QSizePolicy.Expanding,
-  'minimumExpanding': QtGui.QSizePolicy.MinimumExpanding,
-  'ignored': QtGui.QSizePolicy.Ignored,
+  'fixed': QtWidgets.QSizePolicy.Fixed,
+  'minimum': QtWidgets.QSizePolicy.Minimum,
+  'maximum': QtWidgets.QSizePolicy.Maximum,
+  'preferred': QtWidgets.QSizePolicy.Preferred,
+  'expanding': QtWidgets.QSizePolicy.Expanding,
+  'minimumExpanding': QtWidgets.QSizePolicy.MinimumExpanding,
+  'ignored': QtWidgets.QSizePolicy.Ignored,
 }
 
 
@@ -141,7 +141,7 @@ class Base(DropBase):
     layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
                                     # layout, we are going to add one
     if layout is None:
-      layout = QtGui.QGridLayout(self)
+      layout = QtWidgets.QGridLayout(self)
       layout.setContentsMargins(*margins)
       layout.setHorizontalSpacing(spacing[0])
       layout.setVerticalSpacing(spacing[1])
@@ -161,7 +161,7 @@ class Base(DropBase):
     "return the layout of widget"
     layout = None
     try:
-      layout = QtGui.QWidget.layout(widget)
+      layout = QtWidgets.QWidget.layout(widget)
     except:
       pass
     return layout
@@ -180,7 +180,7 @@ class Base(DropBase):
       getLogger().warning('No layout for parent widget %s of %s' % (parent,self))
       return
 
-    if isinstance(layout, QtGui.QGridLayout):
+    if isinstance(layout, QtWidgets.QGridLayout):
       row, col = self._getRowCol(layout, grid)
       rowStr, colStr = stretch
       layout.setRowStretch(row, rowStr)

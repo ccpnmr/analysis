@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt5 import QtCore, QtWebEngineWidgets
 
 from ccpn.framework.PathsAndUrls import ccpnUrl
 
@@ -43,11 +43,10 @@ from ccpn.ui.gui.widgets.Base import Base
 #
 # Remove HelpPopup
 
-class WebViewPanel(QtWebKit.QWebView, Base):
+class WebViewPanel(QtWebEngineWidgets.QWebEngineView, Base):
 
   def __init__(self, parent, **kw):
-  
-    QtWebKit.QWebView.__init__(self, parent=parent)
+    QtWebEngineWidgets.QWebEngineView.__init__(self, parent=parent)
     Base.__init__(self, **kw)
     
 class WebViewPopup(BasePopup):

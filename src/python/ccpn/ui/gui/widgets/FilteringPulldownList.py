@@ -1,5 +1,5 @@
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 

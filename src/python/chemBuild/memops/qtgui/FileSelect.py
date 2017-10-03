@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
@@ -173,7 +173,7 @@ class DirectoryDialog(FileDialog):
 
     
     
-class FileWidget(QtGui.QWidget, Base):
+class FileWidget(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, caption='Select file',
                directory=None, doSave=False,
@@ -181,7 +181,7 @@ class FileWidget(QtGui.QWidget, Base):
                default=None, fileTypes=None, sideBarUrls=None,
                callback=None, **kw):
   
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.callback = callback
@@ -190,7 +190,7 @@ class FileWidget(QtGui.QWidget, Base):
                              default, fileTypes, sideBarUrls)
     
     self.fileBrowser.setParent(self, QtCore.Qt.Widget)
-    self.fileBrowser.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.fileBrowser.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.fileBrowser.accept = self._callback
     self.fileBrowser.done = self._callback
     self.move(0, 0)

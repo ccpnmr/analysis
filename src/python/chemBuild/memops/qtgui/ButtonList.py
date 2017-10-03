@@ -1,16 +1,16 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 from .BasePopup import BasePopup
 from .Button import Button
 from .WebBrowser import WebBrowser
 
-class ButtonList(QtGui.QWidget, Base):
+class ButtonList(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
                tipTexts=None, direction='h', commands=None, images=None, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent,  **kw)
 
     if commands:

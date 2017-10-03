@@ -1,7 +1,7 @@
 
 # TBC: Set icons, tree selection
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 from .List import List
@@ -27,12 +27,12 @@ class PageWidget(LabelFrame):
     self.object = obj
   
 
-class PageView(QtGui.QWidget, Base):
+class PageView(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, pageWidgetClass,
                getTextFunc, objects=None, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     

@@ -32,8 +32,8 @@ import json
 import os
 from functools import partial
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QKeySequence
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 
@@ -70,11 +70,13 @@ from ccpn.util import Logging
 # The docstring of GuiMainWindow should detail how this setup is
 
 
-class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
+class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
-  def __init__(self, application):
+  def __init__(self, application=None):
 
-    QtGui.QMainWindow.__init__(self)
+    # super(GuiMainWindow, self).__init__(parent=None)
+    GuiWindow.__init__(self, application)
+    QtWidgets.QMainWindow.__init__(self)
     # Layout
     layout = self.layout()
 
@@ -89,9 +91,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     # connect a close event, cleaning up things as needed
     self.closeEvent = self._closeEvent
-    self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
+    # self.connect(self, QtCore.PYQT_SIGNAL('triggered()'), self._closeEvent)
+    # self.triggered.connect(self._closeEvent)    # ejb
 
-    GuiWindow.__init__(self, application)
+    # GuiWindow.__init__(self, application)
     self.application = application
 
     # Module area
@@ -220,7 +223,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self._verticalTEMPSPLIT = QtGui.QSplitter(QtCore.Qt.Vertical)
     self._TESTFRAME = Frame(setLayout=False)
-    self._tempLayout = QtGui.QVBoxLayout()
+    self._tempLayout = QtWidgets.QVBoxLayout()
     self._TESTFRAME.setLayout(self._tempLayout)
     self._TESTFRAME.hide()
 
@@ -548,7 +551,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if success is True:
         # Close and clean up project
         self.application._closeProject()      # close if saved
-        QtGui.QApplication.quit()
+        QtWidgets.QApplication.quit()
       else:
         if event:                             # ejb - don't close the project
           event.ignore()
@@ -560,7 +563,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
       self.application._closeProject()
-      QtGui.QApplication.quit()
+      QtWidgets.QApplication.quit()
     else:
       if event:
         event.ignore()

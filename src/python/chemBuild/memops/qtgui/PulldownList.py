@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 
@@ -6,12 +6,12 @@ from .Base import Base, Icon
 
 NULL = object()
 
-class PulldownList(QtGui.QComboBox, Base):
+class PulldownList(QtWidgets.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
                icons=None, callback=None, index=0, **kw):
 
-    QtGui.QComboBox.__init__(self, parent)
+    QtWidgets.QComboBox.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.text = None
@@ -139,9 +139,9 @@ class PulldownList(QtGui.QComboBox, Base):
   def addItem(self, text, object=NULL, icon=None):
     
     if icon:
-      QtGui.QComboBox.addItem(self, Icon(icon), text)
+      QtWidgets.QComboBox.addItem(self, Icon(icon), text)
     else:
-      QtGui.QComboBox.addItem(self, text)
+      QtWidgets.QComboBox.addItem(self, text)
     
     if object is NULL:
       object = text
@@ -151,13 +151,13 @@ class PulldownList(QtGui.QComboBox, Base):
   
   def setItemText(self, index, text):
   
-    QtGui.QComboBox.setItemText(self, index, text)
+    QtWidgets.QComboBox.setItemText(self, index, text)
     
     self.text[index] = text
   
   def removeItem(self, index):
   
-    QtGui.QComboBox.removeItem(self, index)
+    QtWidgets.QComboBox.removeItem(self, index)
     
     if index is self.index:
       self.index = None

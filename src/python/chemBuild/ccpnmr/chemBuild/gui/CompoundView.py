@@ -3,7 +3,7 @@ PI = 3.1415926535898
 
 from os import path
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -21,11 +21,11 @@ from ccpnmr.chemBuild.general.Constants import LINK, MIMETYPE, MIMETYPE_ELEMENT,
 from ccpnmr.chemBuild.general.Constants import ATOM_NAME_FG, ELEMENT_FONT
 from ccpnmr.chemBuild.general.Constants import AROMATIC, EQUIVALENT, PROCHIRAL
     
-class CompoundView(QtGui.QGraphicsView):
+class CompoundView(QtWidgets.QGraphicsView):
 
   def __init__(self, parent=None, variant=None):
 
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     
     self.parent = parent
     self.rotatePos = None
@@ -59,13 +59,13 @@ class CompoundView(QtGui.QGraphicsView):
   
     self.setMinimumSize(500,300)
     self.setRenderHint(QtGui.QPainter.Antialiasing)
-    #self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
-    #self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
-    #self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    #self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
+    #self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
+    #self.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
     self.setInteractive(True)
 
-    self.scene = QtGui.QGraphicsScene(self)
+    self.scene = QtWidgets.QGraphicsScene(self)
     #self.setSceneRect(self.viewport().rect())
     self.setScene(self.scene)
 
@@ -77,7 +77,7 @@ class CompoundView(QtGui.QGraphicsView):
     self.editWidget.setMaxLength(8)
     self.editWidget.resize(50, 30)
 
-    effect = QtGui.QGraphicsDropShadowEffect(self)
+    effect = QtWidgets.QGraphicsDropShadowEffect(self)
     effect.setBlurRadius(3)
     effect.setOffset(2,2)
     
@@ -110,7 +110,7 @@ class CompoundView(QtGui.QGraphicsView):
     
     #self.setSceneRect(self.viewport().rect())
     
-    return QtGui.QGraphicsView.resizeEvent(self, event)
+    return QtWidgets.QGraphicsView.resizeEvent(self, event)
     
   def dragEnterEvent(self, event):
     
@@ -229,7 +229,7 @@ class CompoundView(QtGui.QGraphicsView):
   
   def drawForeground(self, painter, viewRect):
   
-    QtGui.QGraphicsView.drawForeground(self, painter, viewRect)
+    QtWidgets.QGraphicsView.drawForeground(self, painter, viewRect)
     
     #painter.setPen(QtGui.QColor(80, 0, 0, 128))
     #painter.setBrush(QtGui.QColor(80, 0, 0, 128))
@@ -241,7 +241,7 @@ class CompoundView(QtGui.QGraphicsView):
     scale = float(transform.m11())
     unScale = 1.0/scale
     
-    QtGui.QGraphicsView.drawBackground(self, painter, viewRect)
+    QtWidgets.QGraphicsView.drawBackground(self, painter, viewRect)
 
     # Text
     
@@ -283,9 +283,9 @@ class CompoundView(QtGui.QGraphicsView):
   
   def setupContextMenu(self):
     
-    QAction = QtGui.QAction
+    QAction = QtWidgets.QAction
     
-    menu = QtGui.QMenu(self)
+    menu = QtWidgets.QMenu(self)
     
     action = QAction('Reset View', self, triggered=self.resetView)
     menu.addAction(action)
@@ -1261,7 +1261,7 @@ class CompoundView(QtGui.QGraphicsView):
   
   def mousePressEvent(self, event):
    
-    QtGui.QGraphicsView.mousePressEvent(self, event)
+    QtWidgets.QGraphicsView.mousePressEvent(self, event)
     
     button = event.button()
     pos = event.pos()
@@ -1359,7 +1359,7 @@ class CompoundView(QtGui.QGraphicsView):
     else:
       self.selectionBox.updateRegion(end=self.mapToScene(pos))
     
-    QtGui.QGraphicsView.mouseMoveEvent(self, event)
+    QtWidgets.QGraphicsView.mouseMoveEvent(self, event)
 
   def mouseReleaseEvent(self, event):
  
@@ -1388,7 +1388,7 @@ class CompoundView(QtGui.QGraphicsView):
     self.movePos = None
     self.update()
     
-    QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+    QtWidgets.QGraphicsView.mouseReleaseEvent(self, event)
 
   def getStats(self):
     

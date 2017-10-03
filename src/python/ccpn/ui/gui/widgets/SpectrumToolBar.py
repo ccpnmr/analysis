@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
@@ -176,31 +176,31 @@ class SpectrumToolBar(ToolBar):
           if 'text' in dataItem and dataItem['text'].startswith('NR'):
           # only test NmrResidues
           # print('>>>DragEnterFilter %s' % dataItem['text'])
-            QtGui.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
       finally:
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.DragLeave:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.Leave:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.MouseMove:
       if not isinstance(obj,SpectrumToolBar):
-        QtGui.QApplication.restoreOverrideCursor()
+        QtWidgets.QApplication.restoreOverrideCursor()
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.Drop:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print(">>>DropFilter")
       event.ignore()
       # no return True needed, so BackboneAssignment._processDroppedItem still fires

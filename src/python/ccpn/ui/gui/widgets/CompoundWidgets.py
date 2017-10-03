@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -473,11 +473,11 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
 
 
 
-class SelectorWidget(QtGui.QWidget, Base):
+class SelectorWidget(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, label='', data=None, callback=None, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
     if data:

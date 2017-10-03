@@ -29,7 +29,7 @@ __date__ = "$Date: 2016-05-18 09:27:23 +0100 (Wed, 18 May 2016) $"
 
 import os
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.util import Path
 
@@ -48,7 +48,7 @@ class SplashScreen(QtGui.QSplashScreen):
 
     # dummy window; to have something going
     if dummy:
-      self.w = QtGui.QWidget()
+      self.w = QtWidgets.QWidget()
       self.w.resize(dummy[0],dummy[1])
       self.w.show()
 

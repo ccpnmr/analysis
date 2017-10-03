@@ -26,16 +26,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Frame import Frame
 
-class MainWindow(QtGui.QMainWindow, Base):
+class MainWindow(QtWidgets.QMainWindow, Base):
 
   def __init__(self, parent=None, title='', location=None, hide=False, **kw):
 
-    QtGui.QMainWindow.__init__(self, parent=parent)
+    QtWidgets.QMainWindow.__init__(self, parent=parent)
     Base.__init__(self, **kw)
 
     self.mainFrame = Frame(self, setLayout=1)
@@ -70,7 +70,7 @@ class DockWidget(QtGui.QDockWidget):
                      allowedAreas=None,
                      **kwds):
 
-    QtGui.QMainWindow.__init__(self, title, parent=parent)
+    QtWidgets.QMainWindow.__init__(self, title, parent=parent)
     Base.__init__(self, **kwds)
 
     if widget is not None:

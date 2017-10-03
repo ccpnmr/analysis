@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -8,14 +8,14 @@ NULL_RECT = QRectF()
 NULL_POINT = QPointF()
 HIGHLIGHT = QColor(128, 0, 0)
 
-ItemIsMovable = QtGui.QGraphicsItem.ItemIsMovable
-ItemPositionChange = QtGui.QGraphicsItem.ItemPositionChange
+ItemIsMovable = QtWidgets.QGraphicsItem.ItemIsMovable
+ItemPositionChange = QtWidgets.QGraphicsItem.ItemPositionChange
 
-class LabelItem(QtGui.QGraphicsItem):
+class LabelItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent, angle=None, pen=Qt.black):
 
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     
     self.setZValue(2)
     self.parent = parent
@@ -99,7 +99,7 @@ class MovableLabelItem(LabelItem):
   
   def itemChange(self, change, value):
     
-    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    return QtWidgets.QGraphicsItem.itemChange(self, change, value)
       
   def paint(self, painter, option, widget):
   

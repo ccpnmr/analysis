@@ -41,7 +41,7 @@ import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 
 class _StripLabel(Label):
@@ -125,31 +125,31 @@ class _StripLabel(Label):
           if 'text' in dataItem and dataItem['text'].startswith('NR'):
           # only test NmrResidues
           # print('>>>DragEnterFilter %s' % dataItem['text'])
-            QtGui.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
       finally:
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.DragLeave:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.Leave:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.MouseMove:
       if not isinstance(obj,_StripLabel):
-        QtGui.QApplication.restoreOverrideCursor()
+        QtWidgets.QApplication.restoreOverrideCursor()
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.Drop:
-      QtGui.QApplication.restoreOverrideCursor()
+      QtWidgets.QApplication.restoreOverrideCursor()
       # print(">>>DropFilter")
       event.ignore()
       # no return True needed, so BackboneAssignment._processDroppedItem still fires

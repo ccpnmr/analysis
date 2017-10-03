@@ -2,7 +2,7 @@ import os, pickle, zlib
 from os import path
 from math import atan2, cos, sin
 
-from PyQt4 import QtCore, QtGui, QtSvg
+from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
 
 from ccpnmr.chemBuild.gui.CompoundView import CompoundView
 from ccpnmr.chemBuild.gui.AtomDragWidget import AtomDragWidget
@@ -43,14 +43,14 @@ from ccpnmr.chemBuild.exchange.Inchi import makeInchi, importInchi
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
-QAction = QtGui.QAction
+QAction = QtWidgets.QAction
 Qconnect = QtCore.QObject.connect
 
 CHEM_GROUP_DIR = path.join(path.dirname(path.dirname(__file__)), 'chemGroups')
 ICON_DIR =  path.join(path.dirname(path.dirname(__file__)), 'icons')
-EXPANDING = QtGui.QSizePolicy.Expanding
-PREFERRED = QtGui.QSizePolicy.Preferred
-MINIMUM = QtGui.QSizePolicy.Minimum
+EXPANDING = QtWidgets.QSizePolicy.Expanding
+PREFERRED = QtWidgets.QSizePolicy.Preferred
+MINIMUM = QtWidgets.QSizePolicy.Minimum
 
 ABOUT_TEXT = """
 CcpNmr ChemBuild version 1.0
@@ -61,11 +61,11 @@ Copyright Tim Stevens and Magnus Lundborg, University of Cambridge 2010-2012
 """
 
 
-class ChemBuildMain(QtGui.QMainWindow):
+class ChemBuildMain(QtWidgets.QMainWindow):
 
   def __init__(self, parent=None, fileName=None):
   
-    QtGui.QMainWindow.__init__(self, parent)
+    QtWidgets.QMainWindow.__init__(self, parent)
     
     self.chemGroupDir = CHEM_GROUP_DIR
     self.userDir = None
@@ -79,7 +79,7 @@ class ChemBuildMain(QtGui.QMainWindow):
 
     # Main menu
     
-    menuBar = self.menuBar() # QtGui.QMenuBar()
+    menuBar = self.menuBar() # QtWidgets.QMenuBar()
     fileMenu = Menu(menuBar, '&File')
     importMenu = Menu(menuBar, '&Import')
     exportMenu = Menu(menuBar, 'E&xport')
@@ -236,7 +236,7 @@ class ChemBuildMain(QtGui.QMainWindow):
       self.editToolbar.addAction(action)
     
     
-    menuButton = QtGui.QPushButton(self.viewToolbar, icon=self.getIcon('display-prefs.png'))
+    menuButton = QtWidgets.QPushButton(self.viewToolbar, icon=self.getIcon('display-prefs.png'))
     menuButton.setIconSize(QtCore.QSize(32,32))
     menuButton.setMenu(viewMenu)
     menuButton.setToolTip('Compound display options')
@@ -273,13 +273,13 @@ class ChemBuildMain(QtGui.QMainWindow):
     toolbox.setMinimumWidth(220)
     self.splitter.addWidget(toolbox)
     
-    frame =  QtGui.QWidget(toolbox)   
+    frame =  QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('atom-build.png'), 'Build Atoms')
-    layout = QtGui.QVBoxLayout(frame)
+    layout = QtWidgets.QVBoxLayout(frame)
     
-    box = QtGui.QGroupBox("Elements",  frame)
+    box = QtWidgets.QGroupBox("Elements",  frame)
     box.setSizePolicy(MINIMUM, MINIMUM)
-    grid = QtGui.QGridLayout(box)
+    grid = QtWidgets.QGridLayout(box)
     grid.setSpacing(2)
     grid.setContentsMargins(2,2,2,2)
     layout.addWidget(box)
@@ -299,7 +299,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     
     # Smiles button
     self.smiles = ''
-    box = QtGui.QWidget(frame)
+    box = QtWidgets.QWidget(frame)
     
     Button(box, 'Add SMILES string', callback=self.addSmiles,
            tipText='Add the above SMILES string fragment to the current compound')
@@ -319,10 +319,10 @@ class ChemBuildMain(QtGui.QMainWindow):
     layout.addWidget(compoundTree)
 
 
-    frame =  QtGui.QWidget(toolbox)   
+    frame =  QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('periodic-table.png'), 'Periodic Table')
 
-    grid = QtGui.QGridLayout(frame)
+    grid = QtWidgets.QGridLayout(frame)
     grid.setSpacing(2)
     grid.setContentsMargins(2,2,2,2)
 
@@ -361,7 +361,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     toolbox.setMinimumWidth(220)
     self.splitter.addWidget(toolbox)
     
-    frame = QtGui.QWidget(toolbox)
+    frame = QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('atom-property.png'), 'Atom Properties')
     
     # Simple Properties
@@ -419,7 +419,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     
     # Var panel
     
-    frame = QtGui.QWidget(toolbox)
+    frame = QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('variants.png'), 'Compound Variants')
     
     self.defaultVarCheckBox = CheckButton(frame, 'Current is a default form',
@@ -446,16 +446,16 @@ class ChemBuildMain(QtGui.QMainWindow):
  
     # Compound info
     
-    frame = QtGui.QWidget(toolbox)
+    frame = QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('info.png'), 'Compound Info')
     alignment = Qt.AlignTop | Qt.AlignLeft
     
-    layout = QtGui.QVBoxLayout(frame)
+    layout = QtWidgets.QVBoxLayout(frame)
     layout.setSpacing(2)
     layout.setContentsMargins(2,2,2,2)
     frame.setLayout(layout)
     
-    label = QtGui.QLabel(frame)
+    label = QtWidgets.QLabel(frame)
     label.setText("Name:")
     label.setAlignment(alignment)
     layout.addWidget(label)
@@ -464,7 +464,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     box.textChanged.connect(self.changeCompName)
     layout.addWidget(box)
     
-    label = QtGui.QLabel(frame)
+    label = QtWidgets.QLabel(frame)
     label.setText("CCPN Code:")
     label.setAlignment(alignment)
     layout.addWidget(label)
@@ -473,7 +473,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     box.textChanged.connect(self.changeCcpCode)
     layout.addWidget(box)
     
-    label = QtGui.QLabel(frame)
+    label = QtWidgets.QLabel(frame)
     label.setText("CCPN MolType:")
     label.setAlignment(alignment)
     layout.addWidget(label)
@@ -482,7 +482,7 @@ class ChemBuildMain(QtGui.QMainWindow):
                                                  callback=self.changeMolType)
     layout.addWidget(box)
     
-    label = QtGui.QLabel(frame)
+    label = QtWidgets.QLabel(frame)
     label.setText("Details:")
     label.setAlignment(alignment)
     layout.addWidget(label)
@@ -2143,7 +2143,7 @@ class ChemBuildMain(QtGui.QMainWindow):
       if not (fileNames or dirNamesB):
         continue
       
-      category = QtGui.QTreeWidgetItem(parent)
+      category = QtWidgets.QTreeWidgetItem(parent)
       category.setText(0, ''.join(letters))
       category.setData(0, 1, None)
       
@@ -2154,7 +2154,7 @@ class ChemBuildMain(QtGui.QMainWindow):
         filePath = join(dirPath,fileName)
       
         name = fileName[:-fileExtLen]
-        item = QtGui.QTreeWidgetItem(category)
+        item = QtWidgets.QTreeWidgetItem(category)
         item.setText(0, name)
         #item.setIcon(0, Icon('icons/list-add.png'))
         item.setData(0, 32, filePath)
@@ -2571,11 +2571,11 @@ class ChemBuildMain(QtGui.QMainWindow):
     cv.updateAll()
     cv.viewport().repaint()
 
-class CompoundTree(QtGui.QTreeWidget):
+class CompoundTree(QtWidgets.QTreeWidget):
 
   def __init__(self, parent, chemBuild):
   
-    QtGui.QTreeWidget.__init__(self, parent)
+    QtWidgets.QTreeWidget.__init__(self, parent)
     
     self.chemBuild = chemBuild
     
@@ -2589,7 +2589,7 @@ class CompoundTree(QtGui.QTreeWidget):
   
   def mousePressEvent(self, event):
 
-    QtGui.QTreeWidget.mousePressEvent(self, event)
+    QtWidgets.QTreeWidget.mousePressEvent(self, event)
     
     self.chemBuild.statusBar().showMessage('Drag and drop compounds into main window')
     

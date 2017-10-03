@@ -1,14 +1,14 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from .Base import Base
 
-class Frame(QtGui.QFrame, Base):
+class Frame(QtWidgets.QFrame, Base):
 
   def __init__(self, parent=None, **kw):
 
-    QtGui.QFrame.__init__(self, parent)
+    QtWidgets.QFrame.__init__(self, parent)
     Base.__init__(self, parent, **kw)
 
 if __name__ == '__main__':

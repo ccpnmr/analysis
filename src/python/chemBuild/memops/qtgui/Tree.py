@@ -1,7 +1,7 @@
 import os
 from os import path
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 from .Button import Button
@@ -45,12 +45,12 @@ HEAD_ADJUST = QSize(50, 0)
 from memops.universal.Io import getTopDirectory
 ICON_DIR = path.join(getTopDirectory(),'python','memops','qtgui','icons') 
 
-class Tree(QtGui.QTreeView, Base):
+class Tree(QtWidgets.QTreeView, Base):
 
   def __init__(self, parent, model=None, callback=None,
                doubleCallback=None, **kw):
   
-    QtGui.QTreeView.__init__(self, parent)
+    QtWidgets.QTreeView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     if model:
@@ -67,7 +67,7 @@ class Tree(QtGui.QTreeView, Base):
     if self.callback:
       self.callback(index)
 
-    return QtGui.QTreeView.currentChanged(self, index, prev)
+    return QtWidgets.QTreeView.currentChanged(self, index, prev)
     
   def setSelected(self, indices):
     
@@ -90,7 +90,7 @@ class Tree(QtGui.QTreeView, Base):
       else:
         self.doubleCallback(self.currentIndex(), False)
     
-    return QtGui.QTreeView.mouseDoubleClickEvent(self, event)
+    return QtWidgets.QTreeView.mouseDoubleClickEvent(self, event)
 
    
 class TreeNode(object):
@@ -459,12 +459,12 @@ class ObjectTree(Tree):
     drag.exec_(QtCore.Qt.CopyAction | QtCore.Qt.MoveAction, QtCore.Qt.CopyAction)
     
     
-class FileSystemTreePanel(QtGui.QWidget, Base):
+class FileSystemTreePanel(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, fileTypes=None, callback=None,
                iconProvider=None, showHiddenFiles=False, **kw):
   
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.dirPath = None

@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # icons directory removed in revision 9360
 # iconsNew renamed to icons in revision 9361
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 import os
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
   app = TestApplication()
 
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
   
   def click():
     print("Clicked")

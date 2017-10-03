@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay

@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 from ccpn.util import Colour
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 #import pyqtgraph as pg
 
@@ -42,7 +42,7 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'dataDim'))
 
 
-class GuiSpectrumView(QtGui.QGraphicsItem):
+class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):
@@ -52,7 +52,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
     
-    QtGui.QGraphicsItem.__init__(self)    #, scene=self.strip.plotWidget.scene())
+    QtWidgets.QGraphicsItem.__init__(self)    #, scene=self.strip.plotWidget.scene())
     self.scene = self.strip.plotWidget.scene
     self._currentBoundingRect = self.strip.plotWidget.sceneRect()
 
@@ -107,7 +107,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
 
   # override of Qt setVisible
   def setVisible(self, visible):
-    QtGui.QGraphicsItem.setVisible(self, visible)
+    QtWidgets.QGraphicsItem.setVisible(self, visible)
     try:
       if self:                                        # ejb - ?? crashes on table update otherwise
         action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)

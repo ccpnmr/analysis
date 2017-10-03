@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog

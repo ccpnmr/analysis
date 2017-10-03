@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 import os, re
 import pyqtgraph as pg
 from pyqtgraph.widgets.FileDialog import FileDialog
@@ -118,7 +118,7 @@ class Exporter(object):
             root = self.item
         preItems = []
         postItems = []
-        if isinstance(root, QtGui.QGraphicsScene):
+        if isinstance(root, QtWidgets.QGraphicsScene):
             childs = [i for i in root.items() if i.parentItem() is None]
             rootItem = []
         else:

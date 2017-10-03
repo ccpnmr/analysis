@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 import sys
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
 from ccpn.util import Common as commonUtil
 

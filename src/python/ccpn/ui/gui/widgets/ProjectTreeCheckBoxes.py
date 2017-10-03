@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -49,7 +49,7 @@ SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
 
 
-class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
+class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
   checkList = [
                 Chain._pluralLinkName
               , ChemicalShiftList._pluralLinkName
@@ -75,23 +75,23 @@ class ProjectTreeCheckBoxes(QtGui.QTreeWidget, Base):
 
   def __init__(self, parent=None, project=None, maxSize=(250,300), **kw):
 
-    QtGui.QTreeWidget.__init__(self, parent)
+    QtWidgets.QTreeWidget.__init__(self, parent)
     Base.__init__(self, setLayout=False, **kw)
 
     # self.setMaximumSize(*maxSize)
-    self.headerItem = QtGui.QTreeWidgetItem()
-    self.item = QtGui.QTreeWidgetItem()
+    self.headerItem = QtWidgets.QTreeWidgetItem()
+    self.item = QtWidgets.QTreeWidgetItem()
     self.project = project
     self.header().hide()
     if self.project is not None:
       for name in ProjectTreeCheckBoxes.checkList:
         if hasattr(self.project, name):  # just to be safe
-          item = QtGui.QTreeWidgetItem(self)
+          item = QtWidgets.QTreeWidgetItem(self)
           item.setText(0, name)
           item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
           for obj in getattr(self.project, name):
-            child = QtGui.QTreeWidgetItem(item)
+            child = QtWidgets.QTreeWidgetItem(item)
             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
             child.setData(1, 0, obj)
             child.setText(0, obj.pid)

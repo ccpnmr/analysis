@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Base import Base
@@ -34,10 +34,10 @@ from ccpn.ui.gui.guiSettings import menuFont
 from ccpn.framework.Translation import translator
 
 
-class Menu(QtGui.QMenu, Base):
+class Menu(QtWidgets.QMenu, Base):
   def __init__(self, title, parent, isFloatWidget=False, **kw):
     title = translator.translate(title)
-    QtGui.QMenu.__init__(self, title, parent)
+    QtWidgets.QMenu.__init__(self, title, parent)
     Base.__init__(self, isFloatWidget=isFloatWidget, **kw)
     self.isFloatWidget = isFloatWidget
     self.setFont(menuFont)
@@ -52,17 +52,17 @@ class Menu(QtGui.QMenu, Base):
     
   def addMenu(self, title):
     menu = Menu(title, self)
-    QtGui.QMenu.addMenu(self, menu)
+    QtWidgets.QMenu.addMenu(self, menu)
     return menu
 
   def _addQMenu(self, menu):
     ''' this adds a normal QMenu '''
-    QtGui.QMenu.addMenu(self, menu)
+    QtWidgets.QMenu.addMenu(self, menu)
     return menu
 
 
-class MenuBar(QtGui.QMenuBar):
+class MenuBar(QtWidgets.QMenuBar):
   def __init__(self, parent):
 
-    QtGui.QMenuBar.__init__(self, parent)
+    QtWidgets.QMenuBar.__init__(self, parent)
     self.setFont(menuFont)

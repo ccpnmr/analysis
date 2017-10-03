@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -101,7 +101,7 @@ class ExperimentTypePopup(CcpnDialog):
                            callback=self.accept, hAlign='r', vAlign='b')
 
     self.setWindowTitle(title)
-    self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+    self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
     self.setMinimumHeight(200)
     self.setMinimumWidth(450)
 

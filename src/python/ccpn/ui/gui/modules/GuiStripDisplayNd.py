@@ -139,7 +139,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
-        spectrumView.update()
+        spectrumView.rebuildContours()
+        # spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -191,7 +192,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-        spectrumView.update()
+        spectrumView.rebuildContours()
+        # spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -240,6 +242,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         else:
           # Display has custom contour count - change that one only
           spectrumView.negativeContourCount += 1
+
+        spectrumView.rebuildContours()
+        # spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -293,6 +298,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           if spectrumView.negativeContourCount:
             spectrumView.negativeContourCount -= 1
 
+        spectrumView.rebuildContours()
+        # spectrumView.update()
+
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
@@ -306,6 +314,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     Displays specified peaks in all strips of the display using peakListView
     """
+    # TODO:ED generate a display list of peaks here for speed, although actually quite fast
+
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict
     peakItemDict = activePeakItemDict.setdefault(peakListView, {})

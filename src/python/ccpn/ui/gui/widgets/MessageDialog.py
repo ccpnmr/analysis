@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.guiSettings import messageFont
 
@@ -213,10 +213,10 @@ def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
 
 # testing simple progress/busy popup
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtCore import Qt
+from PyQt5 import QtCore
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import Qt
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Label import Label
 from contextlib import contextmanager
@@ -249,7 +249,7 @@ class progressPopup(CcpnDialog):
     self.progressbar.setMinimum(0)
     self.progressbar.setMaximum(progressMax)
     # # 'start' button
-    # self.btn_start = QtGui.QPushButton('Start')
+    # self.btn_start = QtWidgets.QPushButton('Start')
     # # 'clicked()' signal
     # self.btn_start.clicked.connect(self.start)
     #
@@ -265,7 +265,7 @@ class progressPopup(CcpnDialog):
     # vlayout.addStretch()
     # self.setLayout(vlayout)
 
-    self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self.show()
     self.raise_()
 
@@ -295,19 +295,19 @@ def progressManager(parent, title=None, progressMax=100):
   try:
     thisProg.progress_simulation()
     thisProg.update()
-    QtGui.QApplication.processEvents()    # still doesn't catch all the paint events
+    QtWidgets.QApplication.processEvents()    # still doesn't catch all the paint events
     sleep(1)
 
     yield     # yield control to the main process
 
   finally:
     thisProg.update()
-    QtGui.QApplication.processEvents()    # hopefully it will redraw the popup
+    QtWidgets.QApplication.processEvents()    # hopefully it will redraw the popup
     thisProg.close()
 
 import math, sys
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import *
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import *
 
 class busyOverlay(QWidget):
   def __init__(self, parent = None):

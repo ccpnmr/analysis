@@ -34,16 +34,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 
-class Widget(QtGui.QWidget, Base):
+class Widget(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
     "General widget; default accepts drops (for now)"
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
     self.setContentsMargins(0, 0, 0, 0)
 
@@ -74,7 +74,7 @@ class ScrollableWidget(Widget):
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
-    self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.scrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
 

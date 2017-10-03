@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 
     
@@ -60,7 +60,7 @@ class _PopupCore(object):
     if self.quitFunc:
       self.quitFunc()
     
-    QtGui.QWidget.closeEvent(self, event)
+    QtWidgets.QWidget.closeEvent(self, event)
   
       
   def waitCursor(self):
@@ -107,7 +107,7 @@ class _PopupCore(object):
     if h is None:
       h = self.rect().width()  
      
-    screenRect = QtGui.QApplication.desktop()
+    screenRect = QtWidgets.QApplication.desktop()
        
     sWidth = screenRect.width()
     sHeight = screenRect.height()
@@ -131,7 +131,7 @@ class _PopupCore(object):
     elif y < 0:
       y = 0
           
-    QtGui.QWidget.setGeometry(self, x, y, w, h)
+    QtWidgets.QWidget.setGeometry(self, x, y, w, h)
 
 
   def updateLocation(self):
@@ -161,7 +161,7 @@ class _PopupCore(object):
 
   def destroy(self):
 
-    QtGui.QWidget.destroy(self)
+    QtWidgets.QWidget.destroy(self)
 
   def setTitle(self, title=''):
 
@@ -176,14 +176,14 @@ class _PopupCore(object):
     
     return True # this method can be overridden by subclass
 
-class BasePopup(QtGui.QWidget, _PopupCore):
+class BasePopup(QtWidgets.QWidget, _PopupCore):
 
   def __init__(self, parent=None, title='', location=None, hide=False,
                modal=False, transient=False, quitFunc=None,
                tipText=None):
     
 
-    QtGui.QWidget.__init__(self, parent=None)
+    QtWidgets.QWidget.__init__(self, parent=None)
     _PopupCore.__init__(self, parent, title, location, hide,
                         modal, transient, quitFunc, tipText)
 
@@ -198,7 +198,7 @@ class DockPopup(QtGui.QDockWidget, _PopupCore):
     _PopupCore.__init__(self, parent, title, location, hide,
                         modal, transient, quitFunc, tipText)
     
-    self.frame = QtGui.QWidget()
+    self.frame = QtWidgets.QWidget()
     self.setWidget(self.frame)
     
 if __name__ == '__main__':
@@ -232,7 +232,7 @@ if __name__ == '__main__':
       return True
 
   popup = None
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
 
   def new():
 

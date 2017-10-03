@@ -3,7 +3,7 @@ PI = 3.1415926535898
 
 from os import path
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -31,10 +31,10 @@ from memops.qtgui.Colors import inverseGrey
 RADIUS = 50.0
 
 NULL_RECT = QRectF()
-ItemIsMovable = QtGui.QGraphicsItem.ItemIsMovable
-ItemIsSelectable = QtGui.QGraphicsItem.ItemIsSelectable
-ItemPositionChange = QtGui.QGraphicsItem.ItemPositionChange
-ItemSendsGeometryChanges = QtGui.QGraphicsItem.ItemSendsGeometryChanges
+ItemIsMovable = QtWidgets.QGraphicsItem.ItemIsMovable
+ItemIsSelectable = QtWidgets.QGraphicsItem.ItemIsSelectable
+ItemPositionChange = QtWidgets.QGraphicsItem.ItemPositionChange
+ItemSendsGeometryChanges = QtWidgets.QGraphicsItem.ItemSendsGeometryChanges
 
 BOND_CHANGE_DICT = {'single':'double',
                     'aromatic':'double',
@@ -92,7 +92,7 @@ class AtomItemShowWidget(AtomItem):
 
   def __init__(self, scene, compoundView, atom):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     
     compoundView.atomViews[atom] = self
     
@@ -123,7 +123,7 @@ class AtomItemShowWidget(AtomItem):
     self.gradient2.setColorAt(1, color.darker().darker())
     self.gradient2.setColorAt(0.5, color.darker())
     self.gradient2.setColorAt(0, color)
-    #effect = QtGui.QGraphicsDropShadowEffect(compoundView)
+    #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     #effect.setBlurRadius(SHADOW_RADIUS)
     #effect.setColor(SHADOW_COLOR)
     #effect.setOffset(*SHADOW_OFFSET)
@@ -157,7 +157,7 @@ class BondItemShowWidget(BondItem):
 
   def __init__(self, scene, compoundView, bond):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
      
     compoundView.bondItems[bond] = self
    
@@ -192,11 +192,11 @@ class BondItemShowWidget(BondItem):
 
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
     
-class LabelItemShowWidget(QtGui.QGraphicsItem):
+class LabelItemShowWidget(QtWidgets.QGraphicsItem):
   
   def __init__(self, scene, compoundView):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     self.compoundView = compoundView
     self.label = compoundView.compound.name
     if compoundView.glWidget:
@@ -250,11 +250,11 @@ class LabelItemShowWidget(QtGui.QGraphicsItem):
     painter.drawText(qPoint(x0, y0+h), self.label)
     painter.restore()
                
-class CompoundViewShowWidget(QtGui.QGraphicsItemGroup):
+class CompoundViewShowWidget(QtWidgets.QGraphicsItemGroup):
 
   def __init__(self, parent=None, variant=None, spectrum = None, container = None, glWidget = None):
 
-    QtGui.QGraphicsItemGroup.__init__(self, None)
+    QtWidgets.QGraphicsItemGroup.__init__(self, None)
 #    parent.addItem(self)
     self.parent = parent
     self.scene = parent
@@ -318,7 +318,7 @@ class CompoundViewShowWidget(QtGui.QGraphicsItemGroup):
     
     #self.setSceneRect(self.viewport().rect())
     
-    return QtGui.QGraphicsView.resizeEvent(self, event)
+    return QtWidgets.QGraphicsView.resizeEvent(self, event)
     
   def dragEnterEvent(self, event):
     
@@ -338,7 +338,7 @@ class CompoundViewShowWidget(QtGui.QGraphicsItemGroup):
     
 #  def mouseReleaseEvent(self, event):
 #
-#    return QtGui.QGraphicsItemGroup.mouseReleaseEvent(self, event)
+#    return QtWidgets.QGraphicsItemGroup.mouseReleaseEvent(self, event)
 #
   def wheelEvent(self, event):
     
@@ -359,7 +359,7 @@ class CompoundViewShowWidget(QtGui.QGraphicsItemGroup):
 
   def setupContextMenu(self):
     
-    QAction = QtGui.QAction
+    QAction = QtWidgets.QAction
     
     menu = Menu()
     
@@ -739,7 +739,7 @@ class CompoundViewShowWidget(QtGui.QGraphicsItemGroup):
     if self.bbox:
       return self.bbox
     else:
-      return QtGui.QGraphicsItemGroup.boundingRect(self)
+      return QtWidgets.QGraphicsItemGroup.boundingRect(self)
 
   # Places the molecule in the top left corner of the viewable area.
   def alignMolecule(self, ignoreHydrogens = False):

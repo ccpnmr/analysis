@@ -1,15 +1,15 @@
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 import sys
 
-class Application(QtGui.QApplication):
+class Application(QtWidgets.QApplication):
 
   def __init__(self, argv=None):
 
     if not argv:
       argv = []
 
-    QtGui.QApplication.__init__(self, argv)
+    QtWidgets.QApplication.__init__(self, argv)
 
   def start(self):
 

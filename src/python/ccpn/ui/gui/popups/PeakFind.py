@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -67,8 +67,8 @@ class PeakFindPopup(CcpnDialog):
       if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra)>0:
         self.peakListPulldown.select(self.current.strip.spectra[0].peakLists[0].pid)
       self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
-      self.checkBoxWidget = QtGui.QWidget()
-      layout = QtGui.QGridLayout()
+      self.checkBoxWidget = QtWidgets.QWidget()
+      layout = QtWidgets.QGridLayout()
       self.checkBoxWidget.setLayout(layout)
       self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
       self.checkBox1 = RadioButton(self)
@@ -169,7 +169,7 @@ class PeakFindPopup(CcpnDialog):
     self.excludedRegionsPopup = ExcludeRegions(self, self.peakList)
     self.layout().addWidget(self.excludedRegionsPopup, 5, 0, 1, 4)
 
-class ExcludeRegions(QtGui.QWidget, Base):
+class ExcludeRegions(QtWidgets.QWidget, Base):
   def __init__(self, parent, peakList):
     super(ExcludeRegions, self).__init__(parent)
     self.regionCount = 0

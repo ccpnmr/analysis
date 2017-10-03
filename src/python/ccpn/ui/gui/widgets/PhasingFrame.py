@@ -112,17 +112,17 @@ if __name__ == '__main__':
 
   import os
   import sys
-  from PyQt4 import QtGui
+  from PyQt5 import QtGui, QtWidgets
 
   def myCallback(ph0, ph1, pivot, direction):
     print(ph0, ph1, pivot, direction)
     
-  qtApp = QtGui.QApplication(['Test Phase Frame'])
+  qtApp = QtWidgets.QApplication(['Test Phase Frame'])
 
   #QtCore.QCoreApplication.setApplicationName('TestPhasing')
   #QtCore.QCoreApplication.setApplicationVersion('0.1')
 
-  widget = QtGui.QWidget()
+  widget = QtWidgets.QWidget()
   frame = PhasingFrame(widget, callback=myCallback)
   widget.show()
   widget.raise_()

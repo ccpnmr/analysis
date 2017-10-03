@@ -25,9 +25,10 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore, QtGui, QtWidgets
 
+import decimal
 from functools import partial
-from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -201,14 +202,14 @@ class PickPeak1DPopup(CcpnDialog):
     self._addWidgetsToLayout()
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.resize(300, 400)
 
   def _setTabs(self):
     self.tabWidget = QtGui.QTabWidget()
     self.tabGeneralSetup = Frame(self, setLayout=False)
-    self.tabGeneralSetupLayout = QtGui.QGridLayout()
+    self.tabGeneralSetupLayout = QtWidgets.QGridLayout()
     self.tabGeneralSetup.setLayout(self.tabGeneralSetupLayout)
     self.excludedRegionsTab = ExcludeRegions(self)
     self.tabWidget.addTab(self.tabGeneralSetup, 'General')

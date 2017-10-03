@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -7,12 +7,12 @@ from ccpnmr.chemBuild.general.Constants import LINK, MIMETYPE, MIMETYPE_ELEMENT,
 from ccpnmr.chemBuild.general.Constants import ATOM_NAME_FG, ELEMENT_FONT
 from ccpnmr.chemBuild.general.Constants import AROMATIC, EQUIVALENT, PROCHIRAL
 
-class AtomDragWidget(QtGui.QWidget):
+class AtomDragWidget(QtWidgets.QWidget):
   
   def __init__(self, parent=None, text='',  mimeType=MIMETYPE,  data=None,
                bgColor=Qt.white, size=(21,21), callback=None ):
     
-    QtGui.QWidget.__init__(self,  parent)
+    QtWidgets.QWidget.__init__(self,  parent)
     
     self.text = text
     self.mimeType = mimeType
@@ -72,7 +72,7 @@ class AtomDragWidget(QtGui.QWidget):
 
     pixmap = QtGui.QPixmap(self.size())
     pixmap.fill(QtGui.QColor(64,64,64,64))
-    self.render(pixmap, flags=QtGui.QWidget.DrawChildren)
+    self.render(pixmap, flags=QtWidgets.QWidget.DrawChildren)
     
     pixmap.setMask(pixmap.createHeuristicMask())
     

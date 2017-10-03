@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import os
 from functools import reduce, partial
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -64,7 +64,7 @@ class ShortcutModule(CcpnDialog):
     self.setStyleSheet('ScrollArea {background-color: #00092d}')
     self.setStyleSheet('ScrollArea > QWidget {background-color: #00092d}')
 
-    self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+    self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
     self.setMinimumHeight(250)
 
     # self._sequenceGraphScrollArea.layout().addWidget(self.shortcutWidget)

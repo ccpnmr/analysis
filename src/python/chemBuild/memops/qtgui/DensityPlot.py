@@ -1,5 +1,5 @@
 from math import log
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -20,15 +20,15 @@ HIGHLIGHT_BRUSH = QColor(255, 255, 255, 32)
 NULL_RECT = QRectF()
 NULL_POINT = QPointF()
 
-class LegendItem(QtGui.QGraphicsItem):
+class LegendItem(QtWidgets.QGraphicsItem):
   
   def __init__(self, parent):
 
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     
     self.parent = parent
     self.setZValue(2)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
     self.setAcceptedMouseButtons(Qt.LeftButton)
     self.fontMetric = QtGui.QFontMetricsF(self.parent.font())
     self.parent.scene().addItem(self)
@@ -134,12 +134,12 @@ class LegendItem(QtGui.QGraphicsItem):
       x, y, text = t
       drawText(x, y, text)
  
-class MatrixItem(QtGui.QGraphicsItem):
+class MatrixItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, parent, matrix=None,
                boxSize=20, valLimit=None, showGrid=True):
 
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
 
     self.parent = parent
     self.matrix = None
@@ -488,7 +488,7 @@ class MatrixItem(QtGui.QGraphicsItem):
     else: 
       self._highlightOff()
     
-    return QtGui.QGraphicsItem.hoverMoveEvent(self, event)
+    return QtWidgets.QGraphicsItem.hoverMoveEvent(self, event)
 
   def hoverLeaveEvent(self, event):
     
@@ -669,13 +669,13 @@ class MatrixDataSet:
     return values    
 
 
-class DensityPlot(QtGui.QGraphicsView, Base):
+class DensityPlot(QtWidgets.QGraphicsView, Base):
 
   def __init__(self, parent, matrix, title='Density Plot', valLimit=None,
                xAxisName='X Axis', yAxisName='Y Axis', boxSize=25,
                showGrid=True, showLegend=True, **kw):
       
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.parent = parent
@@ -686,13 +686,13 @@ class DensityPlot(QtGui.QGraphicsView, Base):
     self.movePos = None
 
     self.setRenderHint(QtGui.QPainter.Antialiasing)
-    #self.setResizeAnchor(QtGui.QGraphicsView.NoAnchor)
-    #self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
-    self.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-    self.setTransformationAnchor(QtGui.QGraphicsView.NoAnchor)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    #self.setResizeAnchor(QtWidgets.QGraphicsView.NoAnchor)
+    #self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
+    self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+    self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
-    self.gScene = QtGui.QGraphicsScene(self)
+    self.gScene = QtWidgets.QGraphicsScene(self)
     self.setScene(self.gScene)   
     
     self.titleItem  = MovableLabelItem(self)
@@ -827,13 +827,13 @@ class DensityPlot(QtGui.QGraphicsView, Base):
   
     event.accept()
     
-    #QtGui.QGraphicsView.wheelEvent(self, event) 
+    #QtWidgets.QGraphicsView.wheelEvent(self, event)
   
   def mouseReleaseEvent(self, event):
     
     self.movePos = None
     
-    return QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+    return QtWidgets.QGraphicsView.mouseReleaseEvent(self, event)
         
   def mousePressEvent(self, event):
    
@@ -854,7 +854,7 @@ class DensityPlot(QtGui.QGraphicsView, Base):
       v = self.verticalScrollBar().sliderPosition()
       self.movePos = pos.x()+h, pos.y()+v
     
-    return QtGui.QGraphicsView.mousePressEvent(self, event)
+    return QtWidgets.QGraphicsView.mousePressEvent(self, event)
     
   def mouseMoveEvent(self, event):
       
@@ -866,7 +866,7 @@ class DensityPlot(QtGui.QGraphicsView, Base):
       self.horizontalScrollBar().setSliderPosition(x0-pos.x())
       self.verticalScrollBar().setSliderPosition(y0-pos.y())
     
-    return QtGui.QGraphicsView.mouseMoveEvent(self, event)
+    return QtWidgets.QGraphicsView.mouseMoveEvent(self, event)
    
   def popupContextMenu(self, pos):
     

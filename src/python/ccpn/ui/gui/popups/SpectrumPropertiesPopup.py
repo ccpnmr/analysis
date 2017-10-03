@@ -29,7 +29,7 @@ import os
 import sys
 from functools import partial
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core.lib import Util as ccpnUtil
 
@@ -68,10 +68,10 @@ class SpectrumPropertiesPopup(CcpnDialog):
     self.current = mainWindow.application.current
     self.spectrum = spectrum
 
-    # layout = QtGui.QGridLayout()
+    # layout = QtWidgets.QGridLayout()
     # self.setLayout(layout)
     self.tabWidget = QtGui.QTabWidget()
-    # tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    # tabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
       self._generalTab = GeneralTab(spectrum)
       self._dimensionsTab = DimensionsTab(spectrum, spectrum.dimensionCount)
@@ -196,7 +196,7 @@ class FilePathValidator(QtGui.QValidator):
 
 
 
-class GeneralTab(QtGui.QWidget, Base):
+class GeneralTab(QtWidgets.QWidget, Base):
   def __init__(self, spectrum, parent=None, item=None):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
@@ -592,7 +592,7 @@ class GeneralTab(QtGui.QWidget, Base):
 
 
 
-class DimensionsTab(QtGui.QWidget, Base):
+class DimensionsTab(QtWidgets.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
     Base.__init__(self, setLayout=True)      # ejb
@@ -738,7 +738,7 @@ class DimensionsTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
 
 
-class ContoursTab(QtGui.QWidget, Base):
+class ContoursTab(QtWidgets.QWidget, Base):
   def __init__(self, spectrum, parent=None):
     super(ContoursTab, self).__init__(parent)
     Base.__init__(self, setLayout=True)      # ejb

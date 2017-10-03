@@ -133,7 +133,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import re
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 import pandas as pd
 import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -260,7 +260,7 @@ class ObjectTable(QtGui.QTableView, Base):
     headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
   def _setContextMenu(self, enableExport=True, enableDelete=True):
-    self.tableMenu = QtGui.QMenu()
+    self.tableMenu = QtWidgets.QMenu()
     if enableExport:
       self.tableMenu.addAction("Export Table", self.exportDialog )
     if enableDelete:
@@ -650,7 +650,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
-    self.headerContextMenumenu = QtGui.QMenu()
+    self.headerContextMenumenu = QtWidgets.QMenu()
     columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
     searchSettings = None
     if self.searchWidget is not None:
@@ -673,7 +673,7 @@ class ObjectTable(QtGui.QTableView, Base):
       # if hasattr(self.parent, 'getLayout'):
         parentLayout = self.parent.getLayout()
 
-      if isinstance(parentLayout, QtGui.QGridLayout):
+      if isinstance(parentLayout, QtWidgets.QGridLayout):
         idx = parentLayout.indexOf(self)
         location = parentLayout.getItemPosition(idx)
         if location is not None:
@@ -823,7 +823,7 @@ class ObjectTable(QtGui.QTableView, Base):
       rows = []
       for obj in objs:
         rows.append([x.getValue(obj) for x in self.columns])
-      cb = QtGui.QApplication.clipboard()
+      cb = QtWidgets.QApplication.clipboard()
       cb.clear(mode=cb.Clipboard)
 
       rowsStr = ",".join(str(x) for x in rows)
@@ -974,12 +974,12 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setVisible(False)
     # self.setEnabled(False)
     self.blockSignals(True)
-    # self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
-    # self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    # self.verticalHeader().setResizeMode(QtWidgets.QHeaderView.Fixed)
     # print ('  >>>setObjects')
     self.resizeColumnsToContents()
-    self.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
-    self.verticalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    self.verticalHeader().setResizeMode(QtWidgets.QHeaderView.Fixed)
 
     self._highLightObjs(selectedObjects)           # set back again if possible
 
@@ -1081,11 +1081,11 @@ class ObjectTable(QtGui.QTableView, Base):
 
 EDIT_ROLE = QtCore.Qt.EditRole
 
-class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
+class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
 
   def __init__(self, parent):
 
-    QtGui.QStyledItemDelegate.__init__(self, parent)
+    QtWidgets.QStyledItemDelegate.__init__(self, parent)
     self.customWidget = None
     self.parent = parent
 
@@ -1114,7 +1114,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
         # Use the default, type-dependant factory
         # Deals with strings, bools, date time etc.
         self.customWidget = None
-        editor = QtGui.QStyledItemDelegate.createEditor(self, parentWidget, itemStyle, index)
+        editor = QtWidgets.QStyledItemDelegate.createEditor(self, parentWidget, itemStyle, index)
 
         if isinstance(editor, QtGui.QDoubleSpinBox):
           numDecimals = objCol.editDecimals
@@ -1165,7 +1165,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
 
 
     else:
-      return QtGui.QStyledItemDelegate.setEditorData(self, widget, index)
+      return QtWidgets.QStyledItemDelegate.setEditorData(self, widget, index)
 
   def updateEditorGeometry(self, widget, itemStyle, index):# ensures that the editor is displayed correctly
 
@@ -1176,7 +1176,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
       hint = widget.sizeHint()
 
       if hint.height() > cellRect.height():
-        if isinstance(widget, QtGui.QComboBox): # has a popup anyway
+        if isinstance(widget, QtWidgets.QComboBox): # has a popup anyway
           widget.move(cellRect.topLeft())
 
         else:
@@ -1191,7 +1191,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
 
 
     else:
-      return QtGui.QStyledItemDelegate.updateEditorGeometry(self, widget, itemStyle, index)
+      return QtWidgets.QStyledItemDelegate.updateEditorGeometry(self, widget, itemStyle, index)
 
   def setModelData(self, widget, mode, index):#returns updated data
 
@@ -1221,14 +1221,14 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
       model.setData(index, value, EDIT_ROLE)
 
     else:
-      return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
+      return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
 
-class ObjectHeaderView(QtGui.QHeaderView):
+class ObjectHeaderView(QtWidgets.QHeaderView):
 
   def __init__(self, orient, parent):
 
-    QtGui.QHeaderView.__init__(self, orient, parent)
+    QtWidgets.QHeaderView.__init__(self, orient, parent)
     self.table = parent
 
   #def sizeHint(self):
@@ -1239,14 +1239,14 @@ class ObjectHeaderView(QtGui.QHeaderView):
   #
   #  return QtCore.QSize(30*len(self.table.columns), self.table.bbox('A').height())
 
-LESS_THAN = QtGui.QSortFilterProxyModel.lessThan
+LESS_THAN = QtCore.QSortFilterProxyModel.lessThan
 
 
-class ObjectTableProxyModel(QtGui.QSortFilterProxyModel):
+class ObjectTableProxyModel(QtCore.QSortFilterProxyModel):
 
   def __init__(self, parent):
 
-    QtGui.QSortFilterProxyModel.__init__(self, parent=parent)
+    QtCore.QSortFilterProxyModel.__init__(self, parent=parent)
     self.table = parent
 
   def lessThan(self, leftIndex, rightIndex):
@@ -1293,7 +1293,7 @@ class ColumnViewSettingsPopup(CcpnDialog):
     self.table = table
     self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
     buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1,0), hAlign='c')
-    self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
   def _close(self):
     'Save the hidden columns to the table class. So it remembers when you open again the popup'
@@ -1408,7 +1408,7 @@ class ObjectTableFilter(Widget):
                                               partial(self.findOnTable, self.table)])
     self.searchButtons.buttons[1].setEnabled(False)
 
-    self.widgetLayout = QtGui.QHBoxLayout()
+    self.widgetLayout = QtWidgets.QHBoxLayout()
     self.setLayout(self.widgetLayout)
     ws = [labelColumn,self.columnOptions, self.searchLabel,self.edit, self.searchButtons]
     for w in ws:

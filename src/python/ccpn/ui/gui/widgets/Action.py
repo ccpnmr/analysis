@@ -25,14 +25,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 from ccpn.framework.Translation import getTranslator
 
 
-class Action(QtGui.QAction, Base):
+class Action(Base, QtWidgets.QAction):
   def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False,
                icon=None, translate=True, enabled=True, **kw):
     # tr = getTranslator('Dutch')
@@ -40,22 +40,24 @@ class Action(QtGui.QAction, Base):
     if translate:
       text = translator.translate(text)
 
+    QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
+
     if shortcut:
       if type(shortcut) == type(''):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
-      QtGui.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
+        QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
       self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
     # elif icon:
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 
     else:
-      QtGui.QAction.__init__(self, text, parent, checkable=checkable)
+      QtWidgets.QAction.__init__(self, text, parent, checkable=checkable)
 
     if checkable:
       self.setChecked(checked)
       
     if callback:
-      # PyQt4 always seems to add a checked argument for Action callbacks
+      # PyQt5 always seems to add a checked argument for Action callbacks
       self.triggered.connect(lambda checked, *args, **kw: callback(*args, **kw))
 
     self.setEnabled(enabled)

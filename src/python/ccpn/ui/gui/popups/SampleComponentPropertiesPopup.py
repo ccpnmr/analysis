@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -71,7 +71,7 @@ class EditSampleComponentPopup(CcpnDialog):
       pass
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.setWindowTitle("Sample Component Properties")
     self.mainLayout.setContentsMargins(15, 20, 25, 10) #L,T,R,B

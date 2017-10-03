@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -146,16 +146,16 @@ class IntegralTable(ObjectTable):
 
     # create the table; objects are added later via the displayTableForIntegrals method
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
     self.itWidget = IntegralListPulldown(parent=self._widget
                                          , project=self._project, default=0
                                          , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
                                          , showSelectName=True
-                                         , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
+                                         , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
                                          , callback= self._selectionPulldownCallback)
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=self.ITcolumns, objects=[],

@@ -1,21 +1,21 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 from .Frame import Frame
 from .Label import Label
 from .Button import Button
 
-class MultiWidget(QtGui.QFrame, Base):
+class MultiWidget(QtWidgets.QFrame, Base):
 
   def __init__(self, parent, widgetClass, labels=None, values=None,
                callback=None, minRows=3, maxRows=None, useImages=True,
                maxRow=15, widgetArgs=None, **kw):
 
-    QtGui.QFrame.__init__(self, parent)
+    QtWidgets.QFrame.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     self.setAutoFillBackground(True)
     self.setLineWidth(1)
-    self.setFrameStyle(QtGui.QFrame.StyledPanel)
+    self.setFrameStyle(QtWidgets.QFrame.StyledPanel)
  
     #self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
 
@@ -69,7 +69,7 @@ class MultiWidget(QtGui.QFrame, Base):
   
   def keyPressEvent(self, event):
     
-    QtGui.QWidget.keyPressEvent(event)
+    QtWidgets.QWidget.keyPressEvent(event)
     
     key = event.key()
     

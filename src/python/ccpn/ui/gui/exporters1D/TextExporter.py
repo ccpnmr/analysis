@@ -11,7 +11,7 @@ import pyqtgraph as pg
 import pandas as pd
 from numpy import nan as Nan
 from pyqtgraph.widgets.FileDialog import FileDialog
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 __all__ = ['CSVExporter']
 

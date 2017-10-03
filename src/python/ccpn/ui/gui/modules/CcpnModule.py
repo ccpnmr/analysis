@@ -29,7 +29,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
@@ -155,10 +155,10 @@ class CcpnModule(Dock):
 
     # main widget area
     #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-    self.mainWidget = Widget(parent=None, setLayout=True)  #QtGui.QWidget(self)
+    self.mainWidget = Widget(parent=None, setLayout=True)  #QtWidgets.QWidget(self)
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
-    #self.mainWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     # optional settings widget area
     self.settingsState = 0  # current state (not shown)
@@ -173,11 +173,11 @@ class CcpnModule(Dock):
       # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
       # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
       self._settingsScrollArea.setWidget(self.settingsWidget)
-      #self.settingsWidget.setLayout(QtGui.QGridLayout())
+      #self.settingsWidget.setLayout(QtWidgets.QGridLayout())
       self.settingsWidget.setGridLayout()
       self._settingsScrollArea.setWidgetResizable(True)
       #self._settingsScrollArea.getLayout().addWidget(self.settingsWidget)
-      #self.settingsWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+      #self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
       # if self.settingsOnTop:
       #   # self.addWidget(self.settingsWidget.getScrollArea(), 0, 0)
@@ -528,7 +528,7 @@ class CcpnModuleLabel(DockLabel):
 
   def mouseMoveEvent(self, ev):
     if hasattr(self, 'pressPos'):
-      if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtGui.QApplication.startDragDistance():
+      if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
         self.dock.startDrag()
       ev.accept()
 

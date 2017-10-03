@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 
@@ -33,13 +33,13 @@ from ccpn.ui.gui.widgets.RadioButton import RadioButton
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class RadioButtons(QtGui.QWidget, Base):
+class RadioButtons(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, texts=None, selectedInd=None,
                callback=None, direction='h', tipTexts=None,  **kw):
 
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, setLayout = True, **kw)
 
     if texts is None:

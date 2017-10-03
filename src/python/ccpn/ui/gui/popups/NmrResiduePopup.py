@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.Chain import Chain
 from ccpn.core.lib.AssignmentLib import CCP_CODES,  getNmrResiduePrediction

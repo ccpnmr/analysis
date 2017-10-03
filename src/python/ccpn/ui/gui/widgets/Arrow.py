@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 from pyqtgraph import ArrowItem
-from PyQt4 import QtCore
+from PyQt5 import QtCore, QtWidgets
 import pyqtgraph.functions as fn
 
 class Arrow(ArrowItem):

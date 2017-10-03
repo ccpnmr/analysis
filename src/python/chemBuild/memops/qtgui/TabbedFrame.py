@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 
@@ -51,8 +51,8 @@ class TabbedFrame(QtGui.QTabWidget, Base):
   def appendTab(self, text=None, icon=None, widget=None, tipText=None):
 
     if not widget:
-      widget = QtGui.QWidget(self)
-      layout = QtGui.QGridLayout(widget)
+      widget = QtWidgets.QWidget(self)
+      layout = QtWidgets.QGridLayout(widget)
       layout.setSpacing(2)
       layout.setContentsMargins(2,2,2,2)
       widget.setLayout( layout )

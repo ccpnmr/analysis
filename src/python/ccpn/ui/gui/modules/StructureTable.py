@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from PyQt4 import QtGui, QtCore, QtOpenGL
+from PyQt5 import QtGui, QtWidgets, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
@@ -291,13 +291,13 @@ class StructureTable(ObjectTable):
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.stWidget = StructurePulldown(parent=self._widget
                                      , project=self._project, default=0  # first Structure in project (if present)
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
-                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
+                                     , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
                                      , callback=self._selectionPulldownCallback)
     self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'average']
                                   , selectedInd=1
@@ -306,7 +306,7 @@ class StructureTable(ObjectTable):
                                   , tipTexts=None
                                   , grid=(1,2), gridSpan=(1,3))
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True
                          , columns=self.STcolumns, objects = []

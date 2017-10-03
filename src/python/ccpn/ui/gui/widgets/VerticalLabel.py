@@ -27,18 +27,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 
 
-class VerticalLabel(QtGui.QWidget, Base):
+class VerticalLabel(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, text, **kwargs):
 
       text = translator.translate(text)
 
-      QtGui.QWidget.__init__(self, parent)
+      QtWidgets.QWidget.__init__(self, parent)
       self.text = text
       self.setText(text)
       self.height = parent.height()

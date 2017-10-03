@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from os import path
 from memops.universal.Io import getTopDirectory
@@ -35,14 +35,14 @@ class Base(object):
       layout = parent.layout()
  
       if not layout:
-        layout = QtGui.QGridLayout(parent)
+        layout = QtWidgets.QGridLayout(parent)
         layout.setSpacing(2)
         layout.setContentsMargins(2,2,2,2)
         ###parent.setLayout( layout )
  
-      #self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+      #self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
       
-      if isinstance(layout, QtGui.QGridLayout): 
+      if isinstance(layout, QtWidgets.QGridLayout):
         rowSpan, colSpan = gridSpan
         row, col, align = self._getGriddingData(grid, sticky)
  

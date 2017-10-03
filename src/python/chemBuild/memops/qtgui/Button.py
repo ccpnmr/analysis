@@ -1,17 +1,17 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class Button(QtGui.QPushButton, Base):
+class Button(QtWidgets.QPushButton, Base):
 
   def __init__(self, parent, text='', callback=None, icon=None,
                toggle=None, command=None, **kw):
     
     
-    QtGui.QPushButton.__init__(self, text, parent)
+    QtWidgets.QPushButton.__init__(self, text, parent)
     Base.__init__(self, parent, **kw)
 
     if icon: # filename or pixmap
@@ -58,7 +58,7 @@ class Button(QtGui.QPushButton, Base):
 
   def setText(self, text):
 
-    QtGui.QPushButton.setText(self, text)
+    QtWidgets.QPushButton.setText(self, text)
 
   def setState(self, state):
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
   app = Application()
 
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
   
   def click():
     print("Clicked")

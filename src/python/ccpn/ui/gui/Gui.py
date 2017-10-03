@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -49,7 +49,7 @@ def qtMessageHandler(*errors):
     Logging.getLogger().warning('QT error: %s' % err)
 
 # un/suppress messages
-QtCore.qInstallMsgHandler(qtMessageHandler)
+QtCore.qInstallMessageHandler(qtMessageHandler)
 
 
 class Gui(Ui):
@@ -286,7 +286,7 @@ class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
 
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
-    AbstractWrapperObject. __init__(self, project, wrappedData)
+    AbstractWrapperObject.__init__(self, project, wrappedData)
 
     logger = Logging.getLogger()
 
@@ -294,7 +294,8 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> project._appBase: %s' % project._appBase)
 
     application = project._appBase
-    _GuiMainWindow.__init__(self, application = application)
+    _GuiMainWindow.__init__(self, application=application)
+    # _GuiMainWindow.__init__(self)
 
     # patches for now:
     project._mainWindow = self

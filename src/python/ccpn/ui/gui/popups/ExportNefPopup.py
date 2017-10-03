@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from os.path import expanduser
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -107,7 +107,7 @@ class ExportNefPopup(CcpnDialog):
                                , text='expand selection'
                                , grid=(1,0), hAlign ='l')
     # self.spacer = Spacer(self.options, 3, 3
-    #                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+    #                      , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
     #                      , grid=(1,1), gridSpan=(1,1))
     # self._includeCCPN = True
     # self._includeExpand = False
@@ -115,7 +115,7 @@ class ExportNefPopup(CcpnDialog):
     # put save options in this section
 
     self.spacer = Spacer(self, 3, 3
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(1,0), gridSpan=(1,1))
 
     # self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
@@ -135,11 +135,11 @@ class ExportNefPopup(CcpnDialog):
     #   self.restraintCopy.setListObjects(self.project.restraintLists)
     #
     # self.spacer = Spacer(self, 3, 3
-    #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+    #                      , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
     #                      , grid=(6,0), gridSpan=(1,1))
     #
     # self.spacer = Spacer(self, 3, 3
-    #                      , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding
+    #                      , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
     #                      , grid=(7,0), gridSpan=(1,1))
 
     self.treeView = ProjectTreeCheckBoxes(self, project=self.project, grid=(3,0))
@@ -153,7 +153,7 @@ class ExportNefPopup(CcpnDialog):
     self.openPathIcon = Icon('icons/directory')
     self.saveLabel = Label(self.saveFrame, text = ' Path: ', grid=(0,0), hAlign = 'c')
     self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAligment='l')
-    self.saveText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+    self.saveText.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
     self.saveText.setDisabled(False)   # ejb - enable but need to check path on okay
 
@@ -161,7 +161,7 @@ class ExportNefPopup(CcpnDialog):
     self.saveText.textEdited.connect(self._editPath)
 
     self.spacer = Spacer(self.saveFrame, 13, 3
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
     self.pathButton = Button(self.saveFrame, text=''
                              , icon=self.openPathIcon
@@ -170,7 +170,7 @@ class ExportNefPopup(CcpnDialog):
 
     self.buttonFrame = Frame(self, setLayout=True, grid=(9,0))
     self.spacer = Spacer(self.buttonFrame, 3, 3
-                         , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.buttons = ButtonList(self.buttonFrame, ['Cancel', 'Save'], [self._rejectDialog, self._acceptDialog], grid=(0,1))
 
@@ -179,7 +179,7 @@ class ExportNefPopup(CcpnDialog):
     # self.showHideIcon = Icon('icons/directory')               # need to change this
     #
     # self.spacer = Spacer(self.showHide, 3, 3
-    #                      , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed
+    #                      , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
     #                      , grid=(0,0), gridSpan=(1,1))
     # self.saveLabel2 = Label(self.showHide, text='Show/Hide saveDialog', grid=(0,1), hAlign = 'c')
     # self.pathButton = Button(self.showHide, text=''
@@ -191,7 +191,7 @@ class ExportNefPopup(CcpnDialog):
     # else:
     #   self.saveLabel.setText('None')
 
-    self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+    self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
     # from here down is the save dialog
     # can we add a hide/show button?
@@ -349,22 +349,22 @@ class ExportNefPopup(CcpnDialog):
 
   # def _addTreeWidget(self, grid=None):
   #
-  #   self.treeView = QtGui.QTreeWidget()
-  #   self.headerItem = QtGui.QTreeWidgetItem()
-  #   self.item = QtGui.QTreeWidgetItem()
+  #   self.treeView = QtWidgets.QTreeWidget()
+  #   self.headerItem = QtWidgets.QTreeWidgetItem()
+  #   self.item = QtWidgets.QTreeWidgetItem()
   #
   #   self.treeView.header().hide()
   #
   #   for name in ExportNefPopup.checkList:
   #     if hasattr(self.project, name):                   # just to be safe
   #
-  #       parent = QtGui.QTreeWidgetItem(self.treeView)
+  #       parent = QtWidgets.QTreeWidgetItem(self.treeView)
   #       parent.setText(0, name)
   #       parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
   #
   #       for obj in getattr(self.project, name):
   #
-  #         child = QtGui.QTreeWidgetItem(parent)
+  #         child = QtWidgets.QTreeWidgetItem(parent)
   #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
   #         child.setText(0, obj.pid)
   #         child.setCheckState(0, QtCore.Qt.Unchecked)
@@ -376,11 +376,11 @@ class ExportNefPopup(CcpnDialog):
   #   #       self.pidList.append(obj.pid)                 # append the found items to the list
   #   #
   #   # for i in range(3):
-  #   #     parent = QtGui.QTreeWidgetItem(self.treeView)
+  #   #     parent = QtWidgets.QTreeWidgetItem(self.treeView)
   #   #     parent.setText(0, "Parent {}".format(i))
   #   #     parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
   #   #     for x in range(5):
-  #   #         child = QtGui.QTreeWidgetItem(parent)
+  #   #         child = QtWidgets.QTreeWidgetItem(parent)
   #   #         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
   #   #         child.setText(0, "Child {}".format(x))
   #   #         child.setCheckState(0, QtCore.Qt.Unchecked)

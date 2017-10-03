@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 import json
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 
 # TODO this file is a popup and does not belong in this directory
@@ -124,7 +124,7 @@ class PopupGenerator(QtGui.QDialog, Base):
     widgets = json.load(jsonData)
     pythonFilePath = os.path.expanduser('~simon1/.ccpn/') + '%s.py' % self.popupNameBox.text()
     pythonFile = open(pythonFilePath, 'w')
-    pythonFile.write('from PyQt4 import QtGui\n')
+    pythonFile.write('from PyQt5 import QtGui, QtWidgets\n')
     pythonFile.write('from ccpn.ui.gui.widgets.Base import Base\n')
     pythonFile.write('from ccpn.ui.gui.widgets.Button import Button\n')
     pythonFile.write('from ccpn.ui.gui.widgets.CheckBox import CheckBox\n')

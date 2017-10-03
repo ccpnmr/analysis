@@ -1,5 +1,5 @@
 
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebKit
 
 from .BasePopup import BasePopup
 from .Base import Base

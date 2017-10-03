@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 NULL = object()
 
 
-class PulldownList(QtGui.QComboBox, Base):
+class PulldownList(QtWidgets.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
                icons=None, callback=None, index=0, headerText=None, headerEnabled=False, headerIcon=None, **kw):
@@ -53,7 +53,7 @@ class PulldownList(QtGui.QComboBox, Base):
     :param kw:
     '''
 
-    QtGui.QComboBox.__init__(self, parent)
+    QtWidgets.QComboBox.__init__(self, parent)
     Base.__init__(self, **kw)
     
     self.text = None
@@ -75,7 +75,8 @@ class PulldownList(QtGui.QComboBox, Base):
       padding-left: 2px;
     }
     """)
-    self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
+    # self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
+    self.currentIndexChanged.connect(self._callback)
 
   def showPopup(self):
     super(PulldownList, self).showPopup()
@@ -210,9 +211,9 @@ class PulldownList(QtGui.QComboBox, Base):
   def addItem(self, text, object=NULL, icon=None, ):
     
     if icon:
-      QtGui.QComboBox.addItem(self, Icon(icon), text)
+      QtWidgets.QComboBox.addItem(self, Icon(icon), text)
     else:
-      QtGui.QComboBox.addItem(self, text)
+      QtWidgets.QComboBox.addItem(self, text)
     
     if object is NULL:
       object = text
@@ -222,13 +223,13 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def setItemText(self, index, text):
   
-    QtGui.QComboBox.setItemText(self, index, text)
+    QtWidgets.QComboBox.setItemText(self, index, text)
     
     self.text[index] = text
   
   def removeItem(self, index):
   
-    QtGui.QComboBox.removeItem(self, index)
+    QtWidgets.QComboBox.removeItem(self, index)
     
     if index is self.index:
       self.index = None

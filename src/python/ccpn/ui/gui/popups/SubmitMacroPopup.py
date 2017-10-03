@@ -25,7 +25,7 @@ __date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 import os

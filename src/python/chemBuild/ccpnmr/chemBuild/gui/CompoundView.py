@@ -199,7 +199,7 @@ class CompoundView(QtWidgets.QGraphicsView):
       used = set([a.name for a in atom.compound.atoms])
       if text in used:
         msg = 'Name "%s" was already in use: the other atom name as been modified' % text
-        QtGui.QMessageBox.warning(self, "Warning", msg)
+        QtWidgets.QMessageBox.warning(self, "Warning", msg)
         prevAtom = self.compound.atomDict[text]
         name2 = text + '!'
         while name2 in used:
@@ -441,11 +441,11 @@ class CompoundView(QtWidgets.QGraphicsView):
       else:
         msg = 'Really delete all atoms?'
         
-      answ = QtGui.QMessageBox.warning(self, "Confirm", msg,
-                                       QtGui.QMessageBox.Cancel | 
-                                       QtGui.QMessageBox.Ok)
+      answ = QtWidgets.QMessageBox.warning(self, "Confirm", msg,
+                                       QtWidgets.QMessageBox.Cancel |
+                                       QtWidgets.QMessageBox.Ok)
 
-      if answ == QtGui.QMessageBox.Cancel:
+      if answ == QtWidgets.QMessageBox.Cancel:
         return
       
       for atomView in list(self.atomViews.values()):
@@ -990,12 +990,12 @@ class CompoundView(QtWidgets.QGraphicsView):
     
     if ('next' in name) and  self.variant.polyLink in ('middle', 'start'):
       msg = 'Cannot add another next residue link'
-      QtGui.QMessageBox.warning(self, "Abort", msg)
+      QtWidgets.QMessageBox.warning(self, "Abort", msg)
       return
         
     elif ('prev' in name) and self.variant.polyLink in ('middle', 'end'):
       msg = 'Cannot add another previous residue link'
-      QtGui.QMessageBox.warning(self, "Abort", msg)
+      QtWidgets.QMessageBox.warning(self, "Abort", msg)
       return
   
     self.parent.addToHistory()
@@ -1003,7 +1003,7 @@ class CompoundView(QtWidgets.QGraphicsView):
       
     if not atom:
       msg = 'Could not make a link: require at least one hydrogen'
-      QtGui.QMessageBox.warning(self, "Failure", msg)
+      QtWidgets.QMessageBox.warning(self, "Failure", msg)
       return
     
     self.setVariant(atom.variant)

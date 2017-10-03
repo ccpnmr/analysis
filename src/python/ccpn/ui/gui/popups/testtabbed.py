@@ -40,7 +40,7 @@ class TabDialog(CcpnDialog):
         tabWidget.addTab(PermissionsTab(fileInfo), "Permissions")
         tabWidget.addTab(ApplicationsTab(fileInfo), "Applications")
 
-        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)

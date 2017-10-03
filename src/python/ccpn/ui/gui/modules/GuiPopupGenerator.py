@@ -41,7 +41,7 @@ from PyQt5 import QtGui, QtWidgets
 WIDGET_TYPES = ['Button', 'CheckBox', 'DoubleSpinbox', 'LineEdit', 'ListWidget',
                 'PulldownList', 'Spinbox', 'None']
 
-class PopupGenerator(QtGui.QDialog, Base):
+class PopupGenerator(QtWidgets.QDialog, Base):
 
   def __init__(self, parent=None, **kw):
 
@@ -135,7 +135,7 @@ class PopupGenerator(QtGui.QDialog, Base):
     pythonFile.write('from ccpn.ui.gui.widgets.ListWidget import ListWidget\n')
     pythonFile.write('from ccpn.ui.gui.widgets.PulldownList import PulldownList\n')
     pythonFile.write('from ccpn.ui.gui.widgets.Spinbox import Spinbox\n\n\n')
-    pythonFile.write('class %s(QtGui.QDialog, Base):\n  def __init__(self, parent=None, **kw):\n' % self.popupNameBox.text())
+    pythonFile.write('class %s(QtWidgets.QDialog, Base):\n  def __init__(self, parent=None, **kw):\n' % self.popupNameBox.text())
     pythonFile.write('    super(%s, self).__init__(parent)\n' % self.popupNameBox.text())
     pythonFile.write('    Base.__init__(self, **kw)\n\n')
 

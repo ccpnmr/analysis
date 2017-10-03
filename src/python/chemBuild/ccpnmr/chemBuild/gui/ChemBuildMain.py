@@ -812,7 +812,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         compound = func(filePath, not haveModKey)
         
         if compound and not compound.atoms:
-          QtGui.QMessageBox.warning(self, "Load Failed", msg)
+          QtWidgets.QMessageBox.warning(self, "Load Failed", msg)
         
         else:
           self.statusBar().showMessage("Loaded %s" % filePath)
@@ -832,7 +832,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         continue
         
     else:
-      QtGui.QMessageBox.warning(self, "Load Failed", msg)
+      QtWidgets.QMessageBox.warning(self, "Load Failed", msg)
             
                 
   def importChemComp(self, filePath=None, replace=True):
@@ -1021,7 +1021,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       if len(code) != 3:
         msg = 'Residue code must be exactly three characters'
-        QtGui.QMessageBox.warning(self, "Abort", msg)
+        QtWidgets.QMessageBox.warning(self, "Abort", msg)
         return
       
       lines = makePdb(self.variant,  code)
@@ -1073,14 +1073,14 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       if not self.compound.ccpCode:
         msg = 'Cannot export CCPN ChemComp XML file.\n'
         msg += "'CCPN Code' not set. \n Right Panel > Compound Info tab > CCPN Code "
-        QtGui.QMessageBox.warning(self, "Abort", msg)
+        QtWidgets.QMessageBox.warning(self, "Abort", msg)
         return
     
       ccpCode = str(self.compound.ccpCode).strip()
       if not ccpCode:
         msg = 'Cannot export CCPN ChemComp XML file.\n'
         msg += 'CCPN Code may not be blank'
-        QtGui.QMessageBox.warning(self, "Abort", msg)
+        QtWidgets.QMessageBox.warning(self, "Abort", msg)
         return
         
       molType = str(self.compound.ccpMolType).strip()
@@ -1092,7 +1092,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
           msg = 'Cannot export CCPN ChemComp XML file with "%s" molecule type.\n' % molType
           msg += 'Compound does not have any variant forms with'
           msg += ' links to previous or next residues'
-          QtGui.QMessageBox.warning(self, "Abort", msg)
+          QtWidgets.QMessageBox.warning(self, "Abort", msg)
           return
         
       
@@ -1136,7 +1136,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
  
           #XmlIO.save(dirPath, chemComp)
           msg = 'CCPN ChemComp XML file saved as "%s"' % fileName
-          QtGui.QMessageBox.information(self, "Done", msg)
+          QtWidgets.QMessageBox.information(self, "Done", msg)
           
   def _checkCcpnInstallation(self):
     
@@ -1149,7 +1149,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       msg += 'CCPN is not installed or the CCPN installation directory is '
       msg += 'not mentioned in your system\'s PYTHONPATH environment variable.\n'
       msg += 'Please select CCPN installation directory.'
-      QtGui.QMessageBox.warning(self, "Abort", msg)
+      QtWidgets.QMessageBox.warning(self, "Abort", msg)
  
       import sys
  
@@ -1170,13 +1170,13 @@ class ChemBuildMain(QtWidgets.QMainWindow):
  
       except ImportError:
         msg = 'Cannot import CCPN libraries from %s' % dirPath
-        QtGui.QMessageBox.warning(self, "Abort", msg)
+        QtWidgets.QMessageBox.warning(self, "Abort", msg)
         return False
       
       finally:
         msg = 'CCPN libraries located. To avoid further queries please set'
         msg += 'your PYTHONPATH environment variable (e.g. in shell startup script) to:\n%s' % dirPath
-        QtGui.QMessageBox.information(self, "Success", msg)
+        QtWidgets.QMessageBox.information(self, "Success", msg)
         
       
     return True    
@@ -1504,7 +1504,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         msg = 'Compound file "%s" appears to be corrupt. ' % fileName
       
       if msg:	
-        QtGui.QMessageBox.warning(self, "Compound load failed", msg)
+        QtWidgets.QMessageBox.warning(self, "Compound load failed", msg)
         return 
        
       self.statusBar().showMessage('Read Compound file %s' % fileName)
@@ -1533,7 +1533,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     if not self.compound:
       msg = 'Cannot save; no active compound'
-      QtGui.QMessageBox.warning(self, "Abort", msg)
+      QtWidgets.QMessageBox.warning(self, "Abort", msg)
       return False
     
     if self.compoundFileName:
@@ -1547,7 +1547,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
 
     if not self.compound:
       msg = 'Cannot save; no active compound'
-      QtGui.QMessageBox.warning(self, "Abort", msg)
+      QtWidgets.QMessageBox.warning(self, "Abort", msg)
       return False
     
     fType = 'ChemBuild (*.pickle)'
@@ -1569,23 +1569,23 @@ class ChemBuildMain(QtWidgets.QMainWindow):
   
     if self.compound and self.compound.atoms and self.compound.isModified:
       msg2 = 'Save or discard current compound?'
-      dialog = QtGui.QMessageBox(self)
+      dialog = QtWidgets.QMessageBox(self)
       dialog.setWindowTitle("Confirm")
       dialog.setText(msg)
       dialog.setInformativeText(msg2)
-      dialog.setIcon(QtGui.QMessageBox.Question)
-      dialog.setStandardButtons( QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
-      dialog.setDefaultButton(QtGui.QMessageBox.Save)
+      dialog.setIcon(QtWidgets.QMessageBox.Question)
+      dialog.setStandardButtons( QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+      dialog.setDefaultButton(QtWidgets.QMessageBox.Save)
       
-      button = dialog.button(QtGui.QMessageBox.Discard)
+      button = dialog.button(QtWidgets.QMessageBox.Discard)
       button.setText(discardMsg)
       
       answ = dialog.exec_()
       
-      if answ == QtGui.QMessageBox.Save:
+      if answ == QtWidgets.QMessageBox.Save:
         return self.saveCompound() # Abort on failure
         
-      elif answ == QtGui.QMessageBox.Cancel:
+      elif answ == QtWidgets.QMessageBox.Cancel:
         return False # Abort
       
       else:
@@ -1596,7 +1596,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
   def about(self):
     
-    QtGui.QMessageBox.about(self, "CcpNmr ChemBuild", ABOUT_TEXT)
+    QtWidgets.QMessageBox.about(self, "CcpNmr ChemBuild", ABOUT_TEXT)
 
   def loadCompound(self, filePath=None, replace=True):
     
@@ -1737,7 +1737,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     if not atoms:
       msg = 'No atoms selected: select atoms to replace with a link'
-      QtGui.QMessageBox.warning(self, "Failure", msg)
+      QtWidgets.QMessageBox.warning(self, "Failure", msg)
       return
    
     if self.variant:
@@ -1753,7 +1753,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     if not varAtoms:
       msg = 'No atoms selected'
-      QtGui.QMessageBox.warning(self, "Failure", msg)
+      QtWidgets.QMessageBox.warning(self, "Failure", msg)
       return
       
     if self.compound:
@@ -2316,7 +2316,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
               
       if not allCentres:
         msg = 'Selected atom(s) must be next to a stereo centre'
-        QtGui.QMessageBox.warning(self, "Failure", msg)
+        QtWidgets.QMessageBox.warning(self, "Failure", msg)
         return
       
       if stereoCentres:
@@ -2422,7 +2422,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       if not varAtoms2:
         msg = 'An atom must have at least four neighbours to be set as a stereo centre'
-        QtGui.QMessageBox.warning(self, "Failure", msg)
+        QtWidgets.QMessageBox.warning(self, "Failure", msg)
         return
       
       for va1 in varAtoms2:

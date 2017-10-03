@@ -29,9 +29,9 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 
 
-class CcpnDialog(QtGui.QDialog, Base):
+class CcpnDialog(QtWidgets.QDialog, Base):
   def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200,100), **kw):
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     Base.__init__(self, setLayout=setLayout, **kw)
 
     self.setWindowTitle(windowTitle)

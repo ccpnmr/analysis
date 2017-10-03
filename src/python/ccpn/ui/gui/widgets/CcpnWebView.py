@@ -30,11 +30,8 @@ class CcpnWebView(QWebEngineView):
 
   def __init__(self, urlPath, parent=None):
     QWebEngineView.__init__(self, parent)
+
+    urlPath = 'file://'+urlPath     # ejb - new webengine needs to prefix
     self.load(QUrl(urlPath))
+
     self.show()
-
-    QWebEngineView.__init__(self)
-    self.html = None
-    self.loadFinished.connect(self._loadFinished)
-    self.setHtml(html)
-

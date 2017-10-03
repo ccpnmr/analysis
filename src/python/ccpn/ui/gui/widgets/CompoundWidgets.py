@@ -511,11 +511,11 @@ class InputPulldown(PulldownList):
       return newItem
 
 
-class LineEditPopup(QtGui.QDialog, Base):
+class LineEditPopup(QtWidgets.QDialog, Base):
 
   def __init__(self, parent=None, dataType=None, **kw):
 
-    QtGui.QDialog.__init__(self, parent)
+    QtWidgets.QDialog.__init__(self, parent)
     Base.__init__(self, **kw)
 
     inputLabel = Label(self, 'Input', grid=(0, 0))

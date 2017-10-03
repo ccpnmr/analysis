@@ -103,7 +103,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 
 
 #
-# class PrintSpectrumDisplayPopup(QtGui.QDialog, Base):
+# class PrintSpectrumDisplayPopup(QtWidgets.QDialog, Base):
 #   def __init__(self, parent=None, project=None, **kw):
 #     super(PrintSpectrumDisplayPopup, self).__init__(parent)
 #     Base.__init__(self, **kw)

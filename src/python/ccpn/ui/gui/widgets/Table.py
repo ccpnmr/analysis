@@ -1255,7 +1255,7 @@ TAB_FORMAT = 'Tab-separated'
 COMMA_FORMAT = 'Comma-separated'
 EXPORT_FORMATS = (TAB_FORMAT, COMMA_FORMAT)
 
-class ObjectTableExport(QtGui.QDialog, Base):
+class ObjectTableExport(QtWidgets.QDialog, Base):
 
   def __init__(self, table=None, **kw):
     super(ObjectTableExport, self).__init__(table)

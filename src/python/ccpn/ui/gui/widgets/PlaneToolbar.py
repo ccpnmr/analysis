@@ -87,12 +87,20 @@ class _StripLabel(Label):
     dataDict.update(getMouseEventDict(event))
     # convert into json
     itemData = json.dumps(dataDict)
-    mimeData.setData(DropBase.JSONDATA, self.text())
+
+    # ejb - added so that itemData works with PyQt5
+    tempData = QtCore.QByteArray()
+    stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+    stream.writeQString(self.text())
+    mimeData.setData(DropBase.JSONDATA, tempData)
+
+    # mimeData.setData(DropBase.JSONDATA, self.text())
     mimeData.setText(itemData)
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
 
-    pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - set the pixmap to the image of the label
+    # pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - set the pixmap to the image of the label
+    pixmap = self.grab()     # ejb - set the pixmap to the image of the label
     painter = QtGui.QPainter(pixmap)            #       replaces the block text
     painter.setCompositionMode(painter.CompositionMode_DestinationIn)
     painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
@@ -100,7 +108,9 @@ class _StripLabel(Label):
     drag.setPixmap(pixmap)
     drag.setHotSpot(event.pos())
 
-    drag.start(QtCore.Qt.MoveAction)
+    # drag.start(QtCore.Qt.MoveAction)
+    drag.exec_(QtCore.Qt.MoveAction)      # ejb - PytQ5
+
     # if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
     #     pass
     # else:

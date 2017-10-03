@@ -132,7 +132,9 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     # A big NONO!!!
     strip = self.spectrumView.strip
     scene = strip.plotWidget.scene()
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
+
     ###self.strip = strip
     ###self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
@@ -216,7 +218,7 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     if action:
       action.toggled.connect(self.setVisible) # TBD: need to undo this if peakListView removed
 
-    if not self.scene(): # this happens after an undo of a spectrum/peakList deletion
+    if not self.scene: # this happens after an undo of a spectrum/peakList deletion
       spectrumView.strip.plotWidget.scene().addItem(self)
       spectrumView.strip.viewBox.addItem(self)
 
@@ -272,7 +274,8 @@ class Peak1d(QtWidgets.QGraphicsItem):
 
 
     scene = peakListView.spectrumView.strip.plotWidget.scene()
-    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
 
     self.application = peakListView.application
 
@@ -375,7 +378,8 @@ class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
 
   def __init__(self, peakItem, scene):
 
-    QtWidgets.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsSimpleTextItem.__init__(self)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
@@ -479,9 +483,8 @@ class Peak1dSymbol(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, parent):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
-
-
+    QtWidgets.QGraphicsItem.__init__(self)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
 
     self.setParentItem(parent)
     self.peakItem = parent
@@ -573,9 +576,11 @@ class PeakNd(QtWidgets.QGraphicsItem):
 
     self.application = peakListView.application
     scene = peakListView.spectrumView.strip.plotWidget.scene()
-    #QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    #QtWidgets.QGraphicsItem.__init__(self)      # ejb - need to remove , scene=scene from here
+    #self.scene = scene
     self.colourScheme =self.application.colourScheme
-    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
     ###QtWidgets.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
@@ -837,7 +842,8 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
 
   def __init__(self, peakItem, scene):
 
-    QtWidgets.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsSimpleTextItem.__init__(self)      # ejb - need to remove , scene=scene from here
+    self.scene = scene
 
     ###self.setParentItem(peakItem)
     ###self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.

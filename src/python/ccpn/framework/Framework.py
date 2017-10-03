@@ -2002,14 +2002,18 @@ class Framework:
   def _showHtmlFile(self, title, path):
     "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"
 
+    mainWindow = self.ui.mainWindow
+
     if self.preferences.general.useNativeWebbrowser:
       self._systemOpen(path)
     else:
       from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-      newModule = CcpnModule(mainWindow=self.ui.mainWindow, name=title)
+      self.newModule = CcpnModule(mainWindow=mainWindow, name=title)
       view = CcpnWebView(path)
-      newModule.addWidget(view)
-      self.ui.mainWindow.moduleArea.addModule(newModule)
+      self.newModule.addWidget(view)
+      # self.newModule.mainWidget = view      # ejb
+
+      self.ui.mainWindow.moduleArea.addModule(self.newModule, position='top', relativeTo=mainWindow.moduleArea)
 
   def showBeginnersTutorial(self):
     from ccpn.framework.PathsAndUrls import beginnersTutorialPath

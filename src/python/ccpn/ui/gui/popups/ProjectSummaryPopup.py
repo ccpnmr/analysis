@@ -51,7 +51,7 @@ class ProjectSummaryPopup(CcpnDialog):
     self.project = project
 
     # self.setContentsMargins(15,15,15,15)
-    # QtGui.QDialog.__init__(self, parent=parent)
+    # QtWidgets.QDialog.__init__(self, parent=parent)
     if modal:  # Set before visible
       modality = QtCore.Qt.ApplicationModal
       self.setWindowModality(modality)

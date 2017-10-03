@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -35,8 +33,9 @@ class CallbackTimer(QtCore.QTimer):
     
     QtCore.QTimer.__init__(self)
     self.setSingleShot(True)
-    self.connect(self, QtCore.SIGNAL('timeout()'), callback)
-    
+    # self.connect(self, QtCore.PYQT_SIGNAL('timeout()'), callback)
+    self.timeout.connect(callback)
+
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication

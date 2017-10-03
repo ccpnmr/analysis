@@ -63,7 +63,7 @@ class SpectrumToolBar(ToolBar):
         menu.move(event.globalPos().x(), event.globalPos().y() + 10)
         menu.exec()
 
-  def _createContextMenu(self, button:QtGui.QToolButton):
+  def _createContextMenu(self, button:QtWidgets.QToolButton):
     """
     Creates a context menu containing a command to delete the spectrum from the display and its
     button from the toolbar.
@@ -112,7 +112,7 @@ class SpectrumToolBar(ToolBar):
               action.setChecked(False)
               action.toggled.connect(peakListView.setVisible)
 
-  def _removeSpectrum(self, button:QtGui.QToolButton):
+  def _removeSpectrum(self, button:QtWidgets.QToolButton):
     """
     Removes the spectrum from the display and its button from the toolbar.
     """

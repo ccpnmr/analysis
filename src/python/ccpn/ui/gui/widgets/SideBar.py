@@ -625,7 +625,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             pids.append(objFromPid.pid)
 
       itemData = json.dumps({'pids':pids})
-      event.mimeData().setData(ccpnmrJsonData, itemData)
+
+      # ejb - added so that itemData works with PyQt5
+      tempData = QtCore.QByteArray()
+      stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+      stream.writeQString(itemData)
+      event.mimeData().setData(ccpnmrJsonData, tempData)
+
+      # event.mimeData().setData(ccpnmrJsonData, itemData)
       event.mimeData().setText(itemData)
       event.accept()
 

@@ -9,13 +9,13 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.framework.update.UpdateAgent import UpdateAgent
 
 
-# class UpdatePopup(QtGui.QDialog, UpdateAgent):
+# class UpdatePopup(QtWidgets.QDialog, UpdateAgent):
 class UpdatePopup(CcpnDialog, UpdateAgent):
   def __init__(self, parent=None, title='Update CCPN code', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     version = QtCore.QCoreApplication.applicationVersion()
-    # QtGui.QDialog.__init__(self, parent=parent)
+    # QtWidgets.QDialog.__init__(self, parent=parent)
     UpdateAgent.__init__(self, version)
 
     #self.appName = QtCore.QCoreApplication.applicationName()

@@ -5,7 +5,7 @@ def askPassword(title, prompt, parent=None):
     
   dialog = QtGui.QInputDialog(parent)
   dialog.setInputMode(QtGui.QInputDialog.TextInput)
-  dialog.setTextEchoMode( QtGui.QLineEdit.Password )
+  dialog.setTextEchoMode( QtWidgets.QLineEdit.Password )
   dialog.setLabelText(prompt)
   dialog.connect(dialog, QtCore.SIGNAL('rejected()'), lambda:dialog.setTextValue(''))  
   dialog.exec_()

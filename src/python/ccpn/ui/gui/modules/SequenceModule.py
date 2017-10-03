@@ -74,7 +74,7 @@ class SequenceModule(CcpnModule):
     #self.label.hide()
 
     self.setAcceptDrops(True)
-    self.scrollArea = QtGui.QScrollArea()
+    self.scrollArea = QtWidgets.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
     self.scrollArea.scene = QtWidgets.QGraphicsScene(self)
     self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self)

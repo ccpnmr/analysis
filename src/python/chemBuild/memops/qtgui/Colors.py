@@ -254,7 +254,7 @@ class GradientWidget(QtWidgets.QWidget, Base):
     
     p1 = QtCore.QPointF(0.0,h/2.0)
     p2 = QtCore.QPointF(float(w), h/2.0)
-    gradient = QtGui.QLinearGradient(p1, p2)
+    gradient = QtWidgets.QLinearGradient(p1, p2)
     
     n = float(len(self.colors)) - 1.0
     for i, color in enumerate(self.colors):

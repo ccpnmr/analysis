@@ -35,11 +35,11 @@ SCROLLBAR_POLICY_DICT = dict(
     asNeeded = QtCore.Qt.ScrollBarAsNeeded,
 )
 
-class ScrollArea(QtGui.QScrollArea, Base):
+class ScrollArea(QtWidgets.QScrollArea, Base):
 
   def __init__(self, parent, scrollBarPolicies=('asNeeded','asNeeded')
                      , setLayout=True, minimumSizes=(50, 50), **kwds):
-    QtGui.QScrollArea.__init__(self, parent)
+    QtWidgets.QScrollArea.__init__(self, parent)
     # kwds['setLayout'] = True  # A scrollable area always needs a layout to function
 
     Base.__init__(self, setLayout=setLayout, **kwds)

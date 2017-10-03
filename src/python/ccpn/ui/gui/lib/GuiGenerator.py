@@ -80,7 +80,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
           rb.setObjectName(AUTOGEN_TAG + param['variable'])
           setattr(widget, param['variable'], rb)
           rb.set(param['default'])
-          rb.buttonGroup.buttonClicked[QtGui.QAbstractButton].connect(partial(selectedRadioButton, param=param, argsDict=argsDict))
+          rb.buttonGroup.buttonClicked[QtWidgets.QAbstractButton].connect(partial(selectedRadioButton, param=param, argsDict=argsDict))
           argsDict[param['variable']] = param['default']
 
 

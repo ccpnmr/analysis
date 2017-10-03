@@ -89,7 +89,7 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
       self.setDecimals(decimals)
 
     if showButtons is False:
-      self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+      self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
     if prefix:
       self.setPrefix(prefix+' ')

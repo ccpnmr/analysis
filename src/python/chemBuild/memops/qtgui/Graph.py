@@ -1653,7 +1653,7 @@ if __name__ == '__main__':
   def click(*args):
     print('Clicked', args)
   
-  gradient = QtGui.QLinearGradient()
+  gradient = QtWidgets.QLinearGradient()
   c1 = QtGui.QColor(255, 0, 0)
   c2 = QtGui.QColor(0, 0, 255)
   gradient.setColorAt(0.0, c1)

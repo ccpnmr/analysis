@@ -16,12 +16,12 @@ MAXINT = 2**31-1
 INFINITY = float('Inf')
 
 
-class Entry(QtGui.QLineEdit, Base):
+class Entry(QtWidgets.QLineEdit, Base):
 
   def __init__(self, parent, text='', callback=None, maxLength=32, 
                listener=None, stripEndWhitespace=True, **kw):
     
-    QtGui.QLineEdit.__init__(self, parent)
+    QtWidgets.QLineEdit.__init__(self, parent)
     Base.__init__(self, **kw)
     
     self.setText(self.convertInput(text))
@@ -33,9 +33,12 @@ class Entry(QtGui.QLineEdit, Base):
     
     self.textChanged.connect(self._changed)
     
-    self.connect(self, QtCore.SIGNAL('returnPressed()'), self._callback)
-    self.connect(self, QtCore.SIGNAL('editingFinished()'), self._callback)
-      
+    # self.connect(self, QtCore.SIGNAL('returnPressed()'), self._callback)
+    # self.connect(self, QtCore.SIGNAL('editingFinished()'), self._callback)
+
+    self.returnPressed.connect(self._callback)
+    self.editingFinished.connect(self._callback)
+
     if listener:
       if isinstance(listener, (set, list, tuple)):
         for signal in listener:

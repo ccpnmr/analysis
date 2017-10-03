@@ -6,13 +6,13 @@ from ccpn.framework.Translation import translator
 
 
 
-class RadioButton(QtGui.QRadioButton, Base):
+class RadioButton(QtWidgets.QRadioButton, Base):
 
   def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kw):
 
     text = translator.translate(text)
 
-    QtGui.QRadioButton.__init__(self, text, parent)
+    QtWidgets.QRadioButton.__init__(self, text, parent)
     Base.__init__(self,  **kw)
     if textColor:
       self.setStyleSheet('QRadioButton {color: %s; font-size: 12pt;}' % textColor)
@@ -44,8 +44,8 @@ class RadioButton(QtGui.QRadioButton, Base):
     #   self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
 
     if callback:
-      self.connect(self, QtCore.SIGNAL('clicked()'), callback)
-      # self.clicked.connect doesn't work with lambda, yet...
+      # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+      self.clicked.connect(callback)
 
 
 

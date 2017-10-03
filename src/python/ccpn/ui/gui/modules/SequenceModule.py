@@ -369,7 +369,8 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
       else:
         self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
     except:
-      self.setHtml('<div style="color: %s; "text-align: center;">' % self.colour1 + '</div')
+      # self.setHtml('<div style="color: %s; "text-align: center;">' % self.colour1 + '</div')
+      getLogger().warning('GuiChainResidue has been deleted')
 
   def _setFontBold(self):
     """

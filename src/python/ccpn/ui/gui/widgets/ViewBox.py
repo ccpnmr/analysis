@@ -385,7 +385,8 @@ class ViewBox(pg.ViewBox):
   def _hoverEvent(self, event):
     if hasattr(event, '_scenePos'):
       position = self.mapSceneToView(event.pos())
-      self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
+      if self.strip:
+        self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """

@@ -86,7 +86,7 @@ class GuiWindow():
 
 
 
-  def setUserShortcuts(self, preferences=None, mainWindow=None):
+  def _setUserShortcuts(self, preferences=None, mainWindow=None):
 
     from functools import reduce, partial
     from ccpn.ui.gui.modules.ShortcutModule import UserShortcuts

@@ -145,7 +145,7 @@ class Gui(Ui):
 
     self.mainWindow._fillMacrosMenu()
     self.mainWindow._updateRestoreArchiveMenu()
-    self.mainWindow.setUserShortcuts(self.application.preferences, mainWindow=self.mainWindow)
+    # self.mainWindow._setUserShortcuts(self.application.preferences, mainWindow=self.mainWindow)
     project = self.application.project
     self.application.experimentClassifications = getExperimentClassifications(project)
 

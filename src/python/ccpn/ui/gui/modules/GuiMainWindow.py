@@ -516,7 +516,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     info = MessageDialog.showInfo('Not implemented yet',
           'This function has not been implemented in the current version')
 
-
   def _closeEvent(self, event=None):
     """
     Saves application preferences. Displays message box asking user to save project or not.

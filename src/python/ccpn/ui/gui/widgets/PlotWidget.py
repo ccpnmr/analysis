@@ -43,6 +43,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 # as it is only there and is just a small wrapper arount a pyqtgraph class
 # goes together with AxisTextItem (probably can be reduced to a function and included here.
 #TODO:WAYNE: should this inherit from Base??
+
+
 class PlotWidget(pg.PlotWidget):
 
   def __init__(self, strip, useOpenGL=False):
@@ -73,7 +75,7 @@ class PlotWidget(pg.PlotWidget):
     self.hideButtons()
 
     if useOpenGL:
-      self.setViewport(QtOpenGL.QGLWidget())
+      self.setViewport(QtWidgets.QOpenGLWidget())
       # need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom
       # (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)
       # (NoViewportUpdate might work if you could explicitly get the view to repaint when needed)

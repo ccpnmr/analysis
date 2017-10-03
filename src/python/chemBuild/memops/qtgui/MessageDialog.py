@@ -1,19 +1,19 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-Ok          = QtGui.QMessageBox.Ok
-Cancel      = QtGui.QMessageBox.Cancel
-Yes         = QtGui.QMessageBox.Yes
-No          = QtGui.QMessageBox.No
-Retry       = QtGui.QMessageBox.Retry
-Ignore      = QtGui.QMessageBox.Ignore
-Abort       = QtGui.QMessageBox.Abort
-Close       = QtGui.QMessageBox.Close
-Information = QtGui.QMessageBox.Information
-Question    = QtGui.QMessageBox.Question
-Warning     = QtGui.QMessageBox.Warning
-Critical    = QtGui.QMessageBox.Critical
-Save        = QtGui.QMessageBox.Save 
-Discard     = QtGui.QMessageBox.Discard
+Ok          = QtWidgets.QMessageBox.Ok
+Cancel      = QtWidgets.QMessageBox.Cancel
+Yes         = QtWidgets.QMessageBox.Yes
+No          = QtWidgets.QMessageBox.No
+Retry       = QtWidgets.QMessageBox.Retry
+Ignore      = QtWidgets.QMessageBox.Ignore
+Abort       = QtWidgets.QMessageBox.Abort
+Close       = QtWidgets.QMessageBox.Close
+Information = QtWidgets.QMessageBox.Information
+Question    = QtWidgets.QMessageBox.Question
+Warning     = QtWidgets.QMessageBox.Warning
+Critical    = QtWidgets.QMessageBox.Critical
+Save        = QtWidgets.QMessageBox.Save
+Discard     = QtWidgets.QMessageBox.Discard
 
 def showInfo(title, message, parent=None):
 
@@ -103,7 +103,7 @@ def showMulti(title, message, texts, objects=None, parent=None):
                          Question, parent)
   
   for text in texts:
-    dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
+    dialog.addButton(text, QtWidgets.QMessageBox.AcceptRole)
   
   index = dialog.exec_()
 
@@ -133,11 +133,11 @@ def showMessage(title, message, icon, parent=None):
   
   return
   
-class MessageDialog(QtGui.QMessageBox):
+class MessageDialog(QtWidgets.QMessageBox):
 
   def __init__(self, title, basicText, message, icon=Information, parent=None):
      
-    QtGui.QMessageBox.__init__(self, parent)
+    QtWidgets.QMessageBox.__init__(self, parent)
     
     self.setWindowTitle(title)
     self.setText(basicText)

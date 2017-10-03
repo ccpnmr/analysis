@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
@@ -73,12 +73,15 @@ class Slider(QtWidgets.QSlider, Base):
 
 
     if showNumber and not tracking:
-      self.connect(self, QtCore.SIGNAL('sliderMoved(int)'), self._redraw)
+      # self.connect(self, QtCore.PYQT_SIGNAL('sliderMoved(int)'), self._redraw)
+      self.sliderMoved.connect(self._redraw)
 
     if showNumber:
-      self.connect(self, QtCore.SIGNAL('sliderReleased()'), self.update)
+      # self.connect(self, QtCore.PYQT_SIGNAL('sliderReleased()'), self.update)
+      self.sliderReleased.connect(self.update)
 
-    self.connect(self, QtCore.SIGNAL('valueChanged(int)'), self._callback)
+    # self.connect(self, QtCore.PYQT_SIGNAL('valueChanged(int)'), self._callback)
+    self.valueChanged.connect(self._callback)
 
     if listener:
       if isinstance(listener, (set, list, tuple)):
@@ -157,9 +160,9 @@ class Slider(QtWidgets.QSlider, Base):
 
 
 
-class SliderSpinBox(QtGui.QWidget, Base):
+class SliderSpinBox(QtWidgets.QWidget, Base):
   def __init__(self,parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kw):
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
 
     if value is None:

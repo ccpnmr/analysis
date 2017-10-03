@@ -418,7 +418,7 @@ class CcpnModuleLabel(DockLabel):
 
     # Settings
     if showSettingsButton:
-      self.settingsButton = QtGui.QToolButton(self)
+      self.settingsButton = QtWidgets.QToolButton(self)
       self.settingsButton.setIcon(Icon('icons/settings'))
       self.settingsButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
       # hardcoded because stylesheet appears not to work
@@ -531,7 +531,3 @@ class CcpnModuleLabel(DockLabel):
       if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
         self.dock.startDrag()
       ev.accept()
-
-
-
-

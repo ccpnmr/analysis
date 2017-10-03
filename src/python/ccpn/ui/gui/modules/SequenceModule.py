@@ -392,7 +392,10 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     # GuiChainResidue of interest, which would then eliminate this itemAt check
     pos = event.scenePos()
     pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
-    item = self.scene.itemAt(pos)
+
+    # item = self.scene.itemAt(pos)
+    item = self.scene.itemAt(pos, QtGui.QTransform())     # ejb - pyqt5
+
     ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor(self.colour3))
@@ -411,7 +414,10 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
       colour = '#666e98'
     pos = event.scenePos()
     pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
-    item = self.scene.itemAt(pos)
+
+    # item = self.scene.itemAt(pos)
+    item = self.scene.itemAt(pos, QtGui.QTransform())     # ejb - pyqt5
+
     ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
       item.setDefaultTextColor(QtGui.QColor(colour))
@@ -436,7 +442,10 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
       colour = '#f7ffff'
     elif self.colourScheme == 'light':
       colour = '#666e98'
-    guiRes = self.scene.itemAt(event.scenePos())
+
+    # guiRes = self.scene.itemAt(event.scenePos())
+    guiRes = self.scene.itemAt(event.scenePos(), QtGui.QTransform())    # ejb - pyqt5 fix
+
     nmrChain = self.mainWindow.project.getByPid(data[0])
     selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
     residues = [guiRes.residue]

@@ -487,10 +487,13 @@ class GuiStrip(Frame):
       return
 
     position = self.viewBox.mapSceneToView(pos)
-    if self.orderedAxes[1].code == 'intensity':
+    try:
+      if self.orderedAxes[1].code == 'intensity':
+        format = "%s: %.3f  %s: %.4g"
+      else:
+        format = "%s: %.2f  %s: %.2f"
+    except:
       format = "%s: %.3f  %s: %.4g"
-    else:
-      format = "%s: %.2f  %s: %.2f"
 
     self._cursorLabel.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
@@ -534,7 +537,7 @@ class GuiStrip(Frame):
     """
     Creates and displays a popup for zooming to a region in the strip.
     """
-    zoomPopup = QtGui.QDialog()
+    zoomPopup = QtWidgets.QDialog()
 
     Label(zoomPopup, text='x1', grid=(0, 0))
     x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))

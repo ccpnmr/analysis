@@ -15,9 +15,9 @@ ExporterList = {'1D': [ImageExporter, SVGExporter, TextExporter],
                 'nD': [SVGExporter]
                 }
 
-class CustomExportDialog(QtGui.QDialog):
+class CustomExportDialog(QtWidgets.QDialog):
   def __init__(self, scene, titleName=None, spectrumDimension=None ):
-    QtGui.QDialog.__init__(self)
+    QtWidgets.QDialog.__init__(self)
     self.setVisible(False)
     self.shown = False
     self.currentExporter = None

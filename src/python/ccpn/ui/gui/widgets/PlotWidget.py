@@ -175,6 +175,9 @@ class PlotWidget(pg.PlotWidget):
     axes = strip.orderedAxes
 
     # TODO:ED sometimes set to None
+    if not axes[0] or not axes[1]:
+      return
+
     xPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))
     yPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
     #print('>>', strip, xPos, yPos)

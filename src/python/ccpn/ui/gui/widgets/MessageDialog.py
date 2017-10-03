@@ -29,29 +29,29 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.guiSettings import messageFont
 
-Ok          = QtGui.QMessageBox.Ok
-Cancel      = QtGui.QMessageBox.Cancel
-Yes         = QtGui.QMessageBox.Yes
-No          = QtGui.QMessageBox.No
-Retry       = QtGui.QMessageBox.Retry
-Ignore      = QtGui.QMessageBox.Ignore
-Abort       = QtGui.QMessageBox.Abort
-Close       = QtGui.QMessageBox.Close
-Information = QtGui.QMessageBox.Information
-Question    = QtGui.QMessageBox.Question
-Warning     = QtGui.QMessageBox.Warning
-Critical    = QtGui.QMessageBox.Critical
-Save        = QtGui.QMessageBox.Save 
-Discard     = QtGui.QMessageBox.Discard
+Ok          = QtWidgets.QMessageBox.Ok
+Cancel      = QtWidgets.QMessageBox.Cancel
+Yes         = QtWidgets.QMessageBox.Yes
+No          = QtWidgets.QMessageBox.No
+Retry       = QtWidgets.QMessageBox.Retry
+Ignore      = QtWidgets.QMessageBox.Ignore
+Abort       = QtWidgets.QMessageBox.Abort
+Close       = QtWidgets.QMessageBox.Close
+Information = QtWidgets.QMessageBox.Information
+Question    = QtWidgets.QMessageBox.Question
+Warning     = QtWidgets.QMessageBox.Warning
+Critical    = QtWidgets.QMessageBox.Critical
+Save        = QtWidgets.QMessageBox.Save
+Discard     = QtWidgets.QMessageBox.Discard
 
 
-class MessageDialog(QtGui.QMessageBox):
+class MessageDialog(QtWidgets.QMessageBox):
   """
   Base class for all dialogues
   Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
   """
   def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
-    QtGui.QMessageBox.__init__(self, parent)
+    QtWidgets.QMessageBox.__init__(self, parent)
     self.setFont(messageFont)
     self.setWindowModality(QtCore.Qt.WindowModal)
 
@@ -76,7 +76,7 @@ def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog = MessageDialog('Information', title, message, Information, iconPath, parent)
   dialog.setStandardButtons(Ok)
 
-  #dialog = QtGui.QMessageBox.information(parent, title, message)
+  #dialog = QtWidgets.QMessageBox.information(parent, title, message)
   dialog.raise_()
   dialog.exec_()
   return 
@@ -181,7 +181,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
   
   for text in texts:
-    dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
+    dialog.addButton(text, QtWidgets.QMessageBox.AcceptRole)
   
   dialog.raise_()
   index = dialog.exec_()

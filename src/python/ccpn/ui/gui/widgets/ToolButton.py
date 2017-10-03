@@ -29,18 +29,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class ToolButton(QtGui.QToolButton):
+class ToolButton(QtWidgets.QToolButton):
 
   def __init__(self, parent=None, spectrumView=None):
     
-    QtGui.QToolButton.__init__(self, parent.spectrumToolBar)
+    QtWidgets.QToolButton.__init__(self, parent.spectrumToolBar)
     self.spectrumView = spectrumView
     pix=QtGui.QPixmap(120, 10)
     if spectrumView.spectrum.dimensionCount < 2:
       pix.fill(QtGui.QColor(spectrumView.sliceColour))
     else:
       pix.fill(QtGui.QColor(spectrumView.positiveContourColour))
-    # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtGui.QToolButton)
+    # spectrumItem.newAction = self.spectrumToolbar.addAction(spectrumItem.name, QtWidgets.QToolButton)
     # self.spaction = parent.spectrumToolBar.addAction(spectrumView.spectrum.name)#, self)
     # newIcon = QtGui.QIcon(pix)
     # self.spaction.setIcon(newIcon)

@@ -40,12 +40,10 @@ class Action(Base, QtWidgets.QAction):
     if translate:
       text = translator.translate(text)
 
-    QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
-
     if shortcut:
       if type(shortcut) == type(''):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
-        QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
+      QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
       self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
     # elif icon:
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)

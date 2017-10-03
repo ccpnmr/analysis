@@ -45,7 +45,7 @@ from ccpn.util import Register
 
 licenseUrl = ccpnUrl + '/license'
 
-# class RegisterPopup(QtGui.QDialog):
+# class RegisterPopup(QtWidgets.QDialog):
 class RegisterPopup(CcpnDialog):
   def __init__(self, parent=None, version='3', title='Register with CCPN', modal=False, **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)

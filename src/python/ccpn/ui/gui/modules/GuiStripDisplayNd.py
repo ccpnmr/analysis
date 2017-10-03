@@ -139,8 +139,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
-        spectrumView.rebuildContours()
-        # spectrumView.update()
+        # spectrumView.rebuildContours()
+        spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -192,8 +192,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-        spectrumView.rebuildContours()
-        # spectrumView.update()
+        # spectrumView.rebuildContours()
+        spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -243,8 +243,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour count - change that one only
           spectrumView.negativeContourCount += 1
 
-        spectrumView.rebuildContours()
-        # spectrumView.update()
+        # spectrumView.rebuildContours()
+        spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(
@@ -298,8 +298,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           if spectrumView.negativeContourCount:
             spectrumView.negativeContourCount -= 1
 
-        spectrumView.rebuildContours()
-        # spectrumView.update()
+        # spectrumView.rebuildContours()
+        spectrumView.update()
 
         mainWindow = self.mainWindow
         mainWindow.pythonConsole.writeConsoleCommand(

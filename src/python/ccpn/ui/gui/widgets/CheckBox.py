@@ -48,8 +48,8 @@ class CheckBox(QtWidgets.QCheckBox, Base):
     return self.isChecked()
 
   def setCallback(self, callback):
-    self.connect(self, QtCore.SIGNAL('clicked()'), callback)
-
+    # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+    self.clicked.connect(callback)
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

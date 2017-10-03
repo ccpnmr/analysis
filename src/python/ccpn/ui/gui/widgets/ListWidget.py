@@ -58,7 +58,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     QtWidgets.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+    self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
 
     self.setAcceptDrops(acceptDrops)
     self.contextMenu = contextMenu
@@ -75,9 +75,9 @@ class ListWidget(QtWidgets.QListWidget, Base):
       self.itemClicked.connect(callback)
 
     if self.multiSelect:
-      self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+      self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
     else:
-      self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+      self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
     self.contextMenuItem = 'Delete'
     self.currentContextMenu = self.getContextMenu

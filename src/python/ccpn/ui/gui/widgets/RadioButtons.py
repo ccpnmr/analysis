@@ -22,11 +22,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from PyQt5 import QtGui, QtWidgets, QtCore
-
 from ccpn.ui.gui.widgets.Base import Base
-
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
 
 
@@ -47,7 +44,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
     self.texts = texts
     direction = direction.lower()
-    buttonGroup = self.buttonGroup = QtGui.QButtonGroup(self)
+    buttonGroup = self.buttonGroup = QtWidgets.QButtonGroup(self)
     buttonGroup.setExclusive(True)
 
     if not tipTexts:
@@ -70,7 +67,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
     if selectedInd is not None:
       self.radioButtons[selectedInd].setChecked(True)
 
-    buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    buttonGroup.buttonClicked.connect(self._callback)
 
     self.setCallback(callback)
 
@@ -95,10 +93,10 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
     self.callback = callback
 
-  def _callback(self, ind):
+  def _callback(self, button):
 
-    if self.callback and ind >= 0:
-      button = self.buttonGroup.buttons()[ind]
+    if self.callback and button:
+      # button = self.buttonGroup.buttons[ind]
       self.callback()
 
 

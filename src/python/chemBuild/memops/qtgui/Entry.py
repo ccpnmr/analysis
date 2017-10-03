@@ -16,12 +16,12 @@ MAXINT = 2**31-1
 INFINITY = float('Inf')
 
 
-class Entry(QtGui.QLineEdit, Base):
+class Entry(QtWidgets.QLineEdit, Base):
 
   def __init__(self, parent, text='', callback=None, maxLength=32, 
                listener=None, stripEndWhitespace=True, **kw):
     
-    QtGui.QLineEdit.__init__(self, parent)
+    QtWidgets.QLineEdit.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.setText(self.convertInput(text))

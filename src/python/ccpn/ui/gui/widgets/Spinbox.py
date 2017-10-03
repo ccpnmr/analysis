@@ -47,7 +47,7 @@ class Spinbox(QtGui.QSpinBox, Base):
     Base.__init__(self, **kw)
 
     if showButtons is False:
-      self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+      self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
 
 if __name__ == '__main__':

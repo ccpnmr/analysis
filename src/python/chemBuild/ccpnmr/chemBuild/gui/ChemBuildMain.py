@@ -460,7 +460,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     label.setAlignment(alignment)
     layout.addWidget(label)
     
-    self.compNameEdit = box = QtGui.QLineEdit(self)
+    self.compNameEdit = box = QtWidgets.QLineEdit(self)
     box.textChanged.connect(self.changeCompName)
     layout.addWidget(box)
     
@@ -469,7 +469,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     label.setAlignment(alignment)
     layout.addWidget(label)
     
-    self.ccpCodeEdit = box = QtGui.QLineEdit(frame)
+    self.ccpCodeEdit = box = QtWidgets.QLineEdit(frame)
     box.textChanged.connect(self.changeCcpCode)
     layout.addWidget(box)
     

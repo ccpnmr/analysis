@@ -103,7 +103,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     #self.scene.addItem(self.selectionBox)
 
     self.editAtom = None
-    self.editWidget = QtGui.QLineEdit()
+    self.editWidget = QtWidgets.QLineEdit()
     self.editWidget.setMaxLength(8)
     self.editWidget.resize(50, 30)
 

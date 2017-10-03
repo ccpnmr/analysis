@@ -4,11 +4,11 @@ from PyQt5 import QtGui, QtWidgets
 
 from .Base import Base
 
-class ScrolledFrame(QtGui.QScrollArea, Base):
+class ScrolledFrame(QtWidgets.QScrollArea, Base):
 
   def __init__(self, parent=None, minSize=(300,600), **kw):
 
-    QtGui.QScrollArea.__init__(self, parent)
+    QtWidgets.QScrollArea.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     frame = QtWidgets.QWidget(self)

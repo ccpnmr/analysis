@@ -23,13 +23,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWebKit import QWebView
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
-class CcpnWebView(QWebView):
+class CcpnWebView(QWebEngineView):
 
   def __init__(self, urlPath, parent=None):
-
-    QWebView.__init__(self, parent)
+    QWebEngineView.__init__(self, parent)
     self.load(QUrl(urlPath))
     self.show()
+
+    QWebEngineView.__init__(self)
+    self.html = None
+    self.loadFinished.connect(self._loadFinished)
+    self.setHtml(html)
+

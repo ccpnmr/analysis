@@ -8,7 +8,7 @@ class PrintDialog(QtGui.QPrintDialog):
     
     QtGui.QPrintDialog.__init__(self, parent)
     
-    self.setOption(QtGui.QAbstractPrintDialog.PrintToFile)
+    self.setOption(QtWidgets.QAbstractPrintDialog.PrintToFile)
     
   def getPrinter(self):
   

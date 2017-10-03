@@ -58,7 +58,7 @@ class GeneralTab(QtWidgets.QWidget):
         super(GeneralTab, self).__init__(parent)
 
         fileNameLabel = QtWidgets.QLabel("File Name:")
-        fileNameEdit = QtGui.QLineEdit(fileInfo.fileName())
+        fileNameEdit = QtWidgets.QLineEdit(fileInfo.fileName())
 
         pathLabel = QtWidgets.QLabel("Path:")
         pathValueLabel = QtWidgets.QLabel(fileInfo.absoluteFilePath())

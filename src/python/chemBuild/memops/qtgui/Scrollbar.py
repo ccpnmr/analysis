@@ -11,13 +11,13 @@ Antialiasing = QPainter.Antialiasing
 PEN = QtGui.QColor('#000000')
 BRUSH = QtGui.QColor(255, 255, 255, 128)
 
-class Scrollbar(QtGui.QScrollBar, Base):
+class Scrollbar(QtWidgets.QScrollBar, Base):
 
   def __init__(self, parent, startVal=0, endVal=100, loValue=None, hiValue=None,
                isVertical=False, callback=None, tracking=True,
                isInverted=False, **kw):
     
-    QtGui.QScrollBar.__init__(self, parent)
+    QtWidgets.QScrollBar.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.setInvertedAppearance(isInverted)
@@ -77,7 +77,7 @@ class Scrollbar(QtGui.QScrollBar, Base):
       startVal, endVal = endVal, startVal
     
     self.range = (startVal, endVal)    
-    QtGui.QScrollBar.setRange(self, startVal, endVal)
+    QtWidgets.QScrollBar.setRange(self, startVal, endVal)
   
   def set(self, lo, hi):
     

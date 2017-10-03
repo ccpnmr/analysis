@@ -123,7 +123,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     self.multiSelect = multiSelect
     if self.multiSelect:
-      self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+      self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
     self.mainWindow = parent                      # ejb - needed for moduleArea
     self.application = self.mainWindow.application
@@ -523,7 +523,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     for lItem in list:
       items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
       for item in items:
-        self.setItemExpanded(item, list[lItem])
+        # self.setItemExpanded(item, list[lItem])
+        self.expandItem(item)   #, list[lItem])
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
@@ -554,7 +555,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
 
-  def _findItems(self, objPid:str) -> list:     #QtWidgets.QTreeWidgetItem
+  def _findItems(self, objPid:str) -> list:     #QtGui.QTreeWidgetItem
     """Find items that match objPid - returns empty list if no matches"""
 
     if objPid[:2] in classesInSideBar:
@@ -710,6 +711,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # else:
     # if self.multiSelect:
     #   self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+
+    event.accept()
     super(SideBar, self).mousePressEvent(event)
 
   def _mouseReleaseEvent(self, event):

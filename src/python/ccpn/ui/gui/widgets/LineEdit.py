@@ -37,13 +37,13 @@ TextAligment = {
                 'r': QtCore.Qt.AlignRight
                 }
 
-class LineEdit(QtGui.QLineEdit, Base):
+class LineEdit(QtWidgets.QLineEdit, Base):
 
   def __init__(self, parent, text='', textAligment='c', minimumWidth=100, textColor=None, **kw):
 
     #text = translator.translate(text)
 
-    QtGui.QLineEdit.__init__(self, text, parent)
+    QtWidgets.QLineEdit.__init__(self, text, parent)
     Base.__init__(self, **kw)
 
     if textColor:

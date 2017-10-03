@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
-#from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -188,6 +188,8 @@ class GuiSpectrumDisplay(CcpnModule):
       self._stripFrameScrollArea.setWidget(self.stripFrame)
       self._stripFrameScrollArea.setWidgetResizable(True)
       self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
+      self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                    QtWidgets.QSizePolicy.MinimumExpanding)
     else:
       self.qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
 

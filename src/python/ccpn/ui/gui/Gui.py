@@ -381,9 +381,8 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     self.application = project._appBase
     self._appBase = project._appBase
 
-    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                      name=self._wrappedData.name
-                                )
+    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow
+                                , name=self._wrappedData.name)
     self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
                                                         , relativeTo=self.application.ui.mainWindow.moduleArea)
 #old name

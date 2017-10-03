@@ -452,9 +452,11 @@ class GuiPipe(Dock, DockDrop):
     spectrumGroups = list(self.spectrumGroups)
     if len(spectrumGroups)>0:
       for widgetVariable in widgetVariables:
-
+        selected = _getWidgetByAtt(self, widgetVariable).get()
+        print(selected)
         _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
                         headerText = headerText, headerEnabled = headerEnabled, headerIcon=headerIcon)
+        _getWidgetByAtt(self, widgetVariable).select(selected)
 
     else:
       for widgetVariable in widgetVariables:

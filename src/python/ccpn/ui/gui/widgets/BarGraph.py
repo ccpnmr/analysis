@@ -210,7 +210,7 @@ class CustomViewBox(pg.ViewBox):
     self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
     self.selectionBox.setZValue(1e9)
     self.addItem(self.selectionBox, ignoreBounds=True)
-    # self.selectionBox.hide()
+    self.selectionBox.hide()
 
   def wheelEvent(self, ev, axis=None):
     if (self.viewRange()[0][1] - self.viewRange()[0][0]) >= 10.001:

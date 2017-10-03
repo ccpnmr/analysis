@@ -14,6 +14,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours
@@ -123,8 +124,7 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
 
     if self.application:
-      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, xValues=[0],
-                                           yValues=[0], objects=[0], grid=(0, 0))
+      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid=(0, 0))
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
@@ -137,24 +137,32 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setSettingsWidgets(self):
-    self.settingFrame = Frame(self, setLayout=False)
-    self.settingWidgetsLayout = QtGui.QGridLayout()
-    self.settingFrame.setLayout(self.settingWidgetsLayout)
-    self.settingsWidget.getLayout().addWidget(self.settingFrame)
-    self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
-    self.settingsWidget.getLayout().setContentsMargins(1, 1, 1, 1)
-    self.settingWidgetsLayout.setContentsMargins(10, 10, 1, 15) #l,t,r,b
-    self.settingFrame.setMaximumWidth(340)
-    self._settingsScrollArea.setMaximumWidth(340)
+
+    self.scrollArea = ScrollArea(self, setLayout=False, )
+    self.scrollArea.setWidgetResizable(True)
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
+    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+    self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.settingsWidget.getLayout().addWidget(self.scrollArea)
+
+    # self.settingFrame = Frame(self, setLayout=False)
+    # self.settingWidgetsLayout = QtGui.QGridLayout()
+    # self.settingFrame.setLayout(self.settingWidgetsLayout)
+    # self.settingsWidget.getLayout().addWidget(self.settingFrame)
+    # self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
+    # self.settingsWidget.getLayout().setContentsMargins(1, 1, 1, 1)
+    # self.settingWidgetsLayout.setContentsMargins(10, 10, 1, 15) #l,t,r,b
+    # self.settingFrame.setMaximumWidth(340)
+    # self._settingsScrollArea.setMaximumWidth(340)
 
     # self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
     i = 0
-    self.inputLabel = Label(self.settingFrame, text='Select Data Input', grid=(i, 0), vAlign='t')
-    self.spectraSelectionWidget = SpectraSelectionWidget(self.settingFrame, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(i,1))
-    i += 1
-    self.atomLabel = Label(self.settingFrame,text='Select Atoms', grid=(i,0))
+    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
+    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1))
+    i += 2
+    self.atomLabel = Label(self.scrollAreaWidgetContents,text='Select Atoms', grid=(i,0))
     for atom in sorted(self.atoms, key=CcpnSorting.stringSortKey):
-      self.atomCheckBox = CheckBox(self.settingFrame, text=atom, checked=True, grid=(i,1))
+      self.atomCheckBox = CheckBox(self.scrollAreaWidgetContents, text=atom, checked=True, grid=(i,1))
       if atom in DefaultAtoms:
         self.atomCheckBox.setChecked(True)
       else:
@@ -162,11 +170,11 @@ class ChemicalShiftsMapping(CcpnModule):
       self.atomCheckBoxes.append(self.atomCheckBox)
       i += 1
 
-    self.thresholdLAbel = Label(self.settingFrame, text='Threshold value', grid=(i, 0))
-    self.thresholdSpinBox = DoubleSpinbox(self.settingFrame, value=DefaultThreshould, decimals=3, grid=(i, 1))
+    self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
+    self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, decimals=3, grid=(i, 1))
     i += 1
-    self.aboveThresholdColourLabel =  Label(self.settingFrame,text='Above Threshold Colour', grid=(i,0))
-    self.aboveThresholdColourBox = PulldownList(self.settingFrame,  grid=(i, 1))
+    self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
+    self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents,  grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
@@ -174,15 +182,15 @@ class ChemicalShiftsMapping(CcpnModule):
     self.aboveThresholdColourBox.select(list(spectrumColours.values())[-1])
 
     i += 1
-    self.belowThresholdColourLabel = Label(self.settingFrame, text='Below Threshold Colour', grid=(i, 0))
-    self.belowThresholdColourBox = PulldownList(self.settingFrame, grid=(i, 1))
+    self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
+    self.belowThresholdColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
     for item in spectrumColours.items():
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     self.belowThresholdColourBox.setCurrentIndex(0)
     i += 1
-    self.updateButton = Button(self.settingFrame, text='Update All', callback=self.updateModule, grid=(i, 1))
+    self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule, grid=(i, 1))
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)

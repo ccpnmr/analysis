@@ -272,6 +272,12 @@ class Framework:
     self.updatePopup = None
 
 
+  def _testShortcuts0(self):
+    print('>>> Testing shortcuts0')
+
+  def _testShortcuts1(self):
+    print('>>> Testing shortcuts1')
+
   def start(self):
     """Start the program execution"""
 

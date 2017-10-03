@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import os
-from functools import reduce
+from functools import reduce, partial
 
 from PyQt4 import QtGui
 
@@ -36,8 +36,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Base import Base             # ejb
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
+from ccpn.util.Logging import getLogger
 
 
 class ShortcutModule(CcpnDialog):
@@ -54,7 +54,7 @@ class ShortcutModule(CcpnDialog):
     self.scrollArea = ScrollArea(self, grid=(0, 0), gridSpan=(1, 2), setLayout=True)   # ejb
 
     # self.shortcutWidget = ShortcutWidget(self, mainWindow)
-    self.shortcutWidget = ShortcutWidget(self, mainWindow, setLayout=True)      # ejb
+    self.shortcutWidget = ShortcutWidget(mainWindow=mainWindow, setLayout=True)      # ejb
     self.scrollArea.setWidgetResizable(True)
     self.scrollArea.setWidget(self.shortcutWidget)
     self.buttonList = ButtonList(self, grid=(1, 1),
@@ -72,7 +72,9 @@ class ShortcutModule(CcpnDialog):
   def save(self):
     newShortcuts = self.shortcutWidget.getShortcuts()
     self.preferences.shortcuts = newShortcuts
-
+    if hasattr(self.application, '_userShortcuts') and self.application._userShortcuts:
+      for shortcut in newShortcuts:
+        self.application._userShortcuts.addUserShortcut(shortcut, newShortcuts[shortcut])
 
   def saveAndQuit(self):
     self.save()
@@ -82,8 +84,8 @@ class ShortcutModule(CcpnDialog):
 class ShortcutWidget(ScrollableFrame):
 
   # def __init__(self, parent, mainWindow, **kw):
-  def __init__(self, mainWindow, parent=None, **kw):           # ejb
-    ScrollableFrame.__init__(self, setLayout=True)
+  def __init__(self, mainWindow=None, setLayout=True):           # ejb
+    ScrollableFrame.__init__(self, setLayout=setLayout)
     from functools import partial
     self.mainWindow = mainWindow
     self.application = self.mainWindow.application
@@ -162,5 +164,37 @@ class ShortcutWidget(ScrollableFrame):
           return False
 
 
+class UserShortcuts():
+  def __init__(self, mainWindow=None):
+    self.mainWindow = mainWindow
+    self.namespace = self.mainWindow.namespace
+    self._userShortcutFunctions={}
+    self._numUserShortcutFunctions=0
 
+  def addUserShortcut(self, funcName, funcStr):
+    self._userShortcutFunctions[funcName] = funcStr
 
+  def runUserShortcut(self, funcStr):
+    if funcStr in self._userShortcutFunctions:
+      function = self._userShortcutFunctions[funcStr]
+
+      if funcStr and function:
+        if function.split('(')[0] == 'runMacro':
+          func = partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0])
+          if func:
+            getLogger().info(function)
+            func()
+
+          # QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
+          #                 self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]),
+          #                 context=context)
+
+        else:
+          stub = self.namespace.get(function.split('.')[0])
+          func = reduce(getattr, function.split('.')[1:], stub)
+          if func:
+            getLogger().info(function)
+            func()
+
+          # QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+          #                 reduce(getattr, function.split('.')[1:], stub), context=context)

@@ -10,14 +10,12 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b2 $"
-
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +24,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 from PyQt4 import QtCore, QtGui
 
@@ -39,12 +36,13 @@ from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui import guiSettings
-
+from ccpn.util.Logging import getLogger
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
 # _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
 # The latter should all be private methods!
+
 
 class GuiWindow():
   
@@ -88,22 +86,37 @@ class GuiWindow():
 
 
 
-  def setUserShortcuts(self, preferences=None):
+  def setUserShortcuts(self, preferences=None, mainWindow=None):
 
     from functools import reduce, partial
+    from ccpn.ui.gui.modules.ShortcutModule import UserShortcuts
+
+    # TODO:ED fix this circular link
+    self.application._userShortcuts = UserShortcuts(mainWindow=mainWindow)   # set a new set of shortcuts
 
     context = QtCore.Qt.ApplicationShortcut
     userShortcuts = preferences.shortcuts
     for shortcut, function in userShortcuts.items():
 
-      if function.split('(')[0] == 'runMacro':
-        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
-                  self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]), context=context)
+      try:
+        self.application._userShortcuts.addUserShortcut(shortcut, function)
 
-      else:
-        stub = self.namespace.get(function.split('.')[0])
         QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
-                        reduce(getattr, function.split('.')[1:], stub), context=context)
+                            partial(UserShortcuts.runUserShortcut, self.application._userShortcuts, shortcut))
+      except:
+        getLogger().warning('Error setting user shortcuts function')
+
+      # if function.split('(')[0] == 'runMacro':
+      #   QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
+      #             self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]), context=context)
+      #
+      # else:
+      #   stub = self.namespace.get(function.split('.')[0])
+      #   try:
+      #     QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+      #                     reduce(getattr, function.split('.')[1:], stub), context=context)
+      #   except:
+      #     getLogger().warning('Function cannot be found')
 
   def deleteSelectedPeaks(self, parent=None):
 

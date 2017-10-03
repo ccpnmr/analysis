@@ -51,7 +51,7 @@ class TestExtensionClass(unittest.TestCase):
 
 
 import sys
-from PyQt4.QtGui import QApplication
+from PyQt5.QtGui import QApplication
 from ccpn.framework.lib.Extension import GuiModule
 class TestExtensionGuiBox(unittest.TestCase):
 

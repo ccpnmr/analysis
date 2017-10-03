@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # import importlib, os
 
-#from PyQt4 import QtGui, QtCore
+#from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak

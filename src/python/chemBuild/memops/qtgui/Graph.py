@@ -2,7 +2,7 @@ import sys
 
 from math import sin, cos
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -32,7 +32,7 @@ HEXAGON = 'hexagon'
 NULL_RECT = QRectF()
 NULL_POINT = QPointF()
 
-QApp = QtGui.QApplication.instance
+QApp = QtWidgets.QApplication.instance
 
 PI = 3.1415926535898
 INF = float('inf')
@@ -41,10 +41,10 @@ BOX_COLOR_FG = QtGui.QColor( 128, 128, 128, 128)
 BOX_COLOR_BG = QtGui.QColor( 255, 255, 255, 192)
 CROSSHAIR_COLOR = QtGui.QColor( 32, 32, 128, 192)
 
-ItemIsMovable = QtGui.QGraphicsItem.ItemIsMovable
-ItemPositionChange = QtGui.QGraphicsItem.ItemPositionChange
-#ItemIsSelectable = QtGui.QGraphicsItem.ItemIsSelectable
-#ItemSendsGeometryChanges = QtGui.QGraphicsItem.ItemSendsGeometryChanges
+ItemIsMovable = QtWidgets.QGraphicsItem.ItemIsMovable
+ItemPositionChange = QtWidgets.QGraphicsItem.ItemPositionChange
+#ItemIsSelectable = QtWidgets.QGraphicsItem.ItemIsSelectable
+#ItemSendsGeometryChanges = QtWidgets.QGraphicsItem.ItemSendsGeometryChanges
 
 # # # # #  T O  D O  # # # # #
 #
@@ -52,11 +52,11 @@ ItemPositionChange = QtGui.QGraphicsItem.ItemPositionChange
 # Error scalable circles
 
 
-class DataSetItem(QtGui.QGraphicsItem):
+class DataSetItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent, dataSet=None):
     
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     self.setZValue(1)
     self.parent = parent
     self.drawData = None
@@ -343,11 +343,11 @@ class DataSetItem(QtGui.QGraphicsItem):
           drawLine(pointU-sx, pointU+sx)
           drawLine(pointL-sx, pointL+sx)
 
-class AxisItem(QtGui.QGraphicsItem):
+class AxisItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent, axis=None, isVertical=False, secondAxis=False):
     
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     self.setZValue(0)
     self.parent = parent
     self.drawData = None
@@ -611,11 +611,11 @@ class AxisItem(QtGui.QGraphicsItem):
 
       
       
-class CrosshairItem(QtGui.QGraphicsItem):
+class CrosshairItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent):
     
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     self.setZValue(2)
     self.parent = parent
     self.drawData = (NULL_POINT, NULL_POINT)
@@ -649,11 +649,11 @@ class CrosshairItem(QtGui.QGraphicsItem):
 
     painter.drawLine(startPoint, endPoint)
     
-class CoordsItem(QtGui.QGraphicsItem):
+class CoordsItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent):
     
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     self.setZValue(2)
     self.parent = parent
     self.textBox = NULL_RECT
@@ -690,7 +690,7 @@ class CoordsItem(QtGui.QGraphicsItem):
     #  y = value.y()
     #  # self.update()
       
-    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    return QtWidgets.QGraphicsItem.itemChange(self, change, value)
     
   def set(self, vals=None):
     
@@ -733,11 +733,11 @@ class CoordsItem(QtGui.QGraphicsItem):
     painter.setPen(Qt.black)
     painter.drawText(self.textBox.bottomLeft(), self.text)
     
-class LegendItem(QtGui.QGraphicsItem):
+class LegendItem(QtWidgets.QGraphicsItem):
         
   def __init__(self, parent, dataSets=None):
     
-    QtGui.QGraphicsItem.__init__(self)
+    QtWidgets.QGraphicsItem.__init__(self)
     self.setZValue(2)
     self.parent = parent
     self.region = NULL_RECT
@@ -772,7 +772,7 @@ class LegendItem(QtGui.QGraphicsItem):
     #  y = value.y()
     #  # self.update()
       
-    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    return QtWidgets.QGraphicsItem.itemChange(self, change, value)
     
   def set(self, dataSets):
     
@@ -1002,7 +1002,7 @@ DEFAULT_COLORS = ['#800000','#000080',
                   '#808080','#000000',
                   '#804000','#004080']
                  
-class Graph(QtGui.QGraphicsView, Base):
+class Graph(QtWidgets.QGraphicsView, Base):
   
   linePlot = LINE
   scatterPlot = SCATTER
@@ -1013,7 +1013,7 @@ class Graph(QtGui.QGraphicsView, Base):
   def __init__(self, parent, axes, dataSets=None, title=None, size=(400, 300), zoom=1.0,
                showCoords=True, callback=None, motionCallback=None, showLegend=True, **kw):
     
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
  
     self.axes = axes
@@ -1040,14 +1040,14 @@ class Graph(QtGui.QGraphicsView, Base):
       
     self.setMinimumSize(*size)
     self.setRenderHint(QtGui.QPainter.Antialiasing)
-    #self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
+    #self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
     
-    self.setResizeAnchor(QtGui.QGraphicsView.NoAnchor)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-    #self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+    self.setResizeAnchor(QtWidgets.QGraphicsView.NoAnchor)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
+    #self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
     #self.setInteractive(True)
 
-    self.graphicsScene = QtGui.QGraphicsScene(self)
+    self.graphicsScene = QtWidgets.QGraphicsScene(self)
     #self.setSceneRect(self.viewport().rect())
     self.setScene(self.graphicsScene)   
     self.contextMenu = self.configMenu()
@@ -1186,7 +1186,7 @@ class Graph(QtGui.QGraphicsView, Base):
 
     self.refresh()
   
-    return QtGui.QGraphicsView.update(self)
+    return QtWidgets.QGraphicsView.update(self)
    
   def popupContextMenu(self, pos):
     
@@ -1370,7 +1370,7 @@ class Graph(QtGui.QGraphicsView, Base):
 
   def mouseDoubleClickEvent(self, event):
     
-    QtGui.QGraphicsView.mouseDoubleClickEvent(self, event)
+    QtWidgets.QGraphicsView.mouseDoubleClickEvent(self, event)
     
     if self.callback:
       pos = self.mapToScene(event.pos())
@@ -1386,7 +1386,7 @@ class Graph(QtGui.QGraphicsView, Base):
         
   def mousePressEvent(self, event):
    
-    QtGui.QGraphicsView.mousePressEvent(self, event)
+    QtWidgets.QGraphicsView.mousePressEvent(self, event)
     
     # deal with inconsistency in Qt versions for button naming
     try:
@@ -1407,7 +1407,7 @@ class Graph(QtGui.QGraphicsView, Base):
 
   def mouseMoveEvent(self, event):
     
-    QtGui.QGraphicsView.mouseMoveEvent(self, event)
+    QtWidgets.QGraphicsView.mouseMoveEvent(self, event)
     
     if self.movePos:
       x0, y0 = self.movePos
@@ -1440,7 +1440,7 @@ class Graph(QtGui.QGraphicsView, Base):
     
     self.movePos = None
     
-    return QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+    return QtWidgets.QGraphicsView.mouseReleaseEvent(self, event)
   
   def coordsOff(self):
     
@@ -1457,14 +1457,14 @@ class Graph(QtGui.QGraphicsView, Base):
     
   def leaveEvent(self, event):
     
-    QtGui.QGraphicsView.leaveEvent(self, event)
+    QtWidgets.QGraphicsView.leaveEvent(self, event)
     self.coordsOff()
     
     # Popdown menu?
 
   def enterEvent(self, event):
   
-    QtGui.QGraphicsView.enterEvent(self, event)    
+    QtWidgets.QGraphicsView.enterEvent(self, event)
     
 
   def drawVerticalLines(self, positions):

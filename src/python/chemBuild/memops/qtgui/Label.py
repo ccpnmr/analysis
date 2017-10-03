@@ -1,14 +1,14 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 
 from .Base import Base
 
 
-class Label(QtGui.QLabel, Base):
+class Label(QtWidgets.QLabel, Base):
 
   def __init__(self, parent, text='', align=None, textColor=None, **kw):
 
-    QtGui.QLabel.__init__(self, text, parent=None)
+    QtWidgets.QLabel.__init__(self, text, parent=None)
     Base.__init__(self, parent, **kw)
     
     if align:
@@ -56,7 +56,7 @@ if __name__ == '__main__':
   import sys
   app = Application()
   
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
  
   label = Label(window, text='Hello world', textColor='red', grid=(0,0))
   button = Button(window, text='Click me', command=func, grid=(0,1))

@@ -1,7 +1,7 @@
 from math import atan2, sin, cos, sqrt, degrees, radians, hypot
 PI = 3.1415926535898
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpnmr.chemBuild.model.Bond import Bond, BOND_TYPE_VALENCES, BOND_STEREO_DICT
 
@@ -32,10 +32,10 @@ AURA_COLOR = QtGui.QColor(255,255,255)
 AURA_OFFSET = (0,0)
 AURA_RADIUS = 4
 
-ItemIsMovable = QtGui.QGraphicsItem.ItemIsMovable
-ItemIsSelectable = QtGui.QGraphicsItem.ItemIsSelectable
-ItemPositionChange = QtGui.QGraphicsItem.ItemPositionChange
-ItemSendsGeometryChanges = QtGui.QGraphicsItem.ItemSendsGeometryChanges
+ItemIsMovable = QtWidgets.QGraphicsItem.ItemIsMovable
+ItemIsSelectable = QtWidgets.QGraphicsItem.ItemIsSelectable
+ItemPositionChange = QtWidgets.QGraphicsItem.ItemPositionChange
+ItemSendsGeometryChanges = QtWidgets.QGraphicsItem.ItemSendsGeometryChanges
 
 REGION_PEN = QtGui.QPen(HIGHLIGHT, 0.8, Qt.SolidLine)
 
@@ -47,13 +47,13 @@ BOND_CHANGE_DICT = {'single':'double',
                     'triple':'single',
                     'dative':'single'}
 
-class AtomLabel(QtGui.QGraphicsItem):
+class AtomLabel(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, atomView, compoundView, atom):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     
-    #effect = QtGui.QGraphicsDropShadowEffect(compoundView)
+    #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     #effect.setBlurRadius(SHADOW_RADIUS)
     #effect.setColor(SHADOW_COLOR)
     #effect.setOffset(*SHADOW_OFFSET)
@@ -92,7 +92,7 @@ class AtomLabel(QtGui.QGraphicsItem):
     
     self.compoundView.queryAtomName(self)
     
-    return QtGui.QGraphicsItem.mouseDoubleClickEvent(self, event)
+    return QtWidgets.QGraphicsItem.mouseDoubleClickEvent(self, event)
     
   def syncLabel(self):
     
@@ -165,7 +165,7 @@ class AtomLabel(QtGui.QGraphicsItem):
       painter.setFont(ELEMENT_FONT)
       if self.hover:
         painter.setPen(Qt.white)
-      elif not isinstance(self.compoundView, QtGui.QGraphicsItem):
+      elif not isinstance(self.compoundView, QtWidgets.QGraphicsItem):
         if self.compoundView.backgroundColor == Qt.darkGray:
           painter.setPen(ATOM_NAME_FG)
         else:
@@ -175,11 +175,11 @@ class AtomLabel(QtGui.QGraphicsItem):
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
 
 
-class SelectionBox(QtGui.QGraphicsItem):
+class SelectionBox(QtWidgets.QGraphicsItem):
         
   def __init__(self, scene, compoundView):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     self.setZValue(1)
     self.compoundView = compoundView
     self.begin = None
@@ -220,11 +220,11 @@ class SelectionBox(QtGui.QGraphicsItem):
       painter.setBrush(HIGHLIGHT_BG)
       painter.drawRect( self.region )
   
-class AtomGroupItem(QtGui.QGraphicsItem):
+class AtomGroupItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atomGroup):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     
     compoundView.groupItems[atomGroup] = self
     
@@ -429,11 +429,11 @@ class AromaticItem(AtomGroupItem):
     painter.drawEllipse(center, r1, r2)
     
 
-class AtomItem(QtGui.QGraphicsItem):
+class AtomItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atom):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     
     compoundView.atomViews[atom] = self
     
@@ -459,7 +459,7 @@ class AtomItem(QtGui.QGraphicsItem):
     self.gradient2.setColorAt(1, color.darker().darker())
     self.gradient2.setColorAt(0.5, color.darker())
     self.gradient2.setColorAt(0, color)
-    #effect = QtGui.QGraphicsDropShadowEffect(compoundView)
+    #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     #effect.setBlurRadius(SHADOW_RADIUS)
     #effect.setColor(SHADOW_COLOR)
     #effect.setOffset(*SHADOW_OFFSET)
@@ -559,7 +559,7 @@ class AtomItem(QtGui.QGraphicsItem):
           if len(prefAngles) < 2:# or self.atom.atomInSameRing(prevAtom):
             value.setX(x0)
             value.setY(y0)
-            return QtGui.QGraphicsItem.itemChange(self, change, value)
+            return QtWidgets.QGraphicsItem.itemChange(self, change, value)
           
           prevAngle = radians(prevAngle)
           currAngle = (prevAtom.getBondAngle(self.atom) - prevAngle) % (2.0*PI)
@@ -582,7 +582,7 @@ class AtomItem(QtGui.QGraphicsItem):
           if abs(bestAngle - currAngle) < 0.001:
             value.setX(x0)
             value.setY(y0)
-            return QtGui.QGraphicsItem.itemChange(self, change, value)
+            return QtWidgets.QGraphicsItem.itemChange(self, change, value)
 
           bestAngle += prevAngle
           if self.atom.element == 'H':
@@ -681,7 +681,7 @@ class AtomItem(QtGui.QGraphicsItem):
       
       self.atomLabel.syncLabel()
       
-    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    return QtWidgets.QGraphicsItem.itemChange(self, change, value)
     
   def moveAtom(self, coords):
     
@@ -849,7 +849,7 @@ class AtomItem(QtGui.QGraphicsItem):
 
   def mousePressEvent(self, event):
      
-    QtGui.QGraphicsItem.mousePressEvent(self, event)
+    QtWidgets.QGraphicsItem.mousePressEvent(self, event)
       
     selected = list(self.compoundView.selectedViews)
     
@@ -881,7 +881,7 @@ class AtomItem(QtGui.QGraphicsItem):
       if not self.selected:
         self.select()
     
-    QtGui.QGraphicsItem.mouseMoveEvent(self, event)
+    QtWidgets.QGraphicsItem.mouseMoveEvent(self, event)
     
     self.freeDrag = False
  
@@ -925,7 +925,7 @@ class AtomItem(QtGui.QGraphicsItem):
     self.update()
 
      
-    QtGui.QGraphicsItem.mouseDoubleClickEvent(self, event)
+    QtWidgets.QGraphicsItem.mouseDoubleClickEvent(self, event)
    
       
   def mouseReleaseEvent(self, event):
@@ -934,7 +934,7 @@ class AtomItem(QtGui.QGraphicsItem):
     atom = self.atom
     x, y, z = atom.coords
 
-    if isinstance(parent, QtGui.QGraphicsItem):
+    if isinstance(parent, QtWidgets.QGraphicsItem):
       w = parent.boundingRect().width()
       h = parent.boundingRect().height()
     else:
@@ -1009,7 +1009,7 @@ class AtomItem(QtGui.QGraphicsItem):
             
       self.atom.updateValences()
       
-    if isinstance(parent, QtGui.QGraphicsItem):
+    if isinstance(parent, QtWidgets.QGraphicsItem):
       if parent.showSkeletalFormula:
         parent.alignMolecule()
       else:
@@ -1018,7 +1018,7 @@ class AtomItem(QtGui.QGraphicsItem):
     
     self.compoundView.updateAll() # Render new objs
     
-    QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
+    QtWidgets.QGraphicsItem.mouseReleaseEvent(self, event)
     self.update()
 
   def paint(self, painter, option, widget):
@@ -1052,7 +1052,7 @@ class AtomItem(QtGui.QGraphicsItem):
     painter.setFont(ELEMENT_FONT)
         
     color = ELEMENT_DATA.get(elem,  ELEMENT_DEFAULT)[1]
-    if isinstance(self.compoundView, QtGui.QGraphicsItem):
+    if isinstance(self.compoundView, QtWidgets.QGraphicsItem):
       # SpecView
       if self.compoundView.container:
         backgroundColor = QtGui.QColor(*self.glWidget._hexToRgba(self.compoundView.container.mainApp.colors[0]))
@@ -1180,7 +1180,7 @@ class AtomItem(QtGui.QGraphicsItem):
       w2 = bbox.width()/2.0
       
       if not skeletalColor:
-        if isinstance(self.compoundView, QtGui.QGraphicsItem):
+        if isinstance(self.compoundView, QtWidgets.QGraphicsItem):
           # SpecView
           if self.compoundView.container:
             color = foregroundColor
@@ -1414,15 +1414,15 @@ class AtomItem(QtGui.QGraphicsItem):
                
     self.highlights = set()
 
-class BondItem(QtGui.QGraphicsItem):
+class BondItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, bond):
     
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
      
     compoundView.bondItems[bond] = self
    
-    effect = QtGui.QGraphicsDropShadowEffect(compoundView)
+    effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     effect.setBlurRadius(SHADOW_RADIUS)
     effect.setColor(SHADOW_COLOR)
     effect.setOffset(*SHADOW_OFFSET)
@@ -1643,7 +1643,7 @@ class BondItem(QtGui.QGraphicsItem):
     atomItemA.update()
     atomItemB.update()
  
-    QtGui.QGraphicsItem.mousePressEvent(self, event)
+    QtWidgets.QGraphicsItem.mousePressEvent(self, event)
   
   def mouseDoubleClickEvent(self, event):
     
@@ -1697,7 +1697,7 @@ class BondItem(QtGui.QGraphicsItem):
 
     if self.selected:
       color = HIGHLIGHT
-    elif isinstance(self.compoundView, QtGui.QGraphicsItem):
+    elif isinstance(self.compoundView, QtWidgets.QGraphicsItem):
       # SpecView
       if self.compoundView.container:
         color = QtGui.QColor(*self.glWidget._hexToRgba(self.compoundView.container.mainApp.colors[1]))

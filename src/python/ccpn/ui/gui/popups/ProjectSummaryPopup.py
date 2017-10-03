@@ -30,7 +30,7 @@ import datetime
 
 import pandas as pd
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core.lib import Summary
 from ccpn.util import Logging

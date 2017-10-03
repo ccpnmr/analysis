@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
 #from ccpn.framework.PathsAndUrls import fontsPath

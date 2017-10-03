@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DateTime import DateTime
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -66,7 +66,7 @@ class SamplePropertiesPopup(CcpnDialog):
     self._addWidgetsToLayout(widgets=self._getAllWidgets(), layout=self.mainLayout)
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.mainLayout.setContentsMargins(20, 20, 20, 10) #L,T,R,B
     self.setWindowTitle("Sample Properties")

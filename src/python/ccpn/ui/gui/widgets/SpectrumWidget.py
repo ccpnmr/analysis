@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui,QtCore
+from PyQt5 import QtGui, QtWidgets,QtCore
 import pyqtgraph as pg
 from pyqtgraph.Point import Point
 import sys
@@ -178,9 +178,9 @@ class SpectrumWidget:
 if __name__ == '__main__':
 
   def testMain():
-    app = QtGui.QApplication(sys.argv)
-    w = QtGui.QWidget()
-    layout = QtGui.QGridLayout()
+    app = QtWidgets.QApplication(sys.argv)
+    w = QtWidgets.QWidget()
+    layout = QtWidgets.QGridLayout()
     widget=SpectrumWidget().widget
     layout.addWidget(widget)
     xdata = []

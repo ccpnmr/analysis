@@ -1,7 +1,7 @@
 from functools import partial
 
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -20,7 +20,7 @@ class InputWidget(Widget):
   def __init__(self, **kw):
     super(InputWidget, self).__init__()
     self.params = {}
-    l = QtGui.QHBoxLayout()
+    l = QtWidgets.QHBoxLayout()
     self.setLayout(l)
 
     self.peakListInput = PulldownList(None, ['Select'])
@@ -56,7 +56,7 @@ class SettingWidget(Widget):
     self.inputWidgetList = []
 
     self.inputDataBoundary = InputDataBoundary(self.application)
-    self.mainLayout = QtGui.QVBoxLayout(self)
+    self.mainLayout = QtWidgets.QVBoxLayout(self)
     self.initUIinputWidget()
     self.applyButtons = ButtonList(None, texts=['Save', 'Update', 'Apply'],
                                    callbacks=[None, None, self._sendDataToPlot],
@@ -221,7 +221,7 @@ class BarGraphWidget(Widget):
     self.customViewBox.setParent(self.plotWidget)
 
   def _setLayout(self):
-    hbox = QtGui.QHBoxLayout()
+    hbox = QtWidgets.QHBoxLayout()
     self.setLayout(hbox)
     hbox.addWidget(self.plotWidget)
 

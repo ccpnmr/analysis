@@ -1,5 +1,5 @@
 from math import log
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -26,15 +26,15 @@ NULL_POINT = QPointF()
     
 from numpy import array, empty, ones, uint8
 
-class MarkersItem(QtGui.QGraphicsItem):
+class MarkersItem(QtWidgets.QGraphicsItem):
   
   def __init__(self, parent, x0, y0, length, points):
 
-    QtGui.QGraphicsItem.__init__(self, scene=parent.scene())
+    QtWidgets.QGraphicsItem.__init__(self, scene=parent.scene())
     
     self.parent = parent
     self.setZValue(2)
-    #self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    #self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
     #self.setAcceptedMouseButtons(Qt.LeftButton)
     self.fontMetric = QtGui.QFontMetricsF(self.parent.font())
     self.length = length
@@ -95,15 +95,15 @@ class MarkersItem(QtGui.QGraphicsItem):
     for p in triangles:
       drawPolygon(p)
 
-class ScaleItem(QtGui.QGraphicsItem):
+class ScaleItem(QtWidgets.QGraphicsItem):
   
   def __init__(self, parent, x0, y0, length, values):
 
-    QtGui.QGraphicsItem.__init__(self, scene=parent.scene())
+    QtWidgets.QGraphicsItem.__init__(self, scene=parent.scene())
     
     self.parent = parent
     self.setZValue(2)
-    #self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    #self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
     #self.setAcceptedMouseButtons(Qt.LeftButton)
     self.fontMetric = QtGui.QFontMetricsF(self.parent.font())
     self.length = length
@@ -157,11 +157,11 @@ class ScaleItem(QtGui.QGraphicsItem):
       p1, text = t
       drawText(p1, text)
 
-class PixmapPlot(QtGui.QGraphicsView, Base):
+class PixmapPlot(QtWidgets.QGraphicsView, Base):
 
   def __init__(self, parent, array, scale=None, markers=None, **kw):
       
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     if not scale:
@@ -173,18 +173,18 @@ class PixmapPlot(QtGui.QGraphicsView, Base):
     self.parent = parent
 
     self.setRenderHint(QtGui.QPainter.Antialiasing)
-    self.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-    self.setTransformationAnchor(QtGui.QGraphicsView.NoAnchor)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+    self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
-    self.gScene = QtGui.QGraphicsScene(self)
+    self.gScene = QtWidgets.QGraphicsScene(self)
     self.setScene(self.gScene)   
 
     n, m, d = array.shape
     qImage = QtGui.QImage(array.data, m, n, QtGui.QImage.Format_RGB32)
 
     pixmap = QtGui.QPixmap.fromImage(qImage) #.scaled(m,m)
-    self.pixmapItem = QtGui.QGraphicsPixmapItem(pixmap)
+    self.pixmapItem = QtWidgets.QGraphicsPixmapItem(pixmap)
     self.gScene.addItem(self.pixmapItem)
     
     bbox = self.pixmapItem.boundingRect() 
@@ -237,7 +237,7 @@ class PixmapPlot(QtGui.QGraphicsView, Base):
     
   def mousePressEvent(self, event):
    
-    QtGui.QGraphicsView.mousePressEvent(self, event)
+    QtWidgets.QGraphicsView.mousePressEvent(self, event)
     
     # deal with inconsistency in Qt versions for button naming
     try:

@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -72,7 +72,7 @@ class SpectrumGroupEditor(CcpnDialog):
       self._checkCurrentSpectrumGroups()
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.setWindowTitle("Spectrum Group Setup")
     self.mainLayout.setContentsMargins(20, 20, 25, 15)  # L,T,R,B
@@ -190,25 +190,25 @@ class SpectrumGroupEditor(CcpnDialog):
     self.spectrumGroupListWidgetLeft.clear()
     if self.spectrumGroup:
       for spectrum in self.spectrumGroup.spectra:
-        item = QtGui.QListWidgetItem(str(spectrum.id))
+        item = QtWidgets.QListWidgetItem(str(spectrum.id))
         self.spectrumGroupListWidgetLeft.addItem(item)
     else:
       leftPullDownSelection = self.leftPullDownSelection.get()
       if leftPullDownSelection != 'Select an Option':
         spectrumGroup = self.project.getByPid('SG:'+str(leftPullDownSelection))
         for spectrum in spectrumGroup.spectra:
-          item = QtGui.QListWidgetItem(str(spectrum.id))
+          item = QtWidgets.QListWidgetItem(str(spectrum.id))
           self.spectrumGroupListWidgetLeft.addItem(item)
 
   def _populateListWidgetRight(self, spectra=None):
     self.spectrumGroupListWidgetRight.clear()
     if spectra is None:
       for spectrum in self._getRightPullDownSpectrumGroup().spectra:
-        item = QtGui.QListWidgetItem(str(spectrum.id))
+        item = QtWidgets.QListWidgetItem(str(spectrum.id))
         self.spectrumGroupListWidgetRight.addItem(item)
     else:
       for spectrum in spectra:
-        item = QtGui.QListWidgetItem(str(spectrum.id))
+        item = QtWidgets.QListWidgetItem(str(spectrum.id))
         self.spectrumGroupListWidgetRight.addItem(item)
 
   def _leftPullDownSelectionAction(self, selected):
@@ -264,7 +264,7 @@ class SpectrumGroupEditor(CcpnDialog):
           self._populateListWidgetRight(spectrumGroup.spectra)
 
   def _initialLabelListWidgetRight(self):
-    item = QtGui.QListWidgetItem('Select an option and drag/drop items across')
+    item = QtWidgets.QListWidgetItem('Select an option and drag/drop items across')
     item.setFlags(QtCore.Qt.NoItemFlags)
     self.spectrumGroupListWidgetRight.addItem(item)
 

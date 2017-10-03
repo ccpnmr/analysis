@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 
 import os
 from ccpn.util import Path
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList

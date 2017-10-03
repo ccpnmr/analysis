@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.PeakList import PeakList
 
@@ -130,12 +130,12 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addItem("Calibrate X...", callback=self._toggleCalibrateXSpectrum)
     self.contextMenu.addItem("Calibrate Y...", callback=self._toggleCalibrateYSpectrum)
     self.contextMenu.addSeparator()
-    self.stackAction = QtGui.QAction("Stack Spectra", self, triggered=self.toggleStack, checkable=True)
+    self.stackAction = QtWidgets.QAction("Stack Spectra", self, triggered=self.toggleStack, checkable=True)
     self.stackAction.setChecked(False)
     self.contextMenu.addAction(self.stackAction)
     self.contextMenu.addSeparator()
 
-    self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
+    self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
     if self.gridShown:
       self.gridAction.setChecked(True)
     else:

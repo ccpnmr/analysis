@@ -1,13 +1,13 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from .Base import Icon
 
-class Menu(QtGui.QMenu):
+class Menu(QtWidgets.QMenu):
 
   def __init__(self, parent=None, text='', key=None, icon=None,
                callback=None, tearoff=False, persistant=False,
                setupFunc=None):
 
-    QtGui.QMenu.__init__(self, text, parent=parent)
+    QtWidgets.QMenu.__init__(self, text, parent=parent)
 
     if not key:
       key = text
@@ -116,7 +116,7 @@ class Menu(QtGui.QMenu):
   
   def actionEvent(self, event):
   
-    QtGui.QMenu.actionEvent(self, event)
+    QtWidgets.QMenu.actionEvent(self, event)
     
     # keep itemDict up-to-date whenever
     # anything changes a menu's actions
@@ -132,11 +132,11 @@ class Menu(QtGui.QMenu):
               index=None, group=None, widget=None):
     
     if widget:
-      action = QtGui.QWidgetAction(self.parent())
+      action = QtWidgets.QWidgetAction(self.parent())
       
       if text:
-        frame = QtGui.QWidget(self)
-        layout = QtGui.QHBoxLayout(frame)
+        frame = QtWidgets.QWidget(self)
+        layout = QtWidgets.QHBoxLayout(frame)
         layout.setStretch(0,1)
         layout.setStretch(1,0)
         layout.setSpacing(4)
@@ -144,7 +144,7 @@ class Menu(QtGui.QMenu):
         frame.setLayout(layout)
         widget.setParent(frame)
         
-        label = QtGui.QLabel(text, frame)
+        label = QtWidgets.QLabel(text, frame)
         layout.addWidget(label)
         layout.addWidget(widget)
         
@@ -154,11 +154,11 @@ class Menu(QtGui.QMenu):
         action.setDefaultWidget(widget)
     
     elif icon:
-      action = QtGui.QAction(Icon(icon), text, self.parent())
+      action = QtWidgets.QAction(Icon(icon), text, self.parent())
       action.setIconVisibleInMenu(True)
     
     else:
-      action = QtGui.QAction(text, self.parent())
+      action = QtWidgets.QAction(text, self.parent())
     
     if checked is not None:
       action.setCheckable(True)
@@ -199,7 +199,7 @@ class Menu(QtGui.QMenu):
       if group in self._groupDict:
         actionGroup = self._groupDict[group]
       else:
-        actionGroup = QtGui.QActionGroup(self)
+        actionGroup = QtWidgets.QActionGroup(self)
         self._groupDict[group] = actionGroup
     
       actionGroup.addAction(action)
@@ -216,7 +216,7 @@ class Menu(QtGui.QMenu):
       self.killTimer(event.timerId())
       self._toolTipTimerId = None
   
-    QtGui.QMenu.timerEvent(self, event)
+    QtWidgets.QMenu.timerEvent(self, event)
 
   def leaveEvent(self, event):
   
@@ -225,7 +225,7 @@ class Menu(QtGui.QMenu):
       self._toolTipAction = None
       self._toolTipTimerId = None
  
-    QtGui.QMenu.leaveEvent(self, event)
+    QtWidgets.QMenu.leaveEvent(self, event)
 
   def _toolTipHover(self, action):
     

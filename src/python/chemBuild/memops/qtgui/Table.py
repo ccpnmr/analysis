@@ -3,7 +3,7 @@ import re
 from numpy import int8, int16, int32, int64, uint8, uint16, uint32, uint64
 from numpy import float32, float64
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
 QPainter = QtGui.QPainter
@@ -193,11 +193,11 @@ class Column:
 
 EDIT_ROLE = QtCore.Qt.EditRole
 
-class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
+class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
 
   def __init__(self, parent):
     
-    QtGui.QStyledItemDelegate.__init__(self, parent)
+    QtWidgets.QStyledItemDelegate.__init__(self, parent)
     self.customWidget = None
     self.parent = parent
 
@@ -226,7 +226,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
         # Use the default, type-dependant factory
         # Deals with strings, bools, date time etc.
         self.customWidget = None
-        editor = QtGui.QStyledItemDelegate.createEditor(self, parentWidget, itemStyle, index)
+        editor = QtWidgets.QStyledItemDelegate.createEditor(self, parentWidget, itemStyle, index)
         
         if isinstance(editor, QtGui.QDoubleSpinBox):
           numDecimals = objCol.editDecimals
@@ -277,7 +277,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
         
       
     else:
-      return QtGui.QStyledItemDelegate.setEditorData(self, widget, index)
+      return QtWidgets.QStyledItemDelegate.setEditorData(self, widget, index)
        
   def updateEditorGeometry(self, widget, itemStyle, index):# ensures that the editor is displayed correctly 
     
@@ -288,7 +288,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
       hint = widget.sizeHint()
       
       if hint.height() > cellRect.height():
-        if isinstance(widget, QtGui.QComboBox): # has a popup anyway
+        if isinstance(widget, QtWidgets.QComboBox): # has a popup anyway
           widget.move(cellRect.topLeft())
           
         else:
@@ -303,7 +303,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
         
      
     else:
-      return QtGui.QStyledItemDelegate.updateEditorGeometry(self, widget, itemStyle, index)
+      return QtWidgets.QStyledItemDelegate.updateEditorGeometry(self, widget, itemStyle, index)
       
   def setModelData(self, widget, mode, index):#returns updated data 
      
@@ -333,13 +333,13 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
       model.setData(index, value, EDIT_ROLE)
      
     else:
-      return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
+      return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)
       
-class ObjectTableViewport(QtGui.QWidget):      
+class ObjectTableViewport(QtWidgets.QWidget):
   
   def __init__(self, parent):
     
-    QtGui.QWidget.__init__(self, parent=parent)
+    QtWidgets.QWidget.__init__(self, parent=parent)
 
   """ 
     self.setAutoFillBackground(True)
@@ -357,16 +357,16 @@ class ObjectTableViewport(QtGui.QWidget):
     painter.end()
     
     
-    return QtGui.QWidget.paintEvent(self, event)
+    return QtWidgets.QWidget.paintEvent(self, event)
   """   
 
-LESS_THAN = QtGui.QSortFilterProxyModel.lessThan
+LESS_THAN = QtCore.QSortFilterProxyModel.lessThan
 
-class ObjectTableProxyModel(QtGui.QSortFilterProxyModel):      
+class ObjectTableProxyModel(QtCore.QSortFilterProxyModel):
   
   def __init__(self, parent):
     
-    QtGui.QSortFilterProxyModel.__init__(self, parent=parent)
+    QtCore.QSortFilterProxyModel.__init__(self, parent=parent)
     self.table = parent
     
   def lessThan(self, leftIndex, rightIndex):
@@ -385,11 +385,11 @@ class ObjectTableProxyModel(QtGui.QSortFilterProxyModel):
     else:
       return LESS_THAN(self, leftIndex, rightIndex)
 
-class ObjectHeaderView(QtGui.QHeaderView):
+class ObjectHeaderView(QtWidgets.QHeaderView):
 
   def __init__(self, orient, parent):
   
-    QtGui.QHeaderView.__init__(self, orient, parent)
+    QtWidgets.QHeaderView.__init__(self, orient, parent)
     self.table = parent
 
   #def sizeHint(self):
@@ -436,8 +436,8 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setSortingEnabled(True)
     self.setAutoFillBackground(True)
     
-    #self.setSizePolicy(QtGui.QSizePolicy.Preferred, 
-    #                   QtGui.QSizePolicy.Preferred)
+    #self.setSizePolicy(QtWidgets.QSizePolicy.Preferred,
+    #                   QtWidgets.QSizePolicy.Preferred)
     
     if multiSelect:
       self.setSelectionMode(self.ExtendedSelection)
@@ -1249,11 +1249,11 @@ class ObjectTableFilter(BasePopup):
     self.table.clearSelection()    
     self.table.setObjects(objects, None)
   
-class ObjectTableGraph(QtGui.QWidget):
+class ObjectTableGraph(QtWidgets.QWidget):
 
   def __init__(self, table, xCol, yCol):
     
-    QtGui.QWidget.__init__(self, parent=table)
+    QtWidgets.QWidget.__init__(self, parent=table)
     
     self.table = table
     self.xCol = xCol

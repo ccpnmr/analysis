@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -37,13 +37,13 @@ CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
 
-class Button(QtGui.QPushButton, Base):
+class Button(QtWidgets.QPushButton, Base):
 
   def __init__(self, parent=None, text='', callback=None, icon=None, toggle=None, **kw):
 
     #text = translator.translate(text): not needed as it calls setText which does the work
 
-    QtGui.QPushButton.__init__(self, parent)
+    QtWidgets.QPushButton.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.setText(text)
@@ -66,19 +66,21 @@ class Button(QtGui.QPushButton, Base):
       else:
         self.setChecked(UNCHECKED)
 
-  def setCallback(self, callback):
+  def setCallback(self, callback=None):
     "Sets callback; disconnects if callback=None"
     if self._callback is not None:
-      self.disconnect(self, QtCore.SIGNAL('clicked()'), self._callback)
+      # self.disconnect(self, QtCore.SIGNAL('clicked()'), self._callback)
+      self.clicked.disconnect()
     if callback:
-      self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+      # self.connect(self, QtCore.PYQT_SIGNAL('clicked()'), callback)
+      self.clicked.connect(callback)
       # self.clicked.connect doesn't work with lambda, yet...
     self._callback = callback
 
   def setText(self, text):
     "Set the text of the button, applying the translator first"
     self._text = translator.translate(text)
-    QtGui.QPushButton.setText(self, self._text)
+    QtWidgets.QPushButton.setText(self, self._text)
 
   def getText(self):
     "Get the text of the button"
@@ -91,8 +93,8 @@ if __name__ == '__main__':
 
   app = TestApplication()
 
-  window = QtGui.QWidget()
-  window.setLayout(QtGui.QGridLayout())
+  window = QtWidgets.QWidget()
+  window.setLayout(QtWidgets.QGridLayout())
 
   def click():
     print("Clicked")
@@ -119,5 +121,3 @@ if __name__ == '__main__':
   window.raise_()
 
   app.start()
-
-

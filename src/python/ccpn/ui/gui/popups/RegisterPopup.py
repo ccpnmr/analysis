@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
   import sys
 
-  qtApp = QtGui.QApplication(['Test Register'])
+  qtApp = QtWidgets.QApplication(['Test Register'])
 
   #QtCore.QCoreApplication.setApplicationName('TestRegister')
   #QtCore.QCoreApplication.setApplicationVersion('0.1')

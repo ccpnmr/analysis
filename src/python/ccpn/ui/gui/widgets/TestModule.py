@@ -59,12 +59,12 @@ Copy and past this script at the botton of the CcpnModule file you want to run.
 '''
 
 if __name__ == '__main__':
-  from PyQt4 import QtGui
+  from PyQt5 import QtGui, QtWidgets
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
   app = TestApplication()
-  win = QtGui.QMainWindow()
+  win = QtWidgets.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None)
 

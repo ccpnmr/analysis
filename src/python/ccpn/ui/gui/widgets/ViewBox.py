@@ -68,7 +68,7 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 
 import sys
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
 from ccpn.util import Common as commonUtil
 
@@ -169,14 +169,14 @@ class ViewBox(pg.ViewBox):
 
     # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
-    self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
+    self.selectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
     self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
     self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
     self.selectionBox.setZValue(1e9)
     self.selectionBox.hide()
     self.addItem(self.selectionBox, ignoreBounds=True)
 
-    self.pickBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
+    self.pickBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
     self.pickBox.setPen(pg.functions.mkPen((0, 255, 255), width=1))
     self.pickBox.setBrush(pg.functions.mkBrush(100, 255, 255, 100))
     self.pickBox.setZValue(1e9)

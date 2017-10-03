@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 import os
 from ccpn.util import Path
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
@@ -83,7 +83,7 @@ class AboutPopup(CcpnDialog):
 
   def copyToClipboard(self):
     '''TEXT being copied on the clipboard '''
-    cb = QtGui.QApplication.clipboard()
+    cb = QtWidgets.QApplication.clipboard()
     cb.clear(mode=cb.Clipboard)
     cb.setText(TEXT, mode=cb.Clipboard)
 

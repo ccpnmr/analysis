@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 import pyqtgraph as pg
-from PyQt4 import QtGui, QtCore #, QtOpenGL
+from PyQt5 import QtGui, QtWidgets, QtCore #, QtOpenGL
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -79,7 +79,7 @@ class GuiStrip(Frame):
 
     # it appears to be required to explicitly set these, otherwise
     # the Widget will not fill all available space
-    ###self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    ###self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
     #self.setContentsMargins(5, 0, 5, 0)
     self.setContentsMargins(0, 0, 0, 0)
@@ -89,7 +89,7 @@ class GuiStrip(Frame):
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
                                  #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
-    self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
     self.getLayout().addWidget(self.plotWidget, 1, 0)

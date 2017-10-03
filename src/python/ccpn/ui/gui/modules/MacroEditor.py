@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
@@ -56,9 +56,9 @@ class MacroEditor(CcpnModule):
     self.textBox = TextEditor()
 
     # layouts
-    #widget = QtGui.QWidget()
+    #widget = QtWidgets.QWidget()
     widget = self.mainWidget
-    widgetLayout = QtGui.QGridLayout()
+    widgetLayout = QtWidgets.QGridLayout()
     widget.setLayout(widgetLayout)
     widget.layout().setSpacing(5)
     widget.layout().setContentsMargins(10,10,10,10)
@@ -69,7 +69,7 @@ class MacroEditor(CcpnModule):
 
     self.buttonBox = ButtonList(self, texts=['Start', 'Stop', 'Close', 'Save Macro'],
                                 callbacks=[self._startMacroRecord, self._stopMacroRecord, self._reject, self._saveMacro])
-#    buttonLayout = QtGui.QGridLayout()
+#    buttonLayout = QtWidgets.QGridLayout()
 #    self.buttonBox.setLayout(buttonLayout)
 #    self.buttonBox.layout().setSpacing(0)
 

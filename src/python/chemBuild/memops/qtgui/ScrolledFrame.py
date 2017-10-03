@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from .Base import Base
 
@@ -11,10 +11,10 @@ class ScrolledFrame(QtGui.QScrollArea, Base):
     QtGui.QScrollArea.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
-    frame = QtGui.QWidget(self)
+    frame = QtWidgets.QWidget(self)
     frame.setMinimumSize(*minSize)
-    frame.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                        QtGui.QSizePolicy.Expanding)
+    frame.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                        QtWidgets.QSizePolicy.Expanding)
 
     self.setWidget(frame)
     self.frame = frame

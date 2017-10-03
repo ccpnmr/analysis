@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -67,16 +67,16 @@ class NotesEditorModule(CcpnModule):
     self.note = None
 
     self.spacer = Spacer(self.mainWidget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.noWidget = NotesPulldown(parent=self.mainWidget
                                    , project=self.project, default=0
                                    , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                    , showSelectName=True
-                                  , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
+                                  , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
                                   , callback=self._selectionPulldownCallback)
     self.spacer = Spacer(self.mainWidget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
     #~~~~~~~~~~ define noteWidget box to contain man editing
@@ -86,7 +86,7 @@ class NotesEditorModule(CcpnModule):
     self.label1 = Label(self.noteWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
     self.lineEdit1 = LineEdit(self.noteWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
     self.spacer = Spacer(self.noteWidget, 5, 5
-                         , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,3), gridSpan=(1,1))
     self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,6))
 
@@ -98,7 +98,7 @@ class NotesEditorModule(CcpnModule):
 
     # this spacer is expanding, will fill the space when the textbox is invisible
     self.spacer = Spacer(self.mainWidget, 5, 5
-                         , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+                         , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
                          , grid=(7,4), gridSpan=(1,1))
 
     self.mainWidget.setContentsMargins(5, 5, 5, 5)

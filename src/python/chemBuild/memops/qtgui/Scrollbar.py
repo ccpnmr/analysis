@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 from .Entry import FloatEntry
@@ -37,10 +37,10 @@ class Scrollbar(QtGui.QScrollBar, Base):
     
     if isVertical:
       self.setOrientation(QtCore.Qt.Vertical)
-      self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
+      self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
     else:
       self.setOrientation(QtCore.Qt.Horizontal)
-      self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+      self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
     # Callback continuously (True)
     # Or only at intervals (False)
@@ -148,14 +148,14 @@ class FloatScrollbar(Scrollbar):
     return lo/f, hi/f
     
 
-class RegionScrollbar(QtGui.QWidget, Base):
+class RegionScrollbar(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, startVal=-1.0, endVal=1.0,
                loValue=0.0, hiValue=0.1, decimals=2,
                isVertical=False, callback=None,
                tracking=True, setMid=True, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.minSize = 10.0**-decimals
@@ -167,11 +167,11 @@ class RegionScrollbar(QtGui.QWidget, Base):
                                tipText='Shrink range', grid=(0,1),
                                gridSpan=(2,1), stretch=(0,0))
                                
-    self.shrinkButton.setSizePolicy(QtGui.QSizePolicy.Fixed,
-                                    QtGui.QSizePolicy.Minimum)
+    self.shrinkButton.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+                                    QtWidgets.QSizePolicy.Minimum)
                                                                       
-    self.expandButton.setSizePolicy(QtGui.QSizePolicy.Fixed,
-                                    QtGui.QSizePolicy.Minimum) 
+    self.expandButton.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+                                    QtWidgets.QSizePolicy.Minimum)
                                                                        
     self.format = format = '%%.%df' % decimals
     
@@ -188,8 +188,8 @@ class RegionScrollbar(QtGui.QWidget, Base):
     if setMid:
       self.entry = FloatEntry(self, 0.5*(loValue+hiValue), self.setMid, startVal,
                               endVal, decimals, grid=(1,3), stretch=(0,0))
-      self.entry.setSizePolicy(QtGui.QSizePolicy.Fixed,
-                               QtGui.QSizePolicy.Fixed)                                    
+      self.entry.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+                               QtWidgets.QSizePolicy.Fixed)
       self.scrollbar.sliderMoved.connect(self._sliderMoved)
   
   def _sliderMoved(self, val):

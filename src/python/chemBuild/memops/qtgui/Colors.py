@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 QColor = QtGui.QColor
 
@@ -231,11 +231,11 @@ class ColorPulldown(PulldownList):
     
 Qt = QtCore.Qt
 
-class GradientWidget(QtGui.QWidget, Base):
+class GradientWidget(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, colors=None, **kw):
   
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
   
     if not colors:
@@ -264,7 +264,7 @@ class GradientWidget(QtGui.QWidget, Base):
     painter.setPen('#000000')
     painter.drawRect(0, 0, w-1, h-1)
     
-    return QtGui.QWidget.paintEvent(self, event)
+    return QtWidgets.QWidget.paintEvent(self, event)
   
   def setColors(self, colors):
   
@@ -337,7 +337,7 @@ if __name__ == '__main__':
   
   app = Application()
   
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
   
   button = Button(window, 'Choose color...', callback=getColor, grid=(0,0))
   

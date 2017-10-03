@@ -30,7 +30,7 @@ import sys
 import tarfile
 import tempfile
 
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -685,7 +685,7 @@ class Framework:
       # We have a UI with no mainWindow - nothing to do.
       return
 
-    topMenu = mainWindow.menuBar().findChildren(QtGui.QMenu)[0]
+    topMenu = mainWindow.menuBar().findChildren(QtWidgets.QMenu)[0]
     topActionDict = {}
     for topAction in topMenu.actions():
       mainActionDict = {}
@@ -1455,7 +1455,7 @@ class Framework:
       if success is True:
         # Close and clean up project
         self._closeProject()
-        QtGui.QApplication.quit()
+        QtWidgets.QApplication.quit()
       else:
         if event:                             # ejb - don't close the project
           event.ignore()
@@ -1467,7 +1467,7 @@ class Framework:
       json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
       self._closeProject()
-      QtGui.QApplication.quit()
+      QtWidgets.QApplication.quit()
     else:
       if event:
         event.ignore()

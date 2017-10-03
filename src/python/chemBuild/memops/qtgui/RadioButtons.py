@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 from .RadioButton import RadioButton
@@ -6,14 +6,14 @@ from .RadioButton import RadioButton
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class RadioButtons(QtGui.QWidget, Base):
+class RadioButtons(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, texts=None, selectedInd=None,
                callback=None, direction='h', tipTexts=None,  **kw):
     
     # # # # # Note change from exntries to texts compared to Tkinter # # # # # 
     
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
 
     if texts is None:

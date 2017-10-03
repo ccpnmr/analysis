@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-17 13:51:05 +0000 (Wed, May 17, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 class Spacer(QtGui.QSpacerItem):
   """

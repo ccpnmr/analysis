@@ -1,16 +1,16 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 from .CheckButton import CheckButton
 
-class CheckButtons(QtGui.QWidget, Base):
+class CheckButtons(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, texts=None, states=None, selectedInds=None,
                callback=None, direction='h', tipTexts=None, selected=None, **kw):
     
     # # # # # Note change from exntries to texts compared to Tkinter # # # # # 
     
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
 
     if selected:

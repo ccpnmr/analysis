@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 import json
 from collections import OrderedDict
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.core import _coreClassMap
 from ccpn.core.NmrResidue import NmrResidue
@@ -115,10 +115,10 @@ NEW_ITEM_DICT = {
 }
 ### Flag example code removed in revision 7686
 
-class SideBar(QtGui.QTreeWidget, Base):
+class SideBar(QtWidgets.QTreeWidget, Base):
   def __init__(self, parent=None, mainWindow=None, multiSelect=True):
 
-    QtGui.QTreeWidget.__init__(self, parent)
+    QtWidgets.QTreeWidget.__init__(self, parent)
     Base.__init__(self, acceptDrops=True)
 
     self.multiSelect = multiSelect
@@ -136,93 +136,93 @@ class SideBar(QtGui.QTreeWidget, Base):
     self.setDragDropMode(self.InternalMove)
     self.setMinimumWidth(200)
 
-    self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
+    self.projectItem = dd['PR'] = QtWidgets.QTreeWidgetItem(self)
     self.projectItem.setFlags(self.projectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
 
-    self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumItem = dd['SP'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.spectrumItem.setFlags(self.spectrumItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumItem.setText(0, "Spectra")
 
-    self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.spectrumGroupItem = dd['SG'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.spectrumGroupItem.setFlags(self.spectrumGroupItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.spectrumGroupItem.setText(0, "SpectrumGroups")
 
-    self.newSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+    self.newSpectrumGroup = QtWidgets.QTreeWidgetItem(self.spectrumGroupItem)
     self.newSpectrumGroup.setFlags(self.newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSpectrumGroup.setText(0, "<New SpectrumGroup>")
 
-    self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.samplesItem = dd['SA'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setFlags(self.samplesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.samplesItem.setText(0, 'Samples')
 
-    self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
+    self.newSample = QtWidgets.QTreeWidgetItem(self.samplesItem)
     self.newSample.setFlags(self.newSample.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSample.setText(0, "<New Sample>")
 
-    self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.substancesItem = dd['SU'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.substancesItem.setText(0, "Substances")
 
-    self.newSubstance = QtGui.QTreeWidgetItem(self.substancesItem)
+    self.newSubstance = QtWidgets.QTreeWidgetItem(self.substancesItem)
     self.newSubstance.setFlags(self.newSubstance.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newSubstance.setText(0, "<New Substance>")
 
-    self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chainItem = dd['MC'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chainItem.setText(0, "Chains")
 
-    self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
+    self.newChainItem = QtWidgets.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setFlags(self.newChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newChainItem.setText(0, '<New Chain>')
 
-    self.complexItem = dd['MX'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.complexItem = dd['MX'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.complexItem.setFlags(self.complexItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.complexItem.setText(0, "Complexes")
 
     # TODO make COmplexEditor, install it in _createNewObject, and uncomment this
-    # self.newComplex = QtGui.QTreeWidgetItem(self.complexItem)
+    # self.newComplex = QtWidgets.QTreeWidgetItem(self.complexItem)
     # self.newComplex.setFlags(self.newComplex.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     # self.newComplex.setText(0, "<New Complex>")
 
-    self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.nmrChainItem = dd['NC'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setFlags(self.nmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.nmrChainItem.setText(0, "NmrChains")
 
-    self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
+    self.newNmrChainItem = QtWidgets.QTreeWidgetItem(self.nmrChainItem)
     self.newNmrChainItem.setFlags(self.newNmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNmrChainItem.setText(0, '<New NmrChain>')
 
-    self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.chemicalShiftListsItem = dd['CL'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.chemicalShiftListsItem.setFlags(self.chemicalShiftListsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chemicalShiftListsItem.setText(0, "ChemicalShiftLists")
 
-    self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
+    self.newChemicalShiftListItem = QtWidgets.QTreeWidgetItem(self.chemicalShiftListsItem)
     self.newChemicalShiftListItem.setFlags(self.newChemicalShiftListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newChemicalShiftListItem.setText(0, '<New ChemicalShiftList>')
 
-    self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.structuresItem = dd['SE'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setFlags(self.structuresItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.structuresItem.setText(0, "StructureEnsembles")
 
-    self.newStructuresListItem = QtGui.QTreeWidgetItem(self.structuresItem)   # ejb
+    self.newStructuresListItem = QtWidgets.QTreeWidgetItem(self.structuresItem)   # ejb
     self.newStructuresListItem.setFlags(self.newStructuresListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newStructuresListItem.setText(0, '<New StructureEnsemble>')
 
-    self.dataSetsItem = dd['DS'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.dataSetsItem = dd['DS'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.dataSetsItem.setFlags(self.dataSetsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.dataSetsItem.setText(0, "DataSets")
 
-    self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
+    self.newDataSetItem = QtWidgets.QTreeWidgetItem(self.dataSetsItem)
     self.newDataSetItem.setFlags(self.newDataSetItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newDataSetItem.setText(0, '<New DataSet>')
 
-    self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.notesItem = dd['NO'] = QtWidgets.QTreeWidgetItem(self.projectItem)
     self.notesItem.setFlags(self.notesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.notesItem.setText(0, "Notes")
 
-    self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+    self.newNoteItem = QtWidgets.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNoteItem.setText(0, '<New Note>')
 
@@ -338,13 +338,13 @@ class SideBar(QtGui.QTreeWidget, Base):
     # for item in self._findItems(newPid):
     #   item.setExpanded(True)
 
-  def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
+  def _addItem(self, item:QtWidgets.QTreeWidgetItem, pid:str):
     """
     Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object
     passed in.
     """
 
-    newItem = QtGui.QTreeWidgetItem(item)
+    newItem = QtWidgets.QTreeWidgetItem(item)
     newItem.setFlags(newItem.flags() & ~(QtCore.Qt.ItemIsDropEnabled))
     newItem.setData(0, QtCore.Qt.DisplayRole, str(pid))
     newItem.mousePressEvent = self.mousePressEvent
@@ -418,14 +418,14 @@ class SideBar(QtGui.QTreeWidget, Base):
               # sglist = self._findItems(str(sg.pid))
               # if not sglist:
               #   # have not found the group
-              #   newTempSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+              #   newTempSpectrumGroup = QtWidgets.QTreeWidgetItem(self.spectrumGroupItem)
               #   newTempSpectrumGroup.setFlags(
               #     newTempSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
               #   newTempSpectrumGroup.setText(0, str(sg.pid))
               #
               #   # sglist = self._findItems('SpectrumGroups')
               #   # for sgitem in self._findItems('SpectrumGroups'):
-              #   #   newSpectrumGroup = QtGui.QTreeWidgetItem(sgitem)
+              #   #   newSpectrumGroup = QtWidgets.QTreeWidgetItem(sgitem)
               #   #   newSpectrumGroup.setFlags(
               #   #     newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
               #   #   newSpectrumGroup.setText(0, str(sg.pid))
@@ -434,7 +434,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
               for sgitem in self._findItems(str(sg.pid)):   # add '<new spectrumGroup>'
                 newItem = self._addItem(sgitem, str(obj.pid))
-                newObjectItem = QtGui.QTreeWidgetItem(newItem)
+                newObjectItem = QtWidgets.QTreeWidgetItem(newItem)
                 newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
                 newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName].className)
 
@@ -445,15 +445,15 @@ class SideBar(QtGui.QTreeWidget, Base):
         newItem = self._addItem(itemParent, obj.pid)
         # itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
         if shortClassName in ['SA', 'NC', 'DS']:
-          newObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newObjectItem = QtWidgets.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName]._childClasses[0].className)
 
         if shortClassName == 'SP':
-          newPeakListObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newPeakListObjectItem = QtWidgets.QTreeWidgetItem(newItem)
           newPeakListObjectItem.setFlags(newPeakListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newPeakListObjectItem.setText(0, "<New PeakList>")
-          newIntegralListObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newIntegralListObjectItem = QtWidgets.QTreeWidgetItem(newItem)
           newIntegralListObjectItem.setFlags(newIntegralListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newIntegralListObjectItem.setText(0, "<New IntegralList>")
 
@@ -462,7 +462,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           newItem = self._addItem(itemParent, obj.pid)
 
           if shortClassName == 'NR':
-            newObjectItem = QtGui.QTreeWidgetItem(newItem)
+            newObjectItem = QtWidgets.QTreeWidgetItem(newItem)
             newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
             newObjectItem.setText(0, "<New NmrAtom>")
           # for i in range(itemParent.childCount()):
@@ -554,7 +554,7 @@ class SideBar(QtGui.QTreeWidget, Base):
     for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
 
-  def _findItems(self, objPid:str) -> list:     #QtGui.QTreeWidgetItem
+  def _findItems(self, objPid:str) -> list:     #QtWidgets.QTreeWidgetItem
     """Find items that match objPid - returns empty list if no matches"""
 
     if objPid[:2] in classesInSideBar:
@@ -721,7 +721,7 @@ class SideBar(QtGui.QTreeWidget, Base):
       self._raiseContextMenu(event)               # ejb - moved the context menu to button release
       event.accept()
     else:
-      QtGui.QTreeWidget.mouseReleaseEvent(self, event)
+      QtWidgets.QTreeWidget.mouseReleaseEvent(self, event)
 
   def _raiseContextMenu(self, event:QtGui.QMouseEvent):
     """

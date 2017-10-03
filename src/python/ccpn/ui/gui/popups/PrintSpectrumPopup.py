@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
@@ -56,7 +56,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 
     self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtGui.QFrame()
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
     self.spectrumDisplayIds = [sd.title for sd in project.spectrumDisplays]
@@ -150,10 +150,10 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 #       self.filePathLineEdit.setText(path)
 
 
-# class SpectrumDisplaySelectionWidget(QtGui.QWidget, Base):
+# class SpectrumDisplaySelectionWidget(QtWidgets.QWidget, Base):
 #
 #   def __init__(self, parent, project, **kw):
-#     QtGui.QWidget.__init__(self, parent)
+#     QtWidgets.QWidget.__init__(self, parent)
 #     Base.__init__(self, **kw)
 #
 #     current = project._appBase.current

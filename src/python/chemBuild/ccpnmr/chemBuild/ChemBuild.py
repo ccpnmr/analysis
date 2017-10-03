@@ -8,7 +8,7 @@ import sys
 
 sys.setrecursionlimit(10000)
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpnmr.chemBuild.gui.ChemBuildMain import ChemBuildMain
 
@@ -55,10 +55,10 @@ if __name__ == '__main__':
 
   sys.path.append(os.getcwd())
 
-  qtApp = QtGui.QApplication(['CcpNmr ChemBuild'])
+  qtApp = QtWidgets.QApplication(['CcpNmr ChemBuild'])
   
-  QtGui.QApplication.setStartDragDistance(4)
-  QtGui.QApplication.setStartDragTime(400)
+  QtWidgets.QApplication.setStartDragDistance(4)
+  QtWidgets.QApplication.setStartDragTime(400)
   QtCore.QCoreApplication.setOrganizationName("CCPN")
   QtCore.QCoreApplication.setOrganizationDomain("ccpn.ac.uk")
   QtCore.QCoreApplication.setApplicationName("ChemBuild")

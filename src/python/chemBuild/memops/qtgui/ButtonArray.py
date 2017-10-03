@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .Base import Base
 from .Button import Button
@@ -9,13 +9,13 @@ from .Button import Button
 # TBD work with colors, e.g. for spectra
 # More prominant visual when button is down
 
-class ButtonArray(QtGui.QWidget, Base):
+class ButtonArray(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, texts=None, objects=None, icons=None, callback=None,
                toggled=True, radio=False, selected=None, tipTexts=None, 
                maxCols=18, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     buttonGroup = self.buttonGroup = QtGui.QButtonGroup(self)

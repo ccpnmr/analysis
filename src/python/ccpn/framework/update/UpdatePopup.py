@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
   import sys
 
-  qtApp = QtGui.QApplication(['Update'])
+  qtApp = QtWidgets.QApplication(['Update'])
 
   QtCore.QCoreApplication.setApplicationName('Update')
   QtCore.QCoreApplication.setApplicationVersion('3.0')

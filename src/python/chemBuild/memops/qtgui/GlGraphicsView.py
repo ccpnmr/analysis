@@ -1,15 +1,15 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from OpenGL import GL, GLU, GLUT
 
 from .Base import Base
 
 # This is to some extent inspired by Rivo Laks's WidgetProxy ( http://websvn.kde.org/*checkout*/trunk/playground/libs/kgllib/extras/kgllib/widgetproxy.cpp )
 
-class GlScene(QtGui.QGraphicsScene):
+class GlScene(QtWidgets.QGraphicsScene):
   
   def __init__(self, parent, glWidget):
     
-    QtGui.QGraphicsScene.__init__(self, 0, 0, glWidget.width(), glWidget.height(), parent)
+    QtWidgets.QGraphicsScene.__init__(self, 0, 0, glWidget.width(), glWidget.height(), parent)
     self.widget = glWidget
     
   def drawBackground(self, painter, rect):
@@ -17,26 +17,26 @@ class GlScene(QtGui.QGraphicsScene):
     self.widget.paintEvent(None, painterArg=painter)
     #self.widget.update()
     
-    QtGui.QGraphicsScene.drawBackground(self, painter, rect)
+    QtWidgets.QGraphicsScene.drawBackground(self, painter, rect)
         
   def resize(self):
     
     self.setSceneRect(0, 0, self.widget.width(),  self.widget.height())
     return self.sceneRect()
 
-class GlGraphicsView(QtGui.QGraphicsView, Base):
+class GlGraphicsView(QtWidgets.QGraphicsView, Base):
         
   def __init__(self, parent, mainApp, glWidget, **kw):
     
     self.eventForwarding = False
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     Base.__init__(self, parent,  **kw)
     self.mainApp = mainApp
     self.widget = glWidget
     self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
     self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-    self.setOptimizationFlags(QtGui.QGraphicsView.DontSavePainterState)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.SmartViewportUpdate)
+    self.setOptimizationFlags(QtWidgets.QGraphicsView.DontSavePainterState)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.SmartViewportUpdate)
     self.setRenderHints(QtGui.QPainter.Antialiasing)
     self.setStyleSheet("border: 0px solid")
     self.setViewport(glWidget)
@@ -60,13 +60,13 @@ class GlGraphicsView(QtGui.QGraphicsView, Base):
   def addItem(self, item):
     
     self.scene().addItem(item)
-    item.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    item.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
 
   def resizeEvent(self, event):
     
     self.resize()
     
-#    QtGui.QGraphicsView.resizeEvent(self, event)
+#    QtWidgets.QGraphicsView.resizeEvent(self, event)
   
 #  def event(self, event):
 #    
@@ -96,7 +96,7 @@ class GlGraphicsView(QtGui.QGraphicsView, Base):
         self.forwardEvent(event)
       else:
         # Check if there are any items in the viewport that should take care of the event. Otherwise forward it to the background.
-        state = QtGui.QGraphicsView.viewportEvent(self, event)
+        state = QtWidgets.QGraphicsView.viewportEvent(self, event)
         if not event.isAccepted():
           state = self.forwardEvent(event)
         return state
@@ -106,7 +106,7 @@ class GlGraphicsView(QtGui.QGraphicsView, Base):
     else:
       self.forwardEvent(event)
       
-    return QtGui.QGraphicsView.viewportEvent(self, event)
+    return QtWidgets.QGraphicsView.viewportEvent(self, event)
 
   def handleMouseEvent(self, event, pos):
     

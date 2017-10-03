@@ -1,5 +1,5 @@
 from math import log
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -20,15 +20,15 @@ HIGHLIGHT_BRUSH = QColor(255, 255, 255, 32)
 NULL_RECT = QRectF()
 NULL_POINT = QPointF()
 
-class ScaleItem(QtGui.QGraphicsItem):
+class ScaleItem(QtWidgets.QGraphicsItem):
   
   def __init__(self, parent):
 
-    QtGui.QGraphicsItem.__init__(self, scene=parent.scene())
+    QtWidgets.QGraphicsItem.__init__(self, scene=parent.scene())
     
     self.parent = parent
     self.setZValue(2)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+    self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
     self.setAcceptedMouseButtons(Qt.LeftButton)
     self.fontMetric = QtGui.QFontMetricsF(self.parent.font())
     
@@ -132,13 +132,13 @@ class ScaleItem(QtGui.QGraphicsItem):
       x, y, text = t
       drawText(x, y, text)
 
-class ScalePlot(QtGui.QGraphicsView, Base):
+class ScalePlot(QtWidgets.QGraphicsView, Base):
 
   def __init__(self, parent, scalePoints,
                getColor=None, length=300, width=25, title='Scale Plot',
                axisName='Scale', isVertical=False, showGrid=True, **kw):
       
-    QtGui.QGraphicsView.__init__(self, parent)
+    QtWidgets.QGraphicsView.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.getColor = getColor or self._defaultColor
@@ -167,11 +167,11 @@ class ScalePlot(QtGui.QGraphicsView, Base):
     self.scalePoints = scalePoints
 
     self.setRenderHint(QtGui.QPainter.Antialiasing)
-    self.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-    self.setTransformationAnchor(QtGui.QGraphicsView.NoAnchor)
-    self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+    self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+    self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
+    self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
-    self.gScene = QtGui.QGraphicsScene(self)
+    self.gScene = QtWidgets.QGraphicsScene(self)
     self.setScene(self.gScene)   
     
     self.titleItem = MovableLabelItem(self)
@@ -220,13 +220,13 @@ class ScalePlot(QtGui.QGraphicsView, Base):
   
     event.accept()
     
-    #QtGui.QGraphicsView.wheelEvent(self, event) 
+    #QtWidgets.QGraphicsView.wheelEvent(self, event)
   
   def mouseReleaseEvent(self, event):
     
     self.movePos = None
     
-    return QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+    return QtWidgets.QGraphicsView.mouseReleaseEvent(self, event)
         
   def mousePressEvent(self, event):
    
@@ -247,7 +247,7 @@ class ScalePlot(QtGui.QGraphicsView, Base):
       v = self.verticalScrollBar().sliderPosition()
       self.movePos = pos.x()+h, pos.y()+v
     
-    return QtGui.QGraphicsView.mousePressEvent(self, event)
+    return QtWidgets.QGraphicsView.mousePressEvent(self, event)
     
   def mouseMoveEvent(self, event):
       
@@ -259,7 +259,7 @@ class ScalePlot(QtGui.QGraphicsView, Base):
       self.horizontalScrollBar().setSliderPosition(x0-pos.x())
       self.verticalScrollBar().setSliderPosition(y0-pos.y())
     
-    return QtGui.QGraphicsView.mouseMoveEvent(self, event)
+    return QtWidgets.QGraphicsView.mouseMoveEvent(self, event)
    
   def popupContextMenu(self, pos):
     

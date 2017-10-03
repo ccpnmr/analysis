@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.framework.PathsAndUrls import ccpnUrl
 
@@ -35,12 +35,12 @@ from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
 
-class ButtonList(QtGui.QWidget, Base):
+class ButtonList(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
                tipTexts=None, direction='h', commands=None, images=None, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)     # ejb - added setLayout
 
 

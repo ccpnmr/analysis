@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 
 
@@ -38,11 +38,11 @@ class CcpnDialog(QtGui.QDialog, Base):
     self.setContentsMargins(15, 15, 15, 15)
     self.resize(*size)
 
-    # self.mainLayout = QtGui.QGridLayout()   # ejb - handled inside Base
+    # self.mainLayout = QtWidgets.QGridLayout()   # ejb - handled inside Base
     # self.setLayout(self.mainLayout)
 
   def fixedSize(self):
-    self.sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    self.sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
     self.sizePolicy.setHorizontalStretch(0)
     self.sizePolicy.setVerticalStretch(0)
     self.setSizePolicy(self.sizePolicy)

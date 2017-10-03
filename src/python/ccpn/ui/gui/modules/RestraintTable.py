@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -203,16 +203,16 @@ class RestraintTable(ObjectTable):
 
     # create the table; objects are added later via the displayTableForRestraints method
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
     self.rtWidget = RestraintsPulldown(parent=self._widget
                                      , project=self._project, default=0
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
-                                     , sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents
+                                     , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
                                      , callback=self._selectionPulldownCallback)
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=self.RLcolumns, objects=[],
@@ -491,8 +491,8 @@ class RestraintTable(ObjectTable):
 # 
 # 
 #     label = Label(self, "Restraint List:")
-#     widget1 = QtGui.QWidget(self)
-#     widget1.setLayout(QtGui.QGridLayout())
+#     widget1 = QtWidgets.QWidget(self)
+#     widget1.setLayout(QtWidgets.QGridLayout())
 #     widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
 #     self.restraintListPulldown = PulldownList(self, grid=(0, 1))
 #     widget1.layout().addWidget(self.restraintListPulldown, 0, 1)

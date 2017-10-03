@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -83,12 +83,12 @@ class IpythonConsole(Widget, Base):
 
         self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
 
-        # runMacroButton = QtGui.QPushButton()
+        # runMacroButton = QtWidgets.QPushButton()
         # runMacroButton.clicked.connect(self._runMacro)
         # runMacroButton.setText('Run Macro')
         # buttonLayout.addWidget(runMacroButton)
         #
-        # historyButton = QtGui.QPushButton()
+        # historyButton = QtWidgets.QPushButton()
         # historyButton.clicked.connect(self._showHistory)
         # historyButton.setText('Show History')
         # buttonLayout.addWidget(historyButton, 0, 1)

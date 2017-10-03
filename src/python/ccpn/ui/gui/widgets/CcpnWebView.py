@@ -22,8 +22,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4.QtCore import QUrl
-from PyQt4.QtWebKit import QWebView
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWebKit import QWebView
 
 
 class CcpnWebView(QWebView):

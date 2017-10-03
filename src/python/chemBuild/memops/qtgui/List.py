@@ -1,17 +1,17 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 
 SELECTED = 'icons/selected-yes.png'
 UNSELECTED = 'icons/selected-no.png'
 
-class List(QtGui.QListWidget, Base):
+class List(QtWidgets.QListWidget, Base):
 
   def __init__(self, parent, texts=None, callback=None, objects=None,
                icons=None, tipTexts=None, doubleCallback=None,
                multiSelect=True, **kw):
     
-    QtGui.QListWidget.__init__(self, parent)
+    QtWidgets.QListWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.iconYes = Icon(SELECTED)
@@ -58,9 +58,9 @@ class List(QtGui.QListWidget, Base):
   def _makeItem(self, text, object=None, icon=None, tipText=None):
   
     if icon:
-      item = QtGui.QListWidgetItem(QtGui.QIcon(icon), text, self)
+      item = QtWidgets.QListWidgetItem(QtGui.QIcon(icon), text, self)
     else:
-      item = QtGui.QListWidgetItem(self.iconNo, text, self)
+      item = QtWidgets.QListWidgetItem(self.iconNo, text, self)
     
     if object:
       item.setData(32, object)
@@ -78,7 +78,7 @@ class List(QtGui.QListWidget, Base):
                
   def addItem(self, text, object=None, icon=None, tipText=None, selected=False):
     
-    if isinstance(text, QtGui.QListWidgetItem):
+    if isinstance(text, QtWidgets.QListWidgetItem):
       # preserves original use
       item = text
     else:      
@@ -86,13 +86,13 @@ class List(QtGui.QListWidget, Base):
     
     item.setSelected(selected)
     
-    return QtGui.QListWidget.addItem(self, item)
+    return QtWidgets.QListWidget.addItem(self, item)
 
 
   def insertItem(self, index, text, object=None, icon=None, tipText=None):
   
     item = self._makeItem(text, object, icon, tipText)
-    QtGui.QListWidget.insertItem(self, item)
+    QtWidgets.QListWidget.insertItem(self, item)
 
 
   def setItems(self, texts, objects=None, icons=None, tipTexts=None):
@@ -112,7 +112,7 @@ class List(QtGui.QListWidget, Base):
     
     for i, text in enumerate(texts):
       item = self._makeItem(text, objects[i], icons[i], tipTexts[i])
-      QtGui.QListWidget.addItem(self, item)
+      QtWidgets.QListWidget.addItem(self, item)
 
 
   def deleteSelected(self):

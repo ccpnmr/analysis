@@ -28,13 +28,13 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Constants import ccpnmrJsonData
 
-class ListWidget(QtGui.QListWidget, Base):
+class ListWidget(QtWidgets.QListWidget, Base):
 
   # To be done more rigeriously later
   _styleSheet = """
@@ -55,7 +55,7 @@ class ListWidget(QtGui.QListWidget, Base):
                , copyDrop=True
                ,  **kw):
 
-    QtGui.QListWidget.__init__(self, parent)
+    QtWidgets.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
@@ -95,14 +95,14 @@ class ListWidget(QtGui.QListWidget, Base):
     self.objects = list(objects)
     for obj in objects:
       if hasattr(obj, name):
-        item = QtGui.QListWidgetItem(getattr(obj, name), self)
+        item = QtWidgets.QListWidgetItem(getattr(obj, name), self)
         item.setData(QtCore.Qt.UserRole, obj)
         obj.item = item
         self.addItem(item)
         self.items.append(item)
 
       else:
-        item = QtGui.QListWidgetItem(str(obj))
+        item = QtWidgets.QListWidgetItem(str(obj))
         item.setData(QtCore.Qt.UserRole, obj)
         self.addItem(item)
 
@@ -355,7 +355,7 @@ class ListWidgetPair(Frame):
                                , callbacks=[self._moveLeft, self._moveRight]
                                , direction='v'
                                , grid=(3,3), hAlign='c')
-      self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+      self.buttons.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
       transparentStyle = "background-color: transparent; border: 0px solid transparent"
       self.buttons.setStyleSheet(transparentStyle)
 
@@ -363,19 +363,19 @@ class ListWidgetPair(Frame):
     #                          , icon=self.rightIcon
     #                          , callback=self._copyRight
     #                          , grid=(3,3))
-    # self.button.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     self.spacer1 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
     self.spacer2 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,2), gridSpan=(1,1))
     self.spacer3 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(4,4), gridSpan=(1,1))
     self.spacer4 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(6,4), gridSpan=(1,1))
 
     for i, cs in enumerate([2,8,1,1,1,8,2]):
@@ -401,7 +401,7 @@ class ListWidgetPair(Frame):
     list.clear()
     if objs:
       for item in objs:
-        item = QtGui.QListWidgetItem(str(item.pid))
+        item = QtWidgets.QListWidgetItem(str(item.pid))
         list.addItem(item)
     list.sortItems()
 
@@ -410,7 +410,7 @@ class ListWidgetPair(Frame):
     Move contents of the right window to the left window
     """
     for item in self.rightList.selectedItems():
-      leftItem = QtGui.QListWidgetItem(item)
+      leftItem = QtWidgets.QListWidgetItem(item)
       self.leftList.addItem(leftItem)
       self.rightList.takeItem(self.rightList.row(item))
     self.leftList.sortItems()
@@ -420,7 +420,7 @@ class ListWidgetPair(Frame):
     Move contents of the left window to the right window
     """
     for item in self.leftList.selectedItems():
-      rightItem = QtGui.QListWidgetItem(item)
+      rightItem = QtWidgets.QListWidgetItem(item)
       self.rightList.addItem(rightItem)
       self.leftList.takeItem(self.leftList.row(item))
     self.rightList.sortItems()
@@ -429,7 +429,7 @@ class ListWidgetPair(Frame):
     """
     Move contents of the right window to the left window
     """
-    rightItem = QtGui.QListWidgetItem(self.rightList.selectedItems())
+    rightItem = QtWidgets.QListWidgetItem(self.rightList.selectedItems())
     self.leftList.addItem(rightItem)
     self.rightList.takeItem(self.rightList.row(rightItem))
     self.leftList.sortItems()
@@ -438,7 +438,7 @@ class ListWidgetPair(Frame):
     """
     Move contents of the left window to the right window
     """
-    leftItem = QtGui.QListWidgetItem(self.leftList.selectedItem)
+    leftItem = QtWidgets.QListWidgetItem(self.leftList.selectedItem)
     self.rightList.addItem(leftItem)
     self.leftList.takeItem(self.leftList.row(leftItem))
     self.rightList.sortItems()
@@ -448,7 +448,7 @@ class ListWidgetPair(Frame):
     Copy selection of the left window to the right window
     """
     for item in self.leftList.selectedItems():
-      rightItem = QtGui.QListWidgetItem(item)
+      rightItem = QtWidgets.QListWidgetItem(item)
       self.rightList.addItem(rightItem)
     self.rightList.sortItems()
 
@@ -558,7 +558,7 @@ class ListWidgetSelector(Frame):
     #                          , callbacks=[self._moveLeft, self._moveRight]
     #                          , direction='v'
     #                          , grid=(3,3), hAlign='c')
-    # self.buttons.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    # self.buttons.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
     # transparentStyle = "background-color: transparent; border: 0px solid transparent"
     # self.buttons.setStyleSheet(transparentStyle)
 
@@ -566,19 +566,19 @@ class ListWidgetSelector(Frame):
     #                          , icon=self.rightIcon
     #                          , callback=self._copyRight
     #                          , grid=(3,3))
-    # self.button.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     self.spacer1 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,2), gridSpan=(1,1))
     self.spacer2 = Spacer(self, 10, 10
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,2), gridSpan=(1,1))
     self.spacer3 = Spacer(self, 10, 10
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(4,4), gridSpan=(1,1))
     self.spacer4 = Spacer(self, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(6,4), gridSpan=(1,1))
 
     for i, cs in enumerate([2,6,1,1,1,6,2]):
@@ -604,7 +604,7 @@ class ListWidgetSelector(Frame):
     list.clear()
     if objs:
       for item in objs:
-        item = QtGui.QListWidgetItem(str(item.pid))
+        item = QtWidgets.QListWidgetItem(str(item.pid))
         list.addItem(item)
     list.sortItems()
 
@@ -613,7 +613,7 @@ class ListWidgetSelector(Frame):
     Move contents of the right window to the left window
     """
     for item in self.rightList.selectedItems():
-      leftItem = QtGui.QListWidgetItem(item)
+      leftItem = QtWidgets.QListWidgetItem(item)
       self.leftList.addItem(leftItem)
       self.rightList.takeItem(self.rightList.row(item))
     self.leftList.sortItems()
@@ -623,7 +623,7 @@ class ListWidgetSelector(Frame):
     Move contents of the left window to the right window
     """
     for item in self.leftList.selectedItems():
-      rightItem = QtGui.QListWidgetItem(item)
+      rightItem = QtWidgets.QListWidgetItem(item)
       self.rightList.addItem(rightItem)
       self.leftList.takeItem(self.leftList.row(item))
     self.rightList.sortItems()
@@ -632,7 +632,7 @@ class ListWidgetSelector(Frame):
     """
     Move contents of the right window to the left window
     """
-    rightItem = QtGui.QListWidgetItem(self.rightList.selectedItems())
+    rightItem = QtWidgets.QListWidgetItem(self.rightList.selectedItems())
     self.leftList.addItem(rightItem)
     self.rightList.takeItem(self.rightList.row(rightItem))
     self.leftList.sortItems()
@@ -641,7 +641,7 @@ class ListWidgetSelector(Frame):
     """
     Move contents of the left window to the right window
     """
-    leftItem = QtGui.QListWidgetItem(self.leftList.selectedItem)
+    leftItem = QtWidgets.QListWidgetItem(self.leftList.selectedItem)
     self.rightList.addItem(leftItem)
     self.leftList.takeItem(self.leftList.row(leftItem))
     self.rightList.sortItems()
@@ -651,7 +651,7 @@ class ListWidgetSelector(Frame):
     Copy selection of the left window to the right window
     """
     for item in self.leftList.selectedItems():
-      rightItem = QtGui.QListWidgetItem(item)
+      rightItem = QtWidgets.QListWidgetItem(item)
       self.rightList.addItem(rightItem)
     self.rightList.sortItems()
 

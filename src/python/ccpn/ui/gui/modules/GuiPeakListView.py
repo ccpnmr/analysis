@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # import pyqtgraph as pg
 
@@ -46,15 +46,15 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 NULL_RECT = QtCore.QRectF()
 IDENTITY = QtGui.QTransform()
 IDENTITY.reset()
-# class PeakLayer(QtGui.QGraphicsItem):
+# class PeakLayer(QtWidgets.QGraphicsItem):
 #
 #   def __init__(self, scene):
 #
-#     QtGui.QGraphicsItem.__init__(self, scene=scene)
+#     QtWidgets.QGraphicsItem.__init__(self, scene=scene)
 #
 #     # self.glWidget = glWidget
 #     self.peaks = {}
-#     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+#     self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
 #
 #
 #   def boundingRect(self):
@@ -123,7 +123,7 @@ def _getPeakAnnotation(peak):
 #   text = ', '.join(peakLabel)
 #   return text
 
-class GuiPeakListView(QtGui.QGraphicsItem):
+class GuiPeakListView(QtWidgets.QGraphicsItem):
 
   def __init__(self):
     """ peakList is the CCPN wrapper object
@@ -132,11 +132,11 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     # A big NONO!!!
     strip = self.spectrumView.strip
     scene = strip.plotWidget.scene()
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     ###self.strip = strip
     ###self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
-    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
+    self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
     self.application = self.spectrumView.application
 
     strip.viewBox.addItem(self)
@@ -263,7 +263,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
         peakItem.update()     # ejb - force a repaint of the peakItem
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
-class Peak1d(QtGui.QGraphicsItem):
+class Peak1d(QtWidgets.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself,
   but is the parent of the peak symbol and peak annotation.
       TODO: Add hover effect for 1D peaks. """
@@ -272,7 +272,7 @@ class Peak1d(QtGui.QGraphicsItem):
 
 
     scene = peakListView.spectrumView.strip.plotWidget.scene()
-    QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
 
     self.application = peakListView.application
 
@@ -295,8 +295,8 @@ class Peak1d(QtGui.QGraphicsItem):
     self.bbox = NULL_RECT
 
     self.setCacheMode(self.NoCache)
-    self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
-    self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
+    self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
+    self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
     # self.scene().sigMouseClicked.connect(self.peakClicked)
     self.pointPos = peak.pointPosition
     self.ppm = peak.position[self.dim]
@@ -355,8 +355,8 @@ class Peak1d(QtGui.QGraphicsItem):
   #
   #     event.accept()
   #     self.scene.clearSelection()
-  #     self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-  #     QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
+  #     self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+  #     QtWidgets.QGraphicsSimpleTextItem.mousePressEvent(self, event)
   #     self.setSelected(True)
   #     print(self.peak)
 
@@ -369,13 +369,13 @@ class Peak1d(QtGui.QGraphicsItem):
 
     return
 
-class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
+class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
   def __init__(self, peakItem, scene):
 
-    QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
@@ -414,8 +414,8 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     #           event.modifiers() & QtCore.Qt.ShiftModifier):
 
       self.scene.clearSelection()
-      self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
-      QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
+      self.setFlag(QtWidgets.QGraphicsSimpleTextItem.ItemIsMovable)
+      QtWidgets.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
       self.peakItem.setSelected(True)
       self.peakItem.application.current.peak = self.peak
@@ -467,19 +467,19 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     if self.peak: # TBD: is this ever not true??
       self.setSelected(self.peak in self.application.current.peaks)
       # self.setSelected(self.peak.isSelected)
-    QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
+    QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
     # if self.peakItem.peak in self.analysisLayout.currentPeaks:
     # painter.drawRect(self.boundingRect())
 
-class Peak1dSymbol(QtGui.QGraphicsItem):
+class Peak1dSymbol(QtWidgets.QGraphicsItem):
   """ A graphical symbol representing the peak.
       Currently only a dashed line from the peak to the peak annotation is used. This can be improved.
       The length of the line is related to the height of the peak. """
 
   def __init__(self, scene, parent):
 
-    QtGui.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
 
 
 
@@ -560,27 +560,27 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
 
       event.accept()
       # self.scene.clearSelection()
-      self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-      QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
+      self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+      QtWidgets.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
       self.update()
 
 
 
-class PeakNd(QtGui.QGraphicsItem):
+class PeakNd(QtWidgets.QGraphicsItem):
 
   def __init__(self, peakListView, peak):
 
     self.application = peakListView.application
     scene = peakListView.spectrumView.strip.plotWidget.scene()
-    #QtGui.QGraphicsItem.__init__(self, scene=scene)
+    #QtWidgets.QGraphicsItem.__init__(self, scene=scene)
     self.colourScheme =self.application.colourScheme
-    QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
-    ###QtGui.QGraphicsItem.__init__(self, peakLayer)
+    QtWidgets.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
+    ###QtWidgets.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
     ###strip.plotWidget.plotItem.vb.addItem(self)
     # turn off ItemIsSelectable because it fails miserably when you zoom in (have to pick exactly in the centre)
-    ###self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
+    ###self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable + self.ItemIgnoresTransformations)
     self.setFlag(self.ItemIgnoresTransformations)
     self.peakListView = peakListView
     self.annotation = PeakNdAnnotation(self, scene)
@@ -612,7 +612,7 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)
     # self.drawData = (hz, sz, QtCore.QRectF(-hz, -hz, sz, sz))
     """
-    self.rectItem = QtGui.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
+    self.rectItem = QtWidgets.QGraphicsRectItem(-hz, -hz, sz, sz, self.peakLayer, scene)
     color = QtGui.QColor('cyan')
     self.rectItem.setBrush(QtGui.QBrush(color))
     """
@@ -625,7 +625,7 @@ class PeakNd(QtGui.QGraphicsItem):
     # self.inPlane = self.isInPlane()
 
     # from ccpn.ui.gui.widgets.Action import Action
-    # self.deleteAction = QtGui.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
+    # self.deleteAction = QtWidgets.QAction(self, triggered=self.deletePeak, shortcut=QtCore.Qt.Key_Delete)
     #peakLayer.peakItems.append(self)
   #
 
@@ -712,7 +712,7 @@ class PeakNd(QtGui.QGraphicsItem):
     ###self.bbox = box.adjusted(-26,-51, 2, 51)
     # # self.peakLayer.showIcons(self)
     # self.update()
-    # QtGui.QGraphicsItem.mousePressEvent(self, event)
+    # QtWidgets.QGraphicsItem.mousePressEvent(self, event)
 
 
   def boundingRect(self):
@@ -726,7 +726,7 @@ class PeakNd(QtGui.QGraphicsItem):
   """
   def itemChange(self, change, value):
 
-    if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
+    if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
       peak = self.peak
       selected = peak.isSelected = self.isSelected()
       current = self.application.current
@@ -737,7 +737,7 @@ class PeakNd(QtGui.QGraphicsItem):
         if peak in current.peaks:
           current.removePeak(peak)
 
-    return QtGui.QGraphicsItem.itemChange(self, change, value)
+    return QtWidgets.QGraphicsItem.itemChange(self, change, value)
 """
   #@profile
   def paint(self, painter, option, widget):
@@ -831,13 +831,13 @@ class PeakNd(QtGui.QGraphicsItem):
 ###NULL_COLOR = QtGui.QColor()
 ###NULL_RECT = QtCore.QRectF()
 
-class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
+class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
   """ A text annotation of a peak.
       The text rotation is currently always +-45 degrees (depending on peak height). """
 
   def __init__(self, peakItem, scene):
 
-    QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsSimpleTextItem.__init__(self, scene=scene)
 
     ###self.setParentItem(peakItem)
     ###self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
@@ -887,8 +887,8 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
               # event.modifiers() & QtCore.Qt.ShiftModifier):
       event.accept()
       # self.scene.clearSelection()
-      # self.setFlag(QtGui.QGraphicsSimpleTextItem.ItemIsMovable)
-      # QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
+      # self.setFlag(QtWidgets.QGraphicsSimpleTextItem.ItemIsMovable)
+      # QtWidgets.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       # self.setSelected(True)
       # print(self.peakItem)
       # self.update()

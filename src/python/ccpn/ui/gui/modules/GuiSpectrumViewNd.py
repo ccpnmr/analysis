@@ -32,7 +32,7 @@ import os
 from OpenGL import GL
 from OpenGL.error import GLError
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import pyqtgraph as pg
 
@@ -168,7 +168,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     colour = Colour.rgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     rect = QtCore.QRectF(xLimits[0], yLimits[0], xLimits[1]-xLimits[0], yLimits[1]-yLimits[0])
-    self.borderItem = QtGui.QGraphicsRectItem(rect)
+    self.borderItem = QtWidgets.QGraphicsRectItem(rect)
     self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
     self.strip.viewBox.addItem(self.borderItem)
 

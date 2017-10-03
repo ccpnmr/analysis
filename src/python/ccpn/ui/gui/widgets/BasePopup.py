@@ -26,16 +26,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 
-class BasePopup(QtGui.QWidget, Base):
+class BasePopup(QtWidgets.QWidget, Base):
 
   def __init__(self, parent=None, title='', location=None, hide=False,
                modal=False, closeFunc=None, tipText=None, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     
     self.closeFunc = closeFunc
@@ -77,7 +77,7 @@ class BasePopup(QtGui.QWidget, Base):
     if self.closeFunc:
       self.closeFunc()
     
-    QtGui.QWidget.closeEvent(self, event)
+    QtWidgets.QWidget.closeEvent(self, event)
  
   def open(self):
 
@@ -100,7 +100,7 @@ class BasePopup(QtGui.QWidget, Base):
   #   if h is None:
   #     h = self.rect().width()
   #
-  #   screenRect = QtGui.QApplication.desktop()
+  #   screenRect = QtWidgets.QApplication.desktop()
   #
   #   sWidth = screenRect.width()
   #   sHeight = screenRect.height()
@@ -124,7 +124,7 @@ class BasePopup(QtGui.QWidget, Base):
   #   elif y < 0:
   #     y = 0
   #
-  #   QtGui.QWidget.setGeometry(self, x, y, w, h)
+  #   QtWidgets.QWidget.setGeometry(self, x, y, w, h)
 
   def body(self, master):
     
@@ -151,8 +151,8 @@ if __name__ == '__main__':
       button = Button(self, text='close', callback=self.close, grid=(3,0))
 
   popup = None
-  window = QtGui.QWidget()
-  layout = QtGui.QGridLayout()
+  window = QtWidgets.QWidget()
+  layout = QtWidgets.QGridLayout()
   window.setLayout(layout)
 
   def new():

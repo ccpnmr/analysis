@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Wayne Boucher $"
 __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
@@ -30,7 +28,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -50,7 +48,7 @@ def qtMessageHandler(*errors):
     Logging.getLogger().warning('QT error: %s' % err)
 
 # un/suppress messages
-QtCore.qInstallMsgHandler(qtMessageHandler)
+QtCore.qInstallMessageHandler(qtMessageHandler)
 
 
 class Gui(Ui):
@@ -286,7 +284,7 @@ class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
 
   def __init__(self, project: Project, wrappedData:'ApiWindow'):
-    AbstractWrapperObject. __init__(self, project, wrappedData)
+    AbstractWrapperObject.__init__(self, project, wrappedData)
 
     logger = Logging.getLogger()
 
@@ -294,7 +292,8 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> project._appBase: %s' % project._appBase)
 
     application = project._appBase
-    _GuiMainWindow.__init__(self, application = application)
+    _GuiMainWindow.__init__(self, application=application)
+    # _GuiMainWindow.__init__(self)
 
     # patches for now:
     project._mainWindow = self

@@ -36,7 +36,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.lib.Pipeline import Pipeline
 import pandas as pd
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
@@ -248,14 +248,14 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _setMainLayout(self):
     self.mainFrame = Frame(self.mainWidget, setLayout=False)
-    self.mainLayout = QtGui.QVBoxLayout()
+    self.mainLayout = QtWidgets.QVBoxLayout()
     self.mainFrame.setLayout(self.mainLayout)
     self.mainWidget.getLayout().addWidget(self.mainFrame, 0, 0, 0 ,0)
 
   def _setSecondaryLayouts(self):
-    self.settingFrameLayout = QtGui.QHBoxLayout()
-    self.goAreaLayout = QtGui.QHBoxLayout()
-    self.pipelineAreaLayout = QtGui.QHBoxLayout()
+    self.settingFrameLayout = QtWidgets.QHBoxLayout()
+    self.goAreaLayout = QtWidgets.QHBoxLayout()
+    self.pipelineAreaLayout = QtWidgets.QHBoxLayout()
     self.mainLayout.addLayout(self.settingFrameLayout)
     self.mainLayout.addLayout(self.goAreaLayout)
     self.mainLayout.addLayout(self.pipelineAreaLayout)
@@ -280,9 +280,9 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _addMenuToOpenButton(self):
     openButton = self.settingButtons.buttons[0]
-    menu = QtGui.QMenu()
+    menu = QtWidgets.QMenu()
     templatesItem = menu.addAction('Templates')
-    subMenu = QtGui.QMenu()
+    subMenu = QtWidgets.QMenu()
     if self.pipelineTemplates is not None:
       for item in self.pipelineTemplates:
         templatesSubItem = subMenu.addAction(item)
@@ -579,14 +579,14 @@ class GuiPipeline(CcpnModule, Pipeline):
     rows = self.settingsWidget.layout().rowCount()
     cols = self.settingsWidget.layout().columnCount()
     Spacer(self.settingsWidget, 5, 5
-           , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+           , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
            , grid=(rows,cols), gridSpan=(1,1))
 
     self._setSettingsParams()
 
   def _createSettingsGroupBox(self):
     self.settingFrame = Frame(self, setLayout=False)
-    self.settingWidgetsLayout = QtGui.QGridLayout()
+    self.settingWidgetsLayout = QtWidgets.QGridLayout()
     self.settingFrame.setLayout(self.settingWidgetsLayout)
     self.settingsWidget.getLayout().addWidget(self.settingFrame)
     self.settingsWidget.getLayout().setAlignment(self.settingFrame, QtCore.Qt.AlignLeft)
@@ -598,7 +598,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _getInputDataHeaderLabel(self):
     color = QtGui.QColor('Red')
-    header = QtGui.QListWidgetItem(DropHereLabel)
+    header = QtWidgets.QListWidgetItem(DropHereLabel)
     header.setFlags(QtCore.Qt.NoItemFlags)
     header.setTextColor(color)
     return header
@@ -829,7 +829,7 @@ class FilterMethods(CcpnDialog):
 
 
   def _setMainLayout(self):
-    self.mainLayout = QtGui.QGridLayout()
+    self.mainLayout = QtWidgets.QGridLayout()
     self.setLayout(self.mainLayout)
     self.setWindowTitle("Filter Methods")
     self.resize(250, 300)
@@ -925,7 +925,7 @@ if __name__ == '__main__':
   _loadScreenPipes()
 
   app = TestApplication()
-  win = QtGui.QMainWindow()
+  win = QtWidgets.QMainWindow()
 
   moduleArea = CcpnModuleArea(mainWindow=None, )
   pipeline = GuiPipeline(mainWindow=None, pipes = loadedPipes)

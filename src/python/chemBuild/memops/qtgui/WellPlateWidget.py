@@ -1,17 +1,17 @@
 from math import ceil
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
 
-class WellPlateWidget(QtGui.QWidget, Base):
+class WellPlateWidget(QtWidgets.QWidget, Base):
   
   wellSelected = QtCore.Signal(int)
 
   def __init__(self, parent = None, objects = None, colorKeyWord = None, baseColor = None, **kw):
     
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.objects = objects
@@ -62,13 +62,13 @@ class WellPlateWidget(QtGui.QWidget, Base):
       
     self.wellSelected.connect(wellSelectedReaction)
 
-class Well(QtGui.QWidget):
+class Well(QtWidgets.QWidget):
   
   selected = QtCore.Signal(int)
   
   def __init__(self, parent, index, baseColor = 'blue', colorIntensity = 225, pos = None, size = None, text = None):
     
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     
     self.parent = parent
     self.index = index

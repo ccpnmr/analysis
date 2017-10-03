@@ -26,14 +26,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.framework.Translation import translator
 
-class Label(QtGui.QLabel, Base):
+class Label(QtWidgets.QLabel, Base):
 
   _styleSheet = """
   QLabel {
@@ -52,7 +52,7 @@ class Label(QtGui.QLabel, Base):
                margins=[2, 1, 2, 1], **kwds):
 
     text = translator.translate(text)
-    QtGui.QLabel.__init__(self, text, parent)
+    QtWidgets.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kwds)
 
     # if textColor:
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
   app = TestApplication()
   
-  window = QtGui.QWidget()
+  window = QtWidgets.QWidget()
  
   label = Label(window, text=msg, textColor='red', grid=(0,0))
   button = Button(window, text='Click me', callback=func, grid=(0,1))

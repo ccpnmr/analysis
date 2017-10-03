@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -257,17 +257,17 @@ class NmrResidueTable(ObjectTable):
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.ncWidget = NmrChainPulldown(parent=self._widget,
                                      project=self._project, default=0,  #first NmrChain in project (if present)
                                      grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100),
                                      showSelectName=True,
-                                     sizeAdjustPolicy=QtGui.QComboBox.AdjustToContents,
+                                     sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                      callback=self._selectionPulldownCallback
                                      )
     self.spacer = Spacer(self._widget, 5, 5
-                         , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
+                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
     ObjectTable.__init__(self, parent=self._widget, setLayout=True,
                          columns=self.NMRcolumns, objects = [],

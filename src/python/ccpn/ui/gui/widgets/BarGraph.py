@@ -1,5 +1,5 @@
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
 
 import ccpn.ui.gui.widgets.ViewBox as spectrumViewbox
@@ -124,13 +124,13 @@ class BarGraph(pg.BarGraphItem):
 
 
 
-class CustomLabel(QtGui.QGraphicsSimpleTextItem):
+class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
   """ A text annotation of a bar.
       """
 
   def __init__(self, text):
 
-    QtGui.QGraphicsSimpleTextItem.__init__(self)
+    QtWidgets.QGraphicsSimpleTextItem.__init__(self)
 
     self.setText(text)
     font = self.font()
@@ -154,7 +154,7 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
 
   def paint(self, painter, option, widget):
     self._selectCurrentNmrResidue()
-    QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
+    QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
   def _selectCurrentNmrResidue(self):
 
@@ -180,7 +180,7 @@ class CustomViewBox(pg.ViewBox):
 
 
   def addSelectionBox(self):
-    self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
+    self.selectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
     self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
     self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
     self.selectionBox.setZValue(1e9)
@@ -428,7 +428,7 @@ for x, y in zip(x1,y1):
 # if __name__ == '__main__':
 #   import sys
 #   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-#     QtGui.QApplication.instance().exec_()
+#     QtWidgets.QApplication.instance().exec_()
 #
 #
 #

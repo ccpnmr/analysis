@@ -70,27 +70,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 
 
-class Frame(QtGui.QFrame, Base):
+class Frame(QtWidgets.QFrame, Base):
 
   FRAME_DICT = {
       # Shadow
-      'plain':       QtGui.QFrame.Plain,
-      'raised':      QtGui.QFrame.Raised,
-      'sunken':      QtGui.QFrame.Sunken,
+      'plain':       QtWidgets.QFrame.Plain,
+      'raised':      QtWidgets.QFrame.Raised,
+      'sunken':      QtWidgets.QFrame.Sunken,
       # Shapes
-      'noFrame':     QtGui.QFrame.NoFrame,
-      'box':         QtGui.QFrame.Box,
-      'panel':       QtGui.QFrame.Panel,
-      'styledPanel': QtGui.QFrame.StyledPanel,
-      'hLine':       QtGui.QFrame.HLine,
-      'vLine':       QtGui.QFrame.VLine,
+      'noFrame':     QtWidgets.QFrame.NoFrame,
+      'box':         QtWidgets.QFrame.Box,
+      'panel':       QtWidgets.QFrame.Panel,
+      'styledPanel': QtWidgets.QFrame.StyledPanel,
+      'hLine':       QtWidgets.QFrame.HLine,
+      'vLine':       QtWidgets.QFrame.VLine,
   }
 
   def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
@@ -103,7 +103,7 @@ class Frame(QtGui.QFrame, Base):
 
     """
 
-    QtGui.QFrame.__init__(self, parent)
+    QtWidgets.QFrame.__init__(self, parent)
 
     #TODO: replace with proper stylesheet routines once inplemented
     styleSheet = ''
@@ -131,7 +131,7 @@ class Frame(QtGui.QFrame, Base):
       Define frame properties:
       """
       #TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX
-      shape = self.FRAME_DICT.get(fShape, QtGui.QFrame.NoFrame)
+      shape = self.FRAME_DICT.get(fShape, QtWidgets.QFrame.NoFrame)
       shadow = self.FRAME_DICT.get(fShadow, 0)
       #print('>>', shape, shadow)
       #print('Frame.framestyle>', shape | shadow)
@@ -173,7 +173,7 @@ class ScrollableFrame(Frame):
 
     # configure the scroll area to allow all available space without margins
     self.scrollArea.setContentsMargins(0, 0, 0, 0)
-    self.scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     #self._sequenceGraphScrollArea.setWidgetResizable(True)
     self.setScrollBarPolicies(scrollBarPolicies)
     # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
@@ -223,7 +223,7 @@ class ScrollableFrame2(Widget):
 
     # configure the scroll area to allow all available space without margins
     self._scrollArea.setContentsMargins(0, 0, 0, 0)
-    self._scrollArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.setScrollBarPolicies(scrollBarPolicies)
     # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
     #self.show()

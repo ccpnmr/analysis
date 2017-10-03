@@ -1,14 +1,14 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from memops.qtgui.Frame import Frame
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
 
   def __init__(self, parent=None, title='', location=None, hide=False,  **kw):
 
-    QtGui.QMainWindow.__init__(self, parent)
+    QtWidgets.QMainWindow.__init__(self, parent)
 
     self.mainFrame = Frame(self)
     self.setCentralWidget(self.mainFrame)

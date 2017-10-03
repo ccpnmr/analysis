@@ -27,13 +27,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 import pyqtgraph.console as console
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 class Console(console.ConsoleWidget):
   def __init__(self, parent=None, namespace=None, historyFile=None):
     console.ConsoleWidget.__init__(self, parent, namespace)
     # self.console.addAction()
-    self.runMacroButton = QtGui.QPushButton()
+    self.runMacroButton = QtWidgets.QPushButton()
     # self.console.ui.runMacroButton.setCheckable(True)
     self.runMacroButton.setText('Run Macro')
     self.ui.horizontalLayout.addWidget(self.runMacroButton)

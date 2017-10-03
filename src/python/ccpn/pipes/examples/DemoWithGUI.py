@@ -100,11 +100,11 @@ class DemoPipe1(Pipe):
 ########################################################################################################################
 
 if __name__ == '__main__':
-  from PyQt4 import QtGui
+  from PyQt5 import QtGui, QtWidgets
   from ccpn.ui.gui.widgets.Application import TestApplication
 
   app = TestApplication()
-  win = QtGui.QMainWindow()
+  win = QtWidgets.QMainWindow()
 
   pipeline = PipelineDropArea()
   demoGuiPipe = DemoGuiPipe(parent=pipeline)

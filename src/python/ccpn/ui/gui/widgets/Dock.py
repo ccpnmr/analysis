@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 
@@ -37,8 +37,8 @@ class CcpnDock(Dock):
     self.label.closeButton.clicked.connect(self.closeModule)
     self.label.fixedWidth = True
     self.autoOrientation = False
-    self.mainWidget = QtGui.QWidget(self)
-    self.settingsWidget = QtGui.QWidget(self)
+    self.mainWidget = QtWidgets.QWidget(self)
+    self.settingsWidget = QtWidgets.QWidget(self)
     self.addWidget(self.mainWidget, 0, 0)
     self.addWidget(self.settingsWidget, 1, 0)
 

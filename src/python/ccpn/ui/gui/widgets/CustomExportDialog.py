@@ -4,7 +4,7 @@ Reimplementation of PyQtGraph
 '''
 
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt import Ui_Form
 
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
@@ -25,7 +25,7 @@ class CustomExportDialog(QtGui.QDialog):
     self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
     self.setWindowFlags(self.windowFlags() & QtCore.Qt.WindowStaysOnTopHint)
 
-    # self.selectBox = QtGui.QGraphicsRectItem()
+    # self.selectBox = QtWidgets.QGraphicsRectItem()
     # self.selectBox.setPen(pg.functions.mkPen('y', width=3, style=QtCore.Qt.DashLine))
     # self.selectBox.hide()
     # self.scene.addItem(self.selectBox)
@@ -104,7 +104,7 @@ class CustomExportDialog(QtGui.QDialog):
 
   def updateItemList(self, select=None):
     self.ui.itemTree.clear()
-    si = QtGui.QTreeWidgetItem(["Entire Scene"])
+    si = QtWidgets.QTreeWidgetItem(["Entire Scene"])
     si.gitem = self.scene
     self.ui.itemTree.addTopLevelItem(si)
     self.ui.itemTree.setCurrentItem(si)
@@ -116,9 +116,9 @@ class CustomExportDialog(QtGui.QDialog):
   def updateItemTree(self, item, treeItem, select=None):
     si = None
     if isinstance(item, pg.ViewBox):
-      si = QtGui.QTreeWidgetItem(['ViewBox'])
+      si = QtWidgets.QTreeWidgetItem(['ViewBox'])
     elif isinstance(item, pg.PlotItem):
-      si = QtGui.QTreeWidgetItem(['Plot'])
+      si = QtWidgets.QTreeWidgetItem(['Plot'])
 
     if si is not None:
       si.gitem = item

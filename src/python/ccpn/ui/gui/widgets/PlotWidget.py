@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence
 
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui, QtOpenGL
+from PyQt5 import QtCore, QtGui, QtWidgets, QtOpenGL
 
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
 from ccpn.ui.gui.widgets.ViewBox import CrossHair
@@ -77,7 +77,7 @@ class PlotWidget(pg.PlotWidget):
       # need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom
       # (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)
       # (NoViewportUpdate might work if you could explicitly get the view to repaint when needed)
-      self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+      self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
 
     strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 
@@ -139,7 +139,7 @@ class PlotWidget(pg.PlotWidget):
     except NameError:
       raise AttributeError(attr)
 
-  def addItem(self, item:QtGui.QGraphicsObject):
+  def addItem(self, item:QtWidgets.QGraphicsObject):
     """
     Adds specified graphics object to the Graphics Scene of the PlotWidget.
     """

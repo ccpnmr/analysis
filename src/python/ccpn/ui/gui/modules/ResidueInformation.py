@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -64,8 +64,8 @@ class ResidueInformation(CcpnModule):
     self.selectedResidueType = self.residuePulldown.currentText()
     self.residueWidget = Widget(self.mainWidget, setLayout=True
                                 , grid=(1,0), gridSpan=(1,5))
-    # self.residueWidget = QtGui.QWidget(self)
-    # self.residueWidget.setLayout(QtGui.QGridLayout())
+    # self.residueWidget = QtWidgets.QWidget(self)
+    # self.residueWidget.setLayout(QtWidgets.QGridLayout())
     # self.project = project
     # self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
     self._getResidues()

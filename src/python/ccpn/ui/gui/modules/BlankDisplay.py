@@ -37,7 +37,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 
 class BlankDisplay(CcpnModule):

@@ -32,7 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
@@ -75,12 +75,12 @@ class SequenceModule(CcpnModule):
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
-    self.scrollArea.scene = QtGui.QGraphicsScene(self)
-    self.scrollContents = QtGui.QGraphicsView(self.scrollArea.scene, self)
+    self.scrollArea.scene = QtWidgets.QGraphicsScene(self)
+    self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
-    self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
+    self.horizontalLayout2 = QtWidgets.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
     self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
                           QScrollArea QScrollBar::vertical{max-width:20px;}
@@ -198,14 +198,14 @@ class SequenceModule(CcpnModule):
         self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
 
-class GuiChainLabel(QtGui.QGraphicsTextItem):
+class GuiChainLabel(QtWidgets.QGraphicsTextItem):
   """
   This class is acts as an anchor for each chain displayed in the Sequence Module.
   On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
   along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
   """
   def __init__(self, sequenceModule, project, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
-    QtGui.QGraphicsTextItem.__init__(self)
+    QtWidgets.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
     self.items = [self]  # keeps track of items specific to this chainLabel
@@ -263,7 +263,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.currentIndex += 1
     value = int(residue.sequenceCode)-1 if useSequenceCode else number
     if value % 10 == 9:  # print out every 10
-      numberItem = QtGui.QGraphicsTextItem(residue.sequenceCode)
+      numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
       numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
       numberItem.setFont(fixedWidthFont)
       xPosition = self.labelPosition + (20 * self.currentIndex)
@@ -306,13 +306,13 @@ def _interpretEvent(event):
   return (None, None)
 
 
-class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
+class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
 
   fontSize = 20
 
   def __init__(self, guiChainLabel, project, residue, scene, labelPosition, index, yPosition):
 
-    QtGui.QGraphicsTextItem.__init__(self)
+    QtWidgets.QGraphicsTextItem.__init__(self)
     Base.__init__(self, acceptDrops=True)
 
     self.project = project
@@ -348,7 +348,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent
     self.scene = scene
-    self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
+    self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
 
   def _styleResidue(self):
@@ -366,7 +366,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
   def _setFontBold(self):
     """
-    Sets font to bold, necessary as QtGui.QGraphicsTextItems are used for display of residue
+    Sets font to bold, necessary as QtWidgets.QGraphicsTextItems are used for display of residue
     one letter codes.
     """
     format = QtGui.QTextCharFormat()

@@ -1,13 +1,13 @@
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from .Base import Base
 
-class LabelFrame(QtGui.QGroupBox, Base):
+class LabelFrame(QtWidgets.QGroupBox, Base):
 
   def __init__(self, parent=None, text='', **kw):
 
-    QtGui.QGroupBox.__init__(self, parent)
+    QtWidgets.QGroupBox.__init__(self, parent)
     Base.__init__(self, parent, **kw)
     
     self.setText(text)

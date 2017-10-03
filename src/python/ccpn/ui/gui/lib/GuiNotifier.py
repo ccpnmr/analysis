@@ -42,7 +42,7 @@ from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 
@@ -66,7 +66,7 @@ class GuiNotifier(object):
   trigger             targetName           callbackDict keys          Notes
   ____________________________________________________________________________________________________________________
 
-  Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtGui.QWidget and 
+  Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtWidgets.QWidget and
                                                                       be droppable
                                             trigger, notifier,        targetName: optional dropTargets to filter for
                                             event, isCcpnJson,        before callback (None to skip, defined in DropBase)
@@ -102,7 +102,7 @@ class GuiNotifier(object):
     """
 
     # some sanity checks
-    if not isinstance(theObject, QtGui.QWidget):
+    if not isinstance(theObject, QtWidgets.QWidget):
       raise RuntimeError('Invalid object (%r), expected object of type QWidget' % theObject)
 
     if triggers is None:
@@ -209,7 +209,7 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Widget import Widget
   from ccpn.ui.gui.widgets.Button import Button
 
-  from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
+  from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
 
   class MyWidget(Widget):

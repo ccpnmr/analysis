@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from functools import partial
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
 from ccpn.ui.gui.widgets.Base import Base
@@ -41,10 +41,10 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 #                                                       getShiftlistForPeak,
 #                                                       matchingNmrAtomsForDimensionOfPeaks)
 
-class ObjectAssigner(QtGui.QWidget, Base):
+class ObjectAssigner(QtWidgets.QWidget, Base):
   def __init__(self, parent, project, dim, objects, opts, **kw):
 
-    QtGui.QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
 
@@ -102,8 +102,8 @@ class ObjectAssigner(QtGui.QWidget, Base):
     # self.labels.append(label)
 
   def createAssignmentWidget(self, dim):
-    newAssignmentWidget = QtGui.QWidget()
-    newLayout = QtGui.QGridLayout()
+    newAssignmentWidget = QtWidgets.QWidget()
+    newLayout = QtWidgets.QGridLayout()
     chainLabel = Label(self, 'Chain', hAlign='c')
     seqCodeLabel = Label(self, 'Sequence', hAlign='c')
     residueTypeLabel = Label(self, 'Type', hAlign='c')

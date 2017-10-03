@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from .Base import Base
 
@@ -17,7 +17,7 @@ class ProgressDialog(QtGui.QProgressDialog):
      
   def setText(self, text):
    
-    self.setLabel(QtGui.QLabel(text, self))
+    self.setLabel(QtWidgets.QLabel(text, self))
       
   def increment(self, n=1):
   

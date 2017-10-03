@@ -1,9 +1,9 @@
 from collections import Mapping, Iterable
 from functools import partial
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtGui import QWidget
+from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore
+from PyQt5.QtGui import QWidget
 
 from ccpn.ui.gui.widgets.Frame import Frame
 

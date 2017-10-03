@@ -24,15 +24,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 import sys
 
-class Application(QtGui.QApplication):
+class Application(QtWidgets.QApplication):
 
   def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
 
-    QtGui.QApplication.__init__(self, [applicationName,])
+    QtWidgets.QApplication.__init__(self, [applicationName,])
 
     self.setApplicationVersion(applicationVersion)
     self.setOrganizationName(organizationName)
@@ -49,7 +49,7 @@ class TestApplication(Application):
 if __name__ == '__main__':
 
   app = TestApplication()
-  w = QtGui.QWidget()
+  w = QtWidgets.QWidget()
   w.resize(250, 150)
   w.move(300, 300)
   w.setWindowTitle('testApplication')

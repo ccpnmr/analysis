@@ -131,6 +131,7 @@ class BarGraph(pg.BarGraphItem):
     NB, changing the text to any other str may not set the objects correctly!
 
     '''
+    self.allLabelsShown = True
     for key, value in self.allValues.items():
       label = CustomLabel(text=str(key))
       self.viewBox.addItem(label)
@@ -197,8 +198,9 @@ class CustomViewBox(pg.ViewBox):
     self.exportDialog = None
     self.addSelectionBox()
     self.application = application
-    self.allLabelsShown = False
-    self.lastRange = self.viewRange()[0]
+    self.allLabelsShown = True
+    self.showAboveThresholdOnly = False
+    self.lastRange = self.viewRange()
 
 
 
@@ -211,15 +213,14 @@ class CustomViewBox(pg.ViewBox):
     # self.selectionBox.hide()
 
   def wheelEvent(self, ev, axis=None):
-    if (self.viewRange()[0][1] - self.viewRange()[0][0]) <= 10+0.0001:
-      self.lastXRange = self.viewRange()[0]
-    if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
-      ev.ignore()
-      self.setRange(xRange=self.lastXRange)
-
-    else:
+    if (self.viewRange()[0][1] - self.viewRange()[0][0]) >= 10.001:
       self.lastRange = self.viewRange()
-      super(CustomViewBox, self).wheelEvent(ev, axis=None)
+      super(CustomViewBox, self).wheelEvent(ev, axis)
+    if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
+      self.setRange(xRange=self.lastRange[0])
+
+
+
 
 
   def _updateSelectionBox(self, p1:float, p2:float):
@@ -338,23 +339,43 @@ class CustomViewBox(pg.ViewBox):
 
   def _raiseContextMenu(self, ev):
 
-    from pyqtgraph.graphicsItems.ViewBox.ViewBoxMenu import ViewBoxMenu
-
     self.contextMenu = Menu('', None, isFloatWidget=True)
     self.contextMenu.addAction('Reset View', self.autoRange)
-    self.addLabelMenu()
-    self.contextMenu.addAction('ThresholdLine', self._toggleThresholdLine,)
+
+    ## ThresholdLine
+    self.thresholdLineAction = QtGui.QAction("Threshold Line", self, triggered=self._toggleThresholdLine, checkable=True, )
+    self._checkThresholdAction()
+    self.contextMenu.addAction(self.thresholdLineAction)
+
+    ## Labels: Show All
+    self.labelsAction = QtGui.QAction("Show Labels", self, triggered=self._toggleLabels, checkable=True, )
+    self.labelsAction.setChecked(self.allLabelsShown)
+    self.contextMenu.addAction(self.labelsAction)
+
+    ## Labels: Show Above Threshold
+    self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
+    self.contextMenu.addAction(self.showAboveThresholdAction)
+
+
     self.contextMenu.addSeparator()
     self.contextMenu.addAction('Export', self.showExportDialog)
     self.contextMenu.exec_(ev.screenPos().toPoint())
 
+  def _checkThresholdAction(self):
+    tls = self.getthreshouldLine()
+    if len(tls) > 0 and not None in tls:
+      if tls[0].isVisible():
+        self.thresholdLineAction.setChecked(True)
+      else:
+        self.thresholdLineAction.setChecked(False)
+
 
   def addLabelMenu(self):
     self.labelMenu = Menu(parent=self.contextMenu, title='Label Menu')
-    self.labelMenu.addItem('Show All',callback=self.showAllLAbels,
-                         checked=False, checkable=True,)
-    self.labelMenu.addItem('Hide All', callback=self.hideAllLAbels,
-                           checked=False, checkable=True,)
+    self.labelMenu.addItem('Show All', callback=self.showAllLabels,
+                           checked=False, checkable=True, )
+    self.labelMenu.addItem('Hide All', callback=self.hideAllLabels,
+                           checked=False, checkable=True, )
     self.labelMenu.addItem('Show Above Threshold', callback=self.showAboveThreshold,
                            checked=False, checkable=True, )
 
@@ -366,7 +387,12 @@ class CustomViewBox(pg.ViewBox):
       for tl in tls:
         tl.setVisible(not tl.isVisible())
 
+  def _toggleLabels(self):
 
+    if self.allLabelsShown:
+      self.hideAllLabels()
+    else:
+      self.showAllLabels()
 
 
 
@@ -375,19 +401,23 @@ class CustomViewBox(pg.ViewBox):
   def getthreshouldLine(self):
     return [tl for tl in self.childGroup.childItems() if isinstance(tl, pg.InfiniteLine)]
 
-  def hideAllLAbels(self):
+  def hideAllLabels(self):
+    self.allLabelsShown = False
+    self.showAboveThresholdOnly = False
     if self.getLabels():
       for label in self.getLabels():
         label.hide()
 
-  def showAllLAbels(self):
+  def showAllLabels(self):
     self.allLabelsShown = True
+    self.showAboveThresholdOnly = False
     if self.getLabels():
       for label in self.getLabels():
         label.show()
 
   def showAboveThreshold(self):
     self.allLabelsShown = False
+    self.showAboveThresholdOnly = True
     if self.getthreshouldLine():
       tl = self.getthreshouldLine()[0]
       yTlPos = tl.pos().y()

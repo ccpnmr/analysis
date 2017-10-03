@@ -865,8 +865,9 @@ class ObjectTable(QtGui.QTableView, Base):
     h = self.horizontalHeader()
     for i in range(h.count()):
       if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
-        self.scrollTo(self.model.index(self.getSelectedRows()[0], i),
-                                      self.PositionAtCenter)
+        if self.getSelectedRows():
+          self.scrollTo(self.model.index(self.getSelectedRows()[0], i),
+                                        self.PositionAtCenter)
 
   def setObject(self, i, object):
     """Replaces an object in the _underlying_ list"""

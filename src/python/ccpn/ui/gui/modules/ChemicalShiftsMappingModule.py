@@ -13,7 +13,6 @@ from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
@@ -21,6 +20,7 @@ from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
+from ccpn.util.Logging import getLogger
 
 
 DefaultAtoms = ['H', 'N']
@@ -121,12 +121,12 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _setWidgets(self):
-    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, xValues=[0],
-                                         yValues=[0], objects=[0], grid=(0, 0))
-    self.barGraphWidget.xLine.setPos(DefaultThreshould)
-    self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
-    if self.application:
 
+    if self.application:
+      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, xValues=[0],
+                                           yValues=[0], objects=[0], grid=(0, 0))
+      self.barGraphWidget.xLine.setPos(DefaultThreshould)
+      self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
                                                    actionCallback= self._customActionCallBack,
                                                    setLayout=True, grid=(1, 0))
@@ -277,12 +277,28 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application.current.clearNmrResidues()
       event.accept()
 
-  def _customActionCallBack(self, obj, *args):
-    if obj:
-      xPos = int(obj.sequenceCode)
-      yPos = obj._deltaShift
+  def _customActionCallBack(self, nmrResidue, *args):
+    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio
+
+
+    if nmrResidue:
+      xPos = int(nmrResidue.sequenceCode)
+      yPos = nmrResidue._deltaShift
       self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
-      self.nmrResidueTable.defaultActionCallback(obj, args)
+      self.application.ui.mainWindow.clearMarks()
+      if self.current.strip is not None:
+        strip = self.current.strip
+        if len(nmrResidue.selectedNmrAtomNames) == 2:
+          nmrAtom1 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[0]))
+          nmrAtom2 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[1]))
+          if nmrAtom1 and nmrAtom2:
+            navigateToNmrAtomsInStrip(strip,
+                                      nmrAtoms=[nmrAtom1, nmrAtom2],
+                                      widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                      markPositions=True
+                                      )
+      else:
+        getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def updateModule(self):
     selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
@@ -333,13 +349,9 @@ class ChemicalShiftsMapping(CcpnModule):
       event.accept()
 
   def _mouseDoubleClickEvent(self, event):
+    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio
 
-    from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
     self.nmrResidueTable.scrollToSelectedIndex()
-    # h = self.nmrResidueTable.horizontalHeader()
-    # for i in range(h.count()):
-    #   if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
-    #     self.nmrResidueTable.scrollTo(self.nmrResidueTable.model.index(self.nmrResidueTable.getSelectedRows()[0],i), self.nmrResidueTable.PositionAtCenter)
 
     self.application.ui.mainWindow.clearMarks()
     position = event.pos().x()
@@ -350,15 +362,20 @@ class ChemicalShiftsMapping(CcpnModule):
           if label.text() == str(self.doubleclicked):
            nmrResidue =  label.data(self.doubleclicked)
            if nmrResidue:
-
              if self.current.strip is not None:
                strip = self.current.strip
-               navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
-                                             widths=['default'] * len(strip.axisCodes))
+               if len(nmrResidue.selectedNmrAtomNames) == 2:
+                 nmrAtom1 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[0]))
+                 nmrAtom2 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[1]))
+                 if nmrAtom1 and nmrAtom2:
+
+                   navigateToNmrAtomsInStrip(strip,
+                                             nmrAtoms=[nmrAtom1, nmrAtom2],
+                                             widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                             markPositions=True
+                                             )
              else:
-               print('Impossible to navigate to peak position. Set a current strip first')
-
-
+               getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def close(self):
     """
@@ -538,9 +555,11 @@ class BarGraphWidget(Widget, Base):
     self.barGraphs.append(self.aboveThreshold)
     self.barGraphs.append(self.belowTrheshold)
     self.updateViewBoxLimits()
+    if self.customViewBox.allLabelsShown:
+      self.customViewBox.showAllLabels()
+    if self.customViewBox.showAboveThresholdOnly:
+      self.customViewBox.showAboveThreshold()
 
-    for bar in self.barGraphs:
-      bar.viewBox.showAboveThreshold()
 
   def addLegend(self):
     self.legendItem = pg.LegendItem((100, 60), offset=(70, 30))  # args are (size, offset)

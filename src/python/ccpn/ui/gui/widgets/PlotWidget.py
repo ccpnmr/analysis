@@ -75,6 +75,9 @@ class PlotWidget(pg.PlotWidget):
     self.hideButtons()
 
     if useOpenGL:
+
+      # TODO:ED The OpenGL needs to be optimised
+
       self.setViewport(QtWidgets.QOpenGLWidget())
       # need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom
       # (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)

@@ -139,7 +139,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.strip.viewBox.addItem(self)
 
     self._setupTrace()
-    # self.drawContoursCounter = 0
+
+    self.buildContours = True     # trigger the first build
 
     # override of Qt setVisible
 
@@ -606,7 +607,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.okDataFile = True
 
     try:
-      self._drawContours(painter)
+      # need to separate the build GLLists from the paint GLLists
+      # self._buildPeaks(painter)     # ejb - not done yet, this is the slow one
+      if self.buildContours:
+        self._buildContours(painter)    # need to trigger these changes now
+        self.buildContours = False      # set to false, as we have rebuilt
+                                      # setting to True and update() will rebuild the contours
+                                      # can be done with a call to self.rebuildContours()
+
+      self._paintContours(painter)
+      # self._paintPeaks(painter)       # ejb - not done yet, this is the slow one
     except GLError:  # invalid framebuffer operation
       pass
 
@@ -618,11 +628,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   # NBNB TBD internal functions should start with UNDERSCORE!
   # REFACTOR
 
+  def rebuildContours(self):
+    # trigger a rebuild of the contours, and a refresh of the screen
+    self.buildContours = True
+    self.update()   # only seems to work from the buttons
+
   #def drawContours(self, painter, guiStrip):
-  def _drawContours(self, painter):
+  def _buildContours(self, painter):
     
-    # self.drawContoursCounter += 1
-    # print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
+    ##self.drawContoursCounter += 1
+    ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
+
+    print('>>>_buildContours %s' % self)
 
     if self.spectrum.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
@@ -630,89 +647,89 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
 
     if self.displayPositiveContours:
-      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
+      self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
                              self.positiveContourFactor)
     else:
-      posLevels = []
+      self.posLevels = []
 
     if self.displayNegativeContours:
-      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
+      self.negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
                              self.negativeContourFactor)
     else:
-      negLevels = []
-    if not posLevels and not negLevels:
+      self.negLevels = []
+    if not self.posLevels and not self.negLevels:
       return
 
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
-      self._constructContours(posLevels, negLevels)
+      self._constructContours(self.posLevels, self.negLevels)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
       return
 
-    posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
-    negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
+    self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
+    self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
 
-    if self.strip.plotWidget:
-      painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
+  def _paintContours(self, painter):
+    painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 
-      try:
+    try:
 
-        xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
-        yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
+      xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
+      yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
 
-        xTile0 = xClipPoint0 // xTotalPointCount
-        xTile1 = 1 + (xClipPoint1-1) // xTotalPointCount
-        yTile0 = yClipPoint0 // yTotalPointCount
-        yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
+      xTile0 = xClipPoint0 // xTotalPointCount
+      xTile1 = 1 + (xClipPoint1-1) // xTotalPointCount
+      yTile0 = yClipPoint0 // yTotalPointCount
+      yTile1 = 1 + (yClipPoint1-1) // yTotalPointCount
 
-        # GL.glEnable(GL.GL_CLIP_PLANE0)
-        GL.glEnable(GL.GL_CLIP_PLANE1)
-        GL.glEnable(GL.GL_CLIP_PLANE2)
-        # GL.glEnable(GL.GL_CLIP_PLANE3)
+      # GL.glEnable(GL.GL_CLIP_PLANE0)
+      GL.glEnable(GL.GL_CLIP_PLANE1)
+      GL.glEnable(GL.GL_CLIP_PLANE2)
+      # GL.glEnable(GL.GL_CLIP_PLANE3)
 
-        # TODO:ED - why am I displaying a series of tiles?
-        # xTile1 = 1
-        # yTile1 = 1
+      # TODO:ED - why am I displaying a series of tiles?
+      # xTile1 = 1
+      # yTile1 = 1
 
-        # for xTile in range(xTile0, xTile1):
-        #   for yTile in range(yTile0, yTile1):
+      # for xTile in range(xTile0, xTile1):
+      #   for yTile in range(yTile0, yTile1):
 
-        xTile = 0   # ejb - temp to only draw one set
-        yTile = 0
+      xTile = 0   # ejb - temp to only draw one set
+      yTile = 0
 
-        GL.glLoadIdentity()
-        GL.glPushMatrix()
+      GL.glLoadIdentity()
+      GL.glPushMatrix()
 
-        # the below is because the y axis goes from top to bottom
-        GL.glScale(1.0, -1.0, 1.0)
-        GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+      # the below is because the y axis goes from top to bottom
+      GL.glScale(1.0, -1.0, 1.0)
+      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
 
-        # the below makes sure that spectrum points get mapped to screen pixels correctly
-        GL.glTranslate(xTranslate, yTranslate, 0.0)
-        GL.glScale(xScale, yScale, 1.0)
+      # the below makes sure that spectrum points get mapped to screen pixels correctly
+      GL.glTranslate(xTranslate, yTranslate, 0.0)
+      GL.glScale(xScale, yScale, 1.0)
 
-        GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
-        # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
-        GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
-        GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
-        # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
+      GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+      # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
+      GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
+      GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
+      # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
 
-        for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
-                                               (negColour, negLevels, self.negDisplayLists)):
-          for n, level in enumerate(levels):
-            GL.glColor4f(*colour)
-            # TBD: scaling, translating, etc.
-            GL.glCallList(displayLists[n])
-        GL.glPopMatrix()
+      for (colour, levels, displayLists) in ((self.posColour, self.posLevels, self.posDisplayLists),
+                                             (self.negColour, self.negLevels, self.negDisplayLists)):
+        for n, level in enumerate(levels):
+          GL.glColor4f(*colour)
+          # TBD: scaling, translating, etc.
+          GL.glCallList(displayLists[n])
+      GL.glPopMatrix()
 
-        # GL.glDisable(GL.GL_CLIP_PLANE0)
-        GL.glDisable(GL.GL_CLIP_PLANE1)
-        GL.glDisable(GL.GL_CLIP_PLANE2)
-        # GL.glDisable(GL.GL_CLIP_PLANE3)
+      # GL.glDisable(GL.GL_CLIP_PLANE0)
+      GL.glDisable(GL.GL_CLIP_PLANE1)
+      GL.glDisable(GL.GL_CLIP_PLANE2)
+      # GL.glDisable(GL.GL_CLIP_PLANE3)
 
-      finally:
-        painter.endNativePainting()
+    finally:
+      painter.endNativePainting()
       
   def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list

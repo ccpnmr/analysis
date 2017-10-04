@@ -234,7 +234,7 @@ class GuiStripNd(GuiStrip):
     #   self.navigateToMenu.addAction(spectrumDisplay)
 
     self.crossHairAction.setChecked(self.crossHairIsVisible)
-    self.gridAction.setChecked(self.gridIsVisible)
+    # self.gridAction.setChecked(self.gridIsVisible)
 
     return self.contextMenu
 
@@ -365,6 +365,7 @@ class GuiStripNd(GuiStrip):
       cursorPixel = (pixel.x(), pixel.y())
       updateHTrace = self.hTraceAction.isChecked()
       updateVTrace = self.vTraceAction.isChecked()
+
       for spectrumView in self.spectrumViews:
         spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
 

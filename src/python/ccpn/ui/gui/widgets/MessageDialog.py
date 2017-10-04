@@ -182,7 +182,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   
   for text in texts:
     dialog.addButton(text, QtWidgets.QMessageBox.AcceptRole)
-  
+
   dialog.raise_()
   index = dialog.exec_()
 

@@ -612,8 +612,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       if self.buildContours:
         self._buildContours(painter)    # need to trigger these changes now
         self.buildContours = False      # set to false, as we have rebuilt
-                                      # setting to True and update() will rebuild the contours
-                                      # can be done with a call to self.rebuildContours()
+                                        # set to True and update() will rebuild the contours
+                                        # can be done with a call to self.rebuildContours()
 
       self._paintContours(painter)
       # self._paintPeaks(painter)       # ejb - not done yet, this is the slow one
@@ -639,7 +639,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-    print('>>>_buildContours %s' % self)
+    # print('>>>_buildContours %s' % self)
 
     if self.spectrum.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
@@ -670,8 +670,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set
 
-  def _paintContours(self, painter):
-    painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
+  def _paintContours(self, painter, skip=False):
+    if not skip:
+      painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
 
     try:
 
@@ -729,7 +730,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # GL.glDisable(GL.GL_CLIP_PLANE3)
 
     finally:
-      painter.endNativePainting()
+      if not skip:
+        painter.endNativePainting()
       
   def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list

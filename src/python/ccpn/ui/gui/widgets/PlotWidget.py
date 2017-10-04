@@ -74,7 +74,7 @@ class PlotWidget(pg.PlotWidget):
 
     self.hideButtons()
 
-    if useOpenGL:
+    if useOpenGL and QtOpenGL.QGLFormat.hasOpenGL():
 
       # TODO:ED The OpenGL needs to be optimised
 
@@ -82,7 +82,10 @@ class PlotWidget(pg.PlotWidget):
       # need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom
       # (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)
       # (NoViewportUpdate might work if you could explicitly get the view to repaint when needed)
-      self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
+      self.setViewportUpdateMode(QtWidgets.QGraphicsView.BoundingRectViewportUpdate)
+      # self.setOptimizationFlags(QtWidgets.QGraphicsView.DontSavePainterState)
+      # self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
+      # not sure if these change anything
 
     strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 
@@ -111,6 +114,8 @@ class PlotWidget(pg.PlotWidget):
     for orientation in ('right', 'bottom'):
       axisItem = self.plotItem.axes[orientation]['item']
       axisItem.setPen(color=self.foreground)
+      # axisItem = self.plotItem.axes[orientation]['item']
+      # axisItem.hide()
 
     # add grid
     self.grid = CcpnGridItem(gridColour=self.gridColour)
@@ -187,6 +192,8 @@ class PlotWidget(pg.PlotWidget):
     yPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))
     #print('>>', strip, xPos, yPos)
     self.crossHair1.setPosition(xPos, yPos)
+
+    return
 
     strip.axisPositionDict[axes[0].code] = xPos
     strip.axisPositionDict[axes[1].code] = yPos

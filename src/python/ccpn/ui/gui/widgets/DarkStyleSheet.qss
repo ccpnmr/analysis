@@ -91,7 +91,7 @@ QMenuBar {
               }
 
 QMessageBox QPushButton {
-    padding: 10px;
+    padding: 5px;
     border: 1px solid #182548;
 }
 

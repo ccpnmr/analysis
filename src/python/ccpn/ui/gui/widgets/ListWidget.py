@@ -90,6 +90,14 @@ class ListWidget(QtGui.QListWidget, Base):
       self.removeItem()
     self.rightMouseCallback()
 
+  def setTexts(self, texts, clear=True):
+    if clear:
+      self.clear()
+      self.items = []
+    for text in texts:
+      item = QtGui.QListWidgetItem(str(text))
+      self.addItem(item)
+
   def setObjects(self, objects, name='pid'):
     self.clear()
     self.objects = list(objects)

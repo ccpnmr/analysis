@@ -146,6 +146,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
+                                               ('inputData', []),
                                                ('savePath', self.savingDataPath),
                                                ('autoRun', False), ('addPosit', 'bottom'),
                                                ('autoActive', True), ])
@@ -503,6 +504,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     path = self._getPathFromDialogBox()
     state, guiPipesState, pipelineSettings = self._openJsonFile(path)
     self._closeAllGuiPipes()
+
+
+    self.pipelineSettingsParams = OrderedDict(pipelineSettings)
+    self._setSettingsParams()
+
     for item in guiPipesState:
       guiPipeClassName, guiPipeName, widgetsState, isActive = item
       guiPipeClass = self._getGuiPipeClassFromClassName(guiPipeClassName)
@@ -513,8 +519,8 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.pipelineArea.addBox(guiPipe)
 
     self.pipelineArea.restoreState(state)
-    self.pipelineSettingsParams = OrderedDict(pipelineSettings)
-    self._setSettingsParams()
+
+
 
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [guiPipesState], pipelineSettingsParams]   '''
@@ -694,6 +700,7 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _updateSettingsParams(self):
     name = str(self.pipelineReNameTextEdit.text())
     rename = str(self.pipelineReNameTextEdit.text())
+    inputData = self.inputDataList.getTexts()
     savePath = str(self.savePipelineLineEdit.lineEdit.text())
     autoRun = self.autoCheckBox.get()
     addPosit = self.addBoxPosition.get()
@@ -702,6 +709,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     params = OrderedDict([
       ('name', name),
       ('rename', rename),
+      ('inputData', inputData),
       ('savePath', savePath),
       ('autoRun', autoRun),
       ('addPosit', addPosit),
@@ -712,10 +720,13 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _setSettingsParams(self):
 
-    widgets = [self.pipelineNameLabel.setText, self.pipelineReNameTextEdit.setText,
+    widgets = [self.pipelineNameLabel.setText, self.pipelineReNameTextEdit.setText, self.inputDataList.setTexts,
                self.savePipelineLineEdit.lineEdit.setText, self.autoCheckBox.setChecked, self.addBoxPosition.set]
     for widget, value in zip(widgets, self.pipelineSettingsParams.values()):
       widget(value)
+    self.setDataSelection()
+    # self._updateInputDataWidgets()
+    self.goButton.setEnabled(True)
 
 
 

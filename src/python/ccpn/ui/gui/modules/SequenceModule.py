@@ -38,7 +38,8 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthHugeFont
+from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont
+from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
@@ -228,7 +229,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
       self.text = '%s:%s' % (chain.compoundName, chain.shortName)
     self.sequenceModule = sequenceModule
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
-    self.setFont(fixedWidthHugeFont)
+    self.setFont(fixedWidthLargeFont)
     self.residueDict = {}
     self.project = project
     self.currentIndex = 0
@@ -266,7 +267,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
       numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
       numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
       numberItem.setFont(fixedWidthFont)
-      xPosition = self.labelPosition + (20 * self.currentIndex)
+      xPosition = self.labelPosition + (fontSpacing * self.currentIndex)
       numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
       self.scene.addItem(numberItem)
       self.items.append(numberItem)
@@ -322,7 +323,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     #font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
     #font.setStyleHint(QtGui.QFont.Monospace)
     #self.setFont(font)
-    self.setFont(fixedWidthHugeFont)
+    self.setFont(fixedWidthLargeFont)
     self.colourScheme = project._appBase.colourScheme
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'  # un-assigned
@@ -338,7 +339,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     self.setDefaultTextColor(QtGui.QColor(self.colour1))
 
     self.setPlainText(residue.shortName)
-    position = labelPosition+(20*index)
+    position = labelPosition+(fontSpacing*index)
     self.setPos(QtCore.QPointF(position, yPosition))
     self.residueNumber = residue.sequenceCode
     # WB: TODO: below is terrible code (the scene functions are trampled over and over)

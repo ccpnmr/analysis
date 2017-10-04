@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 import pyqtgraph as pg
-from PyQt5 import QtGui, QtWidgets, QtCore #, QtOpenGL
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -95,6 +95,30 @@ class GuiStrip(Frame):
     self.getLayout().addWidget(self.plotWidget, 1, 0)
     self.layout().setHorizontalSpacing(0)
     self.layout().setVerticalSpacing(0)
+    # self.plotWidget.showGrid(x=True, y=True, alpha=None)
+    self.plotWidget.hide()
+
+
+
+    from ccpn.util.CcpnOpenGL import CcpnOpenGLWidget, GLWidget
+    # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
+    # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
+
+    self._testCcpnOpenGLWidget = GLWidget(self)
+    self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
+
+    # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
+    # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+    # self.plotWidgetOverlay.resize(200, 200)
+    # self.plotWidgetOverlay.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+    # self.plotWidgetOverlay.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+    # self.plotWidgetOverlay.showGrid(x=True, y=True, alpha=None)
+
+
+
+
+
+
 
     # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
     # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
@@ -488,6 +512,7 @@ class GuiStrip(Frame):
 
     position = self.viewBox.mapSceneToView(pos)
     try:
+      # this only calls a single _wrapper function
       if self.orderedAxes[1].code == 'intensity':
         format = "%s: %.3f  %s: %.4g"
       else:

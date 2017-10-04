@@ -84,6 +84,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 
+
 class CrossHair:
   "class to implement a cross-hair"
 
@@ -166,6 +167,7 @@ class ViewBox(pg.ViewBox):
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
     self.strip = strip
     self.current = strip.spectrumDisplay.mainWindow.application.current
+    self.mainWindow = strip.spectrumDisplay.mainWindow
 
     # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
@@ -385,8 +387,9 @@ class ViewBox(pg.ViewBox):
   def _hoverEvent(self, event):
     if hasattr(event, '_scenePos'):
       position = self.mapSceneToView(event.pos())
-      if self.strip:
-        self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
+
+      if self.strip and hasattr(self.strip, 'spectrumDisplay'):
+        self.mainWindow._mousePositionMoved(self.strip, position)
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """

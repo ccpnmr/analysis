@@ -717,15 +717,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # for the z axes the position is provided as the center of the axis region (i.e. the position)
 
     mouseMovedDict = dict(strip=strip)
-    for n, axisCode in enumerate(axisCodes):
-      if n == 0:
-        xPos = pos = position.x()
-      elif n == 1:
-        yPos = pos = position.y()
-      else:
-        pos = orderedAxes[n].position
-      mouseMovedDict[axisCode] = pos
+    try:
+      for n, axisCode in enumerate(axisCodes):
+        if n == 0:
+          xPos = pos = position.x()
+        elif n == 1:
+          yPos = pos = position.y()
+        else:
+          pos = orderedAxes[n].position
+        mouseMovedDict[axisCode] = pos
 
-    self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
+      self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
 
-    self._mouseMovedSignal.emit(mouseMovedDict)
+      self._mouseMovedSignal.emit(mouseMovedDict)
+    except Exception as es:
+      Logging.warning(str(es))

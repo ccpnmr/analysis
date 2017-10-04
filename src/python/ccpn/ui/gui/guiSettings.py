@@ -33,7 +33,12 @@ from ccpn.ui.gui.widgets.Font import Font
 
 # fonts
 monaco12              = Font('Monaco', 12)
+monaco16              = Font('Monaco', 16)
 monaco20              = Font('Monaco', 20)
+
+helvetica8            = Font('Helvetica', 8)
+helveticaItalic8      = Font('Helvetica', 8, italic=True)
+helveticaBold8        = Font('Helvetica', 8, bold=True)
 
 helvetica10           = Font('Helvetica', 10)
 helveticaItalic10     = Font('Helvetica', 10, italic=True)
@@ -55,20 +60,30 @@ lucidaGrande12        = Font('Lucida Grande', 12)
 lucidaGrande14        = Font('Lucida Grande', 14)
 
 # widgets and modules
-textFontSmall   = helvetica10        # general text font
-textFont        = helvetica12        # general text font
-textFontBold    = helveticaBold12    # general text font bold
-textFontLarge   = helvetica14        # general text font large
-textFontLargeBold = helveticaBold14  # general text font large bold
-textFontHuge    = helvetica20        # general text font huge
-textFontHugeBold = helveticaBold20   # general text font huge bold
+textFontTiny          = helvetica8        # general text font
+textFontTinyBold      = helveticaBold8        # general text font
+textFontSmall         = helvetica10        # general text font
+textFontSmallBold     = helveticaBold10        # general text font
+textFont              = helvetica12        # general text font
+textFontBold          = helveticaBold12    # general text font bold
+textFontLarge         = helvetica14        # general text font large
+textFontLargeBold     = helveticaBold14  # general text font large bold
+textFontHuge          = helvetica20        # general text font huge
+textFontHugeBold      = helveticaBold20   # general text font huge bold
 
-fixedWidthFont  = monaco12           # for TextEditor, ipythonconsole
-fixedWidthHugeFont = monaco20
-moduleLabelFont = helvetica12        # for text of left-label of modules
-sidebarFont     = lucidaGrande12     # sidebar
-menuFont        = lucidaGrande14     # Menus
-messageFont     = helvetica14        # use in popup messages; does not seem to affect the dialog on OSX
+textFontTinySpacing   = 7
+textFontSmallSpacing  = 9
+textFontSpacing       = 11
+textFontLargeSpacing  = 13
+textFontHugeSpacing   = 18
+
+fixedWidthFont        = monaco12           # for TextEditor, ipythonconsole
+fixedWidthLargeFont   = monaco16
+fixedWidthHugeFont    = monaco20
+moduleLabelFont       = helvetica12        # for text of left-label of modules
+sidebarFont           = lucidaGrande12     # sidebar
+menuFont              = lucidaGrande14     # Menus
+messageFont           = helvetica14        # use in popup messages; does not seem to affect the dialog on OSX
 
 # Colours
 LIGHT = 'light'

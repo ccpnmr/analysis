@@ -22,6 +22,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+
 def getPeakPosition(peak, dim, unit='ppm'):
 
   if len(peak.dimensionNmrAtoms) > dim:
@@ -59,7 +61,7 @@ def getPeakLinewidth(peak, dim):
       return float(lw)
 
 
-def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra):
+def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, atomWeights=None):
   '''
   
   :param nmrResidue: 
@@ -67,23 +69,36 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra):
   :param spectra: compare peaks only from given spectra
   :return: 
   '''
-  import numpy as np
+
   deltas = []
   peaks = []
+  if atomWeights is None:
+    atomWeights = {'H': 7, 'N': 1, 'C': 4, 'Other': 1}
+  weight1, weight2 = atomWeights['H'], atomWeights['N']
 
   if len(nmrAtoms) == 2:
     nmrAtom1 = nmrResidue.getNmrAtom(str(nmrAtoms[0]))
     nmrAtom2 = nmrResidue.getNmrAtom(str(nmrAtoms[1]))
 
+
     if nmrAtom1 and nmrAtom2 is not None:
-      peaks = [p for p in nmrAtom1.assignedPeaks if p.peakList.spectrum in spectra]
-      peaks += [p for p in nmrAtom2.assignedPeaks if p.peakList.spectrum in spectra and not peaks]
+      if nmrAtom1.name != nmrAtom2.name:
+        for k, weight in atomWeights.items():
+          if k in nmrAtom1.name:
+            weight1 = weight
+          if k in nmrAtom2.name:
+            weight2 = weight
+        peaks = [p for p in nmrAtom1.assignedPeaks if p.peakList.spectrum in spectra]
+        peaks += [p for p in nmrAtom2.assignedPeaks if p.peakList.spectrum in spectra and not peaks]
 
   if len(peaks)>0:
     for i, peak in enumerate(peaks):
       if peak.peakList.spectrum in spectra:
         if len(peak.position) == 2:
-          deltas += [(((peak.position[0] - list(peaks)[0].position[0]) * 7) ** 2 + (peak.position[1] - list(peaks)[0].position[1]) ** 2) ** 0.5,]
+          delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
+          delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
+
+          deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
   if deltas and not None in deltas:
     return round(float(np.mean(deltas)),3)
   return

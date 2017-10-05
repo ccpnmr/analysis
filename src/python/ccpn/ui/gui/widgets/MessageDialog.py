@@ -290,8 +290,8 @@ class progressPopup(CcpnDialog):
           self.timer.stop()
 
 @contextmanager
-def progressManager(title=None, progressMax=100):
-  thisProg = progressPopup(title=title, progressMax=progressMax)
+def progressManager(parent, title=None, progressMax=100):
+  thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
   try:
     thisProg.progress_simulation()
     thisProg.update()

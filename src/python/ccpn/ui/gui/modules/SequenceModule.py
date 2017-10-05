@@ -68,6 +68,7 @@ class SequenceModule(CcpnModule):
     #TODO: make closable
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
+    self.mainWindow = mainWindow
     self.project = mainWindow.application.project
     self.colourScheme = mainWindow.application.colourScheme
     #self.label.hide()
@@ -134,7 +135,7 @@ class SequenceModule(CcpnModule):
       self.scrollArea.scene.removeItem(self.chainLabel)
       self.widgetHeight = 0
 
-    self.chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, position=[0, self.widgetHeight],
+    self.chainLabel = GuiChainLabel(self, self.mainWindow, self.scrollArea.scene, position=[0, self.widgetHeight],
                                     chain=chain, placeholder=placeholder, tryToUseSequenceCodes=tryToUseSequenceCodes)
     self.scrollArea.scene.addItem(self.chainLabel)
     self.chainLabels.append(self.chainLabel)
@@ -204,13 +205,15 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
   On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
   along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
   """
-  def __init__(self, sequenceModule, project, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
+  def __init__(self, sequenceModule, mainWindow, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
     QtGui.QGraphicsTextItem.__init__(self)
 
+    self.mainWindow = mainWindow
     self.chain = chain
     self.items = [self]  # keeps track of items specific to this chainLabel
 
-    self.colourScheme = project._appBase.colourScheme
+    # self.colourScheme = project._appBase.colourScheme
+    self.colourScheme = mainWindow.application.colourScheme
 
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'
@@ -230,7 +233,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
     self.setFont(fixedWidthHugeFont)
     self.residueDict = {}
-    self.project = project
+    self.project = mainWindow.application.project
     self.currentIndex = 0
     self.scene = scene
     self.labelPosition = self.boundingRect().width()
@@ -255,7 +258,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
         self._addResidue(n, residue, useSequenceCode)
 
   def _addResidue(self, number, residue, useSequenceCode=False):
-    newResidue = GuiChainResidue(self, self.project, residue, self.scene,
+    newResidue = GuiChainResidue(self, self.mainWindow, residue, self.scene,
                                  self.labelPosition, self.currentIndex, self.yPosition)
     self.scene.addItem(newResidue)
     self.items.append(newResidue)
@@ -310,12 +313,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
   fontSize = 20
 
-  def __init__(self, guiChainLabel, project, residue, scene, labelPosition, index, yPosition):
+  def __init__(self, guiChainLabel, mainWindow, residue, scene, labelPosition, index, yPosition):
 
     QtGui.QGraphicsTextItem.__init__(self)
     Base.__init__(self, acceptDrops=True)
 
-    self.project = project
+    # self.project = project
+    self.mainWindow = mainWindow
+
     self.residue = residue
     self.guiChainLabel = guiChainLabel
 
@@ -323,7 +328,9 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     #font.setStyleHint(QtGui.QFont.Monospace)
     #self.setFont(font)
     self.setFont(fixedWidthHugeFont)
-    self.colourScheme = project._appBase.colourScheme
+    # self.colourScheme = project._appBase.colourScheme
+    self.colourScheme = mainWindow.application.colourScheme
+
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'  # un-assigned
       self.colour2 = '#f7ffff'  # assigned
@@ -430,14 +437,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     elif self.colourScheme == 'light':
       colour = '#666e98'
     guiRes = self.scene.itemAt(event.scenePos())
-    nmrChain = self.project.getByPid(data[0])
-    selectedNmrResidue = self.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
+    nmrChain = self.mainWindow.project.getByPid(data[0])
+    selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
     result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
     if result:
 
-      with progressManager('Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
+      with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
         try:
           if nmrChain.id == '@-':

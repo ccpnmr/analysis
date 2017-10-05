@@ -1288,7 +1288,7 @@ class Framework:
 
   def undo(self):
     if self.project._undo.canUndo():
-      with MessageDialog.progressManager('performing Undo'):
+      with MessageDialog.progressManager(self.ui.mainWindow, 'performing Undo'):
 
         self.ui.echoCommands(['application.undo()'])
         self._echoBlocking += 1
@@ -1306,7 +1306,7 @@ class Framework:
 
   def redo(self):
     if self.project._undo.canRedo():
-      with MessageDialog.progressManager('performing Redo'):
+      with MessageDialog.progressManager(self.ui.mainWindow, 'performing Redo'):
         self.ui.echoCommands(['application.redo()'])
         self._echoBlocking += 1
         self.project._undo.redo()

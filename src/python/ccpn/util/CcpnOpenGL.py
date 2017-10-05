@@ -208,46 +208,32 @@ class GLWidget(QOpenGLWidget):
 
     self.lastPos = event.pos()
 
-  def paintEvent(self, event):
+  def paintGL(self):
     self.makeCurrent()
 
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
-    painter = QPainter(self)
-    painter.setRenderHint(QPainter.Antialiasing)
 
-    self.setClearColor(self.trolltechPurple.darker())
-    # self.setupViewport(self.width(), self.height())
+    GL.glClearColor(0.1, 0.1, 0.1, 1.0)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-    # GL.glShadeModel(GL.GL_SMOOTH)
-    # GL.glEnable(GL.GL_DEPTH_TEST)
-    # # GL.glEnable(GL.GL_CULL_FACE)
-    # GL.glEnable(GL.GL_LIGHTING)
-    # GL.glEnable(GL.GL_LIGHT0)
-    # GL.glEnable(GL.GL_MULTISAMPLE)
-    # GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION,
-    #                   (0.5, 5.0, 7.0, 1.0))
+    self.setProjection()
 
-    # self.setupViewport(20, 150)
-
-    GL.glClear(
-      GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    GL.glLoadIdentity()
-    # GL.glTranslated(0.0, 0.0, -10.0)
-    # GL.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
-    # GL.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
-    # GL.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
-    # # GL.glCallList(self.object)
-
-    # GL.glMatrixMode(GL.GL_MODELVIEW)
-    # GL.glPopMatrix()
-
-    GL.glColor3f(1.0, 1.0, 1.0)
     for spectrumView in self.parent.spectrumViews:
       try:
+        # could put a signal on buildContours
+        if spectrumView.buildContours:
+          spectrumView._buildContours(None)  # need to trigger these changes now
+          spectrumView.buildContours = False  # set to false, as we have rebuilt
+          # set to True and update() will rebuild the contours
+          # can be done with a call to self.rebuildContours()
         spectrumView._paintContours(None, skip=True)
       except:
         spectrumView._buildContours(None)
+        # pass
 
+    # this is needed if it is a paintEvent
+    # painter = QPainter(self)
+    # painter.setRenderHint(QPainter.Antialiasing)
     #
     # for bubble in self.bubbles:
     #   if bubble.rect().intersects(QRectF(event.rect())):
@@ -255,8 +241,9 @@ class GLWidget(QOpenGLWidget):
     #
     # self.drawInstructions(painter)
     #
-    painter.end()
+    # painter.end()
     GL.glPopAttrib()
+    GLUT.glutSwapBuffers()
 
   def resizeGL(self, width, height):
     self.setupViewport(width, height)
@@ -385,7 +372,7 @@ class GLWidget(QOpenGLWidget):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
     # GL.glOrtho(0.0, width, height, 0.0, 0.0, 1.0)
-    GLU.gluOrtho2D(-150, 150, -10, 10)
+    GLU.gluOrtho2D(0, 100, -10, 10)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 

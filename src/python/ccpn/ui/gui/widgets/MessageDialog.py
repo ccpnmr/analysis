@@ -237,6 +237,7 @@ class progressPopup(CcpnDialog):
     # self.project = mainWindow.application.project
     # self.current = mainWindow.application.current
 
+    self.setParent(parent)
     self.busyFunc = busyFunc
 
     # progress bar

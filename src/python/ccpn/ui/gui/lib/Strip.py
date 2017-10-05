@@ -224,14 +224,27 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
     #                             widths=None, markPositions=False, setNmrResidueLabel=True)
     #   strips.append(display.strips[stripIndex]) now enforce this, o/w below would be more complicated
 
-    nmrResidues = []
-    previousNmrResidue = nmrResidue.previousNmrResidue
-    if previousNmrResidue:
-      nmrResidues.append(previousNmrResidue)
-    nmrResidues.append(nmrResidue)
-    nextNmrResidue = nmrResidue.nextNmrResidue
-    if nextNmrResidue:
-      nmrResidues.append(nextNmrResidue)
+
+
+    # show the three connected nmrResidues in the strip
+    # but alqways show the end three if connected and the strip long enough
+
+    allNmrResidues = nmrResidue._getAllConnectedList()
+    if len(allNmrResidues) < 3:
+      nmrResidues = allNmrResidues                          # display those that we have
+    else:
+      nmrMid = allNmrResidues.index(nmrResidue)             # get the index of the required element
+      nmrMid = min(max(nmrMid, 1), len(allNmrResidues)-2)
+      nmrResidues = allNmrResidues[nmrMid-1:nmrMid+2]
+
+    # nmrResidues = []
+    # previousNmrResidue = nmrResidue.previousNmrResidue
+    # if previousNmrResidue:
+    #   nmrResidues.append(previousNmrResidue)
+    # nmrResidues.append(nmrResidue)
+    # nextNmrResidue = nmrResidue.nextNmrResidue
+    # if nextNmrResidue:
+    #   nmrResidues.append(nextNmrResidue)
 
     stripCount = len(nmrResidues)
     while len(display.strips) < stripCount:
@@ -248,6 +261,8 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
   else:
     # not showing sequential strips
     # widths = ['default'] * len(display.strips)
+    for strip in display.strips[stripIndex+1:]:
+      display.removeStrip(strip)
     navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
                               widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
     strips.append(display.strips[stripIndex])

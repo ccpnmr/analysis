@@ -63,6 +63,11 @@ def _getLevels(count:int, base:float, factor:float)->list:
       levels.append(numpy.float32(factor * levels[-1]))
   return levels
 
+class _spectrumSignal(QtWidgets.QWidget):
+  _buildSignal = QtCore.pyqtSignal(bool)
+
+  def _emitSignal(self, value):
+    self._buildSignal.emit(value)
 
 class GuiSpectrumViewNd(GuiSpectrumView):
 
@@ -141,6 +146,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._setupTrace()
 
     self.buildContours = True     # trigger the first build
+    self._buildSignal = _spectrumSignal()
 
     # override of Qt setVisible
 
@@ -632,6 +638,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # trigger a rebuild of the contours, and a refresh of the screen
     self.buildContours = True
     self.update()   # only seems to work from the buttons
+
+    self._buildSignal._emitSignal(self.buildContours)
 
   #def drawContours(self, painter, guiStrip):
   def _buildContours(self, painter):

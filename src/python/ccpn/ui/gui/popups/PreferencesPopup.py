@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import os
 from functools import partial
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -41,6 +41,7 @@ from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
@@ -52,7 +53,7 @@ NotImplementedTipText = 'This option has not been implemented yet'
 
 class PreferencesPopup(CcpnDialog):
   def __init__(self, parent=None, preferences=None, project=None, title='Preferences', **kw):
-    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(300, 500), **kw)
+    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(300, 100), **kw)
 
     if not project:                                         # ejb - should always be loaded
       MessageDialog.showWarning(title, 'No project loaded')
@@ -79,13 +80,17 @@ class PreferencesPopup(CcpnDialog):
 
     ## 1 Tab
     self.generalTabFrame = Frame(self, setLayout=True)
+    # self.generalTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.generalTabFrame.setContentsMargins(1, 10, 1, 10)
     self._setGeneralTabWidgets(parent=self.generalTabFrame)
     self.tabWidget.addTab(self.generalTabFrame, 'General')
 
     ## 2 Tab
-    self.appearanceTabFrame = Frame(self, setLayout=True)
-    self._setAppearanceTabWidgets(parent=self.appearanceTabFrame)
-    self.tabWidget.addTab(self.appearanceTabFrame, 'Appearance')
+    self.spectrumTabFrame = Frame(self, setLayout=True)
+    self.spectrumTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.spectrumTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
+    self._setspectrumTabWidgets(parent=self.spectrumTabFrame)
+    self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
 
     ## 3 Tab Disabled. # Keep the code for future additions
     # self.miscellaneousTabFrame = Frame(self, setLayout=True)
@@ -97,6 +102,47 @@ class PreferencesPopup(CcpnDialog):
     ''' Insert a widget in here to appear in the General Tab  '''
 
     row = 0
+
+    self.languageLabel = Label(parent, text="Language", grid=(row, 0))
+    self.languageBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+    self.languageBox.addItems(languages)
+    self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
+    self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
+    self.languageBox.currentIndexChanged.connect(self._changeLanguage)
+
+    row += 1
+    self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
+    self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+    self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
+    self.colourSchemeBox.addItems(COLOUR_SCHEMES)
+    self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
+      self.preferences.general.colourScheme))
+    self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
+
+    row += 1
+    self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
+    self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNative)
+    self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
+
+    row += 1
+    self.useNativeLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
+    self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
+    self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
+
+    row += 1
+    self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
+    self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
+    self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))
+
+    row += 1
+    self.autoBackupFrequencyLabel = Label(parent, text="Auto Backup Freq (mins)", grid=(row, 0))
+    self.autoBackupFrequencyData = LineEdit(parent, grid=(row, 1), hAlign='l')
+    self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
+    self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
+    self.autoBackupFrequencyData.editingFinished.connect(self._setAutoBackupFrequency)
+
+
+    row += 1
     self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
     self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
     self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
@@ -142,39 +188,17 @@ class PreferencesPopup(CcpnDialog):
     self.pipesPathData.setDisabled(True)
     self.pipesPathDataButton.setDisabled(True)
 
-    row += 1
-    self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
-    self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
-    self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))
 
-    row += 1
-    self.autoBackupFrequencyLabel = Label(parent, text="Auto Backup Freq (mins)", grid=(row, 0))
-    self.autoBackupFrequencyData = LineEdit(parent, grid=(row, 1), hAlign='l')
-    self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
-    self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
-    self.autoBackupFrequencyData.editingFinished.connect(self._setAutoBackupFrequency)
+    # row += 1
+    # Spacer(parent, row, 1
+    #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+    #        , grid=(row , 0), gridSpan=(row, 1))
 
-  def _setAppearanceTabWidgets(self, parent):
-    ''' Insert a widget in here to appear in the Appearance Tab. Parent = the Frame obj where the widget should live'''
+  def _setspectrumTabWidgets(self, parent):
+    ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''
 
     row = 0
-    self.languageLabel = Label(parent, text="Language", grid=(row, 0))
-    self.languageBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-    self.languageBox.addItems(languages)
-    self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
-    self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
-    self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
-    row += 1
-    self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
-    self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-    self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
-    self.colourSchemeBox.addItems(COLOUR_SCHEMES)
-    self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
-      self.preferences.general.colourScheme))
-    self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
-
-    row += 1
     self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
     self.regionPaddingData = LineEdit(parent, grid=(row, 1), hAlign='l')
     self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
@@ -189,15 +213,6 @@ class PreferencesPopup(CcpnDialog):
     self.dropFactorData.editingFinished.connect(self._setDropFactor)
 
     row += 1
-    self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
-    self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNative)
-    self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
-
-    row += 1
-    self.useNativeLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
-    self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
-    self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
-    row += 1
     self.showToolbarLabel = Label(parent, text="Show ToolBar(s): ", grid=(row, 0))
     self.showToolbarBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showToolbar)
     self.showToolbarBox.toggled.connect(partial(self._toggleGeneralOptions, 'showToolbar'))
@@ -207,12 +222,17 @@ class PreferencesPopup(CcpnDialog):
     self.spectrumBorderBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
 
-    #row += 1
+    # row += 1
     #self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
     #self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
     # TODO enable DoubleCursor
     #self.showDoubleCursorBox.setDisabled(True)
     ## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
+
+    # row += 1
+    # Spacer(parent, row, 1
+    #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+    #        , grid=(row , 0), gridSpan=(row, 1))
 
 
   def _setMiscellaneousTabWidgets(self, parent):

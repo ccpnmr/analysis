@@ -30,10 +30,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Label import Label
 
 class Spinbox(QtGui.QSpinBox, Base):
 
-  def __init__(self, parent, value=None,step=None, min=None, max=None, showButtons=True, **kw):
+  def __init__(self, parent, prefix=None, value=None,step=None, min=None, max=None, showButtons=True, **kw):
 
     QtGui.QSpinBox.__init__(self, parent)
     if min is not None:
@@ -44,6 +45,10 @@ class Spinbox(QtGui.QSpinBox, Base):
       self.setValue(value)
     if step is not None:
       self.setSingleStep(step)
+    if prefix:
+      self.setPrefix(prefix+' ')
+
+
     Base.__init__(self, **kw)
 
     if showButtons is False:
@@ -57,6 +62,7 @@ if __name__ == '__main__':
   app = TestApplication()
   popup = CcpnDialog()
   sb = Spinbox(popup, step=10, grid=(0,0))
+  sb.setPrefix('H Weight ')
 
   popup.show()
   popup.raise_()

@@ -87,6 +87,13 @@ class RadioButtons(QtGui.QWidget, Base):
     i = self.texts.index(text)
     self.setIndex(i)
 
+  def getSelectedText(self):
+    for radioButton in self.radioButtons:
+      if radioButton.isChecked():
+        name = radioButton.text()
+        if name:
+          return name
+
   def setIndex(self, i):
 
     self.radioButtons[i].setChecked(True)

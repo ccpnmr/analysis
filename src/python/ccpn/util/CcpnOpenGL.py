@@ -33,6 +33,8 @@ from PyQt5.QtGui import (QBrush, QColor, QFontMetrics, QImage, QPainter,
         QRadialGradient, QSurfaceFormat)
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
+import numpy as np
+from pyqtgraph import functions as fn
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -148,6 +150,9 @@ class GLWidget(QOpenGLWidget):
 
     self.parent = parent
 
+    for spectrumView in self.parent.spectrumViews:
+      spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
+
     midnight = QTime(0, 0, 0)
     random.seed(midnight.secsTo(QTime.currentTime()))
 
@@ -208,6 +213,11 @@ class GLWidget(QOpenGLWidget):
 
     self.lastPos = event.pos()
 
+  @QtCore.pyqtSlot(bool)
+  def paintGLsignal(self, bool):
+    if bool:
+      self.paintGL()
+
   def paintGL(self):
     self.makeCurrent()
 
@@ -242,6 +252,8 @@ class GLWidget(QOpenGLWidget):
     # self.drawInstructions(painter)
     #
     # painter.end()
+    # self.generatePicture()
+
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
 
@@ -400,3 +412,84 @@ class GLWidget(QOpenGLWidget):
   def setColor(self, c):
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
+  def generatePicture(self):
+    # self.picture = QtGui.QPicture()
+    # p = QtGui.QPainter()
+    # p.begin(self.picture)
+
+    # dt = fn.invertQTransform(self.viewTransform())
+    # vr = self.getViewWidget().rect()
+    # unit = self.pixelWidth(), self.pixelHeight()
+    # dim = [vr.width(), vr.height()]
+    # lvr = self.boundingRect()
+    # ul = np.array([lvr.left(), lvr.top()])
+    # br = np.array([lvr.right(), lvr.bottom()])
+
+    # dt = fn.invertQTransform(self.viewTransform())
+    # vr = self.getViewWidget().rect()
+    # unit = self.pixelWidth(), self.pixelHeight()
+    dim = [self.width(), self.height()]
+    # lvr = self.boundingRect()
+    ul = np.array([0, self.height()])
+    br = np.array([self.width(), 0])
+
+    # texts = []
+
+
+    if ul[1] > br[1]:
+      x = ul[1]
+      ul[1] = br[1]
+      br[1] = x
+    for i in [1,0]:   ## Draw three different scales of grid
+      dist = br-ul
+      nlTarget = 10.**i
+      d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
+      ul1 = np.floor(ul / d) * d
+      br1 = np.ceil(br / d) * d
+      dist = br1-ul1
+      nl = (dist / d) + 0.5
+
+      for ax in range(0,2):  ## Draw grid for both axes
+        ppl = np.array( dim[ax] / nl[ax] )                      # ejb
+        c = np.clip(3.*(ppl-3), 0., 30.)
+        # if self.parent.gridColour == '#f7ffff':
+          # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
+
+        GL.glColor3f(247, 255, 255)
+        # else:
+          # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
+          # GL.glColor3f(8, 0, 0)
+
+        bx = (ax+1) % 2
+        for x in range(0, int(nl[ax])):
+          # linePen.setCosmetic(False)
+          if ax == 0:
+              # linePen.setWidthF(self.pixelWidth())
+          #     #print "ax 0 height", self.pixelHeight()
+
+            GL.glLineWidth(1)
+          else:
+              # linePen.setWidthF(self.pixelHeight())
+            GL.glLineWidth(2)
+          #     #print "ax 1 width", self.pixelWidth()
+          # p.setPen(linePen)
+          p1 = np.array([0.,0.])
+          p2 = np.array([0.,0.])
+          p1[ax] = ul1[ax] + x * d[ax]
+          p2[ax] = p1[ax]
+          p1[bx] = ul[bx]
+          p2[bx] = br[bx]
+          if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
+              continue
+          # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
+          GL.glBegin(GL.GL_LINE)
+          GL.glVertex2f(p1[0], p1[1])
+          GL.glVertex2f(p2[0], p2[1])
+          # GL.glEnd()
+
+    # tr = self.deviceTransform()
+    # p.setWorldTransform(fn.invertQTransform(tr))
+    # for t in texts:
+    #     x = tr.map(t[0]) + Point(0.5, 0.5)
+    #     p.drawText(x, t[1])
+    # p.end()

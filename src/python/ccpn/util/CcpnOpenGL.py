@@ -167,14 +167,18 @@ class GLWidget(QOpenGLWidget):
     self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
     self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
 
-    # self.animationTimer = QTimer()
-    # self.animationTimer.setSingleShot(False)
-    # self.animationTimer.timeout.connect(self.animate)
-    # self.animationTimer.start(25)
+    self.animationTimer = QTimer()
+    self.animationTimer.setSingleShot(False)
+    self.animationTimer.timeout.connect(self.animate)
+    self.animationTimer.start(25)
 
     self.setAutoFillBackground(False)
     self.setMinimumSize(200, 200)
     self.setWindowTitle("Overpainting a Scene")
+
+  def _connectSpectra(self):
+    for spectrumView in self.parent.spectrumViews:
+      spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
   def setXRotation(self, angle):
     angle = self.normalizeAngle(angle)
@@ -213,6 +217,48 @@ class GLWidget(QOpenGLWidget):
 
     self.lastPos = event.pos()
 
+  def paintEvent_WithPainter(self, event):
+    self.makeCurrent()
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glPushMatrix()
+
+    self.set3DProjection()
+
+    self.setClearColor(self.trolltechPurple.darker())
+    GL.glShadeModel(GL.GL_SMOOTH)
+    GL.glEnable(GL.GL_DEPTH_TEST)
+    # GL.glEnable(GL.GL_CULL_FACE)
+    GL.glEnable(GL.GL_LIGHTING)
+    GL.glEnable(GL.GL_LIGHT0)
+    GL.glEnable(GL.GL_MULTISAMPLE)
+    GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION,
+                      (0.5, 5.0, 7.0, 1.0))
+
+    self.setupViewport(self.width(), self.height())
+
+    GL.glClear(
+      GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+    GL.glLoadIdentity()
+    GL.glTranslated(0.0, 0.0, -10.0)
+    GL.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
+    GL.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
+    GL.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
+    GL.glCallList(self.object)
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glPopMatrix()
+
+    painter = QPainter(self)
+    painter.setRenderHint(QPainter.Antialiasing)
+
+    for bubble in self.bubbles:
+      if bubble.rect().intersects(QRectF(event.rect())):
+        bubble.drawBubble(painter)
+
+    self.drawInstructions(painter)
+    painter.end()
+
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
     if bool:
@@ -226,7 +272,7 @@ class GLWidget(QOpenGLWidget):
     GL.glClearColor(0.1, 0.1, 0.1, 1.0)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-    self.setProjection()
+    self.set2DProjection()
 
     for spectrumView in self.parent.spectrumViews:
       try:
@@ -374,19 +420,35 @@ class GLWidget(QOpenGLWidget):
     # side = min(width, height)
     # GL.glViewport((width - side) // 2, (height - side) // 2, side,
     #                    side)
-    GL.glViewport(0, -1, width, height)
+    # GL.glViewport(0, -1, width, height)
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glViewport(0, height//2, width//2, height)
     # GL.glMatrixMode(GL.GL_PROJECTION)
     # GL.glLoadIdentity()
     # GL.glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
-    # GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glMatrixMode(GL.GL_MODELVIEW)
 
-  def setProjection(self):
+  def set3DProjection(self):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
-    # GL.glOrtho(0.0, width, height, 0.0, 0.0, 1.0)
-    GLU.gluOrtho2D(0, 100, -10, 10)
+    GL.glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
+
+  def set2DProjection(self):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    # put into a box in the viewport at (50, 50) to (150, 150)
+    GL.glViewport(50, 50, 150, 150)
+
+    GLU.gluOrtho2D(-10, 50, -10, 0)
+    GL.glScalef(1, -1, 1);
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+    # GL.glTranslatef(0.1, 0.1, 0.1)
+
 
   def drawInstructions(self, painter):
     text = "Click and drag with the left mouse button to rotate the Qt " \
@@ -463,14 +525,14 @@ class GLWidget(QOpenGLWidget):
         bx = (ax+1) % 2
         for x in range(0, int(nl[ax])):
           # linePen.setCosmetic(False)
-          if ax == 0:
-              # linePen.setWidthF(self.pixelWidth())
-          #     #print "ax 0 height", self.pixelHeight()
-
-            GL.glLineWidth(1)
-          else:
-              # linePen.setWidthF(self.pixelHeight())
-            GL.glLineWidth(2)
+          # if ax == 0:
+          #     # linePen.setWidthF(self.pixelWidth())
+          # #     #print "ax 0 height", self.pixelHeight()
+          #
+          #   GL.glLineWidth(1)
+          # else:
+          #     # linePen.setWidthF(self.pixelHeight())
+          #   GL.glLineWidth(2)
           #     #print "ax 1 width", self.pixelWidth()
           # p.setPen(linePen)
           p1 = np.array([0.,0.])
@@ -485,7 +547,7 @@ class GLWidget(QOpenGLWidget):
           GL.glBegin(GL.GL_LINE)
           GL.glVertex2f(p1[0], p1[1])
           GL.glVertex2f(p2[0], p2[1])
-          # GL.glEnd()
+          GL.glEnd()
 
     # tr = self.deviceTransform()
     # p.setWorldTransform(fn.invertQTransform(tr))

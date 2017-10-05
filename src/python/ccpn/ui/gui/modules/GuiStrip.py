@@ -96,16 +96,17 @@ class GuiStrip(Frame):
     self.layout().setHorizontalSpacing(0)
     self.layout().setVerticalSpacing(0)
     # self.plotWidget.showGrid(x=True, y=True, alpha=None)
+
+
+    # TODO: ED comment out the block below to return to normal
     self.plotWidget.hide()
-
-
-
     from ccpn.util.CcpnOpenGL import CcpnOpenGLWidget, GLWidget
     # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
     # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
 
     self._testCcpnOpenGLWidget = GLWidget(self)
     self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
+    self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
     # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -24,14 +24,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtGui
 
 import sys
+from PyQt4 import QtGui
+# from ccpn.ui.gui.guiSettings import monaco12
+
 
 class Application(QtGui.QApplication):
 
   def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
 
+    # QtGui.QApplication.setFont(monaco12)
     QtGui.QApplication.__init__(self, [applicationName,])
 
     self.setApplicationVersion(applicationVersion)

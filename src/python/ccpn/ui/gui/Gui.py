@@ -1,6 +1,6 @@
-"""Module Documentation here
 """
-
+Module Documentation here
+"""
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,7 +19,6 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Wayne Boucher $"
 __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
@@ -45,6 +43,7 @@ from ccpn.ui.gui.widgets import resources_rc
 
 from ccpn.util import Logging
 
+
 def qtMessageHandler(*errors):
   for err in errors:
     Logging.getLogger().warning('QT error: %s' % err)
@@ -66,6 +65,7 @@ class Gui(Ui):
   def _initQtApp(self):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
     # it will come out as the executable you are running (e.g. "python3")
+
     self.qtApp = Application(self.application.applicationName,
                                    self.application.applicationVersion,
                                    organizationName='CCPN', organizationDomain='ccpn.ac.uk')

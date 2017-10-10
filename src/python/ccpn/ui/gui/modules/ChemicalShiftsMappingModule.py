@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from functools import partial
 
 import pyqtgraph as pg
@@ -46,6 +45,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
@@ -206,12 +206,26 @@ class ChemicalShiftsMapping(CcpnModule):
     self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Atom Weights', grid=(i, 0))
     j = 0
 
+    self._scrollAreaSpinBoxFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
+    i += 1
+
+    # original by Luca
+    # for k in sorted(DefaultAtomWeight.keys(), key=CcpnSorting.stringSortKey):
+    #   if k in self.atomNames:
+    #     j += 1
+    #     # weightLabel = Label(self.scrollAreaWidgetContents, text=str(k), grid=(i, j), hAlign='l')
+    #     self.atomWeightSpinBox = Spinbox(self.scrollAreaWidgetContents, value=DefaultAtomWeight[k],
+    #                                      prefix=str(k+(' '*10)), grid=(i,j), hAlign='l')
+    #     self.atomWeightSpinBox.setObjectName(str(k))
+    #     self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+    #     j += 1
+
+    # slight change by Ed
+    j = 0
     for k in sorted(DefaultAtomWeight.keys(), key=CcpnSorting.stringSortKey):
       if k in self.atomNames:
-        j += 1
-        # weightLabel = Label(self.scrollAreaWidgetContents, text=str(k), grid=(i, j), hAlign='l')
-        self.atomWeightSpinBox = Spinbox(self.scrollAreaWidgetContents, value=DefaultAtomWeight[k],
-                                         prefix=str(k+(' '*10)), grid=(i,j), hAlign='l')
+        self.atomWeightSpinBox = Spinbox(self._scrollAreaSpinBoxFrame, value=DefaultAtomWeight[k],
+                                         prefix=str(k+(' '*10)), grid=(0, j), hAlign='l')
         self.atomWeightSpinBox.setObjectName(str(k))
         self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
         j += 1
@@ -256,6 +270,10 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
                                grid=(i, 1),  gridSpan=(i, 2))
+    i += 1
+    Spacer(self.scrollAreaWidgetContents, 3, 3
+           , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+           , grid=(i,3), gridSpan=(1,1))
 
   def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):
     texts = sorted(atoms, key=CcpnSorting.stringSortKey)

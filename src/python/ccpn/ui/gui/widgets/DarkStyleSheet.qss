@@ -18,9 +18,11 @@ Frame {
     border: 1px solid #bec4f3;
 }
 
+ /* this overrides the settings for CcpnModuleLabel */
 QLabel {
     padding: 0;
-    margin: 2px 2px 2px 2px;
+    background-color: #2a3358;
+    color: #2a3358;
     border: 0px;
 }
 
@@ -214,6 +216,7 @@ QDialog::header {
 					background-color:#2a3358;
 					}
 
+
 /* not working */
 QListWidget {background-color: #FDFDFC;
              color: #f7ffff;
@@ -293,12 +296,33 @@ Dock  {
           border: 0px solid #2a3358;
 }
 
+ModuleArea  {
+          background-color: #f7ffff;
+          border: 0px solid #f7ffff;
+}
+
+Module  {
+          background-color: #f7ffff;
+          border: 0px solid #f7ffff;
+}
+
 Dock DockLabel  {
           background-color: #BEC4F3;
           color: #122043;
           border: 1px solid #00092D;
           padding: 0px;
           /*font-weight: Semibold;*/
+}
+
+Dock Frame {
+          background-color: #2a3358;
+          border: 1px solid #2a3358;
+          padding: 1px;
+}
+
+Dock QToolButton {
+          border: 0px solid #2a3358;
+          padding: 0px;
 }
 
 Dock > QWidget QScrollArea { background-color: #2a3358;
@@ -353,27 +377,28 @@ QTreeWidget {
 }
 QTreeWidget::branch {
                   background-color: #0E1A3D;
+                  color: #e4e15b;
 }
 QTreeWidget::branch:closed {
                   background-color: #0E1A3D;
 }
 
-QTreeWidget::branch:closed::selected {
+QTreeWidget::branch:closed:selected {
                   background-color: #666E98;
                   color: #F7FFFF;
 }
 
-QTreeWidget::branch:closed::hover {
+QTreeWidget::branch:closed:hover {
                   background-color: #424A71;
                   color: #E4E15B;
                   }
 
-QTreeWidget::branch:open::selected {
+QTreeWidget::branch:open:selected {
                   background-color: #666E98;
                   color: #F7FFFF;
-
 }
-QTreeWidget::branch:open::hover {
+
+QTreeWidget::branch:open:hover {
                   background-color: #424A71;
                   color: #E4E15B;
                   }
@@ -384,6 +409,16 @@ QTreeWidget::branch:closed:has-children {
                   image: url(:/dark-side.png);
                   padding-left: 10px;
 }
+
+QTreeWidget::branch:closed:has-children:selected {
+                  background-color: #666E98;
+                  color: #F7FFFF;
+}
+
+QTreeWidget::branch:closed:hover:has-children {
+                  background-color: #424A71;
+                  color: #E4E15B;
+                  }
 
 QTreeWidget::branch:open {
                   background-color: #0E1A3D;
@@ -406,16 +441,17 @@ QTreeWidget::item::hover {
                   color: #e4e15b;
                   background-color: #424A71;
                   }
+/*
+QTreeView::branch {
+                  color: #e4e15b;
+                  background-color: #0E1A3D;
+                  }
+*/
 
-QTreeView:branch:{
-color: #e4e15b;
-background-color: #0E1A3D;
-}
-
-
+/*  fix the tabs in popups
 QTabWidget QWidget { background: #020F31;
     }
-
+*/
 
 Dock SequenceGraph QWidget { background-color: #000021;
               border: 1px solid #00092d;
@@ -433,7 +469,7 @@ ScrollArea { background-color: #2a3358;
 /* does not seem to work */
 QTableView {
     padding: 0;
-    border: 5px solid #00092d;
+    border: 0px solid #00092d;
 }
 
 
@@ -451,4 +487,3 @@ CcpnModuleLabel QToolButton {
            background-color: #555D85;
            color: #555D85;
  }
-}

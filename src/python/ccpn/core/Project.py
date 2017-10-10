@@ -603,8 +603,9 @@ class Project(AbstractWrapperObject):
       # another className, and if so the names must be sorted.
       tt = tuple(sorted([className, target]))
     try:
-      od = self._context2Notifiers.get((tt), {})
-      del od[notifier]
+      if hasattr(self, '_context2Notifiers'):
+        od = self._context2Notifiers.get((tt), {})
+        del od[notifier]
     except KeyError:
       self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 

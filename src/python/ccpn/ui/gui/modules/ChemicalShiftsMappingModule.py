@@ -359,7 +359,6 @@ class ChemicalShiftsMapping(CcpnModule):
                                    )
 
   def updateThresholdLineValue(self, value):
-    print(value)
     self.barGraphWidget.xLine.setPos(value)
 
   def _updateThreshold(self):

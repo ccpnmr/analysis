@@ -249,7 +249,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
-    self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, decimals=3, grid=(i, 1))
+    self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, step=0.01,
+                                          decimals=3, callback=self.updateThresholdLineValue, grid=(i, 1))
     i += 1
     self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
     self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents,  grid=(i, 1))
@@ -357,6 +358,9 @@ class ChemicalShiftsMapping(CcpnModule):
                                    aboveBrush=aboveBrush
                                    )
 
+  def updateThresholdLineValue(self, value):
+    print(value)
+    self.barGraphWidget.xLine.setPos(value)
 
   def _updateThreshold(self):
     self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())

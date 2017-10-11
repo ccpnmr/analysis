@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.util.Colour import spectrumColours
+from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
@@ -429,9 +429,10 @@ class ChemicalShiftsMapping(CcpnModule):
     '''
     import json
     import subprocess
+
     values = {
-              'aboveThreshold': {'colour':self.aboveBrush, 'residues': self.aboveX},
-              'belowThreshold': {'colour':self.belowBrush, 'residues': self.belowX}
+              'aboveThreshold': {'colour':hexToRgb(self.aboveBrush), 'residues': self.aboveX},
+              'belowThreshold': {'colour':hexToRgb(self.belowBrush), 'residues': self.belowX}
              }
 
     self.jsonPath = self.application.preferences.general.auxiliaryFilesPath+'/data/mv.json'

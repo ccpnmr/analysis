@@ -29,7 +29,7 @@ from functools import partial
 
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
-
+import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
@@ -181,6 +181,9 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
                                                    actionCallback= self._customActionCallBack,
                                                    setLayout=True, grid=(1, 0))
+      self.showOnViewerButton = Button(self.nmrResidueTable._widget, callback=self._showOnMolecularViewer,
+                                       grid = (1, 2))
+
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
 
 
@@ -299,14 +302,14 @@ class ChemicalShiftsMapping(CcpnModule):
     xs = []
     ys = []
     obs = []
-    aboveX = []
-    aboveY = []
+    self.aboveX = []
+    self.aboveY = []
     aboveObjects = []
-    belowX = []
-    belowY = []
+    self.belowX = []
+    self.belowY = []
     belowObjects = []
-    aboveBrush = 'g'
-    belowBrush = 'r'
+    self.aboveBrush = 'g'
+    self.belowBrush = 'r'
     thresholdPos = self.thresholdSpinBox.value()
 
     if self.barGraphWidget.xLine:
@@ -319,23 +322,23 @@ class ChemicalShiftsMapping(CcpnModule):
         ys.append(y)
         obs.append(nmrResidue)
         if y > self.thresholdLinePos:
-          aboveY.append(y)
-          aboveX.append(x)
+          self.aboveY.append(y)
+          self.aboveX.append(x)
           aboveObjects.append(nmrResidue)
         else:
-          belowX.append(x)
-          belowY.append(y)
+          self.belowX.append(x)
+          self.belowY.append(y)
           belowObjects.append(nmrResidue)
 
     selectedNameColourA = self.aboveThresholdColourBox.getText()
     for code, name in spectrumColours.items():
       if name == selectedNameColourA:
-        aboveBrush = code
+        self.aboveBrush = code
 
     selectedNameColourB = self.belowThresholdColourBox.getText()
     for code, name in spectrumColours.items():
       if name == selectedNameColourB:
-        belowBrush = code
+        self.belowBrush = code
 
 
     self.barGraphWidget.deleteLater()
@@ -348,14 +351,14 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget.customViewBox.addSelectionBox()
 
 
-    self.barGraphWidget._lineMoved(aboveX=aboveX,
-                                   aboveY=aboveY,
+    self.barGraphWidget._lineMoved(aboveX=self.aboveX,
+                                   aboveY=self.aboveY,
                                    aboveObjects=aboveObjects,
-                                   belowX=belowX,
-                                   belowY=belowY,
+                                   belowX=self.belowX,
+                                   belowY=self.belowY,
                                    belowObjects=belowObjects,
-                                   belowBrush=belowBrush,
-                                   aboveBrush=aboveBrush
+                                   belowBrush=self.belowBrush,
+                                   aboveBrush=self.aboveBrush
                                    )
 
   def updateThresholdLineValue(self, value):
@@ -363,7 +366,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _updateThreshold(self):
     self.thresholdSpinBox.setValue(self.barGraphWidget.xLine.pos().y())
-    self.barGraphWidget._lineMoved()
+    self.updateBarGraph()
+    # self.barGraphWidget._lineMoved()
 
   def _viewboxMouseClickEvent(self, event):
 
@@ -418,6 +422,31 @@ class ChemicalShiftsMapping(CcpnModule):
       self.updateTable(self.nmrResidueTable.nmrChain)
       self.updateBarGraph()
 
+  def _showOnMolecularViewer(self):
+    ''' 
+    1) write file with values that the script will read
+    2) run pymol and script
+    '''
+    import json
+    import subprocess
+    values = {
+              'aboveThreshold': {'colour':self.aboveBrush, 'residues': self.aboveX},
+              'belowThreshold': {'colour':self.belowBrush, 'residues': self.belowX}
+             }
+
+    self.jsonPath = self.application.preferences.general.auxiliaryFilesPath+'/data/mv.json'
+    try:
+      with open('/Users/luca/Desktop/mv.json', 'w') as fp:
+        json.dump(values, fp, indent=2)
+        fp.close()
+        self.project._logger.info('File saved in: ' + self.jsonPath)
+    except:
+      getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
+
+    p = subprocess.Popen('/Applications/MacPyMOL.app/Contents/MacOS/MacPyMOL /Users/luca/AnalysisV3/src/python/ccpn/plugins/development/TestPymol.py',
+                       shell=True,
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
 
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):

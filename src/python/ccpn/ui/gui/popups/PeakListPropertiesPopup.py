@@ -150,7 +150,8 @@ class PeakListPropertiesPopup(CcpnDialog):
       repopulate the popup widgets
     """
     while self.numUndos > 0:      # remove any previous undo from this popup
-      self.application.undo()     # so only the last colour change is kept
+      # self.application.undo()     # so only the last colour change is kept
+      self.project._undo.undo()     # this doesn't popup the undo progressManager
       self.numUndos -= 1
 
     applyAccept = False

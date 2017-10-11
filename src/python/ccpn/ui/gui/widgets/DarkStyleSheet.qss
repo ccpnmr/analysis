@@ -1,8 +1,34 @@
+/*
+  Dark theme style sheet
+
+@BACKCOLOUR_VVDARK = #020F31
+@BACKCOLOUR_VDARK = #0E1A3D
+@BACKCOLOUR_DARK = #2a3358
+@BACKCOLOUR_MEDIUM = #424a71
+@BACKCOLOUR_LIGHT = #555D85
+@BACKCOLOUR_VLIGHT = #666e98
+
+@BACKCOLOUR_OFFWHITE = #cccff9
+@BACKCOLOUR_WHITE = #f7ffff
+
+@FORECOLOUR_DARK = #122043
+@FORECOLOUR_MEDIUM = #898FBB
+@FORECOLOUR_LIGHT = #bec4f3
+@FORECOLOUR_VLIGHT = #e4e15b
+
+@BORDERCOLOUR_VDARK = #00092D
+@BORDERCOLOUR_DARK = #182548
+@BORDERCOLOUR_LIGHT = #bec4f3
+
+@FORECOLOUR_DISABLED = #7f88ac
+*/
+
 QWidget {
     padding: 0;
     margin: 0px 0px 0px 0px;
     border: 0px;
 }
+
 QTextEdit {
         background-color: #f7ffff;
         color: #122043;
@@ -13,12 +39,10 @@ QTextEdit {
 
 QFrame {
     background-color: #2a3358;
-}
-Frame {
-    border: 1px solid #bec4f3;
+    border: 0px solid #f7ffff;
 }
 
- /* this overrides the settings for CcpnModuleLabel */
+/* this overrides the settings for CcpnModuleLabel */
 QLabel {
     padding: 0;
     background-color: #2a3358;
@@ -81,15 +105,6 @@ DoubleSpinbox::hover {
               background-color: #e4e15b;
               }
 
-RadioButton {
-              background-color: #2a3358;
-              color: #f7ffff;
-              }
-
-RadioButton::disabled {
-                      color: #7f88ac
-                      }
-
 Spinbox {
               background-color: #f7ffff;
               color: #122043;
@@ -99,8 +114,21 @@ Spinbox::hover {
               background-color: #e4e15b;
               }
 
-QCombobox {
-    padding: 0;
+RadioButton {
+              background-color: #2a3358;
+              color: #f7ffff;
+              font-weight: bold
+              }
+
+RadioButton::disabled {
+                      color: #7f88ac
+                      }
+
+/* QComboBox /PulldownList padding appears not to work; hardcoded instead */
+QComboBox {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
 }
 
 QCombobox QAbstractItemView::item {
@@ -141,8 +169,8 @@ QMenuBar::item {
 
               }
 QMenuBar::item::selected { color: #f7ffff;
-                           background: #666e98;
-      }
+                        background: #666e98;
+                      }
 QMenuBar::item::hover {
      background-color: #666E98;
      color: #e4e15b;
@@ -156,13 +184,12 @@ QMenu::item::selected { color: #f7ffff;
                       }
 
 QMenu::item::disabled {background-color: #424a71;
-                       color: #7f88ac;
-                      }
+             color: #7f88ac;
+              }
 
 QMenu::item::disabled::selected {background-color: #424a71;
-                       color: #7f88ac;
-                      }
-
+             color: #7f88ac;
+              }
 
 QDialog QLabel {
 				color: #f7ffff;
@@ -180,58 +207,59 @@ QProgressBar {
 				color:  #f7ffff;
         background-color: #2a3358;
         padding: 0px;
-        }
+}
 
 QPushButton {
-                color:  #bec4f3;
-                background-color: #535a83;
-                border: 1px solid #182548;
-                padding: 1px;
+            color: #bec4f3;
+            background-color: #535a83;
+            border: 1px solid #182548;
+            padding: 1px;
 }
 
 QDialog QPushButton {
-                color:  #bec4f3;
-                background-color: #535a83;
-                border: 1px solid #182548;
-                padding: 1px;
+            color: #bec4f3;
+            background-color: #535a83;
+            border: 1px solid #182548;
+            padding: 1px;
 }
 QDialog QPushButton::clicked {
-                color: #122043;
-                background-color: #BEC4F3;
+            color: #122043;
+            background-color: #BEC4F3;
 }
 QDialog QPushButton::hover {
-                color: #122043;
-                background-color: #BDBC5A;
+            color: #122043;
+            background-color: #BDBC5A;
 }
 QDialog QPushButton::disabled {
-                color: #898FBB;
+            color: #898FBB;
 }
 
-QDialog QToolButton  {
-					background-color: #f7ffff;
-					}
+QToolButton {
+            color: #f7ffff;
+            border: 1px solid #182548;
+            }
+QToolButton::checked {
+                      background-color:  #020F31;
+                      }
 
 QDialog::header {
-					color: white;
+					color: #f7ffff;
 					background-color:#2a3358;
 					}
 
+ListWidget {background-color: #FDFDFC; /* #FFFDD1; */
+             color: #464E76;
+             font-weight: normal;
+             margin: 0px 0px 0px 0px;
+             border: 1px solid #EDC151;
+             }
 
-/* not working */
-QListWidget {background-color: #FDFDFC;
-             color: #f7ffff;
-             border: 1px solid white;
+QListWidget {background-color: #FDFDFC; /* #FFFDD1; */
+             color: #464E76;
+             font-weight: normal;
              margin: 0px 0px 0px 0px;
              font-weight: normal;
 }
-/*
-QListWidget {background-color: #000021;
-             color: #f7ffff;
-             border: 1px solid #424a71;
-             margin: 0px 0px 0px 0px;
-             font-weight: normal;
-}
-*/
 
 ObjectTable {
              border: 1px #182548;
@@ -255,7 +283,7 @@ ObjectTable::item::selected {
 
 QHeaderView {
             color: #555D85;
-              }
+            }
 
 QHeaderView::section {
                     color: #555D85;
@@ -269,13 +297,6 @@ QToolBar {
           border: 0px;
           background-color: transparent;
           }
-QToolButton {
-            color: #f7ffff;
-            border: 1px solid #182548;
-            }
-QToolButton::checked {
-                      background-color:  #020F31;
-                      }
 
 QCheckBox {
         background-color: #2a3358;
@@ -291,20 +312,17 @@ QLineEdit {
         font-size: 1.5em;
         }
 
-Dock  {
-          background-color: #2a3358;
-          border: 0px solid #2a3358;
+Dock {
+         background-color: #2a3358;
+         border: 0px solid #2a3358;
 }
 
-ModuleArea  {
-          background-color: #f7ffff;
-          border: 0px solid #f7ffff;
+/*
+GuiMainWindow {
+         background-color: #2a3358;
+         border: 0px solid #2a3358;
 }
-
-Module  {
-          background-color: #f7ffff;
-          border: 0px solid #f7ffff;
-}
+*/
 
 Dock DockLabel  {
           background-color: #BEC4F3;
@@ -313,6 +331,20 @@ Dock DockLabel  {
           padding: 0px;
           /*font-weight: Semibold;*/
 }
+
+Dock QPushButton {
+				color: #bec4f3;
+				background-color: #535a83;
+				border: 1px solid #182548;
+				padding: 2px;
+				}
+
+Dock QPushButton::clicked {
+                          color: #122043;
+                          background-color: #BEC4F3;
+                          border: 1px solid #182548;
+                          padding: 2px;
+                          }
 
 Dock Frame {
           background-color: #2a3358;
@@ -334,20 +366,6 @@ QDialog > QWidget QScrollArea { background-color: #2a3358;
 Dock > QWidget { background-color: #2a3358;
         }
 
-
-Dock QPushButton {
-				color: #bec4f3;
-				background-color: #535a83;
-				border: 1px solid #182548;
-				padding: 2px;
-				}
-
-Dock QPushButton::clicked {
-                          color: #122043;
-                          background-color: #BEC4F3;
-                          border: 1px solid #182548;
-                          padding: 2px;
-                          }
 
 Dock QPushButton::pressed {
                           color: #122043;
@@ -441,16 +459,21 @@ QTreeWidget::item::hover {
                   color: #e4e15b;
                   background-color: #424A71;
                   }
-/*
-QTreeView::branch {
-                  color: #e4e15b;
-                  background-color: #0E1A3D;
-                  }
-*/
+
+QSplitter {
+          background-color: #122043;
+          }
+QSplitter::handle:horizontal {
+    width: 1px;
+}
+QSplitter::handle:vertical {
+    height: 1px;
+}
 
 /*  fix the tabs in popups
-QTabWidget QWidget { background: #020F31;
-    }
+QTabWidget QWidget {
+                    background: #020F31;
+                    }
 */
 
 Dock SequenceGraph QWidget { background-color: #000021;
@@ -465,6 +488,14 @@ ColorDialog {
 ScrollArea { background-color: #2a3358;
         }
 
+/*
+SpectrumPropertiesPopup QPushButton {
+    background-color: #BD8413;
+            border: 1px solid #EDC151;
+            color: #FDFDFC;
+            padding: 2px;
+            }
+*/
 
 /* does not seem to work */
 QTableView {
@@ -472,18 +503,11 @@ QTableView {
     border: 0px solid #00092d;
 }
 
-
-/* does not seem to do anything, even when overriding the updateStyle method */
-DockLabel {
-          background-color: #555D85;
-          /* color: #fdfdfc; */
-          color: 'white';
+QGraphicsView {
+    background-color: #2a3358;
 }
 
-/* does not seem to do anything, whereas it works when hard-coded */
-CcpnModuleLabel QToolButton {
-           border-width: 0px;
-           padding: 0px;
-           background-color: #555D85;
-           color: #555D85;
- }
+DockLabel {
+          background-color: #555D85;
+          color: 'white';
+}

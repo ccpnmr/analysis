@@ -370,6 +370,8 @@ class PeakList(AbstractWrapperObject):
       else:
         raise ValueError("PeakList has no attribute %s" % key)
     newPeakList = targetSpectrum.newPeakList(**params)
+    newPeakList.symbolColour = targetSpectrum.sliceColour
+    newPeakList.textColour = targetSpectrum.sliceColour
     for peak in self.peaks:
       peak.copyTo(newPeakList)
     #

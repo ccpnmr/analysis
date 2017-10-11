@@ -175,7 +175,7 @@ class CreateChainPopup(CcpnDialog):
       # and still be added to the change list, so only undo if length has changed
       errorName = str(self.__class__.__name__)
       if oldUndo != self.project._undo.numItems():
-        self.application.undo()
+        self.project._undo.undo()
         getLogger().debug('>>>Undo.%s._applychanges' % errorName)
       else:
         getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)

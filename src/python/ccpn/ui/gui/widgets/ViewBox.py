@@ -362,17 +362,19 @@ class ViewBox(pg.ViewBox):
         continue
       for peakListView in spectrumView.peakListViews:
         if peakListView.isVisible():
+
           # ejb - strange error AttributeError: 'IntegralList' object has no attribute 'peaks'
-          for peak in peakListView.peakList.peaks:
-            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
-                if peak in self.current.peaks:
-                  self.current._peaks.remove(peak)
-                else:
-                  self.current.addPeak(peak)
-                break
+          if peakListView.peakList and hasattr(peakListView.peakList, 'peaks'):
+            for peak in peakListView.peakList.peaks:
+              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+                if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                  #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
+                  if peak in self.current.peaks:
+                    self.current._peaks.remove(peak)
+                  else:
+                    self.current.addPeak(peak)
+                  break
 
   def _resetBoxes(self):
     "Reset/Hide the boxes "

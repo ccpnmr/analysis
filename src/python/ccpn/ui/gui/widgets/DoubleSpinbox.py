@@ -35,20 +35,21 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
 
-  # To be done more rigeriously later
-  _styleSheet = """
-  DoubleSpinbox {
-    background-color: #f7ffff;
-    color: #122043;
-    margin: 0px 0px 0px 0px;
-    padding: 2px 2px 2px 2px;
-    border: 1px solid #182548;
-  }
+  # # To be done more rigeriously later
+  # _styleSheet = """
+  # DoubleSpinbox {
+  #   background-color: #f7ffff;
+  #   color: #122043;
+  #   margin: 0px 0px 0px 0px;
+  #   padding: 2px 2px 2px 2px;
+  #   border: 1px solid #182548;
+  # }
+  #
+  # DoubleSpinbox::hover {
+  #   background-color: #e4e15b;
+  # }
+  # """
 
-  DoubleSpinbox::hover {
-    background-color: #e4e15b;
-  } 
-  """
   defaultMinimumSizes = (0,20)
 
   def __init__(self, parent, value=None, min=None, max=None, step=None, showButtons=True,
@@ -96,7 +97,7 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     self.setMinimumWidth(self.defaultMinimumSizes[0])
     self.setMinimumHeight(self.defaultMinimumSizes[1])
 
-    self.setStyleSheet(self._styleSheet)
+    # self.setStyleSheet(self._styleSheet)
 
   def setSelected(self):
     self.isSelected = True

@@ -434,6 +434,6 @@ QGraphicsView {
 }
 
 DockLabel {
-                background-color: #E7D8B6;
-                color: #555D85;
+            background-color: #E7D8B6;
+            color: #555D85;
 }

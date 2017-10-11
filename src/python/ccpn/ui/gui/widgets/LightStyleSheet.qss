@@ -165,7 +165,7 @@ PulldownList::hover {
                   }
 
 QMenuBar::item {
-                background-color: #E7D8B6;
+                background-color: #EDDFBC;
                 color: #555D85;
               }
 QMenuBar::item::selected { color: #FDFDFC;
@@ -222,7 +222,7 @@ QDialog QPushButton {
             color: #fdfdfc;
             background-color: #bd8413;
             border: 1px solid #EDC151;
-            padding: 1px;
+            padding: 5px;
 }
 QDialog QPushButton::clicked {
             color: #fdfdfc;

@@ -213,7 +213,7 @@ QProgressBar {
 QPushButton {
             color: #bec4f3;
             background-color: #535a83;
-            border: 1px solid #182548;
+            border: 1px solid #535a83;
             padding: 1px;
 }
 
@@ -221,7 +221,7 @@ QDialog QPushButton {
             color: #bec4f3;
             background-color: #535a83;
             border: 1px solid #182548;
-            padding: 1px;
+            padding: 5px;
 }
 QDialog QPushButton::clicked {
             color: #122043;

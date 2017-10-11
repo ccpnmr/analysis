@@ -80,9 +80,25 @@ class FileDialog(QtGui.QFileDialog):
                                                background-color: #2a3358;
                                                color: #f7ffff;
                                                }
+                           QFileDialog QPushButton { 
+                                                color: #bec4f3;
+                                                background-color: #535a83;
+                                                border: 1px solid #182548;
+                                                padding: 5px;
+                                          }
                           """)
       elif preferences.colourScheme == 'light':
-        self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+        self.setStyleSheet("""
+                            QFileDialog QWidget {
+                                                color: #464e76;
+                                                }
+                           QFileDialog QPushButton { 
+                                                color: #fdfdfc;
+                                                background-color: #bd8413;
+                                                border: 1px solid #EDC151;
+                                                padding: 5px;
+                                          }
+                          """)
 
     # self.result is '' (first case) or 0 (second case) if Cancel button selected
     if preferences and preferences.useNative and not sys.platform.lower() == 'linux':

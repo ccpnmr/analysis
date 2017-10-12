@@ -116,7 +116,7 @@ Spinbox::hover {
               }
 
 RadioButton {
-              background-color: #E7D8B6;
+              background-color: #FBF4CC;
               color: #555d85;
               font-weight: bold
               }
@@ -302,7 +302,7 @@ QToolBar {
 
 QCheckBox {
         background-color: #FBF4CC;
-        color: #f7ffff;
+        color: #555D85;
         }
 
 QLineEdit {

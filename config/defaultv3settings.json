@@ -20,6 +20,12 @@
         "stripRegionPadding": 0.0,
         "peakDropFactor": 0.1
     },
+
+    "externalPrograms": {
+        "pymol": ""
+
+    },
+
     "recentMacros": [
 
     ],

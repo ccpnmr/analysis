@@ -54,6 +54,7 @@ from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
+from ccpn.ui.gui.widgets import MessageDialog
 
 
 
@@ -308,7 +309,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     # molecular Structure
     self.molecularStructure= Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
-    texts = ['PDB','CCPN Ensembles','Fetch From WWPDB']
+    texts = ['PDB','CCPN Ensembles','Fetch From Server']
     self.molecularStructureRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='h',
                                         grid=(i, 1))
     self.molecularStructureRadioButton.set(texts[0])
@@ -318,7 +319,9 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.mvWidgetContents = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
     self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
-    self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, filter="PDB files (*.pdb)", grid=(0,1))
+    scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
+    self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
+                                        filter="PDB files (*.pdb)", directory=scriptPath, grid=(0,1))
 
 
     i += 1
@@ -484,7 +487,19 @@ class ChemicalShiftsMapping(CcpnModule):
 
     filePath = os.path.join(getScriptsDirectoryPath(self.project),'pymol', PymolScriptName)
 
+    pymolPath = self.application.preferences.externalPrograms.pymol
     pdbPath = self.pathPDB.get()
+
+    if not os.path.exists(pymolPath):
+      ok = MessageDialog.showOkCancelWarning('Molecular Viewer not Set'
+                                             , 'Select the executable file on preferences')
+      if ok:
+        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+        pp = PreferencesPopup(preferences=self.application.preferences, project=self.project)
+        pp.tabWidget.setCurrentIndex(pp.tabWidget.count()-1)
+        pp.exec_()
+        return
+
 
     while not pdbPath.endswith('.pdb'):
       sucess = self.pathPDB._openFileDialog()
@@ -492,6 +507,7 @@ class ChemicalShiftsMapping(CcpnModule):
         pdbPath = self.pathPDB.get()
       else:
         return
+
 
     aboveThresholdResidues = "+".join([str(x) for x in self.aboveX])
     belowThresholdResidues = "+".join([str(x) for x in self.belowX])
@@ -503,11 +519,14 @@ class ChemicalShiftsMapping(CcpnModule):
                                       colourAboveThreshold, colourBelowThreshold)
 
 
-
-    p = subprocess.Popen('/Applications/MacPyMOL.app/Contents/MacOS/MacPyMOL'+' '+scriptPath,
+    try:
+      self.pymolProcess = subprocess.Popen(pymolPath+' '+scriptPath,
                        shell=True,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
+    except Exception as e:
+      getLogger().warning('Pymol not started. Check executable.', e)
+
 
 
   def _selectCurrentNmrResiduesNotifierCallback(self, data):

@@ -228,7 +228,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from os.path import expanduser
 
 class LineEditButtonDialog(Widget, Base):
-  def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, **kw):
+  def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, directory=None, **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
     self.openPathIcon = Icon('icons/directory')
@@ -249,6 +249,7 @@ class LineEditButtonDialog(Widget, Base):
       self.fileMode = fileMode
 
     self.filter = filter
+    self.directory = directory
 
     tipText= 'Click the icon to select'
     self.lineEdit = LineEdit(self, text=self.textLineEdit, textAligment='l', hAlign='l', minimumWidth=100,
@@ -261,7 +262,7 @@ class LineEditButtonDialog(Widget, Base):
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, filter=self.filter)
+               acceptMode=QtGui.QFileDialog.AcceptOpen, directory=self.directory, filter=self.filter)
 
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:

@@ -37,7 +37,7 @@ class FileDialog(QtGui.QFileDialog):
   #              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
 
   def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
+               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None, **kw):
 
     # ejb - added selectFile to suggest a filename in the file box
     #       this is not passed to the super class
@@ -65,6 +65,8 @@ class FileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
+    if filter is not None:
+     self.setFilter(filter)
 
     if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
       self.selectFile(selectFile)
@@ -226,7 +228,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from os.path import expanduser
 
 class LineEditButtonDialog(Widget, Base):
-  def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, **kw):
+  def __init__(self,parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, **kw):
     Widget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)
     self.openPathIcon = Icon('icons/directory')
@@ -246,7 +248,9 @@ class LineEditButtonDialog(Widget, Base):
     else:
       self.fileMode = fileMode
 
-    tipText= 'Select directory where to save'
+    self.filter = filter
+
+    tipText= 'Click the icon to select'
     self.lineEdit = LineEdit(self, text=self.textLineEdit, textAligment='l', hAlign='l', minimumWidth=100,
                              tipText=tipText, grid=(0, 0))
     self.lineEdit.setEnabled(False)
@@ -257,10 +261,16 @@ class LineEditButtonDialog(Widget, Base):
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
-               acceptMode=QtGui.QFileDialog.AcceptOpen,)
+               acceptMode=QtGui.QFileDialog.AcceptOpen, filter=self.filter)
+
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:
       self.lineEdit.setText(str(selectedFile))
+      return True
+    else:
+      return False
+
+
 
   def get(self):
     return self.lineEdit.text()
@@ -276,7 +286,7 @@ if __name__ == '__main__':
   from ccpn.ui.gui.popups.Dialog import CcpnDialog
   app = TestApplication()
   popup = CcpnDialog(windowTitle='Test LineEditButtonDialog')
-  slider = LineEditButtonDialog(parent=popup)
+  slider = LineEditButtonDialog(parent=popup, fileMode=None, filter=('ccpn (*.ccpn)'))
   popup.show()
   popup.raise_()
   app.start()

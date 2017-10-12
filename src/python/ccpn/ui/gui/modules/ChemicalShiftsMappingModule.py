@@ -42,12 +42,13 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
+from ccpn.util.Scripting import getScriptsDirectoryPath
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
 from ccpn.core.lib import CcpnSorting
@@ -55,11 +56,40 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 
 
+
+def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
+                  colourAboveThreshold, colourBelowThreshold):
+
+  if os.path.exists(pdbPath):
+    warn = 'This script is auto-generated. Any changes here will be lost.'
+    with open(filePath, 'w') as f:
+      f.write('''\n"""''' + warn + '''"""''')
+      f.write('''\nfrom pymol import cmd''')
+      f.write('''\n''')
+      f.write('''\ncmd.load("''' + pdbPath + '''") ''')
+      f.write('''\ncmd.hide('lines')''')
+      f.write('''\ncmd.show('cartoon')''')
+      f.write('''\ncmd.color('white')''')
+      f.write('''\ncmd.select('aboveThreshold', 'res  ''' + aboveThresholdResidues + ''' ')''')
+      f.write('''\ncmd.set_color("AboveColour", " ''' + str(colourAboveThreshold) + ''' ")''')
+      f.write('''\ncmd.color('AboveColour', 'aboveThreshold')''')
+      f.write('''\ncmd.select('belowThreshold', 'res  ''' + belowThresholdResidues + ''' ')''')
+      f.write('''\ncmd.set_color("BelowColour", " ''' + str(colourBelowThreshold) + ''' ")''')
+      f.write('''\ncmd.color('BelowColour', 'belowThreshold')''')
+      f.write('''\ncmd.deselect()''')
+
+  return filePath
+
+
+
+
+
 DefaultAtoms = ['H', 'N']
 DefaultAtomWeight = {'H':7, 'N':1, 'C':4, 'Other':1}
 DefaultThreshould = 0.1
 LightColourSchemeCurrentLabel = '#3333ff'
 DarkColourSchemeCurrentLabel = '#00ff00'
+PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
 
 class CustomNmrResidueTable(NmrResidueTable):
@@ -170,7 +200,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
                                                      , callback=self._selectCurrentNmrResiduesNotifierCallback)
 
-
+    if self.project:
+      if len(self.project.nmrChains) > 0:
+        self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
 
   def _setWidgets(self):
 
@@ -181,7 +213,8 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
                                                    actionCallback= self._customActionCallBack,
                                                    setLayout=True, grid=(1, 0))
-      self.showOnViewerButton = Button(self.nmrResidueTable._widget, callback=self._showOnMolecularViewer,
+      self.showOnViewerButton = Button(self.nmrResidueTable._widget, text='Show on Molecular Viewer',
+                                       callback=self._showOnMolecularViewer,
                                        grid = (1, 2))
 
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
@@ -272,6 +305,24 @@ class ChemicalShiftsMapping(CcpnModule):
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     self.belowThresholdColourBox.setCurrentIndex(0)
     i += 1
+
+    # molecular Structure
+    self.molecularStructure= Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
+    texts = ['PDB','CCPN Ensembles','Fetch From WWPDB']
+    self.molecularStructureRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='h',
+                                        grid=(i, 1))
+    self.molecularStructureRadioButton.set(texts[0])
+    self.molecularStructureRadioButton.setEnabled(False)
+    self.molecularStructureRadioButton.setToolTip('Not implemented yet')
+
+    i += 1
+    self.mvWidgetContents = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
+    self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
+    self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, filter="PDB files (*.pdb)", grid=(0,1))
+
+
+    i += 1
+
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
                                grid=(i, 1),  gridSpan=(i, 2))
     i += 1
@@ -295,6 +346,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _displayTableForNmrChain(self, nmrChain):
     self.updateModule()
+
     # self.updateTable(nmrChain)
     # self.updateBarGraph()
 
@@ -424,27 +476,35 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _showOnMolecularViewer(self):
     ''' 
-    1) write file with values that the script will read
-    2) run pymol and script
+    1) write the script in the scripts/pymol dir
+    2) run pymol with the script
     '''
     import json
     import subprocess
 
-    values = {
-              'aboveThreshold': {'colour':hexToRgb(self.aboveBrush), 'residues': self.aboveX},
-              'belowThreshold': {'colour':hexToRgb(self.belowBrush), 'residues': self.belowX}
-             }
+    filePath = os.path.join(getScriptsDirectoryPath(self.project),'pymol', PymolScriptName)
 
-    self.jsonPath = self.application.preferences.general.auxiliaryFilesPath+'/data/mv.json'
-    try:
-      with open('/Users/luca/Desktop/mv.json', 'w') as fp:
-        json.dump(values, fp, indent=2)
-        fp.close()
-        self.project._logger.info('File saved in: ' + self.jsonPath)
-    except:
-      getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
+    pdbPath = self.pathPDB.get()
 
-    p = subprocess.Popen('/Applications/MacPyMOL.app/Contents/MacOS/MacPyMOL /Users/luca/AnalysisV3/src/python/ccpn/plugins/development/TestPymol.py',
+    while not pdbPath.endswith('.pdb'):
+      sucess = self.pathPDB._openFileDialog()
+      if sucess:
+        pdbPath = self.pathPDB.get()
+      else:
+        return
+
+    aboveThresholdResidues = "+".join([str(x) for x in self.aboveX])
+    belowThresholdResidues = "+".join([str(x) for x in self.belowX])
+
+    colourAboveThreshold = hexToRgb(self.aboveBrush)
+    colourBelowThreshold = hexToRgb(self.belowBrush)
+
+    scriptPath = chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
+                                      colourAboveThreshold, colourBelowThreshold)
+
+
+
+    p = subprocess.Popen('/Applications/MacPyMOL.app/Contents/MacOS/MacPyMOL'+' '+scriptPath,
                        shell=True,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)

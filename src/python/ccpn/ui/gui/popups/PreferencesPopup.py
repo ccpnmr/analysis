@@ -42,6 +42,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.util.Logging import getLogger
 
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
@@ -92,10 +93,12 @@ class PreferencesPopup(CcpnDialog):
     self._setspectrumTabWidgets(parent=self.spectrumTabFrame)
     self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
 
-    ## 3 Tab Disabled. # Keep the code for future additions
-    # self.miscellaneousTabFrame = Frame(self, setLayout=True)
-    # self._setMiscellaneousTabWidgets(parent=self.miscellaneousTabFrame)
-    # self.tabWidget.addTab(self.miscellaneousTabFrame, 'Miscellaneous')
+    # 3 Tab Disabled. # Keep the code for future additions
+    self.externalProgramsTabFrame = Frame(self, setLayout=True)
+    self.externalProgramsTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+    self.externalProgramsTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
+    self._setExternalProgramsTabWidgets(parent=self.externalProgramsTabFrame)
+    self.tabWidget.addTab(self.externalProgramsTabFrame, 'External Programs')
 
 
   def _setGeneralTabWidgets(self, parent):
@@ -148,7 +151,7 @@ class PreferencesPopup(CcpnDialog):
     self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
     self.dataPathText.editingFinished.connect(self._setDataPath)
     self.dataPathText.setText(self.preferences.general.dataPath)
-    self.dataPathButton = Button(self.generalTabFrame, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+    self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
 
     row += 1
     self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -235,16 +238,45 @@ class PreferencesPopup(CcpnDialog):
     #        , grid=(row , 0), gridSpan=(row, 1))
 
 
-  def _setMiscellaneousTabWidgets(self, parent):
+  def _setExternalProgramsTabWidgets(self, parent):
     ''' 
-    Insert a widget in here to appear in the Miscellaneous Tab 
-    Empty. To be Implemented
+    Insert a widget in here to appear in the externalPrograms Tab 
+
     '''
 
-    pass
+    row = 0
+
+    self.dataPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
+    self.pymolPath = LineEdit(parent, text='', grid=(row, 1), hAlign='l')
+    self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
+    self.pymolPath.editingFinished.connect(self._setPymolPath)
+    self.pymolPath.setText(self.preferences.externalPrograms.pymol)
+    self.pymolPathButton = Button(parent, grid=(row, 2), callback=self._getPymolPath, icon='icons/directory',
+                                 hPolicy='fixed')
+
+    self.testPymolPathButton = Button(parent, grid=(row, 3), callback=self._testPymol,
+                                      text='test', hPolicy='fixed')
 
 
+  def _testPymol(self):
+    program = self.pymolPath.get()
+    if not self._testExternalProgram(program):
+      self.sender().setText('Failed')
+    else:
+      self.sender().setText('Success')
 
+  def _testExternalProgram(self, program):
+    import subprocess
+    try:
+      p = subprocess.Popen(program,
+                       shell=False,
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+      return True
+
+    except Exception as e:
+      getLogger().warning('Testing External program: Failed.' + str(e))
+      return False
 
   def _getDataPath(self):
     if os.path.exists('/'.join(self.dataPathText.text().split('/')[:-1])):
@@ -349,7 +381,19 @@ class PreferencesPopup(CcpnDialog):
       application = self.project._appBase
       application.updateAutoBackup()
 
+  def _setPymolPath(self):
+    pymolPath = self.pymolPath.get()
+    if 'externalPrograms' in self.preferences:
+      if 'pymol' in self.preferences.externalPrograms:
+        self.preferences.externalPrograms.pymol = pymolPath
+    self.testPymolPathButton.setText('test')
 
+  def _getPymolPath(self):
+
+    dialog = FileDialog(self, text='Select File')
+    file = dialog.selectedFile()
+    if file:
+      self.pymolPath.setText(file)
 
   def _setAutoBackupFrequency(self):
     try:

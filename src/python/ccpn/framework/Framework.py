@@ -53,7 +53,7 @@ from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
-# from ccpn.util.Scripting import createScriptsDirectory, addScriptSubDirectory
+from ccpn.util.Scripting import createScriptsDirectory, addScriptSubDirectory
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
@@ -362,8 +362,8 @@ class Framework:
     self.applyPreferences(project)
 
     # Add Scripts Folder
-    # createScriptsDirectory(project)
-    # addScriptSubDirectory(project, 'pymol')
+    createScriptsDirectory(project)
+    addScriptSubDirectory(project, 'pymol')
 
     self.project = project
     if hasattr(self, '_mainWindow'):

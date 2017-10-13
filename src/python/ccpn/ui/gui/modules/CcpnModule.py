@@ -225,31 +225,33 @@ class CcpnModule(Dock):
       self.addWidget(self._splitter)
 
       #another fix for the stylesheet
-      self.colourScheme = mainWindow.application.colourScheme
-      if self.colourScheme == 'dark':
-        self.setStyleSheet("""QSplitter{
-                                    background-color: #2a3358;
-                              }
-                              QSplitter::handle:horizontal {
-                                    width: 3px;
-                              }
-                              QSplitter::handle:vertical {
-                                    height: 3px;
-                              }
-                              QSplitter::handle { background-color: LightGray }
-                              """)
-      elif self.colourScheme == 'light':
-        self.setStyleSheet("""QSplitter{
-                                    background-color: #FBF4CC;
-                              }
-                              QSplitter::handle:horizontal {
-                                    width: 3px;
-                              }
-                              QSplitter::handle:vertical {
-                                    height: 3px;
-                              }
-                              QSplitter::handle { background-color: DarkGray }
-                              """)
+      if hasattr(mainWindow, 'application') and mainWindow.application:
+        # check that application has been attached - may not be the case for some test modules
+        self.colourScheme = mainWindow.application.colourScheme
+        if self.colourScheme == 'dark':
+          self.setStyleSheet("""QSplitter{
+                                      background-color: #2a3358;
+                                }
+                                QSplitter::handle:horizontal {
+                                      width: 3px;
+                                }
+                                QSplitter::handle:vertical {
+                                      height: 3px;
+                                }
+                                QSplitter::handle { background-color: LightGray }
+                                """)
+        elif self.colourScheme == 'light':
+          self.setStyleSheet("""QSplitter{
+                                      background-color: #FBF4CC;
+                                }
+                                QSplitter::handle:horizontal {
+                                      width: 3px;
+                                }
+                                QSplitter::handle:vertical {
+                                      height: 3px;
+                                }
+                                QSplitter::handle { background-color: DarkGray }
+                                """)
 
     else:
       self.settingsWidget = None

@@ -350,6 +350,7 @@ if __name__ == '__main__':
     print('Run clicked, ', kwargs)
   plugin.run = run
 
+
   qtTestHarness.qtMainWindow.moduleArea = CcpnModuleArea(mainWindow=qtTestHarness.qtMainWindow)
   # print('GuiMainWindow.moduleArea: layout:', qtTestHarness.qtMainWindow.moduleArea.layout)  ## pyqtgraph object
   # qtTestHarness.qtMainWindow.moduleArea.setGeometry(0, 0, 1000, 800)
@@ -360,6 +361,9 @@ if __name__ == '__main__':
   # pluginModule = PluginModule(plugin=plugin
   #                             , application=application
   #                             , mainWindow=application.mainWindow)
+
+  qtTestHarness.qtMainWindow.project = None             # ejb - test
+  qtTestHarness.qtMainWindow.application = application
 
   pluginModule = PluginModule(mainWindow=qtTestHarness.qtMainWindow
                               , plugin=plugin

@@ -36,16 +36,17 @@ from ccpn.util.Constants import ccpnmrJsonData
 
 class ListWidget(QtGui.QListWidget, Base):
 
-  # To be done more rigeriously later
-  _styleSheet = """
-  QListWidget {background-color: #f7ffff; 
-               color: #122043; 
-               font-weight: normal;
-               margin: 0px 0px 0px 0px;
-               padding: 2px 2px 2px 2px;
-               border: 1px solid #182548;
-               }
-  """
+  # # To be done more rigeriously later
+  # _styleSheet = """
+  # QListWidget {background-color: #f7ffff;
+  #              color: #122043;
+  #              font-weight: normal;
+  #              margin: 0px 0px 0px 0px;
+  #              padding: 2px 2px 2px 2px;
+  #              border: 1px solid #182548;
+  #              }
+  # """
+
   def __init__(self, parent=None, objects=None, callback=None
                , rightMouseCallback=None
                , contextMenu=True
@@ -82,7 +83,7 @@ class ListWidget(QtGui.QListWidget, Base):
     self.contextMenuItem = 'Delete'
     self.currentContextMenu = self.getContextMenu
 
-    self.setStyleSheet(self._styleSheet)
+    # self.setStyleSheet(self._styleSheet)
 
   def contextCallback(self, remove=True):
 

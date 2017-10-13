@@ -248,17 +248,12 @@ QDialog::header {
 					background-color:#2a3358;
 					}
 
-ListWidget {background-color: #FDFDFC; /* #FFFDD1; */
+QListWidget {background-color: #FDFDFC;
              color: #464E76;
              font-weight: normal;
              margin: 0px 0px 0px 0px;
-             border: 1px solid #EDC151;
-             }
-
-QListWidget {background-color: #FDFDFC; /* #FFFDD1; */
-             color: #464E76;
-             font-weight: normal;
-             margin: 0px 0px 0px 0px;
+             padding: 2px 2px 2px 2px;
+             border: 0px solid #EDC151;
              font-weight: normal;
 }
 

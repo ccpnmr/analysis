@@ -1600,7 +1600,7 @@ class Framework:
     """
     Displays sequence creation popup.
     """
-    from ui.gui.popups.CreateChainPopup import CreateChainPopup
+    from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showCreateChainPopup()")
     getLogger().info("application.showCreateChainPopup()")
     popup = CreateChainPopup(mainWindow=self.ui.mainWindow).exec_()

@@ -86,7 +86,7 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
 
 
 DefaultAtoms = ['H', 'N']
-DefaultAtomWeight = {'H':7, 'N':1, 'C':4, 'Other':1}
+DefaultAtomWeight = {'H':7.00, 'N':1.00, 'C':4.00, 'Other':1.00}
 DefaultThreshould = 0.1
 LightColourSchemeCurrentLabel = '#3333ff'
 DarkColourSchemeCurrentLabel = '#00ff00'
@@ -261,7 +261,7 @@ class ChemicalShiftsMapping(CcpnModule):
     j = 0
     for k in sorted(DefaultAtomWeight.keys(), key=CcpnSorting.stringSortKey):
       if k in self.atomNames:
-        self.atomWeightSpinBox = Spinbox(self._scrollAreaSpinBoxFrame, value=DefaultAtomWeight[k],
+        self.atomWeightSpinBox = DoubleSpinbox(self._scrollAreaSpinBoxFrame, value=DefaultAtomWeight[k],
                                          prefix=str(k+(' '*10)), grid=(0, j), hAlign='l')
         self.atomWeightSpinBox.setObjectName(str(k))
         self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)

@@ -52,7 +52,7 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
 
   defaultMinimumSizes = (0,20)
 
-  def __init__(self, parent, value=None, min=None, max=None, step=None, showButtons=True,
+  def __init__(self, parent, value=None, min=None, max=None, step=None,prefix=None, showButtons=True,
                decimals=None, callback=None, **kwds):
     """
     From the QTdocumentation 
@@ -90,6 +90,9 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
 
     if showButtons is False:
       self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+
+    if prefix:
+      self.setPrefix(prefix+' ')
 
     self._callback = None
     self.setCallback(callback)

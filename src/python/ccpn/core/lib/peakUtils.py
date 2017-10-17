@@ -73,7 +73,7 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, atomWeights=None):
   deltas = []
   peaks = []
   if atomWeights is None:
-    atomWeights = {'H': 7, 'N': 1, 'C': 4, 'Other': 1}
+    atomWeights = {'H': 7.00, 'N': 1.00, 'C': 4.00, 'Other': 1.00}
   weight1, weight2 = atomWeights['H'], atomWeights['N']
 
   if len(nmrAtoms) == 2:

@@ -240,7 +240,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
     # self.spectraSelectionWidget.setMaximumHeight(150)
     i += 2
-    self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Atom Weights', grid=(i, 0))
+    self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Relative Contribution ', grid=(i, 0))
     j = 0
 
     self._scrollAreaSpinBoxFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
@@ -357,6 +357,7 @@ class ChemicalShiftsMapping(CcpnModule):
     xs = []
     ys = []
     obs = []
+    disappereadPeaks = []
     self.aboveX = []
     self.aboveY = []
     aboveObjects = []
@@ -471,11 +472,19 @@ class ChemicalShiftsMapping(CcpnModule):
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
         spectra = self.spectraSelectionWidget.getSelections()
         nmrResidue.spectraCount = len(spectra)
+        self._updatedPeakCount(nmrResidue, spectra)
         nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
         nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
         nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
       self.updateTable(self.nmrResidueTable.nmrChain)
       self.updateBarGraph()
+
+  def _updatedPeakCount(self, nmrResidue, spectra):
+    if len(nmrResidue.nmrAtoms)>0:
+      peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
+      nmrResidue.peakCount = len(peaks)
+
+
 
   def _showOnMolecularViewer(self):
     ''' 
@@ -520,7 +529,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
     try:
-      self.pymolProcess = subprocess.Popen(pymolPath+' '+scriptPath,
+      self.pymolProcess = subprocess.Popen(pymolPath+' -r '+scriptPath,
                        shell=True,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)

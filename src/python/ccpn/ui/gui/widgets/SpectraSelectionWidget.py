@@ -27,9 +27,10 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import decimal
 from functools import partial
-from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox

@@ -26,9 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+
 import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
@@ -57,7 +57,6 @@ from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 
 
-
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                   colourAboveThreshold, colourBelowThreshold):
 
@@ -80,10 +79,6 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
       f.write('''\ncmd.deselect()''')
 
   return filePath
-
-
-
-
 
 DefaultAtoms = ['H', 'N']
 DefaultAtomWeight = {'H':7.00, 'N':1.00, 'C':4.00, 'Other':1.00}
@@ -120,9 +115,6 @@ class CustomNmrResidueTable(NmrResidueTable):
                        colName, func, tipText, editValue in self.columnDefs]
     self.multiSelect = True
 
-
-
-
   @staticmethod
   def _getNmrResidueSpectraCount(nmrResidue):
 
@@ -144,6 +136,7 @@ class CustomNmrResidueTable(NmrResidueTable):
       return ', '.join(nmrResidue.selectedNmrAtomNames)
     except:
       return None
+
 
 class ChemicalShiftsMapping(CcpnModule):
 
@@ -330,7 +323,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                grid=(i, 1),  gridSpan=(i, 2))
     i += 1
     Spacer(self.scrollAreaWidgetContents, 3, 3
-           , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+           , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
            , grid=(i,3), gridSpan=(1,1))
 
   def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):

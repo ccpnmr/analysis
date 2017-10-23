@@ -440,7 +440,10 @@ class GLWidget(QOpenGLWidget):
     GL.glLoadIdentity()
 
     # put into a box in the viewport at (50, 50) to (150, 150)
-    GL.glViewport(50, 50, 150, 150)
+    # GL.glViewport(150, 50, 350, 150)
+    h = self.height()
+    w = self.width()
+    GL.glViewport(0, 50, w-50, h)
 
     GLU.gluOrtho2D(-10, 50, -10, 0)
     GL.glScalef(1, -1, 1);

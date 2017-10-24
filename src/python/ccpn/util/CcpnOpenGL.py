@@ -298,7 +298,7 @@ class GLWidget(QOpenGLWidget):
     # self.drawInstructions(painter)
     #
     # painter.end()
-    # self.generatePicture()
+    self.generatePicture()
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
@@ -501,6 +501,9 @@ class GLWidget(QOpenGLWidget):
     # texts = []
 
 
+    GL.glColor3f(128, 128, 128)
+    GL.glBegin(GL.GL_LINES)
+
     if ul[1] > br[1]:
       x = ul[1]
       ul[1] = br[1]
@@ -520,7 +523,7 @@ class GLWidget(QOpenGLWidget):
         # if self.parent.gridColour == '#f7ffff':
           # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
 
-        GL.glColor3f(247, 255, 255)
+        # GL.glColor3f(247, 255, 255)
         # else:
           # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
           # GL.glColor3f(8, 0, 0)
@@ -547,10 +550,10 @@ class GLWidget(QOpenGLWidget):
           if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
               continue
           # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
-          GL.glBegin(GL.GL_LINE)
           GL.glVertex2f(p1[0], p1[1])
           GL.glVertex2f(p2[0], p2[1])
-          GL.glEnd()
+
+    GL.glEnd()
 
     # tr = self.deviceTransform()
     # p.setWorldTransform(fn.invertQTransform(tr))

@@ -45,7 +45,7 @@ import os
 
 class SelectSpectrumDisplayPopup(CcpnDialog):
   def __init__(self,parent=None, project=None, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Select Spectrum Display', **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Print to File', **kw)
 
     self.project = project
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
@@ -54,6 +54,8 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     self.setFixedWidth(400)
     self.setFixedHeight(300)
 
+    self.label = Label(self, text='Select Spectrum Display to Print', grid=(0,0), gridSpan=(1,2)
+                       , hAlign='centre', vAlign='centre')
     self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtGui.QFrame()

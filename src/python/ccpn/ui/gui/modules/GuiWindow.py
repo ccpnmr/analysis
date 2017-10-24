@@ -74,7 +74,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("i, 1"), self, self.addIntegral1D, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)

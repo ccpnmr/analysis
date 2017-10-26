@@ -144,9 +144,9 @@ class Bubble(object):
                   2 * self.radius)
 
 
-class GLWidget(QOpenGLWidget):
+class CcpnGLWidget(QOpenGLWidget):
   def __init__(self, parent=None):
-    super(GLWidget, self).__init__(parent)
+    super(CcpnGLWidget, self).__init__(parent)
 
     self.parent = parent
 
@@ -175,6 +175,27 @@ class GLWidget(QOpenGLWidget):
     self.setAutoFillBackground(False)
     self.setMinimumSize(200, 200)
     self.setWindowTitle("Overpainting a Scene")
+
+    self._mouseX = 0
+    self._mouseY = 0
+
+    # self.eventFilter = self._eventFilter
+    # self.installEventFilter(self)   # ejb
+    self.setMouseTracking(True)                 # generate mouse events when button not pressed
+
+  def _eventFilter(self, obj, event):
+    """
+    Replace all the events with a single filter process
+    Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
+    and allows changing of the cursor - ejb
+    """
+    if event.type() == QtCore.QEvent.MouseMove:
+      self._mouseX = event.pos().x()
+      self._mouseY = event.pos().y()
+      print ('>>>MOUSE_EF', self._mouseX, self._mouseY)
+      event.accept()
+      return True
+    return super(CcpnGLWidget, self).eventFilter(obj,event)    # do the rest
 
   def _connectSpectra(self):
     for spectrumView in self.parent.spectrumViews:
@@ -216,6 +237,9 @@ class GLWidget(QOpenGLWidget):
       self.setZRotation(self.zRot + 8 * dx)
 
     self.lastPos = event.pos()
+
+    self._mouseX = event.pos().x()
+    self._mouseY = self.height() - event.pos().y()
 
   def paintEvent_WithPainter(self, event):
     self.makeCurrent()
@@ -261,6 +285,7 @@ class GLWidget(QOpenGLWidget):
 
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
+    # my signal to repaint the screen after the spectra have changed
     if bool:
       self.paintGL()
 
@@ -298,7 +323,61 @@ class GLWidget(QOpenGLWidget):
     # self.drawInstructions(painter)
     #
     # painter.end()
+
+    # draw cursor
+    # self.set2DProjectionFlat()
+    #
+    # GL.glColor4f(0.9, 0.9, 1.0, 150)
+    # GL.glBegin(GL.GL_LINES)
+    # GL.glVertex2f(self._mouseX, 0)
+    # GL.glVertex2f(self._mouseX, self.height())
+    # GL.glVertex2f(0, self._mouseY)
+    # GL.glVertex2f(self.width(), self._mouseY)
+    # GL.glEnd()
+
+    # switch back to the 2D world-view
+    self.set2DProjection()
+
+    self.modelViewMatrix = (GL.GLdouble * 16)()
+    self.projectionMatrix = (GL.GLdouble * 16)()
+    self.viewport = (GL.GLint * 4)()
+
+    GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
+    GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
+    GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
+
+    self.worldCoordinate = GLU.gluUnProject(
+      self._mouseX, self._mouseY, 0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+
+    # grab coordinates of the transformed viewport
+    self._infiniteLineUL = GLU.gluUnProject(
+      0, self.height(), 0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+    self._infiniteLineBR = GLU.gluUnProject(
+      self.width(), 0, 0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+
     self.generatePicture()
+
+    # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
+    # this gets the correct mapped coordinates
+    GL.glColor4f(0.8, 0.9, 1.0, 150)
+    GL.glBegin(GL.GL_LINES)
+    GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineUL[1])
+    GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineBR[1])
+    GL.glVertex2d(self._infiniteLineUL[0], self.worldCoordinate[1])
+    GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
+    GL.glEnd()
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
@@ -443,15 +522,42 @@ class GLWidget(QOpenGLWidget):
     # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 50, w-50, h)
+    GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
+                                        # '15' is a temporary border at left/top
 
-    GLU.gluOrtho2D(-10, 50, -10, 0)
+    # GLU.gluOrtho2D(-10, 50, -10, 0)
+
+    # testing - grab the coordinates from the plotWidget
+    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    axL = axisRangeL[0]
+    axR = axisRangeL[1]
+    axisRangeB = self.parent.plotWidget.getAxis('right').range
+    axB = axisRangeB[0]
+    axT = axisRangeB[1]
+    GLU.gluOrtho2D(axR, axL, axT, axB)      # nearly!
+
     GL.glScalef(1, -1, 1);
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
     # GL.glTranslatef(0.1, 0.1, 0.1)
 
+  def set2DProjectionFlat(self):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    # put into a box in the viewport at (50, 50) to (150, 150)
+    # GL.glViewport(150, 50, 350, 150)
+    h = self.height()
+    w = self.width()
+    GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
+                                        # '15' is a temporary border at left/top
+
+    GLU.gluOrtho2D(0, w, 0, h)
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+    # GL.glTranslatef(0.1, 0.1, 0.1)
 
   def drawInstructions(self, painter):
     text = "Click and drag with the left mouse button to rotate the Qt " \
@@ -478,6 +584,8 @@ class GLWidget(QOpenGLWidget):
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
   def generatePicture(self):
+    # this needs making into a GL_LIST
+
     # self.picture = QtGui.QPicture()
     # p = QtGui.QPainter()
     # p.begin(self.picture)
@@ -495,20 +603,21 @@ class GLWidget(QOpenGLWidget):
     # unit = self.pixelWidth(), self.pixelHeight()
     dim = [self.width(), self.height()]
     # lvr = self.boundingRect()
-    ul = np.array([0, self.height()])
-    br = np.array([self.width(), 0])
+
+    # TODO:ED not sure this is exactly the correct coords yet
+    ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
+    br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
 
     # texts = []
 
-
-    GL.glColor3f(128, 128, 128)
-    GL.glBegin(GL.GL_LINES)
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     if ul[1] > br[1]:
       x = ul[1]
       ul[1] = br[1]
       br[1] = x
-    for i in [1,0]:   ## Draw three different scales of grid
+    for i in [2,1,0]:   ## Draw three different scales of grid
       dist = br-ul
       nlTarget = 10.**i
       d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
@@ -520,6 +629,8 @@ class GLWidget(QOpenGLWidget):
       for ax in range(0,2):  ## Draw grid for both axes
         ppl = np.array( dim[ax] / nl[ax] )                      # ejb
         c = np.clip(3.*(ppl-3), 0., 30.)
+        GL.glColor4f(0.9, 0.9, 1.0, c/256.0)               # make high order lines more transparent
+
         # if self.parent.gridColour == '#f7ffff':
           # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
 
@@ -528,6 +639,7 @@ class GLWidget(QOpenGLWidget):
           # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
           # GL.glColor3f(8, 0, 0)
 
+        GL.glBegin(GL.GL_LINES)
         bx = (ax+1) % 2
         for x in range(0, int(nl[ax])):
           # linePen.setCosmetic(False)
@@ -552,8 +664,9 @@ class GLWidget(QOpenGLWidget):
           # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
           GL.glVertex2f(p1[0], p1[1])
           GL.glVertex2f(p2[0], p2[1])
+        GL.glEnd()
 
-    GL.glEnd()
+    GL.glDisable(GL.GL_BLEND)
 
     # tr = self.deviceTransform()
     # p.setWorldTransform(fn.invertQTransform(tr))

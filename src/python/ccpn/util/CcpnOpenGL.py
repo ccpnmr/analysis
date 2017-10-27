@@ -25,6 +25,7 @@ __date__ = "$Date$"
 
 import sys
 import math, random
+import ctypes
 
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
@@ -46,6 +47,7 @@ except ImportError:
 
 
 class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
+
     def __init__(self, parent=None):
       super(QtWidgets.QOpenGLWidget, self).__init__(parent)
       self.trolltechPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
@@ -183,6 +185,9 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.installEventFilter(self)   # ejb
     self.setMouseTracking(True)                 # generate mouse events when button not pressed
 
+    self.base = None
+    self.spectrumValues = []
+
   def _eventFilter(self, obj, event):
     """
     Replace all the events with a single filter process
@@ -297,8 +302,51 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glClearColor(0.1, 0.1, 0.1, 1.0)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
+    getGLvector = (GL.GLfloat * 2)()
+    GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector);
+    linewidths = [i for i in getGLvector]
+
     self.set2DProjection()
 
+    self.modelViewMatrix = (GL.GLdouble * 16)()
+    self.projectionMatrix = (GL.GLdouble * 16)()
+    self.viewport = (GL.GLint * 4)()
+
+    GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
+    GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
+    GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
+
+    self.worldCoordinate = GLU.gluUnProject(
+      self._mouseX, self._mouseY, 0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+    self.viewport = [i for i in self.viewport]
+    # grab coordinates of the transformed viewport
+    self._infiniteLineUL = GLU.gluUnProject(
+      0.0,
+      self.viewport[3]+self.viewport[1],
+      0.0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+    self._infiniteLineBR = GLU.gluUnProject(
+      self.viewport[2]+self.viewport[0],
+      0.0,
+      0.0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+
+
+    # GL.glEnable(GL.GL_LINE_SMOOTH)
+    # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
+    # GL.glEnable(GL.GL_BLEND)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glLineWidth(1.0)
     for spectrumView in self.parent.spectrumViews:
       try:
         # could put a signal on buildContours
@@ -307,8 +355,18 @@ class CcpnGLWidget(QOpenGLWidget):
           spectrumView.buildContours = False  # set to false, as we have rebuilt
           # set to True and update() will rebuild the contours
           # can be done with a call to self.rebuildContours()
-        spectrumView._paintContours(None, skip=True)
+
+          self._spectrumValues = spectrumView._getValues()
+
+        xScale = (self._spectrumValues[0][3]-self._spectrumValues[0][2]) / (self._infiniteLineBR[0] - self._infiniteLineUL[0])
+        yScale = (self._spectrumValues[1][3]-self._spectrumValues[1][2]) / (self._infiniteLineUL[1] - self._infiniteLineBR[1])
+
+        GL.glPushMatrix
+        GL.glScale(xScale, yScale, 1.0)   # need to do this for each plane - yes
+        spectrumView._paintContoursNoClip()   # new - without clipping
+        GL.glPopMatrix
       except:
+        raise
         spectrumView._buildContours(None)
         # pass
 
@@ -335,38 +393,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glVertex2f(self.width(), self._mouseY)
     # GL.glEnd()
 
-    # switch back to the 2D world-view
     self.set2DProjection()
-
-    self.modelViewMatrix = (GL.GLdouble * 16)()
-    self.projectionMatrix = (GL.GLdouble * 16)()
-    self.viewport = (GL.GLint * 4)()
-
-    GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
-    GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
-    GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
-
-    self.worldCoordinate = GLU.gluUnProject(
-      self._mouseX, self._mouseY, 0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-
-    # grab coordinates of the transformed viewport
-    self._infiniteLineUL = GLU.gluUnProject(
-      0, self.height(), 0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-    self._infiniteLineBR = GLU.gluUnProject(
-      self.width(), 0, 0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-
     self.generatePicture()
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
@@ -378,6 +405,14 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glVertex2d(self._infiniteLineUL[0], self.worldCoordinate[1])
     GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
     GL.glEnd()
+
+    coords = "\n  Mouse Coords: "\
+              +str(round(self.worldCoordinate[0], 3))\
+              +", "+str(round(self.worldCoordinate[1], 3))
+    self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
+                    , GLUT.GLUT_BITMAP_HELVETICA_18
+                    , coords
+                    , 1.0, 1.0, 1.0, 1.0)
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
@@ -522,9 +557,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
-                                        # '15' is a temporary border at left/top
-
+    GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
+                                        # (0,0) is bottom-left
     # GLU.gluOrtho2D(-10, 50, -10, 0)
 
     # testing - grab the coordinates from the plotWidget
@@ -534,9 +568,11 @@ class CcpnGLWidget(QOpenGLWidget):
     axisRangeB = self.parent.plotWidget.getAxis('right').range
     axB = axisRangeB[0]
     axT = axisRangeB[1]
-    GLU.gluOrtho2D(axR, axL, axT, axB)      # nearly!
 
-    GL.glScalef(1, -1, 1);
+    # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
+    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
+
+    # GL.glScalef(1, 1, 1);
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
@@ -612,11 +648,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glLineWidth(1.0)
 
-    if ul[1] > br[1]:
-      x = ul[1]
-      ul[1] = br[1]
-      br[1] = x
+    if ul[0] > br[0]:
+      x = ul[0]
+      ul[0] = br[0]
+      br[0] = x
     for i in [2,1,0]:   ## Draw three different scales of grid
       dist = br-ul
       nlTarget = 10.**i
@@ -629,7 +666,7 @@ class CcpnGLWidget(QOpenGLWidget):
       for ax in range(0,2):  ## Draw grid for both axes
         ppl = np.array( dim[ax] / nl[ax] )                      # ejb
         c = np.clip(3.*(ppl-3), 0., 30.)
-        GL.glColor4f(0.9, 0.9, 1.0, c/256.0)               # make high order lines more transparent
+        GL.glColor4f(0.8, 0.8, 0.8, c/256.0)               # make high order lines more transparent
 
         # if self.parent.gridColour == '#f7ffff':
           # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
@@ -674,3 +711,76 @@ class CcpnGLWidget(QOpenGLWidget):
     #     x = tr.map(t[0]) + Point(0.5, 0.5)
     #     p.drawText(x, t[1])
     # p.end()
+
+  def glut_print(self, x, y, font, text, r, g, b, a):
+
+    # blending = False
+    # if GL.glIsEnabled(GL.GL_BLEND):
+    #   blending = True
+
+    # glEnable(GL_BLEND)
+    GL.glColor4f(1.0, 1.0, 1.0, 0.6)
+    GL.glRasterPos2f(x, y)
+    for ch in text:
+      GLUT.glutBitmapCharacter(font, ctypes.c_int(ord(ch)))
+
+    # if not blending:
+    #   GL.glDisable(GL.GL_BLEND)
+
+  # def Draw():
+  #   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+  #
+  #   glut_print(10, 10, GLUT_BITMAP_9_BY_15, "Hallo World", 1.0, 1.0, 1.0, 1.0)
+  #   # draw my scene ......
+  #   glutSwapBuffers()
+
+  # def BuildFont():
+  #   global base
+  #
+  #   wgldc = WGL.wglGetCurrentDC ()
+  #   # hDC = win32ui.CreateDCFromHandle (wgldc)
+  #
+  #
+  #   base = GL.glGenLists(32+96);					# // Storage For 96 Characters, plus 32 at the start...
+  #
+  #   # CreateFont () takes a python dictionary to specify the requested font properties.
+  #   font_properties = { "name" : "Courier New",
+  #             "width" : 0 ,
+  #             "height" : -24,
+  #             "weight" : 800
+  #             }
+  #   font = win32ui.CreateFont (font_properties)
+  #   # // Selects The Font We Want
+  #   oldfont = hDC.SelectObject (font)
+  #   # // Builds 96 Characters Starting At Character 32
+  #   wglUseFontBitmaps (wgldc, 32, 96, base+32)
+  #   # // reset the font
+  #   hDC.SelectObject (oldfont)
+  #   # // Delete The Font (python will cleanup font for us...)
+  #   return
+  #
+  # def KillFont ():
+  #   """ // Delete The Font List
+  #   """
+  #   global	base
+  #   # // Delete All 96 Characters
+  #   glDeleteLists (base, 32+96)
+  #   return
+  #
+  #
+  # def glPrint (str):
+  #   """ // Custom GL "Print" Routine
+  #   """
+  #   global base
+  #   # // If THere's No Text Do Nothing
+  #   if (str == None):
+  #     return
+  #   if (str == ""):
+  #     return
+  #   glPushAttrib(GL_LIST_BIT);							# // Pushes The Display List Bits
+  #   try:
+  #     glListBase(base);								# // Sets The Base Character to 32
+  #     glCallLists(str)									# // Draws The Display List Text
+  #   finally:
+  #     glPopAttrib();										# // Pops The Display List Bits
+  #   return

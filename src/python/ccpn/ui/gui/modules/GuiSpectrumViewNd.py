@@ -707,18 +707,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       xTile = 0   # ejb - temp to only draw one set
       yTile = 0
 
-      GL.glLoadIdentity()
-      GL.glPushMatrix()
+      if not skip:
 
-      # the below is because the y axis goes from top to bottom
-      GL.glScale(1.0, -1.0, 1.0)
-      GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
+        GL.glLoadIdentity()
+        GL.glPushMatrix()
 
-      # the below makes sure that spectrum points get mapped to screen pixels correctly
-      GL.glTranslate(xTranslate, yTranslate, 0.0)
-      GL.glScale(xScale, yScale, 1.0)
+        # the below is because the y axis goes from top to bottom
+        GL.glScale(1.0, -1.0, 1.0)
+        GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
 
-      GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+        # the below makes sure that spectrum points get mapped to screen pixels correctly
+        GL.glTranslate(xTranslate, yTranslate, 0.0)
+        GL.glScale(xScale, yScale, 1.0)
+
+        GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
+
       # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
       GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
       GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
@@ -730,7 +733,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           GL.glColor4f(*colour)
           # TBD: scaling, translating, etc.
           GL.glCallList(displayLists[n])
-      GL.glPopMatrix()
+
+      if not skip:
+        GL.glPopMatrix()
 
       # GL.glDisable(GL.GL_CLIP_PLANE0)
       GL.glDisable(GL.GL_CLIP_PLANE1)
@@ -740,7 +745,24 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     finally:
       if not skip:
         painter.endNativePainting()
-      
+
+  def _paintContoursNoClip(self, plotHeight=0.0):
+    # xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
+    # yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
+    #
+    # GL.glPushMatrix()
+    # # GL.glScale(1.0, -1.0, 1.0)
+    # # GL.glTranslate(0.0, -plotHeight, 0.0)
+    # GL.glTranslate(-xTranslate, -yTranslate, 0.0)
+    # GL.glScale(xScale, yScale, 1.0)
+    for (colour, levels, displayLists) in ((self.posColour, self.posLevels, self.posDisplayLists),
+                                           (self.negColour, self.negLevels, self.negDisplayLists)):
+      for n, level in enumerate(levels):
+        GL.glColor4f(*colour)
+        # TBD: scaling, translating, etc.
+        GL.glCallList(displayLists[n])
+    # GL.glPopMatrix()
+
   def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
@@ -1080,6 +1102,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
     else:
       return [None, None, None, None, None]
+
+  def _getValues(self):
+    # ejb - get some spectrum information for scaling the display
+    return [self._getSpectrumViewParams(0), self._getSpectrumViewParams(1)]
 
   def refreshData(self):
 

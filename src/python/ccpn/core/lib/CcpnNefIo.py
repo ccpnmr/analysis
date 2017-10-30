@@ -702,7 +702,9 @@ nef2CcpnMap = {
   'nmr_residue':OD((
     ('chain_code', 'nmrChain.shortName'),
     ('sequence_code','sequenceCode'),
-    ('residue_name',None),
+    # ('residue_name',None),
+    ('residue_name','residueType'),
+
     ('serial',None),
     ('comment','comment'),
   )),
@@ -2138,7 +2140,12 @@ class CcpnNefWriter:
     rowdata = {}
     for neftag,attrstring in nef2CcpnMap[loopName].items():
       if attrstring is not None:
-        rowdata[neftag] = attrgetter(attrstring)(wrapperObj)
+
+        val = attrgetter(attrstring)(wrapperObj)
+        if val != '':
+          rowdata[neftag] = val
+        else:
+          rowdata[neftag] = None
     return rowdata
 
   def _newNefSaveFrame(self, wrapperObj:Optional[AbstractWrapperObject],
@@ -2220,6 +2227,8 @@ class CcpnNefReader:
     """Get NEF data structure from file"""
     nmrDataExtent = StarIo.parseNefFile(path)
     dataBlocks = list(nmrDataExtent.values())
+    if len(dataBlocks) > 1:
+      print('More than one datablock in a NEF file is not allowed.  Using the first and discarding the rest.')
     dataBlock = dataBlocks[0]
 
     # Initialise afresh for every file read
@@ -3657,7 +3666,24 @@ class CcpnNefReader:
     # read nmr_residue loop
     mapping = nef2CcpnMap[nmrResidueLoopName]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    for row in saveFrame[nmrResidueLoopName].data:
+
+    nmrResidueLoopData = []
+    for row in saveFrame[nmrResidueLoopName].data:          # can't do this otherwise wrong order
+      if nmrResidueLoopData:
+
+        if row['chain_code'] == nmrResidueLoopData[-1]['chain_code'] \
+            and row['sequence_code'] in nmrResidueLoopData[-1]['sequence_code']:
+
+          nmrResidueLoopData.insert(-1, row)    # insert 1 from the end
+
+        else:
+          nmrResidueLoopData.append(row)                     # must just reverse the 'i-1' residues
+
+      else:   # add the first element
+        nmrResidueLoopData.append(row)  # must just reverse the 'i-1' residues
+
+    # for row in saveFrame[nmrResidueLoopName].data:
+    for row in nmrResidueLoopData:
       parameters = self._parametersFromLoopRow(row, map2)
       parameters['residueType'] = row.get('residue_name')
       # NB chainCode None is not possible here (for ccpn data)

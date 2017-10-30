@@ -983,7 +983,10 @@ class Framework:
         return
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)
-    if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR):
+    if dataType == 'Project' and subType in (ioFormats.CCPN
+                                             , ioFormats.NEF
+                                             , ioFormats.NMRSTAR
+                                             , ioFormats.SPARKY):
 
       if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
         if self.project is not None:
@@ -1005,6 +1008,10 @@ class Framework:
         project = self._loadNMRStarFile(path, makeNewProject=True)   # RHF - new by default
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
 
+      elif subType == ioFormats.SPARKY:
+        sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
+        project = self._loadSparkyProject(path, makeNewProject=True)   # RHF - new by default
+        project._resetUndo(debug=self.level <= Logging.DEBUG2)
 
       return project
 
@@ -1061,6 +1068,31 @@ class Framework:
 
     try:
       self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+    finally:
+      self.project._wrappedData.shiftAveraging = True
+      self._echoBlocking -= 1
+      self.project._undo.decreaseBlocking()
+
+    return self.project
+
+  def _loadSparkyProject(self, path:str, makeNewProject=True) -> Project:
+    """Load Project from NEF file at path, and do necessary setup"""
+
+    # read data files
+    sparkyName = 'NewSparky'
+
+    if makeNewProject:
+      if self.project is not None:
+        self._closeProject()
+      self.project = self.newProject(sparkyName)
+
+    self._echoBlocking += 1
+    self.project._undo.increaseBlocking()
+
+    try:
+      # insert file into project
+      sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
+
     finally:
       self.project._wrappedData.shiftAveraging = True
       self._echoBlocking -= 1
@@ -1225,13 +1257,6 @@ class Framework:
                    , skipPrefixes=skipPrefixes
                    , expandSelection=expandSelection
                    , pidList=pidList)
-
-    # with self.project._convertToDataBlock(nefPath
-    #                , overwriteExisting=True
-    #                , skipPrefixes=skipPrefixes
-    #                , expandSelection=expandSelection
-    #                , pidList=pidList) as dataBlock:
-    #   dataBlock.addItem('AAAAAAARRRRGH', 'I like fishing')
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

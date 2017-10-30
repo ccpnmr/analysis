@@ -192,6 +192,7 @@ class ExportNefPopup(CcpnDialog):
     #   self.saveLabel.setText('None')
 
     self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+    self.resize(300, 500)
 
     # from here down is the save dialog
     # can we add a hide/show button?

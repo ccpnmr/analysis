@@ -1450,6 +1450,10 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None,
           raise ValueError(
             "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
           )
+
+          # test - missing residueType when loading Nef file
+          # result.residueType = residueType      # can't set attribute,so error when creating
+
   except Exception as es:
     getLogger().warning(str(es))
   finally:

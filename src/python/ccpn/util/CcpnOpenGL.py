@@ -150,6 +150,9 @@ class CcpnGLWidget(QOpenGLWidget):
   def __init__(self, parent=None):
     super(CcpnGLWidget, self).__init__(parent)
 
+    if not parent:        # don't initialise if nothing there
+      return
+
     self.parent = parent
 
     for spectrumView in self.parent.spectrumViews:
@@ -394,7 +397,13 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glEnd()
 
     self.set2DProjection()
-    self.generatePicture()
+    self._buildAxes(axisList=[0, 1], scaleGrid=[2, 1, 0], r=1.0, g=1.0, b=1.0, transparency=256.0)
+    self.set2DProjectionRightAxis()
+    self._buildAxes(axisList=[1], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.set2DProjectionBottomAxis()
+    self._buildAxes(axisList=[0], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+
+    self.set2DProjection()      # set back to the main projection
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
     # this gets the correct mapped coordinates
@@ -578,6 +587,66 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glLoadIdentity()
     # GL.glTranslatef(0.1, 0.1, 0.1)
 
+  def set2DProjectionRightAxis(self):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    # put into a box in the viewport at (50, 50) to (150, 150)
+    # GL.glViewport(150, 50, 350, 150)
+    h = self.height()
+    w = self.width()
+    # GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
+                                        # (0,0) is bottom-left
+
+    GL.glViewport(w-40, 35, w-30, h-35)   # leave a 35 width margin for the axes - bottom/right
+                                        # (0,0) is bottom-left
+
+    # testing - grab the coordinates from the plotWidget
+    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    axL = axisRangeL[0]
+    axR = axisRangeL[1]
+    axisRangeB = self.parent.plotWidget.getAxis('right').range
+    axB = axisRangeB[0]
+    axT = axisRangeB[1]
+
+    # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
+    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
+
+    # GL.glScalef(1, 1, 1);
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+    # GL.glTranslatef(0.1, 0.1, 0.1)
+
+  def set2DProjectionBottomAxis(self):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    # put into a box in the viewport at (50, 50) to (150, 150)
+    # GL.glViewport(150, 50, 350, 150)
+    h = self.height()
+    w = self.width()
+    GL.glViewport(0, 30, w-35, 40)   # leave a 35 width margin for the axes - bottom/right
+                                    # (0,0) is bottom-left
+    # GLU.gluOrtho2D(-10, 50, -10, 0)
+
+    # testing - grab the coordinates from the plotWidget
+    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    axL = axisRangeL[0]
+    axR = axisRangeL[1]
+    axisRangeB = self.parent.plotWidget.getAxis('right').range
+    axB = axisRangeB[0]
+    axT = axisRangeB[1]
+
+    # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
+    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
+
+    # GL.glScalef(1, 1, 1);
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+    # GL.glTranslatef(0.1, 0.1, 0.1)
+
   def set2DProjectionFlat(self):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
@@ -619,7 +688,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def setColor(self, c):
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
-  def generatePicture(self):
+  def _buildAxes(self, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
     # this needs making into a GL_LIST
 
     # self.picture = QtGui.QPicture()
@@ -654,7 +723,7 @@ class CcpnGLWidget(QOpenGLWidget):
       x = ul[0]
       ul[0] = br[0]
       br[0] = x
-    for i in [2,1,0]:   ## Draw three different scales of grid
+    for i in scaleGrid:       #  [2,1,0]:   ## Draw three different scales of grid
       dist = br-ul
       nlTarget = 10.**i
       d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
@@ -663,10 +732,10 @@ class CcpnGLWidget(QOpenGLWidget):
       dist = br1-ul1
       nl = (dist / d) + 0.5
 
-      for ax in range(0,2):  ## Draw grid for both axes
+      for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
         ppl = np.array( dim[ax] / nl[ax] )                      # ejb
         c = np.clip(3.*(ppl-3), 0., 30.)
-        GL.glColor4f(0.8, 0.8, 0.8, c/256.0)               # make high order lines more transparent
+        GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
 
         # if self.parent.gridColour == '#f7ffff':
           # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
@@ -784,3 +853,31 @@ class CcpnGLWidget(QOpenGLWidget):
   #   finally:
   #     glPopAttrib();										# // Pops The Display List Bits
   #   return
+
+  def _loadPNG(self, fileName):
+    import imageio
+
+    im = imageio.imread(fileName)
+    print (im.shape)
+    
+    # need to load the offsets file (*.fnt) and put into array
+    
+
+if __name__ == '__main__':
+
+  import sys
+  from ccpn.framework.Version import applicationVersion
+
+  qtApp = QtWidgets.QApplication(['CcpnGLWidget_test', ])
+
+  QtCore.QCoreApplication.setApplicationName('CcpnGLWidget_test')
+  QtCore.QCoreApplication.setApplicationVersion(applicationVersion)
+
+  myGL = CcpnGLWidget()
+  myGL._loadPNG('~/PycharmProjects/myfont.png')
+
+  # popup = UpdateAdmin()
+  # popup.show()
+  # popup.raise_()
+
+  # sys.exit(qtApp.exec_())

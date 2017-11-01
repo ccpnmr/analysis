@@ -36,7 +36,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
-from ccpn.core.lib import CcpnNefIo
+from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import languages, defaultLanguage
@@ -257,6 +257,9 @@ class Framework:
 
     # NEF reader
     self.nefReader = CcpnNefIo.CcpnNefReader(self)
+
+    # SPARKY reader - ejb
+    self.sparkyReader = CcpnSparkyIo.CcpnSparkyReader(self)
 
     self._backupTimerQ    = None
     self.autoBackupThread = None
@@ -1076,10 +1079,12 @@ class Framework:
     return self.project
 
   def _loadSparkyProject(self, path:str, makeNewProject=True) -> Project:
-    """Load Project from NEF file at path, and do necessary setup"""
+    """Load Project from Sparky file at path, and do necessary setup"""
 
     # read data files
     sparkyName = 'NewSparky'
+
+    dataBlock = self.sparkyReader.parseSparkyFile(path)
 
     if makeNewProject:
       if self.project is not None:

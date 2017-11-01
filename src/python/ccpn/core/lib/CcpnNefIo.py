@@ -3650,6 +3650,9 @@ class CcpnNefReader:
     nmrChains = {}
     nmrResidues = {}
 
+    # ejb - stop notifiers from generating spurious items in the sidebar
+    project.blankNotification()
+
     # read nmr_chain loop
     mapping = nef2CcpnMap[nmrChainLoopName]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -3661,26 +3664,40 @@ class CcpnNefReader:
       else:
         nmrChain = creatorFunc(**parameters)
       nmrChain.resetSerial(row['serial'])
+
       nmrChains[parameters['shortName']] = nmrChain
+
+    # resume notifiers again
+    project.unblankNotification()
 
     # read nmr_residue loop
     mapping = nef2CcpnMap[nmrResidueLoopName]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
+    # reorder the residues so that i-1 residues are after the corresponding i residue
     nmrResidueLoopData = []
-    for row in saveFrame[nmrResidueLoopName].data:          # can't do this otherwise wrong order
+    for row in saveFrame[nmrResidueLoopName].data:
+
+      # can't test with an empty list
       if nmrResidueLoopData:
 
+        # check adjacent items have same chain_code and matching sequence_code
+        # split should give [', '-...', ] if correct i-1 residue
+        residueTest = nmrResidueLoopData[-1]['sequence_code'].split(row['sequence_code'])
         if row['chain_code'] == nmrResidueLoopData[-1]['chain_code'] \
-            and row['sequence_code'] in nmrResidueLoopData[-1]['sequence_code']:
+            and len(residueTest) > 1 \
+            and residueTest[0] == '' \
+            and residueTest[1].startswith('-'):
+        # if row['chain_code'] == nmrResidueLoopData[-1]['chain_code'] \
+        #     and row['sequence_code'] in nmrResidueLoopData[-1]['sequence_code']:
 
           nmrResidueLoopData.insert(-1, row)    # insert 1 from the end
 
         else:
-          nmrResidueLoopData.append(row)                     # must just reverse the 'i-1' residues
+          nmrResidueLoopData.append(row)        # else append
 
       else:   # add the first element
-        nmrResidueLoopData.append(row)  # must just reverse the 'i-1' residues
+        nmrResidueLoopData.append(row)
 
     # for row in saveFrame[nmrResidueLoopName].data:
     for row in nmrResidueLoopData:

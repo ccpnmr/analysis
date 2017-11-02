@@ -1086,6 +1086,7 @@ class Framework:
 
     dataBlock = self.sparkyReader.parseSparkyFile(path)
 
+
     if makeNewProject:
       if self.project is not None:
         self._closeProject()

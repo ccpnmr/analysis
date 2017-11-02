@@ -121,9 +121,9 @@ _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 comp
   |(?:^|(?<=\s))(?:(global_)             # 3  
   |(<sparky\s.*>)                        # 4  Sparky project start
   |(\$\S+)                               # 5  STAR save frame reference
-  |(<end\s.*>)                           # 6  block terminator
-  |(<version\s.*>)                       # 7  block start
-  |(<\S*)                              # 8  block header
+  |<end\s(.*?)>                          # 6  block terminator
+  |<(version\s.*?)>                      # 7  block start
+  |<(.*?)>                               # 8  block header   - shouldn't need the leading whitespace
   |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # 9 Invalid privileged construct
   |(_\S+)                              # 10 Data name
   |'(.*?)'                             # 11 Single-quoted string
@@ -131,7 +131,7 @@ _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 comp
   |(\.)                                # 13 CIF null
   |(\?)                                # 14 CIF unknown/missing
   |([\[\]]\S*)                         # 15 Square bracketed constructs (reserved)
-  |((?:[^'";_$]|(?<!^);).*)            # 16 Non-quoted string   -  to end of line *** check
+  |((?:[^'";_$\s]|(?!^);).*)\s?        # 16 Non-quoted string   -  to end of line *** check
   |(\S+)                               # 17 Catch-all bad token
 )
 (?:(?=\s)|$)"""
@@ -254,7 +254,7 @@ class CcpnSparkyReader:
       except AttributeError:
         raise SparkySyntaxError(self._errorMessage("Error inserting version num" % value,
                                                    value))
-      func(value.strip('<>'))
+      func(value)
 
     return
 
@@ -290,6 +290,13 @@ class CcpnSparkyReader:
 
   def _addSparkyBlock(self, name):
     container = self.stack[-1]
+
+    currentNames = [ky for ky in container.keys() if name in ky]
+
+    if currentNames:
+      name = name+str(len(currentNames))   # add an incremental number to the name
+
+    # name is the new named block
     obj = SparkyBlock(name)
     container.addItem(name, obj)
     self.stack.append(obj)
@@ -336,11 +343,11 @@ class CcpnSparkyReader:
     if self.lowerCaseTags:
       value = value.lower()
     if isinstance(stack[-1], SparkyBlock):
-      self._addSparkyBlock(value.strip('<>'))
+      self._addSparkyBlock(value)
 
     elif isinstance(stack[-1], list):
       self._closeList(value)                                  # close the list and store
-      self._addSparkyBlock(value.strip('<>'))
+      self._addSparkyBlock(value)
 
     else:
       raise SparkySyntaxError(
@@ -397,7 +404,7 @@ class CcpnSparkyReader:
     processFunctions = [None] * 20
     processFunctions[SP_TOKEN_SQUOTE_STRING] = self.processValue
     processFunctions[SP_TOKEN_DQUOTE_STRING] = self.processValue
-    processFunctions[SP_TOKEN_MULTILINE] = self.processValue
+    # processFunctions[SP_TOKEN_MULTILINE] = self.processValue
     processFunctions[SP_TOKEN_VERSION] = self._processVersion
     processFunctions[SP_TOKEN_COMMENT] = self._processComment
 

@@ -395,7 +395,7 @@ class PreferencesPopup(CcpnDialog):
 
   def _getPymolPath(self):
 
-    dialog = FileDialog(self, text='Select File')
+    dialog = FileDialog(self, text='Select File',  preferences=self.preferences.general)
     file = dialog.selectedFile()
     if file:
       self.pymolPath.setText(file)

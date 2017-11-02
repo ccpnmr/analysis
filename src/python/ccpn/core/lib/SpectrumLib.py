@@ -183,7 +183,7 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
 
   """Implements an Asymmetric Least Squares Smoothing
   baseline correction algorithm
-  (P. Eilers, H. Boelens 2005)
+  H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. . 
 
   y = signal
   lam = smoothness, 10**2 ≤ λ ≤ 10**9.
@@ -309,7 +309,6 @@ arPLS algorithm
 
 def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     """
-    Credits: Spyctra , no licence , source from web
     Baseline correction using asymmetrically reweighted penalized least squares
     smoothing.
 

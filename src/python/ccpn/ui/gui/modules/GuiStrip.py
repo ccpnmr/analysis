@@ -665,9 +665,9 @@ class GuiStrip(Frame):
           visibleSpectrumViews[0].setVisible(False)
           spectrumViews[0].setVisible(True)
       else:
-        print('Option available if only one spectrum per time is toggled on')
+        getLogger().warning('Option available if only one spectrum per time is toggled on')
     else:
-      print('No spectra displayed')
+      getLogger().warning('No spectra displayed')
 
   def _moveToPreviousSpectrumView(self):
     spectrumViews = self.spectrumViews
@@ -680,9 +680,9 @@ class GuiStrip(Frame):
         visibleSpectrumViews[0].setVisible(False)
         spectrumViews[currentIndex - 1].setVisible(True)
       else:
-        print('Option available if only one spectrum per time is toggled on')
+        getLogger().warning('Option available if only one spectrum per time is toggled on')
     else:
-      print('No spectra displayed')
+      getLogger().warning('No spectra displayed')
 
 
 # Notifiers:

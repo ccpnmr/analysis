@@ -150,6 +150,5 @@ def initParser(project, input_path, spectrum):
 
 ###### Initialise MACRO  ######
 
-
 input_path = '/Users/luca/Desktop/masterClassProjects/Sparky/Lists/nh_tor_42.list.workshop'
 initParser(project, input_path, project.spectra[-1])

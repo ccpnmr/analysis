@@ -116,24 +116,23 @@ sparky2CcpnMap = {
 
 # STAR parsing REGEX, following International Tables for Crystallography volume G section 2.1
 _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 compatibility
-^;([\S\s]*?)(?:\r\n|\s)^;(?:(?=\s)|$)  # Multi-line string
-|(?:^|(?<=\s))(\#.*?)\r?$              # Comment
-|(?:^|(?<=\s))(?:
-  (global_)                            # 
-  |(<sparky\S*)                          # Sparky project start
-  |(\$\S+)                             # STAR save frame reference
-  |(<end\S*)                             # block terminator
-  |(<version\S*)                          # block start
-  |(<\S*)                             # block header
-  |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # Invalid privileged construct
-  |(_\S+)                              # Data name
-  |'(.*?)'                             # Single-quoted string
-  |"(.*?)"                             # Double-quoted string
-  |(\.)                                # CIF null
-  |(\?)                                # CIF unknown/missing
-  |([\[\]]\S*)                         # Square bracketed constructs (reserved)
-  |((?:[^'";_$\s]|(?<!^);)\S*)         # Non-quoted string
-  |(\S+)                               # Catch-all bad token
+  ^;([\S\s]*?)(?:\r\n|\s)^;(?:(?=\s)|$)  # 1  Multi-line string
+  |(?:^|(?<=\s))(\#.*?)\r?$              # 2  Comment
+  |(?:^|(?<=\s))(?:(global_)             # 3  
+  |(<sparky\s.*>)                        # 4  Sparky project start
+  |(\$\S+)                               # 5  STAR save frame reference
+  |(<end\s.*>)                           # 6  block terminator
+  |(<version\s.*>)                       # 7  block start
+  |(<\S*)                              # 8  block header
+  |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # 9 Invalid privileged construct
+  |(_\S+)                              # 10 Data name
+  |'(.*?)'                             # 11 Single-quoted string
+  |"(.*?)"                             # 12 Double-quoted string
+  |(\.)                                # 13 CIF null
+  |(\?)                                # 14 CIF unknown/missing
+  |([\[\]]\S*)                         # 15 Square bracketed constructs (reserved)
+  |((?:[^'";_$]|(?<!^);).*)            # 16 Non-quoted string   -  to end of line *** check
+  |(\S+)                               # 17 Catch-all bad token
 )
 (?:(?=\s)|$)"""
 
@@ -238,6 +237,25 @@ class CcpnSparkyReader:
 
   def _processVersion(self, value):
     # next token must be version
+    stack = self.stack
+    last = stack[-1]
+
+    if isinstance(last, SparkyBlock):
+      try:
+        func = last
+      except AttributeError:
+        raise SparkySyntaxError(self._errorMessage("Error inserting version num" % value,
+                                                 value))
+      func['version'] = value
+
+    elif isinstance(last, list):
+      try:
+        func = last.append
+      except AttributeError:
+        raise SparkySyntaxError(self._errorMessage("Error inserting version num" % value,
+                                                   value))
+      func(value.strip('<>'))
+
     return
 
   def _processComment(self, value):
@@ -247,6 +265,14 @@ class CcpnSparkyReader:
   def processValue(self, value):
     stack = self.stack
     last = stack[-1]
+
+    if isinstance(last, SparkyProjectBlock):
+      # currently ignore until we have a SparkyBlock
+      return
+
+    if isinstance(last, SparkyBlock):
+      return
+
     if isinstance(last, str):
       # Value half of tag, value pair
       stack.pop()
@@ -267,11 +293,11 @@ class CcpnSparkyReader:
     obj = SparkyBlock(name)
     container.addItem(name, obj)
     self.stack.append(obj)
+    self.stack.append(list())     # put a list on as well
 
   def _closeSparkyBlock(self, value):
 
     stack =  self.stack
-
     lowerValue = value.lower()
 
     # Terminate loop
@@ -282,13 +308,14 @@ class CcpnSparkyReader:
         )
       else:
         # Close loop and pop it off the stack
-        self._closeLoop(value)
+        self._closeList(value)
 
     # terminate SparkyBlock
     if isinstance(stack[-1], SparkyBlock):
-      if lowerValue.startswith('<end '):
+      blockName = value[5:-1]
+      if lowerValue.startswith('<end') and stack[-1].name == blockName:
         # Simple terminator. Close save frame
-          stack.pop()#
+        stack.pop()
 
       elif self.enforceSaveFrameStop:
         self._errorMessage("SaveFrame terminated by %s instead of save_" % value, value)
@@ -309,44 +336,51 @@ class CcpnSparkyReader:
     if self.lowerCaseTags:
       value = value.lower()
     if isinstance(stack[-1], SparkyBlock):
-      self._addSparkyBlock(value)
+      self._addSparkyBlock(value.strip('<>'))
+
+    elif isinstance(stack[-1], list):
+      self._closeList(value)                                  # close the list and store
+      self._addSparkyBlock(value.strip('<>'))
+
     else:
       raise SparkySyntaxError(
         self._errorMessage("SparkyBlock start out of context: %s" % value, value)
       )
 
-  def _closeLoop(self, value):
+  def _closeList(self, value):
 
     stack = self.stack
-    data = stack.pop()
-    loop = stack.pop()
-    if not isinstance(loop, SparkyBlock):
+    data = stack.pop()        # remove the list from the end
+    block = stack[-1]         # point to the last block
+    if not isinstance(block, SparkyBlock):
       if isinstance(data, SparkyBlock):
         raise TypeError("Implementation error, loop not correctly put on stack")
       else:
         raise SparkySyntaxError(self._errorMessage("Loop stop_ %s outside loop" % value, value))
 
-    columnCount = len(loop._columns)
-    if not columnCount:
-      raise SparkySyntaxError(self._errorMessage(" loop lacks column names" , value))
+    # columnCount = len(loop._columns)
+    # if not columnCount:
+    #   raise SparkySyntaxError(self._errorMessage(" loop lacks column names" , value))
 
     if data:
 
-      if len(data) % columnCount:
-        if self.padIncompleteLoops:
-          print("WARNING Token %s: %s in %s is missing %s values. Last row was: %s"
-                % (self.counter, loop, self.stack[-2],
-                   columnCount - (len(data) % columnCount), data[-1]))
-        else:
-          raise SparkySyntaxError(
-            self._errorMessage("loop %s is missing %s values"
-                               % (loop, (columnCount - (len(data) % columnCount))), value)
-          )
+      block['data'] = data
 
-      # Make rows:
-      args = [iter(data)] * columnCount
-      for tt in zip_longest(*args, fillvalue=NULLSTRING):
-        loop.newRow(values=tt)
+      # if len(data) % columnCount:
+      #   if self.padIncompleteLoops:
+      #     print("WARNING Token %s: %s in %s is missing %s values. Last row was: %s"
+      #           % (self.counter, loop, self.stack[-2],
+      #              columnCount - (len(data) % columnCount), data[-1]))
+      #   else:
+      #     raise SparkySyntaxError(
+      #       self._errorMessage("loop %s is missing %s values"
+      #                          % (loop, (columnCount - (len(data) % columnCount))), value)
+      #     )
+      #
+      # # Make rows:
+      # args = [iter(data)] * columnCount
+      # for tt in zip_longest(*args, fillvalue=NULLSTRING):
+      #   loop.newRow(values=tt)
 
     else:
       # empty loops appear here. We allow them, but that could change
@@ -393,7 +427,7 @@ class CcpnSparkyReader:
 
         if typ in unquotedValueTags:
           value = UnquotedValue(value)
-          # processValue(value)
+          processValue(value)
 
         else:
           func = processFunctions[typ]
@@ -402,8 +436,9 @@ class CcpnSparkyReader:
 
             if typ == SP_TOKEN_SPARKY_PROJECT:
               # put the first element on the stack
-              result = SparkyProjectBlock(name=name)
+              result = SparkyBlock(name=name)           # result is the actually object, which SHOULD contain all
               stack.append(result)
+              stack.append(list())  # put an empty list on the stack
 
             elif typ == SP_TOKEN_SPARKY_BLOCK:
               # save_ string
@@ -432,12 +467,9 @@ class CcpnSparkyReader:
         raise SparkySyntaxError(self._errorMessage("File ends with item name", value))
 
       if isinstance(stack[-1], list):
-        self._closeLoop('<End-of-File>')
+        self._closeList('<End-of-File>')
 
       if isinstance(stack[-1], SparkyBlock):
-        stack.pop()
-
-      if isinstance(stack[-1], SparkyProjectBlock):
         stack.pop()
 
       if stack:

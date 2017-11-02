@@ -536,6 +536,7 @@ class Strip(AbstractWrapperObject):
 
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
+    # TODO:ED fix the ordering of the spectra
     dataSource = spectrum._wrappedData
     apiStrip = self._wrappedData
     if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:

@@ -23,15 +23,17 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-import random
+# import random
 import os
-import sys
+# import sys
 import time
-import typing
-import itertools
-import errno
+# import typing
+# import itertools
+# import errno
 import re
 import collections
+import pandas as pd
+
 try:
   # Python 3
   from itertools import zip_longest
@@ -39,29 +41,27 @@ except:
   # python 2.7
   from itertools import izip_longest as zip_longest
 
-from datetime import datetime
+# from datetime import datetime
 from collections import OrderedDict
 from ccpn.core.Project import Project
 
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.Complex import Complex
-from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
-from ccpn.core.Integral import Integral
-from ccpn.core.Peak import Peak
-from ccpn.core.Sample import Sample
+# from ccpn.core.Spectrum import Spectrum
+# from ccpn.core.SpectrumGroup import SpectrumGroup
+# from ccpn.core.Complex import Complex
+# from ccpn.core.PeakList import PeakList
+# from ccpn.core.IntegralList import IntegralList
+# from ccpn.core.Integral import Integral
+# from ccpn.core.Peak import Peak
+# from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
-from ccpn.core.Substance import Substance
-from ccpn.core.Chain import Chain
+# from ccpn.core.Substance import Substance
+# from ccpn.core.Chain import Chain
 # from ccpn.core.Residue import Residue
 # from ccpn.core.Atom import Atom
-from ccpn.core.NmrChain import NmrChain
-from ccpn.core.NmrResidue import NmrResidue
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+# from ccpn.core.NmrChain import NmrChain
+# from ccpn.core.NmrResidue import NmrResidue
+# from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.util.Logging import getLogger
-
-import ccpn.macros.parseSparkyHSQCassignmentList as parseSparkyMacro
 
 sparkyReadingOrder = [
   'sparky_nmr_meta_data',
@@ -210,8 +210,8 @@ class SparkyBlock(NamedOrderedDict):
     super(SparkyBlock, self).__init__(name=name)
 
   def getData(self):
-    dataBlocks = [self['db'] for db in self.keys() if 'data' in db]
-    return [ll for x in dataBlocks for ll in x]
+    dataBlocks = [self[db] for db in self.keys() if 'data' in db]
+    return [ll for x in dataBlocks for ll in x]     # concaternate data lists
 
   def getDataValues(self, value, firstOnly=False):
     dataBlocks = [self[db] for db in self.keys() if 'data' in db]
@@ -256,6 +256,7 @@ class SparkyBlock(NamedOrderedDict):
 #
 
 class CcpnSparkyReader:
+
   def __init__(self, application:str, specificationFile:str=None, mode:str='standard',
                testing:bool=False):
 
@@ -275,6 +276,7 @@ class CcpnSparkyReader:
 
     self.stack = []
     self.globalsCounter = 0
+    self.columns = ['ResidueType', 'ResidueCode', 'FirstAtomName', 'SecondAtomName']
 
   def _processVersion(self, value):
     # next token must be version
@@ -585,6 +587,21 @@ class CcpnSparkyReader:
 
     return list
 
+  def importSaveFile(self, project, saveBlock):
+    pathName = saveBlock.getDataValues('pathname', firstOnly=True)
+
+    spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
+    fileName = spectra.getDataValues('name', firstOnly=True)
+    filePath = spectra.getDataValues('pathname', firstOnly=True)
+
+    spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
+    workshopPath = os.path.abspath(
+      os.path.join(pathName, '../lists/' + fileName + '.list.workshop'))
+
+    self.project.loadData(spectrumPath)  # load the spectrum
+
+    self.initParser(self.project, workshopPath, project.spectra[-1])
+
   def importSparkyProject(self, project, sparkyBlock):
     """Import entire project from dataBlock into empty Project"""
     t0 = time.time()
@@ -594,25 +611,35 @@ class CcpnSparkyReader:
 
     # traverse the sparkyBlock and insert into project
     sparkyType = sparkyBlock.getDataValues('sparky', firstOnly=True)
-    pathName = sparkyBlock.getDataValues('pathname', firstOnly=True)
 
     if sparkyType == 'project file':
       # load project file
-      pass
+      fileName = sparkyBlock.getDataValues('name', firstOnly=True)
+      filePath = sparkyBlock.getDataValues('pathname', firstOnly=True)
+
+      saveFiles = sparkyBlock.getBlocks('savefiles', firstOnly=True)
+      loadedBlocks = []
+      for sp in saveFiles.getData():
+        savefilePath = os.path.abspath(os.path.join(filePath, sp))
+        loadedBlocks.append(self.parseSparkyFile(savefilePath))
+
+      # test
+      self.importSaveFile(project, loadedBlocks[0])   # modify to load from the project
 
     elif sparkyType == 'save file':
-      spectra = sparkyBlock.getBlocks('spectrum', firstOnly=True)
-      fileName = spectra.getDataValues('name', firstOnly=True)
-      filePath = spectra.getDataValues('pathname', firstOnly=True)
-
-      spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
-      workshopPath = os.path.abspath(os.path.join(pathName, '../lists/'+fileName+'.list.workshop'))
-
+      self.importSaveFile(project, sparkyBlock)
+      # pathName = sparkyBlock.getDataValues('pathname', firstOnly=True)
+      #
+      # spectra = sparkyBlock.getBlocks('spectrum', firstOnly=True)
+      # fileName = spectra.getDataValues('name', firstOnly=True)
+      # filePath = spectra.getDataValues('pathname', firstOnly=True)
+      #
+      # spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
+      # workshopPath = os.path.abspath(os.path.join(pathName, '../lists/'+fileName+'.list.workshop'))
+      #
       # self.project.loadData(spectrumPath)     # load the spectrum
       #
-      # parseSparkyMacro.initParser(self.project
-      #                             , workshopPath
-      #                             , project.spectra[-1])
+      # self.initParser(self.project, workshopPath, project.spectra[-1])
 
     else:
         getLogger().warning('Unknown Sparky File Type')
@@ -623,6 +650,108 @@ class CcpnSparkyReader:
     for msg in self.warnings:
       print ('====> ', msg)
     self.project = None
+
+  def _createDataFrame(self, input_path):
+    return pd.read_table(input_path, delim_whitespace=True, )
+
+  def _splitAssignmentColumn(self, dataFrame):
+    ''' parses the assignment column.
+    Splits the column assignment in  four columns: ResidueName ResidueCode AtomName1 AtomName2.
+    '''
+    assignments = [re.findall('\d+|\D+', s) for s in dataFrame.iloc[:, 0]]
+    assignmentsColumns = []
+    for a in assignments:
+      try:
+        i,j,*args = a
+        atoms = (''.join(args)).split('-')
+        if len(atoms) == 2:
+            firstAtom, secondAtom = atoms
+            assignmentsColumns += ((i,j,firstAtom, secondAtom),)
+      except:
+        getLogger().warning('Undefined atom assignment %s' % str(a))
+
+    return pd.DataFrame(assignmentsColumns,columns=self.columns)
+
+  def _mergeDataFrames(self, generalDF, assignmentDF):
+    '''
+    :param generalDF: first dataframe with assignments all in on column
+    :param assignmentDF: assignments dataframe  in  4 columns
+    :return: new dataframe with four assignment columns + the original without the first column
+    '''
+    partialDf = generalDF.drop(generalDF.columns[0], axis=1)
+    return pd.concat([assignmentDF, partialDf], axis=1, join_axes=[partialDf.index])
+
+  def _correctChainResidueCodes(self, chain, ccpnDataFrame):
+    ''' renames Chain residueCodes correctly according with the dataFrame, if duplicates, deletes them.
+    '''
+    for residue,resNumber, in zip(chain.residues, ccpnDataFrame.ResidueCode):
+      try:
+        residue.rename(str(resNumber))
+      except:
+        residue.delete()
+    return chain
+
+  def _createCcpnChain(self, project, ccpnDataFrame):
+    '''makes a chain from the ResidueTypes.
+    CCPN wants a long list of  one Letter Codes without spaces'''
+    residueTypes = ''.join([i for i in ccpnDataFrame.ResidueType])
+    newChain = project.createChain(residueTypes,molType='protein')
+    self._correctChainResidueCodes(newChain, ccpnDataFrame)
+    return newChain
+
+  def _fetchAndAssignNmrAtom(self, peak, nmrResidue, atomName):
+    atom = nmrResidue.fetchNmrAtom(name=str(atomName))
+    peak.assignDimension(axisCode=atomName[0], value=[atom])
+
+  def _connectNmrResidues(self, nmrChain):
+    updatingNmrChain = None
+    nrs = nmrChain.nmrResidues
+    for i in range(len(nrs) - 1):
+      currentItem, nextItem = nrs[i], nrs[i + 1]
+      if currentItem or nextItem is not None:
+        updatingNmrChain = currentItem.connectNext(nextItem, )
+    return updatingNmrChain
+
+  def _assignNmrResiduesToResidues(self, connectedNmrChain, ccpnChain):
+    for nmrResidue, residue in zip(connectedNmrChain.nmrResidues, ccpnChain.residues):
+      nmrResidue.residue = residue
+
+  def _parseDataFrame(self, ccpnDataFrame, spectrum, nmrChain):
+
+    lastNmrResidue = None
+    newPeakList = spectrum.newPeakList()
+    foundResNumber = list(ccpnDataFrame.iloc[:,1])
+    for i, resType, resNumber, atom1, atom2, pos1, pos2, in zip(range(len(ccpnDataFrame.iloc[:,0]) -1), ccpnDataFrame.iloc[:,0],
+                                                              ccpnDataFrame.iloc[:,1], ccpnDataFrame.iloc[:,2],
+                                                              ccpnDataFrame.iloc[:,3], ccpnDataFrame.iloc[:,4],
+                                                              ccpnDataFrame.iloc[:,5]):
+
+      peak = newPeakList.newPeak(position=(float(pos2), float(pos1)))
+
+      if resNumber in foundResNumber[:i]:  # in case of duplicated Residues Eg sideChain W2023N-H H and W2023NE1-HE1, don't need to create a new nmrResidue, just add the atoms to the previous one.
+        nmrResidue = lastNmrResidue
+        if nmrResidue:
+          self._fetchAndAssignNmrAtom(peak, nmrResidue, atom2)
+          self._fetchAndAssignNmrAtom(peak, nmrResidue, atom1)
+
+      else:
+        nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=str(resNumber))
+        lastNmrResidue = nmrResidue
+        if nmrResidue:
+          self._fetchAndAssignNmrAtom(peak, nmrResidue, atom2)
+          self._fetchAndAssignNmrAtom(peak, nmrResidue, atom1)
+
+    return nmrChain
+
+  def initParser(self, project, input_path, spectrum):
+    generalDF = self._createDataFrame(input_path)
+    assignmentDF = self._splitAssignmentColumn(generalDF)
+    ccpnDataFrame = self._mergeDataFrames(generalDF, assignmentDF)
+    ccpnChain = self._createCcpnChain(project, ccpnDataFrame)
+    nmrChain = project.fetchNmrChain('A')
+    newNmrChain = self._parseDataFrame(ccpnDataFrame, spectrum, nmrChain)
+    connectedNmrChain = self._connectNmrResidues(newNmrChain)
+    self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
 
 class CcpnSparkyWriter:

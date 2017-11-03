@@ -268,6 +268,11 @@ class PreferencesPopup(CcpnDialog):
   def _testExternalProgram(self, program):
     import subprocess
     try:
+      # TODO:ED check whether relative or absolute path and test
+      # import ccpn.framework.PathsAndUrls as PAU
+      # pathCwd = PAU.ccpnCodePath
+      # programPath = os.path.abspath(os.path.join(pathCwd, program))
+
       p = subprocess.Popen(program,
                        shell=False,
                        stdout=subprocess.PIPE,

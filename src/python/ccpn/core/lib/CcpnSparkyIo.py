@@ -209,12 +209,51 @@ class SparkyBlock(NamedOrderedDict):
   def __init__(self, name='Root'):
     super(SparkyBlock, self).__init__(name=name)
 
+  def getData(self):
+    dataBlocks = [self['db'] for db in self.keys() if 'data' in db]
+    return [ll for x in dataBlocks for ll in x]
 
-class SparkyProjectBlock(NamedOrderedDict):
-  """Top level container for general STAR object tree"""
-  def __init__(self, name='Root'):
-    super(SparkyProjectBlock, self).__init__(name=name)
+  def getDataValues(self, value, firstOnly=False):
+    dataBlocks = [self[db] for db in self.keys() if 'data' in db]
+    spList = []
+    for spType in dataBlocks:
+      if spType:
+        spType = [re.findall(r'%s\s?(.*)\s*' % value, sT) for sT in spType]
+        spList.extend([ll for x in spType for ll in x])
 
+    if spList:
+      if firstOnly:
+        return spList[0]
+      else:
+        return spList
+    else:
+      return None
+
+  def _getBlocks(self, value, list=[]):
+    if value in self.name:
+      list.append(self)
+
+    for ky in self.keys():
+      if isinstance(self[ky], SparkyBlock):
+        self[ky]._getBlocks(value, list)
+
+    return list
+
+  def getBlocks(self, value, firstOnly=False):
+    list = self._getBlocks(value, list=[])
+    if list:
+      if firstOnly:
+        return list[0]
+      else:
+        return list
+    else:
+      return None
+
+# class SparkyProjectBlock(NamedOrderedDict):
+#   """Top level container for general STAR object tree"""
+#   def __init__(self, name='Root'):
+#     super(SparkyProjectBlock, self).__init__(name=name)
+#
 
 class CcpnSparkyReader:
   def __init__(self, application:str, specificationFile:str=None, mode:str='standard',
@@ -268,9 +307,9 @@ class CcpnSparkyReader:
     stack = self.stack
     last = stack[-1]
 
-    if isinstance(last, SparkyProjectBlock):
-      # currently ignore until we have a SparkyBlock
-      return
+    # if isinstance(last, SparkyProjectBlock):
+    #   # currently ignore until we have a SparkyBlock
+    #   return
 
     if isinstance(last, SparkyBlock):
       return
@@ -333,6 +372,8 @@ class CcpnSparkyReader:
         # New saveframe start. We are missing the terminator, but close and continue anyway
         stack.pop()
 
+    stack.append(list())          # in case there are more data items to add
+
     if not isinstance((stack[-1]), SparkyBlock):
       if lowerValue.startswith('<end '):
         raise SparkySyntaxError(self._errorMessage("'%s' found out of context" % value, value))
@@ -373,7 +414,12 @@ class CcpnSparkyReader:
 
     if data:
 
-      block['data'] = data
+      dataName = 'data'
+      currentNames = [ky for ky in block.keys() if 'data' in ky]
+      if currentNames:
+        dataName = 'data' + str(len(currentNames))  # add an incremental number to the name
+
+      block[dataName] = data
 
       # if len(data) % columnCount:
       #   if self.padIncompleteLoops:
@@ -547,35 +593,30 @@ class CcpnSparkyReader:
     self.project = project
 
     # traverse the sparkyBlock and insert into project
-
-    sparkyType = self._getSparkyDataList(sparkyBlock, 'sparky')
-    if sparkyType:
-      sparkyType = sparkyType[0]      # get the first one
-
-    pathName = self._getSparkyDataList(sparkyBlock, 'pathname')[0]
+    sparkyType = sparkyBlock.getDataValues('sparky', firstOnly=True)
+    pathName = sparkyBlock.getDataValues('pathname', firstOnly=True)
 
     if sparkyType == 'project file':
       # load project file
       pass
 
     elif sparkyType == 'save file':
-      spectra = self._getSparkyBlock(sparkyBlock, 'spectrum')
-      fileName = self._getSparkyDataList(spectra[0], 'name')[0]
-      filePath = self._getSparkyDataList(spectra[0], 'pathname')[0]
+      spectra = sparkyBlock.getBlocks('spectrum', firstOnly=True)
+      fileName = spectra.getDataValues('name', firstOnly=True)
+      filePath = spectra.getDataValues('pathname', firstOnly=True)
 
       spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
       workshopPath = os.path.abspath(os.path.join(pathName, '../lists/'+fileName+'.list.workshop'))
 
-      self.project.loadData(spectrumPath)     # load the spectrum
-
-      parseSparkyMacro.initParser(self.project
-                                  , workshopPath
-                                  , project.spectra[-1])
+      # self.project.loadData(spectrumPath)     # load the spectrum
+      #
+      # parseSparkyMacro.initParser(self.project
+      #                             , workshopPath
+      #                             , project.spectra[-1])
 
     else:
         getLogger().warning('Unknown Sparky File Type')
 
-    print (str(sparkyType))
     t2 = time.time()
     getLogger().debug('Imported Sparky file into project, time = %.2fs' %(t2-t0))
 

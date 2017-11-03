@@ -477,9 +477,8 @@ class Peak(AbstractWrapperObject):
       values = self.reorderValues(values, axisCodes)
     setattr(self, attributeName, values)
 
-  def snapToExtremum(self):
-
-    LibPeak.snapToExtremum(self._apiPeak)
+  def snapToExtremum(self, halfBoxSearchWidth:int=2, halfBoxFitWidth:int=2):
+    LibPeak.snapToExtremum(self._apiPeak, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
 
   def fitPositionHeightLineWidths(self):
 

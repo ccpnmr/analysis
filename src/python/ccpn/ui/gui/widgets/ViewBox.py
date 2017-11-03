@@ -187,6 +187,14 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
 
+    self.pointer = QtGui.QGraphicsSimpleTextItem('X')
+    self.addItem(self.pointer)
+    font = self.pointer.font()
+    font.setPointSize(10)
+    self.pointer.setFont(font)
+    self.pointer.setFlag(self.pointer.ItemIgnoresTransformations)
+    self.pointer.hide()
+
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
@@ -552,8 +560,7 @@ class ViewBox(pg.ViewBox):
         self.current.peaks = peaks
 
     elif middleMouse(event):
-      # Control(Cmd)+middle drag: move a selected peak
-
+     # middle drag: move a selected peak
       event.accept()
 
       peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
@@ -580,9 +587,11 @@ class ViewBox(pg.ViewBox):
         # start of move
         project.newUndoPoint()
         undo.increaseBlocking()
-        # project.blankNotification()
+        project.blankNotification()
 
       try:
+        self.pointer.show()
+        self.pointer.setPos(endPosition)
         if not hasattr(peak, 'startPosition'):
           peak.startPosition = peak.position
         indices = peakListToIndicesDict[peak.peakList]
@@ -593,12 +602,13 @@ class ViewBox(pg.ViewBox):
 
       except:
           undo.decreaseBlocking()
-          # project.unblankNotification()
+          project.unblankNotification()
 
       else:
         if event.isFinish():
+          self.pointer.hide()
           undo.decreaseBlocking()
-          # project.unblankNotification()
+          project.unblankNotification()
           if hasattr(peak, 'startPosition'):
             undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
                          redoArgs=[peak, 'position', peak.position])

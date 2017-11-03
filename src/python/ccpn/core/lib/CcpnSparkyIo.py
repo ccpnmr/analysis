@@ -61,6 +61,8 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.util.Logging import getLogger
 
+import ccpn.macros.parseSparkyHSQCassignmentList as parseSparkyMacro
+
 sparkyReadingOrder = [
   'sparky_nmr_meta_data',
   'sparky_molecular_system',
@@ -119,20 +121,20 @@ _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 comp
   ^;([\S\s]*?)(?:\r\n|\s)^;(?:(?=\s)|$)  # 1  Multi-line string
   |(?:^|(?<=\s))(\#.*?)\r?$              # 2  Comment
   |(?:^|(?<=\s))(?:(global_)             # 3  
-  |(<sparky\s.*>)                        # 4  Sparky project start
+  |<sparky\s(.*?)>                       # 4  Sparky project start
   |(\$\S+)                               # 5  STAR save frame reference
   |<end\s(.*?)>                          # 6  block terminator
   |<(version\s.*?)>                      # 7  block start
   |<(.*?)>                               # 8  block header   - shouldn't need the leading whitespace
   |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # 9 Invalid privileged construct
-  |(_\S+)                              # 10 Data name
-  |'(.*?)'                             # 11 Single-quoted string
-  |"(.*?)"                             # 12 Double-quoted string
-  |(\.)                                # 13 CIF null
-  |(\?)                                # 14 CIF unknown/missing
-  |([\[\]]\S*)                         # 15 Square bracketed constructs (reserved)
-  |((?:[^'";_$\s]|(?!^);).*)\s?        # 16 Non-quoted string   -  to end of line *** check
-  |(\S+)                               # 17 Catch-all bad token
+  |(_\S+)                                # 10 Data name
+  |'(.*?)'                               # 11 Single-quoted string
+  |"(.*?)"                               # 12 Double-quoted string
+  |(\.)                                  # 13 CIF null
+  |(\?)                                  # 14 CIF unknown/missing
+  |((?:[^'";_$\s]|(?!^);).*)(?<![ ])     # 15 Non-quoted string - exclude pre/post whitespace
+  |([\[\]]\S*)                           # 16 Square bracketed constructs (reserved)
+  |(\S+)                                 # 17 Catch-all bad token
 )
 (?:(?=\s)|$)"""
 
@@ -154,8 +156,8 @@ SP_TOKEN_SQUOTE_STRING    = 11
 SP_TOKEN_DQUOTE_STRING    = 12
 SP_TOKEN_NULL             = 13
 SP_TOKEN_UNKNOWN          = 14
-SP_TOKEN_SQUARE_BRACKET   = 15
-SP_TOKEN_STRING           = 16
+SP_TOKEN_STRING           = 15
+SP_TOKEN_SQUARE_BRACKET   = 16
 SP_TOKEN_BAD_TOKEN        = 17
 
 SparkyToken = collections.namedtuple('SparkyToken', ('type', 'value'))
@@ -408,7 +410,6 @@ class CcpnSparkyReader:
     processFunctions[SP_TOKEN_VERSION] = self._processVersion
     processFunctions[SP_TOKEN_COMMENT] = self._processComment
 
-
     # processFunctions[SP_TOKEN_LOOP] = self._openLoop
     # processFunctions[SP_TOKEN_LOOP_STOP] = self._closeLoop
     # processFunctions[SP_TOKEN_GLOBAL] = self._processGlobal
@@ -446,6 +447,10 @@ class CcpnSparkyReader:
               result = SparkyBlock(name=name)           # result is the actually object, which SHOULD contain all
               stack.append(result)
               stack.append(list())  # put an empty list on the stack
+
+              processValue("sparky %s" % value)     # put the type on the stack
+              processValue("name %s" % name)
+              processValue("pathname %s" % os.path.dirname(path))
 
             elif typ == SP_TOKEN_SPARKY_BLOCK:
               # save_ string
@@ -512,6 +517,72 @@ class CcpnSparkyReader:
           ii += 1
     #
     return template % (tags[:-1], tags[-1], ii+1, msg)#
+
+  def _getSparkyDataList(self, sparkyBlock, value):
+    if 'data' in sparkyBlock and sparkyBlock['data']:
+      spType = sparkyBlock['data']
+      if spType:
+        spType = [re.findall(r'%s\s?(.*)\s*' % value, sT) for sT in spType]
+        spType = [ll for x in spType for ll in x]
+        if spType:
+          return spType
+
+    return None
+
+  def _getSparkyBlock(self, sparkyBlock, name, list=[]):
+    if name in sparkyBlock.name:
+      list.append(sparkyBlock)
+
+    for ky in sparkyBlock.keys():
+      if isinstance(sparkyBlock[ky], SparkyBlock):
+        self._getSparkyBlock(sparkyBlock[ky], name, list)
+
+    return list
+
+  def importSparkyProject(self, project, sparkyBlock):
+    """Import entire project from dataBlock into empty Project"""
+    t0 = time.time()
+
+    self.warnings = []
+    self.project = project
+
+    # traverse the sparkyBlock and insert into project
+
+    sparkyType = self._getSparkyDataList(sparkyBlock, 'sparky')
+    if sparkyType:
+      sparkyType = sparkyType[0]      # get the first one
+
+    pathName = self._getSparkyDataList(sparkyBlock, 'pathname')[0]
+
+    if sparkyType == 'project file':
+      # load project file
+      pass
+
+    elif sparkyType == 'save file':
+      spectra = self._getSparkyBlock(sparkyBlock, 'spectrum')
+      fileName = self._getSparkyDataList(spectra[0], 'name')[0]
+      filePath = self._getSparkyDataList(spectra[0], 'pathname')[0]
+
+      spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
+      workshopPath = os.path.abspath(os.path.join(pathName, '../lists/'+fileName+'.list.workshop'))
+
+      self.project.loadData(spectrumPath)     # load the spectrum
+
+      parseSparkyMacro.initParser(self.project
+                                  , workshopPath
+                                  , project.spectra[-1])
+
+    else:
+        getLogger().warning('Unknown Sparky File Type')
+
+    print (str(sparkyType))
+    t2 = time.time()
+    getLogger().debug('Imported Sparky file into project, time = %.2fs' %(t2-t0))
+
+    for msg in self.warnings:
+      print ('====> ', msg)
+    self.project = None
+
 
 class CcpnSparkyWriter:
   # ejb - won't be implemented yet

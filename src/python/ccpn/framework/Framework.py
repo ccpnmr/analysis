@@ -1086,7 +1086,6 @@ class Framework:
 
     dataBlock = self.sparkyReader.parseSparkyFile(path)
 
-
     if makeNewProject:
       if self.project is not None:
         self._closeProject()
@@ -1097,6 +1096,8 @@ class Framework:
 
     try:
       # insert file into project
+
+      self.sparkyReader.importSparkyProject(self.project, dataBlock)
       sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
 
     finally:

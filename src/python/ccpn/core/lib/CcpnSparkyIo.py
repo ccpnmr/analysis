@@ -443,6 +443,15 @@ class CcpnSparkyReader:
       # empty loops appear here. We allow them, but that could change
       pass
 
+  def _getToken(self, text, value):
+    # return the value'th token from a string
+    # just simple string NOT containing whitespace or '|' pipe character
+    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", text)
+    try:
+      return vals[value]
+    except:
+      return None
+
   def parseSparkyFile(self, path):
 
     with open(path, 'r') as fileName:
@@ -610,13 +619,61 @@ class CcpnSparkyReader:
 
     spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
     attachedPeak = spectra.getBlocks('attached data', firstOnly=True)
+    spectrumName = saveBlock.name
 
     peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
     peakName = attachedPeak.getDataValues('peak_pattern_name', firstOnly=True)
 
     if peakAxes is not None and peakName is not None:
       # assume that we have to import a peaklist
-      pass
+
+      assignRelation = spectra.getDataValues('assignRelation', firstOnly=False)
+
+      try:
+        axis1 = self._getToken(assignRelation[0], 2)
+        axis2 = self._getToken(assignRelation[1], 2)
+
+        if axis1 and axis2:
+          peakBlock = spectra.getBlocks('ornament', firstOnly=True)
+          if peakBlock:
+            peakData = peakBlock.getData()
+
+            if peakData:
+              spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
+              if spectrum:
+                newPeakList = spectrum[0].newPeakList()
+
+                ii=0
+                while ii<len(peakData)-5:
+
+                  if self._getToken(peakData[ii], 0) == 'id':
+
+                    # TODO:ED put some more error checking in here
+                    for jj in range(1, 5):
+                      line = peakData[ii+jj]
+                      if self._getToken(line, 0) == 'pos':
+                        posX = float(self._getToken(line, 1))
+                        posY = float(self._getToken(line, 2))
+                      if self._getToken(line, 0) == 'rs':
+                        resName = self._getToken(line, 1)
+                        axis1Code = self._getToken(line, 2)
+                        axis2Code = self._getToken(line, 4)
+
+                    nmrChain = project.fetchNmrChain('A')
+                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+
+                    if axis1 in axis1Code and axis2 in axis2Code:
+                      peak = newPeakList.newPeak(position=(float(posY), float(posX)))
+                    elif axis2 in axis1Code and axis1 in axis2Code:
+                      peak = newPeakList.newPeak(position=(float(posX), float(posY)))
+
+                    self._fetchAndAssignNmrAtom(peak, nmrResidue, axis1Code)
+                    self._fetchAndAssignNmrAtom(peak, nmrResidue, axis2Code)
+
+                  ii += 1
+
+      except Exception as es:
+        getLogger().warning('Error importing peak list')
 
   def importSparkyProject(self, project, sparkyBlock):
     """Import entire project from dataBlock into empty Project"""
@@ -640,7 +697,7 @@ class CcpnSparkyReader:
         loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
       # now import the molecule from the main project file
-      self.importSparkyMolecule(project, sparkyBlock)
+      # self.importSparkyMolecule(project, sparkyBlock)
 
       # load spectrum data
       for isf in loadedBlocks:
@@ -649,7 +706,6 @@ class CcpnSparkyReader:
       # load spectrum data
       for isf in loadedBlocks:
         self.importPeakLists(project, isf)   # modify to load from the project
-
 
     elif sparkyType == 'save file':
       self.importSpectra(project, sparkyBlock)
@@ -789,7 +845,7 @@ class CcpnSparkyReader:
         for res in resList:
 
           try:
-            vals = re.findall(r"""(?:\|\s*|\s+)([a-zA-Z0-9._^'";$!^]+)""", res)
+            vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
             chainCode = str(vals[0][0])
             resName = str(vals[0][1:])
             atomType = str(vals[1])

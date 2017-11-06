@@ -587,7 +587,8 @@ class CcpnSparkyReader:
 
     return list
 
-  def importSaveFile(self, project, saveBlock):
+  def importSpectra(self, project, saveBlock):
+    # process the save files to get the spectra
     pathName = saveBlock.getDataValues('pathname', firstOnly=True)
 
     spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
@@ -600,7 +601,22 @@ class CcpnSparkyReader:
 
     self.project.loadData(spectrumPath)  # load the spectrum
 
-    self.initParser(self.project, workshopPath, project.spectra[-1])
+    # if 'nh_tor_42' in workshopPath:
+    #   self.initParser(self.project, workshopPath, project.spectra[-1])
+
+  def importPeakLists(self, project, saveBlock):
+    # process the save files to get the spectra
+    pathName = saveBlock.getDataValues('pathname', firstOnly=True)
+
+    spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
+    attachedPeak = spectra.getBlocks('attached data', firstOnly=True)
+
+    peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
+    peakName = attachedPeak.getDataValues('peak_pattern_name', firstOnly=True)
+
+    if peakAxes is not None and peakName is not None:
+      # assume that we have to import a peaklist
+      pass
 
   def importSparkyProject(self, project, sparkyBlock):
     """Import entire project from dataBlock into empty Project"""
@@ -623,23 +639,20 @@ class CcpnSparkyReader:
         savefilePath = os.path.abspath(os.path.join(filePath, sp))
         loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
-      # test
-      self.importSaveFile(project, loadedBlocks[0])   # modify to load from the project
+      # now import the molecule from the main project file
+      self.importSparkyMolecule(project, sparkyBlock)
+
+      # load spectrum data
+      for isf in loadedBlocks:
+        self.importSpectra(project, isf)   # modify to load from the project
+
+      # load spectrum data
+      for isf in loadedBlocks:
+        self.importPeakLists(project, isf)   # modify to load from the project
+
 
     elif sparkyType == 'save file':
-      self.importSaveFile(project, sparkyBlock)
-      # pathName = sparkyBlock.getDataValues('pathname', firstOnly=True)
-      #
-      # spectra = sparkyBlock.getBlocks('spectrum', firstOnly=True)
-      # fileName = spectra.getDataValues('name', firstOnly=True)
-      # filePath = spectra.getDataValues('pathname', firstOnly=True)
-      #
-      # spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
-      # workshopPath = os.path.abspath(os.path.join(pathName, '../lists/'+fileName+'.list.workshop'))
-      #
-      # self.project.loadData(spectrumPath)     # load the spectrum
-      #
-      # self.initParser(self.project, workshopPath, project.spectra[-1])
+      self.importSpectra(project, sparkyBlock)
 
     else:
         getLogger().warning('Unknown Sparky File Type')
@@ -699,6 +712,15 @@ class CcpnSparkyReader:
     self._correctChainResidueCodes(newChain, ccpnDataFrame)
     return newChain
 
+  def _createNewCcpnChain(self, project, chainList, resList):
+    newChain = project.createChain(chainList, molType='protein')
+    for residue,resNumber, in zip(newChain.residues, resList):
+      try:
+        residue.rename(str(resNumber))
+      except:
+        residue.delete()
+    return newChain
+
   def _fetchAndAssignNmrAtom(self, peak, nmrResidue, atomName):
     atom = nmrResidue.fetchNmrAtom(name=str(atomName))
     peak.assignDimension(axisCode=atomName[0], value=[atom])
@@ -753,6 +775,51 @@ class CcpnSparkyReader:
     connectedNmrChain = self._connectNmrResidues(newNmrChain)
     self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
+  def importSparkyMolecule(self, project, sparkyBlock):
+    molecules = sparkyBlock.getBlocks('molecule')
+
+    for mol in molecules:
+      resBlock = mol.getBlocks('resonances', firstOnly=True)
+
+      if resBlock:
+        resList = resBlock.getData()
+        chain = ''
+        nmrResList = []
+        nmrAtomList = []
+        for res in resList:
+
+          try:
+            vals = re.findall(r"""(?:\|\s*|\s+)([a-zA-Z0-9._^'";$!^]+)""", res)
+            chainCode = str(vals[0][0])
+            resName = str(vals[0][1:])
+            atomType = str(vals[1])
+            chemShift = float(vals[2])
+            atomName = str(vals[3])
+
+            if resName not in nmrResList:
+              nmrResList.append(resName)
+              chain = chain+chainCode
+
+            nmrAtomList.append((chainCode, resName, atomType, chemShift, atomName))
+
+          except Exception as es:
+            getLogger().warning('Incorrect resonance.')
+
+        # create the molecular chain
+        ccpnChain = self._createNewCcpnChain(project, chain, nmrResList)
+
+        # rename to the nmrResidue names in the project
+        nmrChain = project.fetchNmrChain('A')
+        for chainCode, resName, atomType, chemShift, atomName in nmrAtomList:
+          nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+          if nmrResidue:
+            newAtom = nmrResidue.fetchNmrAtom(name=atomType)
+
+        # connect the nmrResidues and assignTo
+        connectedNmrChain = self._connectNmrResidues(nmrChain)
+        self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+
+    # now need to check the save files and find any peak lists that need to be created
 
 class CcpnSparkyWriter:
   # ejb - won't be implemented yet

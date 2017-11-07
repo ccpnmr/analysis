@@ -23,13 +23,8 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-# import random
 import os
-# import sys
 import time
-# import typing
-# import itertools
-# import errno
 import re
 import collections
 import pandas as pd
@@ -44,77 +39,16 @@ except:
 # from datetime import datetime
 from collections import OrderedDict
 from ccpn.core.Project import Project
-
-# from ccpn.core.Spectrum import Spectrum
-# from ccpn.core.SpectrumGroup import SpectrumGroup
-# from ccpn.core.Complex import Complex
-# from ccpn.core.PeakList import PeakList
-# from ccpn.core.IntegralList import IntegralList
-# from ccpn.core.Integral import Integral
-# from ccpn.core.Peak import Peak
-# from ccpn.core.Sample import Sample
-# from ccpn.core.SampleComponent import SampleComponent
-# from ccpn.core.Substance import Substance
-# from ccpn.core.Chain import Chain
-# from ccpn.core.Residue import Residue
-# from ccpn.core.Atom import Atom
-# from ccpn.core.NmrChain import NmrChain
-# from ccpn.core.NmrResidue import NmrResidue
-# from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.util.Logging import getLogger
 
-sparkyReadingOrder = [
-  'sparky_nmr_meta_data',
-  'sparky_molecular_system',
-  'ccpn_sample',
-  'ccpn_substance',
-  'ccpn_assignment',
-  'sparky_chemical_shift_list',
-  'ccpn_dataset',
-  'sparky_distance_restraint_list',
-  'sparky_dihedral_restraint_list',
-  'sparky_rdc_restraint_list',
-  'sparky_nmr_spectrum',
-  'sparky_peak_restraint_links',
-  'ccpn_complex',
-  'ccpn_spectrum_group',
-  'ccpn_restraint_list',
-  'ccpn_notes',
-  'ccpn_additional_data'
-]
-
+sparkyReadingOrder = []
 # possibly for later
 sparkyWritingOrder = ([x for x in sparkyReadingOrder if x.startswith('sparky_')] +
                          [x for x in sparkyReadingOrder if not x.startswith('sparky_')])
-
 _isALoop = ()
 
 # not sure how to use this yet
-sparky2CcpnMap = {
-  'sparky_nmr_meta_data':OrderedDict((
-    ('format_name',None),
-    ('format_version',None),
-    ('program_name',None),
-    ('program_version',None),
-    ('creation_date',None),
-    ('uuid',None),
-    ('coordinate_file_name',None),
-    ('ccpn_dataset_serial', None),
-    ('ccpn_dataset_comment',None),
-    ('sparky_related_entries',_isALoop),
-    ('sparky_program_script',_isALoop),
-    ('sparky_run_history',_isALoop),
-  )),
-  'sparky_related_entries':OrderedDict((
-    ('database_name',None),
-    ('database_accession_code',None),
-  )),
-  'sparky_program_script':OrderedDict((
-    ('program_name',None),
-    ('script_name',None),
-    ('script',None),
-  ))
-}
+sparky2CcpnMap = {}
 
 # STAR parsing REGEX, following International Tables for Crystallography volume G section 2.1
 _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 compatibility
@@ -162,6 +96,15 @@ SP_TOKEN_BAD_TOKEN        = 17
 
 SparkyToken = collections.namedtuple('SparkyToken', ('type', 'value'))
 
+PEAK_TYPE = 'type'
+PEAK_PEAK = 'peak'
+PEAK_MAXSEARCH = 10
+PEAK_POS = 'pos'
+PEAK_RESONANCE = 'rs'
+PEAK_POSNUM = 1
+PEAK_RESONANCENUM = 2
+PEAK_NUMFOUND = PEAK_POSNUM | PEAK_RESONANCENUM
+
 class UnquotedValue(str):
   """A plain string - the only difference is the type: 'UnquotedValue'.
   Used to distinguish values from STAR files that were not quoted.
@@ -177,6 +120,21 @@ NANSTRING = UnquotedValue('NaN')
 PLUSINFINITYSTRING = UnquotedValue('Infinity')
 MINUSINFINITYSTRING = UnquotedValue('-Infinity')
 
+SPARKY_ROOT = 'root'
+SPARKY_DATA = 'data'
+SPARKY_VERSION = 'version'
+SPARKY_ENDBLOCK = '<end'
+SPARKY_PATHNAME = 'pathname'
+SPARKY_SPECTRUM = 'spectrum'
+SPARKY_NAME = 'name'
+SPARKY_ATTACHEDDATA = 'attached data'
+SPARKY_ORNAMENT = 'ornament'
+SPARKY_SPARKY = 'sparky'
+SPARKY_SAVEFILES = 'savefiles'
+SPARKY_PROJECT = 'project file'
+SPARKY_SAVE = 'save file'
+SPARKY_MOLECULE = 'molecule'
+SPARKY_RESONANCES = 'resonances'
 
 def getSparkyTokenIterator(text):
   """Iterator that returns an iterator over all STAR tokens in a generic STAR file"""
@@ -206,15 +164,15 @@ class NamedOrderedDict(OrderedDict):
 
 class SparkyBlock(NamedOrderedDict):
   """Top level container for general STAR object tree"""
-  def __init__(self, name='Root'):
+  def __init__(self, name=SPARKY_ROOT):
     super(SparkyBlock, self).__init__(name=name)
 
   def getData(self):
-    dataBlocks = [self[db] for db in self.keys() if 'data' in db]
+    dataBlocks = [self[db] for db in self.keys() if SPARKY_DATA in db]
     return [ll for x in dataBlocks for ll in x]     # concaternate data lists
 
   def getDataValues(self, value, firstOnly=False):
-    dataBlocks = [self[db] for db in self.keys() if 'data' in db]
+    dataBlocks = [self[db] for db in self.keys() if SPARKY_DATA in db]
     spList = []
     for spType in dataBlocks:
       if spType:
@@ -251,7 +209,7 @@ class SparkyBlock(NamedOrderedDict):
 
 # class SparkyProjectBlock(NamedOrderedDict):
 #   """Top level container for general STAR object tree"""
-#   def __init__(self, name='Root'):
+#   def __init__(self, name=SPARKY_ROOT):
 #     super(SparkyProjectBlock, self).__init__(name=name)
 #
 
@@ -289,7 +247,7 @@ class CcpnSparkyReader:
       except AttributeError:
         raise SparkySyntaxError(self._errorMessage("Error inserting version num" % value,
                                                  value))
-      func['version'] = value
+      func[SPARKY_VERSION] = value
 
     elif isinstance(last, list):
       try:
@@ -363,7 +321,7 @@ class CcpnSparkyReader:
     # terminate SparkyBlock
     if isinstance(stack[-1], SparkyBlock):
       blockName = value[5:-1]
-      if lowerValue.startswith('<end') and stack[-1].name == blockName:
+      if lowerValue.startswith(SPARKY_ENDBLOCK) and stack[-1].name == blockName:
         # Simple terminator. Close save frame
         stack.pop()
 
@@ -377,7 +335,7 @@ class CcpnSparkyReader:
     stack.append(list())          # in case there are more data items to add
 
     if not isinstance((stack[-1]), SparkyBlock):
-      if lowerValue.startswith('<end '):
+      if lowerValue.startswith(SPARKY_ENDBLOCK):
         raise SparkySyntaxError(self._errorMessage("'%s' found out of context" % value, value))
 
   def _openSparkyBlock(self, value):
@@ -408,7 +366,7 @@ class CcpnSparkyReader:
       if isinstance(data, SparkyBlock):
         raise TypeError("Implementation error, loop not correctly put on stack")
       else:
-        raise SparkySyntaxError(self._errorMessage("Loop stop_ %s outside loop" % value, value))
+        raise SparkySyntaxError(self._errorMessage("Error: %s outside list" % value, value))
 
     # columnCount = len(loop._columns)
     # if not columnCount:
@@ -416,10 +374,10 @@ class CcpnSparkyReader:
 
     if data:
 
-      dataName = 'data'
-      currentNames = [ky for ky in block.keys() if 'data' in ky]
+      dataName = SPARKY_DATA
+      currentNames = [ky for ky in block.keys() if SPARKY_DATA in ky]
       if currentNames:
-        dataName = 'data' + str(len(currentNames))  # add an incremental number to the name
+        dataName = SPARKY_DATA + str(len(currentNames))  # add an incremental number to the name
 
       block[dataName] = data
 
@@ -576,8 +534,8 @@ class CcpnSparkyReader:
     return template % (tags[:-1], tags[-1], ii+1, msg)#
 
   def _getSparkyDataList(self, sparkyBlock, value):
-    if 'data' in sparkyBlock and sparkyBlock['data']:
-      spType = sparkyBlock['data']
+    if SPARKY_DATA in sparkyBlock and sparkyBlock[SPARKY_DATA]:
+      spType = sparkyBlock[SPARKY_DATA]
       if spType:
         spType = [re.findall(r'%s\s?(.*)\s*' % value, sT) for sT in spType]
         spType = [ll for x in spType for ll in x]
@@ -598,11 +556,11 @@ class CcpnSparkyReader:
 
   def importSpectra(self, project, saveBlock):
     # process the save files to get the spectra
-    pathName = saveBlock.getDataValues('pathname', firstOnly=True)
+    pathName = saveBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
-    spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
-    fileName = spectra.getDataValues('name', firstOnly=True)
-    filePath = spectra.getDataValues('pathname', firstOnly=True)
+    spectra = saveBlock.getBlocks(SPARKY_SPECTRUM, firstOnly=True)
+    fileName = spectra.getDataValues(SPARKY_NAME, firstOnly=True)
+    filePath = spectra.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
     spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
     workshopPath = os.path.abspath(
@@ -615,10 +573,10 @@ class CcpnSparkyReader:
 
   def importPeakLists(self, project, saveBlock):
     # process the save files to get the spectra
-    pathName = saveBlock.getDataValues('pathname', firstOnly=True)
+    pathName = saveBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
-    spectra = saveBlock.getBlocks('spectrum', firstOnly=True)
-    attachedPeak = spectra.getBlocks('attached data', firstOnly=True)
+    spectra = saveBlock.getBlocks(SPARKY_SPECTRUM, firstOnly=True)
+    attachedPeak = spectra.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)
     spectrumName = saveBlock.name
 
     peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
@@ -634,7 +592,7 @@ class CcpnSparkyReader:
         axis2 = self._getToken(assignRelation[1], 2)
 
         if axis1 and axis2:
-          peakBlock = spectra.getBlocks('ornament', firstOnly=True)
+          peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
           if peakBlock:
             peakData = peakBlock.getData()
 
@@ -643,25 +601,37 @@ class CcpnSparkyReader:
               if spectrum:
                 newPeakList = spectrum[0].newPeakList()
 
+                # TODO:ED remove hard coding for search of properties
                 ii=0
-                while ii<len(peakData)-5:
+                while ii<len(peakData)-PEAK_MAXSEARCH:
 
-                  if self._getToken(peakData[ii], 0) == 'id':
+                  if self._getToken(peakData[ii], 0) == PEAK_TYPE\
+                      and self._getToken(peakData[ii], 1) == PEAK_PEAK:
 
                     # TODO:ED put some more error checking in here
-                    for jj in range(1, 5):
+                    found = 0
+                    for jj in range(1, PEAK_MAXSEARCH):   # arbitrary search length
                       line = peakData[ii+jj]
-                      if self._getToken(line, 0) == 'pos':
+                      if self._getToken(line, 0) == PEAK_POS:
                         posX = float(self._getToken(line, 1))
                         posY = float(self._getToken(line, 2))
-                      if self._getToken(line, 0) == 'rs':
+                        found = found | PEAK_POSNUM
+                        if found == PEAK_NUMFOUND:
+                          break
+                      if self._getToken(line, 0) == PEAK_RESONANCE:
                         resName = self._getToken(line, 1)
                         axis1Code = self._getToken(line, 2)
                         axis2Code = self._getToken(line, 4)
+                        found = found | PEAK_RESONANCENUM
+                        if found == PEAK_NUMFOUND:
+                          break
+                    if found != PEAK_NUMFOUND:
+                      raise TypeError('Error: incomplete peak definition')
 
                     nmrChain = project.fetchNmrChain('A')
                     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
 
+                    # TODO:ED check with specta other than N-H
                     if axis1 in axis1Code and axis2 in axis2Code:
                       peak = newPeakList.newPeak(position=(float(posY), float(posX)))
                     elif axis2 in axis1Code and axis1 in axis2Code:
@@ -669,8 +639,9 @@ class CcpnSparkyReader:
 
                     self._fetchAndAssignNmrAtom(peak, nmrResidue, axis1Code)
                     self._fetchAndAssignNmrAtom(peak, nmrResidue, axis2Code)
-
-                  ii += 1
+                    ii += jj
+                  else:
+                    ii += 1
 
       except Exception as es:
         getLogger().warning('Error importing peak list')
@@ -683,21 +654,21 @@ class CcpnSparkyReader:
     self.project = project
 
     # traverse the sparkyBlock and insert into project
-    sparkyType = sparkyBlock.getDataValues('sparky', firstOnly=True)
+    sparkyType = sparkyBlock.getDataValues(SPARKY_SPARKY, firstOnly=True)
 
-    if sparkyType == 'project file':
+    if sparkyType == SPARKY_PROJECT:
       # load project file
-      fileName = sparkyBlock.getDataValues('name', firstOnly=True)
-      filePath = sparkyBlock.getDataValues('pathname', firstOnly=True)
+      fileName = sparkyBlock.getDataValues(SPARKY_NAME, firstOnly=True)
+      filePath = sparkyBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
-      saveFiles = sparkyBlock.getBlocks('savefiles', firstOnly=True)
+      saveFiles = sparkyBlock.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
       loadedBlocks = []
       for sp in saveFiles.getData():
         savefilePath = os.path.abspath(os.path.join(filePath, sp))
         loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
       # now import the molecule from the main project file
-      # self.importSparkyMolecule(project, sparkyBlock)
+      self.importSparkyMolecule(project, sparkyBlock)
 
       # load spectrum data
       for isf in loadedBlocks:
@@ -707,7 +678,7 @@ class CcpnSparkyReader:
       for isf in loadedBlocks:
         self.importPeakLists(project, isf)   # modify to load from the project
 
-    elif sparkyType == 'save file':
+    elif sparkyType == SPARKY_SAVE:
       self.importSpectra(project, sparkyBlock)
 
     else:
@@ -832,10 +803,10 @@ class CcpnSparkyReader:
     self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
   def importSparkyMolecule(self, project, sparkyBlock):
-    molecules = sparkyBlock.getBlocks('molecule')
+    molecules = sparkyBlock.getBlocks(SPARKY_MOLECULE)
 
     for mol in molecules:
-      resBlock = mol.getBlocks('resonances', firstOnly=True)
+      resBlock = mol.getBlocks(SPARKY_RESONANCES, firstOnly=True)
 
       if resBlock:
         resList = resBlock.getData()

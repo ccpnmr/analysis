@@ -816,50 +816,72 @@ class CcpnSparkyReader:
     self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
   def importSparkyMolecule(self, project, sparkyBlock):
+    # read the molecules from the sparky project and load the resonances
+
     molecules = sparkyBlock.getBlocks(SPARKY_MOLECULE)
 
+    SPARKY_SEQUENCE = 'sequence'
+    SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
+    SPARKY_CONDITION ='condition'
+
     for mol in molecules:
-      resBlock = mol.getBlocks(SPARKY_RESONANCES, firstOnly=True)
+      molName = mol.name        #getDataValues(SPARKY_NAME, firstOnly=True)
 
-      if resBlock:
-        resList = resBlock.getData()
-        chain = ''
-        nmrResList = []
-        nmrAtomList = []
-        for res in resList:
 
-          try:
-            vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
-            chainCode = str(vals[0][0])
-            resName = str(vals[0][1:])
-            atomType = str(vals[1])
-            chemShift = float(vals[2])
-            atomName = str(vals[3])
+      attData = mol.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)    # should be only one
 
-            if resName not in nmrResList:
-              nmrResList.append(resName)
-              chain = chain+chainCode
+      seq = attData.getDataValues(SPARKY_SEQUENCE, firstOnly=True)
+      firstRes = attData.getDataValues(SPARKY_FIRSTRESIDUENUM, firstOnly=True)
+      if seq and firstRes:
+        newChain = project.createChain(sequence=seq
+                                       , molType='protein'
+                                       , startNumber=int(firstRes)
+                                       , compoundName=molName)
 
-            nmrAtomList.append((chainCode, resName, atomType, chemShift, atomName))
+      conditions = mol.getBlocks(SPARKY_CONDITION)
 
-          except Exception as es:
-            getLogger().warning('Incorrect resonance.')
+      for condition in conditions:
+        conditionName = condition.getDataValues(SPARKY_NAME, firstOnly=True)
 
-        # create the molecular chain
-        ccpnChain = self._createNewCcpnChain(project, chain, nmrResList)
+        # assume only one block in each condition
+        resBlock = condition.getBlocks(SPARKY_RESONANCES, firstOnly=True)
 
-        # rename to the nmrResidue names in the project
-        nmrChain = project.fetchNmrChain(SPARKY_DEFAULTCHAIN)
-        for chainCode, resName, atomType, chemShift, atomName in nmrAtomList:
-          nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
-          if nmrResidue:
-            newAtom = nmrResidue.fetchNmrAtom(name=atomType)
+        if resBlock:
+          resList = resBlock.getData()
+          chain = ''
+          nmrResList = []
+          nmrAtomList = []
+          for res in resList:
 
-        # connect the nmrResidues and assignTo
-        # connectedNmrChain = self._connectNmrResidues(nmrChain)
-        # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+            try:
+              vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
+              chainCode = str(vals[0][0])
+              resName = str(vals[0][1:])
+              atomType = str(vals[1])
+              chemShift = float(vals[2])
+              atomName = str(vals[3])
 
-    # now need to check the save files and find any peak lists that need to be created
+              if resName not in nmrResList:
+                nmrResList.append(resName)
+                chain = chain+chainCode
+
+              nmrAtomList.append((chainCode, resName, atomType, chemShift, atomName))
+
+            except Exception as es:
+              getLogger().warning('Incorrect resonance.')
+
+          # rename to the nmrResidue names in the project
+          nmrChain = project.fetchNmrChain(molName)
+          for chainCode, resName, atomType, chemShift, atomName in nmrAtomList:
+            nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+            if nmrResidue:
+              newAtom = nmrResidue.fetchNmrAtom(name=atomType)
+
+          # connect the nmrResidues and assignTo
+          # connectedNmrChain = self._connectNmrResidues(nmrChain)
+          # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+
+      # now need to check the save files and find any peak lists that need to be created
 
 class CcpnSparkyWriter:
   # ejb - won't be implemented yet

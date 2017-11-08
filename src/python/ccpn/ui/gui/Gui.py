@@ -325,6 +325,9 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
     logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
 
+    # hide the window here and make visible later
+    self.hide()
+
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
 #TODO:RASMUS: copy from MainWindow
 class SideWindow(coreClass, _GuiWindow):

@@ -389,7 +389,7 @@ class GuiWindow():
     """
     peaks = self.current.peaks
     n = len(peaks)
-    self.application.project.blankNotification()
+    # self.application.project.blankNotification()
     if n == 1:
       peaks[0].snapToExtremum()
     elif n > 1:
@@ -429,3 +429,4 @@ class GuiWindow():
       getLogger().warning('No current strip. Select a strip first.')
 
     self.application.project.unblankNotification()
+    # self.application.project.unblankNotification()

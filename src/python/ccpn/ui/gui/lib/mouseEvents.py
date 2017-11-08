@@ -1,5 +1,5 @@
 """
-various mouse event functions
+various mouse event functions. See ViewBox.py for the full mouse commands description.
 """
 #=========================================================================================
 # Licence, Reference and Credits

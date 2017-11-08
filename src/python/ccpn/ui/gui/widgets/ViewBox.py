@@ -198,6 +198,7 @@ class ViewBox(pg.ViewBox):
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
+    self.state['wheelScaleFactor'] = -1.0/20.0 #speed of the wheel event. the larger the denominator the slower the zoom
 
     self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
     self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
@@ -588,6 +589,7 @@ class ViewBox(pg.ViewBox):
         project.newUndoPoint()
         undo.increaseBlocking()
         project.blankNotification()
+        self.setMouseEnabled(False,False)
 
       try:
         self.pointer.show()
@@ -603,12 +605,15 @@ class ViewBox(pg.ViewBox):
       except:
           undo.decreaseBlocking()
           project.unblankNotification()
+          self.setMouseEnabled(True, True)
+          self.pointer.hide()
 
       else:
         if event.isFinish():
           self.pointer.hide()
           undo.decreaseBlocking()
           project.unblankNotification()
+          self.setMouseEnabled(True, True)
           if hasattr(peak, 'startPosition'):
             undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
                          redoArgs=[peak, 'position', peak.position])

@@ -136,6 +136,10 @@ SPARKY_SAVE = 'save file'
 SPARKY_MOLECULE = 'molecule'
 SPARKY_RESONANCES = 'resonances'
 SPARKY_DEFAULTCHAIN = '@-'
+SPARKY_SEQUENCE = 'sequence'
+SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
+SPARKY_CONDITION = 'condition'
+
 
 def getSparkyTokenIterator(text):
   """Iterator that returns an iterator over all STAR tokens in a generic STAR file"""
@@ -411,6 +415,21 @@ class CcpnSparkyReader:
     except:
       return None
 
+  def _getTokens(self, text, funcType, start=0, end=0):
+    # returns the list cast as funcType
+    # just simple string NOT containing whitespace or '|' pipe character
+    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", text)
+    try:
+      valEnd = len(vals)-1
+      if start >= end:
+        end = len(vals)-1
+      else:
+        end = min(end, valEnd)
+
+      return [funcType(val) for val in vals[start:end+1]]
+    except:
+      return None
+
   def parseSparkyFile(self, path):
 
     with open(path, 'r') as fileName:
@@ -577,6 +596,11 @@ class CcpnSparkyReader:
     pathName = saveBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
     spectra = saveBlock.getBlocks(SPARKY_SPECTRUM, firstOnly=True)
+    molName = spectra.getDataValues(SPARKY_MOLECULE, firstOnly=True)
+    condName = spectra.getDataValues(SPARKY_CONDITION, firstOnly=True)
+
+    nmrChainName = self._buildName([molName, condName])
+
     attachedPeak = spectra.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)
     spectrumName = saveBlock.name
 
@@ -587,77 +611,110 @@ class CcpnSparkyReader:
     if peakAxes is not None and peakName is not None:
       # assume that we have to import a peaklist
 
+      peakPatternAxes = self._getTokens(peakAxes, int)
       assignRelation = spectra.getDataValues('assignRelation', firstOnly=False)
+      axes = [None] * len(assignRelation)
 
-      try:
-        # these are both None if no axes are defined
-        axis1 = self._getToken(assignRelation[0], 2)
-        axis2 = self._getToken(assignRelation[1], 2)
+      for ax in assignRelation:
+        axisNum = int(self._getToken(ax, 0))
+        axisType = int(self._getToken(ax, 1))
+        axisName = self._getToken(ax, 2)
+        if axisNum:
+          axes[axisNum-1] = (axisType, axisName)
 
-        if axis1 and axis2:
-          peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
-          if peakBlock:
-            peakData = peakBlock.getData()
+      errorLine = 0
+      # try:
 
-            if peakData:
-              spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
-              if spectrum:
-                newPeakList = spectrum[0].peakLists[0]         # get the first one .newPeakList()
+      # these are both None if no axes are defined
+      # axis1 = self._getToken(assignRelation[0], 2)
+      # axis2 = self._getToken(assignRelation[1], 2)
 
-                # TODO:ED remove hard coding for search of properties
-                ii=0
-                while ii<len(peakData)-PEAK_MAXSEARCH:
+      if len(assignRelation) == len([ax for ix, ax in enumerate(axes) if axes[ix]]):
+      # if axis1 and axis2:
+        peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
+        if peakBlock:
+          peakData = peakBlock.getData()
 
-                  if self._getToken(peakData[ii], 0) == PEAK_TYPE\
-                      and self._getToken(peakData[ii], 1) == PEAK_PEAK:
+          if peakData:
+            spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
+            if spectrum:
+              newPeakList = spectrum[0].peakLists[0]         # get the first one .newPeakList()
 
-                    # TODO:ED put some more error checking in here
-                    found = 0
-                    for jj in range(1, PEAK_MAXSEARCH):   # arbitrary search length
-                      line = peakData[ii+jj]
-                      if self._getToken(line, 0) == PEAK_POS:
-                        posX = float(self._getToken(line, 1))
-                        posY = float(self._getToken(line, 2))
-                        found = found | PEAK_POSNUM
-                        if found == PEAK_NUMFOUND:
-                          break
-                      if self._getToken(line, 0) == PEAK_RESONANCE:
-                        resName = self._getToken(line, 1)[1:]
-                        axis1Code = self._getToken(line, 2)
-                        axis2Code = self._getToken(line, 4)
-                        found = found | PEAK_RESONANCENUM
-                        if found == PEAK_NUMFOUND:
-                          break
+              # TODO:ED remove hard coding for search of properties
+              ii=0
+              while ii<len(peakData)-PEAK_MAXSEARCH:
 
-                    if found != PEAK_NUMFOUND:
-                      raise TypeError('Error: incomplete peak definition')
+                if self._getToken(peakData[ii], 0) == PEAK_TYPE\
+                    and self._getToken(peakData[ii], 1) == PEAK_PEAK:
 
-                    if found == PEAK_POSNUM:    # test without residue
+                  # TODO:ED put some more error checking in here
+                  found = 0
+                  for jj in range(1, PEAK_MAXSEARCH):   # arbitrary search length
+                    line = peakData[ii+jj]
+                    if self._getToken(line, 0) == PEAK_POS:
+                      posList = self._getTokens(line, float, start=1)
+                      # posX = float(self._getToken(line, 1))
+                      # posY = float(self._getToken(line, 2))
+                      found = found | PEAK_POSNUM
+                      if found == PEAK_NUMFOUND:
+                        break
+                    if self._getToken(line, 0) == PEAK_RESONANCE:
+                      # resName = self._getToken(line, 1)[1:]
+                      # axis1Code = self._getToken(line, 2)
+                      # axis2Code = self._getToken(line, 4)
 
-                      # currently unreachable
-                      if axis1 in axis1Code and axis2 in axis2Code:
-                        peak = newPeakList.newPeak(position=(float(posY), float(posX)))
-                      elif axis2 in axis1Code and axis1 in axis2Code:
-                        peak = newPeakList.newPeak(position=(float(posX), float(posY)))
+                      resList = self._getTokens(line, str, start=1)
 
-                    elif found == PEAK_NUMFOUND:
-                      # TODO:ED check with specta other than N-H
-                      if axis1 in axis1Code and axis2 in axis2Code:
-                        peak = newPeakList.newPeak(position=(float(posY), float(posX)))
-                      elif axis2 in axis1Code and axis1 in axis2Code:
-                        peak = newPeakList.newPeak(position=(float(posX), float(posY)))
+                      found = found | PEAK_RESONANCENUM
+                      if found == PEAK_NUMFOUND:
+                        break
 
-                      nmrChain = project.fetchNmrChain(SPARKY_DEFAULTCHAIN)
+                  # if found != PEAK_NUMFOUND:
+                  #   raise TypeError('Error: incomplete peak definition')
+
+                  if found == PEAK_POSNUM:    # test without residue
+
+                    pass
+                    # currently unreachable
+                    # if axis1 in axis1Code and axis2 in axis2Code:
+                    #   peak = newPeakList.newPeak(position=(float(posY), float(posX)))
+                    # elif axis2 in axis1Code and axis1 in axis2Code:
+                    #   peak = newPeakList.newPeak(position=(float(posX), float(posY)))
+
+                  elif found == PEAK_NUMFOUND:
+                    # TODO:ED check with specta other than N-H, multidimensional etc.
+
+                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                    # if axis1 in axis1Code and axis2 in axis2Code:
+                    #   peak = newPeakList.newPeak(position=(float(posY), float(posX)))
+                    # elif axis2 in axis1Code and axis1 in axis2Code:
+                    #   peak = newPeakList.newPeak(position=(float(posX), float(posY)))
+
+                    # TODO:ED check that the molName matches molecule/condition
+                    nmrChain = project.fetchNmrChain(nmrChainName)
+                    # nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+                    #
+                    # self._fetchAndAssignNmrAtom(peak, nmrResidue, axis1Code)
+                    # self._fetchAndAssignNmrAtom(peak, nmrResidue, axis2Code)
+
+                    ri=0
+                    while ri < len(resList):
+                      resName = resList[ri][1:]     # clip the chain type from the head
+                      axisCode = resList[ri+1]
                       nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                      ri += 2
 
-                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axis1Code)
-                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axis2Code)
-                    ii += jj
                   else:
-                    ii += 1
+                    getLogger().warning('Missing peakList information: %s %i' % (saveBlock.name, ii+jj))
+                  ii += jj
+                else:
+                  ii += 1
 
-      except Exception as es:
-        getLogger().warning('Error importing peak list')
+              errorLine = ii
+
+      # except Exception as es:
+      #   getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))
 
   def importSparkyProject(self, project, sparkyBlock):
     """Import entire project from dataBlock into empty Project"""
@@ -693,6 +750,7 @@ class CcpnSparkyReader:
 
     elif sparkyType == SPARKY_SAVE:
       self.importSpectra(project, sparkyBlock)
+      self.importPeakLists(project, sparkyBlock, sparkyBlock)  # modify to load from the project
 
     else:
         getLogger().warning('Unknown Sparky File Type')
@@ -805,6 +863,18 @@ class CcpnSparkyReader:
 
     return nmrChain
 
+  def _buildName(self, names, default=SPARKY_DEFAULTCHAIN):
+    import string
+
+    name = ''
+    for nm in names:
+      if nm:
+        exclude = ' ,.'
+        regex = re.compile('[%s]' % re.escape(exclude))
+        name = name + regex.sub('', nm)
+
+    return name if name else default
+
   def initParser(self, project, input_path, spectrum):
     generalDF = self._createDataFrame(input_path)
     assignmentDF = self._splitAssignmentColumn(generalDF)
@@ -820,13 +890,8 @@ class CcpnSparkyReader:
 
     molecules = sparkyBlock.getBlocks(SPARKY_MOLECULE)
 
-    SPARKY_SEQUENCE = 'sequence'
-    SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
-    SPARKY_CONDITION ='condition'
-
     for mol in molecules:
-      molName = mol.name        #getDataValues(SPARKY_NAME, firstOnly=True)
-
+      molName = self._buildName([mol.getDataValues(SPARKY_NAME, firstOnly=True)])
 
       attData = mol.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)    # should be only one
 
@@ -843,6 +908,8 @@ class CcpnSparkyReader:
       for condition in conditions:
         conditionName = condition.getDataValues(SPARKY_NAME, firstOnly=True)
 
+        nmrChainName = self._buildName([molName, conditionName], molName)
+
         # assume only one block in each condition
         resBlock = condition.getBlocks(SPARKY_RESONANCES, firstOnly=True)
 
@@ -854,12 +921,12 @@ class CcpnSparkyReader:
           for res in resList:
 
             try:
-              vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
-              chainCode = str(vals[0][0])
-              resName = str(vals[0][1:])
-              atomType = str(vals[1])
-              chemShift = float(vals[2])
-              atomName = str(vals[3])
+              # vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
+              chainCode = self._getToken(res, 0)[0]       # str(vals[0][0])
+              resName = self._getToken(res, 0)[1:]        # str(vals[0][1:])
+              atomType = self._getToken(res, 1)           # str(vals[1])
+              chemShift = float(self._getToken(res, 2))           # float(vals[2])
+              atomName = self._getToken(res, 3)           # str(vals[3])
 
               if resName not in nmrResList:
                 nmrResList.append(resName)
@@ -871,7 +938,7 @@ class CcpnSparkyReader:
               getLogger().warning('Incorrect resonance.')
 
           # rename to the nmrResidue names in the project
-          nmrChain = project.fetchNmrChain(molName)
+          nmrChain = project.fetchNmrChain(nmrChainName)
           for chainCode, resName, atomType, chemShift, atomName in nmrAtomList:
             nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
             if nmrResidue:

@@ -315,6 +315,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Loads the selected project.
     """
     result = self._queryCloseProject(title='Open Project', phrase='open another')
+    project = None
     if result:
       if projectDir is None:
         dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
@@ -322,8 +323,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         projectDir = dialog.selectedFile()
 
       if projectDir:
-        self.application.loadProject(projectDir)
+        project = self.application.loadProject(projectDir)
+        try:
+          project._mainWindow.show()
+        except Exception as es:
+          Logging.getLogger().warning('Error loading project:', str(es))
 
+    return project
 
   def _fillRecentProjectsMenu(self):
     """
@@ -334,8 +340,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentFileMenu = self.getMenuAction('Project->Open Recent')
     recentFileMenu.clear()
     for recentFile in recentFileLocations:
+      # action = Action(self, text=recentFile, translate=False,
+      #                callback=partial(self.application.loadProject, path=recentFile))
+
       action = Action(self, text=recentFile, translate=False,
-                     callback=partial(self.application.loadProject, path=recentFile))
+                     callback=partial(self.loadProject, projectDir=recentFile))
       recentFileMenu.addAction(action)
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',

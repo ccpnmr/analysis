@@ -54,8 +54,7 @@ from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
@@ -268,7 +267,19 @@ class SideBar(QtGui.QTreeWidget, Base):
     for url in data.get('urls',[]):
       # print('SideBar._processDroppedItems>>> dropped:', url)
       getLogger().info('SideBar._processDroppedItems>>> dropped: '+str(url))
-      objects = self.project.loadData(url)
+
+
+      with progressManager(self.mainWindow, 'Loading...'):
+        objects = self.project.loadData(url)
+
+      # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
+      for obj in objects:
+        if isinstance(obj, Project):
+          try:
+            obj._mainWindow.show()
+          except Exception as es:
+            getLogger().warning('Error', str(es))
+
       # if objects is None or len(objects) == 0:
       #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
 

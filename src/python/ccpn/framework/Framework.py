@@ -29,7 +29,7 @@ import platform
 import sys
 import tarfile
 import tempfile
-
+import re
 from PyQt4 import QtGui
 
 from ccpn.core.IntegralList import IntegralList
@@ -947,8 +947,11 @@ class Framework:
     okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                          phrase='create a new')
     if okToContinue:
-      self.newProject()
-
+      project = self.newProject()
+      try:
+        project._mainWindow.show()
+      except Exception as es:
+        getLogger().warning('Error creating new project:', str(es))
 
   def newProject(self, name='default'):
     # """Create new, empty project"""
@@ -959,7 +962,11 @@ class Framework:
       self._closeProject()
 
     sys.stderr.write('==> Creating new, empty project\n')
-    project = coreIo.newProject(name=name, useFileLogger=self.useFileLogger, level=self.level)
+    newName = re.sub('[^0-9a-zA-Z]+', '', name)
+    if newName != name:
+      getLogger().info('Removing whitespace from name: %s' % name)
+
+    project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
 
     self._initialiseProject(project)
 
@@ -969,15 +976,21 @@ class Framework:
 
 
   def openProject(self, path=None):
-    return self.ui.mainWindow.loadProject(projectDir=path)
+    project = self.ui.mainWindow.loadProject(projectDir=path)
+    try:
+      project._mainWindow.show()
+    except Exception as es:
+      getLogger().warning('Error opening project:', str(es))
+    finally:
+      return project
 
+    # return self.ui.mainWindow.loadProject(projectDir=path)
 
   def loadProject(self, path=None):
     """
        Load project from path
        If not path then opens a file dialog box and loads project from selected file.
     """
-
     if not path:
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project',
                           acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
@@ -1012,9 +1025,10 @@ class Framework:
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
 
       elif subType == ioFormats.SPARKY:
-        sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
-        project = self._loadSparkyProject(path, makeNewProject=True)   # RHF - new by default
-        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+        # with MessageDialog.progressManager(self.ui.mainWindow, 'Loading Sparky File...'):
+          sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
+          project = self._loadSparkyProject(path, makeNewProject=True)   # RHF - new by default
+          project._resetUndo(debug=self.level <= Logging.DEBUG2)
 
       return project
 
@@ -1082,9 +1096,10 @@ class Framework:
     """Load Project from Sparky file at path, and do necessary setup"""
 
     # read data files
-    sparkyName = 'NewSparky'
+    from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
 
     dataBlock = self.sparkyReader.parseSparkyFile(path)
+    sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
     if makeNewProject:
       if self.project is not None:

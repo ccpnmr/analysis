@@ -121,6 +121,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # setVisible and that in turn expects there to be a border item
     self._setupBorderItem()
 
+    self._setDefaultLimits()
+
     GuiSpectrumView.__init__(self)
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
@@ -142,6 +144,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # self.drawContoursCounter = 0
 
     # override of Qt setVisible
+
+  def _setDefaultLimits(self):
+    '''
+    Sets the default limits on the viewBox.
+    '''
+
+    xLimits = self.strip.viewBox.viewRange()[0]
+    yLimits = self.strip.viewBox.viewRange()[1]
+    self.strip.setZoomLimits(xLimits, yLimits, factor=5)
+
 
   def setVisible(self, visible):
     GuiSpectrumView.setVisible(self, visible)
@@ -173,7 +185,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.strip.viewBox.addItem(self.borderItem)
 
     self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder)
-        
+
   def _setBorderItemHidden(self, checked):
     """
     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.

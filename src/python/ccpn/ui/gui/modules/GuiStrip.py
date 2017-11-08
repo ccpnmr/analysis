@@ -607,6 +607,49 @@ class GuiStrip(Frame):
 
     zoomPopup.exec_()
 
+  def setZoomLimits(self, xLimits, yLimits, factor=5):
+    '''
+    
+    :param xLimits: List [min, max] , e.g ppm [0,15] 
+    :param yLimits:  List [min, max]  eg. intensities [-300,2500]
+    :param factor: 
+    :return: Limits the viewBox from zooming in too deeply(crashing the program) to zooming out too far.
+    '''
+    ratio = (abs(xLimits[0] - xLimits[1])/abs(yLimits[0] - yLimits[1]))/factor
+    if max(yLimits)>max(xLimits):
+      self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+                             xMax=max(xLimits) * factor,
+                             yMin=-abs(min(yLimits)) * factor,
+                             yMax=max(yLimits) * factor,
+                             minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) * ratio,
+                             maxXRange=max(xLimits) * factor,
+                             minYRange=(((max(yLimits) - min(yLimits))/max(yLimits))),
+                             maxYRange=max(yLimits) * factor
+                             )
+    else:
+      self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+                             xMax=max(xLimits) * factor,
+                             yMin=-abs(min(yLimits)) * factor,
+                             yMax=max(yLimits) * factor,
+                             minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) ,
+                             maxXRange=max(xLimits) * factor,
+                             minYRange=(((max(yLimits) - min(yLimits))/max(yLimits)))*ratio,
+                             maxYRange=max(yLimits) * factor
+                             )
+
+
+  def removeZoomLimits(self):
+    self.viewBox.setLimits(xMin=None,
+                           xMax=None,
+                           yMin=None,
+                           yMax=None,
+                           # Zoom Limits
+                           minXRange=None,
+                           maxXRange=None,
+                           minYRange=None,
+                           maxYRange=None
+                           )
+
   def _storeZoom(self):
     """
     Adds current region to the zoom stack for the strip.

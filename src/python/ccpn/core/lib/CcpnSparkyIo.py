@@ -54,21 +54,24 @@ sparky2CcpnMap = {}
 _SPARKY_REGEX = r"""(?xmi) # $Revision$  # No 'u' flag for perl 5.8.8/RHEL5 compatibility
   ^;([\S\s]*?)(?:\r\n|\s)^;(?:(?=\s)|$)  # 1  Multi-line string
   |(?:^|(?<=\s))(\#.*?)\r?$              # 2  Comment
-  |(?:^|(?<=\s))(?:(global_)             # 3  
+  |(?:^|(?<=\s))(?:(global_)             # 3  something?
   |<sparky\s(.*?)>                       # 4  Sparky project start
   |(\$\S+)                               # 5  STAR save frame reference
   |<end\s(.*?)>                          # 6  block terminator
   |<(version\s.*?)>                      # 7  block start
   |<(.*?)>                               # 8  block header   - shouldn't need the leading whitespace
-  |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # 9 Invalid privileged construct
-  |(_\S+)                                # 10 Data name
-  |'(.*?)'                               # 11 Single-quoted string
-  |"(.*?)"                               # 12 Double-quoted string
-  |(\.)                                  # 13 CIF null
-  |(\?)                                  # 14 CIF unknown/missing
-  |((?:[^'";_$\s]|(?!^);).*)(?<![ ])     # 15 Non-quoted string - exclude pre/post whitespace
-  |([\[\]]\S*)                           # 16 Square bracketed constructs (reserved)
-  |(\S+)                                 # 17 Catch-all bad token
+  |type\s(.*?)                           # 9  type header
+  |([\[]\S*)                             # 10  type subheader
+  |([\]]\S*)                             # 11  type subblock terminator
+  |((?:global_\S+)|(?:stop_\S+)|(?:data_)|(?:loop_\S+))  # 12 Invalid privileged construct
+  |(_\S+)                                # 13 Data name
+  |'(.*?)'                               # 14 Single-quoted string
+  |"(.*?)"                               # 15 Double-quoted string
+  |(\.)                                  # 16 CIF null
+  |(\?)                                  # 17 CIF unknown/missing
+  |((?:[^'";_$\s]|(?!^);).*)(?<![ ])     # 18 Non-quoted string - exclude pre/post whitespace
+  |([\[\]]\S*)                           # 19 Square bracketed constructs (reserved)
+  |(\S+)                                 # 20 Catch-all bad token
 )
 (?:(?=\s)|$)"""
 
@@ -84,15 +87,18 @@ SP_TOKEN_SAVE_FRAME_REF   = 5
 SP_TOKEN_END_SPARKY_BLOCK = 6
 SP_TOKEN_VERSION          = 7
 SP_TOKEN_SPARKY_BLOCK     = 8
-SP_TOKEN_BAD_CONSTRUCT    = 9
-SP_TOKEN_DATA_NAME        = 10
-SP_TOKEN_SQUOTE_STRING    = 11
-SP_TOKEN_DQUOTE_STRING    = 12
-SP_TOKEN_NULL             = 13
-SP_TOKEN_UNKNOWN          = 14
-SP_TOKEN_STRING           = 15
-SP_TOKEN_SQUARE_BRACKET   = 16
-SP_TOKEN_BAD_TOKEN        = 17
+SP_TOKEN_TYPE_BLOCK       = 9
+SP_TOKEN_TYPE_NESTED      = 10
+SP_TOKEN_END_NESTED       = 11
+SP_TOKEN_BAD_CONSTRUCT    = 12
+SP_TOKEN_DATA_NAME        = 13
+SP_TOKEN_SQUOTE_STRING    = 14
+SP_TOKEN_DQUOTE_STRING    = 15
+SP_TOKEN_NULL             = 16
+SP_TOKEN_UNKNOWN          = 17
+SP_TOKEN_STRING           = 18
+SP_TOKEN_SQUARE_BRACKET   = 19
+SP_TOKEN_BAD_TOKEN        = 20
 
 SparkyToken = collections.namedtuple('SparkyToken', ('type', 'value'))
 
@@ -139,6 +145,7 @@ SPARKY_DEFAULTCHAIN = '@-'
 SPARKY_SEQUENCE = 'sequence'
 SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
 SPARKY_CONDITION = 'condition'
+SPARKY_NESTED = 'local'
 
 
 def getSparkyTokenIterator(text):
@@ -212,11 +219,12 @@ class SparkyBlock(NamedOrderedDict):
     else:
       return None
 
-# class SparkyProjectBlock(NamedOrderedDict):
-#   """Top level container for general STAR object tree"""
-#   def __init__(self, name=SPARKY_ROOT):
-#     super(SparkyProjectBlock, self).__init__(name=name)
-#
+
+class TypeBlock(SparkyBlock):
+  # cheat and just copy the SparkyBlock under a new name
+  def __init__(self, name=SPARKY_ROOT):
+    super(SparkyBlock, self).__init__(name=name)
+
 
 class CcpnSparkyReader:
 
@@ -276,6 +284,16 @@ class CcpnSparkyReader:
     #   # currently ignore until we have a SparkyBlock
     #   return
 
+    if isinstance(last, TypeBlock):   # assume in a type block for now
+      try:
+        # parse the line again and add to the dictionary
+        typeList = self._getTokens(value, str)
+        last[typeList[0]] = typeList[1:]
+
+      except AttributeError:
+        raise SparkySyntaxError(self._errorMessage('Error processing typeList',
+                                                 value))
+
     if isinstance(last, SparkyBlock):
       return
 
@@ -283,6 +301,17 @@ class CcpnSparkyReader:
       # Value half of tag, value pair
       stack.pop()
       stack[-1].addItem(last, value)
+
+    elif isinstance(last, OrderedDict):   # assume in a type block for now
+      try:
+        # parse the line again and add to the dictionary
+        typeList = self._getTokens(value, str)
+        last[typeList[0]] = typeList[1:]
+
+      except AttributeError:
+        raise SparkySyntaxError(self._errorMessage('Error processing typeList',
+                                                 value))
+
     else:
       try:
         func = last.append
@@ -298,7 +327,6 @@ class CcpnSparkyReader:
     container = self.stack[-1]
 
     currentNames = [ky for ky in container.keys() if name in ky]
-
     if currentNames:
       name = name+str(len(currentNames))   # add an incremental number to the name
 
@@ -307,6 +335,22 @@ class CcpnSparkyReader:
     container.addItem(name, obj)
     self.stack.append(obj)
     self.stack.append(list())     # put a list on as well
+
+  def _addTypeBlock(self, name):
+    container = self.stack[-1]
+
+    # currentNames = [ky for ky in container.keys() if name in ky]
+    # if currentNames:
+    #   name = name+str(len(currentNames))   # add an incremental number to the name
+
+    # name is the new named block
+    obj = TypeBlock(name)       # append an 's' for grouping
+
+    if name+'s' not in container:
+      container.addItem(name+'s', list())     # add a list inside the parent block
+
+    self.stack.append(obj)                  # and add a new block to the end
+    # self.stack.append(OrderedDict())      # put a list on as well?
 
   def _closeSparkyBlock(self, value):
 
@@ -362,6 +406,48 @@ class CcpnSparkyReader:
         self._errorMessage("SparkyBlock start out of context: %s" % value, value)
       )
 
+  def _openTypeBlock(self, value):
+    # start a new sparky block, which is everything
+    stack = self.stack
+
+    # Add new SparkyBlock
+    if self.lowerCaseTags:
+      value = value.lower()
+
+    if isinstance(stack[-1], TypeBlock):
+      self._closeDict(value)                                  # close the list and store
+      self._addTypeBlock(value)
+
+    elif isinstance(stack[-1], SparkyBlock):
+      self._addTypeBlock(value)
+
+    elif isinstance(stack[-1], list):
+      self._closeList(value)                                  # close the list and store
+      self._addTypeBlock(value)
+
+    # elif isinstance(stack[-1], OrderedDict):
+    #   self._closeDict(value)                                  # close the list and store
+    #   self._addTypeBlock(value)
+
+    else:
+      raise SparkySyntaxError(
+        self._errorMessage("SparkyBlock start out of context: %s" % value, value)
+      )
+
+  def _closeDict(self, value):
+    stack = self.stack
+    data = stack.pop()        # remove the dict from the end
+    block = stack[-1]         # point to the last block
+    if not isinstance(block, SparkyBlock):
+      if isinstance(data, SparkyBlock):
+        raise TypeError("Implementation error, loop not correctly put on stack")
+      else:
+        raise SparkySyntaxError(self._errorMessage("Error: %s outside list" % value, value))
+
+    if data:
+      dataName = data.name+'s'
+      block[dataName].append(data)    # SHOULD be in the block
+
   def _closeList(self, value):
 
     stack = self.stack
@@ -409,7 +495,7 @@ class CcpnSparkyReader:
   def _getToken(self, text, value):
     # return the value'th token from a string
     # just simple string NOT containing whitespace or '|' pipe character
-    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", text)
+    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^/-]+)""", text)
     try:
       return vals[value]
     except:
@@ -418,7 +504,7 @@ class CcpnSparkyReader:
   def _getTokens(self, text, funcType, start=0, end=0):
     # returns the list cast as funcType
     # just simple string NOT containing whitespace or '|' pipe character
-    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", text)
+    vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^/-]+)""", text)
     try:
       valEnd = len(vals)-1
       if start >= end:
@@ -488,8 +574,16 @@ class CcpnSparkyReader:
               processValue("pathname %s" % os.path.dirname(path))
 
             elif typ == SP_TOKEN_SPARKY_BLOCK:
-              # save_ string
               self._openSparkyBlock(value)
+
+            elif typ == SP_TOKEN_TYPE_BLOCK:
+              self._openTypeBlock(value)
+
+            elif typ == SP_TOKEN_TYPE_NESTED:
+              self._openTypeBlock(SPARKY_NESTED)
+
+            elif typ == SP_TOKEN_END_NESTED:
+              self._closeDict(SPARKY_NESTED)
 
             elif typ == SP_TOKEN_END_SPARKY_BLOCK:
                 self._closeSparkyBlock(value)

@@ -655,7 +655,7 @@ class CcpnSparkyReader:
     peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
     peakName = attachedPeak.getDataValues('peak_pattern_name', firstOnly=True)
 
-    if peakAxes is not None and peakName is not None:
+    if peakAxes is not None and peakName is not None or True:
       # assume that we have to import a peaklist
 
       # peakPatternAxes = self._getTokens(peakAxes, int)

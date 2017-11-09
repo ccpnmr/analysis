@@ -311,8 +311,9 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> project._appBase: %s' % project._appBase)
 
     application = project._appBase
-    _GuiMainWindow.__init__(self, application=application)
-    # _GuiMainWindow.__init__(self)
+    _GuiMainWindow.__init__(self, application = application)
+    # hide the window here and make visible later
+    self.hide()
 
     # patches for now:
     project._mainWindow = self
@@ -324,9 +325,6 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> application.project: %s' %  application.project)
     logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
     logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
-
-    # hide the window here and make visible later
-    self.hide()
 
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
 #TODO:RASMUS: copy from MainWindow

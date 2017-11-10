@@ -844,9 +844,10 @@ class CcpnSparkyReader:
 
                   ri=0
                   while ri < len(resList):
+                    resType = resList[ri][0]
                     resName = resList[ri][1:]     # clip the chain type from the head
                     axisCode = resList[ri+1]
-                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
                     self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
                     ri += 2
 
@@ -1069,7 +1070,7 @@ class CcpnSparkyReader:
 
             try:
               # vals = re.findall(r"""(?:\|\s*|\s*)([a-zA-Z0-9,._^'";$!^]+)""", res)
-              chainCode = self._getToken(res, 0)[0]       # str(vals[0][0])
+              resType = self._getToken(res, 0)[0]       # str(vals[0][0])
               resName = self._getToken(res, 0)[1:]        # str(vals[0][1:])
               atomType = self._getToken(res, 1)           # str(vals[1])
               chemShift = float(self._getToken(res, 2))           # float(vals[2])
@@ -1077,17 +1078,17 @@ class CcpnSparkyReader:
 
               if resName not in nmrResList:
                 nmrResList.append(resName)
-                chain = chain+chainCode
+                chain = chain+resType
 
-              nmrAtomList.append((chainCode, resName, atomType, chemShift, atomIsotopeCode))
+              nmrAtomList.append((resType, resName, atomType, chemShift, atomIsotopeCode))
 
             except Exception as es:
               getLogger().warning('Incorrect resonance.')
 
           # rename to the nmrResidue names in the project
           nmrChain = project.fetchNmrChain(nmrChainName)
-          for chainCode, resName, atomType, chemShift, atomIsotopeCode in nmrAtomList:
-            nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+          for resType, resName, atomType, chemShift, atomIsotopeCode in nmrAtomList:
+            nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
             if nmrResidue:
               newAtom = nmrResidue.newNmrAtom(name=atomType, isotopeCode=atomIsotopeCode)
 

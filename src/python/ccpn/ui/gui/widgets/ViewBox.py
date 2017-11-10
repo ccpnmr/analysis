@@ -3,7 +3,7 @@ By Functionality:
 
 Zoom and pan:
     Left-drag:                          pans the spectrum.
-    Middle-drag:                        draws a zooming box and zooms the viewbox.
+    
     shift-left-drag:                    draws a zooming box and zooms the viewbox.
     shift-middle-drag:                  draws a zooming box and zooms the viewbox.
     shift-right-drag:                   draws a zooming box and zooms the viewbox.
@@ -14,7 +14,7 @@ Peaks:
     Left-click:                         select peak near cursor in a spectrum display, deselecting others
     Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
-
+    Middle-drag:                        Moves a selected peak.
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
@@ -33,7 +33,7 @@ By Mouse button:
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
-    Middle-drag:                        draws a zooming box and zooms the viewbox.
+
     shift-middle-drag:                  draws a zooming box and zooms the viewbox.
 
     Right-click:                        raises the context menu.
@@ -561,7 +561,7 @@ class ViewBox(pg.ViewBox):
         self.current.peaks = peaks
 
     elif middleMouse(event):
-     # middle drag: move a selected peak
+     # middle drag: moves a selected peak
       event.accept()
 
       peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
@@ -600,7 +600,8 @@ class ViewBox(pg.ViewBox):
         position = list(peak.startPosition)
         for n, index in enumerate(indices):
           position[index] += deltaPosition[n]
-        peak.position = position
+        peak.position = self.current.cursorPosition
+        project.newUndoPoint()
 
       except:
           undo.decreaseBlocking()

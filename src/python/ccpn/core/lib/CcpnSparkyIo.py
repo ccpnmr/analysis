@@ -376,7 +376,7 @@ class CcpnSparkyReader:
         self._closeList(value)
 
     if isinstance(stack[-1], TypeBlock):
-      stack.pop()
+      self._closeDict(stack[-1].name)                 # force close, popping the TypeBlock
 
     # terminate SparkyBlock
     if isinstance(stack[-1], SparkyBlock):
@@ -392,11 +392,12 @@ class CcpnSparkyReader:
         getLogger().warning('Closing sparkyBlock with missing terminator')
         stack.pop()
 
-    stack.append(list())          # in case there are more data items to add
+    if stack:
+      stack.append(list())          # in case there are more data items to add
 
-    if not isinstance((stack[-1]), SparkyBlock):
-      if lowerValue.startswith(SPARKY_ENDBLOCK):
-        raise SparkySyntaxError(self._errorMessage("'%s' found out of context" % value, value))
+      if not isinstance((stack[-1]), SparkyBlock):
+        if lowerValue.startswith(SPARKY_ENDBLOCK):
+          raise SparkySyntaxError(self._errorMessage("'%s' found out of context" % value, value))
 
   def _openSparkyBlock(self, value):
     # start a new sparky block, which is everything
@@ -458,7 +459,13 @@ class CcpnSparkyReader:
 
     if data:
       dataName = data.name
-      block[dataName].append(data)    # SHOULD be in the block
+      if dataName in block:
+        block[dataName].append(data)    # SHOULD be in the block
+    else:
+      dataName = data.name
+      if dataName in block and not block[dataName]:     # remove the left-over tag
+        del block[dataName]
+      pass
 
   def _closeList(self, value):
 
@@ -619,11 +626,13 @@ class CcpnSparkyReader:
       if isinstance(stack[-1], str):
         raise SparkySyntaxError(self._errorMessage("File ends with item name", value))
 
-      if isinstance(stack[-1], list):
-        self._closeList('<End-of-File>')
+      self._closeSparkyBlock(name)
 
-      if isinstance(stack[-1], SparkyBlock):
-        stack.pop()
+      # if isinstance(stack[-1], list):
+      #   self._closeList('<End-of-File>')
+      #
+      # if isinstance(stack[-1], SparkyBlock):
+      #   stack.pop()
 
       if stack:
         raise RuntimeError(self._errorMessage("stack not empty at end of file", value))

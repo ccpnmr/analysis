@@ -984,7 +984,6 @@ class Framework:
     finally:
       return project
 
-
   def loadProject(self, path=None):
     """
        Load project from path
@@ -1003,12 +1002,15 @@ class Framework:
                                              , ioFormats.NMRSTAR
                                              , ioFormats.SPARKY):
 
-      if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
-        if self.project is not None:
-          self._closeProject()
+      # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
+      #   if self.project is not None:
+      #     self._closeProject()
 
       if subType == ioFormats.CCPN:
         sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
+
+        if self.project is not None:    # always close for Ccpn
+          self._closeProject()
         project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
         self._initialiseProject(project)
@@ -1099,7 +1101,7 @@ class Framework:
     dataBlock = self.sparkyReader.parseSparkyFile(path)
     sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
-    if makeNewProject:
+    if makeNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
       if self.project is not None:
         self._closeProject()
       self.project = self.newProject(sparkyName)

@@ -147,6 +147,9 @@ SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
 SPARKY_CONDITION = 'condition'
 SPARKY_NESTED = 'local'
 SPARKY_PEAK = 'peak'
+SPARKY_MODIFIEDNAME = 'SparkyModifiedName'
+SPARKY_ORIGINALNAME = 'SparkyOriginalName'
+SPARKY_HASHNAME = 'SparkyHashName'
 
 
 def getSparkyTokenIterator(text):
@@ -179,6 +182,16 @@ class SparkyBlock(NamedOrderedDict):
   """Top level container for general STAR object tree"""
   def __init__(self, name=SPARKY_ROOT):
     super(SparkyBlock, self).__init__(name=name)
+
+  def getParameter(self, name=SPARKY_NAME, firstOnly=False):
+    dataBlocks = [self[db] for db in self.keys() if name in db]
+    if dataBlocks:
+      if firstOnly:
+        return dataBlocks[0]
+      else:
+        return dataBlocks
+    else:
+      return None
 
   def getData(self, name=SPARKY_DATA, firstOnly=False):
     dataBlocks = [self[db] for db in self.keys() if name in db]
@@ -702,10 +715,15 @@ class CcpnSparkyReader:
     workshopPath = os.path.abspath(
       os.path.join(pathName, '../lists/' + fileName + '.list.workshop'))
 
-    self.project.loadData(spectrumPath)  # load the spectrum
+    loadedSpectrum = self.project.loadData(spectrumPath)  # load the spectrum
 
-    spectrumName = saveBlock.name
-    spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
+    # need to remove any bad characters from the spectrum name
+    spectrumName = loadedSpectrum[0].id                       # returns a list
+    spectra[SPARKY_MODIFIEDNAME] = spectrumName
+    spectra[SPARKY_ORIGINALNAME] = saveBlock.name             # store the original name
+    spectra[SPARKY_HASHNAME] = str(abs(hash(spectrumName)) % (10 ** 3))   # testing for names that are too long
+
+    spectrum = loadedSpectrum[0]        # project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
     if spectrum:
 
       spectrumShift = spectra.getDataValues('shift', firstOnly=True)
@@ -722,13 +740,13 @@ class CcpnSparkyReader:
           axes[axisNum-1] = (axisType, axisName)
 
       # generate the mapping of sparky axes to Ccpn axes
-      specAxes = spectrum[0].axisCodes
+      specAxes = spectrum.axisCodes
       reorder = self._reorderAxes(axes, specAxes)
 
       if reorder:
         # apply the sparky spectrum shift to the Ccpn reference values
         # TODO:ED check which axis needs to be negative
-        currentRefValues = list(spectrum[0].referenceValues)
+        currentRefValues = list(spectrum.referenceValues)
 
         # assume that first is always negative
         currentRefValues[0] = currentRefValues[0] + spectrumShiftVals[reorder[0]]
@@ -736,7 +754,7 @@ class CcpnSparkyReader:
         for specInd in range(1, len(spectrumShiftVals)):
           currentRefValues[specInd] = currentRefValues[specInd] + spectrumShiftVals[reorder[specInd]]
 
-        spectrum[0].referenceValues = currentRefValues
+        spectrum.referenceValues = currentRefValues
 
   def _reorderAxes(self, axes, newAxes):
     renameAxes = [None] * len(axes)
@@ -760,10 +778,12 @@ class CcpnSparkyReader:
     molName = spectra.getDataValues(SPARKY_MOLECULE, firstOnly=True)
     condName = spectra.getDataValues(SPARKY_CONDITION, firstOnly=True)
 
-    nmrChainName = self._buildName([molName, condName])
+    # TODO:ED this needs to be a unique name
+    defaultName = spectra.getParameter(SPARKY_HASHNAME, firstOnly=True)
+    nmrChainName = self._buildName([molName, condName], default=defaultName)
 
     attachedPeak = spectra.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)
-    spectrumName = saveBlock.name
+    spectrumName = spectra.getParameter(SPARKY_MODIFIEDNAME, firstOnly=True)
 
     # current test to decide whether to import a peak list
     peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
@@ -1010,8 +1030,7 @@ class CcpnSparkyReader:
     return nmrChain
 
   def _buildName(self, names, default=SPARKY_DEFAULTCHAIN):
-    import string
-
+    # remove spaces, commas, fullstops from names to be used as Pids
     name = ''
     for nm in names:
       if nm:

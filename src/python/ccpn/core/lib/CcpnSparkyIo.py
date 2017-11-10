@@ -146,6 +146,7 @@ SPARKY_SEQUENCE = 'sequence'
 SPARKY_FIRSTRESIDUENUM = 'first_residue_number'
 SPARKY_CONDITION = 'condition'
 SPARKY_NESTED = 'local'
+SPARKY_PEAK = 'peak'
 
 
 def getSparkyTokenIterator(text):
@@ -179,9 +180,16 @@ class SparkyBlock(NamedOrderedDict):
   def __init__(self, name=SPARKY_ROOT):
     super(SparkyBlock, self).__init__(name=name)
 
-  def getData(self):
-    dataBlocks = [self[db] for db in self.keys() if SPARKY_DATA in db]
-    return [ll for x in dataBlocks for ll in x]     # concaternate data lists
+  def getData(self, name=SPARKY_DATA, firstOnly=False):
+    dataBlocks = [self[db] for db in self.keys() if name in db]
+    dataBlocks = [ll for x in dataBlocks for ll in x]     # concaternate data lists
+    if dataBlocks:
+      if firstOnly:
+        return dataBlocks[0]
+      else:
+        return dataBlocks
+    else:
+      return None
 
   def getDataValues(self, value, firstOnly=False):
     dataBlocks = [self[db] for db in self.keys() if SPARKY_DATA in db]
@@ -344,10 +352,10 @@ class CcpnSparkyReader:
     #   name = name+str(len(currentNames))   # add an incremental number to the name
 
     # name is the new named block
-    obj = TypeBlock(name)       # append an 's' for grouping
+    obj = TypeBlock(name)
 
-    if name+'s' not in container:
-      container.addItem(name+'s', list())     # add a list inside the parent block
+    if name not in container:
+      container.addItem(name, list())     # add a list inside the parent block
 
     self.stack.append(obj)                  # and add a new block to the end
     # self.stack.append(OrderedDict())      # put a list on as well?
@@ -367,11 +375,13 @@ class CcpnSparkyReader:
         # Close loop and pop it off the stack
         self._closeList(value)
 
+    if isinstance(stack[-1], TypeBlock):
+      stack.pop()
+
     # terminate SparkyBlock
     if isinstance(stack[-1], SparkyBlock):
-      blockName = value[5:-1]
-      if lowerValue.startswith(SPARKY_ENDBLOCK) and stack[-1].name == blockName:
-        # Simple terminator. Close save frame
+      if stack[-1].name.startswith(value):
+        # Simple terminator. Close sparky block
         stack.pop()
 
       elif self.enforceSaveFrameStop:
@@ -379,6 +389,7 @@ class CcpnSparkyReader:
 
       else:
         # New saveframe start. We are missing the terminator, but close and continue anyway
+        getLogger().warning('Closing sparkyBlock with missing terminator')
         stack.pop()
 
     stack.append(list())          # in case there are more data items to add
@@ -415,7 +426,8 @@ class CcpnSparkyReader:
       value = value.lower()
 
     if isinstance(stack[-1], TypeBlock):
-      self._closeDict(value)                                  # close the list and store
+      if value != SPARKY_NESTED:      # fix for the minute
+        self._closeDict(value)                                  # close the list and store
       self._addTypeBlock(value)
 
     elif isinstance(stack[-1], SparkyBlock):
@@ -445,7 +457,7 @@ class CcpnSparkyReader:
         raise SparkySyntaxError(self._errorMessage("Error: %s outside list" % value, value))
 
     if data:
-      dataName = data.name+'s'
+      dataName = data.name
       block[dataName].append(data)    # SHOULD be in the block
 
   def _closeList(self, value):
@@ -524,7 +536,7 @@ class CcpnSparkyReader:
     self.tokeniser = getSparkyTokenIterator(self.text)
 
     processValue = self.processValue
-    processFunctions = [None] * 20
+    processFunctions = [None] * 21
     processFunctions[SP_TOKEN_SQUOTE_STRING] = self.processValue
     processFunctions[SP_TOKEN_DQUOTE_STRING] = self.processValue
     # processFunctions[SP_TOKEN_MULTILINE] = self.processValue
@@ -586,7 +598,7 @@ class CcpnSparkyReader:
               self._closeDict(SPARKY_NESTED)
 
             elif typ == SP_TOKEN_END_SPARKY_BLOCK:
-                self._closeSparkyBlock(value)
+              self._closeSparkyBlock(value)
 
             elif typ in (SP_TOKEN_BAD_CONSTRUCT, SP_TOKEN_BAD_TOKEN):
               self._processBadToken(value, typ)
@@ -704,32 +716,31 @@ class CcpnSparkyReader:
       specAxes = spectrum[0].axisCodes
       reorder = self._reorderAxes(axes, specAxes)
 
-      # apply the sparky spectrum shift to the Ccpn reference values
-      # TODO:ED check which axis needs to be negative
-      currentRefValues = list(spectrum[0].referenceValues)
+      if reorder:
+        # apply the sparky spectrum shift to the Ccpn reference values
+        # TODO:ED check which axis needs to be negative
+        currentRefValues = list(spectrum[0].referenceValues)
 
-      # assume that first is always negative
-      currentRefValues[0] = currentRefValues[0] - spectrumShiftVals[reorder[0]]
-      # and the rest are the other way
-      for specInd in range(1, len(spectrumShiftVals)):
-        currentRefValues[specInd] = currentRefValues[specInd] + spectrumShiftVals[reorder[specInd]]
+        # assume that first is always negative
+        currentRefValues[0] = currentRefValues[0] + spectrumShiftVals[reorder[0]]
+        # and the rest are the other way
+        for specInd in range(1, len(spectrumShiftVals)):
+          currentRefValues[specInd] = currentRefValues[specInd] + spectrumShiftVals[reorder[specInd]]
 
-      spectrum[0].referenceValues = currentRefValues
-
-    # if 'nh_tor_42' in workshopPath:
-    #   self.initParser(self.project, workshopPath, project.spectra[-1])
+        spectrum[0].referenceValues = currentRefValues
 
   def _reorderAxes(self, axes, newAxes):
     renameAxes = [None] * len(axes)
     for ai, axis in enumerate(axes):
-      ax2 = [aj for aj in axes[0:ai] if axis[1] in aj[1]]
-      if ax2:
-        renameAxes[ai] = (axis[0], axis[1] + str(len(ax2)))
+      if axis[1]:
+        ax2 = [aj for aj in axes[0:ai] if axis[1] in aj[1]]
+        if ax2:
+          renameAxes[ai] = (axis[0], axis[1] + str(len(ax2)))
 
     outAxes = [ai for aj, axisj in enumerate(newAxes) for ai, axis in enumerate(axes) if axisj == axis[1]]
     for ii in range(len(newAxes)):    # add any numbers that are missing from the list
       if ii not in outAxes:
-        outAxes.append(ii)
+        outAxes.insert(0, ii)
     return outAxes
 
   def importPeakLists(self, project, saveBlock, sparkyBlock):
@@ -748,11 +759,14 @@ class CcpnSparkyReader:
     # current test to decide whether to import a peak list
     peakAxes = attachedPeak.getDataValues('peak_pattern_axes', firstOnly=True)
     peakName = attachedPeak.getDataValues('peak_pattern_name', firstOnly=True)
+    peakPatternAxes = None
 
     if peakAxes is not None and peakName is not None or True:
       # assume that we have to import a peaklist
 
-      # peakPatternAxes = self._getTokens(peakAxes, int)
+      if peakAxes:
+        peakPatternAxes = self._getTokens(peakAxes, int)
+
       assignRelation = spectra.getDataValues('assignRelation', firstOnly=False)
       axes = [None] * len(assignRelation)
 
@@ -775,69 +789,65 @@ class CcpnSparkyReader:
         # read in the peak list
         peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
         if peakBlock:
-          peakData = peakBlock.getData()
+          peakData = peakBlock.getData(name=SPARKY_PEAK)
 
           if peakData:
             spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
             if spectrum:
               newPeakList = spectrum[0].peakLists[0]         # get the first one .newPeakList()
 
-              spectrumAxes = spectrum[0].axisCodes
-              peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
+              if not peakPatternAxes:
+                spectrumAxes = spectrum[0].axisCodes
+                peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
 
               # TODO:ED need to remove hard coding for search of properties
-              ii=0
-              while ii<len(peakData)-PEAK_MAXSEARCH:
+              # ii=0
+              # while ii<len(peakData)-PEAK_MAXSEARCH:
 
-                if self._getToken(peakData[ii], 0) == PEAK_TYPE\
-                    and self._getToken(peakData[ii], 1) == PEAK_PEAK:
+              for thisPeak in peakData:
+
+                # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
+                #     and self._getToken(peakData[ii], 1) == PEAK_PEAK:
 
                   # TODO:ED put some more error checking in here - need to parse properly
-                  found = 0
-                  for jj in range(1, PEAK_MAXSEARCH):   # arbitrary search length
-                    line = peakData[ii+jj]
-                    if self._getToken(line, 0) == PEAK_POS:
-                      posList = self._getTokens(line, float, start=1)
 
-                      found = found | PEAK_POSNUM
-                      if found == PEAK_ALLFOUND:
-                        break
-                    if self._getToken(line, 0) == PEAK_RESONANCE:
-                      resList = self._getTokens(line, str, start=1)
+                found = 0
+                line = thisPeak.getData(PEAK_POS)
+                if line:
+                  found = found | PEAK_POSNUM
+                  posList = [float(val) for val in line]
 
-                      found = found | PEAK_RESONANCENUM
-                      if found == PEAK_ALLFOUND:
-                        break
+                line = thisPeak.getData(PEAK_RESONANCE)
+                if line:
+                  found = found | PEAK_RESONANCENUM
+                  resList = line
 
-                  # if found != PEAK_ALLFOUND:
-                  #   raise TypeError('Error: incomplete peak definition')
+                if found == PEAK_POSNUM:    # test without residue
+                  peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
 
-                  if found == PEAK_POSNUM:    # test without residue
-                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                elif found == PEAK_ALLFOUND:
+                  # TODO:ED check with specta other than N-H, multidimensional etc.
 
-                  elif found == PEAK_ALLFOUND:
-                    # TODO:ED check with specta other than N-H, multidimensional etc.
+                  peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
 
-                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                  # TODO:ED check that the molName matches molecule/condition
+                  nmrChain = project.fetchNmrChain(nmrChainName)
 
-                    # TODO:ED check that the molName matches molecule/condition
-                    nmrChain = project.fetchNmrChain(nmrChainName)
+                  ri=0
+                  while ri < len(resList):
+                    resName = resList[ri][1:]     # clip the chain type from the head
+                    axisCode = resList[ri+1]
+                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
+                    self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                    ri += 2
 
-                    ri=0
-                    while ri < len(resList):
-                      resName = resList[ri][1:]     # clip the chain type from the head
-                      axisCode = resList[ri+1]
-                      nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName)
-                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
-                      ri += 2
-
-                  else:
-                    getLogger().warning('Missing peakList information: %s %i' % (saveBlock.name, ii+jj))
-                  ii += jj
-                else:
-                  ii += 1
-
-              errorLine = ii
+              #     else:
+              #       getLogger().warning('Missing peakList information: %s %i' % (saveBlock.name, ii+jj))
+              #     ii += jj
+              #   else:
+              #     ii += 1
+              #
+              # errorLine = ii
 
       # except Exception as es:
       #   getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))

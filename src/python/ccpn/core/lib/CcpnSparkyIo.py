@@ -797,6 +797,7 @@ class CcpnSparkyReader:
     peakName = attachedPeak.getDataValues('peak_pattern_name', firstOnly=True)
     peakPatternAxes = None
 
+    # don't think need this test now
     if peakAxes is not None and peakName is not None or True:
       # assume that we have to import a peaklist
 
@@ -815,79 +816,75 @@ class CcpnSparkyReader:
           axes[axisNum-1] = (axisType, axisName)
 
       errorLine = 0
-      # try:
+      try:
+        project.suspendNotification()
 
-      if len(assignRelation) != len([ax for ix, ax in enumerate(axes) if axes[ix]]):
-        getLogger().info('assignRelation not found: %s' % saveBlock.name)
+        if len(assignRelation) != len([ax for ix, ax in enumerate(axes) if axes[ix]]):
+          getLogger().info('assignRelation not found: %s' % saveBlock.name)
 
-      else:
+        else:
 
-        # read in the peak list
-        peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
-        if peakBlock:
-          peakData = peakBlock.getData(name=SPARKY_PEAK)
+          # read in the peak list
+          peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
+          if peakBlock:
+            peakData = peakBlock.getData(name=SPARKY_PEAK)
 
-          if peakData:
-            spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
-            if spectrum:
-              newPeakList = spectrum[0].peakLists[0]         # get the first one .newPeakList()
+            if peakData:
+              spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
+              if spectrum:
+                newPeakList = spectrum[0].peakLists[0]         # get the first one .newPeakList()
 
-              if not peakPatternAxes:
-                spectrumAxes = spectrum[0].axisCodes
-                peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
+                if not peakPatternAxes:
+                  spectrumAxes = spectrum[0].axisCodes
+                  peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
 
-              # TODO:ED need to remove hard coding for search of properties
-              # ii=0
-              # while ii<len(peakData)-PEAK_MAXSEARCH:
+                # TODO:ED need to remove hard coding for search of properties
+                # ii=0
+                # while ii<len(peakData)-PEAK_MAXSEARCH:
 
-              for thisPeak in peakData:
+                for thisPeak in peakData:
 
-                # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
-                #     and self._getToken(peakData[ii], 1) == PEAK_PEAK:
+                  # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
+                  #     and self._getToken(peakData[ii], 1) == PEAK_PEAK:
 
                   # TODO:ED put some more error checking in here - need to parse properly
 
-                found = 0
-                line = thisPeak.getData(PEAK_POS)
-                if line:
-                  found = found | PEAK_POSNUM
-                  posList = [float(val) for val in line]
+                  found = 0
+                  line = thisPeak.getData(PEAK_POS)
+                  if line:
+                    found = found | PEAK_POSNUM
+                    posList = [float(val) for val in line]
 
-                line = thisPeak.getData(PEAK_RESONANCE)
-                if line:
-                  found = found | PEAK_RESONANCENUM
-                  resList = line
+                  line = thisPeak.getData(PEAK_RESONANCE)
+                  if line:
+                    found = found | PEAK_RESONANCENUM
+                    resList = line
 
-                if found == PEAK_POSNUM:    # test without residue
-                  peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                  if found == PEAK_POSNUM:    # test without residue
+                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
 
-                elif found == PEAK_ALLFOUND:
-                  # TODO:ED check with specta other than N-H, multidimensional etc.
+                  elif found == PEAK_ALLFOUND:
+                    # TODO:ED check with specta other than N-H, multidimensional etc.
 
-                  peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
 
-                  # TODO:ED check that the molName matches molecule/condition
-                  nmrChain = project.fetchNmrChain(nmrChainName)
+                    # TODO:ED check that the molName matches molecule/condition
+                    nmrChain = project.fetchNmrChain(nmrChainName)
 
-                  ri=0
-                  while ri < len(resList):
-                    resType = resList[ri][0]
-                    resName = resList[ri][1:]     # clip the chain type from the head
-                    axisCode = resList[ri+1]
-                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
-                    self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
-                    ri += 2
+                    ri=0
+                    while ri < len(resList):
+                      resType = resList[ri][0]
+                      resName = resList[ri][1:]     # clip the chain type from the head
+                      axisCode = resList[ri+1]
+                      nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
+                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                      ri += 2
 
-              #     else:
-              #       getLogger().warning('Missing peakList information: %s %i' % (saveBlock.name, ii+jj))
-              #     ii += jj
-              #   else:
-              #     ii += 1
-              #
-              # errorLine = ii
+      except Exception as es:
+        getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))
 
-      # except Exception as es:
-      #   getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))
+      finally:
+        project.resumeNotification()
 
   def importSparkyProject(self, project, sparkyBlock):
     """Import entire project from dataBlock into empty Project"""
@@ -916,9 +913,6 @@ class CcpnSparkyReader:
       # load spectrum data
       for isf in loadedBlocks:
         self.importSpectra(project, isf)   # modify to load from the project
-
-      # load spectrum data
-      for isf in loadedBlocks:
         self.importPeakLists(project, isf, sparkyBlock)   # modify to load from the project
 
     elif sparkyType == SPARKY_SAVE:
@@ -926,7 +920,7 @@ class CcpnSparkyReader:
       self.importPeakLists(project, sparkyBlock, sparkyBlock)  # modify to load from the project
 
     else:
-        getLogger().warning('Unknown Sparky File Type')
+      getLogger().warning('Unknown Sparky File Type')
 
     t2 = time.time()
     getLogger().debug('Imported Sparky file into project, time = %.2fs' %(t2-t0))
@@ -1064,7 +1058,7 @@ class CcpnSparkyReader:
     molecules = sparkyBlock.getBlocks(SPARKY_MOLECULE)
 
     for mol in molecules:
-      molName = self._buildName([mol.getDataValues(SPARKY_NAME, firstOnly=True)])
+      molName = self._buildName([mol.getDataValues(SPARKY_NAME, firstOnly=True)], default=mol.name)
 
       attData = mol.getBlocks(SPARKY_ATTACHEDDATA, firstOnly=True)    # should be only one
 
@@ -1118,11 +1112,20 @@ class CcpnSparkyReader:
             if nmrResidue:
               newAtom = nmrResidue.newNmrAtom(name=atomType, isotopeCode=atomIsotopeCode)
 
-          # connect the nmrResidues and assignTo
-          # connectedNmrChain = self._connectNmrResidues(nmrChain)
-          # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+          project.suspendNotification()
+          try:
+            pass
+            # connect the nmrResidues and assignTo
+            # connectedNmrChain = self._connectNmrResidues(nmrChain)
+            # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
-      # now need to check the save files and find any peak lists that need to be created
+          except Exception as es:
+            getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
+
+          finally:
+            project.resumeNotification()
+
+            # now need to check the save files and find any peak lists that need to be created
 
 class CcpnSparkyWriter:
   # ejb - won't be implemented yet

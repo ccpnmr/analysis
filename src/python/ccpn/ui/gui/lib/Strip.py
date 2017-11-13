@@ -110,8 +110,9 @@ def isPositionWithinfBounds(strip:GuiStrip, shift:ChemicalShift, axis:object):
   for spectrumView in strip.spectrumViews:
     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
     index = spectrumIndices[axisIndex]
-    minima.append(spectrumView.spectrum.aliasingLimits[index][0])
-    maxima.append(spectrumView.spectrum.aliasingLimits[index][1])
+    if index:
+      minima.append(spectrumView.spectrum.aliasingLimits[index][0])
+      maxima.append(spectrumView.spectrum.aliasingLimits[index][1])
 
   if len(maxima) < 1:
     return True

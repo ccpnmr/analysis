@@ -392,8 +392,12 @@ class ViewBox(pg.ViewBox):
   def _hoverEvent(self, event):
     if hasattr(event, '_scenePos'):
       position = self.mapSceneToView(event.pos())
-      if self.strip:
+      try:
         self.strip.spectrumDisplay.mainWindow._mousePositionMoved(self.strip, position)
+      finally:
+
+        # TODO:ED this is bad programming
+        pass
 
   def _updateSelectionBox(self, p1:float, p2:float):
     """
@@ -547,7 +551,7 @@ class ViewBox(pg.ViewBox):
                     peaks.append(peak)
         self.current.peaks = peaks
 
-    elif controlMiddleMouse(event):
+    elif middleMouse(event):
       # Control(Cmd)+middle drag: move a selected peak
 
       event.accept()

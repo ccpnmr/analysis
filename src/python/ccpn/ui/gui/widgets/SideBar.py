@@ -126,7 +126,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     self.mainWindow = parent                      # ejb - needed for moduleArea
     self.application = self.mainWindow.application
-    self._typeToItem = dd = {}
+    # self._typeToItem = dd = {}
 
     self.setFont(sidebarFont)
     self.header().hide()
@@ -135,7 +135,122 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     self.setDragDropMode(self.InternalMove)
     self.setMinimumWidth(200)
 
-    self.projectItem = dd['PR'] = QtWidgets.QTreeWidgetItem(self)
+    # self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
+    # self.projectItem.setFlags(self.projectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.projectItem.setText(0, "Project")
+    # self.projectItem.setExpanded(True)
+    #
+    # self.spectrumItem = dd['SP'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.spectrumItem.setFlags(self.spectrumItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.spectrumItem.setText(0, "Spectra")
+    #
+    # self.spectrumGroupItem = dd['SG'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.spectrumGroupItem.setFlags(self.spectrumGroupItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.spectrumGroupItem.setText(0, "SpectrumGroups")
+    #
+    # self.newSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
+    # self.newSpectrumGroup.setFlags(self.newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newSpectrumGroup.setText(0, "<New SpectrumGroup>")
+    #
+    # self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.samplesItem.setFlags(self.samplesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.samplesItem.setText(0, 'Samples')
+    #
+    # self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
+    # self.newSample.setFlags(self.newSample.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newSample.setText(0, "<New Sample>")
+    #
+    # self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.substancesItem.setText(0, "Substances")
+    #
+    # self.newSubstance = QtGui.QTreeWidgetItem(self.substancesItem)
+    # self.newSubstance.setFlags(self.newSubstance.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newSubstance.setText(0, "<New Substance>")
+    #
+    # self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.chainItem.setText(0, "Chains")
+    #
+    # self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
+    # self.newChainItem.setFlags(self.newChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newChainItem.setText(0, '<New Chain>')
+    #
+    # self.complexItem = dd['MX'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.complexItem.setFlags(self.complexItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.complexItem.setText(0, "Complexes")
+    #
+    # # TODO make COmplexEditor, install it in _createNewObject, and uncomment this
+    # # self.newComplex = QtGui.QTreeWidgetItem(self.complexItem)
+    # # self.newComplex.setFlags(self.newComplex.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # # self.newComplex.setText(0, "<New Complex>")
+    #
+    # self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.nmrChainItem.setFlags(self.nmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.nmrChainItem.setText(0, "NmrChains")
+    #
+    # self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
+    # self.newNmrChainItem.setFlags(self.newNmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newNmrChainItem.setText(0, '<New NmrChain>')
+    #
+    # self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.chemicalShiftListsItem.setFlags(self.chemicalShiftListsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.chemicalShiftListsItem.setText(0, "ChemicalShiftLists")
+    #
+    # self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
+    # self.newChemicalShiftListItem.setFlags(self.newChemicalShiftListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newChemicalShiftListItem.setText(0, '<New ChemicalShiftList>')
+    #
+    # self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.structuresItem.setFlags(self.structuresItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.structuresItem.setText(0, "StructureEnsembles")
+    #
+    # self.newStructuresListItem = QtGui.QTreeWidgetItem(self.structuresItem)   # ejb
+    # self.newStructuresListItem.setFlags(self.newStructuresListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newStructuresListItem.setText(0, '<New StructureEnsemble>')
+    #
+    # self.dataSetsItem = dd['DS'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.dataSetsItem.setFlags(self.dataSetsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.dataSetsItem.setText(0, "DataSets")
+    #
+    # self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
+    # self.newDataSetItem.setFlags(self.newDataSetItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newDataSetItem.setText(0, '<New DataSet>')
+    #
+    # self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
+    # self.notesItem.setFlags(self.notesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.notesItem.setText(0, "Notes")
+    #
+    # self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
+    # self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newNoteItem.setText(0, '<New Note>')
+
+    # self._populateSidebar()
+
+    self.mousePressEvent = self._mousePressEvent
+    self.mouseReleaseEvent = self._mouseReleaseEvent
+    # self.mouseMoveEvent = self._mouseMoveEvent
+    self.dragMoveEvent = self._dragMoveEvent
+    self.dragEnterEvent = self._dragEnterEvent
+
+    self.setDragDropMode(self.DragDrop)
+    self.setAcceptDrops(True)
+
+    self.eventFilter = self._eventFilter        # ejb - doesn't work
+    self.installEventFilter(self)   # ejb
+
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                       self._processDroppedItems)
+
+    self.itemDoubleClicked.connect(self._raiseObjectProperties)
+
+  def _populateSidebar(self):
+    self._clearQTreeWidget(self)
+
+    self._typeToItem = dd = {}
+
+    self.projectItem = dd['PR'] = QtGui.QTreeWidgetItem(self)
     self.projectItem.setFlags(self.projectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.projectItem.setText(0, "Project")
     self.projectItem.setExpanded(True)
@@ -225,24 +340,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newNoteItem.setText(0, '<New Note>')
 
-    self.mousePressEvent = self._mousePressEvent
-    self.mouseReleaseEvent = self._mouseReleaseEvent
-    # self.mouseMoveEvent = self._mouseMoveEvent
-    self.dragMoveEvent = self._dragMoveEvent
-    self.dragEnterEvent = self._dragEnterEvent
-
-    self.setDragDropMode(self.DragDrop)
-    self.setAcceptDrops(True)
-
-    self.eventFilter = self._eventFilter        # ejb - doesn't work
-    self.installEventFilter(self)   # ejb
-
-    self.droppedNotifier = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                       self._processDroppedItems)
-
-    self.itemDoubleClicked.connect(self._raiseObjectProperties)
-
   def _raiseObjectProperties(self, item):
     """get object from Pid and dispatch call depending on type
 
@@ -276,6 +373,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       for obj in objects:
         if isinstance(obj, Project):
           try:
+            obj._mainWindow.sideBar.fillSideBar(obj)
             obj._mainWindow.show()
           except Exception as es:
             getLogger().warning('Error', str(es))
@@ -584,10 +682,22 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     self.projectItem.setText(0, project.name)
 
+  def _clearQTreeWidget(self, tree):
+    # clear contents of the sidebar and rebuild
+    iterator = QtGui.QTreeWidgetItemIterator(tree, QtGui.QTreeWidgetItemIterator.All)
+    while iterator.value():
+      iterator.value().takeChildren()
+      iterator += 1
+    i = tree.topLevelItemCount()
+    while i > -1:
+      tree.takeTopLevelItem(i)
+      i -= 1
+
   def fillSideBar(self, project:Project):
     """
     Fills the sidebar with the relevant data from the project.
     """
+    self._populateSidebar()
 
     self.setProjectName(project)
 

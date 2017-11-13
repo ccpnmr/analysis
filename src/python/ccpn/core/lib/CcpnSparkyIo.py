@@ -715,6 +715,7 @@ class CcpnSparkyReader:
     workshopPath = os.path.abspath(
       os.path.join(pathName, '../lists/' + fileName + '.list.workshop'))
 
+    getLogger().info('Loading spectrum: %s' % spectrumPath)
     loadedSpectrum = self.project.loadData(spectrumPath)  # load the spectrum
 
     # need to remove any bad characters from the spectrum name
@@ -757,10 +758,16 @@ class CcpnSparkyReader:
         spectrum.referenceValues = currentRefValues
 
   def _reorderAxes(self, axes, newAxes):
-    renameAxes = [None] * len(axes)
+    # renameAxes = [None] * len(axes)
+    renameAxes = [n for n in range(len(axes))]
     for ai, axis in enumerate(axes):
       if axis[1]:
-        ax2 = [aj for aj in axes[0:ai] if axis[1] in aj[1]]
+
+        try:
+          ax2 = [aj for aj in axes[0:ai] if axis[1] in aj[1]]
+        except:
+          ax2 = axis[1]
+
         if ax2:
           renameAxes[ai] = (axis[0], axis[1] + str(len(ax2)))
 

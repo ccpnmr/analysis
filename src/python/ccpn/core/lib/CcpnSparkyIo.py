@@ -28,6 +28,7 @@ import time
 import re
 import collections
 import pandas as pd
+import itertools
 
 try:
   # Python 3
@@ -746,36 +747,65 @@ class CcpnSparkyReader:
 
       if reorder:
         # apply the sparky spectrum shift to the Ccpn reference values
-        # TODO:ED check which axis needs to be negative
         currentRefValues = list(spectrum.referenceValues)
-
-        # assume that first is always negative
-        currentRefValues[0] = currentRefValues[0] + spectrumShiftVals[reorder[0]]
-        # and the rest are the other way
-        for specInd in range(1, len(spectrumShiftVals)):
+        for specInd in range(0, len(spectrumShiftVals)):
           currentRefValues[specInd] = currentRefValues[specInd] + spectrumShiftVals[reorder[specInd]]
 
         spectrum.referenceValues = currentRefValues
 
   def _reorderAxes(self, axes, newAxes):
     # renameAxes = [None] * len(axes)
-    renameAxes = [n for n in range(len(axes))]
-    for ai, axis in enumerate(axes):
-      if axis[1]:
+    renameAxes = [n for n in range(len(newAxes))]
+    renameAxes2 = [None] * len(newAxes)
 
-        try:
-          ax2 = [aj for aj in axes[0:ai] if axis[1] in aj[1]]
-        except:
-          ax2 = axis[1]
+    for ai, axis in enumerate(newAxes):
+      # if axis[1]:
 
-        if ax2:
-          renameAxes[ai] = (axis[0], axis[1] + str(len(ax2)))
+      try:
+        ax2 = [ind for ind, aj in enumerate(axes) if aj[1] and (aj[1] in axis or aj[1] in axis)]
 
-    outAxes = [ai for aj, axisj in enumerate(newAxes) for ai, axis in enumerate(axes) if axisj == axis[1]]
-    for ii in range(len(newAxes)):    # add any numbers that are missing from the list
-      if ii not in outAxes:
-        outAxes.insert(0, ii)
-    return outAxes
+        # found a element so put it into the list
+        del renameAxes[ai]
+
+      except Exception as es:
+        pass
+
+      if ax2:
+        renameAxes2[ai] = ax2[0]     #(axis[0], axis[1] + str(len(ax2)))
+
+    # list index of Nones in renameAxes2
+    outAxes = [aj for aj, axisj in enumerate(renameAxes2) if not axisj]
+
+    for ii in outAxes:
+      for jj in range(len(renameAxes2)):  # add any numbers that are missing from the list
+        if jj not in renameAxes2:
+          renameAxes2[ii] = jj
+          break
+
+    return renameAxes2
+
+  def _testFirstPeak(self, peakData, spectrum, peakAxes):
+    if peakData and spectrum:
+      line = peakData[0].getData(PEAK_POS)
+      if line:
+        for peakAxis in itertools.permutations(peakAxes):
+          badAxes = self._testPermutation(line, peakAxis, spectrum)
+
+          if not badAxes:
+            return peakAxis
+
+    return peakAxes
+
+  def _testPermutation(self, line, peakAxis, spectrum):
+    badAxes = []
+    posList = [float(val) for val in line]
+    peakPos = [posList[i] for i in peakAxis]
+    for ind, val in enumerate(peakPos):
+      viewParams = (spectrum.aliasingLimits)[ind]
+      if (val > max(viewParams)) or (val < min(viewParams)):
+        badAxes.append(ind)
+        getLogger().warning("Axes error: axis '%s' is out of bounds" % spectrum.axisCodes[ind])
+    return badAxes
 
   def importPeakLists(self, project, saveBlock, sparkyBlock):
     # process the save files to get the spectra
@@ -842,6 +872,10 @@ class CcpnSparkyReader:
                 # ii=0
                 # while ii<len(peakData)-PEAK_MAXSEARCH:
 
+                # test the first peak to check that it fits in the max/minAliasedFrequency
+                peakPatternAxes = self._testFirstPeak(peakData, spectrum[0], peakPatternAxes)
+
+                # iterate over the peaks
                 for thisPeak in peakData:
 
                   # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
@@ -860,13 +894,15 @@ class CcpnSparkyReader:
                     found = found | PEAK_RESONANCENUM
                     resList = line
 
+                  peakPos = [posList[i] for i in peakPatternAxes]
+
                   if found == PEAK_POSNUM:    # test without residue
-                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                    peak = newPeakList.newPeak(position=peakPos)
 
                   elif found == PEAK_ALLFOUND:
                     # TODO:ED check with specta other than N-H, multidimensional etc.
 
-                    peak = newPeakList.newPeak(position=[posList[i] for i in peakPatternAxes])
+                    peak = newPeakList.newPeak(position=peakPos)
 
                     # TODO:ED check that the molName matches molecule/condition
                     nmrChain = project.fetchNmrChain(nmrChainName)
@@ -995,8 +1031,11 @@ class CcpnSparkyReader:
     nrs = nmrChain.nmrResidues
     for i in range(len(nrs) - 1):
       currentItem, nextItem = nrs[i], nrs[i + 1]
-      if currentItem or nextItem is not None:
-        updatingNmrChain = currentItem.connectNext(nextItem, )
+      if currentItem and nextItem:
+
+        # check that the sequence codes are consecutive
+        if int(nextItem.sequenceCode) == int(currentItem.sequenceCode)+1:
+          updatingNmrChain = currentItem.connectNext(nextItem, )
     return updatingNmrChain
 
   def _assignNmrResiduesToResidues(self, connectedNmrChain, ccpnChain):
@@ -1112,20 +1151,35 @@ class CcpnSparkyReader:
             if nmrResidue:
               newAtom = nmrResidue.newNmrAtom(name=atomType, isotopeCode=atomIsotopeCode)
 
-          project.suspendNotification()
-          try:
-            pass
-            # connect the nmrResidues and assignTo
-            # connectedNmrChain = self._connectNmrResidues(nmrChain)
-            # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+          # self.importConnectedNmrResidues(project, nmrChain)
 
-          except Exception as es:
-            getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
+  def importConnectedNmrResidues(self, project, nmrChain):
+    project.suspendNotification()
+    try:
+      connectedNmrChain = self._connectNmrResidues(nmrChain)
+      # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
-          finally:
-            project.resumeNotification()
+    except Exception as es:
+      getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
 
-            # now need to check the save files and find any peak lists that need to be created
+    finally:
+      project.resumeNotification()
+
+  def assignNmrChain(self, nmrChain):
+    # not done yet
+    # project.suspendNotification()
+    try:
+      pass
+      # connect the nmrResidues and assignTo
+      connectedNmrChain = self._connectNmrResidues(nmrChain)
+      # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+
+    except Exception as es:
+      getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
+
+    finally:
+      pass
+      # project.resumeNotification()
 
 class CcpnSparkyWriter:
   # ejb - won't be implemented yet

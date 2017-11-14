@@ -337,7 +337,7 @@ class CcpnGLWidget(QOpenGLWidget):
     )
     self._infiniteLineBR = GLU.gluUnProject(
       self.viewport[2]+self.viewport[0],
-      0.0,
+      self.viewport[1],
       0.0,
       self.modelViewMatrix,
       self.projectionMatrix,
@@ -364,10 +364,10 @@ class CcpnGLWidget(QOpenGLWidget):
         xScale = (self._spectrumValues[0][3]-self._spectrumValues[0][2]) / (self._infiniteLineBR[0] - self._infiniteLineUL[0])
         yScale = (self._spectrumValues[1][3]-self._spectrumValues[1][2]) / (self._infiniteLineUL[1] - self._infiniteLineBR[1])
 
-        GL.glPushMatrix
+        GL.glPushMatrix()
         GL.glScale(xScale, yScale, 1.0)   # need to do this for each plane - yes
         spectrumView._paintContoursNoClip()   # new - without clipping
-        GL.glPopMatrix
+        GL.glPopMatrix()
       except:
         raise
         spectrumView._buildContours(None)
@@ -398,11 +398,20 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.set2DProjection()
     self._buildAxes(axisList=[0, 1], scaleGrid=[2, 1, 0], r=1.0, g=1.0, b=1.0, transparency=256.0)
+
+    # need to change these to pixel coords for the viewbox
+    GL.glColor4f(0.2, 1.0, 3.0, 150)
+    GL.glBegin(GL.GL_LINES)
+    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineUL[1])
+    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineBR[1])
+    GL.glVertex2d(self._infiniteLineUL[0], self._infiniteLineBR[1]+0.1)
+    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineBR[1]-0.1)
+    GL.glEnd()
+
     self.set2DProjectionRightAxis()
     self._buildAxes(axisList=[1], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.set2DProjectionBottomAxis()
     self._buildAxes(axisList=[0], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-
     self.set2DProjection()      # set back to the main projection
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
@@ -598,7 +607,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
-    GL.glViewport(w-40, 35, w-30, h-35)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-40, 35, 10, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
     # testing - grab the coordinates from the plotWidget
@@ -626,7 +635,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 30, w-35, 40)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(0, 30, w-35, 10)   # leave a 35 width margin for the axes - bottom/right
                                     # (0,0) is bottom-left
     # GLU.gluOrtho2D(-10, 50, -10, 0)
 

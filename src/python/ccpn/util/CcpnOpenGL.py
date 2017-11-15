@@ -297,12 +297,15 @@ class CcpnGLWidget(QOpenGLWidget):
     if bool:
       self.paintGL()
 
+  def sign(self, x):
+    return 1.0 if x >= 0 else -1.0
+
   def paintGL(self):
     self.makeCurrent()
 
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
-    GL.glClearColor(0.1, 0.1, 0.1, 1.0)
+    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
     getGLvector = (GL.GLfloat * 2)()
@@ -359,14 +362,20 @@ class CcpnGLWidget(QOpenGLWidget):
           # set to True and update() will rebuild the contours
           # can be done with a call to self.rebuildContours()
 
-          self._spectrumValues = spectrumView._getValues()
-
-        xScale = (self._spectrumValues[0][3]-self._spectrumValues[0][2]) / (self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        yScale = (self._spectrumValues[1][3]-self._spectrumValues[1][2]) / (self._infiniteLineUL[1] - self._infiniteLineBR[1])
+        self._spectrumValues = spectrumView._getValues()
+        dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+        dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+        dxAF = (self._spectrumValues[0].maxAliasedFrequency-self._spectrumValues[0].minAliasedFrequency)
+        dyAF = (self._spectrumValues[1].maxAliasedFrequency-self._spectrumValues[1].minAliasedFrequency)
+        xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
+        yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
+        px = self._spectrumValues[0].maxAliasedFrequency
+        py = self._spectrumValues[1].maxAliasedFrequency
 
         GL.glPushMatrix()
-        GL.glScale(xScale, yScale, 1.0)   # need to do this for each plane - yes
-        spectrumView._paintContoursNoClip()   # new - without clipping
+        GL.glTranslate(px, py, 0.0)
+        GL.glScale(xScale, yScale, 1.0)
+        spectrumView._paintContoursNoClip()
         GL.glPopMatrix()
       except:
         raise
@@ -397,21 +406,28 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glEnd()
 
     self.set2DProjection()
-    self._buildAxes(axisList=[0, 1], scaleGrid=[2, 1, 0], r=1.0, g=1.0, b=1.0, transparency=256.0)
-
-    # need to change these to pixel coords for the viewbox
-    GL.glColor4f(0.2, 1.0, 3.0, 150)
-    GL.glBegin(GL.GL_LINES)
-    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineUL[1])
-    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineBR[1])
-    GL.glVertex2d(self._infiniteLineUL[0], self._infiniteLineBR[1]+0.1)
-    GL.glVertex2d(self._infiniteLineBR[0], self._infiniteLineBR[1]-0.1)
-    GL.glEnd()
-
+    self._buildAxes(axisList=[0, 1], scaleGrid=[2, 1, 0], r=1.0, g=1.0, b=1.0, transparency=600.0)
     self.set2DProjectionRightAxis()
     self._buildAxes(axisList=[1], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.set2DProjectionBottomAxis()
     self._buildAxes(axisList=[0], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+
+    # draw axis lines
+    self.set2DProjectionFlat()
+    h = self.height()
+    w = self.width()
+    GL.glColor4f(0.2, 1.0, 0.3, 150)
+    GL.glBegin(GL.GL_LINES)
+    GL.glVertex2d(0, 1)
+    GL.glVertex2d(w, 1)
+    GL.glVertex2d(w, 0)
+    GL.glVertex2d(w, h)
+    GL.glEnd()
+
+
+
+
+
     self.set2DProjection()      # set back to the main projection
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
@@ -600,17 +616,11 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
 
-    # put into a box in the viewport at (50, 50) to (150, 150)
-    # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    # GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-45, 35, 10, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
-    GL.glViewport(w-40, 35, 10, h-35)   # leave a 35 width margin for the axes - bottom/right
-                                        # (0,0) is bottom-left
-
-    # testing - grab the coordinates from the plotWidget
     axisRangeL = self.parent.plotWidget.getAxis('bottom').range
     axL = axisRangeL[0]
     axR = axisRangeL[1]
@@ -619,27 +629,19 @@ class CcpnGLWidget(QOpenGLWidget):
     axT = axisRangeB[1]
 
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
-    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
-
-    # GL.glScalef(1, 1, 1);
-
+    GLU.gluOrtho2D(axL, axR, axB, axT)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
-    # GL.glTranslatef(0.1, 0.1, 0.1)
 
   def set2DProjectionBottomAxis(self):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
 
-    # put into a box in the viewport at (50, 50) to (150, 150)
-    # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 30, w-35, 10)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(0, 35, w-35, 10)   # leave a 35 width margin for the axes - bottom/right
                                     # (0,0) is bottom-left
-    # GLU.gluOrtho2D(-10, 50, -10, 0)
 
-    # testing - grab the coordinates from the plotWidget
     axisRangeL = self.parent.plotWidget.getAxis('bottom').range
     axL = axisRangeL[0]
     axR = axisRangeL[1]
@@ -648,13 +650,9 @@ class CcpnGLWidget(QOpenGLWidget):
     axT = axisRangeB[1]
 
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
-    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
-
-    # GL.glScalef(1, 1, 1);
-
+    GLU.gluOrtho2D(axL, axR, axB, axT)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
-    # GL.glTranslatef(0.1, 0.1, 0.1)
 
   def set2DProjectionFlat(self):
     GL.glMatrixMode(GL.GL_PROJECTION)
@@ -664,14 +662,14 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(150, 50, 350, 150)
     h = self.height()
     w = self.width()
-    GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
-                                        # '15' is a temporary border at left/top
+    # GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
+    #                                     # '15' is a temporary border at left/top
+    GL.glViewport(0, 35, w-35, h-35)      # leave a 35 width margin for the axes
+                                          # '15' is a temporary border at left/top
 
     GLU.gluOrtho2D(0, w, 0, h)
-
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
-    # GL.glTranslatef(0.1, 0.1, 0.1)
 
   def drawInstructions(self, painter):
     text = "Click and drag with the left mouse button to rotate the Qt " \

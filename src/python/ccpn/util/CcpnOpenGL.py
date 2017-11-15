@@ -36,6 +36,8 @@ from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 import numpy as np
 from pyqtgraph import functions as fn
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Spectrum import Spectrum
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -190,6 +192,32 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.base = None
     self.spectrumValues = []
+    self._GLPeakLists = []
+
+  def _releaseDisplayLists(self, displayLists):
+    for displayList in displayLists:
+      GL.glDeleteLists(displayList, 1)
+    displayLists[:] = []
+
+  def _createDisplayLists(self, levels, displayLists):
+    # could create them in one go but more likely to get fragmentation that way
+    for level in levels:
+      displayLists.append(GL.glGenLists(1))
+
+  def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
+    # clear the list and rebuild
+    GL.glDeleteLists(self._GLPeakLists[num], 1)
+    self._GLPeakLists[num] = GL.glGenLists(1)
+
+    # this is actually quite old-school for openGL but good for test
+    GL.glNewList(self._GLPeakLists[num], GL.GL_COMPILE)
+    GL.glBegin(GL.GL_LINES)
+
+    GL.glColor4f(1.0, 1.0, 1.0, 1.0)
+
+    GL.glEnd()
+    GL.glEndList()
+
 
   def _eventFilter(self, obj, event):
     """
@@ -412,19 +440,20 @@ class CcpnGLWidget(QOpenGLWidget):
     self.set2DProjectionBottomAxis()
     self._buildAxes(axisList=[0], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
 
-    # draw axis lines
+    # draw axis lines to right and bottom
     self.set2DProjectionFlat()
     h = self.height()
     w = self.width()
-    GL.glColor4f(0.2, 1.0, 0.3, 150)
+    GL.glColor4f(0.2, 1.0, 0.3, 1.0)
     GL.glBegin(GL.GL_LINES)
-    GL.glVertex2d(0, 1)
+    GL.glVertex2d(0, 1)         # not sure why 0 doesn't work
     GL.glVertex2d(w, 1)
     GL.glVertex2d(w, 0)
     GL.glVertex2d(w, h)
     GL.glEnd()
 
 
+    # draw all the peak GLLists here
 
 
 
@@ -432,7 +461,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
     # this gets the correct mapped coordinates
-    GL.glColor4f(0.8, 0.9, 1.0, 150)
+    GL.glColor4f(0.8, 0.9, 1.0, 1.0)
     GL.glBegin(GL.GL_LINES)
     GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineUL[1])
     GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineBR[1])
@@ -616,9 +645,10 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
 
+    axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(w-45, 35, 10, h-35)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-35-axisLine, 35, axisLine, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
     axisRangeL = self.parent.plotWidget.getAxis('bottom').range
@@ -637,9 +667,10 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
 
+    axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 35, w-35, 10)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(0, 35, w-35, axisLine)   # leave a 35 width margin for the axes - bottom/right
                                     # (0,0) is bottom-left
 
     axisRangeL = self.parent.plotWidget.getAxis('bottom').range

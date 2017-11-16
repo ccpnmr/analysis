@@ -189,10 +189,25 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.eventFilter = self._eventFilter
     # self.installEventFilter(self)   # ejb
     self.setMouseTracking(True)                 # generate mouse events when button not pressed
+    self.keyboardGrabber()
 
     self.base = None
     self.spectrumValues = []
     self._GLPeakLists = []
+    self._drawSelectionBox = False
+    self._selectionMode = 0
+    self._startCoordinate = None
+    self._endCoordinate = None
+    self._shift = False
+    self._command = False
+
+    self.installEventFilter(self)
+
+  def eventFilter(self, obj, event):
+    if event.type() == QtCore.QEvent.KeyPress:
+      event.accept()
+      return True
+    return super(CcpnGLWidget, self).eventFilter(obj, event)
 
   def _releaseDisplayLists(self, displayLists):
     for displayList in displayLists:
@@ -217,21 +232,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     GL.glEnd()
     GL.glEndList()
-
-
-  def _eventFilter(self, obj, event):
-    """
-    Replace all the events with a single filter process
-    Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
-    and allows changing of the cursor - ejb
-    """
-    if event.type() == QtCore.QEvent.MouseMove:
-      self._mouseX = event.pos().x()
-      self._mouseY = event.pos().y()
-      print ('>>>MOUSE_EF', self._mouseX, self._mouseY)
-      event.accept()
-      return True
-    return super(CcpnGLWidget, self).eventFilter(obj,event)    # do the rest
 
   def _connectSpectra(self):
     for spectrumView in self.parent.spectrumViews:
@@ -261,6 +261,22 @@ class CcpnGLWidget(QOpenGLWidget):
   def mousePressEvent(self, event):
     self.lastPos = event.pos()
 
+    self._startCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+    self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+    self._drawSelectionBox = True
+
+  def mouseReleaseEvent(self, event):
+    self._drawSelectionBox = False
+
+  def keyPressEvent(self, event):
+    self._shift = False
+    self._command = False
+
+    if event.key() & Qt.Key_Shift:
+      self._shift = True
+    if event.key() & Qt.ControlModifier:
+      self._command = True
+
   def mouseMoveEvent(self, event):
     dx = event.x() - self.lastPos.x()
     dy = event.y() - self.lastPos.y()
@@ -276,6 +292,40 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._mouseX = event.pos().x()
     self._mouseY = self.height() - event.pos().y()
+
+    if event.buttons() & Qt.LeftButton:
+      if event.buttons() & Qt.LeftButton & self._shift & ~self._command:
+
+        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._selectionMode = 1
+
+      elif event.buttons() & Qt.LeftButton & ~self._shift & self._command:
+
+        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._selectionMode = 2
+
+      elif event.buttons() & Qt.LeftButton & self._shift & self._command:
+
+        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._selectionMode = 3
+
+        #   event.modifiers() & QtCore.Qt.ShiftModifier):
+    #   position = event.scenePos()
+    #   mousePoint = self.mapSceneToView(position)
+    #   print(mousePoint)
+    #
+    #   elif (event.button() == QtCore.Qt.LeftButton) and (
+    #   event.modifiers() & QtCore.Qt.ShiftModifier) and not (
+    # event.modifiers() & QtCore.Qt.ControlModifier):
+    # print('Add Select')
+    #
+    # elif event.button() == QtCore.Qt.MiddleButton and not event.modifiers():
+    # event.accept()
+    # print('Pick and Assign')
+    #
+    # elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
+    # event.accept()
+    # print('Context Menu to be activated here')
 
   def paintEvent_WithPainter(self, event):
     self.makeCurrent()
@@ -458,6 +508,53 @@ class CcpnGLWidget(QOpenGLWidget):
 
 
     self.set2DProjection()      # set back to the main projection
+
+    if self._drawSelectionBox:
+      GL.glEnable(GL.GL_BLEND)
+      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+      self._dragStart = GLU.gluUnProject(
+        self._startCoordinate[0], self._startCoordinate[1], 0,
+        self.modelViewMatrix,
+        self.projectionMatrix,
+        self.viewport,
+      )
+      self._dragEnd = GLU.gluUnProject(
+        self._endCoordinate[0], self._endCoordinate[1], 0,
+        self.modelViewMatrix,
+        self.projectionMatrix,
+        self.viewport,
+      )
+
+      if self._selectionMode == 1:    # yellow
+        GL.glColor4f(0.8, 0.9, 0.2, 0.2)
+      elif self._selectionMode == 2:      # purple
+        GL.glColor4f(0.8, 0.2, 0.9, 0.2)
+      elif self._selectionMode == 3:      # cyan
+        GL.glColor4f(0.2, 0.5, 0.9, 0.2)
+
+      GL.glBegin(GL.GL_QUADS)
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
+      GL.glEnd()
+
+      if self._selectionMode == 1:    # yellow
+        GL.glColor4f(0.8, 0.9, 0.2, 0.8)
+      elif self._selectionMode == 2:      # purple
+        GL.glColor4f(0.8, 0.2, 0.9, 0.8)
+      elif self._selectionMode == 3:      # cyan
+        GL.glColor4f(0.2, 0.5, 0.9, 0.8)
+
+      GL.glBegin(GL.GL_LINE_STRIP)
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glEnd()
+      GL.glDisable(GL.GL_BLEND)
 
     # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
     # this gets the correct mapped coordinates

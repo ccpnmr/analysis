@@ -503,6 +503,7 @@ class Strip(AbstractWrapperObject):
       obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                      stripSerial=stripSerial, dataSource=dataSource,
                                                      dimensionOrdering=dimensionOrdering)
+
     finally:
       self._endCommandEchoBlock()
     result =  self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]

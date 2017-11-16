@@ -158,6 +158,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
                                            grid=(0, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
+    self.orderedSpectra = []
 
     # spectrumGroupsToolBar
     self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
@@ -634,9 +635,17 @@ class GuiSpectrumDisplay(CcpnModule):
     self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
                                 defaults={'axisOrder':()})
     try:
-      self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+      newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+      if newSpectrum:
+        self.orderedSpectra.append(spectrum)
     finally:
       self._endCommandEchoBlock()
+
+  def _removeSpectrum(self, spectrum):
+    try:
+      self.orderedSpectra.remove(spectrum)
+    except:
+      getLogger().warning('Error, %s does not exist' % spectrum)
 
 def _deletedPeak(peak:Peak):
   """Function for notifiers.

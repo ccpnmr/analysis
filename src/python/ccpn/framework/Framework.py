@@ -507,6 +507,7 @@ class Framework:
       #   strip.setZWidgets()
 
     # Initialise SpectrumViews
+    # TODO:ED use orderedSpectra
     for spectrumDisplay in project.spectrumDisplays:
       for strip in spectrumDisplay.strips:
         for spectrumView in strip.spectrumViews:

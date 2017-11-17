@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, List
+from typing import Sequence, Tuple, List, Optional
 from PyQt4 import QtGui, Qt, QtCore
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
@@ -34,6 +34,10 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
+
+SV_TITLE = '_Strip'
+SV_SPECTRA = '_orderedSpectra'
+
 
 class Strip(AbstractWrapperObject):
   """Display Strip for 1D or nD spectrum"""
@@ -53,9 +57,8 @@ class Strip(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiBoundStrip._metaclass.qualifiedName()
-  
 
-  # CCPN properties  
+  # CCPN properties
   @property
   def _apiStrip(self) -> ApiBoundStrip:
     """ CCPN Strip matching Strip"""
@@ -117,9 +120,74 @@ class Strip(AbstractWrapperObject):
     return self._wrappedData.units
 
   @property
-  def spectra(self) -> Tuple[Spectrum]:
+  def spectra(self) -> Tuple[Spectrum, ...]:
     """The spectra attached to the strip (whether display is currently turned on  or not)"""
     return tuple (x.spectrum for x in self.spectrumViews)
+
+  def _storeOrderedSpectrumViews(self, spectra):
+    for dd in self.project.dataSets:
+      if dd.title == SV_TITLE:
+        for dt in dd.data:
+          if dt.name == SV_SPECTRA:
+            dt.setParameter(self.pid, spectra)
+            setattr(self, SV_SPECTRA, spectra)
+            return
+        dt = dd.newData(name=SV_SPECTRA)
+        dt.setParameter(self.pid, spectra)
+        setattr(self, SV_SPECTRA, spectra)
+        return
+    dd = self.project.newDataSet(title=SV_TITLE)
+    dt = dd.newData(name=SV_SPECTRA)
+    dt.setParameter(self.pid, spectra)
+    setattr(self, SV_SPECTRA, spectra)
+
+  @property
+  def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
+    """The spectra attached to the strip (ordered)"""
+
+    if hasattr(self, SV_SPECTRA):
+      return tuple(x.spectrum for x in getattr(self, SV_SPECTRA) if 'Deleted' not in x.pid)
+    else:
+      # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
+      # store by pid
+      self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+
+      values = tuple(x for x in self.spectrumViews)
+      setattr(self, SV_SPECTRA, values)
+      return tuple(x.spectrum for x in values if 'Deleted' not in x)
+
+  @property
+  def orderedSpectrumViews(self) -> Optional[Tuple]:
+    """The spectra attached to the strip (ordered)"""
+
+    if hasattr(self, SV_SPECTRA):
+      return getattr(self, SV_SPECTRA)
+    else:
+      # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
+      # store by pid
+      self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+
+      values = tuple(x for x in self.spectrumViews)
+      setattr(self, SV_SPECTRA, values)
+      return values
+
+  def appendSpectrumView(self, spectrumView):
+    # retrieve the list from the dataset
+    # append to the end
+    # write back to the dataset
+    if hasattr(self, SV_SPECTRA):
+      spectra = (getattr(self, SV_SPECTRA), (spectrumView,))
+      spectra = tuple(j for i in spectra for j in i)
+    else:
+      spectra = tuple(spectrumView,)
+
+    self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
+    values = tuple(x for x in spectra)
+    setattr(self, SV_SPECTRA, values)
+
+  def removeSpectrumView(self, spectrumView):
+    # TODO:ED handle deletion
+    pass
 
   # Implementation functions
   @classmethod

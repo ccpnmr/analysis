@@ -158,7 +158,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
                                            grid=(0, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
-    self.orderedSpectra = []
+    self._orderedSpectra = []
 
     # spectrumGroupsToolBar
     self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
@@ -637,13 +637,15 @@ class GuiSpectrumDisplay(CcpnModule):
     try:
       newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
       if newSpectrum:
-        self.orderedSpectra.append(spectrum)
+        # self._orderedSpectra.append(spectrum)
+        self.strips[0].appendSpectrumView(newSpectrum)
     finally:
       self._endCommandEchoBlock()
 
   def _removeSpectrum(self, spectrum):
     try:
-      self.orderedSpectra.remove(spectrum)
+      # self._orderedSpectra.remove(spectrum)
+      self.strips[0].removeSpectrumView(spectrum)
     except:
       getLogger().warning('Error, %s does not exist' % spectrum)
 

@@ -507,13 +507,17 @@ class Framework:
       #   strip.setZWidgets()
 
     # Initialise SpectrumViews
-    # TODO:ED use orderedSpectra
     for spectrumDisplay in project.spectrumDisplays:
       for strip in spectrumDisplay.strips:
-        for spectrumView in strip.spectrumViews:
+
+        # TODO:ED use orderedSpectra
+        # for spectrumView in strip.spectrumViews:
+
+        for spectrumView in strip.orderedSpectrumViews:
           spectrumView._createdSpectrumView()
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
+
     # add blank Display
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
       # self.ui.mainWindow.newBlankDisplay()

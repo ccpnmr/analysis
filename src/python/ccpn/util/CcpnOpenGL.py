@@ -189,7 +189,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.eventFilter = self._eventFilter
     # self.installEventFilter(self)   # ejb
     self.setMouseTracking(True)                 # generate mouse events when button not pressed
-    self.keyboardGrabber()
 
     self.base = None
     self.spectrumValues = []
@@ -200,11 +199,17 @@ class CcpnGLWidget(QOpenGLWidget):
     self._endCoordinate = None
     self._shift = False
     self._command = False
+    self._key = ' '
+    self._isSHIFT = ' '
+    self._isCTRL = ' '
 
-    self.installEventFilter(self)
+    # self.installEventFilter(self)
+    self.setFocusPolicy(Qt.StrongFocus)
 
   def eventFilter(self, obj, event):
-    if event.type() == QtCore.QEvent.KeyPress:
+    self._key = '_'
+    if type(event) == QtGui.QKeyEvent and event.key() == Qt.Key_A:
+      self._key = 'A'
       event.accept()
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
@@ -268,16 +273,26 @@ class CcpnGLWidget(QOpenGLWidget):
   def mouseReleaseEvent(self, event):
     self._drawSelectionBox = False
 
-  def keyPressEvent(self, event):
-    self._shift = False
-    self._command = False
+  def keyPressEvent(self, event: QtGui.QKeyEvent):
+    self._key = event.key()
+    keyMod = QApplication.keyboardModifiers()
+    if keyMod == Qt.ShiftModifier:
+      self._isSHIFT = 'S'
+    if keyMod == Qt.ControlModifier:
+      self._isCTRL = 'C'
 
-    if event.key() & Qt.Key_Shift:
-      self._shift = True
-    if event.key() & Qt.ControlModifier:
-      self._command = True
+    # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A:
+    #   self._key = 'A'
+    # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S:
+    #   self._key = 'S'
+
+  def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+    self._key = ' '
+    self._isSHIFT = ' '
+    self._isCTRL = ' '
 
   def mouseMoveEvent(self, event):
+    self.setFocus()
     dx = event.x() - self.lastPos.x()
     dy = event.y() - self.lastPos.y()
 
@@ -294,20 +309,20 @@ class CcpnGLWidget(QOpenGLWidget):
     self._mouseY = self.height() - event.pos().y()
 
     if event.buttons() & Qt.LeftButton:
-      if event.buttons() & Qt.LeftButton & self._shift & ~self._command:
+      # do the complicated keypresses first
+      if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
+          (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
+        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._selectionMode = 3
 
+      elif self._key == Qt.Key_Shift:
         self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 1
 
-      elif event.buttons() & Qt.LeftButton & ~self._shift & self._command:
-
+      elif self._key == Qt.Key_Control:
         self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
 
-      elif event.buttons() & Qt.LeftButton & self._shift & self._command:
-
-        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
-        self._selectionMode = 3
 
         #   event.modifiers() & QtCore.Qt.ShiftModifier):
     #   position = event.scenePos()
@@ -566,7 +581,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
     GL.glEnd()
 
-    coords = "\n  Mouse Coords: "\
+    coords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
     self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]

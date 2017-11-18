@@ -124,6 +124,15 @@ class Strip(AbstractWrapperObject):
     """The spectra attached to the strip (whether display is currently turned on  or not)"""
     return tuple (x.spectrum for x in self.spectrumViews)
 
+  def _retrieveOrderedSpectrumViews(self, pid):
+    for dd in self.project.dataSets:
+      if dd.title == SV_TITLE:
+        for dt in dd.data:
+          if dt.name == SV_SPECTRA:
+            if pid in dt.parameters:
+              return dt.parameters[self.pid]
+    return None
+
   def _storeOrderedSpectrumViews(self, spectra):
     for dd in self.project.dataSets:
       if dd.title == SV_TITLE:
@@ -141,7 +150,6 @@ class Strip(AbstractWrapperObject):
     dt.setParameter(self.pid, spectra)
     setattr(self, SV_SPECTRA, spectra)
 
-  @property
   def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
     """The spectra attached to the strip (ordered)"""
 
@@ -149,15 +157,19 @@ class Strip(AbstractWrapperObject):
       return tuple(x.spectrum for x in getattr(self, SV_SPECTRA) if 'Deleted' not in x.pid)
     else:
       # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
-      # store by pid
-      self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+      # store by pids
 
-      values = tuple(x for x in self.spectrumViews)
+      values = self._retrieveOrderedSpectrumViews(self.pid)
+      if values is None:
+        self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+        values = tuple(x for x in self.spectrumViews)
+      else:
+        values = tuple(self.project.getByPid(x) for x in values if self.project.getByPid(x))
+
       setattr(self, SV_SPECTRA, values)
-      return tuple(x.spectrum for x in values if 'Deleted' not in x)
+      return tuple(x.spectrum for x in values)
 
-  @property
-  def orderedSpectrumViews(self) -> Optional[Tuple]:
+  def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
     """The spectra attached to the strip (ordered)"""
 
     if hasattr(self, SV_SPECTRA):
@@ -165,9 +177,13 @@ class Strip(AbstractWrapperObject):
     else:
       # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
       # store by pid
-      self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+      values = self._retrieveOrderedSpectrumViews(self.pid)
+      if values is None:
+        self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
+        values = tuple(x for x in self.spectrumViews)
+      else:
+        values = tuple(self.project.getByPid(x) for x in values if self.project.getByPid(x))
 
-      values = tuple(x for x in self.spectrumViews)
       setattr(self, SV_SPECTRA, values)
       return values
 

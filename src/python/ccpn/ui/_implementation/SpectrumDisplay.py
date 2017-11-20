@@ -314,7 +314,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
   def removeSpectrumView(self, spectrumView):
     # TODO:ED handle deletion
-    # need to update the deleted object in _ccpnInternalData
+    # do I need to update the deleted object in _ccpnInternalData
     if hasattr(self, ORDEREDSPECTRA):
       spectra = getattr(self, ORDEREDSPECTRA)
       # self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))

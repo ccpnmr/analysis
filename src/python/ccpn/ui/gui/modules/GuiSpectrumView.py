@@ -237,12 +237,15 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
       actionList = spectrumDisplay.spectrumToolBar.actions()
       try:
         # try and find the spectrumView in the orderedlist - for undo function
-        oldIndex = strip.orderedSpectrumViews().index(self)
+        oldList = spectrumDisplay.orderedSpectrumViews()
+        oldIndex = oldList.index(self)
 
         if actionList and oldIndex < len(actionList):
           nextAction = actionList[oldIndex]
-          newAction = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-          action = spectrumDisplay.spectrumToolBar.insertAction(nextAction, newAction)
+
+          # create a new action and move it to the correct place in the list
+          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+          spectrumDisplay.spectrumToolBar.insertAction(nextAction, action)
         else:
           action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
 

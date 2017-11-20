@@ -125,9 +125,14 @@ class SpectrumToolBar(ToolBar):
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
         # TODO:ED delete spectrumView.spectrum from the list before V2 deletion
-        self.widget._removeSpectrum(spectrumView.spectrum)
 
+        spectrumDeleteFunc = self.widget._removeSpectrum
+        spectrumForDeletion = spectrumView
+
+        # delete the spectrumView
         spectrumView._wrappedData.spectrumView.delete()
+
+        spectrumDeleteFunc(spectrumForDeletion)
 
   def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """

@@ -202,7 +202,7 @@ class Strip(AbstractWrapperObject):
     setattr(self, SV_SPECTRA, values)
 
   def removeSpectrumView(self, spectrumView):
-    # TODO:ED handle deletion
+    # TODO:ED handle deletion - may not need anything here
     pass
 
   # Implementation functions

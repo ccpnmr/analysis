@@ -211,7 +211,7 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
     # Update strip
     self.strip.update()
 
-  def _createdSpectrumView(self):
+  def _createdSpectrumView(self, index=None):
     """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
 
     # NBNB TBD FIXME get rid of API objects
@@ -233,7 +233,23 @@ class GuiSpectrumView(QtGui.QGraphicsItem):
       spectrumName = spectrum.name
       if len(spectrumName) > 12:
         spectrumName = spectrumName[:12]+'.....'
-      action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+
+      actionList = spectrumDisplay.spectrumToolBar.actions()
+      try:
+        # try and find the spectrumView in the orderedlist - for undo function
+        oldIndex = strip.orderedSpectrumViews().index(self)
+
+        if actionList and oldIndex < len(actionList):
+          nextAction = actionList[oldIndex]
+          newAction = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+          action = spectrumDisplay.spectrumToolBar.insertAction(nextAction, newAction)
+        else:
+          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+
+      except Exception as es:
+        action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+
+
       action.setCheckable(True)
       action.setChecked(True)
       action.setToolTip(spectrum.name)

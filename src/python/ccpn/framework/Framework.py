@@ -795,14 +795,14 @@ class Framework:
     self._menuSpec = ms = []
 
     ms.append(('Project',   [
-      ("New", self.createNewProject, [('shortcut', 'pn')]),
-      ("Open...", self.openProject, [('shortcut', 'po')]),
+      ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+      ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Open Recent", ()),
 
 #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
       ("Load Data...", self.loadData, [('shortcut', 'ld')]),
       (),
-      ("Save", self.saveProject, [('shortcut', 'ps')]),
+      ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
       ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
@@ -818,7 +818,7 @@ class Framework:
       (),
       ("Preferences...", self.showApplicationPreferences),
       (),
-      ("Close Program", self._closeEvent, [('shortcut', 'qt')]),
+      ("Close Program", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
     ]
                ))
 

@@ -82,6 +82,8 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
 
@@ -396,3 +398,21 @@ class GuiWindow():
           peak.snapToExtremum()
     else:
       getLogger().warning('No selected peak/s. Select a peak first.')
+
+  def storeZoom(self):
+    """
+    store the zoom of the currently selected strip onto a queue
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._storeZoom()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def restoreZoom(self):
+    """
+    restore the zoom of the currently selected strip to the top item of the queue
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._restoreZoom()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')

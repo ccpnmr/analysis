@@ -317,8 +317,13 @@ class SpectrumDisplay(AbstractWrapperObject):
     # do I need to update the deleted object in _ccpnInternalData
     if hasattr(self, ORDEREDSPECTRA):
       spectra = getattr(self, ORDEREDSPECTRA)
-      # self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
+    else:
+      spectra = tuple(spectrumView,)
 
+    self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
+
+    values = tuple(x for x in spectra)
+    setattr(self, ORDEREDSPECTRA, values)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

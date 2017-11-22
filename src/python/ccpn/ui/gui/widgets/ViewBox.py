@@ -195,7 +195,8 @@ class ViewBox(pg.ViewBox):
     for line in self.integralRegions.lines:
       line.sigPositionChanged.connect(self._integralRegionsMoved)
 
-    self.peakWidthPixels = 20  # for ND peaks
+    # TODO:ED smaller cross for now, need to scale for ppm
+    self.peakWidthPixels = 16  # for ND peaks
     self.contextMenuPosition = None #we need this because current.position is not always the best choice for everything!
 
   def _raiseContextMenu(self, event:QtGui.QMouseEvent):

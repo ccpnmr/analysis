@@ -616,7 +616,16 @@ class PeakNd(QtGui.QGraphicsItem):
     color = QtGui.QColor('cyan')
     self.rectItem.setBrush(QtGui.QBrush(color))
     """
+
+    # TODO:ED scale the point as ppm(x, y)
+    vBMTS = peakListView.spectrumView.strip.viewBox.mapSceneToView
+    x = abs(vBMTS(QtCore.QPoint(1, 0)).x() - vBMTS(QtCore.QPoint(0, 0)).x())
+    y = abs(vBMTS(QtCore.QPoint(0, 1)).y() - vBMTS(QtCore.QPoint(0, 0)).y())
+    self.minIndex = 0 if x<=y else 1
+
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
+    # self.drawData = (hz*xPeakWidth, sz*yPeakWidth)#, QtCore.QRectF(-hz, -hz, sz, sz))
+
     ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
     ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
     ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
@@ -760,7 +769,20 @@ class PeakNd(QtGui.QGraphicsItem):
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
         # r, w, box = self.drawData
-        r, w = self.drawData
+
+        # r, w = self.drawData
+        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+        # base on minimum ppm axis for the minute
+        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        #               QtCore.QPoint(0, 0)).x())
+        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+        #   QtCore.QPoint(0, 0)).y())
+        pos = (0.0375 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                      QtCore.QPoint(0, 0)).x()),
+               0.0375 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                QtCore.QPoint(0, 0)).y()))
+        w = r = pos[self.minIndex]
+        self.annotation.setPos(r, -w)
 
         # if self.hover:
         # self.setZValue(10)
@@ -790,17 +812,17 @@ class PeakNd(QtGui.QGraphicsItem):
         # else:
         #   painter.setPen(self.color)
         #   self.setZValue(0)
-        painter.drawLine(-r,-r,r,r)
-        painter.drawLine(-r,r,r,-r)
+        painter.drawLine(-r,-w,r,w)
+        painter.drawLine(-r,w,r,-w)
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
 
         #if self.peak in self.application.current.peaks:
         if self.peak._isSelected:
-          painter.drawLine(-r,-r,-r,r)
-          painter.drawLine(-r,r,r,r)
-          painter.drawLine(r,r,r,-r)
-          painter.drawLine(r,-r,-r,-r)
+          painter.drawLine(-r,-w,-r,w)
+          painter.drawLine(-r,w,r,w)
+          painter.drawLine(r,w,r,-w)
+          painter.drawLine(r,-w,-r,-w)
         #
         # if self.isSelected:
         #   painter.setPen(QtGui.QColor('white'))
@@ -813,17 +835,30 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.setPen(pen)
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
-        r, w = self.drawData
 
-        painter.drawLine(-r,-r,r,r)
-        painter.drawLine(-r,r,r,-r)
+        # r, w = self.drawData
+        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+        # base on minimum ppm axis for the minute
+        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        #               QtCore.QPoint(0, 0)).x())
+        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+        #   QtCore.QPoint(0, 0)).y())
+        pos = (0.0375 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                      QtCore.QPoint(0, 0)).x()),
+               0.0375 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                QtCore.QPoint(0, 0)).y()))
+        w = r = pos[self.minIndex]
+        self.annotation.setPos(r, -w)
+
+        painter.drawLine(-r,-w,r,w)
+        painter.drawLine(-r,w,r,-w)
 
         #if self.peak in self.application.current.peaks:
         if self.peak._isSelected:
-          painter.drawLine(-r,-r,-r,r)
-          painter.drawLine(-r,r,r,r)
-          painter.drawLine(r,r,r,-r)
-          painter.drawLine(r,-r,-r,-r)
+          painter.drawLine(-r,-w,-r,w)
+          painter.drawLine(-r,w,r,w)
+          painter.drawLine(r,w,r,-w)
+          painter.drawLine(r,-w,-r,-w)
 
 
 ###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
@@ -846,7 +881,9 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     ###self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
-    font.setPointSize(14)
+
+    # TODO:ED ad peak annotation size to the preferences
+    font.setPointSize(12)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)

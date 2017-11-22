@@ -190,6 +190,7 @@ class GuiStrip(Frame):
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDroppedItems)
 
+    self.peakLabelling = True
     self.show()
 
   @property
@@ -453,6 +454,18 @@ class GuiStrip(Frame):
   def toggleGrid(self):
     "Toggles whether grid is visible in the strip."
     self.plotWidget.toggleGrid()
+
+  def togglePeakLabelling(self):
+    "Toggles whether peak labelling is minimal is visible in the strip."
+    self.peakLabelling = not self.peakLabelling
+
+    if self.spectrumViews:
+      for sV in self.spectrumViews:
+        for peakList in sV.spectrum.peakLists:
+
+          peakListView = self._findPeakListView(peakList)
+          if peakListView:
+            peakListView._changedPeakListView()
 
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned

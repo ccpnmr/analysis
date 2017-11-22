@@ -317,7 +317,6 @@ class ContoursTab(QtGui.QWidget, Base):
         self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = False")
 
-
   def _queueChangePositiveBaseLevel(self, spectrum, value):
     self._changes['positiveContourBaseLevel'] = partial(self._changePositiveBaseLevel, spectrum, value)
 
@@ -344,6 +343,11 @@ class ContoursTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("spectrum.positiveContourCount = %d" % int(value))
     self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %d" % int(value), spectrum=spectrum)
 
+    # TODO:ED implement changing all of the spectra in the view
+    # for spectrumView in self.spectrum.spectrumViews:
+    #   spectrumView.displayNegativeContours = True
+    #   self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
+    #   self.logger.info("spectrumView.displayNegativeContours = True")
 
   def _queueChangeNegativeBaseLevel(self, spectrum, value):
     self._changes['negativeContourBaseLevel'] = partial(self._changeNegativeBaseLevel, spectrum, value)

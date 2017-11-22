@@ -37,6 +37,8 @@ from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
+from functools import partial
+from ccpn.core.lib.Notifiers import Notifier
 
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 from ccpn.ui.gui.widgets import resources_rc
@@ -107,6 +109,12 @@ class Gui(Ui):
                              GuiPeakListView.GuiPeakListView._changedPeakListView)
 
     project.registerNotifier('NmrAtom', 'rename', GuiPeakListView._updateAssignmentsNmrAtom)
+
+    # project.registerNotifier('NmrAtom', 'delete', partial(GuiPeakListView._updateAssignmentsNmrAtom, None))
+    self._updateNotifier = Notifier(project
+                                    , triggers=[Notifier.DELETE]
+                                    , targetName='NmrAtom'
+                                    , callback=GuiPeakListView._deleteAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
 

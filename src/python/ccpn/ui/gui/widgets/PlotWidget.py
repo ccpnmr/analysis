@@ -130,6 +130,11 @@ class PlotWidget(pg.PlotWidget):
     "Toggle grid state"
     self.grid.setVisible(not self.grid.isVisible())
 
+  # def togglePeakLabelling(self):
+  #   "Toggle grid state"
+  #   self.peakLabelling = not self.peakLabelling
+    # TODO:ED update peaks here
+
   def __getattr__(self, attr):
     """
     Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail.

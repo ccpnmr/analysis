@@ -96,6 +96,18 @@ def _getPeakAnnotation(peak):
   text = ', '.join(peakLabel)
   return text
 
+def _getShortPeakAnnotation(peak):
+  for dimension in range(peak.peakList.spectrum.dimensionCount):
+    pdNA = peak.dimensionNmrAtoms
+
+    # TODO:ED add a sequence of labels that can be cycled through
+    if pdNA:
+      try:
+        return pdNA[0][0].nmrResidue.sequenceCode
+
+      except:
+        return ''
+
 # @profile
 # def _getPeakAnnotation(peak):
 #
@@ -882,7 +894,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
 
-    # TODO:ED ad peak annotation size to the preferences
+    # TODO:ED and peak annotation size to the preferences
     font.setPointSize(12)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
@@ -906,13 +918,20 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   # @profile
   # should not ever call setupPeakAnnotationItem in paint()
   # instead make sure that you have appropriate notifiers call _refreshPeakAnnotation()
-  def setupPeakAnnotationItem(self, peakItem):
+  def setupPeakAnnotationItem(self, peakItem, deleteLabel=False):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
     colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
-    text = _getPeakAnnotation(peakItem.peak)
+
+    if deleteLabel:
+      text = '-, -'         # special case for deletion
+    else:
+      if self.parentWidget().strip.peakLabelling:
+        text = _getPeakAnnotation(peakItem.peak)
+      else:
+        text = _getShortPeakAnnotation(peakItem.peak)
 
     self.setText(text)
   
@@ -950,6 +969,21 @@ def _updateAssignmentsNmrAtom(nmrAtom, oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
   for peak in nmrAtom.assignedPeaks:
     peak._refreshPeakAnnotation()
+
+def _deleteAssignmentsNmrAtom(data):
+  """Update Peak assignments when NmrAtom is reassigned"""
+
+  nmrAtom = data['object']
+  for peak in nmrAtom.assignedPeaks:
+    for peakListView in peak.peakList.peakListViews:
+      peakItem = peakListView.peakItems.get(peak)
+      if peakItem:
+        peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
+
+
+      # thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
+  # if self.restraintList in thisRestraintList:
+
 
 # NB We could replace this with something like the following line,
 # But that would trigger _refreshPeakAnnotation also when the position changes

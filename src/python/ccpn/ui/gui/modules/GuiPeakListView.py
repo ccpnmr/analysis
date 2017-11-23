@@ -975,6 +975,10 @@ def _deleteAssignmentsNmrAtom(data):
   """Update Peak assignments when NmrAtom is reassigned"""
 
   nmrAtom = data['object']
+  project = data['theobject']
+
+
+
   for peak in nmrAtom.assignedPeaks:
     for peakListView in peak.peakList.peakListViews:
       peakItem = peakListView.peakItems.get(peak)

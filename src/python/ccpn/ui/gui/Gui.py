@@ -114,10 +114,10 @@ class Gui(Ui):
                                     , triggers=[Notifier.RENAME]
                                     , targetName='NmrAtom'
                                     , callback=GuiPeakListView._updateAssignmentsNmrAtom)
-    # self._updateNotifier = Notifier(project
-    #                                 , triggers=[Notifier.DELETE]
-    #                                 , targetName='NmrAtom'
-    #                                 , callback=GuiPeakListView._deleteAssignmentsNmrAtom)
+    self._updateNotifier = Notifier(project
+                                    , triggers=[Notifier.DELETE]
+                                    , targetName='NmrAtom'
+                                    , callback=GuiPeakListView._deleteAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
 

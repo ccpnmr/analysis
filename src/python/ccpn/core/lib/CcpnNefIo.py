@@ -877,6 +877,38 @@ def exportNef(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
+def convertToDataBlock(project:Project
+                       , path:str
+                       , overwriteExisting:bool=False
+                       , skipPrefixes:typing.Sequence=()
+                       , expandSelection:bool=True
+                       # , exclusionDict={}
+                       , pidList:typing.Sequence=None):
+  #TODO:ED check that the calling order to correct and matches command line action
+  """export NEF file to path"""
+  # ejb - dialog added to allow the changing of the name from the current project name.
+
+  if path[-4:] != '.nef':
+    path = path+'.nef'
+    getLogger().debug('Adding .nef extension to filename %s' % path)
+
+  if os.path.exists(path) and not overwriteExisting:
+    raise IOError("%s already exists" % path)
+
+  dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+                           pidList=pidList)   #, exclusionDict=exclusionDict)
+
+  return dataBlock, path       # ejb - will this work here?
+
+def writeDataBlock(dataBlock, path):
+  dirPath, fileName = os.path.split(path)
+  if dirPath and not os.path.isdir(dirPath):
+    os.makedirs(dirPath)
+
+  #TODO:ED check overwriteExisting flag and whether file exists
+  with open(path, 'w') as f:            # save write
+    f.write(dataBlock.toString())
+
 def convert2NefString(project:Project, skipPrefixes:typing.Sequence=(), expandSelection:bool=True,
                       pidList:list=None):   #, exclusionDict:dict={}):
   """Convert project to NEF string"""
@@ -909,6 +941,40 @@ def convert2NefString(project:Project, skipPrefixes:typing.Sequence=(), expandSe
                   val.removeColumn(looptag, removeData=True)
 
   return dataBlock.toString()
+
+def convertToCcpnDataBlock(project:Project, skipPrefixes:typing.Sequence=(), expandSelection:bool=True,
+                      pidList:list=None):   #, exclusionDict:dict={}):
+  """Convert project to NEF string"""
+
+  converter = CcpnNefWriter(project)
+
+  #TODO:ED check with Rasmus about removing items from the project export list
+
+  dataBlock = converter.exportProject(expandSelection=expandSelection, pidList=pidList)   #, exclusionDict=exclusionDict)
+
+  # Delete tags starting with certain prefixes.
+  # NB designed to strip out 'ccpn' tags to make output comparison easier
+  for prefix in skipPrefixes:
+    # Could be done faster, but this is a rare operation
+    for sftag in list(dataBlock.keys()):
+      if sftag.startswith(prefix):
+        del dataBlock[sftag]
+      else:
+        sf = dataBlock[sftag]
+        for tag in list(sf.keys()):
+          if tag.startswith(prefix):
+            del sf[tag]
+          else:
+            val = sf[tag]
+            if isinstance(val, StarIo.NmrLoop):
+              # This is a loop:
+              for looptag in val.columns:
+                # NB val.columns is a tuple (encapsulation) and will not change during the loop
+                if looptag.startswith(prefix):
+                  val.removeColumn(looptag, removeData=True)
+
+  return dataBlock
+
 
 class CcpnNefWriter:
   """CCPN NEF reader/writer"""

@@ -1222,6 +1222,13 @@ class Framework:
                    , expandSelection=expandSelection
                    , pidList=pidList)
 
+    # with self.project.convertToDataBlock(nefPath
+    #                , overwriteExisting=True
+    #                , skipPrefixes=skipPrefixes
+    #                , expandSelection=expandSelection
+    #                , pidList=pidList) as dataBlock:
+    #   dataBlock.addItem('AAAAAAARRRRGH', 'I like fishing')
+
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
     # TODO: convert this to a save and call self.project.save()

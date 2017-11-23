@@ -110,11 +110,11 @@ class Gui(Ui):
                              GuiPeakListView.GuiPeakListView._changedPeakListView)
 
     # TODO:ED need to unregister these notifiers on close
-    self._updateNotifier = Notifier(project
+    self._updateNotifier1 = Notifier(project
                                     , triggers=[Notifier.RENAME]
                                     , targetName='NmrAtom'
                                     , callback=GuiPeakListView._updateAssignmentsNmrAtom)
-    self._updateNotifier = Notifier(project
+    self._updateNotifier2 = Notifier(project
                                     , triggers=[Notifier.DELETE]
                                     , targetName='NmrAtom'
                                     , callback=GuiPeakListView._deleteAssignmentsNmrAtom)

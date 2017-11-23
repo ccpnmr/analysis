@@ -457,6 +457,8 @@ class ViewBox(pg.ViewBox):
         finally:
           project.unblankNotification()
 
+        # hide all the messages from the peak annotation generation
+        project._startCommandEchoBlock('mousePeakPicking')
         # update strips which have the above peaks in them
         # (could check for visibility...)
         peakLists = set([peak.peakList for peak in peaks])
@@ -464,6 +466,7 @@ class ViewBox(pg.ViewBox):
           for peakListView in peakList.peakListViews:
             peakListView.spectrumView.strip.showPeaks(peakList)
 
+        project._endCommandEchoBlock()
         # update peak table
         # limitation: this will only update the first peak table
         if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):

@@ -939,7 +939,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       undo.increaseBlocking()
     try:
       if clearLabel:
-        self.setText('')
+        self.setText(text)
       else:
         self.setText(text)
 

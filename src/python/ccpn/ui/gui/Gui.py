@@ -114,22 +114,24 @@ class Gui(Ui):
                                     , triggers=[Notifier.RENAME]
                                     , targetName='NmrAtom'
                                     , callback=GuiPeakListView._updateAssignmentsNmrAtom)
-    self._updateNotifier2 = Notifier(project
-                                    , triggers=[Notifier.DELETE]
-                                    , targetName='NmrAtom'
-                                    , callback=GuiPeakListView._deleteAssignmentsNmrAtom)
+    # self._updateNotifier2 = Notifier(project
+    #                                 , triggers=[Notifier.CREATE]
+    #                                 , targetName='NmrAtom'
+    #                                 , callback=GuiPeakListView._editAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
 
     # API notifiers - see functions for comments on why this is done this way
     project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
                                  'ccp.nmr.Nmr.AbstractPeakDimContrib', 'postInit')
-    # project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
+    # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
     #                             'ccp.nmr.Nmr.AbstractPeakDimContrib', 'preDelete')
 
     # ejb - new notifier to catch the deletion of an nmrAtom and update peak labels
     project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
                                 'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
+
+
 
     from ccpn.ui.gui.modules import GuiStripDisplayNd
     project._registerApiNotifier(GuiStripDisplayNd._changedBoundDisplayAxisOrdering,

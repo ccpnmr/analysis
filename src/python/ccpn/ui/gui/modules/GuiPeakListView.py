@@ -918,23 +918,49 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
   # @profile
   # should not ever call setupPeakAnnotationItem in paint()
   # instead make sure that you have appropriate notifiers call _refreshPeakAnnotation()
-  def setupPeakAnnotationItem(self, peakItem, deleteLabel=False):
+  def setupPeakAnnotationItem(self, peakItem, clearLabel=False):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
     colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
 
-    if deleteLabel:
-      text = '-, -'         # special case for deletion
+    if self.parentWidget().strip.peakLabelling:
+      text = _getPeakAnnotation(peakItem.peak)
     else:
-      if self.parentWidget().strip.peakLabelling:
-        text = _getPeakAnnotation(peakItem.peak)
-      else:
-        text = _getShortPeakAnnotation(peakItem.peak)
+      text = _getShortPeakAnnotation(peakItem.peak)
 
     self.setText(text)
-  
+
+    project = peakItem.peak.project
+    project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem)
+    undo = project._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    try:
+      if clearLabel:
+        self.setText('')
+      else:
+        self.setText(text)
+
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
+      project._endCommandEchoBlock()
+
+    undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                 redoArgs=(peakItem, clearLabel))
+
+
+  def clearPeakAnnotationItem(self, peakItem):
+
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    colour = peakItem.peakListView.peakList.textColour
+    self.setBrush(QtGui.QColor(colour))
+
+    self.setupPeakAnnotationItem(peakItem, clearLabel=True)
+
   def mousePressEvent(self, event):
 
 
@@ -965,6 +991,14 @@ def _refreshPeakAnnotation(peak:Peak):
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
+def _deletePeakAnnotation(peak:Peak):
+  for peakListView in peak.peakList.peakListViews:
+      peakItem = peakListView.peakItems.get(peak)
+      if peakItem:
+        peakItem.annotation.clearPeakAnnotationItem(peakItem)
+
+Peak._deletePeakAnnotation = _deletePeakAnnotation
+
 def _updateAssignmentsNmrAtom(nmrAtom, data):        # oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
   nmrAtom = data['object']
@@ -973,16 +1007,31 @@ def _updateAssignmentsNmrAtom(nmrAtom, data):        # oldPid:str):
 
 def _deleteAssignmentsNmrAtom(data):
   """Update Peak assignments when NmrAtom is reassigned"""
-
   nmrAtom = data['object']
-  project = data['theObject']
 
-  # TODO:ED not correct, will rename all
-  for peak in project.peaks:
-    for peakListView in peak.peakList.peakListViews:
-      peakItem = peakListView.peakItems.get(peak)
-      if peakItem:
-        peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
+  if nmrAtom.assignedPeaks:
+    project = data['theObject']
+
+    # # TODO:ED not correct, will rename all
+    # for peak in project.peaks:
+    #   for peakListView in peak.peakList.peakListViews:
+    #     peakItem = peakListView.peakItems.get(peak)
+    #     if peakItem:
+    #       peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
+
+def _editAssignmentsNmrAtom(data):
+  """Update Peak assignments when NmrAtom is reassigned"""
+  nmrAtom = data['object']
+
+  if nmrAtom.assignedPeaks:
+    project = data['theObject']
+
+    # TODO:ED not correct, will rename all
+    for peak in project.peaks:
+      for peakListView in peak.peakList.peakListViews:
+        peakItem = peakListView.peakItems.get(peak)
+        if peakItem:
+          peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
 
 
       # thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
@@ -1001,7 +1050,8 @@ def _upDateAssignmentsPeakDimContrib(project:Project,
 def _deleteAssignmentsNmrAtomDelete(project:Project,
                                      apiPeakDimContrib:Nmr.AbstractPeakDimContrib):
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
-  peak._refreshPeakAnnotation()
+  if not peak.assignedNmrAtoms:
+    peak._deletePeakAnnotation()
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes
 def _refreshPeakPosition(peak:Peak):

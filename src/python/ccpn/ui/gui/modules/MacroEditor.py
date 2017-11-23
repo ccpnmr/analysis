@@ -59,7 +59,7 @@ class MacroEditor(CcpnModule):
     #widget = QtGui.QWidget()
     widget = self.mainWidget
     widgetLayout = QtGui.QGridLayout()
-    widget.setLayout(widgetLayout)
+    # widget.setLayout(widgetLayout)
     widget.layout().setSpacing(5)
     widget.layout().setContentsMargins(10,10,10,10)
     widget.layout().addWidget(self.label1,    0, 0, 1, 1)
@@ -143,6 +143,7 @@ class MacroEditor(CcpnModule):
     self.mainWindow.recordingMacro = True
     self.buttonBox.buttons[1].setEnabled(True)
     self.buttonBox.buttons[0].setDisabled(True)
+    self.mainWindow.editor = self
 
 
   def _stopMacroRecord(self):
@@ -152,6 +153,7 @@ class MacroEditor(CcpnModule):
     self.mainWindow.recordingMacro = False
     self.buttonBox.buttons[1].setDisabled(True)
     self.buttonBox.buttons[0].setEnabled(True)
+    del self.mainWindow.editor
 
   def _reject(self):
     self.close()

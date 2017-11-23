@@ -907,7 +907,7 @@ class Project(AbstractWrapperObject):
         undo.decreaseBlocking()
 
   @contextmanager
-  def convertToDataBlock(self, path:str=None
+  def _convertToDataBlock(self, path:str=None
                   , overwriteExisting:bool=False
                   , skipPrefixes:typing.Sequence=()
                   , expandSelection:bool=True

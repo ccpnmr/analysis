@@ -1222,7 +1222,7 @@ class Framework:
                    , expandSelection=expandSelection
                    , pidList=pidList)
 
-    # with self.project.convertToDataBlock(nefPath
+    # with self.project._convertToDataBlock(nefPath
     #                , overwriteExisting=True
     #                , skipPrefixes=skipPrefixes
     #                , expandSelection=expandSelection

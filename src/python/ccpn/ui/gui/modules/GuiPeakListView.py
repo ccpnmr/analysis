@@ -965,8 +965,9 @@ def _refreshPeakAnnotation(peak:Peak):
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
-def _updateAssignmentsNmrAtom(nmrAtom, oldPid:str):
+def _updateAssignmentsNmrAtom(nmrAtom, data):        # oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
+  nmrAtom = data['object']
   for peak in nmrAtom.assignedPeaks:
     peak._refreshPeakAnnotation()
 
@@ -994,6 +995,10 @@ def _upDateAssignmentsPeakDimContrib(project:Project,
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
 
+def _deleteAssignmentsNmrAtomDelete(project:Project,
+                                     apiPeakDimContrib:Nmr.AbstractPeakDimContrib):
+  peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
+  peak._refreshPeakAnnotation()
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes
 def _refreshPeakPosition(peak:Peak):

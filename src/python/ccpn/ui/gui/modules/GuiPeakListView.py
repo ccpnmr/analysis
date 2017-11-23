@@ -789,9 +789,9 @@ class PeakNd(QtGui.QGraphicsItem):
         #               QtCore.QPoint(0, 0)).x())
         # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
         #   QtCore.QPoint(0, 0)).y())
-        pos = (0.0375 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
                       QtCore.QPoint(0, 0)).x()),
-               0.0375 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
                 QtCore.QPoint(0, 0)).y()))
         w = r = pos[self.minIndex]
         self.annotation.setPos(r, -w)
@@ -855,9 +855,9 @@ class PeakNd(QtGui.QGraphicsItem):
         #               QtCore.QPoint(0, 0)).x())
         # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
         #   QtCore.QPoint(0, 0)).y())
-        pos = (0.0375 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
                       QtCore.QPoint(0, 0)).x()),
-               0.0375 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
                 QtCore.QPoint(0, 0)).y()))
         w = r = pos[self.minIndex]
         self.annotation.setPos(r, -w)

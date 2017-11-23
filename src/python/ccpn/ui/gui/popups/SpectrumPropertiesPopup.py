@@ -997,3 +997,101 @@ class ContoursTab(QtGui.QWidget, Base):
     spectrum._apiDataSource.negativeContourColour = newColour
     self._writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)
     self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
+
+
+class SpectrumDisplayPropertiesPopup(CcpnDialog):
+  # All spectra in the current display are added as tabs
+  # The apply button then steps through each tab, and calls each function in the _changes dictionary
+  # in order to set the parameters.
+
+  def __init__(self, parent=None, mainWindow=None, orderedSpectra=None
+               , title='Spectrum Display Properties', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+
+    self.tabWidget = QtGui.QTabWidget()
+
+    self._contoursTab = []
+    for specNum, thisSpec in enumerate(orderedSpectra):
+      self._contoursTab.append(ContoursTab(thisSpec))
+      self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
+
+    self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
+
+    Button(self, grid=(2, 1), callback=self.reject, text='Cancel',vPolicy='fixed')
+    self.applyButton = Button(self, grid=(2, 2), callback=self._applyChanges, text='Apply', vPolicy='fixed')
+    # self.applyButton.setEnabled(False)
+    Button(self, grid=(2, 3), callback=self._okButton, text='Ok', vPolicy='fixed')
+
+    # if sys.platform.lower() == 'linux':
+    #   if spectrum.project._appBase.colourScheme == 'dark':
+    #     self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
+    #   elif spectrum.project._appBase.colourScheme == 'light':
+    #     self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
+
+  def _keyPressEvent(self, event):
+    if event.key() == QtCore.Qt.Key_Enter:
+      pass
+
+  def _repopulate(self):
+    if self._contoursTab:
+      self._contoursTab._repopulate()
+
+  def _applyAllChanges(self, changes):
+    for v in changes.values():
+      v()
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    # tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
+    # tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
+
+    # ejb - error above, need to set the tabs explicitly
+    tabs = self._contoursTab
+
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    self.project._startCommandEchoBlock('_applyChanges')
+    try:
+      for t in tabs:
+        if t is not None:
+          changes = t._changes
+          self._applyAllChanges(changes)
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(str(self.windowTitle()), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.project._undo.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
+      return False
+    else:
+      return True
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()

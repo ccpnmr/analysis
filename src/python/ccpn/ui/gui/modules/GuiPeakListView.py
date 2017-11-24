@@ -933,7 +933,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setText(text)
 
     project = peakItem.peak.project
-    project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem)
+    project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
     undo = project._undo
     if undo is not None:
       undo.increaseBlocking()

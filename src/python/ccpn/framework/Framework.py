@@ -607,7 +607,7 @@ class Framework:
   def getByGid(self, gid):
     return self.ui.getByGid(gid)
 
-  def _startCommandBlock(self, command:str, **objectParameters):
+  def _startCommandBlock(self, command:str, quiet:bool=False, **objectParameters):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
 
     MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
@@ -642,7 +642,10 @@ class Framework:
       commands.append(command)
 
       # echo command strings
-      self.ui.echoCommands(commands)
+      # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
+      # but without the screen output
+      if not quiet:
+        self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
     getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
@@ -991,6 +994,7 @@ class Framework:
         project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
         self._initialiseProject(project)
+        project._undo.clear()
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default

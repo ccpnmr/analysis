@@ -114,10 +114,12 @@ class GuiStrip(Frame):
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
-    self._stripIdLabel = Label(parent=self._labelWidget,
-                               text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
-                               grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
-    self._stripIdLabel.setFont(textFontSmall)
+    # self._stripIdLabel = Label(parent=self._labelWidget,
+    #                            text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
+    #                            grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
+    # self._stripIdLabel.setFont(textFontSmall)
+    # TODO:ED check - have moved the label to the top-left corner
+    self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
@@ -128,11 +130,11 @@ class GuiStrip(Frame):
     self.hideStripLabel()
 
     # A label to display the cursor positions (updated by _showMousePosition)
-    self._cursorLabel = Label(parent=self._labelWidget,
-                               text='',
-                               grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
-                               # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
-                               hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
+    # self._cursorLabel = Label(parent=self._labelWidget,
+    #                            text='',
+    #                            grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
+    #                            # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
+    #                            hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
 
     # self._cursorLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
     # self._cursorLabel.setAutoFillBackground(False)
@@ -141,7 +143,7 @@ class GuiStrip(Frame):
     # self._stripLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
     # self._stripLabel.setAutoFillBackground(False)
 
-    self._cursorLabel.setFont(textFontSmall)
+    # self._cursorLabel.setFont(textFontSmall)
     # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
@@ -503,13 +505,19 @@ class GuiStrip(Frame):
 
     position = self.viewBox.mapSceneToView(pos)
     if self.orderedAxes[1] and self.orderedAxes[1].code == 'intensity':
-      format = "%s: %.3f  %s: %.4g"
+      format = "%s: %.3f\n%s: %.4g"
     else:
-      format = "%s: %.2f  %s: %.2f"
+      format = "%s: %.2f\n%s: %.2f"
 
-    self._cursorLabel.setText(format %
+    # self._cursorLabel.setText(format %
+    #   (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+    # )
+
+    self.plotWidget.mouseLabel.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
+    self.plotWidget.mouseLabel.setPos(position.x(), position.y())
+    self.plotWidget.mouseLabel.show()
 
   def zoomToRegion(self, xRegion:typing.Tuple[float, float], yRegion:typing.Tuple[float, float]):
     """

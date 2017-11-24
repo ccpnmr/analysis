@@ -1051,7 +1051,7 @@ def _deletePeakAnnotation(peak:Peak):
 
 Peak._deletePeakAnnotation = _deletePeakAnnotation
 
-def _updateAssignmentsNmrAtom(nmrAtom, data):        # oldPid:str):
+def _updateAssignmentsNmrAtom(data):        # oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
   nmrAtom = data['object']
   for peak in nmrAtom.assignedPeaks:
@@ -1073,6 +1073,7 @@ def _deleteAssignmentsNmrAtom(data):
 
 def _editAssignmentsNmrAtom(data):
   """Update Peak assignments when NmrAtom is reassigned"""
+  # callback in Gui.py currently disabled
   nmrAtom = data['object']
 
   if nmrAtom.assignedPeaks:

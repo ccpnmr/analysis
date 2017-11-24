@@ -206,17 +206,71 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.installEventFilter(self)
     self.setFocusPolicy(Qt.StrongFocus)
 
+    self.axisL = 12
+    self.axisR = 4
+    self.axisT = 20
+    self.axisB = 80
+
   def wheelEvent(self, event):
+    def between(val, l, r):
+      return (l-val)*(r-val) <= 0
+
     numPixels = event.pixelDelta()
     numDegrees = event.angleDelta() / 8
 
-    # returns a QPoint with the 'y' as change, +ve implies zoom-in
-    # if (!numPixels.isNull()) {
-    # scrollWithPixels(numPixels);
-    # } else if (!numDegrees.isNull()) {
-    # QPoint numSteps = numDegrees / 15;
-    # scrollWithDegrees(numSteps);
-    # }
+    h = self.height()
+    w = self.width()
+
+    axisLine = 5
+    h = self.height()
+    w = self.width()
+
+    # find the correct viewport
+    mw = [0, 35, w-36, h-1]
+    ba = [0, 0, w - 36, 34]
+    ra = [w-36, 35, w, h]
+    if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
+      mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
+      mbx = self.axisL + mb * (self.axisR - self.axisL)
+
+      if numDegrees.y() < 0:
+        self.axisL = mbx + 1.125 * (self.axisL - mbx)
+        self.axisR = mbx - 1.125 * (mbx - self.axisR)
+      else:
+        self.axisL = mbx + 0.9 * (self.axisL - mbx)
+        self.axisR = mbx - 0.9 * (mbx - self.axisR)
+
+      mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
+      mby = self.axisB + mb * (self.axisT - self.axisB)
+
+      if numDegrees.y() < 0:
+        self.axisB = mby + 1.125 * (self.axisB - mby)
+        self.axisT = mby - 1.125 * (mby - self.axisT)
+      else:
+        self.axisB = mby + 0.9 * (self.axisB - mby)
+        self.axisT = mby - 0.9 * (mby - self.axisT)
+
+    elif between(self._mouseX, ba[0], ba[2]) and between(self._mouseY, ba[1], ba[3]):
+      mb = (self._mouseX - ba[0]) / (ba[2] - ba[0])
+      mbx = self.axisL + mb * (self.axisR - self.axisL)
+
+      if numDegrees.y() < 0:
+        self.axisL = mbx + 1.125 * (self.axisL - mbx)
+        self.axisR = mbx - 1.125 * (mbx - self.axisR)
+      else:
+        self.axisL = mbx + 0.9 * (self.axisL - mbx)
+        self.axisR = mbx - 0.9 * (mbx - self.axisR)
+
+    elif between(self._mouseX, ra[0], ra[2]) and between(self._mouseY, ra[1], ra[3]):
+      mb = (self._mouseY - ra[1]) / (ra[3] - ra[1])
+      mby = self.axisB + mb * (self.axisT - self.axisB)
+
+      if numDegrees.y() < 0:
+        self.axisB = mby + 1.125 * (self.axisB - mby)
+        self.axisT = mby - 1.125 * (mby - self.axisT)
+      else:
+        self.axisB = mby + 0.9 * (self.axisB - mby)
+        self.axisT = mby - 0.9 * (mby - self.axisT)
 
     event.accept()
 
@@ -277,15 +331,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.object = self.makeObject()
 
-  def mousePressEvent(self, event):
-    self.lastPos = event.pos()
+  def mousePressEvent(self, ev):
+    self.lastPos = ev.pos()
 
-    self._startCoordinate = [event.pos().x(), self.height() - event.pos().y()]
-    self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+    self._startCoordinate = [ev.pos().x(), self.height() - ev.pos().y()]
+    self._endCoordinate = self._startCoordinate
     self._drawSelectionBox = True
 
-  def mouseReleaseEvent(self, event):
+  def mouseReleaseEvent(self, ev):
     self._drawSelectionBox = False
+    self._lastButtonReleased = ev.button()
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -307,17 +362,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def mouseMoveEvent(self, event):
     self.setFocus()
-    dx = event.x() - self.lastPos.x()
-    dy = event.y() - self.lastPos.y()
-
-    if event.buttons() & Qt.LeftButton:
-      self.setXRotation(self.xRot + 8 * dy)
-      self.setYRotation(self.yRot + 8 * dx)
-    elif event.buttons() & Qt.RightButton:
-      self.setXRotation(self.xRot + 8 * dy)
-      self.setZRotation(self.zRot + 8 * dx)
-
+    dx = event.pos().x() - self.lastPos.x()
+    dy = event.pos().y() - self.lastPos.y()
     self.lastPos = event.pos()
+
+    # if event.buttons() & Qt.LeftButton:
+    #   self.setXRotation(self.xRot + 8 * dy)
+    #   self.setYRotation(self.yRot + 8 * dx)
+    # elif event.buttons() & Qt.RightButton:
+    #   self.setXRotation(self.xRot + 8 * dy)
+    #   self.setZRotation(self.zRot + 8 * dx)
 
     self._mouseX = event.pos().x()
     self._mouseY = self.height() - event.pos().y()
@@ -337,6 +391,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
 
+      else:
+        self.axisL -= dx * self.pixelX
+        self.axisR -= dx * self.pixelX
+        self.axisT += dy * self.pixelY
+        self.axisB += dy * self.pixelY
 
         #   event.modifiers() & QtCore.Qt.ShiftModifier):
     #   position = event.scenePos()
@@ -356,47 +415,47 @@ class CcpnGLWidget(QOpenGLWidget):
     # event.accept()
     # print('Context Menu to be activated here')
 
-  def paintEvent_WithPainter(self, event):
-    self.makeCurrent()
-
-    GL.glMatrixMode(GL.GL_MODELVIEW)
-    GL.glPushMatrix()
-
-    self.set3DProjection()
-
-    self.setClearColor(self.trolltechPurple.darker())
-    GL.glShadeModel(GL.GL_SMOOTH)
-    GL.glEnable(GL.GL_DEPTH_TEST)
-    # GL.glEnable(GL.GL_CULL_FACE)
-    GL.glEnable(GL.GL_LIGHTING)
-    GL.glEnable(GL.GL_LIGHT0)
-    GL.glEnable(GL.GL_MULTISAMPLE)
-    GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION,
-                      (0.5, 5.0, 7.0, 1.0))
-
-    self.setupViewport(self.width(), self.height())
-
-    GL.glClear(
-      GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    GL.glLoadIdentity()
-    GL.glTranslated(0.0, 0.0, -10.0)
-    GL.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
-    GL.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
-    GL.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
-    GL.glCallList(self.object)
-
-    GL.glMatrixMode(GL.GL_MODELVIEW)
-    GL.glPopMatrix()
-
-    painter = QPainter(self)
-    painter.setRenderHint(QPainter.Antialiasing)
-
-    for bubble in self.bubbles:
-      if bubble.rect().intersects(QRectF(event.rect())):
-        bubble.drawBubble(painter)
-
-    self.drawInstructions(painter)
-    painter.end()
+  # def paintEvent_WithPainter(self, event):
+  #   self.makeCurrent()
+  #
+  #   GL.glMatrixMode(GL.GL_MODELVIEW)
+  #   GL.glPushMatrix()
+  #
+  #   self.set3DProjection()
+  #
+  #   self.setClearColor(self.trolltechPurple.darker())
+  #   GL.glShadeModel(GL.GL_SMOOTH)
+  #   GL.glEnable(GL.GL_DEPTH_TEST)
+  #   # GL.glEnable(GL.GL_CULL_FACE)
+  #   GL.glEnable(GL.GL_LIGHTING)
+  #   GL.glEnable(GL.GL_LIGHT0)
+  #   GL.glEnable(GL.GL_MULTISAMPLE)
+  #   GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION,
+  #                     (0.5, 5.0, 7.0, 1.0))
+  #
+  #   self.setupViewport(self.width(), self.height())
+  #
+  #   GL.glClear(
+  #     GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+  #   GL.glLoadIdentity()
+  #   GL.glTranslated(0.0, 0.0, -10.0)
+  #   GL.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
+  #   GL.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
+  #   GL.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
+  #   GL.glCallList(self.object)
+  #
+  #   GL.glMatrixMode(GL.GL_MODELVIEW)
+  #   GL.glPopMatrix()
+  #
+  #   painter = QPainter(self)
+  #   painter.setRenderHint(QPainter.Antialiasing)
+  #
+  #   for bubble in self.bubbles:
+  #     if bubble.rect().intersects(QRectF(event.rect())):
+  #       bubble.drawBubble(painter)
+  #
+  #   self.drawInstructions(painter)
+  #   painter.end()
 
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
@@ -454,6 +513,20 @@ class CcpnGLWidget(QOpenGLWidget):
       self.viewport,
     )
 
+    origin = GLU.gluUnProject(
+      0.0, 0.0, 0.0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+    pointOne = GLU.gluUnProject(
+      1.0, 1.0, 0.0,
+      self.modelViewMatrix,
+      self.projectionMatrix,
+      self.viewport,
+    )
+    self.pixelX = pointOne[0]-origin[0]
+    self.pixelY = pointOne[1]-origin[1]
 
     # GL.glEnable(GL.GL_LINE_SMOOTH)
     # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
@@ -525,8 +598,8 @@ class CcpnGLWidget(QOpenGLWidget):
     w = self.width()
     GL.glColor4f(0.2, 1.0, 0.3, 1.0)
     GL.glBegin(GL.GL_LINES)
-    GL.glVertex2d(0, 1)         # not sure why 0 doesn't work
-    GL.glVertex2d(w-36, 1)      # think I'm drawing over it with the next viewport
+    GL.glVertex2d(0, 0)         # not sure why 0 doesn't work
+    GL.glVertex2d(w-36, 0)      # think I'm drawing over it with the next viewport
     GL.glVertex2d(w-36, 0)
     GL.glVertex2d(w-36, h-36)
     GL.glEnd()
@@ -606,9 +679,9 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
 
-  def resizeGL(self, width, height):
-    self.setupViewport(width, height)
-    self.update()
+  # def resizeGL(self, width, height):
+  #   self.setupViewport(width, height)
+  #   self.update()
 
   def showEvent(self, event):
     self.createBubbles(20 - len(self.bubbles))
@@ -751,15 +824,16 @@ class CcpnGLWidget(QOpenGLWidget):
     # GLU.gluOrtho2D(-10, 50, -10, 0)
 
     # testing - grab the coordinates from the plotWidget
-    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
-    axL = axisRangeL[0]
-    axR = axisRangeL[1]
-    axisRangeB = self.parent.plotWidget.getAxis('right').range
-    axB = axisRangeB[0]
-    axT = axisRangeB[1]
+    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axL = axisRangeL[0]
+    # axR = axisRangeL[1]
+    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axB = axisRangeB[0]
+    # axT = axisRangeB[1]
 
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
-    GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
+    # GLU.gluOrtho2D(axL, axR, axB, axT)      # nearly!
+    GLU.gluOrtho2D(self.axisL, self.axisR, self.axisB, self.axisT)      # nearly!
 
     # GL.glScalef(1, 1, 1);
 
@@ -777,15 +851,17 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glViewport(w-35-axisLine, 35, axisLine, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
-    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
-    axL = axisRangeL[0]
-    axR = axisRangeL[1]
-    axisRangeB = self.parent.plotWidget.getAxis('right').range
-    axB = axisRangeB[0]
-    axT = axisRangeB[1]
+    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axL = axisRangeL[0]
+    # axR = axisRangeL[1]
+    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axB = axisRangeB[0]
+    # axT = axisRangeB[1]
 
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
-    GLU.gluOrtho2D(axL, axR, axB, axT)
+    # GLU.gluOrtho2D(axL, axR, axB, axT)
+    GLU.gluOrtho2D(self.axisL, self.axisR, self.axisB, self.axisT)      # nearly!
+
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 
@@ -799,15 +875,17 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glViewport(0, 35, w-35, axisLine)   # leave a 35 width margin for the axes - bottom/right
                                     # (0,0) is bottom-left
 
-    axisRangeL = self.parent.plotWidget.getAxis('bottom').range
-    axL = axisRangeL[0]
-    axR = axisRangeL[1]
-    axisRangeB = self.parent.plotWidget.getAxis('right').range
-    axB = axisRangeB[0]
-    axT = axisRangeB[1]
+    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axL = axisRangeL[0]
+    # axR = axisRangeL[1]
+    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axB = axisRangeB[0]
+    # axT = axisRangeB[1]
 
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
-    GLU.gluOrtho2D(axL, axR, axB, axT)
+    # GLU.gluOrtho2D(axL, axR, axB, axT)
+    GLU.gluOrtho2D(self.axisL, self.axisR, self.axisB, self.axisT)      # nearly!
+
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 
@@ -822,9 +900,9 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(15, 35, w-35, h-50)   # leave a 35 width margin for the axes
     #                                     # '15' is a temporary border at left/top
     GL.glViewport(0, 35, w-35, h-35)      # leave a 35 width margin for the axes
-                                          # '15' is a temporary border at left/top
+                                         # '15' is a temporary border at left/top
 
-    GLU.gluOrtho2D(0, w-36, 0, h-36)
+    GLU.gluOrtho2D(0, w-36, -1, h-36)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 

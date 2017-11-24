@@ -38,6 +38,7 @@ from ccpn.ui.gui.lib.mouseEvents import rightMouse
 from ccpn.util.Colour import Colour
 
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+import pyqtgraph.opengl as gl
 
 #TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like
 # as it is only there and is just a small wrapper arount a pyqtgraph class

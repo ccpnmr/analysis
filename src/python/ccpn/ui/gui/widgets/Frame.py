@@ -8,7 +8,7 @@ Frame(parent=None, showBorder=False, fShape=None, fShadow=None, **kwds)
 ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
                 minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds)
 
-  From: http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details
+  From: http://pyqt.sourceforge.net/Docs/PyQt5/qframe.html#details
 
   The QFrame class is the base class of widgets that can have a frame. More...
 

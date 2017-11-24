@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-08-22 10:28:42 +0000 (Tue, Aug 22, 2017) $"
 # =========================================================================================
 
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.Label import Label

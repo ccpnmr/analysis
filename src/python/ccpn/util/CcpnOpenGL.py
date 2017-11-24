@@ -206,6 +206,20 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.installEventFilter(self)
     self.setFocusPolicy(Qt.StrongFocus)
 
+  def wheelEvent(self, event):
+    numPixels = event.pixelDelta()
+    numDegrees = event.angleDelta() / 8
+
+    # returns a QPoint with the 'y' as change, +ve implies zoom-in
+    # if (!numPixels.isNull()) {
+    # scrollWithPixels(numPixels);
+    # } else if (!numDegrees.isNull()) {
+    # QPoint numSteps = numDegrees / 15;
+    # scrollWithDegrees(numSteps);
+    # }
+
+    event.accept()
+
   def eventFilter(self, obj, event):
     self._key = '_'
     if type(event) == QtGui.QKeyEvent and event.key() == Qt.Key_A:
@@ -512,9 +526,9 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glColor4f(0.2, 1.0, 0.3, 1.0)
     GL.glBegin(GL.GL_LINES)
     GL.glVertex2d(0, 1)         # not sure why 0 doesn't work
-    GL.glVertex2d(w, 1)
-    GL.glVertex2d(w, 0)
-    GL.glVertex2d(w, h)
+    GL.glVertex2d(w-36, 1)      # think I'm drawing over it with the next viewport
+    GL.glVertex2d(w-36, 0)
+    GL.glVertex2d(w-36, h-36)
     GL.glEnd()
 
 
@@ -810,7 +824,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glViewport(0, 35, w-35, h-35)      # leave a 35 width margin for the axes
                                           # '15' is a temporary border at left/top
 
-    GLU.gluOrtho2D(0, w, 0, h)
+    GLU.gluOrtho2D(0, w-36, 0, h-36)
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 

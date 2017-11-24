@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 from functools import partial
 
 import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base

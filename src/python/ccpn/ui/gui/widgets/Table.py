@@ -22,7 +22,7 @@ Basic Usage:
   use clearTable() to clear the table
 
 
-Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html)
+Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt5/qtableview.html)
 
 QTableView Class Reference
 [QtGui module]
@@ -1531,7 +1531,7 @@ class Column:
     self.editStep = editStep
     self.defaultIcon = None
     #self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter
-    # Alignment combinations broken in PyQt4 v1.1.1
+    # Alignment combinations broken in PyQt5 v1.1.1
     # Use better default than top left
     self.alignment = QtCore.Qt.AlignCenter
     # self.orderFunc = orderFunc

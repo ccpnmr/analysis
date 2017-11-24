@@ -153,7 +153,7 @@ class GuiStrip(Frame):
     self._showCrossHair()
     # callbacks
     ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
-    self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
+    self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)    # update mouse cursors
     self.storedZooms = []
     
     self.beingUpdated = False
@@ -398,7 +398,19 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView._updatePhasing()
       
-  def _updateRegion(self, viewBox):
+  def _updateXRegion(self, viewBox):
+    # this is called when the viewBox is changed on the screen via the mouse
+    # this code is complicated because need to keep viewBox region and axis region in sync
+    # and there can be different viewBoxes with the same axis
+
+    if not self._finaliseDone: return
+
+    assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
+
+    self._updateX()
+    self._updatePhasing()
+
+  def _updateYRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     # this code is complicated because need to keep viewBox region and axis region in sync
     # and there can be different viewBoxes with the same axis
@@ -410,12 +422,23 @@ class GuiStrip(Frame):
     self._updateY()
     self._updatePhasing()
 
-    # FIXME fails on newer OSX. It causes the displays to shrink
-    # the below updates the wrapper model.
-    # for ii, axis in enumerate(self.orderedAxes[:2]):
-    #   viewRange = self.viewBox.viewRange()[ii]
-    #   axis.position = 0.5*(viewRange[0] + viewRange[1])
-    #   axis.width = viewRange[1] - viewRange[0]
+  def _updateX(self):
+
+    def _widthsChangedEnough(r1, r2, tol=1e-5):
+      r1 = sorted(r1)
+      r2 = sorted(r2)
+      minDiff = abs(r1[0] - r2[0])
+      maxDiff = abs(r1[1] - r2[1])
+      return (minDiff > tol) or (maxDiff > tol)
+
+    if not self._finaliseDone: return
+
+    xRange = list(self.viewBox.viewRange()[0])
+    for strip in self.spectrumDisplay.strips:
+      if strip is not self:
+        stripXRange = list(strip.viewBox.viewRange()[0])
+        if _widthsChangedEnough(stripXRange, xRange):
+          strip.viewBox.setXRange(*xRange, padding=0)
 
   def _updateY(self):
 
@@ -757,5 +780,8 @@ def _setupGuiStrip(project:Project, apiStrip):
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
   strip.plotWidget._initTextItems()
   strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
-  strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
+
+  # signal for communicating zoom across strips
+  strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
+  strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 

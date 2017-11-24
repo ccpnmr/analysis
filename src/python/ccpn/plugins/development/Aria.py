@@ -36,11 +36,11 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 
-class CyanaGuiPlugin(PluginModule):
+class AriaGuiPlugin(PluginModule):
 
 
   def __init__(self, mainWindow=None, plugin=None, application=None, **kw):
-    super(CyanaGuiPlugin, self)
+    super(AriaGuiPlugin, self)
     PluginModule.__init__(self,mainWindow=mainWindow, plugin=plugin, application=application)
     # self.userPluginPath = self.application.preferences.general.userPluginPath
     self.outputPath = self.application.preferences.general.dataPath
@@ -93,15 +93,15 @@ class CyanaGuiPlugin(PluginModule):
 
 
 
-  # def _checkCyanaPath(self):
-  #   self.cyanaPath = self.userPluginPath+'Cyana/'
-  #   if not os.path.exists(self.cyanaPath):
-  #     os.makedirs(self.cyanaPath)
+  # def _checkAriaPath(self):
+  #   self.AriaPath = self.userPluginPath+'Aria/'
+  #   if not os.path.exists(self.AriaPath):
+  #     os.makedirs(self.AriaPath)
 
   def _run(self):
     pids = self.treeView.getSelectedObjectsPids()
     try:
-      self.project.exportNef(str(self.cyanaPath+self.runNameLineEdit.get()), pidList=pids)
+      self.project.exportNef(str(self.AriaPath+self.runNameLineEdit.get()), pidList=pids)
       self.plugin.run(**self.widgetsState)
     except Exception as e:
       showWarning(message=str(e), title='Error')
@@ -112,7 +112,7 @@ class CyanaGuiPlugin(PluginModule):
 
 
   def _restrictChemicalShiftListSelection(self, item):
-    '''Restrict selection of one chemical shift list per Calculation. Remove this when Cyana can handle multiple CSL '''
+    '''Restrict selection of one chemical shift list per Calculation. Remove this when Aria can handle multiple CSL '''
     from ccpn.core.ChemicalShiftList import ChemicalShiftList
     if item:
       if item.parent():
@@ -125,15 +125,15 @@ class CyanaGuiPlugin(PluginModule):
 
 
 
-class CyanaPlugin(Plugin):
-  PLUGINNAME = 'Cyana'
-  guiModule = CyanaGuiPlugin
+class AriaPlugin(Plugin):
+  PLUGINNAME = 'Aria'
+  guiModule = AriaGuiPlugin
 
   def run(self, **kwargs):
-    ''' Insert here the script for running Cyana '''
-    print('Running Cyana', kwargs)
+    ''' Insert here the script for running Aria '''
+    print('Running Aria', kwargs)
 
 
 
 
-CyanaPlugin.register() # Registers the pipe in the pluginList
+AriaPlugin.register() # Registers the pipe in the pluginList

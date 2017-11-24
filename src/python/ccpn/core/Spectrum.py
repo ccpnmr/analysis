@@ -269,6 +269,15 @@ class Spectrum(AbstractWrapperObject):
     self._wrappedData.noiseLevel = value
 
   @property
+  def synonym(self) -> str:
+    """Systematic experiment type descriptor (CCPN system)."""
+    refExperiment = self._wrappedData.experiment.refExperiment
+    if refExperiment is None:
+      return None
+    else:
+      return refExperiment.synonym
+
+  @property
   def experimentType(self) -> str:
     """Systematic experiment type descriptor (CCPN system)."""
     refExperiment = self._wrappedData.experiment.refExperiment

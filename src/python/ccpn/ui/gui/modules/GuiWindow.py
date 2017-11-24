@@ -84,7 +84,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("p, l"), self, self.togglePeakLabelling, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
 
@@ -418,11 +418,11 @@ class GuiWindow():
     else:
       getLogger().warning('No current strip. Select a strip first.')
 
-  def togglePeakLabelling(self):
+  def cyclePeakLabelling(self):
     """
     restore the zoom of the currently selected strip to the top item of the queue
     """
     if self.current.strip:
-      self.current.strip.spectrumDisplay._togglePeakLabelling()
+      self.current.strip.spectrumDisplay._cyclePeakLabelling()
     else:
       getLogger().warning('No current strip. Select a strip first.')

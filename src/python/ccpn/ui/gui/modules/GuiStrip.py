@@ -190,7 +190,7 @@ class GuiStrip(Frame):
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDroppedItems)
 
-    self.peakLabelling = True
+    self.peakLabelling = 0
     self.show()
 
   @property
@@ -455,9 +455,11 @@ class GuiStrip(Frame):
     "Toggles whether grid is visible in the strip."
     self.plotWidget.toggleGrid()
 
-  def togglePeakLabelling(self):
+  def cyclePeakLabelling(self):
     "Toggles whether peak labelling is minimal is visible in the strip."
-    self.peakLabelling = not self.peakLabelling
+    self.peakLabelling += 1
+    if self.peakLabelling > 2:
+      self.peakLabelling = 0
 
     if self.spectrumViews:
       for sV in self.spectrumViews:
@@ -500,7 +502,7 @@ class GuiStrip(Frame):
       return
 
     position = self.viewBox.mapSceneToView(pos)
-    if self.orderedAxes[1].code == 'intensity':
+    if self.orderedAxes[1] and self.orderedAxes[1].code == 'intensity':
       format = "%s: %.3f  %s: %.4g"
     else:
       format = "%s: %.2f  %s: %.2f"

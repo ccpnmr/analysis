@@ -188,6 +188,7 @@ class GuiStripNd(GuiStrip):
       (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
+      (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
 
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),

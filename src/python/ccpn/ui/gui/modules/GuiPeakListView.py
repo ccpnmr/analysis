@@ -96,17 +96,67 @@ def _getPeakAnnotation(peak):
   text = ', '.join(peakLabel)
   return text
 
-def _getShortPeakAnnotation(peak):
+# def _getShortPeakAnnotation(peak):
+#   for dimension in range(peak.peakList.spectrum.dimensionCount):
+#     pdNA = peak.dimensionNmrAtoms
+#
+#     # TODO:ED add a sequence of labels that can be cycled through
+#     if pdNA:
+#       try:
+#         return pdNA[0][0].nmrResidue.sequenceCode
+#
+#       except:
+#         return ''
+
+def _getScreenPeakAnnotation(peak, useShortCode=False):
+
+  def chainLabel(item):
+    try:
+      chainLabel = item.nmrResidue.nmrChain.id
+      if chainLabel:
+        chainLabel += '_'
+    except:
+      chainLabel = ''
+    return chainLabel
+
+  def shortCode(item):
+    try:
+      shortCode = item.nmrResidue.residue.shortName
+    except:
+      shortCode = ''
+    return shortCode
+
+  peakLabel = []
+  pdNA = peak.dimensionNmrAtoms
   for dimension in range(peak.peakList.spectrum.dimensionCount):
-    pdNA = peak.dimensionNmrAtoms
 
     # TODO:ED add a sequence of labels that can be cycled through
-    if pdNA:
+    if pdNA[dimension]:
       try:
-        return pdNA[0][0].nmrResidue.sequenceCode
+        peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0]
+        if all(x==peakNmrResidues[0] for x in peakNmrResidues):
+          for item in pdNA[dimension]:
+            if len(peakLabel) > 0 and useShortCode:
+              label = item.name
+            else:
+              label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+            peakLabel.append(label)
+
+        else:
+          for item in pdNA[dimension]:
+            label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+            peakLabel.append(label)
 
       except:
-        return ''
+        peakLabel.append('-')
+    else:
+      if len(pdNA) == 1:
+        peakLabel.append('1H')
+      else:
+        peakLabel.append('_')
+
+  text = ', '.join(peakLabel)
+  return text
 
 # @profile
 # def _getPeakAnnotation(peak):
@@ -925,10 +975,12 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
 
-    if self.parentWidget().strip.peakLabelling:
-      text = _getPeakAnnotation(peakItem.peak)
+    if self.parentWidget().strip.peakLabelling == 0:
+      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)
+    elif self.parentWidget().strip.peakLabelling == 1:
+      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)
     else:
-      text = _getShortPeakAnnotation(peakItem.peak)
+      text = _getPeakAnnotation(peakItem.peak)            # original 'pid'
 
     self.setText(text)
 

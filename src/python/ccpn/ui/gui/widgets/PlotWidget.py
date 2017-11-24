@@ -130,7 +130,7 @@ class PlotWidget(pg.PlotWidget):
     "Toggle grid state"
     self.grid.setVisible(not self.grid.isVisible())
 
-  # def togglePeakLabelling(self):
+  # def cyclePeakLabelling(self):
   #   "Toggle grid state"
   #   self.peakLabelling = not self.peakLabelling
     # TODO:ED update peaks here

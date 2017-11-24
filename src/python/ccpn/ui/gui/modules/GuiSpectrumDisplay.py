@@ -580,20 +580,20 @@ class GuiSpectrumDisplay(CcpnModule):
     for strip in self.strips:
       strip.toggleGrid()
 
-  def _togglePeakLabelling(self):
+  def _cyclePeakLabelling(self):
     """toggles peak labelling of current strip."""
     try:
       if not self.current.strip:
-        showWarning('Toggle Peak Labelling', 'No strip selected')
+        showWarning('Cycle Peak Labelling', 'No strip selected')
         return
       if self.current.strip not in self.strips:
-        showWarning('Toggle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+        showWarning('Cycle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
                     % (self.current.strip.pid, self.pid))
         return
       else:
-        self.current.strip.togglePeakLabelling()
+        self.current.strip.cyclePeakLabelling()
     except:
-      getLogger().warning('Error toggling peak labelling')
+      getLogger().warning('Error cycling peak labelling')
 
   def _deletedPeak(self, peak):
     apiPeak = peak._wrappedData

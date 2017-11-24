@@ -125,6 +125,18 @@ class PlotWidget(pg.PlotWidget):
     self.crossHair1 = CrossHair(self, show=True, colour=self.foreground)
     self.crossHair2 = CrossHair(self, show=False, colour=self.foreground)
 
+    # add label to show mouse coordinates at the position of the cursor
+    self.mouseLabel = pg.TextItem(text='', color=(255,255,255), anchor=(0,1))
+    self.mouseLabel.hide()
+    self.addItem(self.mouseLabel)
+    self.mouseLabel.setZValue(1.0)      # brings the item to the top (I assume everything else is 0)
+
+    # add label to show stripID in the top corner
+    self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=(255,255,255))
+    self.stripIDLabel.show()
+    self.addItem(self.stripIDLabel)
+    self.stripIDLabel.setZValue(1.0)
+
   def highlightAxes(self, state=False):
     "Highlight the axes on/of"
     if state:
@@ -139,6 +151,11 @@ class PlotWidget(pg.PlotWidget):
   def toggleGrid(self):
     "Toggle grid state"
     self.grid.setVisible(not self.grid.isVisible())
+
+  # def cyclePeakLabelling(self):
+  #   "Toggle grid state"
+  #   self.peakLabelling = not self.peakLabelling
+    # TODO:ED update peaks here
 
   def __getattr__(self, attr):
     """
@@ -226,6 +243,10 @@ class PlotWidget(pg.PlotWidget):
           self.crossHair2.setHline(yPos + yOffset)
           self.crossHair2.hLine.show()
 
+    if self.strip != mouseMovedDict['strip']:
+      # hide the mouse label if the event comes form a different window
+      self.mouseLabel.hide()
+
   # NBNB TODO code uses API object. REFACTOR
 
   def _addRulerLine(self, apiRuler:ApiRuler):
@@ -301,6 +322,11 @@ class PlotWidget(pg.PlotWidget):
       x = self.plotItem.vb.mapSceneToView(self.strip.viewBox.boundingRect().bottomLeft()).x()
       y = item.pos().y()
       item.setPos(x, y)
+
+    # ejb - move the stripIDLabel to be fixed in the top-left corner if the plotWidget
+    k = self.strip.viewBox.boundingRect().topLeft()
+    self.stripIDLabel.setPos(self.plotItem.vb.mapSceneToView(k).x(),
+                             self.plotItem.vb.mapSceneToView(k).y())
 
   def _initTextItems(self):
     """CCPN internal

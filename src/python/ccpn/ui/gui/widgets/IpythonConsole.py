@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
-
+from ccpn.util.Logging import getLogger
 
 class IpythonConsole(Widget, Base):
 
@@ -146,7 +146,10 @@ class IpythonConsole(Widget, Base):
         # self.textEditor.insertPlainText('\n')
         self.mainWindow.statusBar().showMessage(msg)
       if self.mainWindow.recordingMacro is True:
-        self.mainWindow.macroEditor.textBox.insertPlainText(msg)
+        try:
+          self.mainWindow.editor.textBox.insertPlainText(msg)
+        except:
+          getLogger().warning('Warning: macro editor does not exist')
 
 
     def _setUndoWaypoint(self):

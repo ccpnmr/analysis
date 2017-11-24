@@ -129,17 +129,27 @@ class Undo(deque):
 
   @property
   def undoList(self):
-    undoState = (self.maxWaypoints
-                , self.maxOperations
-                , self.nextIndex
-                , self.waypoints
-                , self._blocked
-                , self.blocking
-                , len(self)
-                , self[-1]
-                , [(undoFunc[0].__name__, undoFunc[1].__name__) for undoFunc in self]
-                , [undoFunc[0].__name__ for undoFunc in self]
-                , [undoFunc[1].__name__ for undoFunc in self])
+    try:
+      undoState = (self.maxWaypoints
+                  , self.maxOperations
+                  , self.nextIndex
+                  , self.waypoints
+                  , self._blocked
+                  , self.blocking
+                  , len(self)
+                  , self[-1]
+                  , [(undoFunc[0].__name__, undoFunc[1].__name__) for undoFunc in self]
+                  , [undoFunc[0].__name__ for undoFunc in self]
+                  , [undoFunc[1].__name__ for undoFunc in self])
+    except:
+      undoState = (self.maxWaypoints
+                   , self.maxOperations
+                   , self.nextIndex
+                   , self.waypoints
+                   , self._blocked
+                   , self.blocking
+                   , len(self)
+                   , None, None, None, None)
     return undoState
 
   @property

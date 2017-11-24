@@ -1,4 +1,4 @@
-PYTHON_DIR = /Users/ejb66/miniconda3/envs/ccpnmr_dist
+PYTHON_DIR = /Users/ccpn/Projects/Git/AnalysisV3/miniconda
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 

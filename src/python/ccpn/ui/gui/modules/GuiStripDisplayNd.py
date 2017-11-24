@@ -33,7 +33,8 @@ from ccpn.ui.gui.modules import GuiPeakListView
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-#from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup
+
 
 from ccpn.util.Logging import getLogger
 
@@ -83,8 +84,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ]
     toolBarItemsForNd = [
      #  action name     icon                    tooltip                     active     callback
-      ('+1',           'icons/contour-add',    'Add one contour level',     True,     self.addContourLevel),
-      ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
+     #  ('+1',           'icons/contour-add',    'Add one contour level',     True,     self.addContourLevel),
+     #  ('-1',           'icons/contour-remove', 'Remove one contour level',  True,     self.removeContourLevel),
       ('*1.4',         'icons/contour-base-up','Raise Contour Base Level',  True,     self.raiseContourBase),
       ('/1.4',         'icons/contour-base-down','Lower Contour Base Level',  True,     self.lowerContourBase),
       ('Store Zoom',   'icons/zoom-store',     'Store Zoom',                True,     self._storeZoom),
@@ -310,6 +311,12 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
     
+  def adjustContours(self):
+    # insert popup to modify contours
+    popup = SpectrumDisplayPropertiesPopup(mainWindow=self.mainWindow, orderedSpectra=self.orderedSpectra())
+    popup.exec_()
+    popup.raise_()
+
   def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
     """
     Displays specified peaks in all strips of the display using peakListView

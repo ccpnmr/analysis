@@ -190,7 +190,7 @@ class DataSet(AbstractWrapperObject):
 
     result = {}
     for fx in self._wrappedData.fixedResonances:
-      ss = '.'.join(x or '' for x in (fx.chainCode, fx,sequenceCode, fx.residueType, fx.name))
+      ss = '.'.join(x or '' for x in (fx.chainCode, fx.sequenceCode, fx.residueType, fx.name))
       result[ss] = fx
     #
     return result

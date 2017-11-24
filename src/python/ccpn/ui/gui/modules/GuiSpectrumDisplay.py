@@ -553,9 +553,9 @@ class GuiSpectrumDisplay(CcpnModule):
                     % (self.current.strip.pid, self.pid))
         return
       else:
-        self.current.strip._restoreZoom()         # ejb - could be empty strip
+        self.current.strip._restoreZoom()
     except:
-      pass
+      getLogger().warning('Error restoring zoom')
 
   def _storeZoom(self):
     """Saves zoomed region of current strip."""
@@ -568,9 +568,9 @@ class GuiSpectrumDisplay(CcpnModule):
                     % (self.current.strip.pid, self.pid))
         return
       else:
-        self.current.strip._storeZoom()         # ejb - could be empty strip
+        self.current.strip._storeZoom()
     except:
-      pass
+      getLogger().warning('Error storing zoom')
 
   def toggleCrossHair(self):
     """Toggles whether cross hair is displayed in all strips of spectrum display."""
@@ -583,6 +583,21 @@ class GuiSpectrumDisplay(CcpnModule):
     # toggle grid for strips in this spectrumDisplay
     for strip in self.strips:
       strip.toggleGrid()
+
+  def _cyclePeakLabelling(self):
+    """toggles peak labelling of current strip."""
+    try:
+      if not self.current.strip:
+        showWarning('Cycle Peak Labelling', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Cycle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+      else:
+        self.current.strip.cyclePeakLabelling()
+    except:
+      getLogger().warning('Error cycling peak labelling')
 
   def _deletedPeak(self, peak):
     apiPeak = peak._wrappedData
@@ -638,9 +653,21 @@ class GuiSpectrumDisplay(CcpnModule):
     self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
                                 defaults={'axisOrder':()})
     try:
-      self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+      newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+      if newSpectrum:
+        # self._orderedSpectra.append(spectrum)
+        self.appendSpectrumView(newSpectrum)
+    except:
+      getLogger().warning('Error appending newSpectrum: %s' % spectrum)
     finally:
       self._endCommandEchoBlock()
+
+  def _removeSpectrum(self, spectrum):
+    try:
+      # self._orderedSpectra.remove(spectrum)
+      self.removeSpectrumView(spectrum)
+    except:
+      getLogger().warning('Error, %s does not exist' % spectrum)
 
 def _deletedPeak(peak:Peak):
   """Function for notifiers.

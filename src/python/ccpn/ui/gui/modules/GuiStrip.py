@@ -139,10 +139,12 @@ class GuiStrip(Frame):
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
-    self._stripIdLabel = Label(parent=self._labelWidget,
-                               text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
-                               grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
-    self._stripIdLabel.setFont(textFontSmall)
+    # self._stripIdLabel = Label(parent=self._labelWidget,
+    #                            text='.'.join(self.id.split('.')), margins=[0,0,0,0], spacing=(0,0),
+    #                            grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
+    # self._stripIdLabel.setFont(textFontSmall)
+    # TODO:ED check - have moved the label to the top-left corner
+    self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
@@ -153,11 +155,11 @@ class GuiStrip(Frame):
     self.hideStripLabel()
 
     # A label to display the cursor positions (updated by _showMousePosition)
-    self._cursorLabel = Label(parent=self._labelWidget,
-                               text='',
-                               grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
-                               # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
-                               hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
+    # self._cursorLabel = Label(parent=self._labelWidget,
+    #                            text='',
+    #                            grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
+    #                            # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
+    #                            hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
 
     # self._cursorLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
     # self._cursorLabel.setAutoFillBackground(False)
@@ -166,7 +168,7 @@ class GuiStrip(Frame):
     # self._stripLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
     # self._stripLabel.setAutoFillBackground(False)
 
-    self._cursorLabel.setFont(textFontSmall)
+    # self._cursorLabel.setFont(textFontSmall)
     # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
@@ -176,7 +178,7 @@ class GuiStrip(Frame):
     self._showCrossHair()
     # callbacks
     ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
-    self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)
+    self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)    # update mouse cursors
     self.storedZooms = []
     
     self.beingUpdated = False
@@ -215,6 +217,7 @@ class GuiStrip(Frame):
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDroppedItems)
 
+    self.peakLabelling = 0
     self.show()
 
   @property
@@ -420,7 +423,19 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView._updatePhasing()
       
-  def _updateRegion(self, viewBox):
+  def _updateXRegion(self, viewBox):
+    # this is called when the viewBox is changed on the screen via the mouse
+    # this code is complicated because need to keep viewBox region and axis region in sync
+    # and there can be different viewBoxes with the same axis
+
+    if not self._finaliseDone: return
+
+    assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
+
+    self._updateX()
+    self._updatePhasing()
+
+  def _updateYRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     # this code is complicated because need to keep viewBox region and axis region in sync
     # and there can be different viewBoxes with the same axis
@@ -432,12 +447,23 @@ class GuiStrip(Frame):
     self._updateY()
     self._updatePhasing()
 
-    # FIXME fails on newer OSX. It causes the displays to shrink
-    # the below updates the wrapper model.
-    # for ii, axis in enumerate(self.orderedAxes[:2]):
-    #   viewRange = self.viewBox.viewRange()[ii]
-    #   axis.position = 0.5*(viewRange[0] + viewRange[1])
-    #   axis.width = viewRange[1] - viewRange[0]
+  def _updateX(self):
+
+    def _widthsChangedEnough(r1, r2, tol=1e-5):
+      r1 = sorted(r1)
+      r2 = sorted(r2)
+      minDiff = abs(r1[0] - r2[0])
+      maxDiff = abs(r1[1] - r2[1])
+      return (minDiff > tol) or (maxDiff > tol)
+
+    if not self._finaliseDone: return
+
+    xRange = list(self.viewBox.viewRange()[0])
+    for strip in self.spectrumDisplay.strips:
+      if strip is not self:
+        stripXRange = list(strip.viewBox.viewRange()[0])
+        if _widthsChangedEnough(stripXRange, xRange):
+          strip.viewBox.setXRange(*xRange, padding=0)
 
   def _updateY(self):
 
@@ -479,6 +505,20 @@ class GuiStrip(Frame):
     "Toggles whether grid is visible in the strip."
     self.plotWidget.toggleGrid()
 
+  def cyclePeakLabelling(self):
+    "Toggles whether peak labelling is minimal is visible in the strip."
+    self.peakLabelling += 1
+    if self.peakLabelling > 2:
+      self.peakLabelling = 0
+
+    if self.spectrumViews:
+      for sV in self.spectrumViews:
+        for peakList in sV.spectrum.peakLists:
+
+          peakListView = self._findPeakListView(peakList)
+          if peakListView:
+            peakListView._changedPeakListView()
+
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
     # TBD: the naive approach below should be improved
@@ -514,16 +554,22 @@ class GuiStrip(Frame):
     position = self.viewBox.mapSceneToView(pos)
     try:
       # this only calls a single _wrapper function
-      if self.orderedAxes[1].code == 'intensity':
-        format = "%s: %.3f  %s: %.4g"
+      if self.orderedAxes[1] and self.orderedAxes[1].code == 'intensity':
+        format = "%s: %.3f\n%s: %.4g"
       else:
-        format = "%s: %.2f  %s: %.2f"
+        format = "%s: %.2f\n%s: %.2f"
     except:
       format = "%s: %.3f  %s: %.4g"
 
-    self._cursorLabel.setText(format %
+    # self._cursorLabel.setText(format %
+    #   (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+    # )
+
+    self.plotWidget.mouseLabel.setText(format %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
     )
+    self.plotWidget.mouseLabel.setPos(position.x(), position.y())
+    self.plotWidget.mouseLabel.show()
 
   def zoomToRegion(self, xRegion:typing.Tuple[float, float], yRegion:typing.Tuple[float, float]):
     """
@@ -763,5 +809,8 @@ def _setupGuiStrip(project:Project, apiStrip):
   strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
   strip.plotWidget._initTextItems()
   strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
-  strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
+
+  # signal for communicating zoom across strips
+  strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
+  strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 

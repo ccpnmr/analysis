@@ -143,6 +143,7 @@ class MacroEditor(CcpnModule):
     self.mainWindow.recordingMacro = True
     self.buttonBox.buttons[1].setEnabled(True)
     self.buttonBox.buttons[0].setDisabled(True)
+    self.mainWindow.editor = self
 
 
   def _stopMacroRecord(self):
@@ -152,6 +153,7 @@ class MacroEditor(CcpnModule):
     self.mainWindow.recordingMacro = False
     self.buttonBox.buttons[1].setDisabled(True)
     self.buttonBox.buttons[0].setEnabled(True)
+    del self.mainWindow.editor
 
   def _reject(self):
     self.close()

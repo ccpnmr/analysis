@@ -96,6 +96,68 @@ def _getPeakAnnotation(peak):
   text = ', '.join(peakLabel)
   return text
 
+# def _getShortPeakAnnotation(peak):
+#   for dimension in range(peak.peakList.spectrum.dimensionCount):
+#     pdNA = peak.dimensionNmrAtoms
+#
+#     # TODO:ED add a sequence of labels that can be cycled through
+#     if pdNA:
+#       try:
+#         return pdNA[0][0].nmrResidue.sequenceCode
+#
+#       except:
+#         return ''
+
+def _getScreenPeakAnnotation(peak, useShortCode=False):
+
+  def chainLabel(item):
+    try:
+      chainLabel = item.nmrResidue.nmrChain.id
+      if chainLabel:
+        chainLabel += '_'
+    except:
+      chainLabel = ''
+    return chainLabel
+
+  def shortCode(item):
+    try:
+      shortCode = item.nmrResidue.residue.shortName
+    except:
+      shortCode = ''
+    return shortCode
+
+  peakLabel = []
+  pdNA = peak.dimensionNmrAtoms
+  for dimension in range(peak.peakList.spectrum.dimensionCount):
+
+    # TODO:ED add a sequence of labels that can be cycled through
+    if pdNA[dimension]:
+      try:
+        peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0]
+        if all(x==peakNmrResidues[0] for x in peakNmrResidues):
+          for item in pdNA[dimension]:
+            if len(peakLabel) > 0 and useShortCode:
+              label = item.name
+            else:
+              label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+            peakLabel.append(label)
+
+        else:
+          for item in pdNA[dimension]:
+            label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+            peakLabel.append(label)
+
+      except:
+        peakLabel.append('-')
+    else:
+      if len(pdNA) == 1:
+        peakLabel.append('1H')
+      else:
+        peakLabel.append('_')
+
+  text = ', '.join(peakLabel)
+  return text
+
 # @profile
 # def _getPeakAnnotation(peak):
 #
@@ -621,7 +683,16 @@ class PeakNd(QtWidgets.QGraphicsItem):
     color = QtGui.QColor('cyan')
     self.rectItem.setBrush(QtGui.QBrush(color))
     """
+
+    # TODO:ED scale the point as ppm(x, y)
+    vBMTS = peakListView.spectrumView.strip.viewBox.mapSceneToView
+    x = abs(vBMTS(QtCore.QPoint(1, 0)).x() - vBMTS(QtCore.QPoint(0, 0)).x())
+    y = abs(vBMTS(QtCore.QPoint(0, 1)).y() - vBMTS(QtCore.QPoint(0, 0)).y())
+    self.minIndex = 0 if x<=y else 1
+
     self.drawData = (hz, sz)#, QtCore.QRectF(-hz, -hz, sz, sz))
+    # self.drawData = (hz*xPeakWidth, sz*yPeakWidth)#, QtCore.QRectF(-hz, -hz, sz, sz))
+
     ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
     ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
     ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
@@ -765,7 +836,20 @@ class PeakNd(QtWidgets.QGraphicsItem):
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
         # r, w, box = self.drawData
-        r, w = self.drawData
+
+        # r, w = self.drawData
+        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+        # base on minimum ppm axis for the minute
+        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        #               QtCore.QPoint(0, 0)).x())
+        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+        #   QtCore.QPoint(0, 0)).y())
+        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                      QtCore.QPoint(0, 0)).x()),
+               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                QtCore.QPoint(0, 0)).y()))
+        w = r = pos[self.minIndex]
+        self.annotation.setPos(r, -w)
 
         # if self.hover:
         # self.setZValue(10)
@@ -795,17 +879,17 @@ class PeakNd(QtWidgets.QGraphicsItem):
         # else:
         #   painter.setPen(self.color)
         #   self.setZValue(0)
-        painter.drawLine(-r,-r,r,r)
-        painter.drawLine(-r,r,r,-r)
+        painter.drawLine(-r,-w,r,w)
+        painter.drawLine(-r,w,r,-w)
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
 
         #if self.peak in self.application.current.peaks:
         if self.peak._isSelected:
-          painter.drawLine(-r,-r,-r,r)
-          painter.drawLine(-r,r,r,r)
-          painter.drawLine(r,r,r,-r)
-          painter.drawLine(r,-r,-r,-r)
+          painter.drawLine(-r,-w,-r,w)
+          painter.drawLine(-r,w,r,w)
+          painter.drawLine(r,w,r,-w)
+          painter.drawLine(r,-w,-r,-w)
         #
         # if self.isSelected:
         #   painter.setPen(QtGui.QColor('white'))
@@ -818,17 +902,30 @@ class PeakNd(QtWidgets.QGraphicsItem):
         painter.setPen(pen)
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
-        r, w = self.drawData
 
-        painter.drawLine(-r,-r,r,r)
-        painter.drawLine(-r,r,r,-r)
+        # r, w = self.drawData
+        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+        # base on minimum ppm axis for the minute
+        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+        #               QtCore.QPoint(0, 0)).x())
+        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+        #   QtCore.QPoint(0, 0)).y())
+        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                      QtCore.QPoint(0, 0)).x()),
+               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                QtCore.QPoint(0, 0)).y()))
+        w = r = pos[self.minIndex]
+        self.annotation.setPos(r, -w)
+
+        painter.drawLine(-r,-w,r,w)
+        painter.drawLine(-r,w,r,-w)
 
         #if self.peak in self.application.current.peaks:
         if self.peak._isSelected:
-          painter.drawLine(-r,-r,-r,r)
-          painter.drawLine(-r,r,r,r)
-          painter.drawLine(r,r,r,-r)
-          painter.drawLine(r,-r,-r,-r)
+          painter.drawLine(-r,-w,-r,w)
+          painter.drawLine(-r,w,r,w)
+          painter.drawLine(r,w,r,-w)
+          painter.drawLine(r,-w,-r,-w)
 
 
 ###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
@@ -852,7 +949,9 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
     ###self.setColor()
     # self.analysisLayout = parent.glWidget.analysisLayout
     font = self.font()
-    font.setPointSize(14)
+
+    # TODO:ED and peak annotation size to the preferences
+    font.setPointSize(12)
     self.setFont(font)
     # self.setCacheMode(self.DeviceCoordinateCache)
     self.setFlag(self.ItemIgnoresTransformations)#+self.ItemIsMovable+self.ItemIsSelectable)
@@ -875,16 +974,51 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
   # @profile
   # should not ever call setupPeakAnnotationItem in paint()
   # instead make sure that you have appropriate notifiers call _refreshPeakAnnotation()
-  def setupPeakAnnotationItem(self, peakItem):
+  def setupPeakAnnotationItem(self, peakItem, clearLabel=False):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
     colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
-    text = _getPeakAnnotation(peakItem.peak)
+
+    if self.parentWidget().strip.peakLabelling == 0:
+      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)
+    elif self.parentWidget().strip.peakLabelling == 1:
+      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)
+    else:
+      text = _getPeakAnnotation(peakItem.peak)            # original 'pid'
 
     self.setText(text)
-  
+
+    project = peakItem.peak.project
+    project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
+    undo = project._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    try:
+      if clearLabel:
+        self.setText(text)
+      else:
+        self.setText(text)
+
+    finally:
+      if undo is not None:
+        undo.decreaseBlocking()
+      project._endCommandEchoBlock()
+
+    undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                 redoArgs=(peakItem, clearLabel))
+
+
+  def clearPeakAnnotationItem(self, peakItem):
+
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    colour = peakItem.peakListView.peakList.textColour
+    self.setBrush(QtGui.QColor(colour))
+
+    self.setupPeakAnnotationItem(peakItem, clearLabel=True)
+
   def mousePressEvent(self, event):
 
 
@@ -915,10 +1049,53 @@ def _refreshPeakAnnotation(peak:Peak):
 
 Peak._refreshPeakAnnotation = _refreshPeakAnnotation
 
-def _updateAssignmentsNmrAtom(nmrAtom, oldPid:str):
+def _deletePeakAnnotation(peak:Peak):
+  for peakListView in peak.peakList.peakListViews:
+      peakItem = peakListView.peakItems.get(peak)
+      if peakItem:
+        peakItem.annotation.clearPeakAnnotationItem(peakItem)
+
+Peak._deletePeakAnnotation = _deletePeakAnnotation
+
+def _updateAssignmentsNmrAtom(data):        # oldPid:str):
   """Update Peak assignments when NmrAtom is reassigned"""
+  nmrAtom = data['object']
   for peak in nmrAtom.assignedPeaks:
     peak._refreshPeakAnnotation()
+
+def _deleteAssignmentsNmrAtom(data):
+  """Update Peak assignments when NmrAtom is reassigned"""
+  nmrAtom = data['object']
+
+  if nmrAtom.assignedPeaks:
+    project = data['theObject']
+
+    # # TODO:ED not correct, will rename all
+    # for peak in project.peaks:
+    #   for peakListView in peak.peakList.peakListViews:
+    #     peakItem = peakListView.peakItems.get(peak)
+    #     if peakItem:
+    #       peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
+
+def _editAssignmentsNmrAtom(data):
+  """Update Peak assignments when NmrAtom is reassigned"""
+  # callback in Gui.py currently disabled
+  nmrAtom = data['object']
+
+  if nmrAtom.assignedPeaks:
+    project = data['theObject']
+
+    # TODO:ED not correct, will rename all
+    for peak in project.peaks:
+      for peakListView in peak.peakList.peakListViews:
+        peakItem = peakListView.peakItems.get(peak)
+        if peakItem:
+          peakItem.annotation.setupPeakAnnotationItem(peakItem, deleteLabel=True)
+
+
+      # thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the restraintList
+  # if self.restraintList in thisRestraintList:
+
 
 # NB We could replace this with something like the following line,
 # But that would trigger _refreshPeakAnnotation also when the position changes
@@ -929,6 +1106,11 @@ def _upDateAssignmentsPeakDimContrib(project:Project,
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
 
+def _deleteAssignmentsNmrAtomDelete(project:Project,
+                                     apiPeakDimContrib:Nmr.AbstractPeakDimContrib):
+  peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
+  if not peak.assignedNmrAtoms:
+    peak._deletePeakAnnotation()
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes
 def _refreshPeakPosition(peak:Peak):

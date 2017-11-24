@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.util import Undo
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
-
+from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
@@ -49,6 +49,8 @@ from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 
 from time import time
 from ccpn.util.Logging import getLogger
+from contextlib import contextmanager
+
 
 # TODO These should be merged with the sams constants in CcpnNefIo
 # (and likely those in ExportNefPopup) and moved elsewhere
@@ -897,6 +899,88 @@ class Project(AbstractWrapperObject):
                           , pidList=pidList)
       t2 = time()
       getLogger().info('Exported NEF file, time = %.2fs' % (t2 - t0))
+
+    finally:
+      self._endCommandEchoBlock()
+      self.unblankNotification()
+      if undo is not None:
+        undo.decreaseBlocking()
+
+  def _convertToDataBlock(self, path:str=None
+                  , overwriteExisting:bool=False
+                  , skipPrefixes:typing.Sequence=()
+                  , expandSelection:bool=True
+                  , pidList:list=None):
+    """
+    Export selected contents of the project to a Nef file.
+
+      skipPrefixes: ( 'ccpn', ..., <str> )
+      expandSelection: <bool> }
+
+      Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
+      expandSelection = True  will include all data from the project, this may not be data that
+                              is not defined in the Nef standard.
+
+    PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
+    The Nef file may also contain further dependent items associated with the pidList.
+
+    :param path: output path and filename
+    :param skipPrefixes: items to skip
+    :param expandSelection: expand the selection
+    :param pidList: a list of pids
+    """
+    from ccpn.core.lib import CcpnNefIo
+
+    defaults = OrderedDict((('path', None)
+                            , ('overwriteExisting', None)
+                            , ('skipPrefixes', None)
+                            , ('expandSelection', None)
+                            , ('pidList', None)))
+
+    self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
+    undo = self._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    self.blankNotification()
+
+    dataBlock = None
+    newPath = None
+    try:
+      t0 = time()
+      dataBlock, newPath = CcpnNefIo.convertToDataBlock(self, path
+                                            , overwriteExisting=overwriteExisting
+                                            , skipPrefixes=skipPrefixes
+                                            , expandSelection=expandSelection
+                                            , pidList=pidList)
+      t2 = time()
+      getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
+
+    finally:
+      self._endCommandEchoBlock()
+      self.unblankNotification()
+      if undo is not None:
+        undo.decreaseBlocking()
+
+    return dataBlock, newPath
+
+  def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None):
+    # Export the modified dataBlock to file
+    from ccpn.core.lib import CcpnNefIo
+
+    defaults = OrderedDict((('dataBlock', None)
+                            , ('path', None)))
+
+    self._startCommandEchoBlock('writeDataBlockToFile', values=locals(), defaults=defaults)
+    undo = self._undo
+    if undo is not None:
+      undo.increaseBlocking()
+    self.blankNotification()
+
+    try:
+      t0 = time()
+      CcpnNefIo.writeDataBlock(dataBlock, path)
+      t2 = time()
+      getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
     finally:
       self._endCommandEchoBlock()

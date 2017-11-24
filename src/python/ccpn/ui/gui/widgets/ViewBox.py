@@ -109,6 +109,10 @@ class CrossHair:
     plotWidget.addItem(self.vLine, ignoreBounds=True)
     plotWidget.addItem(self.hLine, ignoreBounds=True)
 
+    # ejb - set the Z value to 1.0 to bring to the top
+    self.vLine.setZValue(1.0)
+    self.hLine.setZValue(1.0)
+
     self.setPointPosition(position)
     if show:
       self.show()
@@ -197,7 +201,8 @@ class ViewBox(pg.ViewBox):
     for line in self.integralRegions.lines:
       line.sigPositionChanged.connect(self._integralRegionsMoved)
 
-    self.peakWidthPixels = 20  # for ND peaks
+    # TODO:ED smaller cross for now, need to scale for ppm
+    self.peakWidthPixels = 16  # for ND peaks
     self.contextMenuPosition = None #we need this because current.position is not always the best choice for everything!
 
   def _raiseContextMenu(self, event:QtGui.QMouseEvent):
@@ -459,6 +464,8 @@ class ViewBox(pg.ViewBox):
         finally:
           project.unblankNotification()
 
+        # hide all the messages from the peak annotation generation
+        project._startCommandEchoBlock('mousePeakPicking')
         # update strips which have the above peaks in them
         # (could check for visibility...)
         peakLists = set([peak.peakList for peak in peaks])
@@ -466,6 +473,7 @@ class ViewBox(pg.ViewBox):
           for peakListView in peakList.peakListViews:
             peakListView.spectrumView.strip.showPeaks(peakList)
 
+        project._endCommandEchoBlock()
         # update peak table
         # limitation: this will only update the first peak table
         if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):

@@ -509,10 +509,15 @@ class Framework:
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
       for strip in spectrumDisplay.strips:
-        for spectrumView in strip.spectrumViews:
-          spectrumView._createdSpectrumView()
+
+        # TODO:ED use orderedSpectra
+        # for spectrumView in strip.spectrumViews:
+
+        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(includeDeleted=False)):
+          spectrumView._createdSpectrumView(iSV)
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
+
     # add blank Display
     if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
       # self.ui.mainWindow.newBlankDisplay()
@@ -602,7 +607,7 @@ class Framework:
   def getByGid(self, gid):
     return self.ui.getByGid(gid)
 
-  def _startCommandBlock(self, command:str, **objectParameters):
+  def _startCommandBlock(self, command:str, quiet:bool=False, **objectParameters):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
 
     MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
@@ -637,7 +642,10 @@ class Framework:
       commands.append(command)
 
       # echo command strings
-      self.ui.echoCommands(commands)
+      # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
+      # but without the screen output
+      if not quiet:
+        self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
     getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
@@ -790,14 +798,14 @@ class Framework:
     self._menuSpec = ms = []
 
     ms.append(('Project',   [
-      ("New", self.createNewProject, [('shortcut', 'pn')]),
-      ("Open...", self.openProject, [('shortcut', 'po')]),
+      ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+      ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Open Recent", ()),
 
 #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
       ("Load Data...", self.loadData, [('shortcut', 'ld')]),
       (),
-      ("Save", self.saveProject, [('shortcut', 'ps')]),
+      ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
       ("NEF", (("Import Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
@@ -813,7 +821,7 @@ class Framework:
       (),
       ("Preferences...", self.showApplicationPreferences),
       (),
-      ("Close Program", self._closeEvent, [('shortcut', 'qt')]),
+      ("Close Program", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
     ]
                ))
 
@@ -986,6 +994,7 @@ class Framework:
         project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
         project._resetUndo(debug=self.level <= Logging.DEBUG2)
         self._initialiseProject(project)
+        project._undo.clear()
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default
@@ -1216,6 +1225,13 @@ class Framework:
                    , skipPrefixes=skipPrefixes
                    , expandSelection=expandSelection
                    , pidList=pidList)
+
+    # with self.project._convertToDataBlock(nefPath
+    #                , overwriteExisting=True
+    #                , skipPrefixes=skipPrefixes
+    #                , expandSelection=expandSelection
+    #                , pidList=pidList) as dataBlock:
+    #   dataBlock.addItem('AAAAAAARRRRGH', 'I like fishing')
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

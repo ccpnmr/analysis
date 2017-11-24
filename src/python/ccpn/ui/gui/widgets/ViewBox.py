@@ -108,6 +108,10 @@ class CrossHair:
     plotWidget.addItem(self.vLine, ignoreBounds=True)
     plotWidget.addItem(self.hLine, ignoreBounds=True)
 
+    # ejb - set the Z value to 1.0 to bring to the top
+    self.vLine.setZValue(1.0)
+    self.hLine.setZValue(1.0)
+
     self.setPointPosition(position)
     if show:
       self.show()

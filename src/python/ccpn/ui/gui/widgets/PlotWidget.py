@@ -119,11 +119,13 @@ class PlotWidget(pg.PlotWidget):
     self.mouseLabel = pg.TextItem(text='', color=(255,255,255), anchor=(0,1))
     self.mouseLabel.hide()
     self.addItem(self.mouseLabel)
+    self.mouseLabel.setZValue(1.0)      # brings the item to the top (I assume everything else is 0)
 
     # add label to show stripID in the top corner
     self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=(255,255,255))
     self.stripIDLabel.show()
     self.addItem(self.stripIDLabel)
+    self.stripIDLabel.setZValue(1.0)
 
   def highlightAxes(self, state=False):
     "Highlight the axes on/of"

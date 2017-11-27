@@ -461,7 +461,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
       # update the 'orderedSpectra' list
       # TODO:ED update the orderedSpectra list
-      # self.removeSpectrumView(None)
+      self.removeSpectrumView(None)
 
     finally:
       self._endCommandEchoBlock()

@@ -766,8 +766,12 @@ class Strip(AbstractWrapperObject):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # ejb - orderedSpectrumViews, orderedSpectra
-  # store the current orderedSpectrumViews in the internal data store
+  # store the current orderedSpectrumViews in the internal data store _ccpnInternalData
   # so it is hidden from external users
+  #
+  # accessed with the functions:
+  #     strip.orderedSpectra()        returns tuple(spectra) or None
+  #     strip.orderedSpectrumViews    returns tuple(spectrumViews) or None
   def _retrieveOrderedSpectrumViews(self):
     if isinstance(self._ccpnInternalData, dict) and ORDEREDSPECTRA in self._ccpnInternalData:
       return self._ccpnInternalData[ORDEREDSPECTRA]
@@ -806,7 +810,8 @@ class Strip(AbstractWrapperObject):
     """The spectra attached to the strip (ordered)"""
 
     if hasattr(self, ORDEREDSPECTRA):
-      return getattr(self, ORDEREDSPECTRA)
+      values = getattr(self, ORDEREDSPECTRA)
+      return values   # tuple(value for value in values if 'Deleted' not in value.pid or includeDeleted)
     else:
       # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
       # store by pid

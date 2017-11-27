@@ -149,9 +149,10 @@ class Bubble(object):
 
 
 class CcpnGLWidget(QOpenGLWidget):
-  def __init__(self, parent=None):
+  def __init__(self, parent=None, rightMenu=None):
     super(CcpnGLWidget, self).__init__(parent)
 
+    self._rightMenu = rightMenu
     if not parent:        # don't initialise if nothing there
       return
 
@@ -192,6 +193,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.base = None
     self.spectrumValues = []
+    self.gridList = []
+
     self._GLPeakLists = []
     self._drawSelectionBox = False
     self._selectionMode = 0
@@ -210,6 +213,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
+
+  def resizeGL(self, w, h):
+    GL.glViewport(0, 0, w, h)
 
   def wheelEvent(self, event):
     def between(val, l, r):
@@ -250,6 +256,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + 0.9 * (self.axisB - mby)
         self.axisT = mby - 0.9 * (mby - self.axisT)
 
+      # spawn rebuild event for the grid
+      for li in self.gridList:
+        li[1] = True
+
     elif between(self._mouseX, ba[0], ba[2]) and between(self._mouseY, ba[1], ba[3]):
       mb = (self._mouseX - ba[0]) / (ba[2] - ba[0])
       mbx = self.axisL + mb * (self.axisR - self.axisL)
@@ -260,6 +270,10 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         self.axisL = mbx + 0.9 * (self.axisL - mbx)
         self.axisR = mbx - 0.9 * (mbx - self.axisR)
+
+      # spawn rebuild event for the grid
+      self.gridList[0][1] = True
+      self.gridList[2][1] = True
 
     elif between(self._mouseX, ra[0], ra[2]) and between(self._mouseY, ra[1], ra[3]):
       mb = (self._mouseY - ra[1]) / (ra[3] - ra[1])
@@ -272,6 +286,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + 0.9 * (self.axisB - mby)
         self.axisT = mby - 0.9 * (mby - self.axisT)
 
+      # spawn rebuild event for the grid
+      self.gridList[0][1] = True
+      self.gridList[1][1] = True
+
     event.accept()
 
   def eventFilter(self, obj, event):
@@ -282,15 +300,11 @@ class CcpnGLWidget(QOpenGLWidget):
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
 
-  def _releaseDisplayLists(self, displayLists):
-    for displayList in displayLists:
-      GL.glDeleteLists(displayList, 1)
-    displayLists[:] = []
+  def _releaseDisplayLists(self, displayList):
+    GL.glDeleteLists(displayList, 1)
 
-  def _createDisplayLists(self, levels, displayLists):
-    # could create them in one go but more likely to get fragmentation that way
-    for level in levels:
-      displayLists.append(GL.glGenLists(1))
+  def _createDisplayLists(self, numLists, displayList):
+    displayList = GL.glGenLists(numLists)
 
   def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
     # clear the list and rebuild
@@ -329,6 +343,9 @@ class CcpnGLWidget(QOpenGLWidget):
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
 
+    for li in range(3):
+      self.gridList.append( [GL.glGenLists(1), True] )
+
     self.object = self.makeObject()
 
   def mousePressEvent(self, ev):
@@ -341,6 +358,10 @@ class CcpnGLWidget(QOpenGLWidget):
   def mouseReleaseEvent(self, ev):
     self._drawSelectionBox = False
     self._lastButtonReleased = ev.button()
+
+    if self._lastButtonReleased == Qt.RightButton:
+       # raise right-button context menu
+      self._rightMenu()
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -396,6 +417,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisR -= dx * self.pixelX
         self.axisT += dy * self.pixelY
         self.axisB += dy * self.pixelY
+
+        # spawn rebuild event for the grid
+        for li in self.gridList:
+          li[1] = True
 
         #   event.modifiers() & QtCore.Qt.ShiftModifier):
     #   position = event.scenePos()
@@ -586,11 +611,11 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glEnd()
 
     self.set2DProjection()
-    self._buildAxes(axisList=[0, 1], scaleGrid=[2, 1, 0], r=1.0, g=1.0, b=1.0, transparency=600.0)
+    self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
     self.set2DProjectionRightAxis()
-    self._buildAxes(axisList=[1], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.set2DProjectionBottomAxis()
-    self._buildAxes(axisList=[0], scaleGrid=[1, 0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
 
     # draw axis lines to right and bottom
     self.set2DProjectionFlat()
@@ -930,7 +955,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def setColor(self, c):
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
-  def _buildAxes(self, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
+  def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
     # this needs making into a GL_LIST
 
     # self.picture = QtGui.QPicture()
@@ -957,62 +982,70 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # texts = []
 
+    if gridGLList[1]:
+      GL.glNewList(gridGLList[0], GL.GL_COMPILE)
+      gridGLList[1] = False
+
+      if ul[0] > br[0]:
+        x = ul[0]
+        ul[0] = br[0]
+        br[0] = x
+      for i in scaleGrid:       #  [2,1,0]:   ## Draw three different scales of grid
+        dist = br-ul
+        nlTarget = 10.**i
+        d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
+        ul1 = np.floor(ul / d) * d
+        br1 = np.ceil(br / d) * d
+        dist = br1-ul1
+        nl = (dist / d) + 0.5
+
+        for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
+          ppl = np.array( dim[ax] / nl[ax] )                      # ejb
+          c = np.clip(3.*(ppl-3), 0., 30.)
+          GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
+
+          # if self.parent.gridColour == '#f7ffff':
+            # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
+
+          # GL.glColor3f(247, 255, 255)
+          # else:
+            # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
+            # GL.glColor3f(8, 0, 0)
+
+          GL.glBegin(GL.GL_LINES)
+          bx = (ax+1) % 2
+          for x in range(0, int(nl[ax])):
+            # linePen.setCosmetic(False)
+            # if ax == 0:
+            #     # linePen.setWidthF(self.pixelWidth())
+            # #     #print "ax 0 height", self.pixelHeight()
+            #
+            #   GL.glLineWidth(1)
+            # else:
+            #     # linePen.setWidthF(self.pixelHeight())
+            #   GL.glLineWidth(2)
+            #     #print "ax 1 width", self.pixelWidth()
+            # p.setPen(linePen)
+            p1 = np.array([0.,0.])
+            p2 = np.array([0.,0.])
+            p1[ax] = ul1[ax] + x * d[ax]
+            p2[ax] = p1[ax]
+            p1[bx] = ul[bx]
+            p2[bx] = br[bx]
+            if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
+                continue
+            # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
+            GL.glVertex2f(p1[0], p1[1])
+            GL.glVertex2f(p2[0], p2[1])
+          GL.glEnd()
+      GL.glEndList()
+
+
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glLineWidth(1.0)
 
-    if ul[0] > br[0]:
-      x = ul[0]
-      ul[0] = br[0]
-      br[0] = x
-    for i in scaleGrid:       #  [2,1,0]:   ## Draw three different scales of grid
-      dist = br-ul
-      nlTarget = 10.**i
-      d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
-      ul1 = np.floor(ul / d) * d
-      br1 = np.ceil(br / d) * d
-      dist = br1-ul1
-      nl = (dist / d) + 0.5
-
-      for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
-        ppl = np.array( dim[ax] / nl[ax] )                      # ejb
-        c = np.clip(3.*(ppl-3), 0., 30.)
-        GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
-
-        # if self.parent.gridColour == '#f7ffff':
-          # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
-
-        # GL.glColor3f(247, 255, 255)
-        # else:
-          # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
-          # GL.glColor3f(8, 0, 0)
-
-        GL.glBegin(GL.GL_LINES)
-        bx = (ax+1) % 2
-        for x in range(0, int(nl[ax])):
-          # linePen.setCosmetic(False)
-          # if ax == 0:
-          #     # linePen.setWidthF(self.pixelWidth())
-          # #     #print "ax 0 height", self.pixelHeight()
-          #
-          #   GL.glLineWidth(1)
-          # else:
-          #     # linePen.setWidthF(self.pixelHeight())
-          #   GL.glLineWidth(2)
-          #     #print "ax 1 width", self.pixelWidth()
-          # p.setPen(linePen)
-          p1 = np.array([0.,0.])
-          p2 = np.array([0.,0.])
-          p1[ax] = ul1[ax] + x * d[ax]
-          p2[ax] = p1[ax]
-          p1[bx] = ul[bx]
-          p2[bx] = br[bx]
-          if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
-              continue
-          # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
-          GL.glVertex2f(p1[0], p1[1])
-          GL.glVertex2f(p2[0], p2[1])
-        GL.glEnd()
+    GL.glCallList(gridGLList[0])
 
     GL.glDisable(GL.GL_BLEND)
 

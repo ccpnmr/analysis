@@ -122,15 +122,17 @@ class SpectrumToolBar(ToolBar):
 
     # and delete the spectrumView from the V2
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    stripUpdateList = []
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
+        stripUpdateList.append(spectrumView.strip)
 
-        # TODO:ED delete spectrumView.spectrum from the list before V2 deletion
+        # this spawns the creation of all orderedSpectra
+        # should be done on loading though
+        spectrumView.strip.orderedSpectra()
 
-        # spectrumDeleteFunc = self.widget._removeSpectrum
-        spectrumDeleteFunc = spectrumView.strip.removeSpectrumView
-        spectrumForDeletion = spectrumView
-        # spectrumStrip = spectrumView.strip
+    for spectrumView in self.widget.spectrumViews:
+      if spectrumView._apiDataSource == key:
 
         # delete the spectrumView
         try:
@@ -139,8 +141,8 @@ class SpectrumToolBar(ToolBar):
         except Exception as es:
           pass
 
-        finally:
-          spectrumDeleteFunc(spectrumForDeletion)
+    for st in stripUpdateList:
+      st.removeSpectrumView(None)
 
   def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """

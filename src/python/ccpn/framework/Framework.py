@@ -513,7 +513,7 @@ class Framework:
         # TODO:ED use orderedSpectra
         # for spectrumView in strip.spectrumViews:
 
-        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(includeDeleted=False)):
+        for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
           spectrumView._createdSpectrumView(iSV)
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)

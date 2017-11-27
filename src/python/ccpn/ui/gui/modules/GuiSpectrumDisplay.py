@@ -459,6 +459,9 @@ class GuiSpectrumDisplay(CcpnModule):
       strip.delete()
       self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
 
+      # update the 'orderedSpectra' list
+      self.removeSpectrumView(None)
+
     finally:
       self._endCommandEchoBlock()
 

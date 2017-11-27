@@ -20,12 +20,12 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Wayne Boucher $"
 __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from PyQt4 import QtCore, QtGui
 
 # import pyqtgraph as pg
@@ -34,6 +34,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 # from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.util.Logging import getLogger
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
@@ -298,24 +299,27 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     strip = spectrumView.strip
     spectrumDisplay = strip.spectrumDisplay
 
-    peakItemDict = spectrumDisplay.activePeakItemDict[self]
-    peakItems = set(spectrumDisplay.inactivePeakItemDict[self])
-    for apiPeak in peakItemDict:
-      # NBNB TBD FIXME change to get rid of API peaks here
-      peakItem = peakItemDict[apiPeak]
-      peakItems.add(peakItem)
+    try:
+      peakItemDict = spectrumDisplay.activePeakItemDict[self]
+      peakItems = set(spectrumDisplay.inactivePeakItemDict[self])
+      for apiPeak in peakItemDict:
+        # NBNB TBD FIXME change to get rid of API peaks here
+        peakItem = peakItemDict[apiPeak]
+        peakItems.add(peakItem)
 
-    if strip.plotWidget:
-      scene = strip.plotWidget.scene()
-      for peakItem in peakItems:
-        scene.removeItem(peakItem.annotation)
-        if spectrumDisplay.is1D:
-          scene.removeItem(peakItem.symbol)
-        scene.removeItem(peakItem)
-      scene.removeItem(self)
+      if strip.plotWidget:
+        scene = strip.plotWidget.scene()
+        for peakItem in peakItems:
+          scene.removeItem(peakItem.annotation)
+          if spectrumDisplay.is1D:
+            scene.removeItem(peakItem.symbol)
+          scene.removeItem(peakItem)
+        scene.removeItem(self)
 
-    del spectrumDisplay.activePeakItemDict[self]
-    del spectrumDisplay.inactivePeakItemDict[self]
+      del spectrumDisplay.activePeakItemDict[self]
+      del spectrumDisplay.inactivePeakItemDict[self]
+    except Exception as es:
+      getLogger().warning('Error: peakList does not exist in spectrum')
 
   def _changedPeakListView(self):
 

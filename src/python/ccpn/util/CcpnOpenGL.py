@@ -348,6 +348,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.object = self.makeObject()
 
+    aPixmap = QtGui.QPixmap('/Users/ejb66/Documents/Fonts/myfont.png')
+    tex = GL.glBindTexture(aPixmap)
+
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 

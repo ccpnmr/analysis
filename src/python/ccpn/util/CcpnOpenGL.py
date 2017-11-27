@@ -360,8 +360,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self._lastButtonReleased = ev.button()
 
     if self._lastButtonReleased == Qt.RightButton:
-       # raise right-button context menu
-      self._rightMenu()
+      # raise right-button context menu
+      self.parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()

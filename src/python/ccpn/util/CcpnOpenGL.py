@@ -181,7 +181,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.animationTimer.start(25)
 
     self.setAutoFillBackground(False)
-    self.setMinimumSize(200, 200)
+    self.setMinimumSize(100, 50)
     self.setWindowTitle("Overpainting a Scene")
 
     self._mouseX = 0
@@ -348,8 +348,23 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.object = self.makeObject()
 
-    aPixmap = QtGui.QPixmap('/Users/ejb66/Documents/Fonts/myfont.png')
-    tex = GL.glBindTexture(aPixmap)
+    img = Image.open('/Users/ejb66/Documents/Fonts/myfont.png')
+    img_data = np.array(list(img.getdata()), np.uint8)
+    ptr = image.bits()
+    self.texture = GL.glGenBuffers(1)
+
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
+                    , image.width(), image.height()
+                    , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
+                    , img_data)
+
+    GL.glDisable(GL.GL_TEXTURE_2D)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -503,7 +518,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
     getGLvector = (GL.GLfloat * 2)()
-    GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector);
+    GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
     linewidths = [i for i in getGLvector]
 
     self.set2DProjection()
@@ -703,6 +718,20 @@ class CcpnGLWidget(QOpenGLWidget):
                     , GLUT.GLUT_BITMAP_HELVETICA_18
                     , coords
                     , 1.0, 1.0, 1.0, 1.0)
+
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+    GL.glColor4f(0.8, 0.3, 1.0, 1.0)
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    GL.glBegin(GL.GL_QUADS)
+    GL.glTexCoord2f(0.0, 0.0);    GL.glVertex3f(-20.0, -20.0, 0.0)
+    GL.glTexCoord2f(1.0, 0.0);    GL.glVertex3f(20.0, -20.0, 0.0)
+    GL.glTexCoord2f(1.0, 1.0);    GL.glVertex3f(20.0, 20.0, 0.0)
+    GL.glTexCoord2f(0.0, 1.0);    GL.glVertex3f(-20.0, 20.0, 0.0)
+    GL.glEnd()
+    GL.glDisable(GL.GL_TEXTURE_2D)
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
@@ -1132,13 +1161,13 @@ class CcpnGLWidget(QOpenGLWidget):
   #     glPopAttrib();										# // Pops The Display List Bits
   #   return
 
-  def _loadPNG(self, fileName):
-    import imageio
-
-    im = imageio.imread(fileName)
-    print (im.shape)
-    
-    # need to load the offsets file (*.fnt) and put into array
+  # def _loadPNG(self, fileName):
+  #   # import imageio
+  #
+  #   # im = imageio.imread(fileName)
+  #   # print (im.shape)
+  #
+  #   # need to load the offsets file (*.fnt) and put into array
     
 
 if __name__ == '__main__':

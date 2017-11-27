@@ -244,15 +244,20 @@ class SpectrumDisplay(AbstractWrapperObject):
   # so it is hidden from external users
   def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
     """The ordered spectra attached to the strip"""
-    if self.stripCount:
+    try:
       return self.strips[0].orderedSpectra()
+    except:
+      return None
 
-  def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
+  def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
     """The ordered spectrumViews attached to the strip attached to the strip"""
-    if self.stripCount:
-      return self.strips[0].orderedSpectrumViews(includeDeleted=includeDeleted)
+    try:
+      return self.strips[strip].orderedSpectrumViews(includeDeleted=includeDeleted)
+    except:
+      return None
 
   # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # # MOVED TO STRIP
   # # ejb - orderedSpectrumViews, orderedSpectra
   # # store the current orderedSpectrumViews in the internal data store
   # # so it is hidden from external users

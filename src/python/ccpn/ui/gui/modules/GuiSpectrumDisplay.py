@@ -460,7 +460,8 @@ class GuiSpectrumDisplay(CcpnModule):
       self.setColumnStretches(stretchValue=True)      # set to 0 so they disappear
 
       # update the 'orderedSpectra' list
-      self.removeSpectrumView(None)
+      # TODO:ED update the orderedSpectra list
+      # self.removeSpectrumView(None)
 
     finally:
       self._endCommandEchoBlock()
@@ -491,6 +492,8 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
+
+    newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
 
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)
@@ -655,8 +658,20 @@ class GuiSpectrumDisplay(CcpnModule):
       newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
       if newSpectrum:
         # self._orderedSpectra.append(spectrum)
-        self.appendSpectrumView(newSpectrum)
-    except:
+        for strip in self.strips:
+
+          # displaySpectrum above creates a new spectrum for each strip in the display
+          # but only returns the first one
+          # this loops through the strips and adds each to the strip ordered list
+          existingViews = set(strip.orderedSpectrumViews())
+          newViews = set(strip.spectrumViews)
+          dSet = set(newViews).difference(existingViews)
+
+          # append those not found
+          for spInDSet in dSet:
+            strip.appendSpectrumView(spInDSet)
+
+    except Exception as es:
       getLogger().warning('Error appending newSpectrum: %s' % spectrum)
     finally:
       self._endCommandEchoBlock()

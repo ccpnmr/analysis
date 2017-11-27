@@ -850,6 +850,26 @@ class Strip(AbstractWrapperObject):
 
     values = tuple(x for x in spectra)
     setattr(self, ORDEREDSPECTRA, values)
+
+  def copyOrderedSpectrumViews(self, fromStrip):
+    if hasattr(fromStrip, ORDEREDSPECTRA):
+      fromSpectraV = getattr(fromStrip, ORDEREDSPECTRA)
+
+      # loop through the source list of spectra and append the new matching spectra in this spectrumView
+      newSpectra = []
+      for fromSP in fromSpectraV:
+        for selfSPV in self.spectrumViews:
+
+          # fromSP could be a 'deleted' structure, so no 'spectrum' attribute
+          if hasattr(fromSP, 'spectrum'):
+            if fromSP.spectrum == selfSPV.spectrum:
+              newSpectra.append(selfSPV)
+
+      self._storeOrderedSpectrumViews(tuple(x.pid for x in newSpectra))
+
+      values = tuple(x for x in newSpectra)
+      setattr(self, ORDEREDSPECTRA, values)
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

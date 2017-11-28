@@ -98,22 +98,22 @@ class GuiStrip(Frame):
     # self.plotWidget.showGrid(x=True, y=True, alpha=None)
 
 
-    # TODO: ED comment out the block below to return to normal
-    # self.plotWidget.hide()
-    from ccpn.util.CcpnOpenGL import CcpnOpenGLWidget, CcpnGLWidget
-    # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
-    # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
-
-    self._testCcpnOpenGLWidget = CcpnGLWidget(self)
-    self.getLayout().addWidget(self._testCcpnOpenGLWidget, 3, 0)
-    self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
-    # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
-    # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-    # self.plotWidgetOverlay.resize(200, 200)
-    # self.plotWidgetOverlay.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-    # self.plotWidgetOverlay.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-    # self.plotWidgetOverlay.showGrid(x=True, y=True, alpha=None)
+    # # TODO: ED comment out the block below to return to normal
+    # # self.plotWidget.hide()
+    # from ccpn.util.CcpnOpenGL import CcpnOpenGLWidget, CcpnGLWidget
+    # # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
+    # # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
+    #
+    # self._testCcpnOpenGLWidget = CcpnGLWidget(self)
+    # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 3, 0)
+    # self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    #
+    # # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
+    # # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+    # # self.plotWidgetOverlay.resize(200, 200)
+    # # self.plotWidgetOverlay.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+    # # self.plotWidgetOverlay.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+    # # self.plotWidgetOverlay.showGrid(x=True, y=True, alpha=None)
 
 
 
@@ -529,10 +529,13 @@ class GuiStrip(Frame):
 
     if not self._finaliseDone: return
 
-    axisPositionDict = self.axisPositionDict
-    axisCodes = [axis.code for axis in self.orderedAxes[:2]]
-    positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-    self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
+    try:
+      axisPositionDict = self.axisPositionDict
+      axisCodes = [axis.code for axis in self.orderedAxes[:2]]
+      positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+      self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
+    except:
+      getLogger().warning('Error setting mark at current position')
 
   # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
   def _initRulers(self):

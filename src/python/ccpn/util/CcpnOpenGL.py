@@ -215,6 +215,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisT = 20
     self.axisB = 80
 
+    self._buildPeakList = True
+
   def resizeGL(self, w, h):
     GL.glViewport(0, 0, w, h)
 
@@ -310,15 +312,15 @@ class CcpnGLWidget(QOpenGLWidget):
   def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
     # clear the list and rebuild
     GL.glDeleteLists(self._GLPeakLists[num], 1)
-    self._GLPeakLists[num] = GL.glGenLists(1)
+    self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
 
     # this is actually quite old-school for openGL but good for test
-    GL.glNewList(self._GLPeakLists[num], GL.GL_COMPILE)
-    GL.glBegin(GL.GL_LINES)
-
+    GL.glNewList((self._GLPeakLists[num])[0], GL.GL_COMPILE)
     GL.glColor4f(1.0, 1.0, 1.0, 1.0)
 
+    GL.glBegin(GL.GL_LINES)
     GL.glEnd()
+
     GL.glEndList()
 
   def _connectSpectra(self):
@@ -346,6 +348,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     for li in range(3):
       self.gridList.append( [GL.glGenLists(1), True] )
+
+    self.GLPeakLists = {}
 
     self.object = self.makeObject()
 
@@ -502,11 +506,160 @@ class CcpnGLWidget(QOpenGLWidget):
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
     # my signal to repaint the screen after the spectra have changed
-    if bool:
-      self.paintGL()
+    # if bool:
+    #   self.paintGL()
+    pass
 
   def sign(self, x):
     return 1.0 if x >= 0 else -1.0
+
+  def _buildPeakList(self, specView):
+    peakLists = specView.spectrum.peakLists
+
+  def _drawPeakLists(self, spectrumView):
+    spectrum = spectrumView.spectrum
+
+    if spectrum.pid not in self.GLPeakLists:
+      self.GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
+
+    drawList = self.GLPeakLists[spectrum.pid]
+
+    # find the correct scale to draw square pixels
+    # don't forget to change when the axes change
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    minIndex = 0 if x <= y else 1
+    pos = [ 0.05, 0.05*y/x ]
+    w = r = pos[minIndex]
+
+    if x <= y:
+      r = 0.05
+      w = 0.025 * y / x
+    else:
+      w = 0.05
+      r = 0.025 * x / y
+
+    if drawList[1]:
+      drawList[1] = False
+      GL.glNewList(drawList[0], GL.GL_COMPILE)
+
+      GL.glBegin(GL.GL_LINES)
+      for pls in spectrum.peakLists:
+        for peak in pls.peaks:
+
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            colour = spectrumView.strip.plotWidget.highlightColour
+          else:
+            colour = pls.symbolColour
+
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+
+          GL.glColor4f(colR, colG, colB, 1.0)
+
+          # draw a cross
+          p0 = peak.position
+          GL.glVertex2d(p0[0]-r, p0[1]-w)
+          GL.glVertex2d(p0[0]+r, p0[1]+w)
+          GL.glVertex2d(p0[0]+r, p0[1]-w)
+          GL.glVertex2d(p0[0]-r, p0[1]+w)
+
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            # draw box
+            GL.glVertex2d(p0[0]-r, p0[1]-w)
+            GL.glVertex2d(p0[0]+r, p0[1]-w)
+            GL.glVertex2d(p0[0]+r, p0[1]+w)
+            GL.glVertex2d(p0[0]-r, p0[1]+w)
+
+          # glut text failure - need something better
+
+      GL.glEnd()
+      GL.glEndList()
+
+    GL.glCallList(drawList[0])
+
+  def _drawMarks(self):
+
+    if not hasattr(self, 'GLMarkList'):
+      self.GLMarkList = [GL.glGenLists(1), True]
+
+    if self.GLMarkList[1]:
+      # rebuild the mark list
+      self.GLMarkList[1] = False
+      GL.glNewList(self.GLMarkList[0], GL.GL_COMPILE)
+
+      # draw some marks in here
+
+
+
+      GL.glEnd()
+      GL.glEndList()
+
+    GL.glCallList(self.GLMarkList[0])
+
+  def _drawPeakLists(self, spectrumView):
+    spectrum = spectrumView.spectrum
+
+    if spectrum.pid not in self.GLPeakLists:
+      self.GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
+
+    drawList = self.GLPeakLists[spectrum.pid]
+
+    # find the correct scale to draw square pixels
+    # don't forget to change when the axes change
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    minIndex = 0 if x <= y else 1
+    pos = [ 0.05, 0.05*y/x ]
+    w = r = pos[minIndex]
+
+    if x <= y:
+      r = 0.05
+      w = 0.025 * y / x
+    else:
+      w = 0.05
+      r = 0.025 * x / y
+
+    if drawList[1]:
+      drawList[1] = False
+      GL.glNewList(drawList[0], GL.GL_COMPILE)
+
+      GL.glBegin(GL.GL_LINES)
+      for pls in spectrum.peakLists:
+        for peak in pls.peaks:
+
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            colour = spectrumView.strip.plotWidget.highlightColour
+          else:
+            colour = pls.symbolColour
+
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+
+          GL.glColor4f(colR, colG, colB, 1.0)
+
+          # draw a cross
+          p0 = peak.position
+          GL.glVertex2d(p0[0]-r, p0[1]-w)
+          GL.glVertex2d(p0[0]+r, p0[1]+w)
+          GL.glVertex2d(p0[0]+r, p0[1]-w)
+          GL.glVertex2d(p0[0]-r, p0[1]+w)
+
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            # draw box
+            GL.glVertex2d(p0[0]-r, p0[1]-w)
+            GL.glVertex2d(p0[0]+r, p0[1]-w)
+            GL.glVertex2d(p0[0]+r, p0[1]+w)
+            GL.glVertex2d(p0[0]-r, p0[1]+w)
+
+          # glut text failure - need something better
+
+      GL.glEnd()
+      GL.glEndList()
+
+    GL.glCallList(drawList[0])
 
   def paintGL(self):
     self.makeCurrent()
@@ -555,6 +708,7 @@ class CcpnGLWidget(QOpenGLWidget):
       self.viewport,
     )
 
+    # calculate the width of a world pixel on the screen
     origin = GLU.gluUnProject(
       0.0, 0.0, 0.0,
       self.modelViewMatrix,
@@ -605,16 +759,23 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glPopMatrix()
 
         # draw the bounding box
-        GL.glColor4f(*spectrumView.posColour)
-        GL.glLineStipple(1, 0xAAAA)
-        GL.glEnable(GL.GL_LINE_STIPPLE)
+        GL.glEnable(GL.GL_BLEND)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+        # GL.glLineStipple(1, 0xAAAA)
+        # GL.glEnable(GL.GL_LINE_STIPPLE)
         GL.glBegin(GL.GL_LINE_LOOP)
         GL.glVertex2d(fx0, fy0)
         GL.glVertex2d(fx0, fy1)
         GL.glVertex2d(fx1, fy1)
         GL.glVertex2d(fx1, fy0)
         GL.glEnd()
-        GL.glDisable(GL.GL_LINE_STIPPLE)
+        # GL.glDisable(GL.GL_LINE_STIPPLE)
+        GL.glDisable(GL.GL_BLEND)
+
+        # draw the peak List, labelling, marks
+
+        self._drawPeakLists(spectrumView)
 
       except:
         raise

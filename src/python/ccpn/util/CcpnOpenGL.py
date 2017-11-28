@@ -349,21 +349,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.object = self.makeObject()
 
-    image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
-
-    self.texture = GL.glGenBuffers(1)
-
-    GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
-
-    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
-                    , image.shape[1], image.shape[0]
-                    , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
-                    , np.asarray(image).tobytes(order='C'))
-
-    GL.glDisable(GL.GL_TEXTURE_2D)
+    # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
+    #
+    # self.texture = GL.glGenBuffers(1)
+    #
+    # GL.glEnable(GL.GL_TEXTURE_2D)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+    # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+    # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+    #
+    # GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
+    #                 , image.shape[1], image.shape[0]
+    #                 , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
+    #                 , np.asarray(image).tobytes(order='C'))
+    #
+    # GL.glDisable(GL.GL_TEXTURE_2D)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -587,18 +587,35 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumValues = spectrumView._getValues()
         dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
         dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
-        dxAF = (self._spectrumValues[0].maxAliasedFrequency-self._spectrumValues[0].minAliasedFrequency)
-        dyAF = (self._spectrumValues[1].maxAliasedFrequency-self._spectrumValues[1].minAliasedFrequency)
+
+        # get the bounding box of the spectra
+        fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+        dxAF = fx0 - fx1
+        dyAF = fy0 - fy1
         xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
         yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
-        px = self._spectrumValues[0].maxAliasedFrequency
-        py = self._spectrumValues[1].maxAliasedFrequency
 
         GL.glPushMatrix()
-        GL.glTranslate(px, py, 0.0)
+        GL.glTranslate(fx0, fy0, 0.0)
         GL.glScale(xScale, yScale, 1.0)
+
+        # paint the spectrum
         spectrumView._paintContoursNoClip()
         GL.glPopMatrix()
+
+        # draw the bounding box
+        GL.glColor4f(*spectrumView.posColour)
+        GL.glLineStipple(1, 0xAAAA)
+        GL.glEnable(GL.GL_LINE_STIPPLE)
+        GL.glBegin(GL.GL_LINE_LOOP)
+        GL.glVertex2d(fx0, fy0)
+        GL.glVertex2d(fx0, fy1)
+        GL.glVertex2d(fx1, fy1)
+        GL.glVertex2d(fx1, fy0)
+        GL.glEnd()
+        GL.glDisable(GL.GL_LINE_STIPPLE)
+
       except:
         raise
         spectrumView._buildContours(None)
@@ -714,25 +731,25 @@ class CcpnGLWidget(QOpenGLWidget):
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
     self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
-                    , GLUT.GLUT_BITMAP_HELVETICA_18
+                    , GLUT.GLUT_BITMAP_HELVETICA_12
                     , coords
                     , 1.0, 1.0, 1.0, 1.0)
 
-    self.set2DProjectionFlat()
-
-    GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
-    GL.glColor4f(0.8, 0.3, 1.0, 1.0)
-    GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-
-    GL.glBegin(GL.GL_QUADS)
-    GL.glTexCoord2f(1023/1024, 1/256);    GL.glVertex2i(512, 128)
-    GL.glTexCoord2f(1/1024,    1/256);    GL.glVertex2i(0, 128)
-    GL.glTexCoord2f(1/1024,    255/256);    GL.glVertex2i(0, 0)
-    GL.glTexCoord2f(1023/1024, 255/256);    GL.glVertex2i(512, 0)
-    GL.glEnd()
-    GL.glDisable(GL.GL_TEXTURE_2D)
+    # self.set2DProjectionFlat()
+    #
+    # GL.glEnable(GL.GL_TEXTURE_2D)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
+    # GL.glColor4f(0.8, 0.3, 1.0, 1.0)
+    # GL.glEnable(GL.GL_BLEND)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    #
+    # GL.glBegin(GL.GL_QUADS)
+    # GL.glTexCoord2f(1023/1024, 1/256);    GL.glVertex2i(512, 128)
+    # GL.glTexCoord2f(1/1024,    1/256);    GL.glVertex2i(0, 128)
+    # GL.glTexCoord2f(1/1024,    255/256);    GL.glVertex2i(0, 0)
+    # GL.glTexCoord2f(1023/1024, 255/256);    GL.glVertex2i(512, 0)
+    # GL.glEnd()
+    # GL.glDisable(GL.GL_TEXTURE_2D)
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()

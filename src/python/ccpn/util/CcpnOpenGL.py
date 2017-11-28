@@ -26,6 +26,7 @@ __date__ = "$Date$"
 import sys
 import math, random
 import ctypes
+from imageio import imread
 
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
@@ -348,21 +349,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.object = self.makeObject()
 
-    img = Image.open('/Users/ejb66/Documents/Fonts/myfont.png')
-    img_data = np.array(list(img.getdata()), np.uint8)
-    ptr = image.bits()
+    image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
+
     self.texture = GL.glGenBuffers(1)
 
     GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
 
     GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
-                    , image.width(), image.height()
+                    , image.shape[1], image.shape[0]
                     , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
-                    , img_data)
+                    , np.asarray(image).tobytes(order='C'))
 
     GL.glDisable(GL.GL_TEXTURE_2D)
 
@@ -719,6 +718,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     , coords
                     , 1.0, 1.0, 1.0, 1.0)
 
+    self.set2DProjectionFlat()
+
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
     GL.glColor4f(0.8, 0.3, 1.0, 1.0)
@@ -726,10 +727,10 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glBegin(GL.GL_QUADS)
-    GL.glTexCoord2f(0.0, 0.0);    GL.glVertex3f(-20.0, -20.0, 0.0)
-    GL.glTexCoord2f(1.0, 0.0);    GL.glVertex3f(20.0, -20.0, 0.0)
-    GL.glTexCoord2f(1.0, 1.0);    GL.glVertex3f(20.0, 20.0, 0.0)
-    GL.glTexCoord2f(0.0, 1.0);    GL.glVertex3f(-20.0, 20.0, 0.0)
+    GL.glTexCoord2f(1023/1024, 1/512);    GL.glVertex2i(512, 256)
+    GL.glTexCoord2f(1/1024,    1/512);    GL.glVertex2i(0, 256)
+    GL.glTexCoord2f(1/1024,    511/512);    GL.glVertex2i(0, 0)
+    GL.glTexCoord2f(1023/1024, 511/512);    GL.glVertex2i(512, 0)
     GL.glEnd()
     GL.glDisable(GL.GL_TEXTURE_2D)
 

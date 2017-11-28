@@ -727,10 +727,10 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glBegin(GL.GL_QUADS)
-    GL.glTexCoord2f(1023/1024, 1/512);    GL.glVertex2i(512, 256)
-    GL.glTexCoord2f(1/1024,    1/512);    GL.glVertex2i(0, 256)
-    GL.glTexCoord2f(1/1024,    511/512);    GL.glVertex2i(0, 0)
-    GL.glTexCoord2f(1023/1024, 511/512);    GL.glVertex2i(512, 0)
+    GL.glTexCoord2f(1023/1024, 1/256);    GL.glVertex2i(512, 128)
+    GL.glTexCoord2f(1/1024,    1/256);    GL.glVertex2i(0, 128)
+    GL.glTexCoord2f(1/1024,    255/256);    GL.glVertex2i(0, 0)
+    GL.glTexCoord2f(1023/1024, 255/256);    GL.glVertex2i(512, 0)
     GL.glEnd()
     GL.glDisable(GL.GL_TEXTURE_2D)
 

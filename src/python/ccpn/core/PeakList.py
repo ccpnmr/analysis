@@ -432,6 +432,7 @@ class PeakList(AbstractWrapperObject):
     tolerances = self.spectrum.assignmentTolerances
     limits = self.spectrum.spectrumLimits
     selectedRegion = []
+    minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
     for ii, mapping in enumerate(axisCodeMapping):
       if mapping is not None:
@@ -440,7 +441,7 @@ class PeakList(AbstractWrapperObject):
         selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
     regionToPick = selectedRegion
-    peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg)
+    peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg, minDropfactor=minDropFactor)
     return peaks
 
   def reorderValues(self, values, newAxisCodeOrder):

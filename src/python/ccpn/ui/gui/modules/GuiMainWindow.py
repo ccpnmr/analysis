@@ -327,10 +327,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
       if projectDir:
         project = self.application.loadProject(projectDir)
-        try:
+
+        if project:
           project._mainWindow.show()
-        except Exception as es:
-          Logging.getLogger().warning('Error loading project:', str(es))
+        else:
+          MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
+          Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
 
     return project
 

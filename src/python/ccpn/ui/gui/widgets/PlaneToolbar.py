@@ -253,7 +253,7 @@ class PlaneToolbar(ToolBar):
       self.planeCounts.append(planeCount)
 
   def _wheelEvent(self, n, event):
-    if event.delta() > 0: # note that in Qt5 this becomes angleDelta()
+    if event.angleDelta().y() > 0: # note that in Qt5 this becomes angleDelta().y()
       if self.prevPlaneCallback:
         self.prevPlaneCallback(n)
     else:

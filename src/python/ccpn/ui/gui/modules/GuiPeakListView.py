@@ -113,7 +113,9 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
   def chainLabel(item):
     try:
       chainLabel = item.nmrResidue.nmrChain.id
-      if chainLabel:
+      assignedOnlyOneChain = len(peak.project.chains) == 1 and item.nmrResidue.residue
+
+      if chainLabel and not assignedOnlyOneChain:
         chainLabel += '_'
     except:
       chainLabel = ''

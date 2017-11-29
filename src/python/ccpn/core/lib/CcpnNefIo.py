@@ -704,7 +704,6 @@ nef2CcpnMap = {
     ('sequence_code','sequenceCode'),
     # ('residue_name',None),
     ('residue_name','residueType'),
-
     ('serial',None),
     ('comment','comment'),
   )),
@@ -3665,7 +3664,6 @@ class CcpnNefReader:
       else:
         nmrChain = creatorFunc(**parameters)
       nmrChain.resetSerial(row['serial'])
-
       nmrChains[parameters['shortName']] = nmrChain
 
     # resume notifiers again

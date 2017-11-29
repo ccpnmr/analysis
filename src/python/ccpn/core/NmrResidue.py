@@ -1363,6 +1363,7 @@ def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, resid
           sequenceCode = None
         else:
           # Name clashes with existing NmrResidue
+          tempSerial = nmrProject.findFirstResonanceGroup(serial=serial)      # ejb - error here
           raise ValueError("Cannot create NmrResidue with reserved name %s" % sequenceCode)
 
     else:

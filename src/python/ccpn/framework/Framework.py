@@ -1052,6 +1052,9 @@ class Framework:
   def _loadNefFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
+    # import ccpn.util.nef.NefImporter as NefImporter
+    # tempRead = NefImporter.importFile(path)
+
     dataBlock = self.nefReader.getNefData(path)
 
     if makeNewProject:

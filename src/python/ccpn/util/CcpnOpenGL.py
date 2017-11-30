@@ -358,6 +358,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
 
+    self._mouseList = GL.glGenLists(1)
+    self._buildMouse = True
+
     # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
     #
     # self.texture = GL.glGenBuffers(1)
@@ -897,13 +900,10 @@ class CcpnGLWidget(QOpenGLWidget):
     coords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
-    self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
-                    , GLUT.GLUT_BITMAP_HELVETICA_12
-                    , coords
-                    , 1.0, 1.0, 1.0, 1.0)
-
-    # self.set2DProjectionFlat()
-    # GL.glRasterPos2d(10, 50)
+    # self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
+    #                 , GLUT.GLUT_BITMAP_HELVETICA_12
+    #                 , coords
+    #                 , 1.0, 1.0, 1.0, 1.0)
 
     if self._buildTextFlag is True:
       self._buildTextFlag = False
@@ -911,32 +911,40 @@ class CcpnGLWidget(QOpenGLWidget):
       self.drawTextList = GL.glGenLists(1)
       GL.glNewList(self.drawTextList, GL.GL_COMPILE)
 
-      for ti in range(100):
+      for ti in range(7):
+        # GL.glRotate(25.0, 0.0, 0.0, 1.0)      # can rotate if we need to :)
+
         GL.glPushMatrix()
-        GL.glTranslate(ti*10, ti*10, 0.0)
-        GL.glCallLists([ord(c) for c in 'Lets put some text on the screen'])
+        GL.glTranslate(ti*50.0, ti*50, 0.0)
+        GL.glCallLists([ord(c) for c in 'The Quick\tBrown Fox\n013617@something'])
         GL.glPopMatrix()
 
       GL.glEndList()
 
-    GL.glPushMatrix()
-    GL.glScalef(-0.5, -3.0, 1.0)
+
+    self.set2DProjectionFlat()
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    GL.glColor3f(0.8, 0.3, 1.0)
-
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
 
     GL.glListBase( self.firstFont.base )
 
-    # GL.glCallLists( [ord(c) for c in 'ABCDEFGHIJKLMNOPQRSTUVWZYX'] )
-    GL.glCallList(self.drawTextList)
+    # GL.glPushMatrix()
+    # GL.glTranslated(50, 300, 0)
+    # # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
+    # GL.glCallList(self.drawTextList)
+    # GL.glPopMatrix()
+
+    # draw the mouse coordinates
+    GL.glPushMatrix()
+    GL.glTranslate(self._mouseX, self._mouseY-30, 0.0)      # from bottom left of window?
+    GL.glColor3f(0.9, 0.9, 0.9)
+    GL.glCallLists([ord(c) for c in coords])
+    GL.glPopMatrix()
 
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
-    GL.glPopMatrix()
-
 
     # self.set2DProjectionFlat()
     #
@@ -1234,7 +1242,7 @@ class CcpnGLWidget(QOpenGLWidget):
     ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
     br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
 
-    # texts = []
+    texts = []
 
     if gridGLList[1]:
       GL.glNewList(gridGLList[0], GL.GL_COMPILE)
@@ -1309,6 +1317,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     x = tr.map(t[0]) + Point(0.5, 0.5)
     #     p.drawText(x, t[1])
     # p.end()
+
 
   def glut_print(self, x, y, font, text, r, g, b, a):
 
@@ -1526,6 +1535,7 @@ GlyphXoffset = 'Xoffset'
 GlyphYoffset = 'Yoffset'
 GlyphOrigW = 'OrigW'
 GlyphOrigH = 'OrigH'
+GlyphKerns = 'Kerns'
 
 class GLFont():
   def __init__(self, fileName=None, size=12, base=0):
@@ -1542,98 +1552,124 @@ class GLFont():
     self.fontName = self.fontInfo[1].split()[0]
     self.fontSize = self.fontInfo[1].split()[1]
 
-    for line in self.fontInfo[2:]:
+    row = 2
+    exitDims = False
+
+    while exitDims is False and row < len(self.fontInfo):
+      line = self.fontInfo[row]
       print (line)
       if line.startswith('kerning'):
-        break
+        exitDims = True
       else:
-        lineVals = [int(ll) for ll in line.split()]
-        if len(lineVals) == 9:
-          chrNum, a0, b0, c0, d0, e0, f0, g0, h0 = lineVals
+        try:
+          lineVals = [int(ll) for ll in line.split()]
+          if len(lineVals) == 9:
+            chrNum, a0, b0, c0, d0, e0, f0, g0, h0 = lineVals
 
-          # only keep the simple chars for the minute
-          if chrNum < 256:
-            self.fontGlyph[chrNum] = {}
-            self.fontGlyph[chrNum][GlyphXpos] = a0
-            self.fontGlyph[chrNum][GlyphYpos] = b0
-            self.fontGlyph[chrNum][GlyphWidth] = c0
-            self.fontGlyph[chrNum][GlyphHeight] = d0
-            self.fontGlyph[chrNum][GlyphXoffset] = e0
-            self.fontGlyph[chrNum][GlyphYoffset] = f0
-            self.fontGlyph[chrNum][GlyphOrigW]= g0
-            self.fontGlyph[chrNum][GlyphOrigH] = h0
-        else:
-          break
+            # only keep the simple chars for the minute
+            if chrNum < 256:
+              self.fontGlyph[chrNum] = {}
+              self.fontGlyph[chrNum][GlyphXpos] = a0
+              self.fontGlyph[chrNum][GlyphYpos] = b0
+              self.fontGlyph[chrNum][GlyphWidth] = c0
+              self.fontGlyph[chrNum][GlyphHeight] = d0
+              self.fontGlyph[chrNum][GlyphXoffset] = e0
+              self.fontGlyph[chrNum][GlyphYoffset] = f0
+              self.fontGlyph[chrNum][GlyphOrigW]= g0
+              self.fontGlyph[chrNum][GlyphOrigH] = h0
+              self.fontGlyph[chrNum][GlyphKerns] = {}
+          else:
+            exitDims = True
+        except:
+          exitDims = True
+      row += 1
+
+    if line.startswith('kerning'):
+      # kerning list is included
+
+      exitKerns = False
+      while exitKerns is False and row < len(self.fontInfo):
+        line = self.fontInfo[row]
+        print(line)
+
+        try:
+          lineVals = [int(ll) for ll in line.split()]
+          chrNum, chrNext, val = lineVals
+
+          if chrNum < 256 and chrNext < 256:
+            self.fontGlyph[chrNum][GlyphKerns][chrNext] = val
+        except:
+          exitKerns = True
+        row += 1
 
     width, height, ascender, descender = 0, 0, 0, 0
     for c in range(0, 256):
-      # face.load_char( chr(c), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
-      # bitmap    = face.glyph.bitmap
-      if self.fontGlyph[chrNum]:
+      if chrNum < 256 and self.fontGlyph[chrNum]:
         width = max( width, self.fontGlyph[chrNum][GlyphOrigW] )
-        # ascender  = max( ascender, self.fontGlyph[chrNum][GlyphYoffset]- )
-        # descender = max( descender, bitmap.rows-face.glyph.bitmap_top )
-        height = max( height, self.fontGlyph[chrNum][GlyphHeight] )
+        height = max( height, self.fontGlyph[chrNum][GlyphOrigH] )
 
     self.textureId = GL.glGenTextures(1)
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
-    GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
-    GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
 
-    # GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_ALPHA
-    #                  , self.fontPNG.shape[1], self.fontPNG.shape[0]
-    #                  , 0
-    #                  , GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
     GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
                      , self.fontPNG.shape[1], self.fontPNG.shape[0]
                      , 0
                      , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
 
-    # GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
-    #                 , image.shape[1], image.shape[0]
-    #                 , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
-    #                 , np.asarray(image).tobytes(order='C'))
+    # generate a MipMap to cope with smaller text (may not be needed soon)
+    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
+    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
+
+    # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
+    # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
     GL.glDisable(GL.GL_TEXTURE_2D)
 
-    # dx, dy = width / float(self.fontPNG.shape[1]), height / float(self.fontPNG.shape[0])
     self.base = GL.glGenLists(256)
+    dx = 1.0 / float(self.fontPNG.shape[1])
+    dy = 1.0 / float(self.fontPNG.shape[0])
     for i in range(256):
-      if self.fontGlyph[i]:
-        c = chr(i)
-        # x = i % 16
-        # y = i // 16 - 2
-
-        x = float(self.fontGlyph[i][GlyphXpos])
-        y = float(self.fontGlyph[i][GlyphYpos])
-        w = float(self.fontGlyph[i][GlyphWidth])
-        h = float(self.fontGlyph[i][GlyphHeight])
-        dx = 1.0 / float(self.fontPNG.shape[1])
-        dy = 1.0 / float(self.fontPNG.shape[0])
-        fdx = 0.5 * dx
-        fdy = 0.5 * dy
+      if self.fontGlyph[i] or i == 10 or i == 9:    # newline and tab
+        # c = chr(i)
 
         GL.glNewList(self.base + i, GL.GL_COMPILE)
-        if (c == '\n'):
+        if (i == 10):                                 # newline
           GL.glPopMatrix()
           GL.glTranslatef(0.0, -height, 0.0)
           GL.glPushMatrix()
-        elif (c == '\t'):
+        elif (i == 9):                                # tab
           GL.glTranslatef(4.0 * width, 0.0, 0.0)
         elif (i >= 32):
-          GL.glBegin(GL.GL_QUADS)
-          # GL.glTexCoord2f((x) * dx, (y + 1) * dy), GL.glVertex(0, -height)
-          # GL.glTexCoord2f((x) * dx, (y) * dy), GL.glVertex(0, 0)
-          # GL.glTexCoord2f((x + 1) * dx, (y) * dy), GL.glVertex(width, 0)
-          # GL.glTexCoord2f((x + 1) * dx, (y + 1) * dy), GL.glVertex(width, -height)
+          x = float(self.fontGlyph[i][GlyphXpos] + 0.5)
+          y = float(self.fontGlyph[i][GlyphYpos] + 0.5)
+          px = self.fontGlyph[i][GlyphXoffset]
+          py = self.fontGlyph[i][GlyphYoffset]
+          w = self.fontGlyph[i][GlyphWidth]
+          h = self.fontGlyph[i][GlyphHeight]
+          gw = self.fontGlyph[i][GlyphOrigW]
+          gh = self.fontGlyph[i][GlyphOrigH]
 
-          GL.glTexCoord2f( (x*dx)+fdx, ((y+h)*dy)+fdy);     GL.glVertex(0, -h)
-          GL.glTexCoord2f( (x*dx)+fdx, (y*dy)+fdy);         GL.glVertex(0, 0)
-          GL.glTexCoord2f( ((x+w)*dx)+fdx, (y*dy)+fdy);         GL.glVertex(w, 0)
-          GL.glTexCoord2f( ((x+w)*dx)+fdx, ((y+h)*dy)+fdy);     GL.glVertex(w, -h)
+          GL.glBegin(GL.GL_QUADS)
+
+          # coordinates in the texture
+          tx0 = x*dx
+          ty0 = (y+h)*dy
+          tx1 = (x+w)*dx
+          ty1 = y*dy
+          # coordinates mapped to the quad
+          px0 = px
+          py0 = gh-(py+h)
+          px1 = px+w
+          py1 = gh-py
+
+          # draw the quad
+          GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
+          GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
+          GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
+          GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
 
           GL.glEnd()
-          GL.glTranslatef(2*w, 0.0, 0.0)
+          GL.glTranslatef(gw, 0.0, 0.0)
         GL.glEndList()
 
 

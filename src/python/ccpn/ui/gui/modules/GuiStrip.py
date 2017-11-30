@@ -99,7 +99,7 @@ class GuiStrip(Frame):
 
 
     # TODO: ED comment out the block below to return to normal
-    # self.plotWidget.hide()
+    self.plotWidget.hide()
     from ccpn.util.CcpnOpenGL import CcpnOpenGLWidget, CcpnGLWidget
     # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
     # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)

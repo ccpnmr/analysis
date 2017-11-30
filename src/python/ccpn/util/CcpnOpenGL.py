@@ -28,6 +28,9 @@ import math, random
 import ctypes
 from imageio import imread
 
+# import the freetype2 library
+# import freetype
+
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
         QTimer)
@@ -352,11 +355,14 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLPeakLists = {}
 
     self.object = self.makeObject()
+    self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
+    self._buildTextFlag = True
 
     # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
     #
     # self.texture = GL.glGenBuffers(1)
     #
+    # GL.glActiveTexture(GL.GL_TEXTURE0)
     # GL.glEnable(GL.GL_TEXTURE_2D)
     # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
     # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
@@ -897,7 +903,44 @@ class CcpnGLWidget(QOpenGLWidget):
                     , 1.0, 1.0, 1.0, 1.0)
 
     # self.set2DProjectionFlat()
+    # GL.glRasterPos2d(10, 50)
+
+    if self._buildTextFlag is True:
+      self._buildTextFlag = False
+
+      self.drawTextList = GL.glGenLists(1)
+      GL.glNewList(self.drawTextList, GL.GL_COMPILE)
+
+      for ti in range(100):
+        GL.glPushMatrix()
+        GL.glTranslate(ti*10, ti*10, 0.0)
+        GL.glCallLists([ord(c) for c in 'Lets put some text on the screen'])
+        GL.glPopMatrix()
+
+      GL.glEndList()
+
+    GL.glPushMatrix()
+    GL.glScalef(-0.5, -3.0, 1.0)
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glColor3f(0.8, 0.3, 1.0)
+
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
+
+    GL.glListBase( self.firstFont.base )
+
+    # GL.glCallLists( [ord(c) for c in 'ABCDEFGHIJKLMNOPQRSTUVWZYX'] )
+    GL.glCallList(self.drawTextList)
+
+    GL.glDisable(GL.GL_BLEND)
+    GL.glDisable(GL.GL_TEXTURE_2D)
+    GL.glPopMatrix()
+
+
+    # self.set2DProjectionFlat()
     #
+    # GL.glActiveTexture(GL.GL_TEXTURE0)
     # GL.glEnable(GL.GL_TEXTURE_2D)
     # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
     # GL.glColor4f(0.8, 0.3, 1.0, 1.0)
@@ -1349,6 +1392,251 @@ class CcpnGLWidget(QOpenGLWidget):
   #   # need to load the offsets file (*.fnt) and put into array
     
 
+
+
+  base, texid = 0, 0
+  text  = '''Hello World !'''
+  
+  # def on_display():
+  #     global texid
+  #     gl.glClearColor(1,1,1,1)
+  #     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+  #     gl.glBindTexture( gl.GL_TEXTURE_2D, texid )
+  #     gl.glColor(0,0,0,1)
+  #     gl.glPushMatrix( )
+  #     gl.glTranslate( 10, 100, 0 )
+  #     gl.glPushMatrix( )
+  #     gl.glListBase( base+1 )
+  #     gl.glCallLists( [ord(c) for c in text] )
+  #     gl.glPopMatrix( )
+  #     gl.glPopMatrix( )
+  #     glut.glutSwapBuffers( )
+  # 
+  # def on_reshape( width, height ):
+  #     gl.glViewport( 0, 0, width, height )
+  #     gl.glMatrixMode( gl.GL_PROJECTION )
+  #     gl.glLoadIdentity( )
+  #     gl.glOrtho( 0, width, 0, height, -1, 1 )
+  #     gl.glMatrixMode( gl.GL_MODELVIEW )
+  #     gl.glLoadIdentity( )
+  
+  # def on_keyboard( key, x, y ):
+  #     if key == '\033': sys.exit( )
+  
+  def makefont(self, fileName=None, size=None):
+      global texid
+  
+      # # Load font  and check it is monotype
+      # face = Face(filename)
+      # face.set_char_size( size*64 )
+      # if not face.is_fixed_width:
+      #     raise 'Font is not monotype'
+      #
+      # # Determine largest glyph size
+      # width, height, ascender, descender = 0, 0, 0, 0
+      # for c in range(32,128):
+      #     face.load_char( chr(c), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
+      #     bitmap    = face.glyph.bitmap
+      #     width     = max( width, bitmap.width )
+      #     ascender  = max( ascender, face.glyph.bitmap_top )
+      #     descender = max( descender, bitmap.rows-face.glyph.bitmap_top )
+      # height = ascender+descender
+
+      # need to put some of my stuff in here
+
+      self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
+
+      # self.FontGlyph = [None] * 256
+      # with open('/Users/ejb66/Documents/Fonts/myfont.fnt', 'r') as op:
+      #   fontInfo = op.read().split()
+      #
+      #
+      # for line in fontInfo:
+      #
+      # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
+
+      # Generate texture data
+      Z = np.zeros((height*6, width*16), dtype=np.ubyte)
+      for j in range(6):
+          for i in range(16):
+              face.load_char(chr(32+j*16+i), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
+              bitmap = face.glyph.bitmap
+              x = i*width  + face.glyph.bitmap_left
+              y = j*height + ascender - face.glyph.bitmap_top
+              Z[y:y+bitmap.rows,x:x+bitmap.width].flat = bitmap.buffer
+  
+      # Bound texture
+      texid = GL.glGenTextures(1)
+      GL.glBindTexture( GL.GL_TEXTURE_2D, texid )
+      GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
+      GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
+      GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_ALPHA, Z.shape[1], Z.shape[0], 0,
+                       GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, Z )
+  
+      # Generate display lists
+      dx, dy = width/float(Z.shape[1]), height/float(Z.shape[0])
+      base = GL.glGenLists(8*16)
+      for i in range(8*16):
+          c = chr(i)
+          x = i%16
+          y = i//16-2
+          GL.glNewList(base+i, GL.GL_COMPILE)
+          if (c == '\n'):
+              GL.glPopMatrix( )
+              GL.glTranslatef( 0, -height, 0 )
+              GL.glPushMatrix( )
+          elif (c == '\t'):
+              GL.glTranslatef( 4*width, 0, 0 )
+          elif (i >= 32):
+              GL.glBegin( GL.GL_QUADS )
+              GL.glTexCoord2f( (x  )*dx, (y+1)*dy ), GL.glVertex( 0,     -height )
+              GL.glTexCoord2f( (x  )*dx, (y  )*dy ), GL.glVertex( 0,     0 )
+              GL.glTexCoord2f( (x+1)*dx, (y  )*dy ), GL.glVertex( width, 0 )
+              GL.glTexCoord2f( (x+1)*dx, (y+1)*dy ), GL.glVertex( width, -height )
+              GL.glEnd( )
+              GL.glTranslatef( width, 0, 0 )
+          GL.glEndList( )
+  
+  
+  # if __name__ == '__main__':
+  #     import sys
+      # glut.glutInit( sys.argv )
+      # glut.glutInitDisplayMode( glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH )
+      # glut.glutCreateWindow( "Freetype OpenGL" )
+      # glut.glutReshapeWindow( 600, 100 )
+      # glut.glutDisplayFunc( on_display )
+      # glut.glutReshapeFunc( on_reshape )
+      # glut.glutKeyboardFunc( on_keyboard )
+      GL.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE )
+      GL.glEnable( GL.GL_DEPTH_TEST )
+      GL.glEnable( GL.GL_BLEND )
+      GL.glEnable( GL.GL_COLOR_MATERIAL )
+      GL.glColorMaterial( GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE )
+      GL.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA )
+      GL.glEnable( GL.GL_TEXTURE_2D )
+      makefont( './VeraMono.ttf', 64 )
+  # glut.glutMainLoop( )
+
+
+GlyphXpos = 'Xpos'
+GlyphYpos = 'Ypos'
+GlyphWidth = 'Width'
+GlyphHeight = 'Height'
+GlyphXoffset = 'Xoffset'
+GlyphYoffset = 'Yoffset'
+GlyphOrigW = 'OrigW'
+GlyphOrigH = 'OrigH'
+
+class GLFont():
+  def __init__(self, fileName=None, size=12, base=0):
+    self.fontName = None
+    self.fontGlyph = [None] * 256
+    self.base = base
+
+    with open(fileName, 'r') as op:
+      self.fontInfo = op.read().split('\n')
+
+    # no checking yet
+    self.fontFile = self.fontInfo[0].replace('textures: ', '')
+    self.fontPNG = imread('/Users/ejb66/Documents/Fonts/'+self.fontFile)
+    self.fontName = self.fontInfo[1].split()[0]
+    self.fontSize = self.fontInfo[1].split()[1]
+
+    for line in self.fontInfo[2:]:
+      print (line)
+      if line.startswith('kerning'):
+        break
+      else:
+        lineVals = [int(ll) for ll in line.split()]
+        if len(lineVals) == 9:
+          chrNum, a0, b0, c0, d0, e0, f0, g0, h0 = lineVals
+
+          # only keep the simple chars for the minute
+          if chrNum < 256:
+            self.fontGlyph[chrNum] = {}
+            self.fontGlyph[chrNum][GlyphXpos] = a0
+            self.fontGlyph[chrNum][GlyphYpos] = b0
+            self.fontGlyph[chrNum][GlyphWidth] = c0
+            self.fontGlyph[chrNum][GlyphHeight] = d0
+            self.fontGlyph[chrNum][GlyphXoffset] = e0
+            self.fontGlyph[chrNum][GlyphYoffset] = f0
+            self.fontGlyph[chrNum][GlyphOrigW]= g0
+            self.fontGlyph[chrNum][GlyphOrigH] = h0
+        else:
+          break
+
+    width, height, ascender, descender = 0, 0, 0, 0
+    for c in range(0, 256):
+      # face.load_char( chr(c), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
+      # bitmap    = face.glyph.bitmap
+      if self.fontGlyph[chrNum]:
+        width = max( width, self.fontGlyph[chrNum][GlyphOrigW] )
+        # ascender  = max( ascender, self.fontGlyph[chrNum][GlyphYoffset]- )
+        # descender = max( descender, bitmap.rows-face.glyph.bitmap_top )
+        height = max( height, self.fontGlyph[chrNum][GlyphHeight] )
+
+    self.textureId = GL.glGenTextures(1)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
+    GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
+    GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
+
+    # GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_ALPHA
+    #                  , self.fontPNG.shape[1], self.fontPNG.shape[0]
+    #                  , 0
+    #                  , GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
+    GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
+                     , self.fontPNG.shape[1], self.fontPNG.shape[0]
+                     , 0
+                     , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
+
+    # GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
+    #                 , image.shape[1], image.shape[0]
+    #                 , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
+    #                 , np.asarray(image).tobytes(order='C'))
+    GL.glDisable(GL.GL_TEXTURE_2D)
+
+    # dx, dy = width / float(self.fontPNG.shape[1]), height / float(self.fontPNG.shape[0])
+    self.base = GL.glGenLists(256)
+    for i in range(256):
+      if self.fontGlyph[i]:
+        c = chr(i)
+        # x = i % 16
+        # y = i // 16 - 2
+
+        x = float(self.fontGlyph[i][GlyphXpos])
+        y = float(self.fontGlyph[i][GlyphYpos])
+        w = float(self.fontGlyph[i][GlyphWidth])
+        h = float(self.fontGlyph[i][GlyphHeight])
+        dx = 1.0 / float(self.fontPNG.shape[1])
+        dy = 1.0 / float(self.fontPNG.shape[0])
+        fdx = 0.5 * dx
+        fdy = 0.5 * dy
+
+        GL.glNewList(self.base + i, GL.GL_COMPILE)
+        if (c == '\n'):
+          GL.glPopMatrix()
+          GL.glTranslatef(0.0, -height, 0.0)
+          GL.glPushMatrix()
+        elif (c == '\t'):
+          GL.glTranslatef(4.0 * width, 0.0, 0.0)
+        elif (i >= 32):
+          GL.glBegin(GL.GL_QUADS)
+          # GL.glTexCoord2f((x) * dx, (y + 1) * dy), GL.glVertex(0, -height)
+          # GL.glTexCoord2f((x) * dx, (y) * dy), GL.glVertex(0, 0)
+          # GL.glTexCoord2f((x + 1) * dx, (y) * dy), GL.glVertex(width, 0)
+          # GL.glTexCoord2f((x + 1) * dx, (y + 1) * dy), GL.glVertex(width, -height)
+
+          GL.glTexCoord2f( (x*dx)+fdx, ((y+h)*dy)+fdy);     GL.glVertex(0, -h)
+          GL.glTexCoord2f( (x*dx)+fdx, (y*dy)+fdy);         GL.glVertex(0, 0)
+          GL.glTexCoord2f( ((x+w)*dx)+fdx, (y*dy)+fdy);         GL.glVertex(w, 0)
+          GL.glTexCoord2f( ((x+w)*dx)+fdx, ((y+h)*dy)+fdy);     GL.glVertex(w, -h)
+
+          GL.glEnd()
+          GL.glTranslatef(2*w, 0.0, 0.0)
+        GL.glEndList()
+
+
 if __name__ == '__main__':
 
   import sys
@@ -1360,7 +1648,9 @@ if __name__ == '__main__':
   QtCore.QCoreApplication.setApplicationVersion(applicationVersion)
 
   myGL = CcpnGLWidget()
-  myGL._loadPNG('~/PycharmProjects/myfont.png')
+  # myGL._loadPNG('~/PycharmProjects/myfont.png')
+
+  myGL.makefont()
 
   # popup = UpdateAdmin()
   # popup.show()

@@ -51,6 +51,8 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
+AXIS_MARGIN = 35
+
 
 class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
 
@@ -815,7 +817,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glEnd()
 
     self.set2DProjection()
-    self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.axisLabelling = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
     self.set2DProjectionRightAxis()
     self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.set2DProjectionBottomAxis()
@@ -939,9 +941,36 @@ class CcpnGLWidget(QOpenGLWidget):
     # draw the mouse coordinates
     GL.glPushMatrix()
     GL.glTranslate(self._mouseX, self._mouseY-30, 0.0)      # from bottom left of window?
+    # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
     GL.glColor3f(0.9, 0.9, 0.9)
     GL.glCallLists([ord(c) for c in coords])
     GL.glPopMatrix()
+
+    # draw axes labelling
+    self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
+    for axLabel in self.axisLabelling['0']:
+      axisX = int(axLabel[2])
+
+      GL.glPushMatrix()
+      GL.glTranslate(axisX-10.0*self.pixelY, 20, 0.0)
+      GL.glScalef(self.pixelX, 1.0, 1.0)
+
+      GL.glColor3f(0.9, 0.9, 0.9)
+      GL.glCallLists([ord(c) for c in str(axLabel[2])])
+      GL.glPopMatrix()
+
+    self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
+    for axLabel in self.axisLabelling['1']:
+      axisY = int(axLabel[2])
+
+      GL.glPushMatrix()
+      GL.glTranslate(5.0, axisY-5.0*self.pixelY, 0.0)
+      GL.glScalef(1.0, self.pixelY, 1.0)
+
+      GL.glColor3f(0.9, 0.9, 0.9)
+      GL.glCallLists([ord(c) for c in str(axLabel[2])])
+      GL.glPopMatrix()
+
 
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
@@ -1152,6 +1181,19 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 
+  def set2DProjectionRightAxisBar(self, axisLimits=None):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    axisLine = 5
+    h = self.height()
+    w = self.width()
+    GL.glViewport(w-AXIS_MARGIN, AXIS_MARGIN, AXIS_MARGIN, h-AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
+    GLU.gluOrtho2D(*axisLimits)      # nearly!
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+
   def set2DProjectionBottomAxis(self):
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
@@ -1172,6 +1214,19 @@ class CcpnGLWidget(QOpenGLWidget):
     # L/R/B/T   (usually) but 'bottom' is relative to the top-left corner
     # GLU.gluOrtho2D(axL, axR, axB, axT)
     GLU.gluOrtho2D(self.axisL, self.axisR, self.axisB, self.axisT)      # nearly!
+
+    GL.glMatrixMode(GL.GL_MODELVIEW)
+    GL.glLoadIdentity()
+
+  def set2DProjectionBottomAxisBar(self, axisLimits=None):
+    GL.glMatrixMode(GL.GL_PROJECTION)
+    GL.glLoadIdentity()
+
+    axisLine = 5
+    h = self.height()
+    w = self.width()
+    GL.glViewport(0, 0, w-AXIS_MARGIN, AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
+    GLU.gluOrtho2D(*axisLimits)
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
@@ -1242,7 +1297,7 @@ class CcpnGLWidget(QOpenGLWidget):
     ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
     br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
 
-    texts = []
+    labelling = {'0': [], '1': []}
 
     if gridGLList[1]:
       GL.glNewList(gridGLList[0], GL.GL_COMPILE)
@@ -1299,7 +1354,15 @@ class CcpnGLWidget(QOpenGLWidget):
             # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
             GL.glVertex2f(p1[0], p1[1])
             GL.glVertex2f(p2[0], p2[1])
+
+            if i == 1:            # should be largest scale grid
+              if p1[0] == p2[0]:
+                labelling[str(ax)].append((i, ax, p1[0]))
+              else:
+                labelling[str(ax)].append((i, ax, p1[1]))
+
           GL.glEnd()
+
       GL.glEndList()
 
 
@@ -1318,6 +1381,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     p.drawText(x, t[1])
     # p.end()
 
+    return labelling
 
   def glut_print(self, x, y, font, text, r, g, b, a):
 
@@ -1640,12 +1704,12 @@ class GLFont():
         elif (i == 9):                                # tab
           GL.glTranslatef(4.0 * width, 0.0, 0.0)
         elif (i >= 32):
-          x = float(self.fontGlyph[i][GlyphXpos] + 0.5)
-          y = float(self.fontGlyph[i][GlyphYpos] + 0.5)
+          x = float(self.fontGlyph[i][GlyphXpos])   # try +0.5 for centre of texel
+          y = float(self.fontGlyph[i][GlyphYpos])
           px = self.fontGlyph[i][GlyphXoffset]
           py = self.fontGlyph[i][GlyphYoffset]
-          w = self.fontGlyph[i][GlyphWidth]
-          h = self.fontGlyph[i][GlyphHeight]
+          w = self.fontGlyph[i][GlyphWidth]+1       # if 0.5 above, remove the +1
+          h = self.fontGlyph[i][GlyphHeight]+1
           gw = self.fontGlyph[i][GlyphOrigW]
           gh = self.fontGlyph[i][GlyphOrigH]
 

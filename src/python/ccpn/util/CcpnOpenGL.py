@@ -225,6 +225,10 @@ class CcpnGLWidget(QOpenGLWidget):
   def resizeGL(self, w, h):
     GL.glViewport(0, 0, w, h)
 
+    # put stuff in here that will change on a resize
+    for li in self.gridList:
+      li[1] = True
+
   def wheelEvent(self, event):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
@@ -316,8 +320,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
     # clear the list and rebuild
-    GL.glDeleteLists(self._GLPeakLists[num], 1)
-    self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
+    # GL.glDeleteLists(self._GLPeakLists[num], 1)
+    # self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
 
     # this is actually quite old-school for openGL but good for test
     GL.glNewList((self._GLPeakLists[num])[0], GL.GL_COMPILE)
@@ -354,7 +358,7 @@ class CcpnGLWidget(QOpenGLWidget):
     for li in range(3):
       self.gridList.append( [GL.glGenLists(1), True] )
 
-    self.GLPeakLists = {}
+    self._GLPeakLists = {}
 
     self.object = self.makeObject()
     self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
@@ -362,6 +366,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._mouseList = GL.glGenLists(1)
     self._buildMouse = True
+
+    self._drawTextList = GL.glGenLists(1)
+    self._axisXLabels = GL.glGenLists(1)
+    self._axisLabels = GL.glGenLists(1)
 
     # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
     #
@@ -527,68 +535,68 @@ class CcpnGLWidget(QOpenGLWidget):
   def _buildPeakList(self, specView):
     peakLists = specView.spectrum.peakLists
 
-  def _drawPeakLists(self, spectrumView):
-    spectrum = spectrumView.spectrum
-
-    if spectrum.pid not in self.GLPeakLists:
-      self.GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
-
-    drawList = self.GLPeakLists[spectrum.pid]
-
-    # find the correct scale to draw square pixels
-    # don't forget to change when the axes change
-    x = abs(self.pixelX)
-    y = abs(self.pixelY)
-    minIndex = 0 if x <= y else 1
-    pos = [ 0.05, 0.05*y/x ]
-    w = r = pos[minIndex]
-
-    if x <= y:
-      r = 0.05
-      w = 0.025 * y / x
-    else:
-      w = 0.05
-      r = 0.025 * x / y
-
-    if drawList[1]:
-      drawList[1] = False
-      GL.glNewList(drawList[0], GL.GL_COMPILE)
-
-      GL.glBegin(GL.GL_LINES)
-      for pls in spectrum.peakLists:
-        for peak in pls.peaks:
-
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            colour = spectrumView.strip.plotWidget.highlightColour
-          else:
-            colour = pls.symbolColour
-
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
-
-          GL.glColor4f(colR, colG, colB, 1.0)
-
-          # draw a cross
-          p0 = peak.position
-          GL.glVertex2d(p0[0]-r, p0[1]-w)
-          GL.glVertex2d(p0[0]+r, p0[1]+w)
-          GL.glVertex2d(p0[0]+r, p0[1]-w)
-          GL.glVertex2d(p0[0]-r, p0[1]+w)
-
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            # draw box
-            GL.glVertex2d(p0[0]-r, p0[1]-w)
-            GL.glVertex2d(p0[0]+r, p0[1]-w)
-            GL.glVertex2d(p0[0]+r, p0[1]+w)
-            GL.glVertex2d(p0[0]-r, p0[1]+w)
-
-          # glut text failure - need something better
-
-      GL.glEnd()
-      GL.glEndList()
-
-    GL.glCallList(drawList[0])
+  # def _drawPeakLists(self, spectrumView):
+  #   spectrum = spectrumView.spectrum
+  #
+  #   if spectrum.pid not in self._GLPeakLists:
+  #     self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
+  #
+  #   drawList = self._GLPeakLists[spectrum.pid]
+  #
+  #   # find the correct scale to draw square pixels
+  #   # don't forget to change when the axes change
+  #   x = abs(self.pixelX)
+  #   y = abs(self.pixelY)
+  #   minIndex = 0 if x <= y else 1
+  #   pos = [ 0.05, 0.05*y/x ]
+  #   w = r = pos[minIndex]
+  #
+  #   if x <= y:
+  #     r = 0.05
+  #     w = 0.025 * y / x
+  #   else:
+  #     w = 0.05
+  #     r = 0.025 * x / y
+  #
+  #   if drawList[1]:
+  #     drawList[1] = False
+  #     GL.glNewList(drawList[0], GL.GL_COMPILE)
+  #
+  #     GL.glBegin(GL.GL_LINES)
+  #     for pls in spectrum.peakLists:
+  #       for peak in pls.peaks:
+  #
+  #         if hasattr(peak, '_isSelected') and peak._isSelected:
+  #           colour = spectrumView.strip.plotWidget.highlightColour
+  #         else:
+  #           colour = pls.symbolColour
+  #
+  #         colR = int(colour.strip('# ')[0:2], 16)/255.0
+  #         colG = int(colour.strip('# ')[2:4], 16)/255.0
+  #         colB = int(colour.strip('# ')[4:6], 16)/255.0
+  #
+  #         GL.glColor4f(colR, colG, colB, 1.0)
+  #
+  #         # draw a cross
+  #         p0 = peak.position
+  #         GL.glVertex2d(p0[0]-r, p0[1]-w)
+  #         GL.glVertex2d(p0[0]+r, p0[1]+w)
+  #         GL.glVertex2d(p0[0]+r, p0[1]-w)
+  #         GL.glVertex2d(p0[0]-r, p0[1]+w)
+  #
+  #         if hasattr(peak, '_isSelected') and peak._isSelected:
+  #           # draw box
+  #           GL.glVertex2d(p0[0]-r, p0[1]-w)
+  #           GL.glVertex2d(p0[0]+r, p0[1]-w)
+  #           GL.glVertex2d(p0[0]+r, p0[1]+w)
+  #           GL.glVertex2d(p0[0]-r, p0[1]+w)
+  #
+  #         # glut text failure - need something better
+  #
+  #     GL.glEnd()
+  #     GL.glEndList()
+  #
+  #   GL.glCallList(drawList[0])
 
   def _drawMarks(self):
 
@@ -612,10 +620,10 @@ class CcpnGLWidget(QOpenGLWidget):
   def _drawPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
 
-    if spectrum.pid not in self.GLPeakLists:
-      self.GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
+    if spectrum.pid not in self._GLPeakLists:
+      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
 
-    drawList = self.GLPeakLists[spectrum.pid]
+    drawList = self._GLPeakLists[spectrum.pid]
 
     # find the correct scale to draw square pixels
     # don't forget to change when the axes change
@@ -671,6 +679,9 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glEndList()
 
     GL.glCallList(drawList[0])
+
+  def _round_sig(self, x, sig=6, small_value=1.0e-9):
+    return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
   def paintGL(self):
     self.makeCurrent()
@@ -817,7 +828,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glEnd()
 
     self.set2DProjection()
-    self.axisLabelling = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
     self.set2DProjectionRightAxis()
     self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.set2DProjectionBottomAxis()
@@ -909,9 +920,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     if self._buildTextFlag is True:
       self._buildTextFlag = False
-
-      self.drawTextList = GL.glGenLists(1)
-      GL.glNewList(self.drawTextList, GL.GL_COMPILE)
+      GL.glNewList(self._drawTextList, GL.GL_COMPILE)
 
       for ti in range(7):
         # GL.glRotate(25.0, 0.0, 0.0, 1.0)      # can rotate if we need to :)
@@ -935,7 +944,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glPushMatrix()
     # GL.glTranslated(50, 300, 0)
     # # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
-    # GL.glCallList(self.drawTextList)
+    # GL.glCallList(self._drawTextList)
     # GL.glPopMatrix()
 
     # draw the mouse coordinates
@@ -947,30 +956,40 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glPopMatrix()
 
     # draw axes labelling
-    self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
-    for axLabel in self.axisLabelling['0']:
-      axisX = int(axLabel[2])
+    if labelsChanged:
+      GL.glNewList(self._axisLabels, GL.GL_COMPILE)
 
-      GL.glPushMatrix()
-      GL.glTranslate(axisX-10.0*self.pixelY, 20, 0.0)
-      GL.glScalef(self.pixelX, 1.0, 1.0)
+      self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
+      for axLabel in self.axisLabelling['0']:
+        axisX = axLabel[2]
+        axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
 
-      GL.glColor3f(0.9, 0.9, 0.9)
-      GL.glCallLists([ord(c) for c in str(axLabel[2])])
-      GL.glPopMatrix()
+        GL.glPushMatrix()
+        # GL.glTranslate(axisX-(5.0*self.pixelX*len(str(axisX))), 15, 0.0)
+        GL.glTranslate(axisX-(5.0*self.pixelX), 30, 0.0)
+        GL.glScalef(self.pixelX, 1.0, 1.0)
+        GL.glRotate(-90.0, 0.0, 0.0, 1.0)
 
-    self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
-    for axLabel in self.axisLabelling['1']:
-      axisY = int(axLabel[2])
+        GL.glColor3f(0.9, 0.9, 0.9)
+        GL.glCallLists([ord(c) for c in axisXText])
+        GL.glPopMatrix()
 
-      GL.glPushMatrix()
-      GL.glTranslate(5.0, axisY-5.0*self.pixelY, 0.0)
-      GL.glScalef(1.0, self.pixelY, 1.0)
+      self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
+      for axLabel in self.axisLabelling['1']:
+        axisY = axLabel[2]
+        axisYText = str(int(axisY)) if axLabel[3] >= 1 else str(axisY)
 
-      GL.glColor3f(0.9, 0.9, 0.9)
-      GL.glCallLists([ord(c) for c in str(axLabel[2])])
-      GL.glPopMatrix()
+        GL.glPushMatrix()
+        GL.glTranslate(5.0, axisY-5.0*self.pixelY, 0.0)
+        GL.glScalef(1.0, self.pixelY, 1.0)
 
+        GL.glColor3f(0.9, 0.9, 0.9)
+        GL.glCallLists([ord(c) for c in axisYText])
+        GL.glPopMatrix()
+
+      GL.glEndList()
+
+    GL.glCallList(self._axisLabels)
 
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
@@ -1298,10 +1317,12 @@ class CcpnGLWidget(QOpenGLWidget):
     br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
 
     labelling = {'0': [], '1': []}
+    labelsChanged = False
 
     if gridGLList[1]:
       GL.glNewList(gridGLList[0], GL.GL_COMPILE)
       gridGLList[1] = False
+      labelsChanged = True
 
       if ul[0] > br[0]:
         x = ul[0]
@@ -1357,9 +1378,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if i == 1:            # should be largest scale grid
               if p1[0] == p2[0]:
-                labelling[str(ax)].append((i, ax, p1[0]))
+                labelling[str(ax)].append((i, ax, p1[0], d[0]))
               else:
-                labelling[str(ax)].append((i, ax, p1[1]))
+                labelling[str(ax)].append((i, ax, p1[1], d[1]))
 
           GL.glEnd()
 
@@ -1381,7 +1402,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     p.drawText(x, t[1])
     # p.end()
 
-    return labelling
+    return labelling, labelsChanged
 
   def glut_print(self, x, y, font, text, r, g, b, a):
 

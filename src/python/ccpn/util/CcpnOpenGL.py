@@ -375,7 +375,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._GLPeakLists = {}
 
     self.object = self.makeObject()
-    self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
+    self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
 
     self._mouseList = GL.glGenLists(1)
@@ -577,9 +577,9 @@ class CcpnGLWidget(QOpenGLWidget):
     y = abs(self.pixelY)
     if x <= y:
       r = 0.05
-      w = 0.025 * y / x
+      w = 0.05 * y / x
     else:
-      w = 0.025
+      w = 0.05
       r = 0.05 * x / y
 
     tempVert = []
@@ -1495,7 +1495,7 @@ GlyphOrigW = 'OrigW'
 GlyphOrigH = 'OrigH'
 GlyphKerns = 'Kerns'
 
-class GLFont():
+class CcpnGLFont():
   def __init__(self, fileName=None, size=12, base=0):
     self.fontName = None
     self.fontGlyph = [None] * 256
@@ -1629,6 +1629,82 @@ class GLFont():
           GL.glEnd()
           GL.glTranslatef(gw, 0.0, 0.0)
         GL.glEndList()
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# need to use the class below to make everything more generic
+GLOptions = {
+  'opaque':{
+    GL.GL_DEPTH_TEST:True,
+    GL.GL_BLEND:False,
+    GL.GL_ALPHA_TEST:False,
+    GL.GL_CULL_FACE:False,
+  },
+  'translucent':{
+    GL.GL_DEPTH_TEST:True,
+    GL.GL_BLEND:True,
+    GL.GL_ALPHA_TEST:False,
+    GL.GL_CULL_FACE:False,
+    'glBlendFunc':(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA),
+  },
+  'additive':{
+    GL.GL_DEPTH_TEST:False,
+    GL.GL_BLEND:True,
+    GL.GL_ALPHA_TEST:False,
+    GL.GL_CULL_FACE:False,
+    'glBlendFunc':(GL.GL_SRC_ALPHA, GL.GL_ONE),
+  },
+}
+
+
+class CcpnTransform3D(QtGui.QMatrix4x4):
+  """
+  Extension of QMatrix4x4 with some helpful methods added.
+  """
+
+  def __init__(self, *args):
+    QtGui.QMatrix4x4.__init__(self, *args)
+
+  def matrix(self, nd=3):
+    if nd == 3:
+      return np.array(self.copyDataTo()).reshape(4, 4)
+    elif nd == 2:
+      m = np.array(self.copyDataTo()).reshape(4, 4)
+      m[2] = m[3]
+      m[:, 2] = m[:, 3]
+      return m[:3, :3]
+    else:
+      raise Exception("Argument 'nd' must be 2 or 3")
+
+  def map(self, obj):
+    """
+    Extends QMatrix4x4.map() to allow mapping (3, ...) arrays of coordinates
+    """
+    if isinstance(obj, np.ndarray) and obj.ndim >= 2 and obj.shape[0] in (2, 3):
+      return fn.transformCoordinates(self, obj)
+    else:
+      return QtGui.QMatrix4x4.map(self, obj)
+
+  def inverted(self):
+    inv, b = QtGui.QMatrix4x4.inverted(self)
+    return CcpnTransform3D(inv), b
+
+
+class CcpnGLItem():
+  _nextId = 0
+
+  def __init__(self, parentItem=None):
+    self._id = CcpnGLItem._nextId
+    CcpnGLItem._nextId += 1
+
+    self.__parent = None
+    self.__view = None
+    self.__children = set()
+    self.__transform = CcpnTransform3D()
+    self.__visible = True
+    # self.setParentItem(parentItem)
+    # self.setDepthValue(0)
+    self.__glOpts = {}
 
 
 if __name__ == '__main__':

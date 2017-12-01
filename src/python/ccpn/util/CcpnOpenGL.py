@@ -534,72 +534,6 @@ class CcpnGLWidget(QOpenGLWidget):
   def sign(self, x):
     return 1.0 if x >= 0 else -1.0
 
-  def _buildNewPeakList(self, specView):
-    peakLists = specView.spectrum.peakLists
-
-  # def _drawPeakLists(self, spectrumView):
-  #   spectrum = spectrumView.spectrum
-  #
-  #   if spectrum.pid not in self._GLPeakLists:
-  #     self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
-  #
-  #   drawList = self._GLPeakLists[spectrum.pid]
-  #
-  #   # find the correct scale to draw square pixels
-  #   # don't forget to change when the axes change
-  #   x = abs(self.pixelX)
-  #   y = abs(self.pixelY)
-  #   minIndex = 0 if x <= y else 1
-  #   pos = [ 0.05, 0.05*y/x ]
-  #   w = r = pos[minIndex]
-  #
-  #   if x <= y:
-  #     r = 0.05
-  #     w = 0.025 * y / x
-  #   else:
-  #     w = 0.05
-  #     r = 0.025 * x / y
-  #
-  #   if drawList[1]:
-  #     drawList[1] = False
-  #     GL.glNewList(drawList[0], GL.GL_COMPILE)
-  #
-  #     GL.glBegin(GL.GL_LINES)
-  #     for pls in spectrum.peakLists:
-  #       for peak in pls.peaks:
-  #
-  #         if hasattr(peak, '_isSelected') and peak._isSelected:
-  #           colour = spectrumView.strip.plotWidget.highlightColour
-  #         else:
-  #           colour = pls.symbolColour
-  #
-  #         colR = int(colour.strip('# ')[0:2], 16)/255.0
-  #         colG = int(colour.strip('# ')[2:4], 16)/255.0
-  #         colB = int(colour.strip('# ')[4:6], 16)/255.0
-  #
-  #         GL.glColor4f(colR, colG, colB, 1.0)
-  #
-  #         # draw a cross
-  #         p0 = peak.position
-  #         GL.glVertex2d(p0[0]-r, p0[1]-w)
-  #         GL.glVertex2d(p0[0]+r, p0[1]+w)
-  #         GL.glVertex2d(p0[0]+r, p0[1]-w)
-  #         GL.glVertex2d(p0[0]-r, p0[1]+w)
-  #
-  #         if hasattr(peak, '_isSelected') and peak._isSelected:
-  #           # draw box
-  #           GL.glVertex2d(p0[0]-r, p0[1]-w)
-  #           GL.glVertex2d(p0[0]+r, p0[1]-w)
-  #           GL.glVertex2d(p0[0]+r, p0[1]+w)
-  #           GL.glVertex2d(p0[0]-r, p0[1]+w)
-  #
-  #         # glut text failure - need something better
-  #
-  #     GL.glEnd()
-  #     GL.glEndList()
-  #
-  #   GL.glCallList(drawList[0])
-
   def _drawMarks(self):
 
     if not hasattr(self, 'GLMarkList'):
@@ -612,18 +546,37 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # draw some marks in here
 
-
-
       GL.glEnd()
       GL.glEndList()
 
     GL.glCallList(self.GLMarkList[0])
 
-  def _drawPeakLists(self, spectrumView):
+  def _rescalePeakList(self, spectrum):
+    drawList = self._GLPeakLists[spectrum.pid]
+
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    if x <= y:
+      r = 0.05
+      w = 0.025 * y / x
+    else:
+      w = 0.05
+      r = 0.025 * x / y
+
+    tempVert = []
+    for pp in drawList[5]:
+      tempVert.append([pp[0] - r, pp[1] - w])
+      tempVert.append([pp[0] + r, pp[1] + w])
+      tempVert.append([pp[0] + r, pp[1] - w])
+      tempVert.append([pp[0] - r, pp[1] + w])
+
+
+
+  def _buildPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True, np.array([]), np.array([]), 0]
+      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True, np.array([]), np.array([]), 0, None]
 
     drawList = self._GLPeakLists[spectrum.pid]
 
@@ -646,7 +599,13 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList[1] = False
       GL.glNewList(drawList[0], GL.GL_COMPILE)
 
-      drawList[2] = np.array([])
+      drawList[2] = None
+      drawList[3] = None
+      drawList[4] = 0
+      drawList[5] = []
+
+      tempVert = []
+      tempCol = []
       # a = np.append(a, [3, 4])
 
       GL.glBegin(GL.GL_LINES)
@@ -673,17 +632,19 @@ class CcpnGLWidget(QOpenGLWidget):
           GL.glVertex2d(p0[0]-r, p0[1]+w)
 
           # append the new points to the end of nparray
-          drawList[2] = np.append(drawList[2], [p0[0]-r, p0[1]-w])
-          drawList[2] = np.append(drawList[2], [p0[0]+r, p0[1]+w])
-          drawList[2] = np.append(drawList[2], [p0[0]+r, p0[1]-w])
-          drawList[2] = np.append(drawList[2], [p0[0]-r, p0[1]+w])
+          tempVert.append([p0[0]-r, p0[1]-w])
+          tempVert.append([p0[0]+r, p0[1]+w])
+          tempVert.append([p0[0]+r, p0[1]-w])
+          tempVert.append([p0[0]-r, p0[1]+w])
 
-          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
-          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
-          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
-          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
+          tempCol.append([colR, colG, colB, 1.0])
+          tempCol.append([colR, colG, colB, 1.0])
+          tempCol.append([colR, colG, colB, 1.0])
+          tempCol.append([colR, colG, colB, 1.0])
 
-          drawList[4] += 4
+          drawList[4] += 4                              # store the number of points
+          drawList[5].append((p0[0], p0[1]))            # store the point for quicker access
+                                                        # required for rescale
 
           if hasattr(peak, '_isSelected') and peak._isSelected:
             # draw box
@@ -717,7 +678,11 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glEnd()
       GL.glEndList()
 
-    # GL.glCallList(drawList[0])
+      drawList[2] = np.array(tempVert, np.float32)
+      drawList[3] = np.array(tempCol, np.float32)
+
+  def _drawPeakListVertices(self, spectrum):
+    drawList = self._GLPeakLists[spectrum.pid]
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -1382,9 +1347,11 @@ class CcpnGLWidget(QOpenGLWidget):
       gridGLList[1] = False
       labelsChanged = True
 
-      gridGLList[2] = np.array([])      # new empty array
-      gridGLList[3] = np.array([])      # new empty array
+      gridGLList[2] = None
+      gridGLList[3] = None
       gridGLList[4] = 0
+      tempList = []
+      tempCol = []
 
       if ul[0] > br[0]:
         x = ul[0]
@@ -1445,17 +1412,18 @@ class CcpnGLWidget(QOpenGLWidget):
                 labelling[str(ax)].append((i, ax, p1[1], d[1]))
 
             # append the new points to the end of nparray
-            gridGLList[2] = np.append(gridGLList[2], [p1[0], p1[1]])
-            gridGLList[2] = np.append(gridGLList[2], [p2[0], p2[1]])
-
-            gridGLList[3] = np.append(gridGLList[3], [r, g, b, c/transparency])
-            gridGLList[3] = np.append(gridGLList[3], [r, g, b, c/transparency])
+            tempList.append([p1[0], p1[1]])
+            tempList.append([p2[0], p2[1]])
+            tempCol.append([r, g, b, c/transparency])
+            tempCol.append([r, g, b, c/transparency])
 
             gridGLList[4] += 2
 
           GL.glEnd()
 
       GL.glEndList()
+      gridGLList[2] = np.array(tempList, np.float32)
+      gridGLList[3] = np.array(tempCol, np.float32)
 
     # old drawing of the grid
     # GL.glEnable(GL.GL_BLEND)

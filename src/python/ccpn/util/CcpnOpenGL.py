@@ -53,6 +53,9 @@ except ImportError:
     sys.exit(1)
 
 AXIS_MARGIN = 35
+GLRENDERMODE_DRAW = 0
+GLRENDERMODE_RESCALE = 1
+GLRENDERMODE_REBUILD = 2
 
 
 class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
@@ -228,7 +231,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # put stuff in here that will change on a resize
     for li in self.gridList:
-      li[1] = True
+      li[1] = GLRENDERMODE_REBUILD
+    for pp in self._GLPeakLists.values():
+      pp[1] = GLRENDERMODE_RESCALE
 
   def wheelEvent(self, event):
     def between(val, l, r):
@@ -271,7 +276,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # spawn rebuild event for the grid
       for li in self.gridList:
-        li[1] = True
+        li[1] = GLRENDERMODE_REBUILD
 
     elif between(self._mouseX, ba[0], ba[2]) and between(self._mouseY, ba[1], ba[3]):
       mb = (self._mouseX - ba[0]) / (ba[2] - ba[0])
@@ -285,8 +290,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisR = mbx - 0.9 * (mbx - self.axisR)
 
       # spawn rebuild event for the grid
-      self.gridList[0][1] = True
-      self.gridList[2][1] = True
+      self.gridList[0][1] = GLRENDERMODE_REBUILD
+      self.gridList[2][1] = GLRENDERMODE_REBUILD
+
+      # ratios have changed so rescale the peaks symbols
+      for pp in self._GLPeakLists.values():
+        pp[1] = GLRENDERMODE_RESCALE
 
     elif between(self._mouseX, ra[0], ra[2]) and between(self._mouseY, ra[1], ra[3]):
       mb = (self._mouseY - ra[1]) / (ra[3] - ra[1])
@@ -300,8 +309,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisT = mby - 0.9 * (mby - self.axisT)
 
       # spawn rebuild event for the grid
-      self.gridList[0][1] = True
-      self.gridList[1][1] = True
+      self.gridList[0][1] = GLRENDERMODE_REBUILD
+      self.gridList[1][1] = GLRENDERMODE_REBUILD
+
+      # ratios have changed so rescale the peaks symbols
+      for pp in self._GLPeakLists.values():
+        pp[1] = GLRENDERMODE_RESCALE
 
     event.accept()
 
@@ -357,7 +370,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.initializeOpenGLFunctions()
 
     for li in range(3):
-      self.gridList.append( [GL.glGenLists(1), True, np.array([]), np.array([]), 0] )
+      self.gridList.append( [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0] )
 
     self._GLPeakLists = {}
 
@@ -462,7 +475,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # spawn rebuild event for the grid
         for li in self.gridList:
-          li[1] = True
+          li[1] = GLRENDERMODE_REBUILD
+        for pp in self._GLPeakLists.values():
+          pp[1] = GLRENDERMODE_RESCALE
 
         #   event.modifiers() & QtCore.Qt.ShiftModifier):
     #   position = event.scenePos()
@@ -537,9 +552,9 @@ class CcpnGLWidget(QOpenGLWidget):
   def _drawMarks(self):
 
     if not hasattr(self, 'GLMarkList'):
-      self.GLMarkList = [GL.glGenLists(1), True]
+      self.GLMarkList = [GL.glGenLists(1), GLRENDERMODE_REBUILD, None, None, 0, None]
 
-    if self.GLMarkList[1]:
+    if self.GLMarkList[1] == GLRENDERMODE_REBUILD:
       # rebuild the mark list
       self.GLMarkList[1] = False
       GL.glNewList(self.GLMarkList[0], GL.GL_COMPILE)
@@ -549,10 +564,14 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glEnd()
       GL.glEndList()
 
+    elif self.GLMarkList[1] == GLRENDERMODE_REBUILD:
+      # rescale the marks here
+      pass
+
     GL.glCallList(self.GLMarkList[0])
 
-  def _rescalePeakList(self, spectrum):
-    drawList = self._GLPeakLists[spectrum.pid]
+  def _rescalePeakList(self, spectrumView):
+    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -560,8 +579,8 @@ class CcpnGLWidget(QOpenGLWidget):
       r = 0.05
       w = 0.025 * y / x
     else:
-      w = 0.05
-      r = 0.025 * x / y
+      w = 0.025
+      r = 0.05 * x / y
 
     tempVert = []
     for pp in drawList[5]:
@@ -570,33 +589,19 @@ class CcpnGLWidget(QOpenGLWidget):
       tempVert.append([pp[0] + r, pp[1] - w])
       tempVert.append([pp[0] - r, pp[1] + w])
 
-
+    # rebuild the scaled vertices
+    drawList[2] = np.array(tempVert, np.float32)
 
   def _buildPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True, np.array([]), np.array([]), 0, None]
+      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
 
     drawList = self._GLPeakLists[spectrum.pid]
 
-    # find the correct scale to draw square pixels
-    # don't forget to change when the axes change
-    x = abs(self.pixelX)
-    y = abs(self.pixelY)
-    minIndex = 0 if x <= y else 1
-    pos = [ 0.05, 0.05*y/x ]
-    w = r = pos[minIndex]
-
-    if x <= y:
-      r = 0.05
-      w = 0.025 * y / x
-    else:
-      w = 0.05
-      r = 0.025 * x / y
-
-    if drawList[1]:
-      drawList[1] = False
+    if drawList[1] == GLRENDERMODE_REBUILD:
+      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
       GL.glNewList(drawList[0], GL.GL_COMPILE)
 
       drawList[2] = None
@@ -606,7 +611,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
       tempVert = []
       tempCol = []
-      # a = np.append(a, [3, 4])
+
+      # find the correct scale to draw square pixels
+      # don't forget to change when the axes change
+      x = abs(self.pixelX)
+      y = abs(self.pixelY)
+      minIndex = 0 if x <= y else 1
+      pos = [0.05, 0.05 * y / x]
+      w = r = pos[minIndex]
+
+      if x <= y:
+        r = 0.05
+        w = 0.025 * y / x
+      else:
+        w = 0.05
+        r = 0.025 * x / y
 
       GL.glBegin(GL.GL_LINES)
       for pls in spectrum.peakLists:
@@ -654,6 +673,8 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(p0[0]-r, p0[1]+w)
           # GL.glEnd()
 
+
+          # TODO:ED don't delete yet, this is the peak label drawing
           # glut text failure - need something better
           # colour = pls.textColour
           # colR = int(colour.strip('# ')[0:2], 16)/255.0
@@ -681,8 +702,12 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList[2] = np.array(tempVert, np.float32)
       drawList[3] = np.array(tempCol, np.float32)
 
-  def _drawPeakListVertices(self, spectrum):
-    drawList = self._GLPeakLists[spectrum.pid]
+    elif drawList[1] == GLRENDERMODE_RESCALE:
+      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
+      self._rescalePeakList(spectrumView=spectrumView)
+
+  def _drawPeakListVertices(self, spectrumView):
+    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -816,7 +841,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # draw the peak List, labelling, marks
 
-        self._drawPeakLists(spectrumView)
+        self._buildPeakLists(spectrumView)      # should include rescaling
+        self._drawPeakListVertices(spectrumView)
 
       except:
         raise
@@ -890,11 +916,11 @@ class CcpnGLWidget(QOpenGLWidget):
       )
 
       if self._selectionMode == 1:    # yellow
-        GL.glColor4f(0.8, 0.9, 0.2, 0.2)
+        GL.glColor4f(0.8, 0.9, 0.2, 0.3)
       elif self._selectionMode == 2:      # purple
-        GL.glColor4f(0.8, 0.2, 0.9, 0.2)
+        GL.glColor4f(0.8, 0.2, 0.9, 0.3)
       elif self._selectionMode == 3:      # cyan
-        GL.glColor4f(0.2, 0.5, 0.9, 0.2)
+        GL.glColor4f(0.2, 0.5, 0.9, 0.3)
 
       GL.glBegin(GL.GL_QUADS)
       GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -904,11 +930,11 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glEnd()
 
       if self._selectionMode == 1:    # yellow
-        GL.glColor4f(0.8, 0.9, 0.2, 0.8)
+        GL.glColor4f(0.8, 0.9, 0.2, 0.9)
       elif self._selectionMode == 2:      # purple
-        GL.glColor4f(0.8, 0.2, 0.9, 0.8)
+        GL.glColor4f(0.8, 0.2, 0.9, 0.9)
       elif self._selectionMode == 3:      # cyan
-        GL.glColor4f(0.2, 0.5, 0.9, 0.8)
+        GL.glColor4f(0.2, 0.5, 0.9, 0.9)
 
       GL.glBegin(GL.GL_LINE_STRIP)
       GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -937,8 +963,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #                 , coords
     #                 , 1.0, 1.0, 1.0, 1.0)
 
-    if self._buildTextFlag is True:
-      self._buildTextFlag = False
+    if self._buildTextFlag == GLRENDERMODE_REBUILD:
+      self._buildTextFlag = GLRENDERMODE_DRAW
       GL.glNewList(self._drawTextList, GL.GL_COMPILE)
 
       for ti in range(7):
@@ -1342,9 +1368,10 @@ class CcpnGLWidget(QOpenGLWidget):
     labelling = {'0': [], '1': []}
     labelsChanged = False
 
-    if gridGLList[1]:
+    if gridGLList[1] == GLRENDERMODE_REBUILD:
+
       GL.glNewList(gridGLList[0], GL.GL_COMPILE)
-      gridGLList[1] = False
+      gridGLList[1] = GLRENDERMODE_DRAW
       labelsChanged = True
 
       gridGLList[2] = None
@@ -1456,213 +1483,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # p.end()
 
     return labelling, labelsChanged
-
-  def glut_print(self, x, y, font, text, r, g, b, a):
-
-    # blending = False
-    # if GL.glIsEnabled(GL.GL_BLEND):
-    #   blending = True
-
-    # glEnable(GL_BLEND)
-    GL.glColor4f(1.0, 1.0, 1.0, 0.6)
-    GL.glRasterPos2f(x, y)
-    for ch in text:
-      GLUT.glutBitmapCharacter(font, ctypes.c_int(ord(ch)))
-
-    # if not blending:
-    #   GL.glDisable(GL.GL_BLEND)
-
-  # def Draw():
-  #   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-  #
-  #   glut_print(10, 10, GLUT_BITMAP_9_BY_15, "Hallo World", 1.0, 1.0, 1.0, 1.0)
-  #   # draw my scene ......
-  #   glutSwapBuffers()
-
-  # def BuildFont():
-  #   global base
-  #
-  #   wgldc = WGL.wglGetCurrentDC ()
-  #   # hDC = win32ui.CreateDCFromHandle (wgldc)
-  #
-  #
-  #   base = GL.glGenLists(32+96);					# // Storage For 96 Characters, plus 32 at the start...
-  #
-  #   # CreateFont () takes a python dictionary to specify the requested font properties.
-  #   font_properties = { "name" : "Courier New",
-  #             "width" : 0 ,
-  #             "height" : -24,
-  #             "weight" : 800
-  #             }
-  #   font = win32ui.CreateFont (font_properties)
-  #   # // Selects The Font We Want
-  #   oldfont = hDC.SelectObject (font)
-  #   # // Builds 96 Characters Starting At Character 32
-  #   wglUseFontBitmaps (wgldc, 32, 96, base+32)
-  #   # // reset the font
-  #   hDC.SelectObject (oldfont)
-  #   # // Delete The Font (python will cleanup font for us...)
-  #   return
-  #
-  # def KillFont ():
-  #   """ // Delete The Font List
-  #   """
-  #   global	base
-  #   # // Delete All 96 Characters
-  #   glDeleteLists (base, 32+96)
-  #   return
-  #
-  #
-  # def glPrint (str):
-  #   """ // Custom GL "Print" Routine
-  #   """
-  #   global base
-  #   # // If THere's No Text Do Nothing
-  #   if (str == None):
-  #     return
-  #   if (str == ""):
-  #     return
-  #   glPushAttrib(GL_LIST_BIT);							# // Pushes The Display List Bits
-  #   try:
-  #     glListBase(base);								# // Sets The Base Character to 32
-  #     glCallLists(str)									# // Draws The Display List Text
-  #   finally:
-  #     glPopAttrib();										# // Pops The Display List Bits
-  #   return
-
-  # def _loadPNG(self, fileName):
-  #   # import imageio
-  #
-  #   # im = imageio.imread(fileName)
-  #   # print (im.shape)
-  #
-  #   # need to load the offsets file (*.fnt) and put into array
-    
-
-
-
-  base, texid = 0, 0
-  text  = '''Hello World !'''
-  
-  # def on_display():
-  #     global texid
-  #     gl.glClearColor(1,1,1,1)
-  #     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-  #     gl.glBindTexture( gl.GL_TEXTURE_2D, texid )
-  #     gl.glColor(0,0,0,1)
-  #     gl.glPushMatrix( )
-  #     gl.glTranslate( 10, 100, 0 )
-  #     gl.glPushMatrix( )
-  #     gl.glListBase( base+1 )
-  #     gl.glCallLists( [ord(c) for c in text] )
-  #     gl.glPopMatrix( )
-  #     gl.glPopMatrix( )
-  #     glut.glutSwapBuffers( )
-  # 
-  # def on_reshape( width, height ):
-  #     gl.glViewport( 0, 0, width, height )
-  #     gl.glMatrixMode( gl.GL_PROJECTION )
-  #     gl.glLoadIdentity( )
-  #     gl.glOrtho( 0, width, 0, height, -1, 1 )
-  #     gl.glMatrixMode( gl.GL_MODELVIEW )
-  #     gl.glLoadIdentity( )
-  
-  # def on_keyboard( key, x, y ):
-  #     if key == '\033': sys.exit( )
-  
-  def makefont(self, fileName=None, size=None):
-      global texid
-  
-      # # Load font  and check it is monotype
-      # face = Face(filename)
-      # face.set_char_size( size*64 )
-      # if not face.is_fixed_width:
-      #     raise 'Font is not monotype'
-      #
-      # # Determine largest glyph size
-      # width, height, ascender, descender = 0, 0, 0, 0
-      # for c in range(32,128):
-      #     face.load_char( chr(c), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
-      #     bitmap    = face.glyph.bitmap
-      #     width     = max( width, bitmap.width )
-      #     ascender  = max( ascender, face.glyph.bitmap_top )
-      #     descender = max( descender, bitmap.rows-face.glyph.bitmap_top )
-      # height = ascender+descender
-
-      # need to put some of my stuff in here
-
-      self.firstFont = GLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
-
-      # self.FontGlyph = [None] * 256
-      # with open('/Users/ejb66/Documents/Fonts/myfont.fnt', 'r') as op:
-      #   fontInfo = op.read().split()
-      #
-      #
-      # for line in fontInfo:
-      #
-      # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
-
-      # Generate texture data
-      Z = np.zeros((height*6, width*16), dtype=np.ubyte)
-      for j in range(6):
-          for i in range(16):
-              face.load_char(chr(32+j*16+i), FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT )
-              bitmap = face.glyph.bitmap
-              x = i*width  + face.glyph.bitmap_left
-              y = j*height + ascender - face.glyph.bitmap_top
-              Z[y:y+bitmap.rows,x:x+bitmap.width].flat = bitmap.buffer
-  
-      # Bound texture
-      texid = GL.glGenTextures(1)
-      GL.glBindTexture( GL.GL_TEXTURE_2D, texid )
-      GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
-      GL.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
-      GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_ALPHA, Z.shape[1], Z.shape[0], 0,
-                       GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, Z )
-  
-      # Generate display lists
-      dx, dy = width/float(Z.shape[1]), height/float(Z.shape[0])
-      base = GL.glGenLists(8*16)
-      for i in range(8*16):
-          c = chr(i)
-          x = i%16
-          y = i//16-2
-          GL.glNewList(base+i, GL.GL_COMPILE)
-          if (c == '\n'):
-              GL.glPopMatrix( )
-              GL.glTranslatef( 0, -height, 0 )
-              GL.glPushMatrix( )
-          elif (c == '\t'):
-              GL.glTranslatef( 4*width, 0, 0 )
-          elif (i >= 32):
-              GL.glBegin( GL.GL_QUADS )
-              GL.glTexCoord2f( (x  )*dx, (y+1)*dy ), GL.glVertex( 0,     -height )
-              GL.glTexCoord2f( (x  )*dx, (y  )*dy ), GL.glVertex( 0,     0 )
-              GL.glTexCoord2f( (x+1)*dx, (y  )*dy ), GL.glVertex( width, 0 )
-              GL.glTexCoord2f( (x+1)*dx, (y+1)*dy ), GL.glVertex( width, -height )
-              GL.glEnd( )
-              GL.glTranslatef( width, 0, 0 )
-          GL.glEndList( )
-  
-  
-  # if __name__ == '__main__':
-  #     import sys
-      # glut.glutInit( sys.argv )
-      # glut.glutInitDisplayMode( glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH )
-      # glut.glutCreateWindow( "Freetype OpenGL" )
-      # glut.glutReshapeWindow( 600, 100 )
-      # glut.glutDisplayFunc( on_display )
-      # glut.glutReshapeFunc( on_reshape )
-      # glut.glutKeyboardFunc( on_keyboard )
-      GL.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE )
-      GL.glEnable( GL.GL_DEPTH_TEST )
-      GL.glEnable( GL.GL_BLEND )
-      GL.glEnable( GL.GL_COLOR_MATERIAL )
-      GL.glColorMaterial( GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE )
-      GL.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA )
-      GL.glEnable( GL.GL_TEXTURE_2D )
-      makefont( './VeraMono.ttf', 64 )
-  # glut.glutMainLoop( )
 
 
 GlyphXpos = 'Xpos'
@@ -1824,7 +1644,7 @@ if __name__ == '__main__':
   myGL = CcpnGLWidget()
   # myGL._loadPNG('~/PycharmProjects/myfont.png')
 
-  myGL.makefont()
+  # myGL.makefont()
 
   # popup = UpdateAdmin()
   # popup.show()

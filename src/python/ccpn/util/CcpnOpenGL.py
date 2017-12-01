@@ -42,6 +42,7 @@ import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -356,7 +357,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.initializeOpenGLFunctions()
 
     for li in range(3):
-      self.gridList.append( [GL.glGenLists(1), True] )
+      self.gridList.append( [GL.glGenLists(1), True, np.array([]), np.array([]), 0] )
 
     self._GLPeakLists = {}
 
@@ -370,6 +371,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._drawTextList = GL.glGenLists(1)
     self._axisXLabels = GL.glGenLists(1)
     self._axisLabels = GL.glGenLists(1)
+    self.peakLabelling = 0
 
     # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
     #
@@ -532,7 +534,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def sign(self, x):
     return 1.0 if x >= 0 else -1.0
 
-  def _buildPeakList(self, specView):
+  def _buildNewPeakList(self, specView):
     peakLists = specView.spectrum.peakLists
 
   # def _drawPeakLists(self, spectrumView):
@@ -621,7 +623,7 @@ class CcpnGLWidget(QOpenGLWidget):
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True]
+      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), True, np.array([]), np.array([]), 0]
 
     drawList = self._GLPeakLists[spectrum.pid]
 
@@ -644,6 +646,9 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList[1] = False
       GL.glNewList(drawList[0], GL.GL_COMPILE)
 
+      drawList[2] = np.array([])
+      # a = np.append(a, [3, 4])
+
       GL.glBegin(GL.GL_LINES)
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
@@ -656,15 +661,29 @@ class CcpnGLWidget(QOpenGLWidget):
           colR = int(colour.strip('# ')[0:2], 16)/255.0
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
-
           GL.glColor4f(colR, colG, colB, 1.0)
 
           # draw a cross
+          # TODO:ED need to put scaling in here to keep the cross square at 0.1ppm
           p0 = peak.position
+          # GL.glBegin(GL.GL_LINES)
           GL.glVertex2d(p0[0]-r, p0[1]-w)
           GL.glVertex2d(p0[0]+r, p0[1]+w)
           GL.glVertex2d(p0[0]+r, p0[1]-w)
           GL.glVertex2d(p0[0]-r, p0[1]+w)
+
+          # append the new points to the end of nparray
+          drawList[2] = np.append(drawList[2], [p0[0]-r, p0[1]-w])
+          drawList[2] = np.append(drawList[2], [p0[0]+r, p0[1]+w])
+          drawList[2] = np.append(drawList[2], [p0[0]+r, p0[1]-w])
+          drawList[2] = np.append(drawList[2], [p0[0]-r, p0[1]+w])
+
+          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
+          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
+          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
+          drawList[3] = np.append(drawList[3], [colR, colG, colB, 1.0])
+
+          drawList[4] += 4
 
           if hasattr(peak, '_isSelected') and peak._isSelected:
             # draw box
@@ -672,13 +691,48 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(p0[0]+r, p0[1]-w)
             GL.glVertex2d(p0[0]+r, p0[1]+w)
             GL.glVertex2d(p0[0]-r, p0[1]+w)
+          # GL.glEnd()
 
           # glut text failure - need something better
-
+          # colour = pls.textColour
+          # colR = int(colour.strip('# ')[0:2], 16)/255.0
+          # colG = int(colour.strip('# ')[2:4], 16)/255.0
+          # colB = int(colour.strip('# ')[4:6], 16)/255.0
+          # GL.glColor4f(colR, colG, colB, 1.0)
+          #
+          # GL.glPushMatrix()
+          # GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
+          # GL.glScaled(self.pixelX, self.pixelY, 1.0)
+          #
+          # if self.peakLabelling == 0:
+          #   text = _getScreenPeakAnnotation(peak, useShortCode=False)
+          # elif self.parentWidget().strip.peakLabelling == 1:
+          #   text = _getScreenPeakAnnotation(peak, useShortCode=True)
+          # else:
+          #   text = _getPeakAnnotation(peak)  # original 'pid'
+          #
+          # GL.glCallLists([ord(c) for c in text])
+          #
+          # GL.glPopMatrix()
       GL.glEnd()
       GL.glEndList()
 
-    GL.glCallList(drawList[0])
+    # GL.glCallList(drawList[0])
+
+    # new bit to use a vertex array to draw the peaks, very fast and easy
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+
+    GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
+    GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    GL.glDisable(GL.GL_BLEND)
+
 
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
@@ -933,7 +987,6 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glEndList()
 
 
-    self.set2DProjectionFlat()
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnable(GL.GL_TEXTURE_2D)
@@ -947,7 +1000,12 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glCallList(self._drawTextList)
     # GL.glPopMatrix()
 
+    # self.set2DProjection()
+    # for spectrumView in self.parent.spectrumViews:
+    #   self._drawPeakLists(spectrumView)
+
     # draw the mouse coordinates
+    self.set2DProjectionFlat()
     GL.glPushMatrix()
     GL.glTranslate(self._mouseX, self._mouseY-30, 0.0)      # from bottom left of window?
     # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
@@ -1324,6 +1382,10 @@ class CcpnGLWidget(QOpenGLWidget):
       gridGLList[1] = False
       labelsChanged = True
 
+      gridGLList[2] = np.array([])      # new empty array
+      gridGLList[3] = np.array([])      # new empty array
+      gridGLList[4] = 0
+
       if ul[0] > br[0]:
         x = ul[0]
         ul[0] = br[0]
@@ -1382,17 +1444,40 @@ class CcpnGLWidget(QOpenGLWidget):
               else:
                 labelling[str(ax)].append((i, ax, p1[1], d[1]))
 
+            # append the new points to the end of nparray
+            gridGLList[2] = np.append(gridGLList[2], [p1[0], p1[1]])
+            gridGLList[2] = np.append(gridGLList[2], [p2[0], p2[1]])
+
+            gridGLList[3] = np.append(gridGLList[3], [r, g, b, c/transparency])
+            gridGLList[3] = np.append(gridGLList[3], [r, g, b, c/transparency])
+
+            gridGLList[4] += 2
+
           GL.glEnd()
 
       GL.glEndList()
 
+    # old drawing of the grid
+    # GL.glEnable(GL.GL_BLEND)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glLineWidth(1.0)
+    #
+    # GL.glCallList(gridGLList[0])
+    #
+    # GL.glDisable(GL.GL_BLEND)
 
+    # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    GL.glLineWidth(1.0)
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-    GL.glCallList(gridGLList[0])
+    GL.glVertexPointer(2, GL.GL_FLOAT, 0, gridGLList[2])
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, gridGLList[3])
+    GL.glDrawArrays(GL.GL_LINES, 0, gridGLList[4])
 
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
     GL.glDisable(GL.GL_BLEND)
 
     # tr = self.deviceTransform()
@@ -1703,8 +1788,8 @@ class GLFont():
                      , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
 
     # generate a MipMap to cope with smaller text (may not be needed soon)
-    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR )
-    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR )
+    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )
+    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST )
 
     # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
     # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )

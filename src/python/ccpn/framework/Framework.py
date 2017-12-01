@@ -1054,8 +1054,8 @@ class Framework:
 
     # TODO:ED example for Chris
     # import ccpn.util.nef.NefImporter as NefImporter
-    # tempRead = NefImporter.importFile(path)
-    # tempReadToString = tempRead.toString()
+    # tempDict = NefImporter.importFile(path)
+    # tempReadToString = tempDict.toString()
 
     dataBlock = self.nefReader.getNefData(path)
 

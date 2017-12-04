@@ -41,6 +41,7 @@ except:
 from collections import OrderedDict
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
+from ccpn.util.nef.GenericStarParser import NamedOrderedDict
 
 sparkyReadingOrder = []
 # possibly for later
@@ -161,22 +162,22 @@ def getSparkyTokenIterator(text):
 class SparkySyntaxError(ValueError):
   pass
 
-class NamedOrderedDict(OrderedDict):
-  def __init__(self, name=None):
-    super(NamedOrderedDict, self).__init__()
-    self.name = name
-
-  def __str__(self):
-    return '%s(name=%s)' % (self.__class__.__name__, self.name)
-
-  def __repr__(self):
-    return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
-
-  def addItem(self, tag, value):
-    if tag in self:
-      raise ValueError("%s: duplicate key name %s" % (self, tag))
-    else:
-      self[tag] = value
+# class NamedOrderedDict(OrderedDict):
+#   def __init__(self, name=None):
+#     super(NamedOrderedDict, self).__init__()
+#     self.name = name
+#
+#   def __str__(self):
+#     return '%s(name=%s)' % (self.__class__.__name__, self.name)
+#
+#   def __repr__(self):
+#     return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
+#
+#   def addItem(self, tag, value):
+#     if tag in self:
+#       raise ValueError("%s: duplicate key name %s" % (self, tag))
+#     else:
+#       self[tag] = value
 
 
 class SparkyDict(NamedOrderedDict):

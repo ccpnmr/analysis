@@ -1053,9 +1053,14 @@ class Framework:
     """Load Project from NEF file at path, and do necessary setup"""
 
     # TODO:ED example for Chris
-    # import ccpn.util.nef.NefImporter as NefImporter
-    # tempDict = NefImporter.importFile(path)
-    # tempReadToString = tempDict.toString()
+    import ccpn.util.nef.NefImporter as NefImporter
+    tempDict = NefImporter.loadFile(path)
+
+    NefImporter.export(object.path)
+    tempDict = NefImporter()
+    tempDict.loadFile(path)
+
+    tempReadToString = tempDict.toString()
 
     dataBlock = self.nefReader.getNefData(path)
 

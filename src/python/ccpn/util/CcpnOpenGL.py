@@ -411,31 +411,41 @@ void main() {
 #version 120
 
 varying vec3 P;
+varying vec3 C;
 
 void main()
 {
   P = gl_Vertex.xyz;
-
-  gl_Position = vec4(P, 1.0);    //ftransform();
+  C = gl_Color.xyz;
+  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);    //ftransform();
 }
 """
 
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 100.0;    //size of the grid
+uniform float gsize = 1.5;    //size of the grid
 uniform float gwidth = 1.0;     //grid lines'width in pixels
 varying vec3 P;
+varying vec3 C;
 
 void main()
 {
-  vec3 f  = abs(fract (P * gsize)-0.5);
-  vec3 df = fwidth(P * gsize);
+//  vec3 f  = fract (P * gsize);
+//  vec3 df = fwidth(P * gsize);
+  
+//  vec3 g = smoothstep(df * 1.0, df * 2.0, f);
+  
+//  float c = g.z;
+  
+//  gl_FragColor = vec4(c, c, c, 1.0);
+  
+  vec3  f  = abs(fract (P * gsize)-0.5);
+  vec3  df = fwidth(P * gsize);
   float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
-  float c = g.x * g.y * g.z;
-  gl_FragColor = vec4(c, c, c, 1.0);
-  gl_FragColor = gl_FragColor * gl_Color;
+  vec3  g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);        //max(0.0,1.0-gwidth) should also be sent as uniform
+  float cAlpha = 1.0-g.z;
+  gl_FragColor = vec4(C, cAlpha);
 }
 """
 
@@ -1225,12 +1235,14 @@ void main()
 
     self.set2DProjectionFlat()
 
-    GL.glColor4f(1.0, 1.0, 1.0, 1.0)
-    GL.glBegin(GL.GL_QUADS)
-    GL.glVertex3f(0.0, 0.0, 0.0)
-    GL.glVertex3f(100.0, 0.0, 120.0)
-    GL.glVertex3f(100.0, 100.0, 5167.0)
-    GL.glVertex3f(0.0, 100.0, 636.0)
+    GL.glColor4f(0.8, 0.3, 1.0, 1.0)
+    GL.glBegin(GL.GL_TRIANGLES)
+    GL.glVertex3f(-0.75, -0.75, 0.0)
+    GL.glVertex3f(0.75, -0.75, 1.0)
+    GL.glVertex3f(0.75, 0.75, 2.5)
+    GL.glVertex3f(-0.75, -0.75, 0.0)
+    GL.glVertex3f(0.75, 0.75, 2.5)
+    GL.glVertex3f(-0.75, 0.75, 1.8)
     GL.glEnd()
 
     GL.glUseProgram(0)

@@ -206,7 +206,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self.spectrumValues = []
     self.gridList = []
 
-    self._GLPeakLists = []
     self._drawSelectionBox = False
     self._selectionMode = 0
     self._startCoordinate = None
@@ -371,55 +370,84 @@ class CcpnGLWidget(QOpenGLWidget):
     self._vertexShader1 = """
 #version 120
 
-attribute vec3 vertex_pos;          // vertex position (in mesh coordinate frame)
-attribute vec3 vertex_norm;         // vertex normal   (in mesh coordinate frame)
+uniform mat4 u_projTrans;
 
-uniform mat4 mesh_frame;            // mesh frame (as a matrix)
-uniform mat4 camera_frame_inverse;  // inverse of the camera frame (as a matrix)
-uniform mat4 camera_projection;     // camera projection
+attribute vec4 a_position;
+attribute vec2 a_texCoord0;
+attribute vec4 a_color;
 
-varying vec3 pos;                   // [to fragment shader] vertex position (in world coordinate)
-varying vec3 norm;                  // [to fragment shader] vertex normal (in world coordinate)
+varying vec4 v_color;
+varying vec2 v_texCoord;
 
 void main() {
-  // compute pos and normal in world space and set up variables for fragment shader (use     mesh_frame)
-
-  // project vertex position to gl_Position using mesh_frame, camera_frame_inverse and camera_projection
-  gl_Position = vec4( 0, 0, 0, 1 );
+  gl_Position = u_projTrans * a_position;
+  v_texCoord = a_texCoord0;
+  v_color = a_color;
 }
 """
 
     self._fragmentShader1 = """
 #version 120
 
-varying vec3 pos;                   // [from vertex shader] position in world space
-varying vec3 norm;                  // [from vertex shader] normal in world space (need normalization)
+#ifdef GL_ES
+precision mediump float;
+#endif
 
-uniform vec3 camera_pos;            // camera position (center of the camera frame)
+uniform sampler2D u_texture;
 
-uniform vec3 ambient;               // scene ambient
+varying vec4 v_color;
+varying vec2 v_texCoord;
 
-uniform int lights_num;             // number of lights
-uniform vec3 light_pos[16];         // light positions
-uniform vec3 light_intensity[16];   // light intensities
-
-uniform vec3 material_kd;           // material kd
-uniform vec3 material_ks;           // material ks
-uniform float material_n;           // material n
+const float smoothing = 1.0/16.0;
 
 void main() {
-  vec3 c = vec3(0,0,0);
-  gl_FragColor = vec4(c,1);
+  float distance = texture2D(u_texture, v_texCoord).a;
+  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+  gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+}
+"""
+
+    self._vertexShader2 = """
+#version 120
+
+varying vec3 P;
+
+void main()
+{
+  P = gl_Vertex.xyz;
+
+  gl_Position = vec4(P, 1.0);    //ftransform();
+}
+"""
+
+    self._fragmentShader2 = """
+#version 120
+
+uniform float gsize = 100.0;    //size of the grid
+uniform float gwidth = 1.0;     //grid lines'width in pixels
+varying vec3 P;
+
+void main()
+{
+  vec3 f  = abs(fract (P * gsize)-0.5);
+  vec3 df = fwidth(P * gsize);
+  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
+  float c = g.x * g.y * g.z;
+  gl_FragColor = vec4(c, c, c, 1.0);
+  gl_FragColor = gl_FragColor * gl_Color;
 }
 """
 
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
+    self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
     for li in range(3):
       self.gridList.append( [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0] )
 
     self._GLPeakLists = {}
+    self._GLPeakListLabels = {}
 
     self.object = self.makeObject()
     self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
@@ -450,7 +478,9 @@ void main() {
     #
     # GL.glDisable(GL.GL_TEXTURE_2D)
 
-    # self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
+    # TODO:ED only have openGL 2.1 installed, so no point yet
+    self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
+    self._shaderProgram2 = ShaderProgram(fragment=self._fragmentShader2, vertex=self._vertexShader2)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -757,6 +787,73 @@ void main() {
       drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakList(spectrumView=spectrumView)
 
+  def _buildPeakListLabels(self, spectrumView):
+    spectrum = spectrumView.spectrum
+
+    if spectrum.pid not in self._GLPeakListLabels:
+      self._GLPeakListLabels[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
+
+    drawList = self._GLPeakListLabels[spectrum.pid]
+    if drawList[1] == GLRENDERMODE_REBUILD:
+      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
+      drawList[2] = None
+      drawList[3] = None
+      drawList[4] = 0
+      drawList[5] = []
+
+      tempVert = []
+      tempCol = []
+
+      # find the correct scale to draw square pixels
+      # don't forget to change when the axes change
+      x = abs(self.pixelX)
+      y = abs(self.pixelY)
+      minIndex = 0 if x <= y else 1
+      pos = [0.05, 0.05 * y / x]
+      w = r = pos[minIndex]
+
+      if x <= y:
+        r = 0.05
+        w = 0.025 * y / x
+      else:
+        w = 0.05
+        r = 0.025 * x / y
+
+      for pls in spectrum.peakLists:
+        for peak in pls.peaks:
+          p0 = peak.position
+          colour = pls.textColour
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+          GL.glColor4f(colR, colG, colB, 1.0)
+
+          GL.glPushMatrix()
+          GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
+          GL.glScaled(self.pixelX, self.pixelY, 1.0)
+
+          if self.peakLabelling == 0:
+            text = _getScreenPeakAnnotation(peak, useShortCode=False)
+          elif self.parentWidget().strip.peakLabelling == 1:
+            text = _getScreenPeakAnnotation(peak, useShortCode=True)
+          else:
+            text = _getPeakAnnotation(peak)  # original 'pid'
+
+          # TODO:ED change this to a vertex array
+          # GL.glCallLists([ord(c) for c in text])
+          for c in text:
+            ch = ord(c)
+
+          GL.glPopMatrix()
+      GL.glEndList()
+
+      drawList[2] = np.array(tempVert, np.float32)
+      drawList[3] = np.array(tempCol, np.float32)
+
+    elif drawList[1] == GLRENDERMODE_RESCALE:
+      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
+      self._rescalePeakListLabel(spectrumView=spectrumView)
+
   def _drawPeakListVertices(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
@@ -778,6 +875,27 @@ void main() {
     GL.glListBase( self.firstFont.base )
     GL.glCallList(drawList[0])        # temporarily call the drawing of the text
     GL.glDisable(GL.GL_TEXTURE_2D)
+
+    GL.glDisable(GL.GL_BLEND)
+
+  def _drawPeakListLabels(self, spectrumView):
+    drawList = self._GLPeakListLabels[spectrumView.spectrum.pid]
+
+    # new bit to use a vertex array to draw the peaks, very fast and easy
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+
+    GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
+    GL.glTexCoordPointer(4, GL.GL_FLOAT, 0, drawList[4])
+    GL.glDrawArrays(GL.GL_LINES, 0, drawList[5])
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
 
     GL.glDisable(GL.GL_BLEND)
 
@@ -1102,22 +1220,20 @@ void main() {
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
 
-    # self.set2DProjectionFlat()
-    #
-    # GL.glActiveTexture(GL.GL_TEXTURE0)
-    # GL.glEnable(GL.GL_TEXTURE_2D)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
-    # GL.glColor4f(0.8, 0.3, 1.0, 1.0)
-    # GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    #
-    # GL.glBegin(GL.GL_QUADS)
-    # GL.glTexCoord2f(1023/1024, 1/256);    GL.glVertex2i(512, 128)
-    # GL.glTexCoord2f(1/1024,    1/256);    GL.glVertex2i(0, 128)
-    # GL.glTexCoord2f(1/1024,    255/256);    GL.glVertex2i(0, 0)
-    # GL.glTexCoord2f(1023/1024, 255/256);    GL.glVertex2i(512, 0)
-    # GL.glEnd()
-    # GL.glDisable(GL.GL_TEXTURE_2D)
+
+    GL.glUseProgram(self._shaderProgram2.program_id)
+
+    self.set2DProjectionFlat()
+
+    GL.glColor4f(1.0, 1.0, 1.0, 1.0)
+    GL.glBegin(GL.GL_QUADS)
+    GL.glVertex3f(0.0, 0.0, 0.0)
+    GL.glVertex3f(100.0, 0.0, 120.0)
+    GL.glVertex3f(100.0, 100.0, 5167.0)
+    GL.glVertex3f(0.0, 100.0, 636.0)
+    GL.glEnd()
+
+    GL.glUseProgram(0)
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
@@ -1395,27 +1511,8 @@ void main() {
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
-    # this needs making into a GL_LIST
-
-    # self.picture = QtGui.QPicture()
-    # p = QtGui.QPainter()
-    # p.begin(self.picture)
-
-    # dt = fn.invertQTransform(self.viewTransform())
-    # vr = self.getViewWidget().rect()
-    # unit = self.pixelWidth(), self.pixelHeight()
-    # dim = [vr.width(), vr.height()]
-    # lvr = self.boundingRect()
-    # ul = np.array([lvr.left(), lvr.top()])
-    # br = np.array([lvr.right(), lvr.bottom()])
-
-    # dt = fn.invertQTransform(self.viewTransform())
-    # vr = self.getViewWidget().rect()
-    # unit = self.pixelWidth(), self.pixelHeight()
     dim = [self.width(), self.height()]
-    # lvr = self.boundingRect()
 
-    # TODO:ED not sure this is exactly the correct coords yet
     ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
     br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
 
@@ -1451,29 +1548,9 @@ void main() {
           ppl = np.array( dim[ax] / nl[ax] )                      # ejb
           c = np.clip(3.*(ppl-3), 0., 30.)
           GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
-
-          # if self.parent.gridColour == '#f7ffff':
-            # linePen = QtGui.QPen(QtGui.QColor(247, 255, 255, c))
-
-          # GL.glColor3f(247, 255, 255)
-          # else:
-            # linePen = QtGui.QPen(QtGui.QColor(8, 0, 0, c))
-            # GL.glColor3f(8, 0, 0)
-
           GL.glBegin(GL.GL_LINES)
           bx = (ax+1) % 2
           for x in range(0, int(nl[ax])):
-            # linePen.setCosmetic(False)
-            # if ax == 0:
-            #     # linePen.setWidthF(self.pixelWidth())
-            # #     #print "ax 0 height", self.pixelHeight()
-            #
-            #   GL.glLineWidth(1)
-            # else:
-            #     # linePen.setWidthF(self.pixelHeight())
-            #   GL.glLineWidth(2)
-            #     #print "ax 1 width", self.pixelWidth()
-            # p.setPen(linePen)
             p1 = np.array([0.,0.])
             p2 = np.array([0.,0.])
             p1[ax] = ul1[ax] + x * d[ax]
@@ -1514,6 +1591,7 @@ void main() {
     # GL.glCallList(gridGLList[0])
     #
     # GL.glDisable(GL.GL_BLEND)
+
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -1854,6 +1932,49 @@ class ShaderProgram(object):
         Integer describing location
     """
     return GL.glGetAttribLocation(self.program_id, name)
+
+class GLString:
+  def __init__(self, text, font, color=(1.0, 1.0, 1.0, 0.0), x=0, y=0,
+               width=None, height=None):
+    self.text = text
+    self.vertices = np.zeros((len(text) * 4, 3), dtype=np.float32)
+    self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
+    self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
+    self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    self.attrib = np.zeros((len(text) * 4, 1), dtype=np.float32)
+    pen = [x, y]
+    prev = None
+
+    for i, charcode in enumerate(text):
+      glyph = font[charcode]
+      kerning = glyph.get_kerning(prev)
+      x0 = pen[0] + glyph.offset[0] + kerning
+      dx = x0 - int(x0)
+      x0 = int(x0)
+      y0 = pen[1] + glyph.offset[1]
+      x1 = x0 + glyph.size[0]
+      y1 = y0 - glyph.size[1]
+      u0 = glyph.texcoords[0]
+      v0 = glyph.texcoords[1]
+      u1 = glyph.texcoords[2]
+      v1 = glyph.texcoords[3]
+
+      index = i * 4
+      indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+      vertices = [[x0, y0, 1], [x0, y1, 1], [x1, y1, 1], [x1, y0, 1]]
+      texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+      colors = [color, ] * 4
+
+      self.vertices[i * 4:i * 4 + 4] = vertices
+      self.indices[i * 6:i * 6 + 6] = indices
+      self.texcoords[i * 4:i * 4 + 4] = texcoords
+      self.colors[i * 4:i * 4 + 4] = colors
+      self.attrib[i * 4:i * 4 + 4] = dx
+      pen[0] = pen[0] + glyph.advance[0] / 64.0 + kerning
+      pen[1] = pen[1] + glyph.advance[1] / 64.0
+      prev = charcode
+
+    width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
 
 
 if __name__ == '__main__':

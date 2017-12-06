@@ -58,104 +58,104 @@ GLRENDERMODE_RESCALE = 1
 GLRENDERMODE_REBUILD = 2
 
 
-class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
+# class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
+#
+#     def __init__(self, parent=None):
+#       super(QtWidgets.QOpenGLWidget, self).__init__(parent)
+#       self.trolltechPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
+#
+#     def minimumSizeHint(self):
+#       return QtCore.QSize(100, 300)
+#
+#     def sizeHint(self):
+#       return QtCore.QSize(400, 400)
+#
+#     def initializeGL(self):
+#       # self.qglClearColor(self.trolltechPurple.dark())
+#       GL.glClearColor(*self.trolltechPurple.getRgb())
+#
+#     def paintGL(self):
+#       GL.glMatrixMode(GL.GL_MODELVIEW)
+#       GL.glLoadIdentity()
+#       GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+#       GL.glColor3f(1,0,0)
+#       GL.glRectf(-1,-1,1,0)
+#       GL.glColor3f(0,1,0)
+#       GL.glRectf(-1,0,1,1)
+#       GL.glBegin(GL.GL_TRIANGLES)
+#       GL.glVertex2f(3.0, 3.0)
+#       GL.glVertex2f(5.0, 3.0)
+#       GL.glVertex2f(5.0, 5.0)
+#       GL.glVertex2f(6.0, 4.0)
+#       GL.glVertex2f(7.0, 4.0)
+#       GL.glVertex2f(7.0, 7.0)
+#       GL.glEnd()
+#       GL.glFinish()
+#
+#     def resizeGL(self, w, h):
+#       GL.glViewport(0, 0, w, h)
 
-    def __init__(self, parent=None):
-      super(QtWidgets.QOpenGLWidget, self).__init__(parent)
-      self.trolltechPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
 
-    def minimumSizeHint(self):
-      return QtCore.QSize(100, 300)
-
-    def sizeHint(self):
-      return QtCore.QSize(400, 400)
-
-    def initializeGL(self):
-      # self.qglClearColor(self.trolltechPurple.dark())
-      GL.glClearColor(*self.trolltechPurple.getRgb())
-
-    def paintGL(self):
-      GL.glMatrixMode(GL.GL_MODELVIEW)
-      GL.glLoadIdentity()
-      GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-      GL.glColor3f(1,0,0)
-      GL.glRectf(-1,-1,1,0)
-      GL.glColor3f(0,1,0)
-      GL.glRectf(-1,0,1,1)
-      GL.glBegin(GL.GL_TRIANGLES)
-      GL.glVertex2f(3.0, 3.0)
-      GL.glVertex2f(5.0, 3.0)
-      GL.glVertex2f(5.0, 5.0)
-      GL.glVertex2f(6.0, 4.0)
-      GL.glVertex2f(7.0, 4.0)
-      GL.glVertex2f(7.0, 7.0)
-      GL.glEnd()
-      GL.glFinish()
-
-    def resizeGL(self, w, h):
-      GL.glViewport(0, 0, w, h)
-
-
-class Bubble(object):
-  def __init__(self, position, radius, velocity):
-    self.position = position
-    self.vel = velocity
-    self.radius = radius
-
-    self.innerColor = self.randomColor()
-    self.outerColor = self.randomColor()
-    self.updateBrush()
-
-  def updateBrush(self):
-    gradient = QRadialGradient(QPointF(self.radius, self.radius),
-                               self.radius, QPointF(self.radius * 0.5, self.radius * 0.5))
-
-    gradient.setColorAt(0, QColor(255, 255, 255, 255))
-    gradient.setColorAt(0.25, self.innerColor)
-    gradient.setColorAt(1, self.outerColor)
-    self.brush = QBrush(gradient)
-
-  def drawBubble(self, painter):
-    painter.save()
-    painter.translate(self.position.x() - self.radius,
-                      self.position.y() - self.radius)
-    painter.setBrush(self.brush)
-    painter.drawEllipse(0, 0, int(2 * self.radius), int(2 * self.radius))
-    painter.restore()
-
-  def randomColor(self):
-    red = random.randrange(205, 256)
-    green = random.randrange(205, 256)
-    blue = random.randrange(205, 256)
-    alpha = random.randrange(91, 192)
-
-    return QColor(red, green, blue, alpha)
-
-  def move(self, bbox):
-    self.position += self.vel
-    leftOverflow = self.position.x() - self.radius - bbox.left()
-    rightOverflow = self.position.x() + self.radius - bbox.right()
-    topOverflow = self.position.y() - self.radius - bbox.top()
-    bottomOverflow = self.position.y() + self.radius - bbox.bottom()
-
-    if leftOverflow < 0.0:
-      self.position.setX(self.position.x() - 2 * leftOverflow)
-      self.vel.setX(-self.vel.x())
-    elif rightOverflow > 0.0:
-      self.position.setX(self.position.x() - 2 * rightOverflow)
-      self.vel.setX(-self.vel.x())
-
-    if topOverflow < 0.0:
-      self.position.setY(self.position.y() - 2 * topOverflow)
-      self.vel.setY(-self.vel.y())
-    elif bottomOverflow > 0.0:
-      self.position.setY(self.position.y() - 2 * bottomOverflow)
-      self.vel.setY(-self.vel.y())
-
-  def rect(self):
-    return QRectF(self.position.x() - self.radius,
-                  self.position.y() - self.radius, 2 * self.radius,
-                  2 * self.radius)
+# class Bubble(object):
+#   def __init__(self, position, radius, velocity):
+#     self.position = position
+#     self.vel = velocity
+#     self.radius = radius
+#
+#     self.innerColor = self.randomColor()
+#     self.outerColor = self.randomColor()
+#     self.updateBrush()
+#
+#   def updateBrush(self):
+#     gradient = QRadialGradient(QPointF(self.radius, self.radius),
+#                                self.radius, QPointF(self.radius * 0.5, self.radius * 0.5))
+#
+#     gradient.setColorAt(0, QColor(255, 255, 255, 255))
+#     gradient.setColorAt(0.25, self.innerColor)
+#     gradient.setColorAt(1, self.outerColor)
+#     self.brush = QBrush(gradient)
+#
+#   def drawBubble(self, painter):
+#     painter.save()
+#     painter.translate(self.position.x() - self.radius,
+#                       self.position.y() - self.radius)
+#     painter.setBrush(self.brush)
+#     painter.drawEllipse(0, 0, int(2 * self.radius), int(2 * self.radius))
+#     painter.restore()
+#
+#   def randomColor(self):
+#     red = random.randrange(205, 256)
+#     green = random.randrange(205, 256)
+#     blue = random.randrange(205, 256)
+#     alpha = random.randrange(91, 192)
+#
+#     return QColor(red, green, blue, alpha)
+#
+#   def move(self, bbox):
+#     self.position += self.vel
+#     leftOverflow = self.position.x() - self.radius - bbox.left()
+#     rightOverflow = self.position.x() + self.radius - bbox.right()
+#     topOverflow = self.position.y() - self.radius - bbox.top()
+#     bottomOverflow = self.position.y() + self.radius - bbox.bottom()
+#
+#     if leftOverflow < 0.0:
+#       self.position.setX(self.position.x() - 2 * leftOverflow)
+#       self.vel.setX(-self.vel.x())
+#     elif rightOverflow > 0.0:
+#       self.position.setX(self.position.x() - 2 * rightOverflow)
+#       self.vel.setX(-self.vel.x())
+#
+#     if topOverflow < 0.0:
+#       self.position.setY(self.position.y() - 2 * topOverflow)
+#       self.vel.setY(-self.vel.y())
+#     elif bottomOverflow > 0.0:
+#       self.position.setY(self.position.y() - 2 * bottomOverflow)
+#       self.vel.setY(-self.vel.y())
+#
+#   def rect(self):
+#     return QRectF(self.position.x() - self.radius,
+#                   self.position.y() - self.radius, 2 * self.radius,
+#                   2 * self.radius)
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -185,10 +185,11 @@ class CcpnGLWidget(QOpenGLWidget):
     self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
     self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
 
-    self.animationTimer = QTimer()
-    self.animationTimer.setSingleShot(False)
-    self.animationTimer.timeout.connect(self.animate)
-    self.animationTimer.start(25)
+    # TODO:ED need to explicitly call self.update() to refresh after an update
+    # self.animationTimer = QTimer()
+    # self.animationTimer.setSingleShot(False)
+    # self.animationTimer.timeout.connect(self.animate)
+    # self.animationTimer.start(25)
 
     self.setAutoFillBackground(False)
     self.setMinimumSize(100, 50)
@@ -317,6 +318,7 @@ class CcpnGLWidget(QOpenGLWidget):
         pp[1] = GLRENDERMODE_RESCALE
 
     event.accept()
+    self.update()
 
   def eventFilter(self, obj, event):
     self._key = '_'
@@ -366,6 +368,51 @@ class CcpnGLWidget(QOpenGLWidget):
       self.zRot = angle
 
   def initializeGL(self):
+    self._vertexShader1 = """
+#version 120
+
+attribute vec3 vertex_pos;          // vertex position (in mesh coordinate frame)
+attribute vec3 vertex_norm;         // vertex normal   (in mesh coordinate frame)
+
+uniform mat4 mesh_frame;            // mesh frame (as a matrix)
+uniform mat4 camera_frame_inverse;  // inverse of the camera frame (as a matrix)
+uniform mat4 camera_projection;     // camera projection
+
+varying vec3 pos;                   // [to fragment shader] vertex position (in world coordinate)
+varying vec3 norm;                  // [to fragment shader] vertex normal (in world coordinate)
+
+void main() {
+  // compute pos and normal in world space and set up variables for fragment shader (use     mesh_frame)
+
+  // project vertex position to gl_Position using mesh_frame, camera_frame_inverse and camera_projection
+  gl_Position = vec4( 0, 0, 0, 1 );
+}
+"""
+
+    self._fragmentShader1 = """
+#version 120
+
+varying vec3 pos;                   // [from vertex shader] position in world space
+varying vec3 norm;                  // [from vertex shader] normal in world space (need normalization)
+
+uniform vec3 camera_pos;            // camera position (center of the camera frame)
+
+uniform vec3 ambient;               // scene ambient
+
+uniform int lights_num;             // number of lights
+uniform vec3 light_pos[16];         // light positions
+uniform vec3 light_intensity[16];   // light intensities
+
+uniform vec3 material_kd;           // material kd
+uniform vec3 material_ks;           // material ks
+uniform float material_n;           // material n
+
+void main() {
+  vec3 c = vec3(0,0,0);
+  gl_FragColor = vec4(c,1);
+}
+"""
+
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
 
@@ -402,6 +449,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #                 , np.asarray(image).tobytes(order='C'))
     #
     # GL.glDisable(GL.GL_TEXTURE_2D)
+
+    # self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -538,6 +587,7 @@ class CcpnGLWidget(QOpenGLWidget):
   #
   #   self.drawInstructions(painter)
   #   painter.end()
+    self.update()
 
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
@@ -627,76 +677,77 @@ class CcpnGLWidget(QOpenGLWidget):
         w = 0.05
         r = 0.025 * x / y
 
-      GL.glBegin(GL.GL_LINES)
+      # GL.glBegin(GL.GL_LINES)
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
-
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            colour = spectrumView.strip.plotWidget.highlightColour
-          else:
-            colour = pls.symbolColour
-
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
-          GL.glColor4f(colR, colG, colB, 1.0)
+          #
+          # if hasattr(peak, '_isSelected') and peak._isSelected:
+          #   colour = spectrumView.strip.plotWidget.highlightColour
+          # else:
+          #   colour = pls.symbolColour
+          #
+          # colR = int(colour.strip('# ')[0:2], 16)/255.0
+          # colG = int(colour.strip('# ')[2:4], 16)/255.0
+          # colB = int(colour.strip('# ')[4:6], 16)/255.0
+          # GL.glColor4f(colR, colG, colB, 1.0)
 
           # draw a cross
           # TODO:ED need to put scaling in here to keep the cross square at 0.1ppm
           p0 = peak.position
           # GL.glBegin(GL.GL_LINES)
-          GL.glVertex2d(p0[0]-r, p0[1]-w)
-          GL.glVertex2d(p0[0]+r, p0[1]+w)
-          GL.glVertex2d(p0[0]+r, p0[1]-w)
-          GL.glVertex2d(p0[0]-r, p0[1]+w)
-
-          # append the new points to the end of nparray
-          tempVert.append([p0[0]-r, p0[1]-w])
-          tempVert.append([p0[0]+r, p0[1]+w])
-          tempVert.append([p0[0]+r, p0[1]-w])
-          tempVert.append([p0[0]-r, p0[1]+w])
-
-          tempCol.append([colR, colG, colB, 1.0])
-          tempCol.append([colR, colG, colB, 1.0])
-          tempCol.append([colR, colG, colB, 1.0])
-          tempCol.append([colR, colG, colB, 1.0])
-
-          drawList[4] += 4                              # store the number of points
-          drawList[5].append((p0[0], p0[1]))            # store the point for quicker access
-                                                        # required for rescale
-
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            # draw box
-            GL.glVertex2d(p0[0]-r, p0[1]-w)
-            GL.glVertex2d(p0[0]+r, p0[1]-w)
-            GL.glVertex2d(p0[0]+r, p0[1]+w)
-            GL.glVertex2d(p0[0]-r, p0[1]+w)
+          # GL.glVertex2d(p0[0]-r, p0[1]-w)
+          # GL.glVertex2d(p0[0]+r, p0[1]+w)
+          # GL.glVertex2d(p0[0]+r, p0[1]-w)
+          # GL.glVertex2d(p0[0]-r, p0[1]+w)
+          #
+          # # append the new points to the end of nparray
+          # tempVert.append([p0[0]-r, p0[1]-w])
+          # tempVert.append([p0[0]+r, p0[1]+w])
+          # tempVert.append([p0[0]+r, p0[1]-w])
+          # tempVert.append([p0[0]-r, p0[1]+w])
+          #
+          # tempCol.append([colR, colG, colB, 1.0])
+          # tempCol.append([colR, colG, colB, 1.0])
+          # tempCol.append([colR, colG, colB, 1.0])
+          # tempCol.append([colR, colG, colB, 1.0])
+          #
+          # drawList[4] += 4                              # store the number of points
+          # drawList[5].append((p0[0], p0[1]))            # store the point for quicker access
+          #                                               # required for rescale
+          #
+          # if hasattr(peak, '_isSelected') and peak._isSelected:
+          #   # draw box
+          #   GL.glVertex2d(p0[0]-r, p0[1]-w)
+          #   GL.glVertex2d(p0[0]+r, p0[1]-w)
+          #   GL.glVertex2d(p0[0]+r, p0[1]+w)
+          #   GL.glVertex2d(p0[0]-r, p0[1]+w)
           # GL.glEnd()
-
+          #
 
           # TODO:ED don't delete yet, this is the peak label drawing
           # glut text failure - need something better
-          # colour = pls.textColour
-          # colR = int(colour.strip('# ')[0:2], 16)/255.0
-          # colG = int(colour.strip('# ')[2:4], 16)/255.0
-          # colB = int(colour.strip('# ')[4:6], 16)/255.0
-          # GL.glColor4f(colR, colG, colB, 1.0)
-          #
-          # GL.glPushMatrix()
-          # GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
-          # GL.glScaled(self.pixelX, self.pixelY, 1.0)
-          #
-          # if self.peakLabelling == 0:
-          #   text = _getScreenPeakAnnotation(peak, useShortCode=False)
-          # elif self.parentWidget().strip.peakLabelling == 1:
-          #   text = _getScreenPeakAnnotation(peak, useShortCode=True)
-          # else:
-          #   text = _getPeakAnnotation(peak)  # original 'pid'
-          #
-          # GL.glCallLists([ord(c) for c in text])
-          #
-          # GL.glPopMatrix()
-      GL.glEnd()
+          colour = pls.textColour
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+          GL.glColor4f(colR, colG, colB, 1.0)
+
+          GL.glPushMatrix()
+          GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
+          GL.glScaled(self.pixelX, self.pixelY, 1.0)
+
+          if self.peakLabelling == 0:
+            text = _getScreenPeakAnnotation(peak, useShortCode=False)
+          elif self.parentWidget().strip.peakLabelling == 1:
+            text = _getScreenPeakAnnotation(peak, useShortCode=True)
+          else:
+            text = _getPeakAnnotation(peak)  # original 'pid'
+
+          GL.glCallLists([ord(c) for c in text])
+
+          GL.glPopMatrix()
+
+      # GL.glEnd()
       GL.glEndList()
 
       drawList[2] = np.array(tempVert, np.float32)
@@ -721,7 +772,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
+    GL.glListBase( self.firstFont.base )
+    GL.glCallList(drawList[0])        # temporarily call the drawing of the text
+    GL.glDisable(GL.GL_TEXTURE_2D)
+
     GL.glDisable(GL.GL_BLEND)
+
 
 
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
@@ -1062,13 +1121,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()
+    self.doneCurrent()
 
   # def resizeGL(self, width, height):
   #   self.setupViewport(width, height)
   #   self.update()
 
-  def showEvent(self, event):
-    self.createBubbles(20 - len(self.bubbles))
+  # def showEvent(self, event):
+  #   self.createBubbles(20 - len(self.bubbles))
 
   def sizeHint(self):
     return QSize(400, 400)
@@ -1160,21 +1220,15 @@ class CcpnGLWidget(QOpenGLWidget):
       angle -= 360 * 16
     return angle
 
-  def createBubbles(self, number):
-    for i in range(number):
-      position = QPointF(self.width() * (0.1 + 0.8 * random.random()),
-                         self.height() * (0.1 + 0.8 * random.random()))
-      radius = min(self.width(), self.height()) * (0.0125 + 0.0875 * random.random())
-      velocity = QPointF(self.width() * 0.0125 * (-0.5 + random.random()),
-                         self.height() * 0.0125 * (-0.5 + random.random()))
-
-      self.bubbles.append(Bubble(position, radius, velocity))
-
-  def animate(self):
-    for bubble in self.bubbles:
-      bubble.move(self.rect())
-
-    self.update()
+  # def createBubbles(self, number):
+  #   for i in range(number):
+  #     position = QPointF(self.width() * (0.1 + 0.8 * random.random()),
+  #                        self.height() * (0.1 + 0.8 * random.random()))
+  #     radius = min(self.width(), self.height()) * (0.0125 + 0.0875 * random.random())
+  #     velocity = QPointF(self.width() * 0.0125 * (-0.5 + random.random()),
+  #                        self.height() * 0.0125 * (-0.5 + random.random()))
+  # 
+  #     self.bubbles.append(Bubble(position, radius, velocity))
 
   def setupViewport(self, width, height):
     # side = min(width, height)
@@ -1705,6 +1759,101 @@ class CcpnGLItem():
     # self.setParentItem(parentItem)
     # self.setDepthValue(0)
     self.__glOpts = {}
+
+vertex_data = np.array([0.75, 0.75, 0.0,
+                        0.75, -0.75, 0.0,
+                        -0.75, -0.75, 0.0], dtype=np.float32)
+
+color_data = np.array([1, 0, 0,
+                       0, 1, 0,
+                       0, 0, 1], dtype=np.float32)
+
+
+class ShaderProgram(object):
+  """ Helper class for using GLSL shader programs
+  """
+
+  def __init__(self, vertex, fragment):
+    """
+    Parameters
+    ----------
+    vertex : str
+        String containing shader source code for the vertex
+        shader
+    fragment : str
+        String containing shader source code for the fragment
+        shader
+    """
+    self.program_id = GL.glCreateProgram()
+    vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
+    frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
+
+    GL.glAttachShader(self.program_id, vs_id)
+    GL.glAttachShader(self.program_id, frag_id)
+    GL.glLinkProgram(self.program_id)
+
+    if GL.glGetProgramiv(self.program_id, GL.GL_LINK_STATUS) != GL.GL_TRUE:
+      info = GL.glGetProgramInfoLog(self.program_id)
+      GL.glDeleteProgram(self.program_id)
+      GL.glDeleteShader(vs_id)
+      GL.glDeleteShader(frag_id)
+      raise RuntimeError('Error linking program: %s' % (info))
+
+    # detach after successful link
+    GL.glDetachShader(self.program_id, vs_id)
+    GL.glDetachShader(self.program_id, frag_id)
+
+  def add_shader(self, source, shader_type):
+    """ Helper function for compiling a GLSL shader
+    Parameters
+    ----------
+    source : str
+        String containing shader source code
+    shader_type : valid OpenGL shader type
+        Type of shader to compile
+    Returns
+    -------
+    value : int
+        Identifier for shader if compilation is successful
+    """
+    shader_id = 0
+    try:
+      shader_id = GL.glCreateShader(shader_type)
+      GL.glShaderSource(shader_id, source)
+      GL.glCompileShader(shader_id)
+      if GL.glGetShaderiv(shader_id, GL.GL_COMPILE_STATUS) != GL.GL_TRUE:
+        info = GL.glGetShaderInfoLog(shader_id)
+        raise RuntimeError('Shader compilation failed: %s' % (info))
+      return shader_id
+    except:
+      GL.glDeleteShader(shader_id)
+      raise
+
+  def uniform_location(self, name):
+    """ Helper function to get location of an OpenGL uniform variable
+    Parameters
+    ----------
+    name : str
+        Name of the variable for which location is to be returned
+    Returns
+    -------
+    value : int
+        Integer describing location
+    """
+    return GL.glGetUniformLocation(self.program_id, name)
+
+  def attribute_location(self, name):
+    """ Helper function to get location of an OpenGL attribute variable
+    Parameters
+    ----------
+    name : str
+        Name of the variable for which location is to be returned
+    Returns
+    -------
+    value : int
+        Integer describing location
+    """
+    return GL.glGetAttribLocation(self.program_id, name)
 
 
 if __name__ == '__main__':

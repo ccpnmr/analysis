@@ -53,9 +53,11 @@ except ImportError:
     sys.exit(1)
 
 AXIS_MARGIN = 35
-GLRENDERMODE_DRAW = 0
-GLRENDERMODE_RESCALE = 1
-GLRENDERMODE_REBUILD = 2
+
+GLRENDERMODE_IGNORE = 0
+GLRENDERMODE_DRAW = 1
+GLRENDERMODE_RESCALE = 2
+GLRENDERMODE_REBUILD = 3
 
 
 # class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
@@ -204,7 +206,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.base = None
     self.spectrumValues = []
-    self.gridList = []
 
     self._drawSelectionBox = False
     self._selectionMode = 0
@@ -227,13 +228,16 @@ class CcpnGLWidget(QOpenGLWidget):
     self._buildPeakList = True
 
   def resizeGL(self, w, h):
-    GL.glViewport(0, 0, w, h)
+    # GL.glViewport(0, 0, w, h)
+    self.set2DProjectionFlat()
 
     # put stuff in here that will change on a resize
     for li in self.gridList:
-      li[1] = GLRENDERMODE_REBUILD
+      li.renderMode = GLRENDERMODE_REBUILD
     for pp in self._GLPeakLists.values():
-      pp[1] = GLRENDERMODE_RESCALE
+      pp.renderMode = GLRENDERMODE_RESCALE
+
+    self.repaint()
 
   def wheelEvent(self, event):
     def between(val, l, r):
@@ -276,7 +280,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # spawn rebuild event for the grid
       for li in self.gridList:
-        li[1] = GLRENDERMODE_REBUILD
+        li.renderMode = GLRENDERMODE_REBUILD
 
     elif between(self._mouseX, ba[0], ba[2]) and between(self._mouseY, ba[1], ba[3]):
       mb = (self._mouseX - ba[0]) / (ba[2] - ba[0])
@@ -290,12 +294,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisR = mbx - 0.9 * (mbx - self.axisR)
 
       # spawn rebuild event for the grid
-      self.gridList[0][1] = GLRENDERMODE_REBUILD
-      self.gridList[2][1] = GLRENDERMODE_REBUILD
+      self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+      self.gridList[2].renderMode = GLRENDERMODE_REBUILD
 
       # ratios have changed so rescale the peaks symbols
       for pp in self._GLPeakLists.values():
-        pp[1] = GLRENDERMODE_RESCALE
+        pp.renderMode = GLRENDERMODE_RESCALE
 
     elif between(self._mouseX, ra[0], ra[2]) and between(self._mouseY, ra[1], ra[3]):
       mb = (self._mouseY - ra[1]) / (ra[3] - ra[1])
@@ -309,15 +313,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisT = mby - 0.9 * (mby - self.axisT)
 
       # spawn rebuild event for the grid
-      self.gridList[0][1] = GLRENDERMODE_REBUILD
-      self.gridList[1][1] = GLRENDERMODE_REBUILD
+      self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+      self.gridList[1].renderMode = GLRENDERMODE_REBUILD
 
       # ratios have changed so rescale the peaks symbols
       for pp in self._GLPeakLists.values():
-        pp[1] = GLRENDERMODE_RESCALE
+        pp.renderMode = GLRENDERMODE_RESCALE
 
     event.accept()
-    self.update()
+    self.repaint()
 
   def eventFilter(self, obj, event):
     self._key = '_'
@@ -428,7 +432,7 @@ void main()
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 5.0;    //size of the grid
+uniform float gsize = 7.0;    //size of the grid
 uniform float gwidth = 1.0;     //grid lines'width in pixels
 varying vec3 P;
 varying vec3 C;
@@ -465,12 +469,42 @@ void main()
 }
 """
 
+    self._vertexShader3 = """
+#version 120
+
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+varying vec4 FC;
+
+void main()
+{
+  gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  FC = gl_Color;
+}
+"""
+
+    self._fragmentShader3 = """
+#version 120
+
+varying vec4 FC;
+
+void main()
+{
+  gl_FragColor = FC;
+}
+"""
+
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
+    self.gridList = []
     for li in range(3):
-      self.gridList.append( [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0] )
+      self.gridList.append(GLvertexArray(numLists=1
+                                          , renderMode=GLRENDERMODE_REBUILD
+                                          , blendMode=True
+                                          , drawMode=GL.GL_LINES
+                                          , dimension=2))
 
     self._GLPeakLists = {}
     self._GLPeakListLabels = {}
@@ -486,28 +520,28 @@ void main()
     self._axisXLabels = GL.glGenLists(1)
     self._axisLabels = GL.glGenLists(1)
     self.peakLabelling = 0
+    self._contourList = GLvertexArray(numLists=1
+                                      , renderMode=GLRENDERMODE_REBUILD
+                                      , blendMode=True
+                                      , drawMode=GL.GL_TRIANGLES
+                                      , dimension=3)
 
-    # image = imread('/Users/ejb66/Documents/Fonts/myfont.png')
-    #
-    # self.texture = GL.glGenBuffers(1)
-    #
-    # GL.glActiveTexture(GL.GL_TEXTURE0)
-    # GL.glEnable(GL.GL_TEXTURE_2D)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture)
-    # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
-    # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
-    #
-    # GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
-    #                 , image.shape[1], image.shape[0]
-    #                 , 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE
-    #                 , np.asarray(image).tobytes(order='C'))
-    #
-    # GL.glDisable(GL.GL_TEXTURE_2D)
+    # self._axisLabels = GLvertexArray(numLists=1
+    #                                   , renderMode=GLRENDERMODE_REBUILD
+    #                                   , blendMode=True
+    #                                   , drawMode=GL.GL_TRIANGLES)
 
     # TODO:ED only have openGL 2.1 installed, so no point yet
     self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
     self._shaderProgram2 = ShaderProgram(fragment=self._fragmentShader2, vertex=self._vertexShader2)
+    self._shaderProgram3 = ShaderProgram(fragment=self._fragmentShader3, vertex=self._vertexShader3)
 
+    # self._localPMatrix = CcpnTransform3D()
+    # self._localMVMatrix = CcpnTransform3D()
+    # self._localPMatrix.setToIdentity()
+    # self._localMVMatrix.setToIdentity()
+
+    # these are the links to the GL projection.model matrices
     self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
     self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
 
@@ -583,9 +617,9 @@ void main()
 
         # spawn rebuild event for the grid
         for li in self.gridList:
-          li[1] = GLRENDERMODE_REBUILD
+          li.renderMode = GLRENDERMODE_REBUILD
         for pp in self._GLPeakLists.values():
-          pp[1] = GLRENDERMODE_RESCALE
+          pp.renderMode = GLRENDERMODE_RESCALE
 
         #   event.modifiers() & QtCore.Qt.ShiftModifier):
     #   position = event.scenePos()
@@ -646,7 +680,7 @@ void main()
   #
   #   self.drawInstructions(painter)
   #   painter.end()
-    self.update()
+    self.repaint()
 
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
@@ -691,35 +725,51 @@ void main()
       w = 0.05
       r = 0.05 * x / y
 
-    tempVert = []
-    for pp in drawList[5]:
-      tempVert.append([pp[0] - r, pp[1] - w])
-      tempVert.append([pp[0] + r, pp[1] + w])
-      tempVert.append([pp[0] + r, pp[1] - w])
-      tempVert.append([pp[0] - r, pp[1] + w])
+    # drawList.clearVertices()
+    # drawList.vertices = drawList.attribs
+    offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+    for pp in range(0, 2*drawList.numVertices, 8):
+      drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+
+      # drawList.vertices = np.append(drawList.vertices, [pp[0] - r, pp[1] - w
+      #   , pp[0] + r, pp[1] + w
+      #   , pp[0] + r, pp[1] - w
+      #   , pp[0] - r, pp[1] + w])
+      # drawList.numVertices += 4
+
+      # tempVert.append([pp[0] - r, pp[1] - w])
+      # tempVert.append([pp[0] + r, pp[1] + w])
+      # tempVert.append([pp[0] + r, pp[1] - w])
+      # tempVert.append([pp[0] - r, pp[1] + w])
 
     # rebuild the scaled vertices
-    drawList[2] = np.array(tempVert, np.float32)
+    # drawList[2] = np.array(tempVert, np.float32)
 
   def _buildPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
+      self._GLPeakLists[spectrum.pid] = GLvertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
+                                                      , blendMode=False, drawMode=GL.GL_LINES, dimension=2)
+
+      # self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
 
     drawList = self._GLPeakLists[spectrum.pid]
 
-    if drawList[1] == GLRENDERMODE_REBUILD:
-      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
-      GL.glNewList(drawList[0], GL.GL_COMPILE)
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
-      drawList[2] = None
-      drawList[3] = None
-      drawList[4] = 0
-      drawList[5] = []
+      # GL.glNewList(drawList[0], GL.GL_COMPILE)
+      #
+      # drawList[2] = None
+      # drawList[3] = None
+      # drawList[4] = 0
+      # drawList[5] = []
+      #
+      # tempVert = []
+      # tempCol = []
 
-      tempVert = []
-      tempCol = []
+      drawList.clearArrays()
 
       # find the correct scale to draw square pixels
       # don't forget to change when the axes change
@@ -737,18 +787,18 @@ void main()
         r = 0.025 * x / y
 
       # GL.glBegin(GL.GL_LINES)
+      index=0
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
           #
-          # if hasattr(peak, '_isSelected') and peak._isSelected:
-          #   colour = spectrumView.strip.plotWidget.highlightColour
-          # else:
-          #   colour = pls.symbolColour
-          #
-          # colR = int(colour.strip('# ')[0:2], 16)/255.0
-          # colG = int(colour.strip('# ')[2:4], 16)/255.0
-          # colB = int(colour.strip('# ')[4:6], 16)/255.0
-          # GL.glColor4f(colR, colG, colB, 1.0)
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            colour = spectrumView.strip.plotWidget.highlightColour
+          else:
+            colour = pls.symbolColour
+
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
 
           # draw a cross
           # TODO:ED need to put scaling in here to keep the cross square at 0.1ppm
@@ -760,6 +810,20 @@ void main()
           # GL.glVertex2d(p0[0]-r, p0[1]+w)
           #
           # # append the new points to the end of nparray
+
+          drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+          drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+                                                            , p0[0]+r, p0[1]+w
+                                                            , p0[0]+r, p0[1]-w
+                                                            , p0[0]-r, p0[1]+w])
+          drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+                                                          ,p0[0], p0[1]
+                                                          ,p0[0], p0[1]
+                                                          ,p0[0], p0[1]])
+          index += 4
+          drawList.numVertices += 4
+
           # tempVert.append([p0[0]-r, p0[1]-w])
           # tempVert.append([p0[0]+r, p0[1]+w])
           # tempVert.append([p0[0]+r, p0[1]-w])
@@ -783,37 +847,37 @@ void main()
           # GL.glEnd()
           #
 
-          # TODO:ED don't delete yet, this is the peak label drawing
-          # glut text failure - need something better
-          colour = pls.textColour
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
-          GL.glColor4f(colR, colG, colB, 1.0)
+      #     # TODO:ED don't delete yet, this is the peak label drawing
+      #     # glut text failure - need something better
+      #     colour = pls.textColour
+      #     colR = int(colour.strip('# ')[0:2], 16)/255.0
+      #     colG = int(colour.strip('# ')[2:4], 16)/255.0
+      #     colB = int(colour.strip('# ')[4:6], 16)/255.0
+      #     GL.glColor4f(colR, colG, colB, 1.0)
+      #
+      #     GL.glPushMatrix()
+      #     GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
+      #     GL.glScaled(self.pixelX, self.pixelY, 1.0)
+      #
+      #     if self.peakLabelling == 0:
+      #       text = _getScreenPeakAnnotation(peak, useShortCode=False)
+      #     elif self.parentWidget().strip.peakLabelling == 1:
+      #       text = _getScreenPeakAnnotation(peak, useShortCode=True)
+      #     else:
+      #       text = _getPeakAnnotation(peak)  # original 'pid'
+      #
+      #     GL.glCallLists([ord(c) for c in text])
+      #
+      #     GL.glPopMatrix()
+      #
+      # # GL.glEnd()
+      # GL.glEndList()
 
-          GL.glPushMatrix()
-          GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
-          GL.glScaled(self.pixelX, self.pixelY, 1.0)
+      # drawList[2] = np.array(tempVert, np.float32)
+      # drawList[3] = np.array(tempCol, np.float32)
 
-          if self.peakLabelling == 0:
-            text = _getScreenPeakAnnotation(peak, useShortCode=False)
-          elif self.parentWidget().strip.peakLabelling == 1:
-            text = _getScreenPeakAnnotation(peak, useShortCode=True)
-          else:
-            text = _getPeakAnnotation(peak)  # original 'pid'
-
-          GL.glCallLists([ord(c) for c in text])
-
-          GL.glPopMatrix()
-
-      # GL.glEnd()
-      GL.glEndList()
-
-      drawList[2] = np.array(tempVert, np.float32)
-      drawList[3] = np.array(tempCol, np.float32)
-
-    elif drawList[1] == GLRENDERMODE_RESCALE:
-      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakList(spectrumView=spectrumView)
 
   def _buildPeakListLabels(self, spectrumView):
@@ -883,6 +947,18 @@ void main()
       drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakListLabel(spectrumView=spectrumView)
 
+  def _drawVertexColor(self, drawList):
+    # new bit to use a vertex array to draw the peaks, very fast and easy
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+
+    GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
+    GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+
   def _drawPeakListVertices(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
@@ -899,11 +975,11 @@ void main()
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
-    GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
-    GL.glListBase( self.firstFont.base )
-    GL.glCallList(drawList[0])        # temporarily call the drawing of the text
-    GL.glDisable(GL.GL_TEXTURE_2D)
+    # GL.glEnable(GL.GL_TEXTURE_2D)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
+    # GL.glListBase( self.firstFont.base )
+    # GL.glCallList(drawList[0])        # temporarily call the drawing of the text
+    # GL.glDisable(GL.GL_TEXTURE_2D)
 
     GL.glDisable(GL.GL_BLEND)
 
@@ -934,18 +1010,64 @@ void main()
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
   def paintGL(self):
-    self.makeCurrent()
+    # self.makeCurrent()
 
-    GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
+    # GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
-    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
+    GL.glBlendColor(0.0, 0.0, 0.0, 0.0)
+    GL.glClearColor(0.05, 0.05, 0.05, 0.0)
+    GL.glDisable(GL.GL_BLEND)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
+    GL.glDisable(GL.GL_DEPTH_TEST)
     getGLvector = (GL.GLfloat * 2)()
     GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
     linewidths = [i for i in getGLvector]
 
     self.set2DProjection()
+
+    # GL.glUseProgram(self._shaderProgram3.program_id)
+    # GL.glViewport(0, 35, w-35, h-35)  # leave a 35 width margin for the axes - bottom/right
+    # of = -1.0
+    # on = 1.0
+    # oa = -2.0/(self.axisR-self.axisL)
+    # ob = -2.0/(self.axisT-self.axisB)
+    # oc = -2.0/(of-on)
+    # od = -(of+on)/(of-on)
+    # oe = (self.axisT+self.axisB)/(self.axisT-self.axisB)
+    # og = (self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # # orthographic
+    # self._localPMatrix = np.array([
+    #    oa, 0.0, 0.0,  0.0,
+    #   0.0,  ob, 0.0,  0.0,
+    #   0.0, 0.0,  oc,  0.0,
+    #   og, oe, od, 1.0], np.float32)
+    #
+    # # create modelview matrix
+    # self._localMVMatrix = np.array([
+    #   1.0, 0.0, 0.0, 0.0,
+    #   0.0, 1.0, 0.0, 0.0,
+    #   0.0, 0.0, 1.0, 0.0,
+    #   0.0, 0.0, 0.0, 1.0], np.float32)
+    #
+    # # self._localPMatrix = CcpnTransform3D([oa, 0.0, 0.0,  0.0,
+    # #                                     0.0,  ob, 0.0,  0.0,
+    # #                                     0.0, 0.0,  oc,  0.0,
+    # #                                     og, oe, od, 1.0])
+    #
+    # # mvMatrix = CcpnTransform3D([1.0, 0.0, 0.0, 0.0,
+    # #                           0.0, 1.0, 0.0, 0.0,
+    # #                           0.0, 0.0, 1.0, 0.0,
+    # #                           0.0, 0.0, 0.0, 1.0])
+    #
+    # # self._localPMatrix.viewport(self.axisL, self.axisT
+    # #                         , (self.axisR-self.axisL)
+    # #                         , (self.axisB-self.axisT)
+    # #                         , -1.0, 1.0)
+    #
+    # # self.GLpMatrix = np.array(self._localPMatrix.copyDataTo()).reshape((4, 4))
+    # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._localPMatrix)
+    # # self.GLmvMatrix = np.array(self._localMVMatrix.copyDataTo()).reshape((4, 4))
+    # # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self.GLmvMatrix)
 
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
@@ -1026,6 +1148,17 @@ void main()
         GL.glTranslate(fx0, fy0, 0.0)
         GL.glScale(xScale, yScale, 1.0)
 
+        # self._localMVMatrix = np.array([
+        #   xScale, 0.0, 0.0, 0.0,
+        #   0.0, yScale, 0.0, 0.0,
+        #   0.0, 0.0, 1.0, 0.0,
+        #  -fx0, -fy0, 0.0, 1.0], np.float32)
+        # # self._localMVMatrix.setToIdentity()
+        # # self._localMVMatrix.translate(QtGui.QVector3D(fx0, fy0, 0.0))
+        # # self._localMVMatrix.scale(QtGui.QVector3D(xScale, yScale, 1.0))
+        # # self.GLmvMatrix = np.array(self._localMVMatrix.copyDataTo()).reshape((4, 4))
+        # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._localMVMatrix)
+
         # paint the spectrum
         spectrumView._paintContoursNoClip()
         GL.glPopMatrix()
@@ -1048,12 +1181,16 @@ void main()
         # draw the peak List, labelling, marks
 
         self._buildPeakLists(spectrumView)      # should include rescaling
-        self._drawPeakListVertices(spectrumView)
+        self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
+        # self._drawPeakListVertices(spectrumView)
 
       except:
         raise
         spectrumView._buildContours(None)
         # pass
+
+    # GL.glUseProgram(0)
+    # self.set2DProjection()
 
     # this is needed if it is a paintEvent
     # painter = QPainter(self)
@@ -1080,10 +1217,15 @@ void main()
 
     self.set2DProjection()
     self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.gridList[0].drawIndexArray()
+
     self.set2DProjectionRightAxis()
     self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[1].drawIndexArray()
+
     self.set2DProjectionBottomAxis()
     self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[2].drawIndexArray()
 
     # draw axis lines to right and bottom
     self.set2DProjectionFlat()
@@ -1191,11 +1333,11 @@ void main()
 
     GL.glListBase( self.firstFont.base )
 
-    # GL.glPushMatrix()
-    # GL.glTranslated(50, 300, 0)
-    # # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
-    # GL.glCallList(self._drawTextList)
-    # GL.glPopMatrix()
+    GL.glPushMatrix()
+    GL.glTranslated(50, 300, 0)
+    # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
+    GL.glCallList(self._drawTextList)
+    GL.glPopMatrix()
 
     # self.set2DProjection()
     # for spectrumView in self.parent.spectrumViews:
@@ -1287,39 +1429,81 @@ void main()
     #   0.0, 0.0, 1.0, 0.0,
     #   0.0, 0.0, -2.0, 1.0], np.float32)
 
-    GL.glUseProgram(self._shaderProgram2.program_id)
+    if (self._contourList.renderMode == GLRENDERMODE_REBUILD):
+      self._contourList.renderMode = GLRENDERMODE_DRAW
 
-    # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, pMatrix)
-    # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, mvMatrix)
+      # GL.glNewList(self._contourList[0], GL.GL_COMPILE)
+      #
+      # # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, pMatrix)
+      # # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, mvMatrix)
+      #
+      # GL.glEnable(GL.GL_BLEND)
+      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      #
+      # # pastel pink - # df2950
+      # GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
+      #
+      # GL.glBegin(GL.GL_TRIANGLES)
 
-    self.set2DProjectionFlat()
+      step = 0.05
+      ii=0
+      elements = (2.0/step)**2
+      self._contourList.indices = np.zeros(int(elements*6), dtype=np.uint)
+      self._contourList.vertices = np.zeros(int(elements*12), dtype=np.float32)
+      self._contourList.colors = np.zeros(int(elements*16), dtype=np.float32)
 
-    GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      for x0 in np.arange(-1.0, 1.0, step):
+        for y0 in np.arange(-1.0, 1.0, step):
+          x1 = x0+step
+          y1 = y0+step
 
-    # pastel pink - # df2950
-    GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
+          index = ii*4
+          indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+          vertices = [x0, y0, self.mathFun(x0, y0)
+                      , x0, y1, self.mathFun(x0, y1)
+                      , x1, y1, self.mathFun(x1, y1)
+                      , x1, y0, self.mathFun(x1, y0)]
+          # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+          colors = [0.8745, 0.1608, 0.3137, 1.0] * 4
 
-    GL.glBegin(GL.GL_TRIANGLES)
-    step = 0.05
-    for ii in np.arange(-0.75, 0.75, step):
-      for jj in np.arange(-0.75, 0.75, step):
-        GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
-        GL.glVertex3f(ii+step, jj,     self.mathFun(ii+step, jj))
-        GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+          self._contourList.indices[ii * 6:ii * 6 + 6] = indices
+          self._contourList.vertices[ii * 12:ii * 12 + 12] = vertices
+          self._contourList.colors[ii * 16:ii * 16 + 16] = colors
+          ii += 1
 
-        GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
-        GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
-        GL.glVertex3f(ii,     jj+step, self.mathFun(ii, jj+step))
-    GL.glEnd()
-    GL.glDisable(GL.GL_BLEND)
+          # self._contourList.indices = np.append(self._contourList.indices, indices)
+          # self._contourList.vertices = np.append(self._contourList.vertices, vertices)
+          # self._contourList.colors = np.append(self._contourList.colors, colors)
+
+          # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+          # GL.glVertex3f(ii+step, jj,     self.mathFun(ii+step, jj))
+          # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+          #
+          # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+          # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+          # GL.glVertex3f(ii,     jj+step, self.mathFun(ii, jj+step))
+      self._contourList.numVertices = index
+      # self._contourList.bindBuffers()
+
+      # GL.glEnd()
+      # GL.glDisable(GL.GL_BLEND)
+      # GL.glEndList()
+
+    if self._contourList.renderMode == GLRENDERMODE_DRAW:
+      GL.glUseProgram(self._shaderProgram2.program_id)
+      self.set2DProjectionFlat()
+
+      # self._contourList.drawIndexArray()
+
+      # self._drawIndexColor(self._contourList)
+      # GL.glCallList(self._contourList[0])
 
     GL.glUseProgram(0)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GL.glPopAttrib()
-    GLUT.glutSwapBuffers()
-    self.doneCurrent()
+    # GL.glPopAttrib()
+    # self.doneCurrent()
+    # GLUT.glutSwapBuffers()
 
   def mathFun(self, aa, bb):
     return math.sin(5.0*aa)*math.cos(5.0*bb**2)
@@ -1603,18 +1787,22 @@ void main()
     labelling = {'0': [], '1': []}
     labelsChanged = False
 
-    if gridGLList[1] == GLRENDERMODE_REBUILD:
+    if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
-      GL.glNewList(gridGLList[0], GL.GL_COMPILE)
-      gridGLList[1] = GLRENDERMODE_DRAW
+      # GL.glNewList(gridGLList[0], GL.GL_COMPILE)
+      gridGLList.renderMode = GLRENDERMODE_DRAW
       labelsChanged = True
 
-      gridGLList[2] = None
-      gridGLList[3] = None
-      gridGLList[4] = 0
+      # gridGLList[2] = None
+      # gridGLList[3] = None
+      # gridGLList[4] = 0
+
+      gridGLList.clearArrays()
+
       tempList = []
       tempCol = []
 
+      index = 0
       if ul[0] > br[0]:
         x = ul[0]
         ul[0] = br[0]
@@ -1631,8 +1819,8 @@ void main()
         for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
           ppl = np.array( dim[ax] / nl[ax] )                      # ejb
           c = np.clip(3.*(ppl-3), 0., 30.)
-          GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
-          GL.glBegin(GL.GL_LINES)
+          # GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
+          # GL.glBegin(GL.GL_LINES)
           bx = (ax+1) % 2
           for x in range(0, int(nl[ax])):
             p1 = np.array([0.,0.])
@@ -1644,8 +1832,8 @@ void main()
             if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
                 continue
             # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
-            GL.glVertex2f(p1[0], p1[1])
-            GL.glVertex2f(p2[0], p2[1])
+            # GL.glVertex2f(p1[0], p1[1])
+            # GL.glVertex2f(p2[0], p2[1])
 
             if i == 1:            # should be largest scale grid
               if p1[0] == p2[0]:
@@ -1654,18 +1842,17 @@ void main()
                 labelling[str(ax)].append((i, ax, p1[1], d[1]))
 
             # append the new points to the end of nparray
-            tempList.append([p1[0], p1[1]])
-            tempList.append([p2[0], p2[1]])
-            tempCol.append([r, g, b, c/transparency])
-            tempCol.append([r, g, b, c/transparency])
+            gridGLList.indices = np.append(gridGLList.indices, [index, index+1])
+            gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
+            gridGLList.colors = np.append(gridGLList.colors, [r, g, b, c/transparency, r, g, b, c/transparency])
+            gridGLList.numVertices += 2
+            index += 2
 
-            gridGLList[4] += 2
-
-          GL.glEnd()
-
-      GL.glEndList()
-      gridGLList[2] = np.array(tempList, np.float32)
-      gridGLList[3] = np.array(tempCol, np.float32)
+      #     GL.glEnd()
+      #
+      # GL.glEndList()
+      # gridGLList[2] = np.array(tempList, np.float32)
+      # gridGLList[3] = np.array(tempCol, np.float32)
 
     # old drawing of the grid
     # GL.glEnable(GL.GL_BLEND)
@@ -1678,18 +1865,18 @@ void main()
 
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
-    GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-
-    GL.glVertexPointer(2, GL.GL_FLOAT, 0, gridGLList[2])
-    GL.glColorPointer(4, GL.GL_FLOAT, 0, gridGLList[3])
-    GL.glDrawArrays(GL.GL_LINES, 0, gridGLList[4])
-
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    GL.glDisable(GL.GL_BLEND)
+    # GL.glEnable(GL.GL_BLEND)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    # GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    #
+    # GL.glVertexPointer(2, GL.GL_FLOAT, 0, gridGLList[2])
+    # GL.glColorPointer(4, GL.GL_FLOAT, 0, gridGLList[3])
+    # GL.glDrawArrays(GL.GL_LINES, 0, gridGLList[4])
+    #
+    # GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    # GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    # GL.glDisable(GL.GL_BLEND)
 
     # tr = self.deviceTransform()
     # p.setWorldTransform(fn.invertQTransform(tr))
@@ -1731,7 +1918,7 @@ class CcpnGLFont():
 
     while exitDims is False and row < len(self.fontInfo):
       line = self.fontInfo[row]
-      print (line)
+      # print (line)
       if line.startswith('kerning'):
         exitDims = True
       else:
@@ -1764,7 +1951,7 @@ class CcpnGLFont():
       exitKerns = False
       while exitKerns is False and row < len(self.fontInfo):
         line = self.fontInfo[row]
-        print(line)
+        # print(line)
 
         try:
           lineVals = [int(ll) for ll in line.split()]
@@ -2025,7 +2212,7 @@ class GLString:
     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
     self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    self.attrib = np.zeros((len(text) * 4, 1), dtype=np.float32)
+    self.attribs = np.zeros((len(text) * 4, 1), dtype=np.float32)
     pen = [x, y]
     prev = None
 
@@ -2053,12 +2240,110 @@ class GLString:
       self.indices[i * 6:i * 6 + 6] = indices
       self.texcoords[i * 4:i * 4 + 4] = texcoords
       self.colors[i * 4:i * 4 + 4] = colors
-      self.attrib[i * 4:i * 4 + 4] = dx
+      self.attribs[i * 4:i * 4 + 4] = dx
       pen[0] = pen[0] + glyph.advance[0] / 64.0 + kerning
       pen[1] = pen[1] + glyph.advance[1] / 64.0
       prev = charcode
 
     width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
+
+
+class GLvertexArray():
+  def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
+               , blendMode=False, drawMode=GL.GL_LINES, dimension=3):
+    self.initialise(numLists=numLists, renderMode=renderMode
+                    , blendMode=blendMode, drawMode=drawMode, dimension=dimension)
+
+  def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
+                 , blendMode=False, drawMode=GL.GL_LINES, dimension=3):
+    self.renderMode = renderMode
+    self.vertices = np.array([], dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
+    self.indices = np.array([], dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
+    self.colors = np.array([], dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
+    self.texcoords= np.array([], dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
+    self.attribs = np.array([], dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
+    self.numVertices = 0
+    self.GLLists = GL.glGenLists(numLists)
+    self.numLists = numLists
+    self.blendMode = blendMode
+    self.drawMode = drawMode
+    self.dimension = int(dimension)
+
+  def _close(self):
+    GL.glDeleteLists(self.GLLists, self.numLists)
+
+  def clearArrays(self):
+    self.vertices = np.array([], dtype=np.float32)
+    self.indices = np.array([], dtype=np.uint)
+    self.colors = np.array([], dtype=np.float32)
+    self.texcoords= np.array([], dtype=np.float32)
+    self.attribs = np.array([], dtype=np.float32)
+    self.numVertices = 0
+
+  def clearVertices(self):
+    self.vertices = np.array([], dtype=np.float32)
+    self.numVertices = 0
+
+  def drawIndexArray(self):
+    if self.blendMode:
+      GL.glEnable(GL.GL_BLEND)
+      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    # GL.glEnableClientState(GL.GL_TEXTURE_2D_ARRAY)
+    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+    # GL.glTexCoordPointer(2, gl.GL_FLOAT, 0, self.texcoords)
+
+    # this is for passing extra attributes in
+    # GL.glEnableVertexAttribArray(1)
+    # GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+
+    GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+
+    # GL.glDisableVertexAttribArray(1)
+    # GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+
+    if self.blendMode:
+      GL.glDisable(GL.GL_BLEND)
+
+  def drawVertexColor(self):
+    if self.blendMode:
+      GL.glEnable(GL.GL_BLEND)
+      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+
+    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+    GL.glDrawArrays(self.drawMode, 0, self.numVertices)
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+
+    if self.blendMode:
+      GL.glDisable(GL.GL_BLEND)
+
+  # def bindBuffers(self):
+  #   return
+  #   # self._vertexBuffer = GL.glGenBuffers(1)
+  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexBuffer)
+  #   # GL.glBufferData(GL.GL_ARRAY_BUFFER, len(self.vertices), self.vertices, GL.GL_STATIC_DRAW)
+  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+  #   #
+  #   # self._colorBuffer = GL.glGenBuffers(1)
+  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorBuffer)
+  #   # GL.glBufferData(GL.GL_ARRAY_BUFFER, len(self.colors), self.colors, GL.GL_STATIC_DRAW)
+  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+  #
+  #   self._indexBuffer = GL.glGenBuffers(1)
+  #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexBuffer)
+  #   GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, len(self.indices), self.indices, GL.GL_STATIC_DRAW)
+  #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
 
 if __name__ == '__main__':

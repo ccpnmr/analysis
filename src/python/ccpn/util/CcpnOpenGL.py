@@ -1292,7 +1292,10 @@ void main()
 
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    GL.glColor4f(0.8, 0.2, 0.2, 1.0)
+
+    # pastel pink - # df2950
+    GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
+
     GL.glBegin(GL.GL_TRIANGLES)
     GL.glVertex3f(-0.5, -0.5, 8.0)
     GL.glVertex3f(0.5, -0.5, 12.5)

@@ -412,19 +412,23 @@ void main() {
 
 varying vec3 P;
 varying vec3 C;
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
 
 void main()
 {
   P = gl_Vertex.xyz;
   C = gl_Color.xyz;
   gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);    //ftransform();
+//  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
+//  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
 }
 """
 
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 1.5;    //size of the grid
+uniform float gsize = 3.0;    //size of the grid
 uniform float gwidth = 1.0;     //grid lines'width in pixels
 varying vec3 P;
 varying vec3 C;
@@ -440,11 +444,19 @@ void main()
   
 //  gl_FragColor = vec4(c, c, c, 1.0);
   
-  vec3  f  = abs(fract (P * gsize)-0.5);
-  vec3  df = fwidth(P * gsize);
-  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-  vec3  g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);        //max(0.0,1.0-gwidth) should also be sent as uniform
-  float cAlpha = 1.0-g.z;
+//  vec3  f  = 2.0*abs(fract (P * gsize)-0.5);
+//  vec3  df = fwidth(P * gsize / gwidth);
+//  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+//  vec3  g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);        //max(0.0,1.0-gwidth) should also be sent as uniform
+//  float cAlpha = 1.0-g.z;
+
+  float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
+  float   df = fwidth(P.z * gsize * gwidth);
+  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);               //should be uniforms
+  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);  //max(0.0,1.0-gwidth) should also be sent as uniform
+  float   cAlpha = 1.0-(g*g);
+  if (cAlpha < 0.25)
+    discard;
   gl_FragColor = vec4(C, cAlpha);
 }
 """
@@ -491,6 +503,9 @@ void main()
     # TODO:ED only have openGL 2.1 installed, so no point yet
     self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
     self._shaderProgram2 = ShaderProgram(fragment=self._fragmentShader2, vertex=self._vertexShader2)
+
+    self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
+    self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1230,22 +1245,66 @@ void main()
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # new bit
+    # fov = math.radians(45.0)
+    # f = 1.0 / math.tan(fov / 2.0)
+    # zNear = 0.1
+    # zFar = 100.0
+    # aspect = glutGet(GLUT_WINDOW_WIDTH) / float(glutGet(GLUT_WINDOW_HEIGHT))
+    # aspect = w / float(h)
+    # perspective
+    # pMatrix = np.array([
+    #   f / aspect, 0.0, 0.0, 0.0,
+    #   0.0, f, 0.0, 0.0,
+    #   0.0, 0.0, (zFar + zNear) / (zNear - zFar), -1.0,
+    #   0.0, 0.0, 2.0 * zFar * zNear / (zNear - zFar), 0.0], np.float32)
+
+    # GL.glViewport(0, 0, self.width(), self.height())
+    # of = 10.0
+    # on = -1.0
+    # oa = 2.0/(self.axisR-self.axisL)
+    # ob = 2.0/(self.axisT-self.axisB)
+    # oc = -2.0/(of-on)
+    # od = -(of+on)/(of-on)
+    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # # orthographic
+    # pMatrix = np.array([
+    #    oa, 0.0, 0.0,  0.0,
+    #   0.0,  ob, 0.0,  0.0,
+    #   0.0, 0.0,  oc,  0.0,
+    #   og, oe, od, 1.0], np.float32)
+    #
+    # # create modelview matrix
+    # mvMatrix = np.array([
+    #   1.0, 0.0, 0.0, 0.0,
+    #   0.0, 1.0, 0.0, 0.0,
+    #   0.0, 0.0, 1.0, 0.0,
+    #   0.0, 0.0, -2.0, 1.0], np.float32)
 
     GL.glUseProgram(self._shaderProgram2.program_id)
 
+    # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, pMatrix)
+    # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, mvMatrix)
+
     self.set2DProjectionFlat()
 
-    GL.glColor4f(0.8, 0.3, 1.0, 1.0)
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glColor4f(0.8, 0.2, 0.2, 1.0)
     GL.glBegin(GL.GL_TRIANGLES)
-    GL.glVertex3f(-0.75, -0.75, 0.0)
-    GL.glVertex3f(0.75, -0.75, 1.0)
-    GL.glVertex3f(0.75, 0.75, 2.5)
-    GL.glVertex3f(-0.75, -0.75, 0.0)
-    GL.glVertex3f(0.75, 0.75, 2.5)
-    GL.glVertex3f(-0.75, 0.75, 1.8)
+    GL.glVertex3f(-0.5, -0.5, 8.0)
+    GL.glVertex3f(0.5, -0.5, 12.5)
+    GL.glVertex3f(0.5, 0.5, 12.5)
+    GL.glVertex3f(-0.5, -0.5, 8.0)
+    GL.glVertex3f(0.5, 0.5, 12.5)
+    GL.glVertex3f(-0.5, 0.5, 12.5)
     GL.glEnd()
+    GL.glDisable(GL.GL_BLEND)
 
     GL.glUseProgram(0)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GL.glPopAttrib()
     GLUT.glutSwapBuffers()

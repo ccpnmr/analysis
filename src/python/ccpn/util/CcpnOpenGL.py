@@ -428,7 +428,7 @@ void main()
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 3.0;    //size of the grid
+uniform float gsize = 5.0;    //size of the grid
 uniform float gwidth = 1.0;     //grid lines'width in pixels
 varying vec3 P;
 varying vec3 C;
@@ -445,15 +445,19 @@ void main()
 //  gl_FragColor = vec4(c, c, c, 1.0);
   
 //  vec3  f  = 2.0*abs(fract (P * gsize)-0.5);
-//  vec3  df = fwidth(P * gsize / gwidth);
+//  vec3  df = fwidth(P * gsize);
 //  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
 //  vec3  g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);        //max(0.0,1.0-gwidth) should also be sent as uniform
 //  float cAlpha = 1.0-g.z;
 
+  //  this is very slow
+  
   float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
-  float   df = fwidth(P.z * gsize * gwidth);
+  float   df = fwidth(P.z * gsize);
   float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);               //should be uniforms
-  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);  //max(0.0,1.0-gwidth) should also be sent as uniform
+//  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);  //max(0.0,1.0-gwidth) should also be sent as uniform
+  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //max(0.0,1.0-gwidth) should also be sent as uniform
+  g = g/(df*(ma-mi));
   float   cAlpha = 1.0-(g*g);
   if (cAlpha < 0.25)
     discard;
@@ -1297,12 +1301,16 @@ void main()
     GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
 
     GL.glBegin(GL.GL_TRIANGLES)
-    GL.glVertex3f(-0.5, -0.5, 8.0)
-    GL.glVertex3f(0.5, -0.5, 12.5)
-    GL.glVertex3f(0.5, 0.5, 12.5)
-    GL.glVertex3f(-0.5, -0.5, 8.0)
-    GL.glVertex3f(0.5, 0.5, 12.5)
-    GL.glVertex3f(-0.5, 0.5, 12.5)
+    step = 0.05
+    for ii in np.arange(-0.75, 0.75, step):
+      for jj in np.arange(-0.75, 0.75, step):
+        GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+        GL.glVertex3f(ii+step, jj,     self.mathFun(ii+step, jj))
+        GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+
+        GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+        GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+        GL.glVertex3f(ii,     jj+step, self.mathFun(ii, jj+step))
     GL.glEnd()
     GL.glDisable(GL.GL_BLEND)
 
@@ -1313,6 +1321,8 @@ void main()
     GLUT.glutSwapBuffers()
     self.doneCurrent()
 
+  def mathFun(self, aa, bb):
+    return math.sin(5.0*aa)*math.cos(5.0*bb**2)
   # def resizeGL(self, width, height):
   #   self.setupViewport(width, height)
   #   self.update()

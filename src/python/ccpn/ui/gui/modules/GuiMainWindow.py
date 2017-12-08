@@ -51,7 +51,7 @@ from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
+from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 #from ccpn.util.Logging import getLogger
@@ -214,11 +214,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.sideBar = SideBar(parent=self)
 
     # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
-    self._horizontalSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+    self._horizontalSplitter = Splitter(QtCore.Qt.Horizontal)
     # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
     # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-    self._verticalTEMPSPLIT = QtGui.QSplitter(QtCore.Qt.Vertical)
+    self._verticalTEMPSPLIT = Splitter(QtCore.Qt.Vertical)
     self._TESTFRAME = Frame(setLayout=False)
     self._tempLayout = QtGui.QVBoxLayout()
     self._TESTFRAME.setLayout(self._tempLayout)
@@ -326,6 +326,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         project = self.application.loadProject(projectDir)
         try:
           project._mainWindow.show()
+
         except Exception as es:
           Logging.getLogger().warning('Error loading project:', str(es))
 

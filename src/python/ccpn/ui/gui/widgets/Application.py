@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtGui, Qt
 # from ccpn.ui.gui.guiSettings import monaco12
 
 
@@ -40,6 +40,15 @@ class Application(QtGui.QApplication):
     self.setApplicationVersion(applicationVersion)
     self.setOrganizationName(organizationName)
     self.setOrganizationDomain(organizationDomain)
+
+  #   Qt.QObject.connect(self, Qt.SIGNAL("focusChanged(QWidget *, QWidget *)"), self.changedFocusSlot)
+  #
+  # def changedFocusSlot(old, now):
+  #   if (now == None and QtGui.QApplication.activeWindow() != None):
+  #     # QtGui.QApplication.activeWindow().setFocus()
+  #     old.activeWindow().clearFocus()
+  #     old.activeWindow().setFocus()
+
 
   def start(self):
     self.exec_()

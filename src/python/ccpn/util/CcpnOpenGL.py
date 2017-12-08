@@ -173,19 +173,19 @@ class CcpnGLWidget(QOpenGLWidget):
     for spectrumView in self.parent.spectrumViews:
       spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
-    midnight = QTime(0, 0, 0)
-    random.seed(midnight.secsTo(QTime.currentTime()))
-
-    self.object = 0
-    self.xRot = 0
-    self.yRot = 0
-    self.zRot = 0
-    self.image = QImage()
-    self.bubbles = []
+    # midnight = QTime(0, 0, 0)
+    # random.seed(midnight.secsTo(QTime.currentTime()))
+    #
+    # self.object = 0
+    # self.xRot = 0
+    # self.yRot = 0
+    # self.zRot = 0
+    # self.image = QImage()
+    # self.bubbles = []
     self.lastPos = QPoint()
-
-    self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
-    self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
+    #
+    # self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
+    # self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
 
     # TODO:ED need to explicitly call self.update() to refresh after an update
     # self.animationTimer = QTimer()
@@ -193,9 +193,9 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.animationTimer.timeout.connect(self.animate)
     # self.animationTimer.start(25)
 
-    self.setAutoFillBackground(False)
-    self.setMinimumSize(100, 50)
-    self.setWindowTitle("Overpainting a Scene")
+    # self.setAutoFillBackground(False)
+    # self.setMinimumSize(100, 50)
+    # self.setWindowTitle("Overpainting a Scene")
 
     self._mouseX = 0
     self._mouseY = 0
@@ -224,8 +224,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
-
-    self._buildPeakList = True
 
   def resizeGL(self, w, h):
     # GL.glViewport(0, 0, w, h)
@@ -501,15 +499,15 @@ void main()
     self.gridList = []
     for li in range(3):
       self.gridList.append(GLvertexArray(numLists=1
-                                          , renderMode=GLRENDERMODE_REBUILD
-                                          , blendMode=True
-                                          , drawMode=GL.GL_LINES
-                                          , dimension=2))
+                                         , renderMode=GLRENDERMODE_REBUILD
+                                         , blendMode=True
+                                         , drawMode=GL.GL_LINES
+                                         , dimension=2
+                                         , GLContext=self))
 
     self._GLPeakLists = {}
     self._GLPeakListLabels = {}
 
-    self.object = self.makeObject()
     self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
 
@@ -750,7 +748,8 @@ void main()
 
     if spectrum.pid not in self._GLPeakLists:
       self._GLPeakLists[spectrum.pid] = GLvertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
-                                                      , blendMode=False, drawMode=GL.GL_LINES, dimension=2)
+                                                      , blendMode=False, drawMode=GL.GL_LINES
+                                                      , dimension=2, GLContext=self)
 
       # self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
 
@@ -1519,86 +1518,6 @@ void main()
   def sizeHint(self):
     return QSize(400, 400)
 
-  def makeObject(self):
-    # list = GL.glGenLists(1)
-    list = GL.glGenLists(1)
-    GL.glNewList(list, GL.GL_COMPILE)
-
-    GL.glEnable(GL.GL_NORMALIZE)
-    GL.glBegin(GL.GL_QUADS)
-
-    GL.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE,
-                   (self.trolltechGreen.red() / 255.0,
-                    self.trolltechGreen.green() / 255.0,
-                    self.trolltechGreen.blue() / 255.0, 1.0))
-
-    x1 = +0.06
-    y1 = -0.14
-    x2 = +0.14
-    y2 = -0.06
-    x3 = +0.08
-    y3 = +0.00
-    x4 = +0.30
-    y4 = +0.22
-
-    self.quad(x1, y1, x2, y2, y2, x2, y1, x1)
-    self.quad(x3, y3, x4, y4, y4, x4, y3, x3)
-
-    self.extrude(x1, y1, x2, y2)
-    self.extrude(x2, y2, y2, x2)
-    self.extrude(y2, x2, y1, x1)
-    self.extrude(y1, x1, x1, y1)
-    self.extrude(x3, y3, x4, y4)
-    self.extrude(x4, y4, y4, x4)
-    self.extrude(y4, x4, y3, x3)
-
-    NumSectors = 200
-
-    for i in range(NumSectors):
-      angle1 = (i * 2 * math.pi) / NumSectors
-      x5 = 0.30 * math.sin(angle1)
-      y5 = 0.30 * math.cos(angle1)
-      x6 = 0.20 * math.sin(angle1)
-      y6 = 0.20 * math.cos(angle1)
-
-      angle2 = ((i + 1) * 2 * math.pi) / NumSectors
-      x7 = 0.20 * math.sin(angle2)
-      y7 = 0.20 * math.cos(angle2)
-      x8 = 0.30 * math.sin(angle2)
-      y8 = 0.30 * math.cos(angle2)
-
-      self.quad(x5, y5, x6, y6, x7, y7, x8, y8)
-
-      self.extrude(x6, y6, x7, y7)
-      self.extrude(x8, y8, x5, y5)
-
-    GL.glEnd()
-
-    GL.glEndList()
-    return list
-
-  def quad(self, x1, y1, x2, y2, x3, y3, x4, y4):
-    GL.glNormal3d(0.0, 0.0, -1.0)
-    GL.glVertex3d(x1, y1, -0.05)
-    GL.glVertex3d(x2, y2, -0.05)
-    GL.glVertex3d(x3, y3, -0.05)
-    GL.glVertex3d(x4, y4, -0.05)
-
-    GL.glNormal3d(0.0, 0.0, 1.0)
-    GL.glVertex3d(x4, y4, +0.05)
-    GL.glVertex3d(x3, y3, +0.05)
-    GL.glVertex3d(x2, y2, +0.05)
-    GL.glVertex3d(x1, y1, +0.05)
-
-  def extrude(self, x1, y1, x2, y2):
-    self.setColor(self.trolltechGreen.darker(250 + int(100 * x1)))
-
-    GL.glNormal3d((x1 + x2) / 2.0, (y1 + y2) / 2.0, 0.0)
-    GL.glVertex3d(x1, y1, +0.05)
-    GL.glVertex3d(x2, y2, +0.05)
-    GL.glVertex3d(x2, y2, -0.05)
-    GL.glVertex3d(x1, y1, -0.05)
-
   def normalizeAngle(self, angle):
     while angle < 0:
       angle += 360 * 16
@@ -2289,7 +2208,7 @@ class GLvertexArray():
     self.numVertices = 0
 
   def drawIndexArray(self):
-    self._GLContext.makeCurrent()
+    # self._GLContext.makeCurrent()
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
@@ -2316,7 +2235,7 @@ class GLvertexArray():
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
 
-    self._GLContext.doneCurrent()
+    # self._GLContext.doneCurrent()
 
   def drawVertexColor(self):
     if self.blendMode:

@@ -911,6 +911,8 @@ class Framework:
 
     ms.append(('Plugins', ()))
 
+    ms.append(('Modules', ()))
+
     ms.append(('Help',      [
       ("Tutorials",([
         # Submenu

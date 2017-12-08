@@ -524,7 +524,8 @@ void main()
                                       , renderMode=GLRENDERMODE_REBUILD
                                       , blendMode=True
                                       , drawMode=GL.GL_TRIANGLES
-                                      , dimension=3)
+                                      , dimension=3
+                                      , GLContext=self)
 
     # self._axisLabels = GLvertexArray(numLists=1
     #                                   , renderMode=GLRENDERMODE_REBUILD
@@ -2251,12 +2252,13 @@ class GLString:
 
 class GLvertexArray():
   def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
-               , blendMode=False, drawMode=GL.GL_LINES, dimension=3):
+               , blendMode=False, drawMode=GL.GL_LINES, dimension=3, GLContext=None):
     self.initialise(numLists=numLists, renderMode=renderMode
-                    , blendMode=blendMode, drawMode=drawMode, dimension=dimension)
+                    , blendMode=blendMode, drawMode=drawMode, dimension=dimension, GLContext=GLContext)
 
   def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
-                 , blendMode=False, drawMode=GL.GL_LINES, dimension=3):
+                , blendMode=False, drawMode=GL.GL_LINES, dimension=3
+                , GLContext=None):
     self.renderMode = renderMode
     self.vertices = np.array([], dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
     self.indices = np.array([], dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
@@ -2269,6 +2271,7 @@ class GLvertexArray():
     self.blendMode = blendMode
     self.drawMode = drawMode
     self.dimension = int(dimension)
+    self._GLContext = GLContext
 
   def _close(self):
     GL.glDeleteLists(self.GLLists, self.numLists)
@@ -2286,6 +2289,8 @@ class GLvertexArray():
     self.numVertices = 0
 
   def drawIndexArray(self):
+    self._GLContext.makeCurrent()
+
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
       GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
@@ -2310,6 +2315,8 @@ class GLvertexArray():
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
+
+    self._GLContext.doneCurrent()
 
   def drawVertexColor(self):
     if self.blendMode:

@@ -229,7 +229,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def resizeGL(self, w, h):
     # GL.glViewport(0, 0, w, h)
-    self.set2DProjectionFlat()
+    # self.set2DProjectionFlat()
 
     # put stuff in here that will change on a resize
     for li in self.gridList:
@@ -237,7 +237,7 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
-    self.repaint()
+    # self.update()
 
   def wheelEvent(self, event):
     def between(val, l, r):
@@ -321,7 +321,7 @@ class CcpnGLWidget(QOpenGLWidget):
         pp.renderMode = GLRENDERMODE_RESCALE
 
     event.accept()
-    self.repaint()
+    self.update()
 
   def eventFilter(self, obj, event):
     self._key = '_'
@@ -680,14 +680,13 @@ void main()
   #
   #   self.drawInstructions(painter)
   #   painter.end()
-    self.repaint()
+    self.update()
 
   @QtCore.pyqtSlot(bool)
   def paintGLsignal(self, bool):
-    # my signal to repaint the screen after the spectra have changed
-    # if bool:
-    #   self.paintGL()
-    pass
+    # my signal to update the screen after the spectra have changed
+    if bool:
+      self.update()
 
   def sign(self, x):
     return 1.0 if x >= 0 else -1.0
@@ -1010,15 +1009,19 @@ void main()
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
   def paintGL(self):
-    # self.makeCurrent()
+    GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
-    # GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
-
-    GL.glBlendColor(0.0, 0.0, 0.0, 0.0)
-    GL.glClearColor(0.05, 0.05, 0.05, 0.0)
     GL.glDisable(GL.GL_BLEND)
+    GL.glDisable(GL.GL_ALPHA_TEST)
+    GL.glClearColor(0.1, 0.1, 0.1, 1.0)
+    # GL.glBlendColor(0.0, 0.0, 0.0, 1.0)
+    # # GL.glClearIndex()
+    # GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    GL.glDisable(GL.GL_DEPTH_TEST)
+    # GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+
+    GL.glDisable(GL.GL_BLEND)
+
     getGLvector = (GL.GLfloat * 2)()
     GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
     linewidths = [i for i in getGLvector]
@@ -1493,17 +1496,15 @@ void main()
       GL.glUseProgram(self._shaderProgram2.program_id)
       self.set2DProjectionFlat()
 
-      # self._contourList.drawIndexArray()
+      self._contourList.drawIndexArray()
 
       # self._drawIndexColor(self._contourList)
       # GL.glCallList(self._contourList[0])
 
-    GL.glUseProgram(0)
+      GL.glUseProgram(0)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # GL.glPopAttrib()
-    # self.doneCurrent()
-    # GLUT.glutSwapBuffers()
+    GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)
 
   def mathFun(self, aa, bb):
     return math.sin(5.0*aa)*math.cos(5.0*bb**2)

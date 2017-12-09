@@ -241,12 +241,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
 
-    numPixels = event.pixelDelta()
+    zoomScale = 25.0
+    zoomIn = (100.0+zoomScale)/100.0
+    zoomOut = 100.0/(100.0+zoomScale)
+
     numDegrees = event.angleDelta() / 8
-
-    h = self.height()
-    w = self.width()
-
     axisLine = 5
     h = self.height()
     w = self.width()
@@ -260,21 +259,21 @@ class CcpnGLWidget(QOpenGLWidget):
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
       if numDegrees.y() < 0:
-        self.axisL = mbx + 1.125 * (self.axisL - mbx)
-        self.axisR = mbx - 1.125 * (mbx - self.axisR)
+        self.axisL = mbx + zoomIn * (self.axisL - mbx)
+        self.axisR = mbx - zoomIn * (mbx - self.axisR)
       else:
-        self.axisL = mbx + 0.9 * (self.axisL - mbx)
-        self.axisR = mbx - 0.9 * (mbx - self.axisR)
+        self.axisL = mbx + zoomOut * (self.axisL - mbx)
+        self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
       mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
       if numDegrees.y() < 0:
-        self.axisB = mby + 1.125 * (self.axisB - mby)
-        self.axisT = mby - 1.125 * (mby - self.axisT)
+        self.axisB = mby + zoomIn * (self.axisB - mby)
+        self.axisT = mby - zoomIn * (mby - self.axisT)
       else:
-        self.axisB = mby + 0.9 * (self.axisB - mby)
-        self.axisT = mby - 0.9 * (mby - self.axisT)
+        self.axisB = mby + zoomOut * (self.axisB - mby)
+        self.axisT = mby - zoomOut * (mby - self.axisT)
 
       # spawn rebuild event for the grid
       for li in self.gridList:
@@ -285,11 +284,11 @@ class CcpnGLWidget(QOpenGLWidget):
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
       if numDegrees.y() < 0:
-        self.axisL = mbx + 1.125 * (self.axisL - mbx)
-        self.axisR = mbx - 1.125 * (mbx - self.axisR)
+        self.axisL = mbx + zoomIn * (self.axisL - mbx)
+        self.axisR = mbx - zoomIn * (mbx - self.axisR)
       else:
-        self.axisL = mbx + 0.9 * (self.axisL - mbx)
-        self.axisR = mbx - 0.9 * (mbx - self.axisR)
+        self.axisL = mbx + zoomOut * (self.axisL - mbx)
+        self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
       # spawn rebuild event for the grid
       self.gridList[0].renderMode = GLRENDERMODE_REBUILD
@@ -304,11 +303,11 @@ class CcpnGLWidget(QOpenGLWidget):
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
       if numDegrees.y() < 0:
-        self.axisB = mby + 1.125 * (self.axisB - mby)
-        self.axisT = mby - 1.125 * (mby - self.axisT)
+        self.axisB = mby + zoomIn * (self.axisB - mby)
+        self.axisT = mby - zoomIn * (mby - self.axisT)
       else:
-        self.axisB = mby + 0.9 * (self.axisB - mby)
-        self.axisT = mby - 0.9 * (mby - self.axisT)
+        self.axisB = mby + zoomOut * (self.axisB - mby)
+        self.axisT = mby - zoomOut * (mby - self.axisT)
 
       # spawn rebuild event for the grid
       self.gridList[0].renderMode = GLRENDERMODE_REBUILD
@@ -412,58 +411,52 @@ void main() {
     self._vertexShader2 = """
 #version 120
 
-varying vec3 P;
-varying vec3 C;
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
+varying vec4  P;
+varying vec3  C;
+uniform mat4  mvMatrix;
+uniform mat4  pMatrix;
+uniform vec4  positiveContour;
+uniform vec4  negativeContour;
+//uniform float gsize = 5.0;      // size of the grid
+//uniform float gwidth = 1.0;     // grid lines' width in pixels
+//varying float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
 
 void main()
 {
-  P = gl_Vertex.xyz;
+  P = gl_Vertex;
   C = gl_Color.xyz;
-  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);    //ftransform();
+//  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);    //ftransform();
 //  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
 //  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
+  gl_Position = pMatrix * mvMatrix * vec4(P.xyz, 1.0);
 }
 """
 
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 7.0;    //size of the grid
-uniform float gwidth = 1.0;     //grid lines'width in pixels
-varying vec3 P;
+uniform float gsize = 35.0;       // size of the grid
+uniform float gwidth = 1.0;       // grid lines' width in pixels
+uniform float mi = 0.0;           // max(0.0,gwidth-1.0)  
+uniform float ma = 1.0;           // ma=max(1.0,gwidth);
+varying vec4 P;
 varying vec3 C;
 
 void main()
 {
-//  vec3 f  = fract (P * gsize);
-//  vec3 df = fwidth(P * gsize);
-  
-//  vec3 g = smoothstep(df * 1.0, df * 2.0, f);
-  
-//  float c = g.z;
-  
-//  gl_FragColor = vec4(c, c, c, 1.0);
-  
-//  vec3  f  = 2.0*abs(fract (P * gsize)-0.5);
-//  vec3  df = fwidth(P * gsize);
-//  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-//  vec3  g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);        //max(0.0,1.0-gwidth) should also be sent as uniform
-//  float cAlpha = 1.0-g.z;
-
-  //  this is very slow
-  
-  float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
-  float   df = fwidth(P.z * gsize);
-  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);               //should be uniforms
+  float   f = min(abs(fract(P.z)-0.5), 0.2);
+  float   df = fwidth(P.z);
+//  float   f = P.z;          //min(abs(fract(P.z * gsize)-0.5), 0.2);
+//  float   df = fwidth(P.w);
+//  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);               //should be uniforms
 //  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);  //max(0.0,1.0-gwidth) should also be sent as uniform
   float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //max(0.0,1.0-gwidth) should also be sent as uniform
+
   g = g/(df*(ma-mi));
-  float   cAlpha = 1.0-(g*g);
-  if (cAlpha < 0.25)
-    discard;
-  gl_FragColor = vec4(C, cAlpha);
+//  float   cAlpha = 1.0-(g*g);
+//  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
+//    discard;
+  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
 }
 """
 
@@ -498,7 +491,7 @@ void main()
 
     self.gridList = []
     for li in range(3):
-      self.gridList.append(GLvertexArray(numLists=1
+      self.gridList.append(GLVertexArray(numLists=1
                                          , renderMode=GLRENDERMODE_REBUILD
                                          , blendMode=True
                                          , drawMode=GL.GL_LINES
@@ -518,14 +511,14 @@ void main()
     self._axisXLabels = GL.glGenLists(1)
     self._axisLabels = GL.glGenLists(1)
     self.peakLabelling = 0
-    self._contourList = GLvertexArray(numLists=1
+    self._contourList = GLVertexArray(numLists=1
                                       , renderMode=GLRENDERMODE_REBUILD
                                       , blendMode=True
                                       , drawMode=GL.GL_TRIANGLES
                                       , dimension=3
                                       , GLContext=self)
 
-    # self._axisLabels = GLvertexArray(numLists=1
+    # self._axisLabels = GLVertexArray(numLists=1
     #                                   , renderMode=GLRENDERMODE_REBUILD
     #                                   , blendMode=True
     #                                   , drawMode=GL.GL_TRIANGLES)
@@ -543,6 +536,20 @@ void main()
     # these are the links to the GL projection.model matrices
     self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
     self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
+    self.positiveContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'positiveContour')
+    self.negativeContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'negativeContour')
+
+    self._uPMatrix = np.zeros((16,), np.float32)
+    self._uMVMatrix = np.zeros((16,), np.float32)
+    self._positiveContours = np.zeros((4,), np.float32)
+    self._negativeContours = np.zeros((4,), np.float32)
+
+    self._testSpectrum = GLVertexArray(numLists=1
+                                       , renderMode=GLRENDERMODE_REBUILD
+                                       , blendMode=True
+                                       , drawMode=GL.GL_TRIANGLES
+                                       , dimension=4
+                                       , GLContext=self)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -747,7 +754,7 @@ void main()
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = GLvertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
+      self._GLPeakLists[spectrum.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
                                                       , blendMode=False, drawMode=GL.GL_LINES
                                                       , dimension=2, GLContext=self)
 
@@ -1032,12 +1039,12 @@ void main()
     # GL.glViewport(0, 35, w-35, h-35)  # leave a 35 width margin for the axes - bottom/right
     # of = -1.0
     # on = 1.0
-    # oa = -2.0/(self.axisR-self.axisL)
-    # ob = -2.0/(self.axisT-self.axisB)
+    # oa = 2.0/(self.axisR-self.axisL)
+    # ob = 2.0/(self.axisT-self.axisB)
     # oc = -2.0/(of-on)
     # od = -(of+on)/(of-on)
-    # oe = (self.axisT+self.axisB)/(self.axisT-self.axisB)
-    # og = (self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
     # # orthographic
     # self._localPMatrix = np.array([
     #    oa, 0.0, 0.0,  0.0,
@@ -1151,6 +1158,12 @@ void main()
         GL.glTranslate(fx0, fy0, 0.0)
         GL.glScale(xScale, yScale, 1.0)
 
+        # create modelview matrix
+        self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
+                                 0.0, yScale, 0.0, 0.0,
+                                 0.0, 0.0, 1.0, 0.0,
+                                 fx0, fy0, 0.0, 1.0]
+
         # self._localMVMatrix = np.array([
         #   xScale, 0.0, 0.0, 0.0,
         #   0.0, yScale, 0.0, 0.0,
@@ -1163,7 +1176,7 @@ void main()
         # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._localMVMatrix)
 
         # paint the spectrum
-        spectrumView._paintContoursNoClip()
+        # spectrumView._paintContoursNoClip()
         GL.glPopMatrix()
 
         # draw the bounding box
@@ -1187,9 +1200,13 @@ void main()
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
         # self._drawPeakListVertices(spectrumView)
 
-      except:
-        raise
-        spectrumView._buildContours(None)
+        if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
+          self._testSpectrum.renderMode = GLRENDERMODE_DRAW
+
+          self._makeSpectrumArray(spectrumView, self._testSpectrum)
+
+      except Exception as es:
+        raise es
         # pass
 
     # GL.glUseProgram(0)
@@ -1410,27 +1427,25 @@ void main()
     #   0.0, 0.0, 2.0 * zFar * zNear / (zNear - zFar), 0.0], np.float32)
 
     # GL.glViewport(0, 0, self.width(), self.height())
-    # of = 10.0
-    # on = -1.0
-    # oa = 2.0/(self.axisR-self.axisL)
-    # ob = 2.0/(self.axisT-self.axisB)
-    # oc = -2.0/(of-on)
-    # od = -(of+on)/(of-on)
-    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
-    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
-    # # orthographic
-    # pMatrix = np.array([
-    #    oa, 0.0, 0.0,  0.0,
-    #   0.0,  ob, 0.0,  0.0,
-    #   0.0, 0.0,  oc,  0.0,
-    #   og, oe, od, 1.0], np.float32)
-    #
-    # # create modelview matrix
-    # mvMatrix = np.array([
-    #   1.0, 0.0, 0.0, 0.0,
-    #   0.0, 1.0, 0.0, 0.0,
-    #   0.0, 0.0, 1.0, 0.0,
-    #   0.0, 0.0, -2.0, 1.0], np.float32)
+    of = 1.0
+    on = -1.0
+    oa = 2.0/(self.axisR-self.axisL)
+    ob = 2.0/(self.axisT-self.axisB)
+    oc = -2.0/(of-on)
+    od = -(of+on)/(of-on)
+    oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+    og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # orthographic
+    self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+                            0.0,  ob, 0.0,  0.0,
+                            0.0, 0.0,  oc,  0.0,
+                            og, oe, od, 1.0]
+
+    # create modelview matrix
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                         0.0, 1.0, 0.0, 0.0,
+    #                         0.0, 0.0, 1.0, 0.0,
+    #                         0.0, 0.0, 0.0, 1.0]
 
     if (self._contourList.renderMode == GLRENDERMODE_REBUILD):
       self._contourList.renderMode = GLRENDERMODE_DRAW
@@ -1492,20 +1507,95 @@ void main()
       # GL.glDisable(GL.GL_BLEND)
       # GL.glEndList()
 
-    if self._contourList.renderMode == GLRENDERMODE_DRAW:
+    if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
       GL.glUseProgram(self._shaderProgram2.program_id)
+
+      # must be called after glUseProgram
+      GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
+      GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+
       self.set2DProjectionFlat()
-
-      self._contourList.drawIndexArray()
-
-      # self._drawIndexColor(self._contourList)
-      # GL.glCallList(self._contourList[0])
-
+      self._testSpectrum.drawIndexArray()
       GL.glUseProgram(0)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)
 
+  def _makeSpectrumArray(self, spectrumView, drawList):
+    drawList.renderMode = GLRENDERMODE_DRAW
+    spectrum = spectrumView.spectrum
+    drawList.clearArrays()
+
+    for position, dataArray in spectrumView._getPlaneData():
+      ma = np.amax(dataArray)
+      mi = np.amin(dataArray)
+      # min(  abs(  fract(P.z * gsize) - 0.5), 0.2);
+      # newData = np.clip(np.absolute(np.remainder((50.0*dataArray/ma), 1.0)-0.5), 0.2, 50.0)
+      newData = 35.0*dataArray/ma
+      npX = dataArray.shape[0]
+      npY = dataArray.shape[1]
+
+      indexing = (npX-1)*(npY-1)
+      elements = npX*npY
+      drawList.indices = np.zeros(int(indexing * 6), dtype=np.uint)
+      drawList.vertices = np.zeros(int(elements * 4), dtype=np.float32)
+      drawList.colors = np.zeros(int(elements * 4), dtype=np.float32)
+
+      ii = 0
+      for y0 in range(0, npY):
+        for x0 in range(0, npX):
+          vertex = [y0, x0, newData[x0,y0], 0.0]
+          color = [0.5, 0.5, 0.5, 1.0]
+          drawList.vertices[ii * 4:ii * 4 + 4] = vertex
+          drawList.colors[ii * 4:ii * 4 + 4] = color
+          ii += 1
+      drawList.numVertices = elements
+
+      ii = 0
+      for y0 in range(0, npY-1):
+        for x0 in range(0, npX-1):
+          corner = x0+(y0*npX)
+          indices = [corner, corner+1, corner+npX
+                    , corner+1, corner+npX, corner+1+npX]
+          drawList.indices[ii * 6:ii * 6 + 6] = indices
+          ii += 1
+      break
+
+  # lrLengthx = (int)((xmax - xmin) / xres + 1); // how
+  # many
+  # points in the
+  # x
+  # direction
+  # lrLengthz = (int)((zmax - zmin) / zres + 1); // how
+  # many
+  # points
+  # needed in z
+  # direction
+  # points = new
+  # Vector3[lrLengthx * lrLengthz];
+  # uvs = new
+  # Vector2[lrLengthx * lrLengthz];
+  # triangles = new
+  # int[points.Length * 6];
+  # // generate
+  # triangles
+  # int
+  # index = 0;
+  # for (int z = 0; z < lrLengthz-1;z++){
+  # for (int x = 0; x < lrLengthx-1;x++){
+  # uvs[x+z * lrLengthx] = new Vector2(x / (lrLengthx-1.0f), z / (lrLengthz-1.0f));
+  # triangles[index+2]   = x+z * lrLengthx;
+  # triangles[index+1] = x+1+z * lrLengthx;
+  # triangles[index+0] = x+z * lrLengthx+lrLengthx;
+  #
+  # triangles[index+3] = x+z * lrLengthx+lrLengthx;
+  # triangles[index+4] = x+1+z * lrLengthx+lrLengthx;
+  # triangles[index+5] = x+1+z * lrLengthx;
+  # index += 6;
+  # }
+  # }
+  #
+  #
   def mathFun(self, aa, bb):
     return math.sin(5.0*aa)*math.cos(5.0*bb**2)
   # def resizeGL(self, width, height):
@@ -2169,7 +2259,7 @@ class GLString:
     width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
 
 
-class GLvertexArray():
+class GLVertexArray():
   def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
                , blendMode=False, drawMode=GL.GL_LINES, dimension=3, GLContext=None):
     self.initialise(numLists=numLists, renderMode=renderMode
@@ -2208,7 +2298,7 @@ class GLvertexArray():
     self.numVertices = 0
 
   def drawIndexArray(self):
-    # self._GLContext.makeCurrent()
+    self._GLContext.makeCurrent()
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)

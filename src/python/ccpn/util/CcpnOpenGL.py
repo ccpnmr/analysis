@@ -412,7 +412,7 @@ void main() {
 #version 120
 
 varying vec4  P;
-varying vec3  C;
+varying vec4  C;
 uniform mat4  mvMatrix;
 uniform mat4  pMatrix;
 uniform vec4  positiveContour;
@@ -424,39 +424,47 @@ uniform vec4  negativeContour;
 void main()
 {
   P = gl_Vertex;
-  C = gl_Color.xyz;
-//  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);    //ftransform();
+  C = gl_Color;
+//  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
 //  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
 //  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
-  gl_Position = pMatrix * mvMatrix * vec4(P.xyz, 1.0);
+  gl_Position = pMatrix * mvMatrix * vec4(P.xy, 0.0, 1.0);
 }
 """
 
     self._fragmentShader2 = """
 #version 120
 
-uniform float gsize = 35.0;       // size of the grid
-uniform float gwidth = 1.0;       // grid lines' width in pixels
-uniform float mi = 0.0;           // max(0.0,gwidth-1.0)  
+//  uniform float gsize = 50.0;       // size of the grid
+uniform float gwidth = 0.5;       // grid lines' width in pixels
+uniform float mi = 0.0;           // mi=max(0.0,gwidth-1.0)
 uniform float ma = 1.0;           // ma=max(1.0,gwidth);
 varying vec4 P;
-varying vec3 C;
+varying vec4 C;
 
 void main()
 {
+//  vec3 f  = abs(fract (P * gsize)-0.5);
+//	vec3 df = fwidth(P * gsize);
+//	float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+//	vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
+//	float c = g.x * g.y * g.z;
+//	gl_FragColor = vec4(c, c, c, 1.0);
+//	gl_FragColor = gl_FragColor * gl_Color;
+	
+	
   float   f = min(abs(fract(P.z)-0.5), 0.2);
   float   df = fwidth(P.z);
-//  float   f = P.z;          //min(abs(fract(P.z * gsize)-0.5), 0.2);
-//  float   df = fwidth(P.w);
-//  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);               //should be uniforms
-//  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);  //max(0.0,1.0-gwidth) should also be sent as uniform
-  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //max(0.0,1.0-gwidth) should also be sent as uniform
+//  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
+  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);      //  max(0.0,1.0-gwidth) should also be sent as uniform
+//  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //  max(0.0,1.0-gwidth) should also be sent as uniform
 
-  g = g/(df*(ma-mi));
+//  g = g/(df*(ma-mi));
 //  float   cAlpha = 1.0-(g*g);
 //  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
 //    discard;
-  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
+//  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
+  gl_FragColor = vec4(P.w, P.w, P.w, 1.0-(g*g));
 }
 """
 
@@ -511,6 +519,7 @@ void main()
     self._axisXLabels = GL.glGenLists(1)
     self._axisLabels = GL.glGenLists(1)
     self.peakLabelling = 0
+
     self._contourList = GLVertexArray(numLists=1
                                       , renderMode=GLRENDERMODE_REBUILD
                                       , blendMode=True
@@ -524,25 +533,29 @@ void main()
     #                                   , drawMode=GL.GL_TRIANGLES)
 
     # TODO:ED only have openGL 2.1 installed, so no point yet
-    self._shaderProgram1 = ShaderProgram(fragment=self._fragmentShader1, vertex=self._vertexShader1)
-    self._shaderProgram2 = ShaderProgram(fragment=self._fragmentShader2, vertex=self._vertexShader2)
-    self._shaderProgram3 = ShaderProgram(fragment=self._fragmentShader3, vertex=self._vertexShader3)
-
-    # self._localPMatrix = CcpnTransform3D()
-    # self._localMVMatrix = CcpnTransform3D()
-    # self._localPMatrix.setToIdentity()
-    # self._localMVMatrix.setToIdentity()
+    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
+                                        , fragment=self._fragmentShader1
+                                        , attributes={})
+    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
+                                        , fragment=self._fragmentShader2
+                                        , attributes={'pMatrix':(16, np.float32)
+                                                      , 'mvMatrix':(16, np.float32)
+                                                      , 'positiveContours':(4, np.float32)
+                                                      , 'negativeContours':(4, np.float32)})
+    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3
+                                        , fragment=self._fragmentShader3
+                                        , attributes={'pMatrix':(4, np.float32)
+                                                      , 'mvMatrix':(4, np.float32)})
 
     # these are the links to the GL projection.model matrices
-    self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
-    self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
-    self.positiveContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'positiveContour')
-    self.negativeContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'negativeContour')
-
-    self._uPMatrix = np.zeros((16,), np.float32)
-    self._uMVMatrix = np.zeros((16,), np.float32)
-    self._positiveContours = np.zeros((4,), np.float32)
-    self._negativeContours = np.zeros((4,), np.float32)
+    # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
+    # self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
+    # self.positiveContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'positiveContour')
+    # self.negativeContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'negativeContour')
+    self._uPMatrix = np.zeros((16,), dtype=np.float32)
+    self._uMVMatrix = np.zeros((16,), dtype=np.float32)
+    # self._positiveContours = np.zeros((4,), dtype=np.float32)
+    # self._negativeContours = np.zeros((4,), dtype=np.float32)
 
     self._testSpectrum = GLVertexArray(numLists=1
                                        , renderMode=GLRENDERMODE_REBUILD
@@ -1511,8 +1524,11 @@ void main()
       GL.glUseProgram(self._shaderProgram2.program_id)
 
       # must be called after glUseProgram
-      GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
-      GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+      # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
+      # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+
+      self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
       self.set2DProjectionFlat()
       self._testSpectrum.drawIndexArray()
@@ -1531,7 +1547,8 @@ void main()
       mi = np.amin(dataArray)
       # min(  abs(  fract(P.z * gsize) - 0.5), 0.2);
       # newData = np.clip(np.absolute(np.remainder((50.0*dataArray/ma), 1.0)-0.5), 0.2, 50.0)
-      newData = 35.0*dataArray/ma
+      dataScale = 15.0
+      newData = dataScale*dataArray/ma
       npX = dataArray.shape[0]
       npY = dataArray.shape[1]
 
@@ -1544,7 +1561,7 @@ void main()
       ii = 0
       for y0 in range(0, npY):
         for x0 in range(0, npX):
-          vertex = [y0, x0, newData[x0,y0], 0.0]
+          vertex = [y0, x0, newData[x0,y0], 0.5+newData[x0,y0]/(2.0*dataScale)]
           color = [0.5, 0.5, 0.5, 1.0]
           drawList.vertices[ii * 4:ii * 4 + 4] = vertex
           drawList.colors[ii * 4:ii * 4 + 4] = color
@@ -2130,38 +2147,39 @@ color_data = np.array([1, 0, 0,
 
 
 class ShaderProgram(object):
-  """ Helper class for using GLSL shader programs
-  """
-
-  def __init__(self, vertex, fragment):
-    """
-    Parameters
-    ----------
-    vertex : str
-        String containing shader source code for the vertex
-        shader
-    fragment : str
-        String containing shader source code for the fragment
-        shader
-    """
+  def __init__(self, vertex, fragment, attributes):
     self.program_id = GL.glCreateProgram()
-    vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
-    frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
+    self.vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
+    self.frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
+    self.attributes = attributes
+    self.uniformLocations = {}
 
-    GL.glAttachShader(self.program_id, vs_id)
-    GL.glAttachShader(self.program_id, frag_id)
+    GL.glAttachShader(self.program_id, self.vs_id)
+    GL.glAttachShader(self.program_id, self.frag_id)
     GL.glLinkProgram(self.program_id)
 
     if GL.glGetProgramiv(self.program_id, GL.GL_LINK_STATUS) != GL.GL_TRUE:
       info = GL.glGetProgramInfoLog(self.program_id)
       GL.glDeleteProgram(self.program_id)
-      GL.glDeleteShader(vs_id)
-      GL.glDeleteShader(frag_id)
+      GL.glDeleteShader(self.vs_id)
+      GL.glDeleteShader(self.frag_id)
       raise RuntimeError('Error linking program: %s' % (info))
 
     # detach after successful link
-    GL.glDetachShader(self.program_id, vs_id)
-    GL.glDetachShader(self.program_id, frag_id)
+    GL.glDetachShader(self.program_id, self.vs_id)
+    GL.glDetachShader(self.program_id, self.frag_id)
+
+    # define attributes to be passed to the shaders
+    for att in attributes.keys():
+      self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
+      self.uniformLocations['_'+att] = np.zeros((attributes[att][0],), dtype=attributes[att][1])
+
+  def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
+    if uniformLocation in self.uniformLocations:
+      GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation]
+                            , count, transpose, value)
+    else:
+      raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 
   def add_shader(self, source, shader_type):
     """ Helper function for compiling a GLSL shader

@@ -52,7 +52,9 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-AXIS_MARGIN = 35
+AXIS_MARGINRIGHT = 35
+AXIS_MARGINBOTTOM = 35
+AXIS_LINE = 5
 
 GLRENDERMODE_IGNORE = 0
 GLRENDERMODE_DRAW = 1
@@ -229,6 +231,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # GL.glViewport(0, 0, w, h)
     # self.set2DProjectionFlat()
 
+
     # put stuff in here that will change on a resize
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
@@ -371,40 +374,25 @@ class CcpnGLWidget(QOpenGLWidget):
     self._vertexShader1 = """
 #version 120
 
-uniform mat4 u_projTrans;
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+varying vec4 FC;
 
-attribute vec4 a_position;
-attribute vec2 a_texCoord0;
-attribute vec4 a_color;
-
-varying vec4 v_color;
-varying vec2 v_texCoord;
-
-void main() {
-  gl_Position = u_projTrans * a_position;
-  v_texCoord = a_texCoord0;
-  v_color = a_color;
+void main()
+{
+  gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  FC = gl_Color;
 }
 """
 
     self._fragmentShader1 = """
 #version 120
 
-#ifdef GL_ES
-precision mediump float;
-#endif
+varying vec4 FC;
 
-uniform sampler2D u_texture;
-
-varying vec4 v_color;
-varying vec2 v_texCoord;
-
-const float smoothing = 1.0/16.0;
-
-void main() {
-  float distance = texture2D(u_texture, v_texCoord).a;
-  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-  gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+void main()
+{
+  gl_FragColor = FC;
 }
 """
 
@@ -445,14 +433,13 @@ varying vec4 C;
 void main()
 {
 //  vec3 f  = abs(fract (P * gsize)-0.5);
-//	vec3 df = fwidth(P * gsize);
-//	float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-//	vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
-//	float c = g.x * g.y * g.z;
-//	gl_FragColor = vec4(c, c, c, 1.0);
-//	gl_FragColor = gl_FragColor * gl_Color;
-	
-	
+//  vec3 df = fwidth(P * gsize);
+//  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+//  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
+//  float c = g.x * g.y * g.z;
+//  gl_FragColor = vec4(c, c, c, 1.0);
+//  gl_FragColor = gl_FragColor * gl_Color;
+
   float   f = min(abs(fract(P.z)-0.5), 0.2);
   float   df = fwidth(P.z);
 //  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
@@ -469,29 +456,44 @@ void main()
 """
 
     self._vertexShader3 = """
-#version 120
+    #version 120
 
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
-varying vec4 FC;
+    uniform mat4 u_projTrans;
 
-void main()
-{
-  gl_Position = pMatrix * mvMatrix * gl_Vertex;
-  FC = gl_Color;
-}
-"""
+    attribute vec4 a_position;
+    attribute vec2 a_texCoord0;
+    attribute vec4 a_color;
+
+    varying vec4 v_color;
+    varying vec2 v_texCoord;
+
+    void main() {
+      gl_Position = u_projTrans * a_position;
+      v_texCoord = a_texCoord0;
+      v_color = a_color;
+    }
+    """
 
     self._fragmentShader3 = """
-#version 120
+    #version 120
 
-varying vec4 FC;
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
 
-void main()
-{
-  gl_FragColor = FC;
-}
-"""
+    uniform sampler2D u_texture;
+
+    varying vec4 v_color;
+    varying vec2 v_texCoord;
+
+    const float smoothing = 1.0/16.0;
+
+    void main() {
+      float distance = texture2D(u_texture, v_texCoord).a;
+      float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+      gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+    }
+    """
 
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
@@ -535,7 +537,8 @@ void main()
     # TODO:ED only have openGL 2.1 installed, so no point yet
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
                                         , fragment=self._fragmentShader1
-                                        , attributes={})
+                                        , attributes={'pMatrix':(16, np.float32)
+                                                      , 'mvMatrix':(16, np.float32)})
     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
                                         , fragment=self._fragmentShader2
                                         , attributes={'pMatrix':(16, np.float32)
@@ -544,16 +547,18 @@ void main()
                                                       , 'negativeContours':(4, np.float32)})
     self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3
                                         , fragment=self._fragmentShader3
-                                        , attributes={'pMatrix':(4, np.float32)
-                                                      , 'mvMatrix':(4, np.float32)})
+                                        , attributes={'pMatrix':(16, np.float32)
+                                                      , 'mvMatrix':(16, np.float32)})
 
     # these are the links to the GL projection.model matrices
     # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
     # self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
     # self.positiveContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'positiveContour')
     # self.negativeContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'negativeContour')
+
     self._uPMatrix = np.zeros((16,), dtype=np.float32)
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
+
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
     # self._negativeContours = np.zeros((4,), dtype=np.float32)
 
@@ -563,6 +568,33 @@ void main()
                                        , drawMode=GL.GL_TRIANGLES
                                        , dimension=4
                                        , GLContext=self)
+
+    self.viewports = GLViewports()
+    self.viewports.addViewport('mainView', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+                                                , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+
+    self.viewports.addViewport('mainViewFullWidth', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+                                                        , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+
+    self.viewports.addViewport('rightAxis', self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
+                                                  , (AXIS_MARGINBOTTOM, 'a')
+                                                  , (AXIS_LINE, 'a'), (0, 'h'))
+
+    self.viewports.addViewport('rightAxisBar', self, (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a')
+                                                    , (0, 'w'), (0, 'h'))
+
+    self.viewports.addViewport('bottomAxis', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+                                                  , (-AXIS_MARGINRIGHT, 'w'), (AXIS_LINE, 'a'))
+
+    self.viewports.addViewport('bottomAxisBar', self, (0, 'a'), (0, 'a')
+                                                    , (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a'))
+
+    # def set2DProjection                GL.glViewport(0, 35, w - 35, h - 35)
+    # def set2DProjectionRightAxis       GL.glViewport(w - 35 - axisLine, 35, axisLine, h - 35)
+    # def set2DProjectionRightAxisBar    GL.glViewport(w - AXIS_MARGIN, AXIS_MARGIN, AXIS_MARGIN, h - AXIS_MARGIN)
+    # def set2DProjectionBottomAxis      GL.glViewport(0, 35, w - 35, axisLine)
+    # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
+    # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -699,6 +731,11 @@ void main()
   #
   #   self.drawInstructions(painter)
   #   painter.end()
+
+    print ('INV~~~~~~~')
+    print (self._invTransform.dot(np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32)))
+    print ('   ~~~~~~~')
+    print (np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32).dot(self._invTransform))
     self.update()
 
   @QtCore.pyqtSlot(bool)
@@ -1029,11 +1066,14 @@ void main()
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
   def paintGL(self):
+    def between(val, l, r):
+      return (l-val)*(r-val) <= 0
+
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_ALPHA_TEST)
-    GL.glClearColor(0.1, 0.1, 0.1, 1.0)
+    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
     # GL.glBlendColor(0.0, 0.0, 0.0, 1.0)
     # # GL.glClearIndex()
     # GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
@@ -1042,55 +1082,49 @@ void main()
 
     GL.glDisable(GL.GL_BLEND)
 
-    getGLvector = (GL.GLfloat * 2)()
-    GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
-    linewidths = [i for i in getGLvector]
+    # getGLvector = (GL.GLfloat * 2)()
+    # GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
+    # linewidths = [i for i in getGLvector]
 
-    self.set2DProjection()
+    # setup projection matrix based on the axis limits
+    # need to move it, doesn't need to be done every frame
 
-    # GL.glUseProgram(self._shaderProgram3.program_id)
-    # GL.glViewport(0, 35, w-35, h-35)  # leave a 35 width margin for the axes - bottom/right
-    # of = -1.0
-    # on = 1.0
-    # oa = 2.0/(self.axisR-self.axisL)
-    # ob = 2.0/(self.axisT-self.axisB)
-    # oc = -2.0/(of-on)
-    # od = -(of+on)/(of-on)
-    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
-    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
-    # # orthographic
-    # self._localPMatrix = np.array([
-    #    oa, 0.0, 0.0,  0.0,
-    #   0.0,  ob, 0.0,  0.0,
-    #   0.0, 0.0,  oc,  0.0,
-    #   og, oe, od, 1.0], np.float32)
-    #
-    # # create modelview matrix
-    # self._localMVMatrix = np.array([
-    #   1.0, 0.0, 0.0, 0.0,
-    #   0.0, 1.0, 0.0, 0.0,
-    #   0.0, 0.0, 1.0, 0.0,
-    #   0.0, 0.0, 0.0, 1.0], np.float32)
-    #
-    # # self._localPMatrix = CcpnTransform3D([oa, 0.0, 0.0,  0.0,
-    # #                                     0.0,  ob, 0.0,  0.0,
-    # #                                     0.0, 0.0,  oc,  0.0,
-    # #                                     og, oe, od, 1.0])
-    #
-    # # mvMatrix = CcpnTransform3D([1.0, 0.0, 0.0, 0.0,
-    # #                           0.0, 1.0, 0.0, 0.0,
-    # #                           0.0, 0.0, 1.0, 0.0,
-    # #                           0.0, 0.0, 0.0, 1.0])
-    #
-    # # self._localPMatrix.viewport(self.axisL, self.axisT
-    # #                         , (self.axisR-self.axisL)
-    # #                         , (self.axisB-self.axisT)
-    # #                         , -1.0, 1.0)
-    #
-    # # self.GLpMatrix = np.array(self._localPMatrix.copyDataTo()).reshape((4, 4))
-    # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._localPMatrix)
-    # # self.GLmvMatrix = np.array(self._localMVMatrix.copyDataTo()).reshape((4, 4))
-    # # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self.GLmvMatrix)
+    w = self.width()
+    h = self.height()
+
+    # self.set2DProjection()
+
+    GL.glUseProgram(self._shaderProgram1.program_id)
+    # self.viewports.setViewport('mainView')
+    # GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
+
+    self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                           self.axisT, -1.0, 1.0)
+    self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                            0.0, 1.0, 0.0, 0.0,
+                            0.0, 0.0, 1.0, 0.0,
+                            0.0, 0.0, 0.0, 1.0]     # set to identity matrix
+    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    # TODO:ED check why this isn't working
+    pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))
+    mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))
+    self._invTransform = mvInv*pInv
+
+    self.viewports.setViewport('mainView')
+    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.gridList[0].drawIndexArray()
+
+    # self.set2DProjectionRightAxis()
+    self.viewports.setViewport('rightAxis')
+    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[1].drawIndexArray()
+
+    # self.set2DProjectionBottomAxis()
+    self.viewports.setViewport('bottomAxis')
+    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[2].drawIndexArray()
 
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
@@ -1100,30 +1134,40 @@ void main()
     GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
     GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
 
-    self.worldCoordinate = GLU.gluUnProject(
-      self._mouseX, self._mouseY, 0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-    self.viewport = [i for i in self.viewport]
+    # self.worldCoordinate = GLU.gluUnProject(
+    #   self._mouseX, self._mouseY, 0,
+    #   self.modelViewMatrix,
+    #   self.projectionMatrix,
+    #   self.viewport,
+    # )
+
+    self.worldCoordinate = [0, 0]   #invTransform.dot([self._mouseX, self._mouseY, 0.0, 0.0])
+    mw = [0, 35, w-36, h-1]
+    if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
+      mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
+      mbx = self.axisL + mb * (self.axisR - self.axisL)
+      mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
+      mby = self.axisB + mb * (self.axisT - self.axisB)
+      self.worldCoordinate = [mbx, mby]
+
+    # self.viewport = [i for i in self.viewport]
     # grab coordinates of the transformed viewport
-    self._infiniteLineUL = GLU.gluUnProject(
-      0.0,
-      self.viewport[3]+self.viewport[1],
-      0.0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-    self._infiniteLineBR = GLU.gluUnProject(
-      self.viewport[2]+self.viewport[0],
-      self.viewport[1],
-      0.0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
+    # self._infiniteLineUL = GLU.gluUnProject(
+    #   0.0,
+    #   self.viewport[3]+self.viewport[1],
+    #   0.0,
+    #   self.modelViewMatrix,
+    #   self.projectionMatrix,
+    #   self.viewport,
+    # )
+    # self._infiniteLineBR = GLU.gluUnProject(
+    #   self.viewport[2]+self.viewport[0],
+    #   self.viewport[1],
+    #   0.0,
+    #   self.modelViewMatrix,
+    #   self.projectionMatrix,
+    #   self.viewport,
+    # )
 
     # calculate the width of a world pixel on the screen
     origin = GLU.gluUnProject(
@@ -1145,6 +1189,9 @@ void main()
     # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
     # GL.glEnable(GL.GL_BLEND)
     # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    self.viewports.setViewport('mainView')
+
     GL.glLineWidth(1.0)
     for spectrumView in self.parent.spectrumViews:
       try:
@@ -1156,8 +1203,11 @@ void main()
           # can be done with a call to self.rebuildContours()
 
         self._spectrumValues = spectrumView._getValues()
-        dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+        # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+        # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+
+        dx = self.sign(self.axisR - self.axisL)
+        dy = self.sign(self.axisT - self.axisB)
 
         # get the bounding box of the spectra
         fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
@@ -1167,15 +1217,16 @@ void main()
         xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
         yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
 
-        GL.glPushMatrix()
-        GL.glTranslate(fx0, fy0, 0.0)
-        GL.glScale(xScale, yScale, 1.0)
+        # GL.glPushMatrix()
+        # GL.glTranslate(fx0, fy0, 0.0)
+        # GL.glScale(xScale, yScale, 1.0)
 
         # create modelview matrix
         self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
                                  0.0, yScale, 0.0, 0.0,
                                  0.0, 0.0, 1.0, 0.0,
                                  fx0, fy0, 0.0, 1.0]
+        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
         # self._localMVMatrix = np.array([
         #   xScale, 0.0, 0.0, 0.0,
@@ -1189,8 +1240,8 @@ void main()
         # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._localMVMatrix)
 
         # paint the spectrum
-        # spectrumView._paintContoursNoClip()
-        GL.glPopMatrix()
+        spectrumView._paintContoursNoClip()
+        # GL.glPopMatrix()
 
         # draw the bounding box
         GL.glEnable(GL.GL_BLEND)
@@ -1216,7 +1267,7 @@ void main()
         if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
           self._testSpectrum.renderMode = GLRENDERMODE_DRAW
 
-          self._makeSpectrumArray(spectrumView, self._testSpectrum)
+          # self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
       except Exception as es:
         raise es
@@ -1248,53 +1299,58 @@ void main()
     # GL.glVertex2f(self.width(), self._mouseY)
     # GL.glEnd()
 
-    self.set2DProjection()
-    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
-    self.gridList[0].drawIndexArray()
+    # self.set2DProjection()
 
-    self.set2DProjectionRightAxis()
-    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    self.gridList[1].drawIndexArray()
-
-    self.set2DProjectionBottomAxis()
-    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    self.gridList[2].drawIndexArray()
+    # self.viewports.setViewport('mainView')
+    # self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    # self.gridList[0].drawIndexArray()
+    #
+    # # self.set2DProjectionRightAxis()
+    # self.viewports.setViewport('rightAxis')
+    # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    # self.gridList[1].drawIndexArray()
+    #
+    # # self.set2DProjectionBottomAxis()
+    # self.viewports.setViewport('bottomAxis')
+    # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    # self.gridList[2].drawIndexArray()
 
     # draw axis lines to right and bottom
-    self.set2DProjectionFlat()
-    h = self.height()
-    w = self.width()
-    GL.glColor4f(0.2, 1.0, 0.3, 1.0)
-    GL.glBegin(GL.GL_LINES)
-    GL.glVertex2d(0, 0)         # not sure why 0 doesn't work
-    GL.glVertex2d(w-36, 0)      # think I'm drawing over it with the next viewport
-    GL.glVertex2d(w-36, 0)
-    GL.glVertex2d(w-36, h-36)
-    GL.glEnd()
-
+    # self.set2DProjectionFlat()
+    # h = self.height()
+    # w = self.width()
+    # GL.glColor4f(0.2, 1.0, 0.3, 1.0)
+    # GL.glBegin(GL.GL_LINES)
+    # GL.glVertex2d(0, 0)         # not sure why 0 doesn't work
+    # GL.glVertex2d(w-36, 0)      # think I'm drawing over it with the next viewport
+    # GL.glVertex2d(w-36, 0)
+    # GL.glVertex2d(w-36, h-36)
+    # GL.glEnd()
 
     # draw all the peak GLLists here
 
-
-
-    self.set2DProjection()      # set back to the main projection
+    # self.set2DProjection()      # set back to the main projection
+    # self.viewports.setViewport('mainView')
 
     if self._drawSelectionBox:
       GL.glEnable(GL.GL_BLEND)
       GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
-      self._dragStart = GLU.gluUnProject(
-        self._startCoordinate[0], self._startCoordinate[1], 0,
-        self.modelViewMatrix,
-        self.projectionMatrix,
-        self.viewport,
-      )
-      self._dragEnd = GLU.gluUnProject(
-        self._endCoordinate[0], self._endCoordinate[1], 0,
-        self.modelViewMatrix,
-        self.projectionMatrix,
-        self.viewport,
-      )
+      # self._dragStart = GLU.gluUnProject(
+      #   self._startCoordinate[0], self._startCoordinate[1], 0,
+      #   self.modelViewMatrix,
+      #   self.projectionMatrix,
+      #   self.viewport,
+      # )
+      # self._dragEnd = GLU.gluUnProject(
+      #   self._endCoordinate[0], self._endCoordinate[1], 0,
+      #   self.modelViewMatrix,
+      #   self.projectionMatrix,
+      #   self.viewport,
+      # )
+
+      self._dragStart = self._startCoordinate
+      self._dragEnd = self._endCoordinate
 
       if self._selectionMode == 1:    # yellow
         GL.glColor4f(0.8, 0.9, 0.2, 0.3)
@@ -1330,10 +1386,16 @@ void main()
     # this gets the correct mapped coordinates
     GL.glColor4f(0.8, 0.9, 1.0, 1.0)
     GL.glBegin(GL.GL_LINES)
-    GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineUL[1])
-    GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineBR[1])
-    GL.glVertex2d(self._infiniteLineUL[0], self.worldCoordinate[1])
-    GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
+    # GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineUL[1])
+    # GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineBR[1])
+    # GL.glVertex2d(self._infiniteLineUL[0], self.worldCoordinate[1])
+    # GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
+
+    GL.glVertex2d(self.worldCoordinate[0], self.axisT)
+    GL.glVertex2d(self.worldCoordinate[0], self.axisB)
+    GL.glVertex2d(self.axisL, self.worldCoordinate[1])
+    GL.glVertex2d(self.axisR, self.worldCoordinate[1])
+
     GL.glEnd()
 
     coords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
@@ -1358,7 +1420,6 @@ void main()
 
       GL.glEndList()
 
-
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnable(GL.GL_TEXTURE_2D)
@@ -1377,7 +1438,7 @@ void main()
     #   self._drawPeakLists(spectrumView)
 
     # draw the mouse coordinates
-    self.set2DProjectionFlat()
+    # self.set2DProjectionFlat()
     GL.glPushMatrix()
     GL.glTranslate(self._mouseX, self._mouseY-30, 0.0)      # from bottom left of window?
     # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
@@ -1389,7 +1450,11 @@ void main()
     if labelsChanged:
       GL.glNewList(self._axisLabels, GL.GL_COMPILE)
 
-      self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
+      # self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
+      self.viewports.setViewport('bottomAxisBar')
+      self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
       for axLabel in self.axisLabelling['0']:
         axisX = axLabel[2]
         axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
@@ -1404,7 +1469,11 @@ void main()
         GL.glCallLists([ord(c) for c in axisXText])
         GL.glPopMatrix()
 
-      self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
+      # self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
+      self.viewports.setViewport('rightAxisBar')
+      self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
+      self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
       for axLabel in self.axisLabelling['1']:
         axisY = axLabel[2]
         axisYText = str(int(axisY)) if axLabel[3] >= 1 else str(axisY)
@@ -1460,79 +1529,79 @@ void main()
     #                         0.0, 0.0, 1.0, 0.0,
     #                         0.0, 0.0, 0.0, 1.0]
 
-    if (self._contourList.renderMode == GLRENDERMODE_REBUILD):
-      self._contourList.renderMode = GLRENDERMODE_DRAW
-
-      # GL.glNewList(self._contourList[0], GL.GL_COMPILE)
-      #
-      # # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, pMatrix)
-      # # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, mvMatrix)
-      #
-      # GL.glEnable(GL.GL_BLEND)
-      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-      #
-      # # pastel pink - # df2950
-      # GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
-      #
-      # GL.glBegin(GL.GL_TRIANGLES)
-
-      step = 0.05
-      ii=0
-      elements = (2.0/step)**2
-      self._contourList.indices = np.zeros(int(elements*6), dtype=np.uint)
-      self._contourList.vertices = np.zeros(int(elements*12), dtype=np.float32)
-      self._contourList.colors = np.zeros(int(elements*16), dtype=np.float32)
-
-      for x0 in np.arange(-1.0, 1.0, step):
-        for y0 in np.arange(-1.0, 1.0, step):
-          x1 = x0+step
-          y1 = y0+step
-
-          index = ii*4
-          indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-          vertices = [x0, y0, self.mathFun(x0, y0)
-                      , x0, y1, self.mathFun(x0, y1)
-                      , x1, y1, self.mathFun(x1, y1)
-                      , x1, y0, self.mathFun(x1, y0)]
-          # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-          colors = [0.8745, 0.1608, 0.3137, 1.0] * 4
-
-          self._contourList.indices[ii * 6:ii * 6 + 6] = indices
-          self._contourList.vertices[ii * 12:ii * 12 + 12] = vertices
-          self._contourList.colors[ii * 16:ii * 16 + 16] = colors
-          ii += 1
-
-          # self._contourList.indices = np.append(self._contourList.indices, indices)
-          # self._contourList.vertices = np.append(self._contourList.vertices, vertices)
-          # self._contourList.colors = np.append(self._contourList.colors, colors)
-
-          # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
-          # GL.glVertex3f(ii+step, jj,     self.mathFun(ii+step, jj))
-          # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
-          #
-          # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
-          # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
-          # GL.glVertex3f(ii,     jj+step, self.mathFun(ii, jj+step))
-      self._contourList.numVertices = index
-      # self._contourList.bindBuffers()
-
-      # GL.glEnd()
-      # GL.glDisable(GL.GL_BLEND)
-      # GL.glEndList()
-
-    if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
-      GL.glUseProgram(self._shaderProgram2.program_id)
-
-      # must be called after glUseProgram
-      # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
-      # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
-
-      self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-
-      self.set2DProjectionFlat()
-      self._testSpectrum.drawIndexArray()
-      GL.glUseProgram(0)
+    # if (self._contourList.renderMode == GLRENDERMODE_REBUILD):
+    #   self._contourList.renderMode = GLRENDERMODE_DRAW
+    #
+    #   # GL.glNewList(self._contourList[0], GL.GL_COMPILE)
+    #   #
+    #   # # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, pMatrix)
+    #   # # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, mvMatrix)
+    #   #
+    #   # GL.glEnable(GL.GL_BLEND)
+    #   # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    #   #
+    #   # # pastel pink - # df2950
+    #   # GL.glColor4f(0.8745, 0.1608, 0.3137, 1.0)
+    #   #
+    #   # GL.glBegin(GL.GL_TRIANGLES)
+    #
+    #   step = 0.05
+    #   ii=0
+    #   elements = (2.0/step)**2
+    #   self._contourList.indices = np.zeros(int(elements*6), dtype=np.uint)
+    #   self._contourList.vertices = np.zeros(int(elements*12), dtype=np.float32)
+    #   self._contourList.colors = np.zeros(int(elements*16), dtype=np.float32)
+    #
+    #   for x0 in np.arange(-1.0, 1.0, step):
+    #     for y0 in np.arange(-1.0, 1.0, step):
+    #       x1 = x0+step
+    #       y1 = y0+step
+    #
+    #       index = ii*4
+    #       indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+    #       vertices = [x0, y0, self.mathFun(x0, y0)
+    #                   , x0, y1, self.mathFun(x0, y1)
+    #                   , x1, y1, self.mathFun(x1, y1)
+    #                   , x1, y0, self.mathFun(x1, y0)]
+    #       # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+    #       colors = [0.8745, 0.1608, 0.3137, 1.0] * 4
+    #
+    #       self._contourList.indices[ii * 6:ii * 6 + 6] = indices
+    #       self._contourList.vertices[ii * 12:ii * 12 + 12] = vertices
+    #       self._contourList.colors[ii * 16:ii * 16 + 16] = colors
+    #       ii += 1
+    #
+    #       # self._contourList.indices = np.append(self._contourList.indices, indices)
+    #       # self._contourList.vertices = np.append(self._contourList.vertices, vertices)
+    #       # self._contourList.colors = np.append(self._contourList.colors, colors)
+    #
+    #       # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+    #       # GL.glVertex3f(ii+step, jj,     self.mathFun(ii+step, jj))
+    #       # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+    #       #
+    #       # GL.glVertex3f(ii,     jj,     self.mathFun(ii,jj))
+    #       # GL.glVertex3f(ii+step, jj+step, self.mathFun(ii+step, jj+step))
+    #       # GL.glVertex3f(ii,     jj+step, self.mathFun(ii, jj+step))
+    #   self._contourList.numVertices = index
+    #   # self._contourList.bindBuffers()
+    #
+    #   # GL.glEnd()
+    #   # GL.glDisable(GL.GL_BLEND)
+    #   # GL.glEndList()
+    #
+    # if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
+    #   GL.glUseProgram(self._shaderProgram2.program_id)
+    #
+    #   # must be called after glUseProgram
+    #   # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
+    #   # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    #   self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #   self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    #   self.set2DProjectionFlat()
+    #   self._testSpectrum.drawIndexArray()
+    #   GL.glUseProgram(0)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)
@@ -1759,7 +1828,7 @@ void main()
     axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 0, w-AXIS_MARGIN, AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(0, 0, w-AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM)   # leave a 35 width margin for the axes - bottom/right
     GLU.gluOrtho2D(*axisLimits)
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
@@ -1809,8 +1878,11 @@ void main()
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
     dim = [self.width(), self.height()]
 
-    ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
-    br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
+    # ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
+    # br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
+
+    ul = np.array([self.axisL, self.axisT])
+    br = np.array([self.axisR, self.axisB])
 
     labelling = {'0': [], '1': []}
     labelsChanged = False
@@ -2145,6 +2217,46 @@ color_data = np.array([1, 0, 0,
                        0, 1, 0,
                        0, 0, 1], dtype=np.float32)
 
+class GLViewports(object):
+  # Class to handle the different viewports in the display
+  def __init__(self):
+    # define a new empty list
+    self._viewports = {}
+
+  def addViewport(self, name, parent, left, bottom, rightOffset, topOffset):
+    # add a new viewport
+    # parent points to the containing widget
+    # left, bottom - coordinates of bottom-left corner
+    # rightOffset   - offset from the right border
+    # topOffset     - offset from the top border
+    self._viewports[name] = (parent, left, bottom, rightOffset, topOffset)
+
+    # e.g., GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
+    #                      0, 35, -35, 0
+
+  def setViewport(self, name):
+    # change to the named viewport
+    def setVal(offsetType, w, h):
+      if offsetType[1] in 'alb':
+        return offsetType[0]
+      elif offsetType[1] == 'w':
+        return w+offsetType[0]
+      elif offsetType[1] == 'h':
+        return h+offsetType[0]
+
+    if name in self._viewports:
+      thisView = self._viewports[name]
+      w=thisView[0].width()
+      h=thisView[0].height()
+      l = setVal(thisView[1], w, h)
+      b = setVal(thisView[2], w, h)
+      wi = setVal(thisView[3], w, h)
+      he = setVal(thisView[4], w, h)
+
+      GL.glViewport(l, b, wi, he)
+                    # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
+    else:
+      raise RuntimeError('Error: viewport %s does not exist' % name)
 
 class ShaderProgram(object):
   def __init__(self, vertex, fragment, attributes):
@@ -2173,6 +2285,33 @@ class ShaderProgram(object):
     for att in attributes.keys():
       self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
       self.uniformLocations['_'+att] = np.zeros((attributes[att][0],), dtype=attributes[att][1])
+
+  def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
+    # of = 1.0
+    # on = -1.0
+    # oa = 2.0/(self.axisR-self.axisL)
+    # ob = 2.0/(self.axisT-self.axisB)
+    # oc = -2.0/(of-on)
+    # od = -(of+on)/(of-on)
+    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # # orthographic
+    # self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+    #                         0.0,  ob, 0.0,  0.0,
+    #                         0.0, 0.0,  oc,  0.0,
+    #                         og, oe, od, 1.0]
+
+    oa = 2.0/(right-left)
+    ob = 2.0/(top-bottom)
+    oc = -2.0/(far-near)
+    od = -(far+near)/(far-near)
+    oe = -(top+bottom)/(top-bottom)
+    og = -(right+left)/(right-left)
+    # orthographic
+    attMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+                        0.0,  ob, 0.0,  0.0,
+                        0.0, 0.0,  oc,  0.0,
+                        og, oe, od, 1.0]
 
   def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
     if uniformLocation in self.uniformLocations:

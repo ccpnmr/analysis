@@ -381,6 +381,7 @@ varying vec4 FC;
 void main()
 {
   gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  gl_TexCoord[0]=gl_MultiTexCoord0;
   FC = gl_Color;
 }
 """
@@ -388,10 +389,41 @@ void main()
     self._fragmentShader1 = """
 #version 120
 
+uniform sampler2D texture;
 varying vec4 FC;
 
 void main()
 {
+  vec4 current = texture2D(texture, gl_TexCoord[0].xy);
+  
+  gl_FragColor = FC;
+}
+"""
+
+    self._vertexShaderTex = """
+#version 120
+
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+uniform sampler2D texture;
+varying vec4 FC;
+
+void main()
+{
+  gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  gl_TexCoord[0].xy = gl_MultiTexCoord0.xy;
+  FC = gl_Color;
+}
+"""
+
+    self._fragmentShaderTex = """
+#version 120
+
+varying vec4 FC;
+
+void main()
+{
+  vec4 current = texture2D(texture, uv);
   gl_FragColor = FC;
 }
 """
@@ -1119,7 +1151,9 @@ void main()
 
     self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                            self.axisT, -1.0, 1.0)
-    self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h, -1.0, 1.0)
+
+    # TODO:ED check why this is h+35 and not h
+    self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
@@ -1129,32 +1163,31 @@ void main()
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     # TODO:ED check why this isn't working
-    self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))
-    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))
-    self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
-
     self._shaderProgram1.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                            self.axisT, -1.0, 1.0)
-    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))
 
+    self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
+    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
+    self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
+    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+
+    # calculate the size of the screen pixels in axis coordinates
     self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
     self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
     self.pixelX = self._pointOne[0]-self._pointZero[0]
     self.pixelY = self._pointOne[1]-self._pointZero[1]
 
-    # self._invTransform = vInv.dot(pInv)
-    # self.test = self._uVMatrix.reshape((4, 4)).dot(vInv)
-
+    # set to the mainView and draw the grid
     self.viewports.setViewport('mainView')
     self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
     self.gridList[0].drawIndexArray()
 
-    # self.set2DProjectionRightAxis()
+    # draw the grid marks for the right axis
     self.viewports.setViewport('rightAxis')
     self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.gridList[1].drawIndexArray()
 
-    # self.set2DProjectionBottomAxis()
+    # draw the grid marks for the bottom axis
     self.viewports.setViewport('bottomAxis')
     self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.gridList[2].drawIndexArray()
@@ -1220,8 +1253,7 @@ void main()
 
     # GL.glEnable(GL.GL_LINE_SMOOTH)
     # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
-    # GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glDisable(GL.GL_BLEND)
 
     self.viewports.setViewport('mainView')
 
@@ -1250,35 +1282,45 @@ void main()
         xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
         yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
 
-        # GL.glPushMatrix()
-        # GL.glTranslate(fx0, fy0, 0.0)
-        # GL.glScale(xScale, yScale, 1.0)
-
-        # create modelview matrix
+        # create modelview matrix for the spectrum to be drawn
         self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
                                  0.0, yScale, 0.0, 0.0,
                                  0.0, 0.0, 1.0, 0.0,
                                  fx0, fy0, 0.0, 1.0]
         self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
-        # self._localMVMatrix = np.array([
-        #   xScale, 0.0, 0.0, 0.0,
-        #   0.0, yScale, 0.0, 0.0,
-        #   0.0, 0.0, 1.0, 0.0,
-        #  -fx0, -fy0, 0.0, 1.0], np.float32)
-        # # self._localMVMatrix.setToIdentity()
-        # # self._localMVMatrix.translate(QtGui.QVector3D(fx0, fy0, 0.0))
-        # # self._localMVMatrix.scale(QtGui.QVector3D(xScale, yScale, 1.0))
-        # # self.GLmvMatrix = np.array(self._localMVMatrix.copyDataTo()).reshape((4, 4))
-        # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._localMVMatrix)
-
-        # paint the spectrum
+        # draw the spectrum - call the existing glCallList
         spectrumView._paintContoursNoClip()
-        # GL.glPopMatrix()
+
+        if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
+          self._testSpectrum.renderMode = GLRENDERMODE_DRAW
+
+          # self._makeSpectrumArray(spectrumView, self._testSpectrum)
+
+      except Exception as es:
+        raise es
+
+    # reset the modelview matrix
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0]
+    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    for spectrumView in self.parent.spectrumViews:
+      try:
+        self._spectrumValues = spectrumView._getValues()
+        # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+        # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+
+        # get the bounding box of the spectra
+        fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
 
         # draw the bounding box
         GL.glEnable(GL.GL_BLEND)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
         # GL.glLineStipple(1, 0xAAAA)
         # GL.glEnable(GL.GL_LINE_STIPPLE)
@@ -1297,14 +1339,8 @@ void main()
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
         # self._drawPeakListVertices(spectrumView)
 
-        if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
-          self._testSpectrum.renderMode = GLRENDERMODE_DRAW
-
-          # self._makeSpectrumArray(spectrumView, self._testSpectrum)
-
       except Exception as es:
         raise es
-        # pass
 
     # GL.glUseProgram(0)
     # self.set2DProjection()
@@ -1445,19 +1481,19 @@ void main()
     #                 , coords
     #                 , 1.0, 1.0, 1.0, 1.0)
 
-    if self._buildTextFlag == GLRENDERMODE_REBUILD:
-      self._buildTextFlag = GLRENDERMODE_DRAW
-      GL.glNewList(self._drawTextList, GL.GL_COMPILE)
-
-      for ti in range(7):
-        # GL.glRotate(25.0, 0.0, 0.0, 1.0)      # can rotate if we need to :)
-
-        GL.glPushMatrix()
-        GL.glTranslate(ti*50.0, ti*50, 0.0)
-        GL.glCallLists([ord(c) for c in 'The Quick\tBrown Fox\n013617@something'])
-        GL.glPopMatrix()
-
-      GL.glEndList()
+    # if self._buildTextFlag == GLRENDERMODE_REBUILD:
+    #   self._buildTextFlag = GLRENDERMODE_DRAW
+    #   GL.glNewList(self._drawTextList, GL.GL_COMPILE)
+    #
+    #   for ti in range(7):
+    #     # GL.glRotate(25.0, 0.0, 0.0, 1.0)      # can rotate if we need to :)
+    #
+    #     GL.glPushMatrix()
+    #     GL.glTranslate(ti*50.0, ti*50, 0.0)
+    #     GL.glCallLists([ord(c) for c in 'The Quick\tBrown Fox\n013617@something'])
+    #     GL.glPopMatrix()
+    #
+    #   GL.glEndList()
 
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
@@ -1466,11 +1502,11 @@ void main()
 
     GL.glListBase( self.firstFont.base )
 
-    GL.glPushMatrix()
-    GL.glTranslated(50, 300, 0)
-    # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
-    GL.glCallList(self._drawTextList)
-    GL.glPopMatrix()
+    # GL.glPushMatrix()
+    # GL.glTranslated(50, 300, 0)
+    # # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
+    # GL.glCallList(self._drawTextList)
+    # GL.glPopMatrix()
 
     # self.set2DProjection()
     # for spectrumView in self.parent.spectrumViews:
@@ -1478,18 +1514,25 @@ void main()
 
     # draw the mouse coordinates
     # self.set2DProjectionFlat()
-    GL.glPushMatrix()
-    GL.glTranslate(self._mouseX, self._mouseY-30, 0.0)      # from bottom left of window?
+
+
+    # GL.glPushMatrix()
+    # GL.glTranslate(self.worldCoordinate[0], self.worldCoordinate[1], 0.0)      # from bottom left of window?
     # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
     GL.glColor3f(0.9, 0.9, 0.9)
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0,
+                             self.worldCoordinate[0], self.worldCoordinate[1], 0.0, 1.0]
+    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
     GL.glCallLists([ord(c) for c in coords])
-    GL.glPopMatrix()
+    # GL.glPopMatrix()
 
     # draw axes labelling
     if labelsChanged:
       GL.glNewList(self._axisLabels, GL.GL_COMPILE)
 
-      # self.set2DProjectionBottomAxisBar(axisLimits=[self.axisL, self.axisR, 0, AXIS_MARGIN])
+      # put the axis labels into the bottom bar
       self.viewports.setViewport('bottomAxisBar')
       self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
       self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -1508,7 +1551,7 @@ void main()
         GL.glCallLists([ord(c) for c in axisXText])
         GL.glPopMatrix()
 
-      # self.set2DProjectionRightAxisBar(axisLimits=[0, AXIS_MARGIN, self.axisB, self.axisT])
+      # put the axis labels into the right bar
       self.viewports.setViewport('rightAxisBar')
       self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
       self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)

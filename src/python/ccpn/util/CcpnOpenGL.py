@@ -390,13 +390,19 @@ void main()
 #version 120
 
 uniform sampler2D texture;
+uniform int  useTexture;
 varying vec4 FC;
 
 void main()
 {
-  vec4 current = texture2D(texture, gl_TexCoord[0].xy);
-  
-  gl_FragColor = FC;
+  if (useTexture == 1)
+  {
+    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
+  }
+  else
+  {
+    gl_FragColor = FC;
+  }
 }
 """
 
@@ -570,7 +576,8 @@ void main()
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
                                         , fragment=self._fragmentShader1
                                         , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)})
+                                                      , 'mvMatrix':(16, np.float32)
+                                                      , 'useTexture':(1, np.uint)})
     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
                                         , fragment=self._fragmentShader2
                                         , attributes={'pMatrix':(16, np.float32)
@@ -592,6 +599,7 @@ void main()
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
     self._uVMatrix = np.zeros((16,), dtype=np.float32)
     self._aMatrix = np.zeros((16,), dtype=np.float32)
+    self._useTexture = np.zeros((1,), dtype=np.int)
     self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
@@ -1156,6 +1164,9 @@ void main()
     self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
+    self._useTexture = 0
+    self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
+
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
@@ -1476,6 +1487,8 @@ void main()
     coords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
+
+    coords = 'E'
     # self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
     #                 , GLUT.GLUT_BITMAP_HELVETICA_12
     #                 , coords
@@ -1494,6 +1507,9 @@ void main()
     #     GL.glPopMatrix()
     #
     #   GL.glEndList()
+
+    self._useTexture = 1
+    self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
 
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
@@ -1591,19 +1607,19 @@ void main()
     #   0.0, 0.0, 2.0 * zFar * zNear / (zNear - zFar), 0.0], np.float32)
 
     # GL.glViewport(0, 0, self.width(), self.height())
-    of = 1.0
-    on = -1.0
-    oa = 2.0/(self.axisR-self.axisL)
-    ob = 2.0/(self.axisT-self.axisB)
-    oc = -2.0/(of-on)
-    od = -(of+on)/(of-on)
-    oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
-    og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
-    # orthographic
-    self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
-                            0.0,  ob, 0.0,  0.0,
-                            0.0, 0.0,  oc,  0.0,
-                            og, oe, od, 1.0]
+    # of = 1.0
+    # on = -1.0
+    # oa = 2.0/(self.axisR-self.axisL)
+    # ob = 2.0/(self.axisT-self.axisB)
+    # oc = -2.0/(of-on)
+    # od = -(of+on)/(of-on)
+    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
+    # # orthographic
+    # self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+    #                         0.0,  ob, 0.0,  0.0,
+    #                         0.0, 0.0,  oc,  0.0,
+    #                         og, oe, od, 1.0]
 
     # create modelview matrix
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
@@ -2164,8 +2180,9 @@ class CcpnGLFont():
     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )
     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST )
 
-    # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
-    # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
+    # the following 2 lines generate a multitexture mipmap
+    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
+    GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
     GL.glDisable(GL.GL_TEXTURE_2D)
 
     self.base = GL.glGenLists(256)
@@ -2419,6 +2436,13 @@ class ShaderProgram(object):
     if uniformLocation in self.uniformLocations:
       GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation]
                             , count, transpose, value)
+    else:
+      raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+
+  def setGLUniform1i(self, uniformLocation=None, count=1, value=None):
+    if uniformLocation in self.uniformLocations:
+      GL.glUniform1i(self.uniformLocations[uniformLocation]
+                      , count, value)
     else:
       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 

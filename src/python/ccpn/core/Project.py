@@ -906,11 +906,9 @@ class Project(AbstractWrapperObject):
       if undo is not None:
         undo.decreaseBlocking()
 
-  def _convertToDataBlock(self, path:str=None
-                  , overwriteExisting:bool=False
-                  , skipPrefixes:typing.Sequence=()
-                  , expandSelection:bool=True
-                  , pidList:list=None):
+  def _convertToDataBlock(self, skipPrefixes:typing.Sequence=()
+                            , expandSelection:bool=True
+                            , pidList:list=None):
     """
     Export selected contents of the project to a Nef file.
 
@@ -931,9 +929,7 @@ class Project(AbstractWrapperObject):
     """
     from ccpn.core.lib import CcpnNefIo
 
-    defaults = OrderedDict((('path', None)
-                            , ('overwriteExisting', None)
-                            , ('skipPrefixes', None)
+    defaults = OrderedDict((('skipPrefixes', None)
                             , ('expandSelection', None)
                             , ('pidList', None)))
 
@@ -947,11 +943,9 @@ class Project(AbstractWrapperObject):
     newPath = None
     try:
       t0 = time()
-      dataBlock, newPath = CcpnNefIo.convertToDataBlock(self, path
-                                            , overwriteExisting=overwriteExisting
-                                            , skipPrefixes=skipPrefixes
-                                            , expandSelection=expandSelection
-                                            , pidList=pidList)
+      dataBlock, newPath = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes
+                                                        , expandSelection=expandSelection
+                                                        , pidList=pidList)
       t2 = time()
       getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
 
@@ -963,12 +957,14 @@ class Project(AbstractWrapperObject):
 
     return dataBlock, newPath
 
-  def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None):
+  def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None
+                            , overwriteExisting:bool=False):
     # Export the modified dataBlock to file
     from ccpn.core.lib import CcpnNefIo
 
     defaults = OrderedDict((('dataBlock', None)
-                            , ('path', None)))
+                            , ('path', None)
+                            , ('overwriteExisting', None)))
 
     self._startCommandEchoBlock('writeDataBlockToFile', values=locals(), defaults=defaults)
     undo = self._undo
@@ -978,7 +974,7 @@ class Project(AbstractWrapperObject):
 
     try:
       t0 = time()
-      CcpnNefIo.writeDataBlock(dataBlock, path)
+      CcpnNefIo.writeDataBlock(dataBlock, path=path, overwriteExisting=overwriteExisting)
       t2 = time()
       getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 

@@ -165,6 +165,29 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return a.menu() or a
     raise ValueError('Menu item not found.')
 
+  def searchMenuAction(self, menuString, topMenuAction=None):
+    from ccpn.framework.Translation import translator
+
+    found = None
+    if topMenuAction is None:
+      topMenuAction = self._menuBar
+    splitMenuString = menuString.split('->')
+    splitMenuString = [translator.translate(text) for text in splitMenuString]
+    if len(splitMenuString) > 1:
+      topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
+    for a in topMenuAction.actions():
+      # temp = a.text()
+      # print (temp)
+      if a.text() == splitMenuString[-1]:
+        found = a.menu() if a.menu() else a
+        break
+      else:
+        if a.menu():
+          found = self.searchMenuAction(menuString, topMenuAction=a.menu())
+          if found:
+            break
+    return found
+
   def _setupWindow(self):
     """
     Sets up SideBar, python console and splitters to divide up main window properly.
@@ -260,7 +283,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._fillRecentMacrosMenu()
     #TODO:ED needs fixing
     self._fillPluginsMenu()     # ejb - nothing to show, and crash anyway
+    self._attachModulesMenuAction()
 
+  def _attachModulesMenuAction(self):
+    # add a connect to call _fillModulesMenu when the menu item is about to show
+    # so it is always uptodate
+    modulesMenu = self.getMenuAction('Modules')
+    modulesMenu.aboutToShow.connect(self._fillModulesMenu)
 
   def _createMenu(self, spec, targetMenu=None):
     menu = self._addMenu(spec[0], targetMenu)
@@ -324,11 +353,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
       if projectDir:
         project = self.application.loadProject(projectDir)
-        try:
-          project._mainWindow.show()
 
-        except Exception as es:
-          Logging.getLogger().warning('Error loading project:', str(es))
+        if project:
+          project._mainWindow.show()
+        else:
+          MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
+          Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
 
     return project
 
@@ -440,6 +470,29 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                     callback=partial(self.startPlugin, Plugin=Plugin))
     targetMenu.addAction(action)
 
+
+  def _fillModulesMenu(self):
+    modulesMenu = self.getMenuAction('Modules')
+    modulesMenu.clear()
+
+    for module in self.moduleArea.currentModules:
+      moduleSize = module.size()
+      visible = moduleSize.width() != 0 and moduleSize.height() != 0
+
+      modulesMenu.addAction(Action(modulesMenu, text=module.name()
+                                   , checkable=True, checked=visible
+                                   , callback=partial(self._showModule, module, self)))
+
+  def _showModule(self, module, modulesMenu):
+    try:
+      menuItem = self.searchMenuAction(module.name())
+      if menuItem:
+        if module.size().height() != 0 and module.size().width() != 0:   #menuItem.isChecked():    # opposite as it has toggled
+          module.setStretch(0, 0)
+        else:
+          module.setStretch(1, 1)
+    except Exception as es:
+      Logging.getLogger().warning('Error expanding module: %s', module.name())
 
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
@@ -725,15 +778,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # for the z axes the position is provided as the center of the axis region (i.e. the position)
 
     mouseMovedDict = dict(strip=strip)
-    for n, axisCode in enumerate(axisCodes):
-      if n == 0:
-        xPos = pos = position.x()
-      elif n == 1:
-        yPos = pos = position.y()
-      else:
-        pos = orderedAxes[n].position
-      mouseMovedDict[axisCode] = pos
+    try:
+      for n, axisCode in enumerate(axisCodes):
+        if n == 0:
+          xPos = pos = position.x()
+        elif n == 1:
+          yPos = pos = position.y()
+        else:
+          pos = orderedAxes[n].position
+        mouseMovedDict[axisCode] = pos
 
-    self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
+      self.application.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
 
-    self._mouseMovedSignal.emit(mouseMovedDict)
+      self._mouseMovedSignal.emit(mouseMovedDict)
+    except Exception as es:
+      Logging.warning(str(es))

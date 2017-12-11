@@ -879,8 +879,8 @@ def exportNef(project:Project
     f.write(text)
 
 def convertToDataBlock(project:Project
-                       , path:str
-                       , overwriteExisting:bool=False
+                       # , path:str
+                       # , overwriteExisting:bool=False
                        , skipPrefixes:typing.Sequence=()
                        , expandSelection:bool=True
                        # , exclusionDict={}
@@ -889,6 +889,19 @@ def convertToDataBlock(project:Project
   """export NEF file to path"""
   # ejb - dialog added to allow the changing of the name from the current project name.
 
+  # if path[-4:] != '.nef':
+  #   path = path+'.nef'
+  #   getLogger().debug('Adding .nef extension to filename %s' % path)
+  #
+  # if os.path.exists(path) and not overwriteExisting:
+  #   raise IOError("%s already exists" % path)
+  #
+  dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+                           pidList=pidList)   #, exclusionDict=exclusionDict)
+
+  return dataBlock, path       # ejb - will this work here?
+
+def writeDataBlock(dataBlock, path:str, overwriteExisting:bool=False):
   if path[-4:] != '.nef':
     path = path+'.nef'
     getLogger().debug('Adding .nef extension to filename %s' % path)
@@ -896,12 +909,6 @@ def convertToDataBlock(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
-                           pidList=pidList)   #, exclusionDict=exclusionDict)
-
-  return dataBlock, path       # ejb - will this work here?
-
-def writeDataBlock(dataBlock, path):
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)

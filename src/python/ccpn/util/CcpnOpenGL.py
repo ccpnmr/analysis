@@ -558,6 +558,9 @@ void main()
 
     self._uPMatrix = np.zeros((16,), dtype=np.float32)
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
+    self._uVMatrix = np.zeros((16,), dtype=np.float32)
+    self._aMatrix = np.zeros((16,), dtype=np.float32)
+    self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
     # self._negativeContours = np.zeros((4,), dtype=np.float32)
@@ -644,6 +647,17 @@ void main()
 
     self._mouseX = event.pos().x()
     self._mouseY = self.height() - event.pos().y()
+
+    # print ('INV~~~~~~~')
+
+    # translate mouse to NDC
+    vect = self.vInv.dot([self._mouseX, self._mouseY, 0.0, 1.0])
+
+    # translate to axis coordinates
+    self.worldCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+
+    print (self._mouseX, self._mouseY, " : ", vect[0:2], self.worldCoordinate)
+    # print (self._mouseX, self._mouseY, " : ", np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32).dot(self._invTransform))
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
@@ -732,10 +746,6 @@ void main()
   #   self.drawInstructions(painter)
   #   painter.end()
 
-    print ('INV~~~~~~~')
-    print (self._invTransform.dot(np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32)))
-    print ('   ~~~~~~~')
-    print (np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32).dot(self._invTransform))
     self.update()
 
   @QtCore.pyqtSlot(bool)
@@ -1100,7 +1110,9 @@ void main()
 
     self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                            self.axisT, -1.0, 1.0)
+    self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
@@ -1108,9 +1120,16 @@ void main()
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     # TODO:ED check why this isn't working
-    pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))
-    mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))
-    self._invTransform = mvInv*pInv
+    self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))
+    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))
+    self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
+
+    self._shaderProgram1.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+                                           self.axisT, -1.0, 1.0)
+    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))
+
+    # self._invTransform = vInv.dot(pInv)
+    # self.test = self._uVMatrix.reshape((4, 4)).dot(vInv)
 
     self.viewports.setViewport('mainView')
     self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
@@ -1141,14 +1160,14 @@ void main()
     #   self.viewport,
     # )
 
-    self.worldCoordinate = [0, 0]   #invTransform.dot([self._mouseX, self._mouseY, 0.0, 0.0])
-    mw = [0, 35, w-36, h-1]
-    if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
-      mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
-      mbx = self.axisL + mb * (self.axisR - self.axisL)
-      mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
-      mby = self.axisB + mb * (self.axisT - self.axisB)
-      self.worldCoordinate = [mbx, mby]
+    # self.worldCoordinate = [0, 0]   #invTransform.dot([self._mouseX, self._mouseY, 0.0, 0.0])
+    # mw = [0, 35, w-36, h-1]
+    # if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
+    #   mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
+    #   mbx = self.axisL + mb * (self.axisR - self.axisL)
+    #   mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
+    #   mby = self.axisB + mb * (self.axisT - self.axisB)
+    #   self.worldCoordinate = [mbx, mby]
 
     # self.viewport = [i for i in self.viewport]
     # grab coordinates of the transformed viewport
@@ -2312,6 +2331,26 @@ class ShaderProgram(object):
                         0.0,  ob, 0.0,  0.0,
                         0.0, 0.0,  oc,  0.0,
                         og, oe, od, 1.0]
+
+  def setViewportMatrix(self, viewMatrix, left, right, bottom, top, near, far):
+    # return the viewport transformation matrix - mapping screen to NDC
+    #   normalised device coordinates
+    #   viewport * NDC_cooord = world_coord
+    oa = (right-left)/2.0
+    ob = (top-bottom)/2.0
+    oc = (far-near)/2.0
+    og = (right+left)/2.0
+    oe = (top+bottom)/2.0
+    od = (near+far)/2.0
+    # orthographic
+    # viewMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+    #                     0.0,  ob, 0.0,  0.0,
+    #                     0.0, 0.0,  oc,  0.0,
+    #                     og, oe, od, 1.0]
+    viewMatrix[0:16] = [oa, 0.0, 0.0,  og,
+                        0.0,  ob, 0.0,  oe,
+                        0.0, 0.0,  oc,  od,
+                        0.0, 0.0, 0.0, 1.0]
 
   def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
     if uniformLocation in self.uniformLocations:

@@ -1488,7 +1488,7 @@ void main()
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
 
-    coords = 'E'
+    coords = 'F'
     # self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
     #                 , GLUT.GLUT_BITMAP_HELVETICA_12
     #                 , coords
@@ -1531,15 +1531,19 @@ void main()
     # draw the mouse coordinates
     # self.set2DProjectionFlat()
 
+    # TODO:ED now change all the texts to drawList with coordinates as screen(x,y)
+    # rescale needs to keep the lists but offset the characters from the first in the list
+    # each string can be id'ed by a pid and attrib array keeps the world coordinate of the first character
 
     # GL.glPushMatrix()
     # GL.glTranslate(self.worldCoordinate[0], self.worldCoordinate[1], 0.0)      # from bottom left of window?
     # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
     GL.glColor3f(0.9, 0.9, 0.9)
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
+    self._uMVMatrix[0:16] = [self.pixelX*3.0, 0.0, 0.0, 0.0,
+                             0.0, self.pixelY*3.0, 0.0, 0.0,
                              0.0, 0.0, 1.0, 0.0,
-                             self.worldCoordinate[0], self.worldCoordinate[1], 0.0, 1.0]
+                             self.worldCoordinate[0]+(25*self.pixelX)
+                                  , self.worldCoordinate[1]+(25*self.pixelY), 0.0, 1.0]
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
     GL.glCallLists([ord(c) for c in coords])
     # GL.glPopMatrix()

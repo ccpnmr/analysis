@@ -602,7 +602,11 @@ void main()
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 
-    self._startCoordinate = [ev.pos().x(), self.height() - ev.pos().y()]
+    # self._startCoordinate = [ev.pos().x(), self.height() - ev.pos().y()]
+
+    vect = self.vInv.dot([ev.pos().x(), self.height() - ev.pos().y(), 0.0, 1.0])
+    self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+
     self._endCoordinate = self._startCoordinate
     self._drawSelectionBox = True
 
@@ -656,22 +660,27 @@ void main()
     # translate to axis coordinates
     self.worldCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
-    print (self._mouseX, self._mouseY, " : ", vect[0:2], self.worldCoordinate)
+    # self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    # self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    # self.pixelX = self._pointOne[0]-self._pointZero[0]
+    # self.pixelY = self._pointOne[1]-self._pointZero[1]
+
+    # print (self._mouseX, self._mouseY, " : ", vect[0:2], self.worldCoordinate)
     # print (self._mouseX, self._mouseY, " : ", np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32).dot(self._invTransform))
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
       if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
           (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
-        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 3
 
       elif self._key == Qt.Key_Shift:
-        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 1
 
       elif self._key == Qt.Key_Control:
-        self._endCoordinate = [event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
 
       else:
@@ -1128,6 +1137,11 @@ void main()
                                            self.axisT, -1.0, 1.0)
     self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))
 
+    self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    self.pixelX = self._pointOne[0]-self._pointZero[0]
+    self.pixelY = self._pointOne[1]-self._pointZero[1]
+
     # self._invTransform = vInv.dot(pInv)
     # self.test = self._uVMatrix.reshape((4, 4)).dot(vInv)
 
@@ -1149,9 +1163,9 @@ void main()
     self.projectionMatrix = (GL.GLdouble * 16)()
     self.viewport = (GL.GLint * 4)()
 
-    GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
-    GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
-    GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
+    # GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
+    # GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
+    # GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
 
     # self.worldCoordinate = GLU.gluUnProject(
     #   self._mouseX, self._mouseY, 0,
@@ -1189,20 +1203,20 @@ void main()
     # )
 
     # calculate the width of a world pixel on the screen
-    origin = GLU.gluUnProject(
-      0.0, 0.0, 0.0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-    pointOne = GLU.gluUnProject(
-      1.0, 1.0, 0.0,
-      self.modelViewMatrix,
-      self.projectionMatrix,
-      self.viewport,
-    )
-    self.pixelX = pointOne[0]-origin[0]
-    self.pixelY = pointOne[1]-origin[1]
+    # origin = GLU.gluUnProject(
+    #   0.0, 0.0, 0.0,
+    #   self.modelViewMatrix,
+    #   self.projectionMatrix,
+    #   self.viewport,
+    # )
+    # pointOne = GLU.gluUnProject(
+    #   1.0, 1.0, 0.0,
+    #   self.modelViewMatrix,
+    #   self.projectionMatrix,
+    #   self.viewport,
+    # )
+    # self.pixelX = pointOne[0]-origin[0]
+    # self.pixelY = pointOne[1]-origin[1]
 
     # GL.glEnable(GL.GL_LINE_SMOOTH)
     # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
@@ -1367,6 +1381,12 @@ void main()
       #   self.projectionMatrix,
       #   self.viewport,
       # )
+
+      self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0, 0.0,
+                               0.0, 0.0, 1.0, 0.0,
+                               0.0, 0.0, 0.0, 1.0]
+      self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
       self._dragStart = self._startCoordinate
       self._dragEnd = self._endCoordinate

@@ -275,6 +275,24 @@ ObjectTable::item::selected {
     color: #f7ffff;
 }
 
+TableWidget {
+             border: 1px #182548;
+             font-family: open-sans;
+             alternate-background-color: black;
+
+           }
+
+TableWidget::item {
+                  padding: 2px;
+                  background-color: #cccff9;
+                  color: #122043;
+                 }
+
+TableWidget::item::selected {
+    background-color: #182548;
+    color: #f7ffff;
+}
+
 /* setting the QHeader background colour produces an unexpected behavior when a row is selected. */
 
 QHeaderView {

@@ -922,7 +922,6 @@ class Project(AbstractWrapperObject):
     PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
     The Nef file may also contain further dependent items associated with the pidList.
 
-    :param path: output path and filename
     :param skipPrefixes: items to skip
     :param expandSelection: expand the selection
     :param pidList: a list of pids
@@ -943,9 +942,9 @@ class Project(AbstractWrapperObject):
     newPath = None
     try:
       t0 = time()
-      dataBlock, newPath = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes
-                                                        , expandSelection=expandSelection
-                                                        , pidList=pidList)
+      dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes
+                                                , expandSelection=expandSelection
+                                                , pidList=pidList)
       t2 = time()
       getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
 
@@ -955,7 +954,7 @@ class Project(AbstractWrapperObject):
       if undo is not None:
         undo.decreaseBlocking()
 
-    return dataBlock, newPath
+    return dataBlock
 
   def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None
                             , overwriteExisting:bool=False):

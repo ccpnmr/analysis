@@ -899,7 +899,7 @@ def convertToDataBlock(project:Project
   dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
                            pidList=pidList)   #, exclusionDict=exclusionDict)
 
-  return dataBlock, path       # ejb - will this work here?
+  return dataBlock
 
 def writeDataBlock(dataBlock, path:str, overwriteExisting:bool=False):
   if path[-4:] != '.nef':

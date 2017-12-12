@@ -34,6 +34,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
@@ -198,7 +200,7 @@ class StructureTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
 
-    self.addWidget(self.structureTable)
+    self.mainWidget.layout().addWidget(self.structureTable)
 
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
@@ -343,7 +345,6 @@ class StructureTable(pg.TableWidget):
     :param itemPid: should be None
     :param kwds:
     """
-    super(StructureTable, self).__init__()
 
     self.moduleParent=moduleParent
     self._application = application
@@ -399,6 +400,8 @@ class StructureTable(pg.TableWidget):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
+    self._widget.setFixedHeight(40)
+
     # ObjectTable.__init__(self, parent=self._widget, setLayout=True
     #                      , columns=self.STcolumns, objects = []
     #                      , autoResize=True, multiSelect=True
@@ -406,6 +409,8 @@ class StructureTable(pg.TableWidget):
     #                      , actionCallback=self._actionCallback
     #                      , grid = (3, 0), gridSpan = (1, 6)
     #                      )
+
+    super(StructureTable, self).__init__()
 
     self._ensembleNotifier = None
     self._updateSilence = False
@@ -606,14 +611,14 @@ class StructureTable(pg.TableWidget):
       #   (443, 1e-12, 'w'),
       # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
 
-      self.hide()
-      tuples = structureEnsemble.data.as_namedtuples()
-      headings = [head[0] for head in self.STcolumns]
-      data = []
-      for row in tuples:
-        data.append(list(row))
-
-      df = pd.DataFrame(data[0], columns=headings)
+      # self.hide()
+      # tuples = structureEnsemble.data.as_namedtuples()
+      # headings = [head[0] for head in self.STcolumns]
+      # data = []
+      # for row in tuples:
+      #   data.append(list(row))
+      #
+      # df = pd.DataFrame(data[0], columns=headings)
 
       # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
       #                                       ('modelNumber', int),
@@ -642,7 +647,12 @@ class StructureTable(pg.TableWidget):
       #                                         ('modelNumber', float),
       #                                         ('chainCode', str)])
 
-      self.setData(tuples)
+      self._project.blankNotification()
+
+      self.setData(structureEnsemble.data.values)
+      self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
+
+      self._project.unblankNotification()
       self.show()
       self.resizeColumnsToContents()
 

@@ -34,8 +34,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
@@ -200,7 +199,7 @@ class StructureTableModule(CcpnModule):
                                         , moduleParent=self
                                         , grid=(0,0))
 
-    self.mainWidget.layout().addWidget(self.structureTable)
+    # self.mainWidget.layout().addWidget(self.structureTable)
 
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
@@ -301,7 +300,7 @@ class NewStructureTable(pg.TableWidget):
 
   pass
 
-class StructureTable(pg.TableWidget):
+class StructureTable(QuickTable):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
@@ -402,15 +401,16 @@ class StructureTable(pg.TableWidget):
 
     self._widget.setFixedHeight(40)
 
-    # ObjectTable.__init__(self, parent=self._widget, setLayout=True
-    #                      , columns=self.STcolumns, objects = []
-    #                      , autoResize=True, multiSelect=True
-    #                      , selectionCallback=self._selectionCallback
-    #                      , actionCallback=self._actionCallback
-    #                      , grid = (3, 0), gridSpan = (1, 6)
-    #                      )
+    QuickTable.__init__(self, parent=parent, setLayout=True
+                       , columns=[head[0] for head in self.STcolumns]
+                       , objects = []
+                       , autoResize=True, multiSelect=True
+                       , selectionCallback=self._selectionCallback
+                       , actionCallback=self._actionCallback
+                       , grid = (3, 0), gridSpan = (1, 6)
+                       )
 
-    super(StructureTable, self).__init__()
+    # super(StructureTable, self).__init__()
 
     self._ensembleNotifier = None
     self._updateSilence = False

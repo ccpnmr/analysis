@@ -365,7 +365,7 @@ class StructureTable(QuickTable):
     # self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     self.STcolumns = [
-      ('index', int),
+      ('Index', int),
       ('modelNumber', int),
       ('chainCode', str),
       ('sequenceId', int),

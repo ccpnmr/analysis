@@ -158,6 +158,9 @@ class QuickTable(TableWidget, Base):
     headers.setResizeMode(QtGui.QHeaderView.Fixed)
     headers.setDefaultSectionSize(rowHeight)
 
+    # and hide the row labels
+    headers.hide()
+
     # for qt5 and above
     # QHeaderView * verticalHeader = myTableView->verticalHeader();
     # verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
@@ -285,6 +288,20 @@ class QuickTable(TableWidget, Base):
     self._dataFrame = dataFrame
 
     self.hide()
+
+    # check for the existence of 'Index' and 'comment' in the values
+    numRows = len(dataFrame.index)
+    if 'Index' not in dataFrame:
+      dataFrame['Index'] = [x for x in range(1, numRows+1)]
+    if 'comment' not in dataFrame:
+      dataFrame['comment'] = [''] * numRows
+
+    # and reorder the 'Index' to the front
+    cols = dataFrame.columns.tolist()
+    cols.insert(0, cols.pop(cols.index('Index')))
+    dataFrame = dataFrame.reindex(columns=cols)
+
+    # set the table and column headings
     self.setData(dataFrame.values)
     self.setHorizontalHeaderLabels(self._columns)
 

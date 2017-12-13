@@ -194,9 +194,9 @@ class StructureTableModule(CcpnModule):
 
     # main window
     self.structureTable = StructureTable(parent=self.mainWidget
-                                        , setLayout=True
-                                        , application=self.application
+                                        , mainWindow=self.mainWindow
                                         , moduleParent=self
+                                        , setLayout=True
                                         , grid=(0,0))
 
     # self.mainWidget.layout().addWidget(self.structureTable)
@@ -335,7 +335,7 @@ class StructureTable(QuickTable):
   OBJECT = 'object'
   TABLE = 'table'
 
-  def __init__(self, parent, application, moduleParent, structureEnsemble=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, structureEnsemble=None, **kwds):
     """
     Initialise the widgets for the module.
     :param parent: parent widget
@@ -345,10 +345,16 @@ class StructureTable(QuickTable):
     :param kwds:
     """
 
+    # Derive application, project, and current from mainWindow
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
+
     self.moduleParent=moduleParent
-    self._application = application
-    self._project = application.project
-    self._current = application.current
+    # self._application = application
+    # self._project = application.project
+    # self._current = application.current
     self._widget = Widget(parent=parent, **kwds)
     self.thisObj = None
     self.thisDataSet = None
@@ -359,7 +365,7 @@ class StructureTable(QuickTable):
     # self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     self.STcolumns = [
-      ('#', int),
+      # ('#', int),
       ('modelNumber', int),
       ('chainCode', str),
       ('sequenceId', int),
@@ -401,16 +407,20 @@ class StructureTable(QuickTable):
 
     self._widget.setFixedHeight(40)
 
-    QuickTable.__init__(self, parent=parent, setLayout=True
-                       , columns=[head[0] for head in self.STcolumns]
-                       , objects = []
-                       , autoResize=True, multiSelect=True
-                       , selectionCallback=self._selectionCallback
-                       , actionCallback=self._actionCallback
-                       , grid = (3, 0), gridSpan = (1, 6)
-                       )
-
-    # super(StructureTable, self).__init__()
+    self._columnNames = [header[0] for header in self.STcolumns]
+    self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=self._mainWindow
+                        , dataFrame=None
+                        , columns=self._columnNames
+                        , hiddenColumns=self._hiddenColumns
+                        , objects = None
+                        , setLayout=True
+                        , autoResize=True, multiSelect=True
+                        , selectionCallback=self._selectionCallback
+                        , actionCallback=self._actionCallback
+                        , grid = (3, 0), gridSpan = (1, 6)
+                        )
 
     self._ensembleNotifier = None
     self._updateSilence = False
@@ -421,10 +431,6 @@ class StructureTable(QuickTable):
 
     if structureEnsemble is not None:
       self._selectStructureEnsemble(structureEnsemble)
-
-    self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
-    # for colName in self._hiddenColumns:
-    #   self.hideColumnName(colName)
 
     # data = np.array([
     #   (1, 1.6, 'x'),
@@ -647,14 +653,21 @@ class StructureTable(QuickTable):
       #                                         ('modelNumber', float),
       #                                         ('chainCode', str)])
 
+      # self._project.blankNotification()
+      #
+      # self.setData(structureEnsemble.data.values)
+      # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
+      #
+      # self._project.unblankNotification()
+      # self.resizeColumnsToContents()
+      # self.show()
+
+      # add a comment field to the Pandas dataFrame?
+
       self._project.blankNotification()
-
-      self.setData(structureEnsemble.data.values)
-      self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
-
+      self.setTableFromDataFrame(structureEnsemble.data)
       self._project.unblankNotification()
-      self.show()
-      self.resizeColumnsToContents()
+
 
   def _updateDataSet(self, structureData):
     """

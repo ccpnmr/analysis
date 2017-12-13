@@ -117,7 +117,12 @@ class QuickTable(TableWidget, Base):
     else:
       self.setSelectionBehavior(self.SelectItems)
 
+    # set all the elements to the same size
     self._setDefaultRowHeight()
+
+    # enable sorting and sort on the first column
+    self.setSortingEnabled(True)
+    self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
     # enable drag and drop operations on the table
     self.setDragEnabled(True)

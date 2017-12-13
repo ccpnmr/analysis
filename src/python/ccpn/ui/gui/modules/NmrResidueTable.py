@@ -31,6 +31,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -39,7 +40,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.Column import Column
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
@@ -127,11 +129,12 @@ class NmrResidueTableModule(CcpnModule):
                                             )
 
     # main window
-    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget, setLayout=True,
-                                           application=self.application,
-                                           actionCallback=self.navigateToNmrResidue,
-                                           grid=(0,0))
-    # settingsWidget
+    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget
+                                           , mainWindow=self.mainWindow
+                                           , moduleParent=self
+                                           , setLayout=True
+                                           , actionCallback=self.navigateToNmrResidue
+                                           , grid=(0,0))
 
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
@@ -202,7 +205,7 @@ class NmrResidueTableModule(CcpnModule):
     self._closeModule()
 
 
-class NmrResidueTable(ObjectTable):
+class NmrResidueTable(QuickTable):
   """
   Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
   """
@@ -236,15 +239,19 @@ class NmrResidueTable(ObjectTable):
     except:
       return None
 
-  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None,  multiSelect = False,
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, nmrChain=None,  multiSelect = False,
                **kwds):
     """
     Initialise the widgets for the module.
     """
-    self._application = application
-    self._project = application.project
-    self._current = application.current
+    # Derive application, project, and current from mainWindow
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
+    self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
+
     self.nmrChain = None
     if actionCallback is None:
       actionCallback = self.defaultActionCallback
@@ -271,12 +278,30 @@ class NmrResidueTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=self.NMRcolumns, objects = [],
-                         autoResize=True,  multiSelect = multiSelect,
-                         actionCallback=actionCallback, selectionCallback=selectionCallback,
-                         grid = (3, 0), gridSpan = (1, 6), enableDelete=True
-                         )
+
+    # ObjectTable.__init__(self, parent=self._widget, setLayout=True,
+    #                      columns=self.NMRcolumns, objects = [],
+    #                      autoResize=True,  multiSelect = multiSelect,
+    #                      actionCallback=actionCallback, selectionCallback=selectionCallback,
+    #                      grid = (3, 0), gridSpan = (1, 6), enableDelete=True
+    #                      )
+
+    self._columnNames = [header.headerText for header in self.NMRcolumns]
+    self._hiddenColumns = []
+
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=mainWindow
+                        , dataFrame=None
+                        , columns=self._columnNames
+                        , hiddenColumns=self._hiddenColumns
+                        , objects=None
+                        , setLayout=True
+                        , autoResize=True,  multiSelect=multiSelect
+                        , actionCallback=actionCallback
+                        , selectionCallback=selectionCallback
+                        , grid = (3, 0), gridSpan = (1, 6)
+                        , enableDelete=True
+                        )
 
     # Notifier object to update the table if the nmrChain changes
     self._chainNotifier = None
@@ -370,13 +395,21 @@ class NmrResidueTable(ObjectTable):
     Update the table with NmrResidues of nmrChain
     """
     if not self._updateSilence:
-      # objs = self.getSelectedObjects()
-      self.setObjectsAndColumns(nmrChain.nmrResidues,self.NMRcolumns)
-      # self.setColumns(self.NMRcolumns)
-      # self.setObjects(nmrChain.nmrResidues)
-      # self._highLightObjs(objs)
-      self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
-      # self.show()
+      # # objs = self.getSelectedObjects()
+      # self.setObjectsAndColumns(nmrChain.nmrResidues,self.NMRcolumns)
+      # # self.setColumns(self.NMRcolumns)
+      # # self.setObjects(nmrChain.nmrResidues)
+      # # self._highLightObjs(objs)
+      # self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
+      # # self.show()
+
+      dataFrame = self.getDataFrameFromList(nmrChain.nmrResidues, self.NMRcolumns)
+
+      # new populate from Pandas
+      self._project.blankNotification()
+      self.setTableFromDataFrame(dataFrame=dataFrame)
+      self._project.unblankNotification()
+
 
   def setUpdateSilence(self, silence):
     """

@@ -37,7 +37,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable
+from ccpn.ui.gui.widgets.Column import Column
 from PyQt4 import QtGui, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
@@ -199,8 +200,6 @@ class StructureTableModule(CcpnModule):
                                         , setLayout=True
                                         , grid=(0,0))
 
-    # self.mainWidget.layout().addWidget(self.structureTable)
-
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
 
@@ -350,8 +349,8 @@ class StructureTable(QuickTable):
     self._application = mainWindow.application
     self._project = mainWindow.application.project
     self._current = mainWindow.application.current
-
     self.moduleParent=moduleParent
+
     # self._application = application
     # self._project = application.project
     # self._current = application.current
@@ -362,28 +361,28 @@ class StructureTable(QuickTable):
     StructureTable._project = self._project
 
     # create the column objects
-    # self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.STcolumns = [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
 
-    self.STcolumns = [
-      ('Index', int),
-      ('modelNumber', int),
-      ('chainCode', str),
-      ('sequenceId', int),
-      ('insertionCode', str),
-      ('residueName', str),
-      ('atomName', str),
-      ('altLocationCode', str),
-      ('element', str),
-      ('x', float),
-      ('y', float),
-      ('z', float),
-      ('occupancy', float),
-      ('bFactor', float),
-      ('nmrChainCode', str),
-      ('nmrSequenceCode', str),
-      ('nmrResidueName', str),
-      ('nmrAtomName', str),
-      ('Comment', str)]  # will need to put the comment back in
+    # self.STcolumns = [
+    #   ('Index', int),
+    #   ('modelNumber', int),
+    #   ('chainCode', str),
+    #   ('sequenceId', int),
+    #   ('insertionCode', str),
+    #   ('residueName', str),
+    #   ('atomName', str),
+    #   ('altLocationCode', str),
+    #   ('element', str),
+    #   ('x', float),
+    #   ('y', float),
+    #   ('z', float),
+    #   ('occupancy', float),
+    #   ('bFactor', float),
+    #   ('nmrChainCode', str),
+    #   ('nmrSequenceCode', str),
+    #   ('nmrResidueName', str),
+    #   ('nmrAtomName', str),
+    #   ('Comment', str)]  # will need to put the comment back in
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
@@ -407,8 +406,9 @@ class StructureTable(QuickTable):
 
     self._widget.setFixedHeight(40)
 
-    self._columnNames = [header[0] for header in self.STcolumns]
+    self._columnNames = [header.headerText for header in self.STcolumns]
     self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
+
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self._mainWindow
                         , dataFrame=None
@@ -664,10 +664,11 @@ class StructureTable(QuickTable):
 
       # add a comment field to the Pandas dataFrame?
 
-      self._project.blankNotification()
-      self.setTableFromDataFrame(structureEnsemble.data)
-      self._project.unblankNotification()
+      dataFrame = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
 
+      self._project.blankNotification()
+      self.setTableFromDataFrame(dataFrame=dataFrame)
+      self._project.unblankNotification()
 
   def _updateDataSet(self, structureData):
     """

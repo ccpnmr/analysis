@@ -46,6 +46,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from functools import partial
+from collections import OrderedDict
 
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
@@ -139,6 +140,22 @@ class QuickTable(TableWidget, Base):
     if dataFrame:
       self.setTableFromDataFrame(dataFrame)
       self.showColumns()
+
+    # enable callbacks
+    self._actionCallback = actionCallback
+    self._selectionCallback = selectionCallback
+    self.doubleClicked.connect(self._doubleClickCallback)
+
+  def _doubleClickCallback(self, itemSelection):
+    if self.SelectRows and self.SelectColumns:
+        # obj = self.objects[row]
+        # if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
+        #   self.callback(obj, row, col)
+
+      # TODO:ED generate a callback dict for the selected item
+      # data = OrderedDict()
+      # data['OBJECT'] = return pid, key/values, row, col
+      pass
 
   def showColumns(self):
     # hide the columns in the list
@@ -289,17 +306,18 @@ class QuickTable(TableWidget, Base):
 
     self.hide()
 
+    # TODO:ED this shouldn't need to be here
     # check for the existence of 'Index' and 'comment' in the values
-    numRows = len(dataFrame.index)
-    if 'Index' not in dataFrame:
-      dataFrame['Index'] = [x for x in range(1, numRows+1)]
-    if 'comment' not in dataFrame:
-      dataFrame['comment'] = [''] * numRows
-
-    # and reorder the 'Index' to the front
-    cols = dataFrame.columns.tolist()
-    cols.insert(0, cols.pop(cols.index('Index')))
-    dataFrame = dataFrame.reindex(columns=cols)
+    # numRows = len(dataFrame.index)
+    # if 'Index' not in dataFrame:
+    #   dataFrame['Index'] = [x for x in range(1, numRows+1)]
+    # if 'comment' not in dataFrame:
+    #   dataFrame['comment'] = [''] * numRows
+    #
+    # # and reorder the 'Index' to the front
+    # cols = dataFrame.columns.tolist()
+    # cols.insert(0, cols.pop(cols.index('Index')))
+    # dataFrame = dataFrame.reindex(columns=cols)
 
     # set the table and column headings
     self.setData(dataFrame.values)
@@ -309,3 +327,43 @@ class QuickTable(TableWidget, Base):
     self.resizeColumnsToContents()
     self.showColumns()
     self.show()
+
+  def getDataFrameFromList(self, buildList, colDefs):
+    """
+    Return a Pandas dataFrame from an internal list of objects
+    The columns are based on the 'func' functions in the columnDefinitions
+
+    :param buildList:
+    :param colDefs:
+    :return pandas dataFrame:
+    """
+    allItems = []
+    for obj in buildList:
+      listItem = OrderedDict()
+      for header in colDefs:
+        listItem[header.headerText] = header.getValue(obj)
+
+      allItems.append(listItem)
+
+    return pd.DataFrame(allItems, columns=[header.headerText for header in colDefs])
+
+  def getDataFrameFromRows(self, ensembleData, colDefs):
+    """
+    Return a Pandas dataFrame from the internal rows of an internal Pandas dataFrame
+    The columns are based on the 'func' functions in the columnDefinitions
+
+    :param buildList:
+    :param colDefs:
+    :return pandas dataFrame:
+    """
+    allItems = []
+    buildList = ensembleData.as_namedtuples()
+    for obj in buildList:
+      listItem = OrderedDict()
+      for header in colDefs:
+        listItem[header.headerText] = header.getValue(obj)
+
+      allItems.append(listItem)
+
+    return pd.DataFrame(allItems, columns=[header.headerText for header in colDefs])
+

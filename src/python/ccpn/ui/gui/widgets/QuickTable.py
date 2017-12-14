@@ -160,29 +160,13 @@ class QuickTable(TableWidget, Base):
 
     model = self.selectionModel()
 
-    # if self.selectRows:
-    #   selection = model.selectedRows(column=0)
-    # else:
-    #   selection = model.selectedIndexes()
+    # selects all the items in the row
     selection = model.selectedIndexes()
 
     if selection:
-
-      # rows = [i.row() for i in selection]
-      # rows.sort()
-      # if row not in rows:
-      #   row = rows[0]
-
-      # get the coordinates of the current cell
       row = itemSelection.row()
       col = itemSelection.column()
 
-      # need to select the whole row
-      # self.selectRow(row)
-      # model = self.selectionModel()
-      # selection = model.selectedIndexes()
-
-      # index = self.tableSusAmigos.selectedIndexes()[0]
       data = {}
       for iSelect in selection:
         col = iSelect.column()
@@ -204,7 +188,8 @@ class QuickTable(TableWidget, Base):
       data = CallBack(theObject = self._dataFrameObject
                       , object = obj
                       , index = objIndex
-                      , triggers = [CallBack.DOUBLECLICK]
+                      , targetName = obj.className
+                      , trigger = CallBack.DOUBLECLICK
                       , row = row
                       , col = col
                       , rowItem = data)
@@ -288,18 +273,6 @@ class QuickTable(TableWidget, Base):
 
     if action == searchSettings:
       self.showSearchSettings()
-
-  def exportDialog(self):
-
-    self.saveDialog = FileDialog(directory='ccpn_Table.xlsx', #default saving name
-                            fileMode=FileDialog.AnyFile,
-                            filter=".xlsx;; .csv;; .tsv;; .json ",
-                            text='Save as ',
-                            acceptMode=FileDialog.AcceptSave,
-                            preferences=None)
-    path = self.saveDialog.selectedFile()
-    if path:
-      self.findExportFormats(path)
 
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
@@ -443,4 +416,107 @@ class QuickTable(TableWidget, Base):
                            , columnDefs=colDefs
                            , hiddenColumns=hiddenColumns
                            , table=table)
+
+  def exportDialog(self):
+    self.saveDialog = FileDialog(directory='ccpn_Table.xlsx', #default saving name
+                            fileMode=FileDialog.AnyFile,
+                            filter=".xlsx;; .csv;; .tsv;; .json ",
+                            text='Save as ',
+                            acceptMode=FileDialog.AcceptSave,
+                            preferences=None)
+    path = self.saveDialog.selectedFile()
+    if path:
+      self.findExportFormats(path)
+
+  def findExportFormats(self, path):
+    formatTypes = OrderedDict([
+                               ('.xlsx', self.dataFrameToExcel),
+                               ('.csv', self.dataFrameToCsv),
+                               ('.tsv', self.dataFrameToTsv),
+                               ('.json', self.dataFrameToJson)
+                              ])
+
+    extension = os.path.splitext(path)[1]
+    if extension in formatTypes.keys():
+       formatTypes[extension](self._dataFrameObject.dataFrame, path)
+       return
+    else:
+      try:
+        self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter())
+      except:
+        print('Format file not supported')
+
+  def dataFrameToExcel(self, dataFrame, path):
+    dataFrame.to_excel(path, sheet_name='Table', index=False)
+
+  def dataFrameToCsv(self, dataFrame, path):
+    dataFrame.to_csv(path)
+
+  def dataFrameToTsv(self, dataFrame, path):
+    dataFrame.to_csv(path, sep='\t')
+
+  def dataFrameToJson(self, dataFrame, path):
+    dataFrame.to_json(path, orient = 'split')
+
+  def getSelectedObjects(self):
+
+    model = self.selectionModel()
+
+    # selects all the items in the row
+    selection = model.selectedIndexes()
+
+    if selection:
+      selectedObjects = []
+      rows = []
+
+      for iSelect in selection:
+        row = iSelect.row()
+        col = iSelect.column()
+        colName = self.horizontalHeaderItem(col).text()
+        if colName == 'Index':
+
+          if row not in rows:
+            rows.append(row)
+            objIndex = model.model().data(iSelect)
+            obj = self._dataFrameObject.indexList[objIndex]  # item.index needed
+            selectedObjects.append(obj)
+
+    #     if iSelect.row() not in rows:
+    #       rows.append(i.row())
+    #
+    #       data = {}
+    #       for iSelect in selection:
+    #         col = iSelect.column()
+    #         colName = self.horizontalHeaderItem(col).text()
+    #         data[colName] = model.model().data(iSelect)
+    #
+    #       objIndex = data['Index']
+    #       obj = self._dataFrameObject.indexList[objIndex]  # item.index needed
+    #
+    #       selectedObjects.append()
+    #
+    #
+    #
+    #
+    #   objIndex = data['Index']
+    #   obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
+    #
+    #
+    #
+    # model = self.selectionModel()
+    # if self.selectRows:
+    #   selection = model.selectedRows(column=0)
+    # else:
+    #   selection = model.selectedIndexes()
+    #
+    # objects = self.objects
+    # selectedObjects = []
+    #
+    # for index in selection:
+    #   row = self.model.mapToSource(index).row()
+    #   selectedObjects.append(objects[row])
+    #
+      return selectedObjects
+    else:
+      return None
 

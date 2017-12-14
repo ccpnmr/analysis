@@ -164,7 +164,9 @@ class NmrResidueTableModule(CcpnModule):
     """
     Navigate in selected displays to nmrResidue; skip if none defined
     """
-    nmrResidue = data['OBJECT']
+    from ccpn.core.lib.CallBack import CallBack
+
+    nmrResidue = data[CallBack.OBJECT]
 
     logger.debug('nmrResidue=%s' % (nmrResidue.id))
 
@@ -376,7 +378,7 @@ class NmrResidueTable(QuickTable):
     self.ncWidget.select(nmrChain.pid)
     self._update(nmrChain)
 
-  def _updateCallback(self, data):
+  def _updateChainCallback(self, data):
     """
     Notifier callback for updating the table
     """
@@ -391,6 +393,35 @@ class NmrResidueTable(QuickTable):
     logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
     # if nmrChain is not None:
     #   self._update(nmrChain)
+
+  def _updateResidueCallback(self, data):
+    """
+    Notifier callback for updating the table for change in nmrResidues
+    """
+    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+    nmrResidue = data[Notifier.OBJECT]
+    trigger = data[Notifier.TRIGGER]
+
+    if self.nmrChain in thisChainList:
+      # is the nmrResidue in the visible list
+      # TODO:ED move these into the table class
+
+      if nmrResidue.pid in self._dataFrameObject.objectList and trigger == Notifier.DELETE:
+
+          # remove item from self._dataFrameObject
+
+        self._dataFrameObject.removeObject(nmrResidue)
+
+      elif nmrResidue.pid not in self._dataFrameObject.objectList and trigger == Notifier.CREATE:
+
+        # insert item into self._dataFrameObject
+
+        if self.nmrChain.nmrResidues and len(self.nmrChain.nmrResidues) > 1:
+          self._dataFrameObject.appendObject(nmrResidue)
+        else:
+          self._update(self.nmrChain)
+
+    logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _update(self, nmrChain):
     """
@@ -446,7 +477,7 @@ class NmrResidueTable(QuickTable):
     if self.nmrChain is not None:
       self.displayTableForNmrChain(self.nmrChain)
     else:
-      self.clearTable()
+      self.clear()
 
   def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
     '''callback from a notifier to select the current NmrResidue  '''
@@ -519,11 +550,11 @@ class NmrResidueTable(QuickTable):
     self._chainNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                       , NmrChain.__name__
-                                      , self._updateCallback)
+                                      , self._updateChainCallback)
     self._residueNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                       , NmrResidue.__name__
-                                      , self._updateCallback
+                                      , self._updateResidueCallback
                                       , onceOnly=True)
     # very slow
     # self._peakNotifier = Notifier(self._project

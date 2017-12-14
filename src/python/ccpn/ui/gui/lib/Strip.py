@@ -181,7 +181,7 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
   if markPositions:
     strip.spectrumDisplay.mainWindow.markPositions(list(shiftDict.keys()), list(shiftDict.values()))
 
-  if setNmrResidueLabel:
+  if setNmrResidueLabel and nmrAtoms:
     strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)
     strip.showStripLabel()
 

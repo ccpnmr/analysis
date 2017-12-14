@@ -43,9 +43,10 @@ class CallBack(OrderedDict):
   THEOBJECT = 'theObject'
   OBJECT = 'object'
   INDEX = 'index'
-  TRIGGERS = 'triggers'
+  TARGETNAME = 'targetName'
+  TRIGGER = 'trigger'
   ROW = 'row'
-  COL = 'COL'
+  COL = 'col'
   ROWITEM = 'rowItem'
 
   _callbackwords = (CLICK, DOUBLECLICK, CURRENT)
@@ -53,7 +54,8 @@ class CallBack(OrderedDict):
   def __init__(self, theObject: Any=None
                , object: Any=None
                , index: int=None
-               , triggers: list=None
+               , targetName: str=None
+               , trigger: list=None
                , row: int=None
                , col: int=None
                , rowItem: dict=None
@@ -66,11 +68,12 @@ class CallBack(OrderedDict):
     super(CallBack, self).__init__(*args, **kwargs)
 
     _dict = {}
-    _dict['THEOBJECT'] = theObject
-    _dict['OBJECT'] = object
-    _dict['INDEX'] = index
-    _dict['TRIGGERS'] = triggers
-    _dict['ROW'] = row
-    _dict['COL'] = col
-    _dict['ROWITEM'] = rowItem
+    _dict[self.THEOBJECT] = theObject
+    _dict[self.OBJECT] = object
+    _dict[self.INDEX] = index
+    _dict[self.TARGETNAME] = targetName
+    _dict[self.TRIGGER] = trigger
+    _dict[self.ROW] = row
+    _dict[self.COL] = col
+    _dict[self.ROWITEM] = rowItem
     self.update(_dict)

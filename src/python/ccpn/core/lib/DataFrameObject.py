@@ -24,6 +24,9 @@ __date__ = "$Date$"
 #=========================================================================================
 
 from ccpn.ui.gui.widgets.Column import Column
+from PyQt4 import QtGui, QtCore
+from collections import OrderedDict
+import pandas as pd
 
 
 class DataFrameObject(object):
@@ -91,4 +94,70 @@ class DataFrameObject(object):
   @table.setter
   def table(self, table=None):
     self._table = table
+
+  def removeObject(self, obj):
+    # remove an object from the class
+
+    if obj.pid in self._objectList:
+
+      # the object exists
+      index = self._objectList[obj.pid]
+
+      del self._objectList[obj.pid]   # remove from objectList
+      del self._indexList[str(index)]      # remove from indexList
+
+      # now remove from dataFrame
+      self._dataFrame = self._dataFrame.ix[self._dataFrame['Index'] != index]
+      row = self.find(self._table, str(index))
+      self._table.removeRow(row)
+
+  def find(self, table, text, column=1):
+    model = table.model()
+    start = model.index(0, column)
+    matches = model.match(
+      start, QtCore.Qt.DisplayRole,
+      text, 1, QtCore.Qt.MatchContains)
+    if matches:
+      return matches[0].row()
+      # # index.row(), index.column()
+      # self.table.selectionModel().select(
+      #   index, QtGui.QItemSelectionModel.Select)
+
+    return None
+
+  def appendObject(self, obj):
+    if obj.pid not in self._objectList:
+
+      # the object doesn't exist in list, so can be added
+      listItem = OrderedDict()
+      for header in self._columnDefinitions.columns:
+        listItem[header.headerText] = header.getValue(obj)
+
+      # need to
+      if not self._dataFrame.empty:
+        newIndex = len(self._dataFrame.index)
+
+        listItem['Index'] = newIndex
+        self._indexList[str(newIndex)] = obj
+        self._objectList[obj.pid] = newIndex
+
+        appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
+
+        self._dataFrame.append(appendDataFrame)
+        self._table.appendData(appendDataFrame.values)
+      else:
+        # set the table and column headings
+        self._indexList[str(listItem['Index'])] = obj
+        self._objectList[obj.pid] = listItem['Index']
+
+        appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
+
+        self._dataFrame = appendDataFrame
+        self._table.setData(self._dataFrame.values)
+        self._table.setHorizontalHeaderLabels(self.headings)
+
+        # needed after setting the column headings
+        self._table.resizeColumnsToContents()
+        self._table.showColumns(self._dataFrame)
+        self._table.show()
 

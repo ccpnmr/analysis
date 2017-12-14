@@ -664,10 +664,10 @@ class StructureTable(QuickTable):
 
       # add a comment field to the Pandas dataFrame?
 
-      dataFrame = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
+      dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
 
       self._project.blankNotification()
-      self.setTableFromDataFrame(dataFrame=dataFrame)
+      self.setTableFromDataFrame(dataFrame=dataFrameObject.dataFrame)
       self._project.unblankNotification()
 
   def _updateDataSet(self, structureData):

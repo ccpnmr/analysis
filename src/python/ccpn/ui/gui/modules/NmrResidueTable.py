@@ -41,7 +41,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
-from ccpn.ui.gui.widgets.Column import Column
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
@@ -209,20 +209,6 @@ class NmrResidueTable(QuickTable):
   """
   Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
   """
-  columnDefs = [
-    ('#',          lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-    ('Index',      lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-    # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-#    ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
-    ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-    ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-    ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
-    ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
-                  , 'Number of peaks assigned to NmrResidue', None),
-    ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
-     lambda nmr, value:NmrResidueTable._setComment(nmr, value))
-  ]
-
   className = 'NmrResidueTable'
   attributeName = 'nmrChains'
 
@@ -259,7 +245,21 @@ class NmrResidueTable(QuickTable):
     NmrResidueTable._project = self._project
 
     # create the column objects
-    self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.NMRcolumns = ColumnClass([
+      ('#',          lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+      ('Index',      lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+      # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+      # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
+      ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+      ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+      ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
+      ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
+                    , 'Number of peaks assigned to NmrResidue', None),
+      ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
+       lambda nmr, value:NmrResidueTable._setComment(nmr, value))
+    ]
+
+)    # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
     # create the table; objects are added later via the displayTableForNmrChain method
@@ -286,15 +286,19 @@ class NmrResidueTable(QuickTable):
     #                      grid = (3, 0), gridSpan = (1, 6), enableDelete=True
     #                      )
 
-    self._columnNames = [header.headerText for header in self.NMRcolumns]
+    # self._columnNames = [header.headerText for header in self.NMRcolumns]
     self._hiddenColumns = []
+    self.dataFrameObject = None
 
     QuickTable.__init__(self, parent=parent
                         , mainWindow=mainWindow
-                        , dataFrame=None
-                        , columns=self._columnNames
-                        , hiddenColumns=self._hiddenColumns
-                        , objects=None
+
+                        , dataFrameObject=None    # class collating table and objects and headings
+
+                        # , dataFrame=None
+                        # , columns=self._columnNames
+                        # , hiddenColumns=self._hiddenColumns
+                        # , objects=None
                         , setLayout=True
                         , autoResize=True,  multiSelect=multiSelect
                         , actionCallback=actionCallback
@@ -403,11 +407,14 @@ class NmrResidueTable(QuickTable):
       # self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
       # # self.show()
 
-      dataFrame = self.getDataFrameFromList(nmrChain.nmrResidues, self.NMRcolumns)
+      self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                  , buildList=nmrChain.nmrResidues
+                                                  , colDefs=self.NMRcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
 
       # new populate from Pandas
       self._project.blankNotification()
-      self.setTableFromDataFrame(dataFrame=dataFrame)
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
       self._project.unblankNotification()
 
 

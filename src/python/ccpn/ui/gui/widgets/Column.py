@@ -30,6 +30,41 @@ from ccpn.util.Logging import getLogger
 BG_COLOR = QtGui.QColor('#E0E0E0')
 
 
+class ColumnClass:
+  def __init__(self, columnList=None):
+    self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
+                     colName, func, tipText, editValue in columnList]
+
+  def addColumn(self, newColumn):
+    columnToAdd = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
+                     colName, func, tipText, editValue in newColumn]
+
+    if self._columns:
+      self._columns.append(columnToAdd)
+    else:
+      self._columns = columnToAdd
+
+  @property
+  def columns(self):
+    return self._columns
+
+  @property
+  def headings(self):
+    return [heading.headerText for heading in self._columns]
+
+  @property
+  def functions(self):
+    return [heading.getValue for heading in self._columns]
+
+  @property
+  def tipTexts(self):
+    return [heading.tipText for heading in self._columns]
+
+  @property
+  def editValues(self):
+    return [heading.getEditValue for heading in self._columns]
+
+
 class Column:
 
   def __init__(self, headerText, getValue, getEditValue=None, setEditValue=None,

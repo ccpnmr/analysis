@@ -30,6 +30,8 @@ import pandas as pd
 from pyqtgraph import TableWidget
 import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
+from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
@@ -58,10 +60,13 @@ class QuickTable(TableWidget, Base):
 
   def __init__(self, parent=None,
                mainWindow=None,
-               dataFrame=None,
-               columns=None,
-               hiddenColumns=None,
-               objects=None,
+
+               dataFrameObject=None,      # collate into a single object that can be changed quickly
+
+               # dataFrame=None,
+               # columns=None,
+               # hiddenColumns=None,
+               # objects=None,
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
@@ -95,14 +100,15 @@ class QuickTable(TableWidget, Base):
     self.current = mainWindow.application.current
 
     # initialise the internal data storage
-    self._dataFrame = dataFrame
-    self._columns = columns
-    self._objects = list(objects or [])
+    self._dataFrameObject = dataFrameObject
+    # self._dataFrame = dataFrame
+    # self._columns = columns
+    # self._objects = list(objects or [])
 
     # set the prefered scrolling behaviour
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
-    self._hiddenColumns = hiddenColumns
+    # self._hiddenColumns = hiddenColumns
 
     # define the multiselection behaviour
     self.multiSelect = multiSelect
@@ -137,8 +143,8 @@ class QuickTable(TableWidget, Base):
     self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
 
     # populate if a dataFrame has been passed in
-    if dataFrame:
-      self.setTableFromDataFrame(dataFrame)
+    if dataFrameObject:
+      self.setTableFromDataFrame(dataFrameObject.dataFrame)
       self.showColumns()
 
     # enable callbacks
@@ -147,20 +153,33 @@ class QuickTable(TableWidget, Base):
     self.doubleClicked.connect(self._doubleClickCallback)
 
   def _doubleClickCallback(self, itemSelection):
-    if self.SelectRows and self.SelectColumns:
-        # obj = self.objects[row]
+    row = self.SelectRows
+    col = self.SelectColumns
+
+    if row and col:
         # if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
         #   self.callback(obj, row, col)
 
       # TODO:ED generate a callback dict for the selected item
       # data = OrderedDict()
       # data['OBJECT'] = return pid, key/values, row, col
-      pass
 
-  def showColumns(self):
+      obj = self.objects[row]
+
+      data = {}
+      data['THEOBJECT'] = self.project
+      data['OBJECT'] = obj
+      data['TRIGGER'] = 'doubleclick'
+      data['ROW'] = row
+      data['COL'] = col
+      data['GETPID'] = None
+
+      self._actionCallback(obj, data)
+
+  def showColumns(self, dataFrameObject):
     # hide the columns in the list
-    for i, colName in enumerate(self._columns):
-      if colName in self._hiddenColumns:
+    for i, colName in enumerate(dataFrameObject.headings):
+      if colName in dataFrameObject.hiddenColumns:
         self.hideColumn(i)
       else:
         self.showColumn(i)
@@ -228,7 +247,7 @@ class QuickTable(TableWidget, Base):
     action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
     if action == columnsSettings:
-      settingsPopup = ColumnViewSettingsPopup(parent=self._parent, hideColumns=self._hiddenColumns, table=self)
+      settingsPopup = ColumnViewSettingsPopup(parent=self._parent, dataFrameObject=self._dataFrameObject)   #, hideColumns=self._hiddenColumns, table=self)
       settingsPopup.raise_()
       settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
 
@@ -300,9 +319,9 @@ class QuickTable(TableWidget, Base):
             self.searchWidget.hide()
     return True
 
-  def setTableFromDataFrame(self, dataFrame):
+  def setTableFromDataFrameObject(self, dataFrameObject):
     # populate the table from the the Pandas dataFrame
-    self._dataFrame = dataFrame
+    self._dataFrameObject = dataFrameObject
 
     self.hide()
 
@@ -320,34 +339,46 @@ class QuickTable(TableWidget, Base):
     # dataFrame = dataFrame.reindex(columns=cols)
 
     # set the table and column headings
-    self.setData(dataFrame.values)
-    self.setHorizontalHeaderLabels(self._columns)
+    self.setData(dataFrameObject.dataFrame.values)
+    self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
     # needed after setting the column headings
     self.resizeColumnsToContents()
-    self.showColumns()
+    self.showColumns(dataFrameObject)
     self.show()
 
-  def getDataFrameFromList(self, buildList, colDefs):
+  def getDataFrameFromList(self, table=None
+                           , buildList=None
+                           , colDefs=None
+                           , hiddenColumns=None):
     """
     Return a Pandas dataFrame from an internal list of objects
     The columns are based on the 'func' functions in the columnDefinitions
 
     :param buildList:
     :param colDefs:
-    :return pandas dataFrame:
+    :return pandas dataFrameObject:
     """
     allItems = []
+    objectList = indexList = {}
+
     for obj in buildList:
       listItem = OrderedDict()
-      for header in colDefs:
+      for header in colDefs.columns:
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
+      indexList[listItem['Index']] = obj
+      objectList[obj.pid] = listItem['Index']
 
-    return pd.DataFrame(allItems, columns=[header.headerText for header in colDefs])
+    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
+                           , objectList=objectList
+                           , indexList=indexList
+                           , columnDefs=colDefs
+                           , hiddenColumns=hiddenColumns
+                           , table=table)
 
-  def getDataFrameFromRows(self, ensembleData, colDefs):
+  def getDataFrameFromRows(self, table, ensembleData, colDefs, hiddenColumns):
     """
     Return a Pandas dataFrame from the internal rows of an internal Pandas dataFrame
     The columns are based on the 'func' functions in the columnDefinitions
@@ -357,13 +388,21 @@ class QuickTable(TableWidget, Base):
     :return pandas dataFrame:
     """
     allItems = []
+    objectList = indexList = {}
     buildList = ensembleData.as_namedtuples()
     for obj in buildList:
       listItem = OrderedDict()
-      for header in colDefs:
+      for header in colDefs.columns:
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
+      indexList[listItem['Index']] = obj
+      objectList[obj.pid] = listItem['Index']
 
-    return pd.DataFrame(allItems, columns=[header.headerText for header in colDefs])
+    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
+                           , objectList=objectList
+                           , indexList=indexList
+                           , columnDefs=colDefs
+                           , hiddenColumns=hiddenColumns
+                           , table=table)
 

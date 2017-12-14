@@ -107,9 +107,15 @@ class DataFrameObject(object):
       del self._indexList[str(index)]      # remove from indexList
 
       # now remove from dataFrame
+
+      self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Index'] == index]
       self._dataFrame = self._dataFrame.ix[self._dataFrame['Index'] != index]
       row = self.find(self._table, str(index))
       self._table.removeRow(row)
+
+      # add undo item
+
+      # copy deleteSelectedRows from EnsembleData
 
   def find(self, table, text, column=1):
     model = table.model()
@@ -135,7 +141,10 @@ class DataFrameObject(object):
 
       # need to
       if not self._dataFrame.empty:
-        newIndex = len(self._dataFrame.index)
+        newIndex = self._dataFrame['Index'].max()+1
+        # newIndex = len(self._dataFrame.index)
+
+        print ('>>>newIndex', newIndex)
 
         listItem['Index'] = newIndex
         self._indexList[str(newIndex)] = obj
@@ -143,8 +152,10 @@ class DataFrameObject(object):
 
         appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
 
-        self._dataFrame.append(appendDataFrame)
+        self._dataFrame = self._dataFrame.append(appendDataFrame)
+        print (self._dataFrame)
         self._table.appendData(appendDataFrame.values)
+        self._table.update()
       else:
         # set the table and column headings
         self._indexList[str(listItem['Index'])] = obj

@@ -46,7 +46,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ccpn.util.Logging import getLogger
 import numpy as np
 
@@ -139,6 +139,19 @@ class NmrResidueTableModule(CcpnModule):
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
 
+    self.eventFilter = self._eventFilter
+    self.installEventFilter(self)
+
+  def actionEvent(self, event):
+    print ('>>action', event.type())
+    return super(NmrResidueTableModule, self).actionEvent(event)
+
+  def _eventFilter(self, obj, event):
+    if event.type() == QtCore.QEvent.WindowStateChange:
+      print ('~~~')
+
+    return super(NmrResidueTableModule, self).eventFilter(obj,event)
+
   def selectNmrChain(self, nmrChain=None):
     """
     Manually select an NmrChain from the pullDown
@@ -208,6 +221,31 @@ class NmrResidueTableModule(CcpnModule):
     Close the table from the commandline
     """
     self._closeModule()
+
+  def paintEvent(self, ev):
+    try:
+      print('>>>', ev.oldState())
+    except:
+      pass
+
+    finally:
+      super(NmrResidueTableModule, self).paintEvent(ev)
+
+  def showEvent(self, event):
+    if event.type() == QtCore.QEvent.WindowStateChange:
+      if self.windowState() & QtCore.Qt.WindowMinimized:
+        print('changeEvent: Minimised')
+      elif event.oldState() & QtCore.Qt.WindowMinimized:
+        print('changeEvent: Normal/Maximised/FullScreen')
+
+        # TODO:ED update table from dataFrame
+
+        self.nmrResidueTable._maximise()
+      else:
+        print ('~~~~')
+    else:
+      print ('>>>changeEvent', event.type())
+    return super(NmrResidueTableModule, self).showEvent(event)
 
 
 class NmrResidueTable(QuickTable):
@@ -422,6 +460,9 @@ class NmrResidueTable(QuickTable):
           self._update(self.nmrChain)
 
     logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+
+  def _maximise(self):
+    self._update(self.nmrChain)
 
   def _update(self, nmrChain):
     """

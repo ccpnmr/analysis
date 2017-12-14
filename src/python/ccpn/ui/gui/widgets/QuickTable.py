@@ -276,37 +276,38 @@ class QuickTable(TableWidget, Base):
 
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
-    n = len(selected)
-    title = 'Delete Item%s' % ('' if n == 1 else 's')
-    msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-    if MessageDialog.showYesNo(title, msg):
+    if selected:
+      n = len(selected)
+      title = 'Delete Item%s' % ('' if n == 1 else 's')
+      msg = 'Delete %sselected item%s from the project?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+      if MessageDialog.showYesNo(title, msg):
 
-      if hasattr(selected[0], 'project'):
-        thisProject = selected[0].project
-        thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
-        try:
+        if hasattr(selected[0], 'project'):
+          thisProject = selected[0].project
+          thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
+          try:
 
-          self.blockSignals(True)
+            self.blockSignals(True)
 
+            for obj in selected:
+              if hasattr(obj, 'pid'):
+
+                # print ('>>> deleting', obj)
+                obj.delete()
+
+          except Exception as es:
+            getLogger().warning(str(es))
+          finally:
+
+            self.blockSignals(False)
+
+            thisProject._endCommandEchoBlock()
+        else:
+
+          # TODO:ED this is deleting from PandasTable, check for another way to get project
           for obj in selected:
             if hasattr(obj, 'pid'):
-
-              # print ('>>> deleting', obj)
               obj.delete()
-
-        except Exception as es:
-          getLogger().warning(str(es))
-        finally:
-
-          self.blockSignals(False)
-
-          thisProject._endCommandEchoBlock()
-      else:
-
-        # TODO:ED this is deleting from PandasTable, check for another way to get project
-        for obj in selected:
-          if hasattr(obj, 'pid'):
-            obj.delete()
 
   def _addSearchWidget(self):
     # TODO:Luca Add search option for any table

@@ -160,37 +160,54 @@ class QuickTable(TableWidget, Base):
 
     model = self.selectionModel()
 
-    if self.selectRows:
-      selection = model.selectedRows(column=0)
-    else:
-      selection = model.selectedIndexes()
+    # if self.selectRows:
+    #   selection = model.selectedRows(column=0)
+    # else:
+    #   selection = model.selectedIndexes()
+    selection = model.selectedIndexes()
 
-    if selection and len(selection) == 1:
+    if selection:
 
       # rows = [i.row() for i in selection]
       # rows.sort()
       # if row not in rows:
       #   row = rows[0]
 
-      row = selection[0].row()
-      # index = self.model.index(row, 0)
-      # row = self.model.mapToSource(index).row()
+      # get the coordinates of the current cell
+      row = itemSelection.row()
+      col = itemSelection.column()
+
+      # need to select the whole row
+      # self.selectRow(row)
+      # model = self.selectionModel()
+      # selection = model.selectedIndexes()
 
       # index = self.tableSusAmigos.selectedIndexes()[0]
-      row = model.model().data(selection[0])
+      data = {}
+      for iSelect in selection:
+        col = iSelect.column()
+        colName = self.horizontalHeaderItem(col).text()
+        data[colName] = model.model().data(iSelect)
 
-      loc = self._dataFrameObject.dataFrame.loc[row]
-      objIndex = loc['Index']
+      objIndex = data['Index']
       obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
 
-      data = {}
-      data['THEOBJECT'] = self._dataFrameObject
-      data['OBJECT'] = obj
-      data['INDEX'] = objIndex
-      data['TRIGGER'] = 'doubleclick'
-      data['ROW'] = selection[0].row()
-      data['COL'] = selection[0].column()
-      data['ROWITEM'] = loc
+      # data = {}
+      # data['THEOBJECT'] = self._dataFrameObject
+      # data['OBJECT'] = obj
+      # data['INDEX'] = objIndex
+      # data['TRIGGER'] = 'doubleclick'
+      # data['ROW'] = selection[0].row()
+      # data['COL'] = selection[0].column()
+      # data['ROWITEM'] = data
+
+      data = CallBack(theObject = self._dataFrameObject
+                      , object = obj
+                      , index = objIndex
+                      , triggers = [CallBack.DOUBLECLICK]
+                      , row = row
+                      , col = col
+                      , rowItem = data)
 
       self._actionCallback(data)
 
@@ -387,7 +404,7 @@ class QuickTable(TableWidget, Base):
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
-      indexList[listItem['Index']] = obj
+      indexList[str(listItem['Index'])] = obj
       objectList[obj.pid] = listItem['Index']
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)

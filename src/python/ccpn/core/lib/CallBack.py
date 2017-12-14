@@ -34,36 +34,43 @@ from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 
-class CallBack(object):
-  """
-  CallBack class:
-
-  CallBack returns a callback dictionary with keywords based on the action type
-  """
-  _currentIndex = 0
-
+class CallBack(OrderedDict):
   # callback keywords
   CLICK = 'click'
   DOUBLECLICK = 'doubleclick'
   CURRENT = 'current'
 
-  CALLBACK = 'callback'
   THEOBJECT = 'theObject'
-  TRIGGER = 'trigger'
   OBJECT = 'object'
-  GETPID = 'pid'
+  INDEX = 'index'
+  TRIGGERS = 'triggers'
+  ROW = 'row'
+  COL = 'COL'
+  ROWITEM = 'rowItem'
 
   _callbackwords = (CLICK, DOUBLECLICK, CURRENT)
 
-  def __init__(self, theObject: Any
-               , triggers: list
-               , targetName: str
-               , callback: Callable[..., str]
-               , onceOnly=False
+  def __init__(self, theObject: Any=None
+               , object: Any=None
+               , index: int=None
+               , triggers: list=None
+               , row: int=None
+               , col: int=None
+               , rowItem: dict=None
+               # , callback: Callable[..., str]
                , *args, **kwargs):
     """
-    Create CallBack object;
+    Create CallBack object
+    an object for passing to the callback function
     """
-    pass
+    super(CallBack, self).__init__(*args, **kwargs)
 
-
+    _dict = {}
+    _dict['THEOBJECT'] = theObject
+    _dict['OBJECT'] = object
+    _dict['INDEX'] = index
+    _dict['TRIGGERS'] = triggers
+    _dict['ROW'] = row
+    _dict['COL'] = col
+    _dict['ROWITEM'] = rowItem
+    self.update(_dict)

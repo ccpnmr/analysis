@@ -54,6 +54,7 @@ from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
+# TODO:ED add some documentation here
 
 
 class QuickTable(TableWidget, Base):
@@ -153,28 +154,45 @@ class QuickTable(TableWidget, Base):
     self.doubleClicked.connect(self._doubleClickCallback)
 
   def _doubleClickCallback(self, itemSelection):
-    row = self.SelectRows
-    col = self.SelectColumns
+    # TODO:ED generate a callback dict for the selected item
+    # data = OrderedDict()
+    # data['OBJECT'] = return pid, key/values, row, col
 
-    if row and col:
-        # if self.callback and not self.columns[col].setEditValue:    # ejb - editable fields don't actionCallback
-        #   self.callback(obj, row, col)
+    model = self.selectionModel()
 
-      # TODO:ED generate a callback dict for the selected item
-      # data = OrderedDict()
-      # data['OBJECT'] = return pid, key/values, row, col
+    if self.selectRows:
+      selection = model.selectedRows(column=0)
+    else:
+      selection = model.selectedIndexes()
 
-      obj = self.objects[row]
+    if selection and len(selection) == 1:
+
+      # rows = [i.row() for i in selection]
+      # rows.sort()
+      # if row not in rows:
+      #   row = rows[0]
+
+      row = selection[0].row()
+      # index = self.model.index(row, 0)
+      # row = self.model.mapToSource(index).row()
+
+      # index = self.tableSusAmigos.selectedIndexes()[0]
+      row = model.model().data(selection[0])
+
+      loc = self._dataFrameObject.dataFrame.loc[row]
+      objIndex = loc['Index']
+      obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
 
       data = {}
-      data['THEOBJECT'] = self.project
+      data['THEOBJECT'] = self._dataFrameObject
       data['OBJECT'] = obj
+      data['INDEX'] = objIndex
       data['TRIGGER'] = 'doubleclick'
-      data['ROW'] = row
-      data['COL'] = col
-      data['GETPID'] = None
+      data['ROW'] = selection[0].row()
+      data['COL'] = selection[0].column()
+      data['ROWITEM'] = loc
 
-      self._actionCallback(obj, data)
+      self._actionCallback(data)
 
   def showColumns(self, dataFrameObject):
     # hide the columns in the list
@@ -360,7 +378,8 @@ class QuickTable(TableWidget, Base):
     :return pandas dataFrameObject:
     """
     allItems = []
-    objectList = indexList = {}
+    objectList = {}
+    indexList = {}
 
     for obj in buildList:
       listItem = OrderedDict()
@@ -388,7 +407,9 @@ class QuickTable(TableWidget, Base):
     :return pandas dataFrame:
     """
     allItems = []
-    objectList = indexList = {}
+    objectList = {}
+    indexList = {}
+
     buildList = ensembleData.as_namedtuples()
     for obj in buildList:
       listItem = OrderedDict()

@@ -159,10 +159,13 @@ class NmrResidueTableModule(CcpnModule):
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
 
-  def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
+  # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
+  def navigateToNmrResidue(self, data):
     """
     Navigate in selected displays to nmrResidue; skip if none defined
     """
+    nmrResidue = data['OBJECT']
+
     logger.debug('nmrResidue=%s' % (nmrResidue.id))
 
     displays = self._getDisplays()
@@ -257,14 +260,10 @@ class NmrResidueTable(QuickTable):
                     , 'Number of peaks assigned to NmrResidue', None),
       ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
        lambda nmr, value:NmrResidueTable._setComment(nmr, value))
-    ]
-
-)    # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    ])    # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
-    # create the table; objects are added later via the displayTableForNmrChain method
 
-    # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
@@ -286,7 +285,6 @@ class NmrResidueTable(QuickTable):
     #                      grid = (3, 0), gridSpan = (1, 6), enableDelete=True
     #                      )
 
-    # self._columnNames = [header.headerText for header in self.NMRcolumns]
     self._hiddenColumns = []
     self.dataFrameObject = None
 

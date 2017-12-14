@@ -29,7 +29,7 @@ from ccpn.util.Logging import getLogger
 
 BG_COLOR = QtGui.QColor('#E0E0E0')
 
-
+# TODO:ED add some documentation here
 class ColumnClass:
   def __init__(self, columnList=None):
     self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
@@ -64,6 +64,7 @@ class ColumnClass:
   def editValues(self):
     return [heading.getEditValue for heading in self._columns]
 
+# TODO:ED add some documentation here
 
 class Column:
 

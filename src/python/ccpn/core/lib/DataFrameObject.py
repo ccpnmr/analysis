@@ -53,6 +53,14 @@ class DataFrameObject(object):
     self._objectList = objectList
 
   @property
+  def indexList(self):
+    return self._indexList
+
+  @indexList.setter
+  def indexList(self, indexList=None):
+    self._indexList = indexList
+
+  @property
   def hiddenColumns(self):
     return self._hiddenColumns
 

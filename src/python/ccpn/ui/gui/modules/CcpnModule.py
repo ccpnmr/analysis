@@ -257,6 +257,9 @@ class CcpnModule(Dock):
       self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
 
+    # add an event filter to handle transparency
+    # and to check when the dock has been floated - it needs to have a callback
+    # that fires when the window has been maximised
     self._maximiseFunc = None
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
@@ -279,6 +282,9 @@ class CcpnModule(Dock):
   def _eventFilter(self, source, event):
     """
     CCPNInternal
+    Handle events for switching transparency of modules
+    Modules become transparent when dragging to another module.
+    Ensure that the dropAreas become active
     """
     if isinstance(source, CcpnModule):
       if event.type() == QtCore.QEvent.DragEnter:
@@ -347,28 +353,26 @@ class CcpnModule(Dock):
     # """)
 
   def installMaximiseEventHandler(self, maximiseFunc):
+    """
+    Attach a maximise function to the parent window.
+    This is called when the WindowStateChanges to maximises
+
+    :param maximiseFunc:
+    """
     self._maximiseFunc = maximiseFunc
 
   def removeMaximiseEventHandler(self):
+    """
+    Clear the attached maximise function
+    :return:
+    """
     self._maximiseFunc = None
 
-  # def _eventFilter(self, obj, event):
-  #   if event.type() == QtCore.QEvent.ParentChange:
-  #     try:
-  #       if isinstance(self.parent().parent().parent(), TempAreaWindow):
-  #         print('>>> inserting new routine into TempAreaWindow')
-  #         tempWindow = self.parent().parent().parent()
-  #
-  #         # add a new eventFilter to the window and install it
-  #         tempWindow.eventFilter = self._tempAreaWindowEventFilter
-  #         tempWindow.installEventFilter(tempWindow)
-  #
-  #     except Exception as es:
-  #       print('>>> Error changing window', self, str(es))
-  #
-  #   return False  # continue with all events
-
   def _tempAreaWindowEventFilter(self, obj, event):
+    """
+    Window manager event filter to call the attached maximise function.
+    This is required to re-populate the window when it has been maximised
+    """
     try:
       if event.type() == QtCore.QEvent.WindowStateChange:
         if event.oldState() & QtCore.Qt.WindowMinimized:
@@ -403,7 +407,9 @@ class CcpnModule(Dock):
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def _closeModule(self):
-
+    """
+    Close the module
+    """
     if self.closeFunc:
       self.closeFunc()
 

@@ -27,15 +27,13 @@ from PyQt4 import QtCore
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
+
 class Blank(CcpnDialog):
   def __init__(self, parent=None, title='Blank', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
     self.setWindowFlags(self.windowFlags() |
                           QtCore.Qt.WindowMaximizeButtonHint |
                           QtCore.Qt.WindowMinimizeButtonHint)
-
-    self.moduleArea = CcpnModuleArea(mainWindow=self)
-    self.layout().addWidget(self.moduleArea)
 
   def changeEvent(self, event):
     if event.type() == QtCore.QEvent.WindowStateChange:
@@ -45,9 +43,6 @@ class Blank(CcpnDialog):
         print('>>>Blank changeEvent: Normal/Maximised/FullScreen')
 
         # TODO:ED update table from dataFrame
-
-    else:
-      print ('>>>Blank changeEvent', event.type())
 
     event.ignore()
 

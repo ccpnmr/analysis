@@ -385,7 +385,7 @@ class StructureTable(QuickTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
-    self._widget.setFixedHeight(40)
+    self._widget.setFixedHeight(30)
 
     # self._columnNames = [header.headerText for header in self.STcolumns]
     self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']

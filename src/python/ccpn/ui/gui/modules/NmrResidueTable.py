@@ -133,7 +133,7 @@ class NmrResidueTableModule(CcpnModule):
                                              checked = True
                                             )
 
-    # main window
+    # initialise the table
     self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget
                                            , mainWindow=self.mainWindow
                                            , moduleParent=self
@@ -144,15 +144,13 @@ class NmrResidueTableModule(CcpnModule):
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
 
-    # trying to catch the minimise event
-    # self._oldParent = None
-    # self._newParent = None
-    # self.eventFilter = self._eventFilter
-    # self.installEventFilter(self)
-
+    # install the event filter to handle maximising from floated dock
     self.installMaximiseEventHandler(self._maximise)
 
   def _maximise(self):
+    """
+    Maximise the attached table
+    """
     self.nmrResidueTable._maximise()
 
   def selectNmrChain(self, nmrChain=None):
@@ -225,105 +223,8 @@ class NmrResidueTableModule(CcpnModule):
     """
     self._closeModule()
 
-  def paintEvent(self, ev):
-    try:
-      print('>>>', ev.oldState())
-    except:
-      pass
-
-    finally:
-      super(NmrResidueTableModule, self).paintEvent(ev)
-
-  # def _eventFilter(self, obj, event):
-  # # def changeEvent(self, event):
-  #   if event.type() == QtCore.QEvent.ParentAboutToChange:
-  #     if self.windowState() & QtCore.Qt.WindowMinimized:
-  #       print('Dock - changeEvent: Minimised')
-  #     # elif event.oldState() & QtCore.Qt.WindowMinimized:
-  #     #   print('Dock - changeEvent: Normal/Maximised/FullScreen')
-  #
-  #       # TODO:ED update table from dataFrame
-  #
-  #       # self.nmrResidueTable._maximise()
-  #     else:
-  #       print ('Dock - ~~~~', self.windowState())
-  #       self._oldParent = self.parent()
-  #   elif event.type() == QtCore.QEvent.ParentChange:
-  #     self._newParent = self.parent()
-  #     # print ('Dock - >>>changeEvent', self, self._oldParent, self._newParent)
-  #
-  #     try:
-  #       print (self.parent())
-  #       print (self.parent().parent())
-  #       print (self.parent().parent().parent())
-  #       print (self.parent().parent().parent().parent())
-  #
-  #       # self._OldChangeEvent = self.parent().parent().parent().changeEvent
-  #       # self.parent().parent().parent().changeEvent = self._changeEvent
-  #
-  #       if isinstance(self.parent().parent().parent(), TempAreaWindow):
-  #         # newWin = Blank()
-  #         # newWin.show()
-  #         # newWin.raise_()
-  #
-  #         print ('>>> inserting new routine into TempAreaWindow')
-  #         tempWindow = self.parent().parent().parent()
-  #
-  #         # ad a new eventFilter to the window and install it
-  #         tempWindow.eventFilter = self._tempEventFilter
-  #         tempWindow.installEventFilter(tempWindow)
-  #
-  #         # insert new changeEvent routine
-  #         # self._oldChangeEvent = tempWindow.changeEvent
-  #         # tempWindow.changeEvent = self._changeEvent
-  #         print ('>>> inserting new routine - done')
-  #
-  #         # tempWindow.hide()
-  #         #
-  #         # newWin = CcpnModuleArea(mainWindow=self)
-  #         # newWin.show()
-  #         # newWin.raise_()
-  #         #
-  #         # tempWindow.mo
-  #         # newWin.addModule(tempWindow)
-  #
-  #       # if isinstance(self.parent(), dockarea):
-  #       #   self.setParent(newWin.moduleArea)
-  #
-  #     except Exception as es:
-  #       print ('>>> Error changing window', self, str(es))
-  #       pass
-  #     # if not self._newParent:
-  #     #   newWin.layout().addWidget(self)
-  #
-  #   return False        # continue with all events
-  #
-  # def _tempEventFilter(self, obj, event):
-  #   try:
-  #     if event.type() == QtCore.QEvent.WindowStateChange:
-  #       if obj.windowState() & QtCore.Qt.WindowMinimized:
-  #         print('>>>TEMP changeEvent: Minimised')
-  #       elif event.oldState() & QtCore.Qt.WindowMinimized:
-  #         print('>>>TEMP changeEvent: Normal/Maximised/FullScreen')
-  #
-  #         # TODO:ED update table from dataFrame
-  #
-  #         self.nmrResidueTable._maximise()
-  #
-  #         # only return True to stop event going any further
-  #         # return True
-  #
-  #       else:
-  #         print('>>>TEMP ~~~~', obj, event.type(), obj.windowState())
-  #   except Exception as es:
-  #     print ('>>>TEMP Error', obj, event, str(es))
-  #
-  #   # try:
-  #   #   self._oldEventFilter(obj, event)
-  #   # except Exception as es:
-  #   #   print ('>>>TEMP second error', str(es), super(NmrResidueTableModule, self))
-  #
-  #   return False
+  def paintEvent(self, event):
+    event.ignore()
 
 
 class NmrResidueTable(QuickTable):
@@ -378,7 +279,7 @@ class NmrResidueTable(QuickTable):
                     , 'Number of peaks assigned to NmrResidue', None),
       ('Comment', lambda nmr:NmrResidueTable._getCommentText(nmr), 'Notes',
        lambda nmr, value:NmrResidueTable._setComment(nmr, value))
-    ])    # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    ])
 
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
 
@@ -396,20 +297,16 @@ class NmrResidueTable(QuickTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
-    self._widget.setFixedHeight(40)
+    self._widget.setFixedHeight(30)
 
+    # initiaise the currently attached dataFrame
     self._hiddenColumns = []
     self.dataFrameObject = None
 
+    # initialise the table
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self._mainWindow
-
-                        , dataFrameObject=None    # class collating table and objects and headings
-
-                        # , dataFrame=None
-                        # , columns=self._columnNames
-                        # , hiddenColumns=self._hiddenColumns
-                        # , objects=None
+                        , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True,  multiSelect=multiSelect
                         , actionCallback=actionCallback
@@ -422,7 +319,6 @@ class NmrResidueTable(QuickTable):
     self._chainNotifier = None
     self._residueNotifier = None
     self._selectOnTableCurrentNmrResiduesNotifier = None
-
 
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
@@ -467,9 +363,10 @@ class NmrResidueTable(QuickTable):
             self.ncWidget.select(self.nmrChain.pid)
 
   def defaultActionCallback(self, nmrResidue, *args):
-
-    '''default Action Callback if not defined in the parent Module 
-    If current strip contains the double clicked nmrResidue will navigateToPositionInStrip '''
+    """
+    default Action Callback if not defined in the parent Module
+    If current strip contains the double clicked nmrResidue will navigateToPositionInStrip
+    """
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
     self._application.ui.mainWindow.clearMarks()
@@ -535,6 +432,9 @@ class NmrResidueTable(QuickTable):
     logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _maximise(self):
+    """
+    refresh the table on a maximise event
+    """
     self._update(self.nmrChain)
 
   def _update(self, nmrChain):
@@ -555,7 +455,7 @@ class NmrResidueTable(QuickTable):
                                                   , colDefs=self.NMRcolumns
                                                   , hiddenColumns=self._hiddenColumns)
 
-      # new populate from Pandas
+      # populate from the Pandas dataFrame inside the dataFrameObject
       self._project.blankNotification()
       self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
       self._project.unblankNotification()
@@ -594,12 +494,16 @@ class NmrResidueTable(QuickTable):
       self.clear()
 
   def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
-    '''callback from a notifier to select the current NmrResidue  '''
+    """
+    callback from a notifier to select the current NmrResidue
+    """
     currentNmrResidues = data['value']
     self._selectOnTableCurrentNmrResidues(currentNmrResidues)
 
   def _selectOnTableCurrentNmrResidues(self, currentNmrResidues):
-    ''' highlight  current NmrResidues on the opened  table '''
+    """
+    highlight  current NmrResidues on the opened table
+    """
     if len(currentNmrResidues)>0:
       self._highLightObjs(currentNmrResidues)
     else:

@@ -122,14 +122,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def changeEvent(self, event):
     if event.type() == QtCore.QEvent.WindowStateChange:
       if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('>>>guiMainWindow   changeEvent: Minimised')
+
+        # don't do anything on minimising
+        pass
+
       elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('>>>guiMainWindow   changeEvent: Normal/Maximised/FullScreen')
 
-        # TODO:ED update table from dataFrame
-
-    else:
-      print ('>>>guiMainWindow   changeEvent', event.type())
+        # TODO:ED changeEvent: Normal/Maximised/FullScreen - call populate all modules
+        pass
 
     event.ignore()
 

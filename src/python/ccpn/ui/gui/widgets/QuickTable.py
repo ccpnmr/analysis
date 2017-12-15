@@ -491,41 +491,6 @@ class QuickTable(TableWidget, Base):
             obj = self._dataFrameObject.indexList[objIndex]  # item.index needed
             selectedObjects.append(obj)
 
-    #     if iSelect.row() not in rows:
-    #       rows.append(i.row())
-    #
-    #       data = {}
-    #       for iSelect in selection:
-    #         col = iSelect.column()
-    #         colName = self.horizontalHeaderItem(col).text()
-    #         data[colName] = model.model().data(iSelect)
-    #
-    #       objIndex = data['Index']
-    #       obj = self._dataFrameObject.indexList[objIndex]  # item.index needed
-    #
-    #       selectedObjects.append()
-    #
-    #
-    #
-    #
-    #   objIndex = data['Index']
-    #   obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
-    #
-    #
-    #
-    # model = self.selectionModel()
-    # if self.selectRows:
-    #   selection = model.selectedRows(column=0)
-    # else:
-    #   selection = model.selectedIndexes()
-    #
-    # objects = self.objects
-    # selectedObjects = []
-    #
-    # for index in selection:
-    #   row = self.model.mapToSource(index).row()
-    #   selectedObjects.append(objects[row])
-    #
       return selectedObjects
     else:
       return None

@@ -410,17 +410,17 @@ class NmrResidueTable(QuickTable):
     nmrResidue = data[Notifier.OBJECT]
     trigger = data[Notifier.TRIGGER]
 
-    if self.nmrChain in thisChainList:
+    if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
       # is the nmrResidue in the visible list
       # TODO:ED move these into the table class
 
-      if nmrResidue.pid in self._dataFrameObject.objectList and trigger == Notifier.DELETE:
+      if trigger == Notifier.DELETE:
 
           # remove item from self._dataFrameObject
 
         self._dataFrameObject.removeObject(nmrResidue)
 
-      elif nmrResidue.pid not in self._dataFrameObject.objectList and trigger == Notifier.CREATE:
+      elif trigger == Notifier.CREATE:
 
         # insert item into self._dataFrameObject
 
@@ -428,6 +428,18 @@ class NmrResidueTable(QuickTable):
           self._dataFrameObject.appendObject(nmrResidue)
         else:
           self._update(self.nmrChain)
+
+      elif trigger == Notifier.CHANGE:
+
+        # modify the line in the table
+        self._dataFrameObject.changeObject(nmrResidue)
+
+      elif trigger == Notifier.RENAME:
+        # get the old pid before the rename
+        oldPid = data[Notifier.OLDPID]
+
+        # modify the oldPid in the objectList, change to newPid
+        self._dataFrameObject.renameObject(nmrResidue, oldPid)
 
     logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
 

@@ -24,6 +24,7 @@ __date__ = "$Date$"
 #=========================================================================================
 
 import pandas as pd
+import pyqtgraph as pg
 from ccpn.ui.gui.widgets.Column import Column
 from PyQt4 import QtGui, QtCore
 from collections import OrderedDict
@@ -146,7 +147,7 @@ class DataFrameObject(object):
         newIndex = self._dataFrame['Index'].max()+1
         # newIndex = len(self._dataFrame.index)
 
-        print ('>>>newIndex', newIndex)
+        # print ('>>>newIndex', newIndex)
 
         listItem['Index'] = newIndex
         self._indexList[str(newIndex)] = obj
@@ -155,7 +156,6 @@ class DataFrameObject(object):
         appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
 
         self._dataFrame = self._dataFrame.append(appendDataFrame)
-        print (self._dataFrame)
         self._table.appendData(appendDataFrame.values)
         self._table.update()
       else:
@@ -171,6 +171,63 @@ class DataFrameObject(object):
 
         # needed after setting the column headings
         self._table.resizeColumnsToContents()
-        self._table.showColumns(self._dataFrame)
+        self._table.showColumns(self)
         self._table.show()
 
+  def renameObject(self, obj, oldPid):
+    if oldPid in self._objectList:
+
+      # get the existing index and remove the items from the lists
+      index = self._objectList[oldPid]
+      del self._objectList[oldPid]
+      del self._indexList[str(index)]
+
+      # insert the updated object and pid
+      self._indexList[str(index)] = obj
+      self._objectList[obj.pid] = index
+
+      # check whether the pid is used anywhere in the table
+      # this could be covered by the following change event
+      self._table.hide()
+      changeList = self._dataFrame.replace({oldPid:obj.pid}, regex=True)
+
+      # self._dataFrame = changeList
+      self._table.setData(changeList.values)
+      # update table from diff
+      self._table.setHorizontalHeaderLabels(self.headings)
+
+      # needed after setting the column headings
+      self._table.resizeColumnsToContents()
+      self._table.showColumns(self)
+      self._table.show()
+
+      # TODO:ED new functionality may be to use the label types in preferences in the tables
+
+  def changeObject(self, obj):
+    if obj.pid in self._objectList:
+
+      # update the values as 'Index' may have changed
+      index = self._objectList[obj.pid]
+      del self._objectList[obj.pid]
+      del self._indexList[str(index)]
+
+      # generate a new row
+      listItem = []
+      listDict = {}
+      for header in self._columnDefinitions.columns:
+        listDict[header.headerText] = header.getValue(obj)
+        listItem.append(header.getValue(obj))
+
+      # update the pointers
+      newIndex = listDict['Index']
+      self._indexList[str(newIndex)] = obj
+      self._objectList[obj.pid] = newIndex
+
+      self._dataFrame.loc[self._dataFrame['Index'] == index] = listItem
+      # appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
+
+      # change row in table
+      # self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Index'] == index]
+      # self._dataFrame = self._dataFrame.ix[self._dataFrame['Index'] != index]
+      row = self.find(self._table, str(index))
+      self._table.setRow(row, listItem)

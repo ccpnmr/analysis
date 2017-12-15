@@ -23,10 +23,11 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
 from ccpn.ui.gui.widgets.Column import Column
 from PyQt4 import QtGui, QtCore
 from collections import OrderedDict
-import pandas as pd
+from ccpn.util.Logging import getLogger
 
 
 class DataFrameObject(object):
@@ -100,20 +101,21 @@ class DataFrameObject(object):
 
     if obj.pid in self._objectList:
 
-      # the object exists
-      index = self._objectList[obj.pid]
+      try:
+        # the object exists
+        index = self._objectList[obj.pid]
 
-      del self._objectList[obj.pid]   # remove from objectList
-      del self._indexList[str(index)]      # remove from indexList
+        del self._objectList[obj.pid]   # remove from objectList
+        del self._indexList[str(index)]      # remove from indexList
 
-      # now remove from dataFrame
+        # now remove from dataFrame
 
-      self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Index'] == index]
-      self._dataFrame = self._dataFrame.ix[self._dataFrame['Index'] != index]
-      row = self.find(self._table, str(index))
-      self._table.removeRow(row)
-
-      # add undo item
+        self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Index'] == index]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame['Index'] != index]
+        row = self.find(self._table, str(index))
+        self._table.removeRow(row)
+      except Exception as es:
+        getLogger().warning('removeObject: Invalid row', str(es), row)      # add undo item
 
       # copy deleteSelectedRows from EnsembleData
 

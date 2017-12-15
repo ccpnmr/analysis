@@ -49,7 +49,7 @@ class Blank(CcpnDialog):
     else:
       print ('>>>Blank changeEvent', event.type())
 
-    super(Blank, self).changeEvent(event)
+    event.ignore()
 
 
 if __name__ == '__main__':

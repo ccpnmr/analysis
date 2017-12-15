@@ -50,20 +50,6 @@ class CcpnModuleArea(ModuleArea):
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
     self.setContentsMargins(0, 0, 0, 0)
 
-  def changeEvent(self, event):
-    if event.type() == QtCore.QEvent.WindowStateChange:
-      if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('>>>Ccpn changeEvent: Minimised')
-      elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('>>>Ccpn changeEvent: Normal/Maximised/FullScreen')
-
-        # TODO:ED update table from dataFrame
-
-    else:
-      print ('>>>Ccpn changeEvent', event.type())
-
-    super(CcpnModuleArea, self).changeEvent(event)
-
   @property
   def currentModules(self) -> list:
     'return all current modules in area'

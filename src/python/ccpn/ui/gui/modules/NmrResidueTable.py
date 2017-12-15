@@ -145,10 +145,15 @@ class NmrResidueTableModule(CcpnModule):
       self.selectNmrChain(nmrChain)
 
     # trying to catch the minimise event
-    self._oldParent = None
-    self._newParent = None
-    self.eventFilter = self._eventFilter
-    self.installEventFilter(self)
+    # self._oldParent = None
+    # self._newParent = None
+    # self.eventFilter = self._eventFilter
+    # self.installEventFilter(self)
+
+    self.installMaximiseEventHandler(self._maximise)
+
+  def _maximise(self):
+    self.nmrResidueTable._maximise()
 
   def selectNmrChain(self, nmrChain=None):
     """
@@ -229,108 +234,97 @@ class NmrResidueTableModule(CcpnModule):
     finally:
       super(NmrResidueTableModule, self).paintEvent(ev)
 
-  def _eventFilter(self, obj, event):
-  # def changeEvent(self, event):
-    if event.type() == QtCore.QEvent.ParentAboutToChange:
-      if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('Dock - changeEvent: Minimised')
-      # elif event.oldState() & QtCore.Qt.WindowMinimized:
-      #   print('Dock - changeEvent: Normal/Maximised/FullScreen')
+  # def _eventFilter(self, obj, event):
+  # # def changeEvent(self, event):
+  #   if event.type() == QtCore.QEvent.ParentAboutToChange:
+  #     if self.windowState() & QtCore.Qt.WindowMinimized:
+  #       print('Dock - changeEvent: Minimised')
+  #     # elif event.oldState() & QtCore.Qt.WindowMinimized:
+  #     #   print('Dock - changeEvent: Normal/Maximised/FullScreen')
+  #
+  #       # TODO:ED update table from dataFrame
+  #
+  #       # self.nmrResidueTable._maximise()
+  #     else:
+  #       print ('Dock - ~~~~', self.windowState())
+  #       self._oldParent = self.parent()
+  #   elif event.type() == QtCore.QEvent.ParentChange:
+  #     self._newParent = self.parent()
+  #     # print ('Dock - >>>changeEvent', self, self._oldParent, self._newParent)
+  #
+  #     try:
+  #       print (self.parent())
+  #       print (self.parent().parent())
+  #       print (self.parent().parent().parent())
+  #       print (self.parent().parent().parent().parent())
+  #
+  #       # self._OldChangeEvent = self.parent().parent().parent().changeEvent
+  #       # self.parent().parent().parent().changeEvent = self._changeEvent
+  #
+  #       if isinstance(self.parent().parent().parent(), TempAreaWindow):
+  #         # newWin = Blank()
+  #         # newWin.show()
+  #         # newWin.raise_()
+  #
+  #         print ('>>> inserting new routine into TempAreaWindow')
+  #         tempWindow = self.parent().parent().parent()
+  #
+  #         # ad a new eventFilter to the window and install it
+  #         tempWindow.eventFilter = self._tempEventFilter
+  #         tempWindow.installEventFilter(tempWindow)
+  #
+  #         # insert new changeEvent routine
+  #         # self._oldChangeEvent = tempWindow.changeEvent
+  #         # tempWindow.changeEvent = self._changeEvent
+  #         print ('>>> inserting new routine - done')
+  #
+  #         # tempWindow.hide()
+  #         #
+  #         # newWin = CcpnModuleArea(mainWindow=self)
+  #         # newWin.show()
+  #         # newWin.raise_()
+  #         #
+  #         # tempWindow.mo
+  #         # newWin.addModule(tempWindow)
+  #
+  #       # if isinstance(self.parent(), dockarea):
+  #       #   self.setParent(newWin.moduleArea)
+  #
+  #     except Exception as es:
+  #       print ('>>> Error changing window', self, str(es))
+  #       pass
+  #     # if not self._newParent:
+  #     #   newWin.layout().addWidget(self)
+  #
+  #   return False        # continue with all events
+  #
+  # def _tempEventFilter(self, obj, event):
+  #   try:
+  #     if event.type() == QtCore.QEvent.WindowStateChange:
+  #       if obj.windowState() & QtCore.Qt.WindowMinimized:
+  #         print('>>>TEMP changeEvent: Minimised')
+  #       elif event.oldState() & QtCore.Qt.WindowMinimized:
+  #         print('>>>TEMP changeEvent: Normal/Maximised/FullScreen')
+  #
+  #         # TODO:ED update table from dataFrame
+  #
+  #         self.nmrResidueTable._maximise()
+  #
+  #         # only return True to stop event going any further
+  #         # return True
+  #
+  #       else:
+  #         print('>>>TEMP ~~~~', obj, event.type(), obj.windowState())
+  #   except Exception as es:
+  #     print ('>>>TEMP Error', obj, event, str(es))
+  #
+  #   # try:
+  #   #   self._oldEventFilter(obj, event)
+  #   # except Exception as es:
+  #   #   print ('>>>TEMP second error', str(es), super(NmrResidueTableModule, self))
+  #
+  #   return False
 
-        # TODO:ED update table from dataFrame
-
-        # self.nmrResidueTable._maximise()
-      else:
-        print ('Dock - ~~~~', self.windowState())
-        self._oldParent = self.parent()
-    elif event.type() == QtCore.QEvent.ParentChange:
-      self._newParent = self.parent()
-      print ('Dock - >>>changeEvent', self, self._oldParent, self._newParent)
-
-      try:
-        print (self.parent())
-        print (self.parent().parent())
-        print (self.parent().parent().parent())
-        print (self.parent().parent().parent().parent())
-
-        # self._OldChangeEvent = self.parent().parent().parent().changeEvent
-        # self.parent().parent().parent().changeEvent = self._changeEvent
-
-        if isinstance(self.parent().parent().parent(), TempAreaWindow):
-          # newWin = Blank()
-          # newWin.show()
-          # newWin.raise_()
-
-          print ('>>> inserting new routine into TempAreaWindow')
-          tempWindow = self.parent().parent().parent()
-
-          self._oldEventFilter = tempWindow.eventFilter
-          self._tempAreaWindow = tempWindow
-          tempWindow.eventFilter = self._tempEventFilter
-          tempWindow.installEventFilter(tempWindow)
-
-          # insert new changeEvent routine
-          # self._oldChangeEvent = tempWindow.changeEvent
-          # tempWindow.changeEvent = self._changeEvent
-          print ('>>> inserting new routine - done')
-
-          # tempWindow.hide()
-          #
-          # newWin = CcpnModuleArea(mainWindow=self)
-          # newWin.show()
-          # newWin.raise_()
-          #
-          # tempWindow.mo
-          # newWin.addModule(tempWindow)
-
-        # if isinstance(self.parent(), dockarea):
-        #   self.setParent(newWin.moduleArea)
-
-      except Exception as es:
-        print ('>>> Error changing window', self, str(es))
-        pass
-      # if not self._newParent:
-      #   newWin.layout().addWidget(self)
-
-    return super(NmrResidueTableModule, self)._eventFilter(obj,event)
-
-  def _tempEventFilter(self, obj, event):
-    try:
-      if event.type() == QtCore.QEvent.WindowStateChange:
-        if obj.windowState() & QtCore.Qt.WindowMinimized:
-          print('>>>TEMP changeEvent: Minimised')
-        elif event.oldState() & QtCore.Qt.WindowMinimized:
-          print('>>>TEMP changeEvent: Normal/Maximised/FullScreen')
-
-          # TODO:ED update table from dataFrame
-
-          self.nmrResidueTable._maximise()
-
-        else:
-          print('>>>TEMP ~~~~', obj, event.type(), obj.windowState())
-    except Exception as es:
-      print ('>>>TEMP Error', obj, event, str(es))
-
-    try:
-      return self._oldEventFilter(obj, event)
-    except Exception as es:
-      print ('>>>TEMP second error', str(es))
-
-  def _changeEvent(self, event):
-    if event.type() == QtCore.QEvent.WindowStateChange:
-      if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('>>>NMR changeEvent: Minimised')
-      elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('>>>NMR changeEvent: Normal/Maximised/FullScreen')
-
-        # TODO:ED update table from dataFrame
-
-      else:
-        print ('>>>NMR ~~~~')
-    else:
-      print ('>>>NMR changeEvent', event.type())
-
-    return self._oldChangeEvent(event)
 
 class NmrResidueTable(QuickTable):
   """

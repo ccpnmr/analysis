@@ -33,7 +33,7 @@ from PyQt4 import QtCore, QtGui
 
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-
+from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -257,6 +257,7 @@ class CcpnModule(Dock):
       self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
 
+    self._maximiseFunc = None
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
 
@@ -267,7 +268,6 @@ class CcpnModule(Dock):
     if self.mainWindow is not None:
       self.setParent(self.mainWindow.moduleArea)   # ejb
     self.widgetArea.setParent(self)
-
 
   # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
   # def getName(self):
@@ -306,7 +306,23 @@ class CcpnModule(Dock):
       elif event.type() == QtCore.QEvent.MouseButtonRelease:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
-    return super(CcpnModule, self).eventFilter(source,event)
+    if event.type() == QtCore.QEvent.ParentChange and self._maximiseFunc:
+      try:
+        found = False
+        searchWidget = self.parent()
+        while searchWidget is not None and not found:
+          # print (searchWidget)
+          if isinstance(searchWidget, TempAreaWindow):
+            searchWidget.eventFilter = self._tempAreaWindowEventFilter
+            searchWidget.installEventFilter(searchWidget)
+            found = True
+          else:
+            searchWidget = searchWidget.parent()
+
+      except Exception as es:
+        getLogger().warning('Error setting maximiseFunc', str(es))
+
+    return False
 
   # def _transparentAllModules(self, transparency:bool=True):
   #   if self.area:
@@ -329,6 +345,41 @@ class CcpnModule(Dock):
     #   border: 0px;
     # }
     # """)
+
+  def installMaximiseEventHandler(self, maximiseFunc):
+    self._maximiseFunc = maximiseFunc
+
+  def removeMaximiseEventHandler(self):
+    self._maximiseFunc = None
+
+  # def _eventFilter(self, obj, event):
+  #   if event.type() == QtCore.QEvent.ParentChange:
+  #     try:
+  #       if isinstance(self.parent().parent().parent(), TempAreaWindow):
+  #         print('>>> inserting new routine into TempAreaWindow')
+  #         tempWindow = self.parent().parent().parent()
+  #
+  #         # add a new eventFilter to the window and install it
+  #         tempWindow.eventFilter = self._tempAreaWindowEventFilter
+  #         tempWindow.installEventFilter(tempWindow)
+  #
+  #     except Exception as es:
+  #       print('>>> Error changing window', self, str(es))
+  #
+  #   return False  # continue with all events
+
+  def _tempAreaWindowEventFilter(self, obj, event):
+    try:
+      if event.type() == QtCore.QEvent.WindowStateChange:
+        if event.oldState() & QtCore.Qt.WindowMinimized:
+
+          if self._maximiseFunc:
+            self._maximiseFunc()
+
+    except Exception as es:
+      print('>>>TEMP Error', obj, event, str(es))
+    finally:
+      return False
 
   def _settingsCallback(self):
     """

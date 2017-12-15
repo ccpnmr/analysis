@@ -122,18 +122,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def changeEvent(self, event):
     if event.type() == QtCore.QEvent.WindowStateChange:
       if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('changeEvent: Minimised')
+        print('>>>guiMainWindow   changeEvent: Minimised')
       elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('changeEvent: Normal/Maximised/FullScreen')
+        print('>>>guiMainWindow   changeEvent: Normal/Maximised/FullScreen')
 
         # TODO:ED update table from dataFrame
 
-      else:
-        print ('~~~~')
     else:
-      print ('>>>changeEvent', event.type())
+      print ('>>>guiMainWindow   changeEvent', event.type())
 
-    super(GuiMainWindow, self).changeEvent(event)
+    event.ignore()
 
   def _initProject(self):
     """

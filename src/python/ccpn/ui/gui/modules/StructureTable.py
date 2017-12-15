@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable
-from ccpn.ui.gui.widgets.Column import Column
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from PyQt4 import QtGui, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
@@ -303,30 +303,6 @@ class StructureTable(QuickTable):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
-  #row.modelNumber, etc., may not exist..
-  columnDefs = [
-                ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
-                ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
-                ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
-                ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
-                ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
-                ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
-                ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
-                ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
-                ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
-                ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
-                ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
-                ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
-                ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
-                ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
-                ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
-                ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
-                ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
-                ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
-                ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
-                 lambda row, value:StructureTable._setComment(row, 'comment', value))
-  ]
-
   className = 'StructureTable'
   objectClass = 'StructureEnsemble'
   attributeName = 'structureEnsembles'
@@ -361,28 +337,33 @@ class StructureTable(QuickTable):
     StructureTable._project = self._project
 
     # create the column objects
-    self.STcolumns = [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
-
-    # self.STcolumns = [
-    #   ('Index', int),
-    #   ('modelNumber', int),
-    #   ('chainCode', str),
-    #   ('sequenceId', int),
-    #   ('insertionCode', str),
-    #   ('residueName', str),
-    #   ('atomName', str),
-    #   ('altLocationCode', str),
-    #   ('element', str),
-    #   ('x', float),
-    #   ('y', float),
-    #   ('z', float),
-    #   ('occupancy', float),
-    #   ('bFactor', float),
-    #   ('nmrChainCode', str),
-    #   ('nmrSequenceCode', str),
-    #   ('nmrResidueName', str),
-    #   ('nmrAtomName', str),
-    #   ('Comment', str)]  # will need to put the comment back in
+    self.STcolumns = ColumnClass([
+      ('#', lambda row:StructureTable._stLamInt(row, 'Index'), 'Index', None),
+      ('modelNumber', lambda row:StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
+      ('chainCode', lambda row:StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
+      ('sequenceId', lambda row:StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
+      ('insertionCode', lambda row:StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode',
+       None),
+      ('residueName', lambda row:StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
+      ('atomName', lambda row:StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
+      ('altLocationCode', lambda row:StructureTable._stLamStr(row, 'altLocationCode'),
+       'altLocationCode', None),
+      ('element', lambda row:StructureTable._stLamStr(row, 'element'), 'element', None),
+      ('x', lambda row:StructureTable._stLamFloat(row, 'x'), 'x', None),
+      ('y', lambda row:StructureTable._stLamFloat(row, 'y'), 'y', None),
+      ('z', lambda row:StructureTable._stLamFloat(row, 'z'), 'z', None),
+      ('occupancy', lambda row:StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
+      ('bFactor', lambda row:StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
+      ('nmrChainCode', lambda row:StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode',
+       None),
+      ('nmrSequenceCode', lambda row:StructureTable._stLamStr(row, 'nmrSequenceCode'),
+       'nmrSequenceCode', None),
+      ('nmrResidueName', lambda row:StructureTable._stLamStr(row, 'nmrResidueName'),
+       'nmrResidueName', None),
+      ('nmrAtomName', lambda row:StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
+      ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
+       lambda row, value:StructureTable._setComment(row, 'comment', value))
+    ])    # [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
@@ -406,15 +387,19 @@ class StructureTable(QuickTable):
 
     self._widget.setFixedHeight(40)
 
-    self._columnNames = [header.headerText for header in self.STcolumns]
+    # self._columnNames = [header.headerText for header in self.STcolumns]
     self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
+    self.dataFrameObject = None
 
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self._mainWindow
-                        , dataFrame=None
-                        , columns=self._columnNames
-                        , hiddenColumns=self._hiddenColumns
-                        , objects = None
+
+                        , dataFrameObject=None    # class collating table and objects and headings
+
+                        # , dataFrame=None
+                        # , columns=self._columnNames
+                        # , hiddenColumns=self._hiddenColumns
+                        # , objects = None
                         , setLayout=True
                         , autoResize=True, multiSelect=True
                         , selectionCallback=self._selectionCallback
@@ -664,10 +649,16 @@ class StructureTable(QuickTable):
 
       # add a comment field to the Pandas dataFrame?
 
-      dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
+      # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
 
+      self._dataFrameObject = self.getDataFrameFromRows(table=self
+                                                  , dataFrame=structureEnsemble.data
+                                                  , colDefs=self.STcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
+
+      # new populate from Pandas
       self._project.blankNotification()
-      self.setTableFromDataFrame(dataFrame=dataFrameObject.dataFrame)
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
       self._project.unblankNotification()
 
   def _updateDataSet(self, structureData):
@@ -710,7 +701,7 @@ class StructureTable(QuickTable):
       self._getAttachedDataSet(self.thisObj)        # check for a matching dataset, DS.title=SE.label
       self.displayTableForStructure(self.thisObj)
     else:
-      self.clearTable()
+      self.clear()
 
   def _selectionButtonCallback(self):
     """
@@ -724,7 +715,7 @@ class StructureTable(QuickTable):
       elif item is 'average':
         self.displayTableForDataSetStructure(self.thisObj)
     else:
-      self.clearTable()
+      self.clear()
 
   def _updateCallback(self, data):
     """

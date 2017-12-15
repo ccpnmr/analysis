@@ -402,18 +402,13 @@ class NmrResidueTable(QuickTable):
                          , QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
 
-    # ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-    #                      columns=self.NMRcolumns, objects = [],
-    #                      autoResize=True,  multiSelect = multiSelect,
-    #                      actionCallback=actionCallback, selectionCallback=selectionCallback,
-    #                      grid = (3, 0), gridSpan = (1, 6), enableDelete=True
-    #                      )
+    self._widget.setFixedHeight(40)
 
     self._hiddenColumns = []
     self.dataFrameObject = None
 
     QuickTable.__init__(self, parent=parent
-                        , mainWindow=mainWindow
+                        , mainWindow=self._mainWindow
 
                         , dataFrameObject=None    # class collating table and objects and headings
 

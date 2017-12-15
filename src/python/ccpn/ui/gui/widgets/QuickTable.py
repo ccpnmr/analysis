@@ -388,7 +388,10 @@ class QuickTable(TableWidget, Base):
                            , hiddenColumns=hiddenColumns
                            , table=table)
 
-  def getDataFrameFromRows(self, table, ensembleData, colDefs, hiddenColumns):
+  def getDataFrameFromRows(self, table=None
+                           , dataFrame=None
+                           , colDefs=None
+                           , hiddenColumns=None):
     """
     Return a Pandas dataFrame from the internal rows of an internal Pandas dataFrame
     The columns are based on the 'func' functions in the columnDefinitions
@@ -401,15 +404,21 @@ class QuickTable(TableWidget, Base):
     objectList = {}
     indexList = {}
 
-    buildList = ensembleData.as_namedtuples()
-    for obj in buildList:
+    buildList = dataFrame.as_namedtuples()
+    for ind, obj in enumerate(buildList):
       listItem = OrderedDict()
       for header in colDefs.columns:
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
-      indexList[listItem['Index']] = obj
-      objectList[obj.pid] = listItem['Index']
+
+    #   # TODO:ED need to add object links in here, but only the top object exists so far
+    #   if 'Index' in listItem:
+    #     indexList[str(listItem['Index'])] = obj
+    #     objectList[obj.pid] = listItem['Index']
+    #   else:
+    #     indexList[str(ind)] = obj
+    #     objectList[obj.pid] = ind
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
                            , objectList=objectList

@@ -34,6 +34,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import pandas as pd
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
@@ -43,10 +44,14 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Blank import Blank
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from PyQt4 import QtGui, QtCore
+from pyqtgraph import dockarea
+from pyqtgraph.dockarea import DockArea
+from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 import numpy as np
 
@@ -139,18 +144,11 @@ class NmrResidueTableModule(CcpnModule):
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
 
+    # trying to catch the minimise event
+    self._oldParent = None
+    self._newParent = None
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
-
-  def actionEvent(self, event):
-    print ('>>action', event.type())
-    return super(NmrResidueTableModule, self).actionEvent(event)
-
-  def _eventFilter(self, obj, event):
-    if event.type() == QtCore.QEvent.WindowStateChange:
-      print ('~~~')
-
-    return super(NmrResidueTableModule, self).eventFilter(obj,event)
 
   def selectNmrChain(self, nmrChain=None):
     """
@@ -231,22 +229,73 @@ class NmrResidueTableModule(CcpnModule):
     finally:
       super(NmrResidueTableModule, self).paintEvent(ev)
 
-  def showEvent(self, event):
-    if event.type() == QtCore.QEvent.WindowStateChange:
+  def _eventFilter(self, obj, event):
+  # def changeEvent(self, event):
+    if event.type() == QtCore.QEvent.ParentAboutToChange:
       if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('changeEvent: Minimised')
-      elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('changeEvent: Normal/Maximised/FullScreen')
+        print('Dock - changeEvent: Minimised')
+      # elif event.oldState() & QtCore.Qt.WindowMinimized:
+      #   print('Dock - changeEvent: Normal/Maximised/FullScreen')
 
         # TODO:ED update table from dataFrame
 
-        self.nmrResidueTable._maximise()
+        # self.nmrResidueTable._maximise()
       else:
-        print ('~~~~')
-    else:
-      print ('>>>changeEvent', event.type())
-    return super(NmrResidueTableModule, self).showEvent(event)
+        print ('Dock - ~~~~', self.windowState())
+        self._oldParent = self.parent()
+    elif event.type() == QtCore.QEvent.ParentChange:
+      self._newParent = self.parent()
+      print ('Dock - >>>changeEvent', self, self._oldParent, self._newParent)
 
+      try:
+        print (self.parent())
+        print (self.parent().parent())
+        print (self.parent().parent().parent())
+        print (self.parent().parent().parent().parent())
+
+        # self._OldChangeEvent = self.parent().parent().parent().changeEvent
+        # self.parent().parent().parent().changeEvent = self._changeEvent
+
+        if isinstance(self.parent().parent().parent(), TempAreaWindow):
+          # newWin = Blank()
+          # newWin.show()
+          # newWin.raise_()
+
+          tempWindow = self.parent().parent().parent()
+          tempWindow.hide()
+
+          newWin = CcpnModuleArea(mainWindow=self)
+          newWin.show()
+          newWin.raise_()
+
+          newWin.addModule(self)
+          # tempWindow.deleteLater()
+
+        # if isinstance(self.parent(), dockarea):
+        #   self.setParent(newWin.moduleArea)
+
+      except:
+        pass
+      # if not self._newParent:
+      #   newWin.layout().addWidget(self)
+
+    return super(NmrResidueTableModule, self)._eventFilter(obj,event)
+
+  def _changeEvent(self, event):
+    if event.type() == QtCore.QEvent.WindowStateChange:
+      if self.windowState() & QtCore.Qt.WindowMinimized:
+        print('>>>TEMP changeEvent: Minimised')
+      elif event.oldState() & QtCore.Qt.WindowMinimized:
+        print('>>>TEMP changeEvent: Normal/Maximised/FullScreen')
+
+        # TODO:ED update table from dataFrame
+
+      else:
+        print ('>>>TEMP ~~~~')
+    else:
+      print ('>>>TEMP changeEvent', event.type())
+
+    self._OldChangeEvent(event)
 
 class NmrResidueTable(QuickTable):
   """

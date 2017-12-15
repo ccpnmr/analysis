@@ -119,6 +119,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.statusBar().showMessage('Ready')
     self.show()
 
+  def changeEvent(self, event):
+    if event.type() == QtCore.QEvent.WindowStateChange:
+      if self.windowState() & QtCore.Qt.WindowMinimized:
+        print('changeEvent: Minimised')
+      elif event.oldState() & QtCore.Qt.WindowMinimized:
+        print('changeEvent: Normal/Maximised/FullScreen')
+
+        # TODO:ED update table from dataFrame
+
+      else:
+        print ('~~~~')
+    else:
+      print ('>>>changeEvent', event.type())
+
+    super(GuiMainWindow, self).changeEvent(event)
+
   def _initProject(self):
     """
     Puts relevant information from the project into the appropriate places in the main window.

@@ -48,6 +48,7 @@ from ccpn.ui.gui.widgets.Blank import Blank
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
 from PyQt4 import QtGui, QtCore
 from pyqtgraph import dockarea
 from pyqtgraph.dockarea import DockArea
@@ -318,6 +319,7 @@ class NmrResidueTable(QuickTable):
     # Notifier object to update the table if the nmrChain changes
     self._chainNotifier = None
     self._residueNotifier = None
+    self._atomNotifier = None
     self._selectOnTableCurrentNmrResiduesNotifier = None
 
     # TODO: see how to handle peaks as this is too costly at present
@@ -391,16 +393,26 @@ class NmrResidueTable(QuickTable):
     Notifier callback for updating the table
     """
     thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+    nmrChain = data[Notifier.OBJECT]
 
     if self.nmrChain in thisChainList:
-      self.displayTableForNmrChain(self.nmrChain)
-    else:
-      self.clearTable()
+      trigger = data[Notifier.TRIGGER]
+      if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
 
-      # nmrChain = data['theObject']
+        self.clear()
+
+      elif nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.CHANGE:
+
+        self.displayTableForNmrChain(nmrChain)
+
+      elif trigger == Notifier.RENAME:
+        if nmrChain == self.nmrChain:
+          self.displayTableForNmrChain(nmrChain)
+
+    else:
+      self.clear()
+
     logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
-    # if nmrChain is not None:
-    #   self._update(nmrChain)
 
   def _updateResidueCallback(self, data):
     """
@@ -442,6 +454,21 @@ class NmrResidueTable(QuickTable):
         self._dataFrameObject.renameObject(nmrResidue, oldPid)
 
     logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+
+  def _updateAtomCallback(self, data):
+    """
+    Notifier callback for updating the table
+    """
+    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+    nmrAtom = data[Notifier.OBJECT]
+    nmrResidue = nmrAtom.nmrResidue
+    trigger = data[Notifier.TRIGGER]
+
+    if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+      # change the dataFrame for the updated nmrAtom
+      self._dataFrameObject.changeObject(nmrResidue)
+
+    logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _maximise(self):
     """
@@ -586,6 +613,11 @@ class NmrResidueTable(QuickTable):
                                       , NmrResidue.__name__
                                       , self._updateResidueCallback
                                       , onceOnly=True)
+    self._atomNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , NmrAtom.__name__
+                                      , self._updateAtomCallback
+                                      , onceOnly=True)
     # very slow
     # self._peakNotifier = Notifier(self._project
     #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
@@ -607,6 +639,8 @@ class NmrResidueTable(QuickTable):
       self._chainNotifier.unRegister()
     if self._residueNotifier is not None:
       self._residueNotifier.unRegister()
+    if self._atomNotifier is not None:
+      self._atomNotifier.unRegister()
     if self._peakNotifier is not None:
       self._peakNotifier.unRegister()
     if self._selectOnTableCurrentNmrResiduesNotifier is not None:

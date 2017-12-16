@@ -61,16 +61,11 @@ class QuickTable(TableWidget, Base):
 
   def __init__(self, parent=None,
                mainWindow=None,
-
                dataFrameObject=None,      # collate into a single object that can be changed quickly
-
-               # dataFrame=None,
-               # columns=None,
-               # hiddenColumns=None,
-               # objects=None,
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
+               hideIndex=False,
                **kw):
     """
     Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -126,6 +121,7 @@ class QuickTable(TableWidget, Base):
       self.setSelectionBehavior(self.SelectItems)
 
     # set all the elements to the same size
+    self.hideIndex = hideIndex
     self._setDefaultRowHeight()
 
     # enable sorting and sort on the first column
@@ -176,15 +172,6 @@ class QuickTable(TableWidget, Base):
       objIndex = data['Index']
       obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
 
-      # data = {}
-      # data['THEOBJECT'] = self._dataFrameObject
-      # data['OBJECT'] = obj
-      # data['INDEX'] = objIndex
-      # data['TRIGGER'] = 'doubleclick'
-      # data['ROW'] = selection[0].row()
-      # data['COL'] = selection[0].column()
-      # data['ROWITEM'] = data
-
       data = CallBack(theObject = self._dataFrameObject
                       , object = obj
                       , index = objIndex
@@ -197,7 +184,7 @@ class QuickTable(TableWidget, Base):
       self._actionCallback(data)
 
   def showColumns(self, dataFrameObject):
-    # hide the columns in the list
+    # show the columns in the list
     for i, colName in enumerate(dataFrameObject.headings):
       if colName in dataFrameObject.hiddenColumns:
         self.hideColumn(i)
@@ -215,7 +202,8 @@ class QuickTable(TableWidget, Base):
     headers.setDefaultSectionSize(rowHeight)
 
     # and hide the row labels
-    headers.hide()
+    if self.hideIndex:
+      headers.hide()
 
     # for qt5 and above
     # QHeaderView * verticalHeader = myTableView->verticalHeader();
@@ -372,14 +360,16 @@ class QuickTable(TableWidget, Base):
     objectList = {}
     indexList = {}
 
-    for obj in buildList:
+    for col, obj in enumerate(buildList):
       listItem = OrderedDict()
       for header in colDefs.columns:
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
-      indexList[str(listItem['Index'])] = obj
-      objectList[obj.pid] = listItem['Index']
+      # indexList[str(listItem['Index'])] = obj
+      # objectList[obj.pid] = listItem['Index']
+      indexList[str(col)] = obj
+      objectList[obj.pid] = col
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
                            , objectList=objectList

@@ -377,6 +377,7 @@ class CcpnModule(Dock):
       if event.type() == QtCore.QEvent.WindowStateChange:
         if event.oldState() & QtCore.Qt.WindowMinimized:
 
+          # TODO:ED check that this is unique if changed to another window
           if self._maximiseFunc:
             self._maximiseFunc()
 

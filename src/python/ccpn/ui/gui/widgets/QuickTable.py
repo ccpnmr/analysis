@@ -65,7 +65,7 @@ class QuickTable(TableWidget, Base):
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
-               hideIndex=False,
+               hideIndex=True,
                **kw):
     """
     Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -149,6 +149,10 @@ class QuickTable(TableWidget, Base):
     self._selectionCallback = selectionCallback
     self.doubleClicked.connect(self._doubleClickCallback)
 
+    model = self.selectionModel()
+    model.selectionChanged.connect(self._selectionTableCallback)
+
+
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
     # data = OrderedDict()
@@ -169,19 +173,61 @@ class QuickTable(TableWidget, Base):
         colName = self.horizontalHeaderItem(col).text()
         data[colName] = model.model().data(iSelect)
 
-      objIndex = data['Index']
-      obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
+      objIndex = data['Pid']
+      # obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
 
+      obj = self.project.getByPid(objIndex)
+
+      if obj:
+        data = CallBack(theObject = self._dataFrameObject
+                        , object = obj
+                        , index = objIndex
+                        , targetName = obj.className
+                        , trigger = CallBack.DOUBLECLICK
+                        , row = row
+                        , col = col
+                        , rowItem = data)
+
+        self._actionCallback(data)
+
+  def _selectionTableCallback(self, itemSelection):
+    # TODO:ED generate a callback dict for the selected item
+    # data = OrderedDict()
+    # data['OBJECT'] = return pid, key/values, row, col
+
+    objList = self.getSelectedObjects()
+    # model = self.selectionModel()
+    #
+    # # selects all the items in the row
+    # selection = model.selectedIndexes()
+    #
+    # if selection:
+    #   # row = itemSelection.row()
+    #   # col = itemSelection.column()
+    #
+    #   data = {}
+    #   objList = []
+    #   for iSelect in selection:
+    #     col = iSelect.column()
+    #     colName = self.horizontalHeaderItem(col).text()
+    #     data[colName] = model.model().data(iSelect)
+    #
+    #     objIndex = data['Pid']
+    #     obj = self.project.getByPid(objIndex)
+    #     if obj:
+    #       objList.append(obj)
+
+    if objList:
       data = CallBack(theObject = self._dataFrameObject
-                      , object = obj
-                      , index = objIndex
-                      , targetName = obj.className
+                      , object = objList
+                      , index = 0
+                      , targetName = objList[0].className
                       , trigger = CallBack.DOUBLECLICK
-                      , row = row
-                      , col = col
-                      , rowItem = data)
+                      , row = 0
+                      , col = 0
+                      , rowItem = None)
 
-      self._actionCallback(data)
+      self._selectionCallback(data)
 
   def showColumns(self, dataFrameObject):
     # show the columns in the list
@@ -358,8 +404,8 @@ class QuickTable(TableWidget, Base):
     """
     allItems = []
     objects = []
-    objectList = {}
-    indexList = {}
+    # objectList = {}
+    # indexList = {}
 
     for col, obj in enumerate(buildList):
       listItem = OrderedDict()
@@ -368,14 +414,19 @@ class QuickTable(TableWidget, Base):
 
       allItems.append(listItem)
       objects.append(obj)
+
       # indexList[str(listItem['Index'])] = obj
       # objectList[obj.pid] = listItem['Index']
-      indexList[str(col)] = obj
-      objectList[obj.pid] = col
+
+      # indexList[str(col)] = obj
+      # objectList[obj.pid] = col
+
+      # indexList[str(col)] = obj
+      # objectList[obj.pid] = col
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
-                           , objectList=objectList
-                           , indexList=indexList
+                           , objectList=objects
+                           # , indexList=indexList
                            , columnDefs=colDefs
                            , hiddenColumns=hiddenColumns
                            , table=table)
@@ -394,8 +445,8 @@ class QuickTable(TableWidget, Base):
     """
     allItems = []
     objects = []
-    objectList = {}
-    indexList = {}
+    # objectList = None
+    # indexList = {}
 
     buildList = dataFrame.as_namedtuples()
     for ind, obj in enumerate(buildList):
@@ -414,8 +465,8 @@ class QuickTable(TableWidget, Base):
     #     objectList[obj.pid] = ind
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
-                           , objectList=objectList
-                           , indexList=indexList
+                           , objectList=objects
+                           # , indexList=indexList
                            , columnDefs=colDefs
                            , hiddenColumns=hiddenColumns
                            , table=table)
@@ -476,13 +527,18 @@ class QuickTable(TableWidget, Base):
         row = iSelect.row()
         col = iSelect.column()
         colName = self.horizontalHeaderItem(col).text()
-        if colName == 'Index':
+        if colName == 'Pid':
 
           if row not in rows:
             rows.append(row)
             objIndex = model.model().data(iSelect)
-            if str(objIndex) in self._dataFrameObject.indexList:
-              obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
+
+            # if str(objIndex) in self._dataFrameObject.indexList:
+              # obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
+              # selectedObjects.append(obj)
+
+            obj = self.project.getByPid(objIndex)
+            if obj:
               selectedObjects.append(obj)
 
       return selectedObjects
@@ -501,10 +557,13 @@ class QuickTable(TableWidget, Base):
       self.setUpdatesEnabled(False)
 
       for obj in uniqObjs:
-        if obj in self._dataFrameObject.objectList:
-          index = self._dataFrameObject.objectList[obj]
-          item = self._dataFrameObject.find(self, str(index))
-          selectionModel.select(item)
+        if obj in self._dataFrameObject.objects:
+          # index = self._dataFrameObject.objectList[obj]
+
+          row = self._dataFrameObject.find(self, str(obj.pid))
+          # selectionModel.select(item)
+          selectionModel.setCurrentIndex(self.model().index(row, 0)
+                                         , selectionModel.SelectCurrent | selectionModel.Rows)
 
       self._silenceCallback = False
       self.setUpdatesEnabled(True)

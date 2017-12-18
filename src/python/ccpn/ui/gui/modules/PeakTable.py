@@ -141,7 +141,7 @@ class PeakListTableWidget(QuickTable):
 
     self._widget.setFixedHeight(30)       # needed for the correct sizing of the table
 
-    self._hiddenColumns = []
+    self._hiddenColumns = ['Pid']
     self.dataFrameObject = None
 
     QuickTable.__init__(self, parent=parent
@@ -174,6 +174,7 @@ class PeakListTableWidget(QuickTable):
 
     # Serial column
     columnDefs.append(('#', 'serial', 'Peak serial number', None))
+    columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None))
 
     # Assignment column
     for i in range(peakList.spectrum.dimensionCount):
@@ -275,9 +276,11 @@ class PeakListTableWidget(QuickTable):
   ##################   Widgets callbacks  ##################
 
 
-  def _actionCallback(self, peak, *args):
+  def _actionCallback(self, data, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+
+    peak = data[Notifier.OBJECT]
 
     if self._current.strip is not None:
       widths = None
@@ -287,14 +290,18 @@ class PeakListTableWidget(QuickTable):
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
-  def _selectionCallback(self, peaks, *args):
+  def _selectionCallback(self, data, *args):
     """
     set as current the selected peaks on the table
     """
+    peaks = data[Notifier.OBJECT]
+
     if peaks is None:
       self._current.clearPeaks()
     else:
+      self.project.blankNotification()
       self._current.peaks = peaks
+      self.project.unblankNotification()
 
   def _pulldownUnitsCallback(self, unit):
     # update the table with new units

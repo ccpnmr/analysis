@@ -273,6 +273,7 @@ class NmrResidueTable(QuickTable):
       ('Index',      lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
       # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
       # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
+      ('Pid',        lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
       ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
       ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
       ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
@@ -301,7 +302,7 @@ class NmrResidueTable(QuickTable):
     self._widget.setFixedHeight(30)
 
     # initiaise the currently attached dataFrame
-    self._hiddenColumns = []
+    self._hiddenColumns = ['Pid']
     self.dataFrameObject = None
 
     # initialise the table

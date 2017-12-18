@@ -299,7 +299,6 @@ class PeakListTableWidget(QuickTable):
     if peaks is None:
       self._current.clearPeaks()
     else:
-
       # TODO:ED fix feedback loop
       self._current.peaks = peaks
 
@@ -355,7 +354,6 @@ class PeakListTableWidget(QuickTable):
 
   def _selectOnTableCurrentPeaks(self, currentPeaks):
     ''' highlight current peaks on the opened peak table '''
-
     if len(currentPeaks)>0:
       self._highLightObjs(currentPeaks)
     else:

@@ -147,6 +147,7 @@ class QuickTable(TableWidget, Base):
     # enable callbacks
     self._actionCallback = actionCallback
     self._selectionCallback = selectionCallback
+    self._silenceCallback = False
     self.doubleClicked.connect(self._doubleClickCallback)
 
     model = self.selectionModel()
@@ -195,39 +196,40 @@ class QuickTable(TableWidget, Base):
     # data = OrderedDict()
     # data['OBJECT'] = return pid, key/values, row, col
 
-    objList = self.getSelectedObjects()
-    # model = self.selectionModel()
-    #
-    # # selects all the items in the row
-    # selection = model.selectedIndexes()
-    #
-    # if selection:
-    #   # row = itemSelection.row()
-    #   # col = itemSelection.column()
-    #
-    #   data = {}
-    #   objList = []
-    #   for iSelect in selection:
-    #     col = iSelect.column()
-    #     colName = self.horizontalHeaderItem(col).text()
-    #     data[colName] = model.model().data(iSelect)
-    #
-    #     objIndex = data['Pid']
-    #     obj = self.project.getByPid(objIndex)
-    #     if obj:
-    #       objList.append(obj)
+    if not self._silenceCallback:
+      objList = self.getSelectedObjects()
+      # model = self.selectionModel()
+      #
+      # # selects all the items in the row
+      # selection = model.selectedIndexes()
+      #
+      # if selection:
+      #   # row = itemSelection.row()
+      #   # col = itemSelection.column()
+      #
+      #   data = {}
+      #   objList = []
+      #   for iSelect in selection:
+      #     col = iSelect.column()
+      #     colName = self.horizontalHeaderItem(col).text()
+      #     data[colName] = model.model().data(iSelect)
+      #
+      #     objIndex = data['Pid']
+      #     obj = self.project.getByPid(objIndex)
+      #     if obj:
+      #       objList.append(obj)
 
-    if objList:
-      data = CallBack(theObject = self._dataFrameObject
-                      , object = objList
-                      , index = 0
-                      , targetName = objList[0].className
-                      , trigger = CallBack.DOUBLECLICK
-                      , row = 0
-                      , col = 0
-                      , rowItem = None)
+      if objList:
+        data = CallBack(theObject = self._dataFrameObject
+                        , object = objList
+                        , index = 0
+                        , targetName = objList[0].className
+                        , trigger = CallBack.DOUBLECLICK
+                        , row = 0
+                        , col = 0
+                        , rowItem = None)
 
-      self._selectionCallback(data)
+        self._selectionCallback(data)
 
   def showColumns(self, dataFrameObject):
     # show the columns in the list
@@ -561,9 +563,10 @@ class QuickTable(TableWidget, Base):
           # index = self._dataFrameObject.objectList[obj]
 
           row = self._dataFrameObject.find(self, str(obj.pid))
-          # selectionModel.select(item)
-          selectionModel.setCurrentIndex(self.model().index(row, 0)
-                                         , selectionModel.SelectCurrent | selectionModel.Rows)
+          selectionModel.select(self.model().index(row, 0)
+                                         , selectionModel.Select | selectionModel.Rows)
+          # selectionModel.setCurrentIndex(self.model().index(row, 0)
+          #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
       self._silenceCallback = False
       self.setUpdatesEnabled(True)

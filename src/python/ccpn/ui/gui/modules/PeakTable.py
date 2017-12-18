@@ -299,9 +299,9 @@ class PeakListTableWidget(QuickTable):
     if peaks is None:
       self._current.clearPeaks()
     else:
-      self.project.blankNotification()
+
+      # TODO:ED fix feedback loop
       self._current.peaks = peaks
-      self.project.unblankNotification()
 
   def _pulldownUnitsCallback(self, unit):
     # update the table with new units

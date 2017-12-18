@@ -31,7 +31,9 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
+# from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
@@ -60,12 +62,15 @@ class PeakTableModule(CcpnModule):
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
-    self.project = self.mainWindow.project
+    self.project = mainWindow.project
     self.current = mainWindow.application.current
 
     # mainWidget
-    self.peakListTable = PeakListTableWidget(parent=self.mainWidget, moduleParent=self, setLayout=True,
-                                             application=self.application, grid=(0, 0))
+    self.peakListTable = PeakListTableWidget(parent=self.mainWidget
+                                             , mainWindow=self.mainWindow
+                                             , moduleParent=self
+                                             , setLayout=True
+                                             , grid=(0, 0))
 
     if peakList is not None:
       self.selectPeakList(peakList)
@@ -89,15 +94,22 @@ class PeakTableModule(CcpnModule):
     self._closeModule()
 
 
-class PeakListTableWidget(ObjectTable):
+class PeakListTableWidget(QuickTable):
+  """
+  Class to present a peakList Table
+  """
+  className = 'PeakListTable'
+  attributeName = 'peakLists'
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent, moduleParent, application, peakList=None, **kwds):
-    self._project = application.project
-    self._current = application.current
-    self._mainWindow = application.ui.mainWindow
-    self.moduleParent = moduleParent
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, **kwds):
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
+    self.moduleParent=moduleParent
+
     PeakListTableWidget._project = self._project
 
     self.settingWidgets = None
@@ -106,10 +118,10 @@ class PeakListTableWidget(ObjectTable):
     self._widget = Widget(parent=parent, **kwds)
 
     ## create peakList table widget
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[]
-                         , autoResize=True, multiSelect=True
-                         , actionCallback=self._actionCallback, selectionCallback=self._selectionCallback
-                         , grid=(1, 0), gridSpan=(1, 6))
+    # ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[]
+    #                      , autoResize=True, multiSelect=True
+    #                      , actionCallback=self._actionCallback, selectionCallback=self._selectionCallback
+    #                      , grid=(1, 0), gridSpan=(1, 6))
 
     ## create Pulldown for selection of peakList
     gridHPos = 0
@@ -127,21 +139,24 @@ class PeakListTableWidget(ObjectTable):
     gridHPos += 1
     self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
 
-    ## set notifiers
-    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current
-                                                       , [Notifier.CURRENT]
-                                                       , targetName='peaks'
-                                                       , callback=self._selectOnTableCurrentPeaksNotifierCallback)
-    # TODO set notifier to trigger only for the selected peakList.
+    self._widget.setFixedHeight(30)       # needed for the correct sizing of the table
 
-    self._peakListDeleteNotifier = Notifier(self._project
-                                            , [Notifier.CREATE, Notifier.DELETE]
-                                            , 'PeakList'
-                                            , self._peakListNotifierCallback)
-    self._peakNotifier =  Notifier(self._project
-                                   , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-                                   , 'Peak', self._peakNotifierNotifierCallback
-                                   , onceOnly=True)
+    self._hiddenColumns = []
+    self.dataFrameObject = None
+
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=self._mainWindow
+                        , dataFrameObject=None
+                        , setLayout=True
+                        , autoResize=True, multiSelect=True
+                        , actionCallback=self._actionCallback
+                        , selectionCallback=self._selectionCallback
+                        , grid=(3, 0), gridSpan=(1, 6))
+
+    self._selectOnTableCurrentPeaksNotifier = None
+    self._peakListDeleteNotifier = None
+    self._peakNotifier = None
+    self._setNotifiers()
 
     self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
@@ -196,8 +211,7 @@ class PeakListTableWidget(ObjectTable):
     columnDefs.append(('Comment', lambda pk: PeakListTableWidget._getCommentText(pk), commentsTipText,
                        lambda pk, value: PeakListTableWidget._setComment(pk, value)))
 
-    return [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in
-            columnDefs]
+    return ColumnClass(columnDefs)
 
 
   ##################   Updates   ##################
@@ -212,19 +226,34 @@ class PeakListTableWidget(ObjectTable):
 
     # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
+
     if useSelectedPeakList:
       if self._selectedPeakList is not None:
-        peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
-        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
-        self._selectOnTableCurrentPeaks(self._current.peaks)
-      else:
-        self.setObjects([]) #if not peaks, make the table empty
-    else: #set only specific peak of a peakList
-      if peaks is not None:
-        self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
-        self._selectOnTableCurrentPeaks(self._current.peaks)
-      else:
-        self.setObjects([]) #if not peaks, make the table empty
+
+        self._project.blankNotification()
+        self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                          , buildList=self._selectedPeakList.peaks
+                                                          , colDefs=self._getTableColumns(self._selectedPeakList)
+                                                          , hiddenColumns=self._hiddenColumns)
+
+        # populate from the Pandas dataFrame inside the dataFrameObject
+        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        self._highLightObjs(self._current.peaks)
+        self._project.unblankNotification()
+
+    # if useSelectedPeakList:
+    #   if self._selectedPeakList is not None:
+    #     peaks = [peak for peak in self._selectedPeakList.peaks if not peak.isDeleted]
+    #     self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+    #     self._selectOnTableCurrentPeaks(self._current.peaks)
+    #   else:
+    #     self.setObjects([]) #if not peaks, make the table empty
+    # else: #set only specific peak of a peakList
+    #   if peaks is not None:
+    #     self.setObjectsAndColumns(objects=peaks, columns=self._getTableColumns(self._selectedPeakList))
+    #     self._selectOnTableCurrentPeaks(self._current.peaks)
+    #   else:
+    #     self.setObjects([]) #if not peaks, make the table empty
 
   def _selectPeakList(self, peakList=None):
     """
@@ -343,11 +372,38 @@ class PeakListTableWidget(ObjectTable):
     if value in UNITS:
       PeakListTableWidget.positionsUnit = value
 
-
   def destroy(self):
     "Cleanup of self"
-    if self._peakListDeleteNotifier:
+    self._clearNotifiers()
+
+  def _setNotifiers(self):
+    """
+    Set a Notifier to call when an object is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+    """
+    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current
+                                                       , [Notifier.CURRENT]
+                                                       , targetName='peaks'
+                                                       , callback=self._selectOnTableCurrentPeaksNotifierCallback)
+    # TODO set notifier to trigger only for the selected peakList.
+
+    self._peakListDeleteNotifier = Notifier(self._project
+                                            , [Notifier.CREATE, Notifier.DELETE]
+                                            , 'PeakList'
+                                            , self._peakListNotifierCallback)
+    self._peakNotifier =  Notifier(self._project
+                                   , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
+                                   , 'Peak', self._peakNotifierNotifierCallback
+                                   , onceOnly=True)
+
+  def _clearNotifiers(self):
+    """
+    clean up the notifiers
+    """
+    if self._peakListDeleteNotifier is not None:
       self._peakListDeleteNotifier.unRegister()
-    if self._peakNotifier:
+    if self._peakNotifier is not None:
       self._peakNotifier.unRegister()
-    self._selectOnTableCurrentPeaksNotifier.unRegister()
+    if self._selectOnTableCurrentPeaksNotifier is not None:
+      self._selectOnTableCurrentPeaksNotifier.unRegister()

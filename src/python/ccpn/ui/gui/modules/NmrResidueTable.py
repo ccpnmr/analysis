@@ -462,7 +462,6 @@ class NmrResidueTable(QuickTable):
     thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
     nmrAtom = data[Notifier.OBJECT]
     nmrResidue = nmrAtom.nmrResidue
-    trigger = data[Notifier.TRIGGER]
 
     if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
       # change the dataFrame for the updated nmrAtom
@@ -489,14 +488,17 @@ class NmrResidueTable(QuickTable):
       # self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
       # # self.show()
 
+      self._project.blankNotification()
+      objs = self.getSelectedObjects()
+
       self._dataFrameObject = self.getDataFrameFromList(table=self
                                                   , buildList=nmrChain.nmrResidues
                                                   , colDefs=self.NMRcolumns
                                                   , hiddenColumns=self._hiddenColumns)
 
       # populate from the Pandas dataFrame inside the dataFrameObject
-      self._project.blankNotification()
       self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+      self._highLightObjs(objs)
       self._project.unblankNotification()
 
 

@@ -36,6 +36,7 @@ class DataFrameObject(object):
   def __init__(self, table=None, dataFrame=None, objectList=None, indexList=None, columnDefs=None, hiddenColumns=None):
     self._dataFrame = dataFrame
     self._objectList = objectList
+    self._objects = objectList.copy()
     self._indexList = indexList
     self._columnDefinitions = columnDefs
     self._hiddenColumns = hiddenColumns
@@ -56,6 +57,10 @@ class DataFrameObject(object):
   @objectList.setter
   def objectList(self, objectList=None):
     self._objectList = objectList
+
+  @property
+  def objects(self):
+    return self._objects
 
   @property
   def indexList(self):

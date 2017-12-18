@@ -357,6 +357,7 @@ class QuickTable(TableWidget, Base):
     :return pandas dataFrameObject:
     """
     allItems = []
+    objects = []
     objectList = {}
     indexList = {}
 
@@ -366,6 +367,7 @@ class QuickTable(TableWidget, Base):
         listItem[header.headerText] = header.getValue(obj)
 
       allItems.append(listItem)
+      objects.append(obj)
       # indexList[str(listItem['Index'])] = obj
       # objectList[obj.pid] = listItem['Index']
       indexList[str(col)] = obj
@@ -391,6 +393,7 @@ class QuickTable(TableWidget, Base):
     :return pandas dataFrame:
     """
     allItems = []
+    objects = []
     objectList = {}
     indexList = {}
 
@@ -478,10 +481,32 @@ class QuickTable(TableWidget, Base):
           if row not in rows:
             rows.append(row)
             objIndex = model.model().data(iSelect)
-            obj = self._dataFrameObject.indexList[objIndex]  # item.index needed
-            selectedObjects.append(obj)
+            if str(objIndex) in self._dataFrameObject.indexList:
+              obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
+              selectedObjects.append(obj)
 
       return selectedObjects
     else:
       return None
+
+  def _highLightObjs(self, selection):
+
+    selectionModel = self.selectionModel()
+
+    if selection:
+      uniqObjs = set(selection)
+
+      self._silenceCallback = True
+      selectionModel.clearSelection()
+      self.setUpdatesEnabled(False)
+
+      for obj in uniqObjs:
+        if obj in self._dataFrameObject.objectList:
+          index = self._dataFrameObject.objectList[obj]
+          item = self._dataFrameObject.find(self, str(index))
+          selectionModel.select(item)
+
+      self._silenceCallback = False
+      self.setUpdatesEnabled(True)
+      self.setFocus(QtCore.Qt.OtherFocusReason)
 

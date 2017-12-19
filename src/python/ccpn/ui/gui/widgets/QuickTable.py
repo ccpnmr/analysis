@@ -329,7 +329,8 @@ class QuickTable(TableWidget, Base):
           thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
           try:
 
-            self.blockSignals(True)
+            # self.blockSignals(True)
+            self._silenceCallback = True
 
             for obj in selected:
               if hasattr(obj, 'pid'):
@@ -341,9 +342,11 @@ class QuickTable(TableWidget, Base):
             getLogger().warning(str(es))
           finally:
 
-            self.blockSignals(False)
+            self._silenceCallback = False
+            # self.blockSignals(False)
 
             thisProject._endCommandEchoBlock()
+
         else:
 
           # TODO:ED this is deleting from PandasTable, check for another way to get project
@@ -634,7 +637,11 @@ class QuickTable(TableWidget, Base):
     trigger = data[Notifier.TRIGGER]
 
     self._silenceCallback = True
-    if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
+    thisRow = getattr(row, self._tableData['tableName'])
+
+    try:
+      # multiple delete from deleteObjFromTable messes with this
+      # if thisRow.pid == self._tableData['pullDownWidget'].getText():
 
       # is the row in the table
       # TODO:ED move these into the table class
@@ -670,6 +677,9 @@ class QuickTable(TableWidget, Base):
 
         # modify the oldPid in the objectList, change to newPid
         self._dataFrameObject.renameObject(row, oldPid)
+
+    except Exception as es:
+      pass
 
     self._silenceCallback = False
     getLogger().debug('>updateRowCallback>', data['notifier']

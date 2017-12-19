@@ -169,10 +169,10 @@ class PeakListTableWidget(QuickTable):
                            , rowClass=Peak
                            , cellClassNames=None
                            , tableName='peakList', rowName='peak'
-                           , changeFunc=None   #self.displayTableForNmrChain
+                           , changeFunc=self._updateAllModule
                            , className=self.attributeName
                            , updateFunc=self._updateTableCallback
-                           , tableSelection='peakist'
+                           , tableSelection='_selectedPeakList.peaks'
                            , pullDownWidget=self.pLwidget
                            , selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
 
@@ -287,6 +287,13 @@ class PeakListTableWidget(QuickTable):
 
   ##################   Widgets callbacks  ##################
 
+
+  def displayTableForPeakList(self, peakList):
+    """
+    Display the table for all NmrResidue's of nmrChain
+    """
+    self.pLwidget.select(peakList.pid)
+    self._updateTable(peaks=peakList.peaks)
 
   def _actionCallback(self, data, *args):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''

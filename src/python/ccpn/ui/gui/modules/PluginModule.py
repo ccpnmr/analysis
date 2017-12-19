@@ -89,12 +89,19 @@ class PluginModule(CcpnModule):
 
       CcpnModule.__init__(self, mainWindow=mainWindow, name=self.plugin.PLUGINNAME)
       self.mainWindow = mainWindow
-      self.project = self.mainWindow.project
+      if mainWindow is not None:
+        self.project = self.mainWindow.project
       self.application = application
       self._kwargs = {}
+      self.aborted = False
 
   def issueMessage(self, message):
     raise NotImplemented('Messages are not implemented yet.')
+
+  def abort(self):
+    self.deleteLater()
+    self.aborted = True
+    return
 
   @property
   def widgetsState(self):

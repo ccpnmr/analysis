@@ -564,8 +564,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                       plugin=plugin, application=self.application
                                       , mainWindow=self)
     plugin.ui = pluginModule
-    self.application.ui.pluginModules.append(pluginModule)
-    self.moduleArea.addModule(pluginModule)
+    if not pluginModule.aborted:
+      self.application.ui.pluginModules.append(pluginModule)
+      self.moduleArea.addModule(pluginModule)
     # TODO: open as pop-out, not as part of MainWindow
     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 

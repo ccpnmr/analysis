@@ -158,7 +158,8 @@ class QuickTable(TableWidget, Base):
     self._tableNotifier = None
     self._rowNotifier = None
     self._cellNotifiers = []
-    
+    self._selectCurrentNotifier = None
+
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
     # data = OrderedDict()
@@ -699,7 +700,8 @@ class QuickTable(TableWidget, Base):
   def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None
                          , tableName=None, rowName=None, className=None
                          , displayFunc=None, updateFunc=None
-                         , tableSelection=None, pullDownWidget=None):
+                         , tableSelection=None, pullDownWidget=None
+                         , selectCurrentCallBack=None):
     """
     Set a Notifier to call when an object is created/deleted/renamed/changed
     rename calls on name
@@ -742,6 +744,11 @@ class QuickTable(TableWidget, Base):
                                             , self._updateCellCallback
                                             , onceOnly=True))
 
+      self._selectCurrentNotifier = Notifier(self._current
+                                             , [Notifier.CURRENT]
+                                             , targetName=rowClass._pluralLinkName
+                                             , callback=selectCurrentCallBack)
+
     self._tableData = {'updateFunc': updateFunc
                         , 'displayFunc': displayFunc
                         , 'tableSelection': tableSelection
@@ -751,7 +758,8 @@ class QuickTable(TableWidget, Base):
                         , 'cellClassNames': cellClassNames
                         , 'tableName': tableName
                         , 'rowName': rowName
-                        , 'className': className}
+                        , 'className': className
+                        , 'selectCurrentCallBack': selectCurrentCallBack}
 
   def clearTableNotifiers(self):
     """
@@ -766,3 +774,5 @@ class QuickTable(TableWidget, Base):
         if cell is not None:
           cell.unRegister()
     self._cellNotifiers = []
+    if self._selectCurrentNotifier is not None:
+      self._selectCurrentNotifier.unRegister()

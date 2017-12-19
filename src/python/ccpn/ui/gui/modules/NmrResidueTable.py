@@ -340,7 +340,8 @@ class NmrResidueTable(QuickTable):
                            , className=self.attributeName
                            , updateFunc=self._update
                            , tableSelection='nmrChain'
-                           , pullDownWidget=self.ncWidget)
+                           , pullDownWidget=self.ncWidget
+                           , selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """

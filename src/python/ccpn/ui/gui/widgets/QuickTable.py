@@ -590,6 +590,7 @@ class QuickTable(TableWidget, Base):
   def _updateTableCallback(self, data):
     """
     Notifier callback for updating the table
+    :param data:
     """
     thisTableList = getattr(data[Notifier.THEOBJECT]
                             , self._tableData['className'])   # get the chainList
@@ -606,13 +607,13 @@ class QuickTable(TableWidget, Base):
       elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
 
         # self.displayTableForNmrTable(table)
-        self._tableData['displayFunc'](table)
+        self._tableData['changeFunc'](table)
 
       elif trigger == Notifier.RENAME:
         if table == getattr(self, self._tableData['tableSelection']):
 
           # self.displayTableForNmrTable(table)
-          self._tableData['displayFunc'](table)
+          self._tableData['changeFunc'](table)
 
     else:
       self.clear()
@@ -620,12 +621,12 @@ class QuickTable(TableWidget, Base):
     self._silenceCallback = False
     getLogger().debug('>updateTableCallback>', data['notifier']
                       , self._tableData['tableSelection']
-                      , data['trigger'], data['object']
-                      , self._updateSilence)
+                      , data['trigger'], data['object'])
 
   def _updateRowCallback(self, data):
     """
     Notifier callback for updating the table for change in nmrRows
+    :param data:
     """
     thisTableList = getattr(data[Notifier.THEOBJECT]
                             , self._tableData['className'])   # get the tableList
@@ -673,12 +674,12 @@ class QuickTable(TableWidget, Base):
     self._silenceCallback = False
     getLogger().debug('>updateRowCallback>', data['notifier']
                       , self._tableData['tableSelection']
-                      , data['trigger'], data['object']
-                      , self._updateSilence)
+                      , data['trigger'], data['object'])
 
   def _updateCellCallback(self, data):
     """
     Notifier callback for updating the table
+    :param data:
     """
     thisTableList = getattr(data[Notifier.THEOBJECT]
                             , self._tableData['className'])   # get the tableList
@@ -694,12 +695,18 @@ class QuickTable(TableWidget, Base):
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']
                       , self._tableData['tableSelection']
-                      , data['trigger'], data['object']
-                      , self._updateSilence)
+                      , data['trigger'], data['object'])
+
+  def _selectCurrentCallBack(self, data):
+    """
+    Callback to handle selection on the table, linked to user defined function
+    :param data:
+    """
+    self._tableData['selectCurrentCallBack'](data)
 
   def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None
                          , tableName=None, rowName=None, className=None
-                         , displayFunc=None, updateFunc=None
+                         , changeFunc=None, updateFunc=None
                          , tableSelection=None, pullDownWidget=None
                          , selectCurrentCallBack=None):
     """
@@ -713,7 +720,7 @@ class QuickTable(TableWidget, Base):
                             class that affects row when changed
     :param tableName - name of attribute for parent name of row:
     :param rowName - name of attribute for parent name of cell:
-    :param displayFunc:
+    :param changeFunc:
     :param updateFunc:
     :param tableSelection:
     :param pullDownWidget:
@@ -746,11 +753,11 @@ class QuickTable(TableWidget, Base):
 
       self._selectCurrentNotifier = Notifier(self._current
                                              , [Notifier.CURRENT]
-                                             , targetName=rowClass._pluralLinkName
-                                             , callback=selectCurrentCallBack)
+                                             , rowClass._pluralLinkName
+                                             , self._selectCurrentCallBack)
 
     self._tableData = {'updateFunc': updateFunc
-                        , 'displayFunc': displayFunc
+                        , 'changeFunc': changeFunc
                         , 'tableSelection': tableSelection
                         , 'pullDownWidget': pullDownWidget
                         , 'tableClass': tableClass

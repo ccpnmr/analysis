@@ -318,15 +318,15 @@ class NmrResidueTable(QuickTable):
                         )
 
     # Notifier object to update the table if the nmrChain changes
-    self._chainNotifier = None
-    self._residueNotifier = None
-    self._atomNotifier = None
-    self._selectOnTableCurrentNmrResiduesNotifier = None
+    # self._chainNotifier = None
+    # self._residueNotifier = None
+    # self._atomNotifier = None
+    # self._selectOnTableCurrentNmrResiduesNotifier = None
 
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
     self._peakNotifier = None
-    self._updateSilence = False  # flag to silence updating of the table
+    # self._updateSilence = False  # flag to silence updating of the table
     # self._setNotifiers()
 
     if nmrChain is not None:
@@ -336,7 +336,7 @@ class NmrResidueTable(QuickTable):
                            , rowClass=NmrResidue
                            , cellClassNames=(NmrAtom, 'nmrAtom')
                            , tableName='nmrChain', rowName='nmrResidue'
-                           , displayFunc=self.displayTableForNmrChain
+                           , changeFunc=self.displayTableForNmrChain
                            , className=self.attributeName
                            , updateFunc=self._update
                            , tableSelection='nmrChain'
@@ -491,7 +491,7 @@ class NmrResidueTable(QuickTable):
     """
     Update the table with NmrResidues of nmrChain
     """
-    if not self._updateSilence:
+    # if not self._updateSilence:
       # # objs = self.getSelectedObjects()
       # self.setObjectsAndColumns(nmrChain.nmrResidues,self.NMRcolumns)
       # # self.setColumns(self.NMRcolumns)
@@ -500,25 +500,25 @@ class NmrResidueTable(QuickTable):
       # self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
       # # self.show()
 
-      self._project.blankNotification()
-      objs = self.getSelectedObjects()
+    self._project.blankNotification()
+    objs = self.getSelectedObjects()
 
-      self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                  , buildList=nmrChain.nmrResidues
-                                                  , colDefs=self.NMRcolumns
-                                                  , hiddenColumns=self._hiddenColumns)
+    self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                , buildList=nmrChain.nmrResidues
+                                                , colDefs=self.NMRcolumns
+                                                , hiddenColumns=self._hiddenColumns)
 
-      # populate from the Pandas dataFrame inside the dataFrameObject
-      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-      self._highLightObjs(objs)
-      self._project.unblankNotification()
+    # populate from the Pandas dataFrame inside the dataFrameObject
+    self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+    self._highLightObjs(objs)
+    self._project.unblankNotification()
 
 
-  def setUpdateSilence(self, silence):
-    """
-    Silences/unsilences the update of the table until switched again
-    """
-    self._updateSilence = silence
+  # def setUpdateSilence(self, silence):
+  #   """
+  #   Silences/unsilences the update of the table until switched again
+  #   """
+  #   self._updateSilence = silence
 
   def _selectionCallback(self, data):
     """
@@ -666,6 +666,6 @@ class NmrResidueTable(QuickTable):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearNotifiers()
+    self.clearTableNotifiers()
 
 

@@ -58,6 +58,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Substance import Substance
+from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Chain import Chain
 # from ccpn.core.Residue import Residue
 # from ccpn.core.Atom import Atom
@@ -1985,6 +1986,17 @@ class CcpnNefWriter:
       del result[loopName]
     #
     return result
+
+
+  # TODO:ED add the correct function for converting structureEnsemble to Nef
+  # def structureEnsemble2Nef(self, ensemble:StructureEnsemble) -> StarIo.NmrSaveFrame:
+  #   """Convert StructureEnsemble to CCPN NEF saveframe"""
+  #
+  #   # Set up frame
+  #   category = 'ccpn_structure_ensemble'
+  #   result = self._newNefSaveFrame(ensemble, category, ensemble.name)
+  #
+  #   return result
 
 
   def sample2Nef(self, sample:Sample) -> StarIo.NmrSaveFrame:

@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
+from ccpn.core.Peak import Peak
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -153,16 +154,27 @@ class PeakListTableWidget(QuickTable):
                         , selectionCallback=self._selectionCallback
                         , grid=(3, 0), gridSpan=(1, 6))
 
-    self._selectOnTableCurrentPeaksNotifier = None
-    self._peakListDeleteNotifier = None
-    self._peakNotifier = None
-    self._setNotifiers()
+    # self._selectOnTableCurrentPeaksNotifier = None
+    # self._peakListDeleteNotifier = None
+    # self._peakNotifier = None
+    # self._setNotifiers()
 
     self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
     ## populate the table if there are peaklists in the project
     if peakList is not None:
       self._selectPeakList(peakList)
+
+    self.setTableNotifiers(tableClass=PeakList
+                           , rowClass=Peak
+                           , cellClassNames=None
+                           , tableName='peakList', rowName='peak'
+                           , changeFunc=None   #self.displayTableForNmrChain
+                           , className=self.attributeName
+                           , updateFunc=self._updateTableCallback
+                           , tableSelection='peakist'
+                           , pullDownWidget=self.pLwidget
+                           , selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
 
   def _getTableColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension
@@ -323,29 +335,29 @@ class PeakListTableWidget(QuickTable):
 
   ##################   Notifiers callbacks  ##################
 
-  def _peakListNotifierCallback(self, data):
-    '''Refreshs the table only if the peakList involved in the notification is the one displayed '''
-    if self._selectedPeakList is not None:
-      self.pLwidget.select(self._selectedPeakList.pid) #otherwise automatically reset from the compoundWidget pulldown notifiers
+  # def _peakListNotifierCallback(self, data):
+  #   '''Refreshs the table only if the peakList involved in the notification is the one displayed '''
+  #   if self._selectedPeakList is not None:
+  #     self.pLwidget.select(self._selectedPeakList.pid) #otherwise automatically reset from the compoundWidget pulldown notifiers
+  #
+  #   peakList = data['object']
+  #   if self._selectedPeakList != peakList:
+  #     return
+  #   else:
+  #     self._updateAllModule()
 
-    peakList = data['object']
-    if self._selectedPeakList != peakList:
-      return
-    else:
-      self._updateAllModule()
-
-  def _peakNotifierNotifierCallback(self, data):
-    '''Callback for peak notifier. Refresh the table only if the peak belongs to the peakList displayed
-    NB. Currently impossible to register and trigger the notifier dynamically for only the peaks in the peakList displayed.
-    This because when deleting a peakList or spectrum from the project, the process starts by deleting one by one the peak and triggering the peak notifier automatically and therefore refreshing the table,
-    TODO: better notifier that if a parent object is deleted it suspends all the children notifiers.
-   '''
-    peak = data['object']
-    if peak is not None:
-      if self._selectedPeakList != peak.peakList:
-        return
-      else:
-        self._updateAllModule()
+  # def _peakNotifierNotifierCallback(self, data):
+  #   '''Callback for peak notifier. Refresh the table only if the peak belongs to the peakList displayed
+  #   NB. Currently impossible to register and trigger the notifier dynamically for only the peaks in the peakList displayed.
+  #   This because when deleting a peakList or spectrum from the project, the process starts by deleting one by one the peak and triggering the peak notifier automatically and therefore refreshing the table,
+  #   TODO: better notifier that if a parent object is deleted it suspends all the children notifiers.
+  #  '''
+  #   peak = data['object']
+  #   if peak is not None:
+  #     if self._selectedPeakList != peak.peakList:
+  #       return
+  #     else:
+  #       self._updateAllModule()
 
   def _selectOnTableCurrentPeaksNotifierCallback(self, data):
     '''callback from a notifier to select the current peaks  '''
@@ -379,36 +391,36 @@ class PeakListTableWidget(QuickTable):
 
   def destroy(self):
     "Cleanup of self"
-    self._clearNotifiers()
+    self.clearTableNotifiers()
 
-  def _setNotifiers(self):
-    """
-    Set a Notifier to call when an object is created/deleted/renamed/changed
-    rename calls on name
-    change calls on any other attribute
-    """
-    self._selectOnTableCurrentPeaksNotifier = Notifier(self._current
-                                                       , [Notifier.CURRENT]
-                                                       , targetName='peaks'
-                                                       , callback=self._selectOnTableCurrentPeaksNotifierCallback)
-    # TODO set notifier to trigger only for the selected peakList.
-
-    self._peakListDeleteNotifier = Notifier(self._project
-                                            , [Notifier.CREATE, Notifier.DELETE]
-                                            , 'PeakList'
-                                            , self._peakListNotifierCallback)
-    self._peakNotifier =  Notifier(self._project
-                                   , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-                                   , 'Peak', self._peakNotifierNotifierCallback
-                                   , onceOnly=True)
-
-  def _clearNotifiers(self):
-    """
-    clean up the notifiers
-    """
-    if self._peakListDeleteNotifier is not None:
-      self._peakListDeleteNotifier.unRegister()
-    if self._peakNotifier is not None:
-      self._peakNotifier.unRegister()
-    if self._selectOnTableCurrentPeaksNotifier is not None:
-      self._selectOnTableCurrentPeaksNotifier.unRegister()
+  # def _setNotifiers(self):
+  #   """
+  #   Set a Notifier to call when an object is created/deleted/renamed/changed
+  #   rename calls on name
+  #   change calls on any other attribute
+  #   """
+  #   self._selectOnTableCurrentPeaksNotifier = Notifier(self._current
+  #                                                      , [Notifier.CURRENT]
+  #                                                      , targetName='peaks'
+  #                                                      , callback=self._selectOnTableCurrentPeaksNotifierCallback)
+  #   # TODO set notifier to trigger only for the selected peakList.
+  #
+  #   self._peakListDeleteNotifier = Notifier(self._project
+  #                                           , [Notifier.CREATE, Notifier.DELETE]
+  #                                           , 'PeakList'
+  #                                           , self._peakListNotifierCallback)
+  #   self._peakNotifier =  Notifier(self._project
+  #                                  , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
+  #                                  , 'Peak', self._peakNotifierNotifierCallback
+  #                                  , onceOnly=True)
+  #
+  # def _clearNotifiers(self):
+  #   """
+  #   clean up the notifiers
+  #   """
+  #   if self._peakListDeleteNotifier is not None:
+  #     self._peakListDeleteNotifier.unRegister()
+  #   if self._peakNotifier is not None:
+  #     self._peakNotifier.unRegister()
+  #   if self._selectOnTableCurrentPeaksNotifier is not None:
+  #     self._selectOnTableCurrentPeaksNotifier.unRegister()

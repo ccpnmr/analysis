@@ -61,6 +61,9 @@ class ColourDialog(QtGui.QColorDialog):
 
     self.setColour(colour)
 
+  def get(self):
+    return self.getColor()
+
 
   def getColor(self, initialColour=None):
 

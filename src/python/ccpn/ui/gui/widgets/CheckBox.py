@@ -47,6 +47,9 @@ class CheckBox(QtGui.QCheckBox, Base):
   def get(self):
     return self.isChecked()
 
+  def set(self, checked):
+    self.setChecked(checked)
+
   def setCallback(self, callback):
     self.connect(self, QtCore.SIGNAL('clicked()'), callback)
 

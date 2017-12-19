@@ -51,3 +51,7 @@ class TextEditor(QtGui.QTextEdit, Base):
 
   def get(self):
     return self.toPlainText()
+
+  def set(self, value):
+    self.setText(value)
+

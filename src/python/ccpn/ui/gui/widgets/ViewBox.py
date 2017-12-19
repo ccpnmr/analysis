@@ -563,66 +563,89 @@ class ViewBox(pg.ViewBox):
     elif middleMouse(event):
      # middle drag: moves a selected peak
       event.accept()
+      self.setMouseEnabled(False, False)
+      self.pointer.show()
 
-      peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
+
+      peaks = self.current.peaks
       if not peaks:
         return
       if len(peaks) == 1:
         peak = peaks[0]
+        project = peak.project
+        # project.blankNotification()
+
       else:
         if event.isFinish():
           getLogger().warn('Can only move one peak at a time')
         return
 
-      startPoint = Point(event.buttonDownPos())
-      endPoint = Point(event.pos())
-      startPosition = self.childGroup.mapFromParent(startPoint)
-      endPosition = self.childGroup.mapFromParent(endPoint)
-      deltaPosition = endPosition - startPosition
-      deltaPosition = deltaPosition.x(), deltaPosition.y()
-
-      project = peak.project
-      undo = project._undo
-
-      if not hasattr(peak, 'startPosition'):
-        # start of move
+      if event.isFinish():
+        # project.unblankNotification()
+        peak.position =  self.current.cursorPosition
+        peak._finaliseAction('change')
+        self.current.peak = peak
         project.newUndoPoint()
-        undo.increaseBlocking()
-        project.blankNotification()
-        self.setMouseEnabled(False,False)
-
-      try:
-        self.pointer.show()
-        self.pointer.setPos(endPosition)
-        if not hasattr(peak, 'startPosition'):
-          peak.startPosition = peak.position
-        indices = peakListToIndicesDict[peak.peakList]
-        position = list(peak.startPosition)
-        for n, index in enumerate(indices):
-          position[index] += deltaPosition[n]
-        peak.position = self.current.cursorPosition
-        project.newUndoPoint()
-
-      except:
-          undo.decreaseBlocking()
-          project.unblankNotification()
-          self.setMouseEnabled(True, True)
-          self.pointer.hide()
+        self.setMouseEnabled(True, True)
+        self.pointer.hide()
+        self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
+            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
 
       else:
-        if event.isFinish():
-          self.pointer.hide()
-          undo.decreaseBlocking()
-          project.unblankNotification()
-          self.setMouseEnabled(True, True)
-          if hasattr(peak, 'startPosition'):
-            undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
-                         redoArgs=[peak, 'position', peak.position])
-            delattr(peak, 'startPosition')
-          peak._finaliseAction('change')
-          self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
-            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
-            )
+        ## this is when the peak is being dragged.
+        ## Don't use peak.position =  self.current.cursorPosition here to simply show the Label moving.
+        ## Because will fire millions of notifications and will not undo to the starting point. Unless (again) nested code.
+        self.pointer.setPos(self.current.cursorPosition[0], self.current.cursorPosition[1])
+
+      # startPoint = Point(event.buttonDownPos())
+      # endPoint = Point(event.pos())
+      # startPosition = self.childGroup.mapFromParent(startPoint)
+      # endPosition = self.childGroup.mapFromParent(endPoint)
+      # deltaPosition = endPosition - startPosition
+      # deltaPosition = deltaPosition.x(), deltaPosition.y()
+      #
+      # project = peak.project
+      # undo = project._undo
+      #
+      # if not hasattr(peak, 'startPosition'):
+      #   # start of move
+      #   project.newUndoPoint()
+      #   undo.increaseBlocking()
+      #   project.blankNotification()
+      #   self.setMouseEnabled(False,False)
+      #
+      # try:
+      #   self.pointer.show()
+      #   self.pointer.setPos(endPosition)
+      #   if not hasattr(peak, 'startPosition'):
+      #     peak.startPosition = peak.position
+      #   indices = peakListToIndicesDict[peak.peakList]
+      #   position = list(peak.startPosition)
+      #   for n, index in enumerate(indices):
+      #     position[index] += deltaPosition[n]
+      #   peak.position = self.current.cursorPosition
+      #   project.newUndoPoint()
+      #
+      # except:
+      #     undo.decreaseBlocking()
+      #     project.unblankNotification()
+      #     self.setMouseEnabled(True, True)
+      #     self.pointer.hide()
+
+      # else:
+      # if event.isFinish():
+      #   self.pointer.hide()
+      #   undo.decreaseBlocking()
+      #   project.unblankNotification()
+      #   self.setMouseEnabled(True, True)
+      #   if hasattr(peak, 'startPosition'):
+      #     undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+      #                  redoArgs=[peak, 'position', peak.position])
+      #     delattr(peak, 'startPosition')
+      #   peak._finaliseAction('change')
+      #   self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
+      #     ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
+      #     )
 
     elif shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
       # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.

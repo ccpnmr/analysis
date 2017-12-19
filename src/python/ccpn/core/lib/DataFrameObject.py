@@ -105,7 +105,8 @@ class DataFrameObject(object):
   def removeObject(self, obj):
     # remove an object from the class
     # if obj.pid in self._objectList:
-    try:
+    if self.find(self._table, str(obj.pid), column='Pid') is not None:
+      self._table.silenceCallBack = True
       # the object exists
       # index = self._objectList[obj.pid]
       # del self._objectList[obj.pid]   # remove from objectList
@@ -129,13 +130,12 @@ class DataFrameObject(object):
 
       # remove from table by pid
       row = self.find(self._table, str(obj.pid), column='Pid')
-      if row:
+      if row is not None:
         self._table.removeRow(row)
 
-    except Exception as es:
-      getLogger().warning('removeObject: Invalid row', str(es), row)      # add undo item
+      self._table.silenceCallBack = False
 
-    # copy deleteSelectedRows from EnsembleData
+# copy deleteSelectedRows from EnsembleData
 
   def find(self, table, text, column='Pid'):
     model = table.model()
@@ -162,7 +162,8 @@ class DataFrameObject(object):
 
   def appendObject(self, obj):
     # if obj.pid not in self._objectList:
-    if not self.find(self._table, str(obj.pid), column='Pid'):
+    if self.find(self._table, str(obj.pid), column='Pid') is None:
+      self._table.silenceCallBack = True
 
       # the object doesn't exist in list, so can be added
       listDict = OrderedDict()
@@ -208,10 +209,12 @@ class DataFrameObject(object):
         # df = df[df.index != x]
         # desired_indices = [i for i in len(df.index) if i not in unwanted_indices]
         # desired_df = df.iloc[desired_indices]
+      self._table.silenceCallBack = False
 
   def renameObject(self, obj, oldPid):
     # if oldPid in self._objectList:
-    if self.find(self._table, str(oldPid), column='Pid'):
+    if self.find(self._table, str(oldPid), column='Pid') is not None:
+      self._table.silenceCallBack = True
 
       # get the existing index and remove the items from the lists
       # index = self._objectList[oldPid]
@@ -236,13 +239,14 @@ class DataFrameObject(object):
       # self._table.resizeColumnsToContents()
       # self._table.showColumns(self)
       self._table.show()
+      self._table.silenceCallBack = False
 
       # TODO:ED new functionality may be to use the label types in preferences in the tables
 
   def changeObject(self, obj):
     # if obj.pid in self._objectList:
-    if self.find(self._table, str(obj.pid), column='Pid'):
-
+    if self.find(self._table, str(obj.pid), column='Pid') is not None:
+      self._table.silenceCallBack = True
       # update the values as 'Pid' may have changed
       # index = self._objectList[obj.pid]
       # del self._objectList[obj.pid]
@@ -267,5 +271,6 @@ class DataFrameObject(object):
       # self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != index]
       # df.columns.get_loc('Pid')
       row = self.find(self._table, str(obj.pid), column='Pid')
-      if row:
+      if row is not None:
         self._table.setRow(row, list(listDict.values()))
+      self._table.silenceCallBack = False

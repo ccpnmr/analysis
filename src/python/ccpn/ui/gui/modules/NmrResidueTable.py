@@ -327,10 +327,20 @@ class NmrResidueTable(QuickTable):
     # Notifier object to update the table if the peaks change
     self._peakNotifier = None
     self._updateSilence = False  # flag to silence updating of the table
-    self._setNotifiers()
+    # self._setNotifiers()
 
     if nmrChain is not None:
       self._selectNmrChain(nmrChain)
+
+    self.setTableNotifiers(tableClass=NmrChain
+                           , rowClass=NmrResidue
+                           , cellClassNames=(NmrAtom, 'nmrAtom')
+                           , tableName='nmrChain', rowName='nmrResidue'
+                           , displayFunc=self.displayTableForNmrChain
+                           , className=self.attributeName
+                           , updateFunc=self._update
+                           , tableSelection='nmrChain'
+                           , pullDownWidget=self.ncWidget)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -389,86 +399,86 @@ class NmrResidueTable(QuickTable):
     self.ncWidget.select(nmrChain.pid)
     self._update(nmrChain)
 
-  def _updateChainCallback(self, data):
-    """
-    Notifier callback for updating the table
-    """
-    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    nmrChain = data[Notifier.OBJECT]
-
-    if self.nmrChain in thisChainList:
-      trigger = data[Notifier.TRIGGER]
-      if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
-
-        self.clear()
-
-      elif nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.CHANGE:
-
-        self.displayTableForNmrChain(nmrChain)
-
-      elif trigger == Notifier.RENAME:
-        if nmrChain == self.nmrChain:
-          self.displayTableForNmrChain(nmrChain)
-
-    else:
-      self.clear()
-
-    logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
-
-  def _updateResidueCallback(self, data):
-    """
-    Notifier callback for updating the table for change in nmrResidues
-    """
-    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    nmrResidue = data[Notifier.OBJECT]
-    trigger = data[Notifier.TRIGGER]
-
-    if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
-      # is the nmrResidue in the visible list
-      # TODO:ED move these into the table class
-
-      if trigger == Notifier.DELETE:
-
-          # remove item from self._dataFrameObject
-
-        self._dataFrameObject.removeObject(nmrResidue)
-
-      elif trigger == Notifier.CREATE:
-
-        # insert item into self._dataFrameObject
-
-        if self.nmrChain.nmrResidues and len(self.nmrChain.nmrResidues) > 1:
-          self._dataFrameObject.appendObject(nmrResidue)
-        else:
-          self._update(self.nmrChain)
-
-      elif trigger == Notifier.CHANGE:
-
-        # modify the line in the table
-        self._dataFrameObject.changeObject(nmrResidue)
-
-      elif trigger == Notifier.RENAME:
-        # get the old pid before the rename
-        oldPid = data[Notifier.OLDPID]
-
-        # modify the oldPid in the objectList, change to newPid
-        self._dataFrameObject.renameObject(nmrResidue, oldPid)
-
-    logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
-
-  def _updateAtomCallback(self, data):
-    """
-    Notifier callback for updating the table
-    """
-    thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    nmrAtom = data[Notifier.OBJECT]
-    nmrResidue = nmrAtom.nmrResidue
-
-    if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
-      # change the dataFrame for the updated nmrAtom
-      self._dataFrameObject.changeObject(nmrResidue)
-
-    logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  # def _updateChainCallback(self, data):
+  #   """
+  #   Notifier callback for updating the table
+  #   """
+  #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+  #   nmrChain = data[Notifier.OBJECT]
+  #
+  #   if self.nmrChain in thisChainList:
+  #     trigger = data[Notifier.TRIGGER]
+  #     if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
+  #
+  #       self.clear()
+  #
+  #     elif nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.CHANGE:
+  #
+  #       self.displayTableForNmrChain(nmrChain)
+  #
+  #     elif trigger == Notifier.RENAME:
+  #       if nmrChain == self.nmrChain:
+  #         self.displayTableForNmrChain(nmrChain)
+  #
+  #   else:
+  #     self.clear()
+  #
+  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #
+  # def _updateResidueCallback(self, data):
+  #   """
+  #   Notifier callback for updating the table for change in nmrResidues
+  #   """
+  #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+  #   nmrResidue = data[Notifier.OBJECT]
+  #   trigger = data[Notifier.TRIGGER]
+  #
+  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #     # is the nmrResidue in the visible list
+  #     # TODO:ED move these into the table class
+  #
+  #     if trigger == Notifier.DELETE:
+  #
+  #         # remove item from self._dataFrameObject
+  #
+  #       self._dataFrameObject.removeObject(nmrResidue)
+  #
+  #     elif trigger == Notifier.CREATE:
+  #
+  #       # insert item into self._dataFrameObject
+  #
+  #       if self.nmrChain.nmrResidues and len(self.nmrChain.nmrResidues) > 1:
+  #         self._dataFrameObject.appendObject(nmrResidue)
+  #       else:
+  #         self._update(self.nmrChain)
+  #
+  #     elif trigger == Notifier.CHANGE:
+  #
+  #       # modify the line in the table
+  #       self._dataFrameObject.changeObject(nmrResidue)
+  #
+  #     elif trigger == Notifier.RENAME:
+  #       # get the old pid before the rename
+  #       oldPid = data[Notifier.OLDPID]
+  #
+  #       # modify the oldPid in the objectList, change to newPid
+  #       self._dataFrameObject.renameObject(nmrResidue, oldPid)
+  #
+  #   logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #
+  # def _updateAtomCallback(self, data):
+  #   """
+  #   Notifier callback for updating the table
+  #   """
+  #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
+  #   nmrAtom = data[Notifier.OBJECT]
+  #   nmrResidue = nmrAtom.nmrResidue
+  #
+  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #     # change the dataFrame for the updated nmrAtom
+  #     self._dataFrameObject.changeObject(nmrResidue)
+  #
+  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _maximise(self):
     """
@@ -509,16 +519,18 @@ class NmrResidueTable(QuickTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, selected, row, col):
+  def _selectionCallback(self, data):
     """
     Notifier Callback for selecting a row in the table
     """
-    if selected is not None:
+    selected = data[Notifier.OBJECT]
+
+    if selected:
       if self.multiSelect: #In this case selected is a List!!
         if isinstance(selected, list):
           self._current.nmrResidues = selected
       else:
-        self._current.nmrResidue = selected
+        self._current.nmrResidue = selected[0]
     else:
       self._current.clearNmrResidues()
     NmrResidueTableModule._currentCallback = {'object':self.nmrChain, 'table':self}
@@ -600,54 +612,54 @@ class NmrResidueTable(QuickTable):
   #     return round(float(np.mean(deltas)),3)
   #   return
 
-  def _setNotifiers(self):
-    """
-    Set a Notifier to call when an object is created/deleted/renamed/changed
-    rename calls on name
-    change calls on any other attribute
-    """
-    self._clearNotifiers()
-    self._chainNotifier = Notifier(self._project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                      , NmrChain.__name__
-                                      , self._updateChainCallback)
-    self._residueNotifier = Notifier(self._project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-                                      , NmrResidue.__name__
-                                      , self._updateResidueCallback
-                                      , onceOnly=True)
-    self._atomNotifier = Notifier(self._project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                      , NmrAtom.__name__
-                                      , self._updateAtomCallback
-                                      , onceOnly=True)
-    # very slow
-    # self._peakNotifier = Notifier(self._project
-    #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-    #                               , 'Peak'
-    #                               , self._updateCallback
-    #                               , onceOnly = True
-    #                               )
-
-    self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self._current
-                                                       , [Notifier.CURRENT]
-                                                       , targetName='nmrResidues'
-                                                       , callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
-
-  def _clearNotifiers(self):
-    """
-    clean up the notifiers
-    """
-    if self._chainNotifier is not None:
-      self._chainNotifier.unRegister()
-    if self._residueNotifier is not None:
-      self._residueNotifier.unRegister()
-    if self._atomNotifier is not None:
-      self._atomNotifier.unRegister()
-    if self._peakNotifier is not None:
-      self._peakNotifier.unRegister()
-    if self._selectOnTableCurrentNmrResiduesNotifier is not None:
-      self._selectOnTableCurrentNmrResiduesNotifier.unRegister()
+  # def _setNotifiers(self):
+  #   """
+  #   Set a Notifier to call when an object is created/deleted/renamed/changed
+  #   rename calls on name
+  #   change calls on any other attribute
+  #   """
+  #   self._clearNotifiers()
+  #   self._chainNotifier = Notifier(self._project
+  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+  #                                     , NmrChain.__name__
+  #                                     , self._updateChainCallback)
+  #   self._residueNotifier = Notifier(self._project
+  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+  #                                     , NmrResidue.__name__
+  #                                     , self._updateResidueCallback
+  #                                     , onceOnly=True)
+  #   self._atomNotifier = Notifier(self._project
+  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+  #                                     , NmrAtom.__name__
+  #                                     , self._updateAtomCallback
+  #                                     , onceOnly=True)
+  #   # very slow
+  #   # self._peakNotifier = Notifier(self._project
+  #   #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
+  #   #                               , 'Peak'
+  #   #                               , self._updateCallback
+  #   #                               , onceOnly = True
+  #   #                               )
+  #
+  #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self._current
+  #                                                      , [Notifier.CURRENT]
+  #                                                      , targetName='nmrResidues'
+  #                                                      , callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
+  #
+  # def _clearNotifiers(self):
+  #   """
+  #   clean up the notifiers
+  #   """
+  #   if self._chainNotifier is not None:
+  #     self._chainNotifier.unRegister()
+  #   if self._residueNotifier is not None:
+  #     self._residueNotifier.unRegister()
+  #   if self._atomNotifier is not None:
+  #     self._atomNotifier.unRegister()
+  #   if self._peakNotifier is not None:
+  #     self._peakNotifier.unRegister()
+  #   if self._selectOnTableCurrentNmrResiduesNotifier is not None:
+  #     self._selectOnTableCurrentNmrResiduesNotifier.unRegister()
 
   def _close(self):
     """

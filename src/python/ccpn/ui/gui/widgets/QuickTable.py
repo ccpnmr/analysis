@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
+from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
 
@@ -153,7 +154,11 @@ class QuickTable(TableWidget, Base):
     model = self.selectionModel()
     model.selectionChanged.connect(self._selectionTableCallback)
 
-
+    self._tableData = {}
+    self._tableNotifier = None
+    self._rowNotifier = None
+    self._cellNotifiers = []
+    
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
     # data = OrderedDict()
@@ -384,6 +389,7 @@ class QuickTable(TableWidget, Base):
     # dataFrame = dataFrame.reindex(columns=cols)
 
     # set the table and column headings
+    self._silenceCallback = True
     self.setData(dataFrameObject.dataFrame.values)
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
@@ -391,6 +397,7 @@ class QuickTable(TableWidget, Base):
     self.resizeColumnsToContents()
     self.showColumns(dataFrameObject)
     self.show()
+    self._silenceCallback = False
 
   def getDataFrameFromList(self, table=None
                            , buildList=None
@@ -554,6 +561,7 @@ class QuickTable(TableWidget, Base):
     if selection:
       uniqObjs = set(selection)
 
+      # disable callbacks while populating the table
       self._silenceCallback = True
       selectionModel.clearSelection()
       self.setUpdatesEnabled(False)
@@ -572,3 +580,189 @@ class QuickTable(TableWidget, Base):
       self.setUpdatesEnabled(True)
       self.setFocus(QtCore.Qt.OtherFocusReason)
 
+  def clearTable(self):
+    "remove all objects from the table"
+    self._silenceCallback = True
+    self.clear()
+    self._silenceCallback = False
+
+  def _updateTableCallback(self, data):
+    """
+    Notifier callback for updating the table
+    """
+    thisTableList = getattr(data[Notifier.THEOBJECT]
+                            , self._tableData['className'])   # get the chainList
+    table = data[Notifier.OBJECT]
+
+    self._silenceCallback = True
+    if getattr(self, self._tableData['tableSelection']) in thisTableList:
+      trigger = data[Notifier.TRIGGER]
+
+      if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
+
+        self.clear()
+
+      elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
+
+        # self.displayTableForNmrTable(table)
+        self._tableData['displayFunc'](table)
+
+      elif trigger == Notifier.RENAME:
+        if table == getattr(self, self._tableData['tableSelection']):
+
+          # self.displayTableForNmrTable(table)
+          self._tableData['displayFunc'](table)
+
+    else:
+      self.clear()
+
+    self._silenceCallback = False
+    getLogger().debug('>updateTableCallback>', data['notifier']
+                      , self._tableData['tableSelection']
+                      , data['trigger'], data['object']
+                      , self._updateSilence)
+
+  def _updateRowCallback(self, data):
+    """
+    Notifier callback for updating the table for change in nmrRows
+    """
+    thisTableList = getattr(data[Notifier.THEOBJECT]
+                            , self._tableData['className'])   # get the tableList
+    row = data[Notifier.OBJECT]
+    trigger = data[Notifier.TRIGGER]
+
+    self._silenceCallback = True
+    if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
+
+      # is the row in the table
+      # TODO:ED move these into the table class
+
+      if trigger == Notifier.DELETE:
+
+          # remove item from self._dataFrameObject
+
+        self._dataFrameObject.removeObject(row)
+
+      elif trigger == Notifier.CREATE:
+
+        # insert item into self._dataFrameObject
+
+        tSelect = getattr(self, self._tableData['tableSelection'])
+        rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+
+        if rows and len(rows) > 1:
+          self._dataFrameObject.appendObject(row)
+        else:
+
+          # self._update(self.nmrTable)
+          self._tableData['updateFunc'](tSelect)
+
+      elif trigger == Notifier.CHANGE:
+
+        # modify the line in the table
+        self._dataFrameObject.changeObject(row)
+
+      elif trigger == Notifier.RENAME:
+        # get the old pid before the rename
+        oldPid = data[Notifier.OLDPID]
+
+        # modify the oldPid in the objectList, change to newPid
+        self._dataFrameObject.renameObject(row, oldPid)
+
+    self._silenceCallback = False
+    getLogger().debug('>updateRowCallback>', data['notifier']
+                      , self._tableData['tableSelection']
+                      , data['trigger'], data['object']
+                      , self._updateSilence)
+
+  def _updateCellCallback(self, data):
+    """
+    Notifier callback for updating the table
+    """
+    thisTableList = getattr(data[Notifier.THEOBJECT]
+                            , self._tableData['className'])   # get the tableList
+    cell = data[Notifier.OBJECT]
+    row = getattr(cell, self._tableData['rowName'])
+
+    self._silenceCallback = True
+    if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
+
+      # change the dataFrame for the updated nmrCell
+      self._dataFrameObject.changeObject(row)
+
+    self._silenceCallback = False
+    getLogger().debug('>updateCellCallback>', data['notifier']
+                      , self._tableData['tableSelection']
+                      , data['trigger'], data['object']
+                      , self._updateSilence)
+
+  def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None
+                         , tableName=None, rowName=None, className=None
+                         , displayFunc=None, updateFunc=None
+                         , tableSelection=None, pullDownWidget=None):
+    """
+    Set a Notifier to call when an object is created/deleted/renamed/changed
+    rename calls on name
+    change calls on any other attribute
+
+    :param tableClass - class of table object, selected by pulldown:
+    :param rowClass - class identified by a row in the table:
+    :param cellClassNames - list of tuples (cellClass, cellClassName):
+                            class that affects row when changed
+    :param tableName - name of attribute for parent name of row:
+    :param rowName - name of attribute for parent name of cell:
+    :param displayFunc:
+    :param updateFunc:
+    :param tableSelection:
+    :param pullDownWidget:
+    :return:
+    """
+    self.clearTableNotifiers()
+    self._tableNotifier = Notifier(self._project
+                                    , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                    , tableClass.__name__
+                                    , self._updateTableCallback)
+    self._rowNotifier = Notifier(self._project
+                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                  , rowClass.__name__
+                                  , self._updateRowCallback
+                                  , onceOnly=True)
+    if isinstance(cellClassNames, list):
+      for cellClass in cellClassNames:
+        self._cellNotifiers.append(Notifier(self._project
+                                            , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                            , cellClass[0].__name__
+                                            , self._updateCellCallback
+                                            , onceOnly=True))
+    else:
+      if cellClassNames:
+        self._cellNotifiers.append(Notifier(self._project
+                                            , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                            , cellClassNames[0].__name__
+                                            , self._updateCellCallback
+                                            , onceOnly=True))
+
+    self._tableData = {'updateFunc': updateFunc
+                        , 'displayFunc': displayFunc
+                        , 'tableSelection': tableSelection
+                        , 'pullDownWidget': pullDownWidget
+                        , 'tableClass': tableClass
+                        , 'rowClass': rowClass
+                        , 'cellClassNames': cellClassNames
+                        , 'tableName': tableName
+                        , 'rowName': rowName
+                        , 'className': className}
+
+  def clearTableNotifiers(self):
+    """
+    clean up the notifiers
+    """
+    if self._tableNotifier is not None:
+      self._tableNotifier.unRegister()
+    if self._rowNotifier is not None:
+      self._rowNotifier.unRegister()
+    if self._cellNotifiers:
+      for cell in self.cellNotifiers:
+        if cell is not None:
+          cell.unRegister()
+    self._cellNotifiers = []

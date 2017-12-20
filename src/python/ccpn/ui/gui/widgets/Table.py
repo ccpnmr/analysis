@@ -1091,8 +1091,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
   def createEditor(self, parentWidget, itemStyle, index): # returns the edit widget
 
     col = index.column()
-    # objCol = self.parent.columns[col]
-    objCol = self.parent._dataFrameObject.columnDefinitions.columns[col]
+    objCol = self.parent.columns[col]
 
     if objCol.editClass:
       widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
@@ -1101,9 +1100,7 @@ class ObjectTableItemDelegate(QtGui.QStyledItemDelegate):
       return widget
 
     else:
-      # obj = self.parent.objects[index.row()]
-      obj = self.parent._dataFrameObject.objects[0]
-
+      obj = self.parent.objects[index.row()]
       editValue = objCol.getEditValue(obj)
 
       if isinstance(editValue, (list, tuple)):

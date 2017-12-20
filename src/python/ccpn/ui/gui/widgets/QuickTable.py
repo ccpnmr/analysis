@@ -48,7 +48,6 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
-from ccpn.ui.gui.widgets.Table import ObjectTableItemDelegate
 from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
@@ -150,7 +149,7 @@ class QuickTable(TableWidget, Base):
     self.doubleClicked.connect(self._doubleClickCallback)
 
     # set the delegate for editing
-    delegate = ObjectTableItemDelegate(self)
+    delegate = QuickTableDelegate(self)
     self.setItemDelegate(delegate)
 
     # set the callback for changing selection on table
@@ -206,13 +205,20 @@ class QuickTable(TableWidget, Base):
         elif self._dataFrameObject.columnDefinitions.editValues[col]:    # ejb - editable fields don't actionCallback:
           item = self.item(row, col)
           item.setEditable(True)
-          self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+          # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
           # item.textChanged.connect(partial(self._changeMe, item))
           self.editItem(item)         # enter the editing mode
 
   def _changeMe(self, row, col, widget, endEditHint):
     text = widget.text()
     # TODO:ED process setting of object in here
+
+    item = self.item(row, col)
+
+    print ('>>>changeMe', row, col)
+
+    # obj = self._dataFrameObject.objects[row]
+    # self._dataFrameObject.columnDefinitions.editValues[col](obj, text)
     pass
 
   def _selectionTableCallback(self, itemSelection):
@@ -853,7 +859,34 @@ class QuickTable(TableWidget, Base):
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
 
-  def cellDoubleClicked(self, *args, **kwargs):
-    # enter for editing if editable
-    pass
 
+EDIT_ROLE = QtCore.Qt.EditRole
+
+class QuickTableDelegate(QtGui.QStyledItemDelegate):
+  def __init__(self, parent):
+    QtGui.QStyledItemDelegate.__init__(self, parent)
+    self.customWidget = False
+    self._parent = parent
+
+  def setModelData(self, widget, mode, index):#returns updated data
+    text = widget.text()
+    row = index.row()
+    col = index.column()
+
+    try:
+      rowData = []
+      # read the row from the table to get the pid
+      for ii in range(self._parent.columnCount()):
+        rowData.append(self._parent.item(row, ii).text())
+
+      pidCol = self._parent._dataFrameObject.headings.index('Pid')
+      thisPid = rowData[pidCol]
+
+      obj = self._parent.project.getByPid(thisPid)
+      print (row, col, obj)
+
+      # good, now set the data which will fire notifiers to populate the tables
+    except Exception as es:
+      print ('>>>error', str(es))
+
+    # return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)

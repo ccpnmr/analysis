@@ -271,22 +271,19 @@ class QuickTable(TableWidget, Base):
     if event.button() == QtCore.Qt.RightButton:
       # stops the selection from the table when the right button is clicked
       event.accept()
-    # elif event.button() == QtCore.Qt.LeftButton:
-    #
-    #   # we are selecting from the table
-    #   self._mousePressed = True
-    #
-    #   event.ignore()
-    # else:
-    #   event.ignore()
+    elif event.button() == QtCore.Qt.LeftButton:
 
-  # def mouseReleaseEvent(self, event):
-  #   self._mousePressed = False
-  #   event.ignore()
-    else:
-      # not sure why event.ignore() didn't work
+      # we are selecting from the table
+      self._mousePressed = True
       event.ignore()
       super(QuickTable, self).mousePressEvent(event)
+    else:
+      event.ignore()
+      super(QuickTable, self).mousePressEvent(event)
+
+  def mouseReleaseEvent(self, event):
+    self._mousePressed = False
+    super(QuickTable, self).mouseReleaseEvent(event)
 
   def _setHeaderContextMenu(self):
     headers = self.horizontalHeader()
@@ -576,29 +573,37 @@ class QuickTable(TableWidget, Base):
 
   def _highLightObjs(self, selection):
 
+    # skip if the table is empty
+    if not self._dataFrameObject:
+      return
+
     selectionModel = self.selectionModel()
 
     if selection:
       uniqObjs = set(selection)
 
-      # disable callbacks while populating the table
-      self._silenceCallback = True
-      self.blockSignals(True)
-      selectionModel.clearSelection()
-      self.setUpdatesEnabled(False)
-
+      rowObjs = []
       for obj in uniqObjs:
         if obj in self._dataFrameObject.objects:
-          # index = self._dataFrameObject.objectList[obj]
+          rowObjs.append(obj)
 
-          row = self._dataFrameObject.find(self, str(obj.pid))
-          selectionModel.select(self.model().index(row, 0)
-                                         , selectionModel.Select | selectionModel.Rows)
-          # selectionModel.setCurrentIndex(self.model().index(row, 0)
-          #                                , selectionModel.SelectCurrent | selectionModel.Rows)
+      # disable callbacks while populating the table
+      self._silenceCallback = True
+      # self.blockSignals(True)
+      if not self._mousePressed:
+        selectionModel.clearSelection()       # causes a clear problem here
+                                              # strange tablewidget cmd/selection problem
+      self.setUpdatesEnabled(False)
+
+      for obj in rowObjs:
+        row = self._dataFrameObject.find(self, str(obj.pid))
+        selectionModel.select(self.model().index(row, 0)
+                                       , selectionModel.Select | selectionModel.Rows)
+        # selectionModel.setCurrentIndex(self.model().index(row, 0)
+        #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
       self.setUpdatesEnabled(True)
-      self.blockSignals(False)
+      # self.blockSignals(False)
       self._silenceCallback = False
       self.setFocus(QtCore.Qt.OtherFocusReason)
 

@@ -241,7 +241,7 @@ class PeakListTableWidget(QuickTable):
     self._selectedPeakList = self._project.getByPid(self.pLwidget.getText())
 
     if useSelectedPeakList:
-      if self._selectedPeakList is not None:
+      if self._selectedPeakList:
 
         self._project.blankNotification()
         self._dataFrameObject = self.getDataFrameFromList(table=self
@@ -253,6 +253,23 @@ class PeakListTableWidget(QuickTable):
         self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
         self._highLightObjs(self._current.peaks)
         self._project.unblankNotification()
+      else:
+        self.clear()
+    else:
+      if peaks:
+
+        self._project.blankNotification()
+        self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                          , buildList=peaks
+                                                          , colDefs=self._getTableColumns(self._selectedPeakList)
+                                                          , hiddenColumns=self._hiddenColumns)
+
+        # populate from the Pandas dataFrame inside the dataFrameObject
+        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        self._highLightObjs(self._current.peaks)
+        self._project.unblankNotification()
+      else:
+        self.clear()
 
     # if useSelectedPeakList:
     #   if self._selectedPeakList is not None:

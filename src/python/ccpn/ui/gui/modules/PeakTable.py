@@ -367,12 +367,18 @@ class PeakListTableWidget(QuickTable):
   #       self._updateAllModule()
 
   def _selectOnTableCurrentPeaksNotifierCallback(self, data):
-    '''callback from a notifier to select the current peaks  '''
+    """
+    Callback from a notifier to highlight the peaks on the peak table
+    :param data:
+    """
     currentPeaks = data['value']
     self._selectOnTableCurrentPeaks(currentPeaks)
 
   def _selectOnTableCurrentPeaks(self, currentPeaks):
-    ''' highlight current peaks on the opened peak table '''
+    """
+    Highlight the list of peaks on the table
+    :param currentPeaks:
+    """
     if len(currentPeaks)>0:
       self._highLightObjs(currentPeaks)
     else:

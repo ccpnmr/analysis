@@ -154,6 +154,7 @@ class QuickTable(TableWidget, Base):
     model = self.selectionModel()
     model.selectionChanged.connect(self._selectionTableCallback)
 
+    self._mousePressed = False
     self._tableData = {}
     self._tableNotifier = None
     self._rowNotifier = None
@@ -203,6 +204,7 @@ class QuickTable(TableWidget, Base):
     # data['OBJECT'] = return pid, key/values, row, col
 
     if not self._silenceCallback:
+    # if not self._mousePressed:
       objList = self.getSelectedObjects()
       # model = self.selectionModel()
       #
@@ -269,7 +271,21 @@ class QuickTable(TableWidget, Base):
     if event.button() == QtCore.Qt.RightButton:
       # stops the selection from the table when the right button is clicked
       event.accept()
+    # elif event.button() == QtCore.Qt.LeftButton:
+    #
+    #   # we are selecting from the table
+    #   self._mousePressed = True
+    #
+    #   event.ignore()
+    # else:
+    #   event.ignore()
+
+  # def mouseReleaseEvent(self, event):
+  #   self._mousePressed = False
+  #   event.ignore()
     else:
+      # not sure why event.ignore() didn't work
+      event.ignore()
       super(QuickTable, self).mousePressEvent(event)
 
   def _setHeaderContextMenu(self):
@@ -567,6 +583,7 @@ class QuickTable(TableWidget, Base):
 
       # disable callbacks while populating the table
       self._silenceCallback = True
+      self.blockSignals(True)
       selectionModel.clearSelection()
       self.setUpdatesEnabled(False)
 
@@ -580,8 +597,9 @@ class QuickTable(TableWidget, Base):
           # selectionModel.setCurrentIndex(self.model().index(row, 0)
           #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
-      self._silenceCallback = False
       self.setUpdatesEnabled(True)
+      self.blockSignals(False)
+      self._silenceCallback = False
       self.setFocus(QtCore.Qt.OtherFocusReason)
 
   def clearTable(self):
@@ -657,14 +675,15 @@ class QuickTable(TableWidget, Base):
         # insert item into self._dataFrameObject
 
         tSelect = getattr(self, self._tableData['tableSelection'])
-        rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+        if tSelect:
+          rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
 
-        if rows and len(rows) > 1:
-          self._dataFrameObject.appendObject(row)
-        else:
+          if rows and len(rows) > 1:
+            self._dataFrameObject.appendObject(row)
+          else:
 
-          # self._update(self.nmrTable)
-          self._tableData['updateFunc'](tSelect)
+            # self._update(self.nmrTable)
+            self._tableData['updateFunc'](tSelect)
 
       elif trigger == Notifier.CHANGE:
 
@@ -737,15 +756,18 @@ class QuickTable(TableWidget, Base):
     :return:
     """
     self.clearTableNotifiers()
-    self._tableNotifier = Notifier(self._project
-                                    , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                    , tableClass.__name__
-                                    , self._updateTableCallback)
-    self._rowNotifier = Notifier(self._project
-                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-                                  , rowClass.__name__
-                                  , self._updateRowCallback
-                                  , onceOnly=True)
+
+    if tableClass:
+      self._tableNotifier = Notifier(self._project
+                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                      , tableClass.__name__
+                                      , self._updateTableCallback)
+    if rowClass:
+      self._rowNotifier = Notifier(self._project
+                                    , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+                                    , rowClass.__name__
+                                    , self._updateRowCallback
+                                    , onceOnly=True)
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
         self._cellNotifiers.append(Notifier(self._project
@@ -761,6 +783,7 @@ class QuickTable(TableWidget, Base):
                                             , self._updateCellCallback
                                             , onceOnly=True))
 
+    if selectCurrentCallBack:
       self._selectCurrentNotifier = Notifier(self._current
                                              , [Notifier.CURRENT]
                                              , rowClass._pluralLinkName

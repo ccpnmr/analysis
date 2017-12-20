@@ -47,6 +47,8 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
+from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
+from ccpn.ui.gui.widgets.Table import ObjectTableItemDelegate
 from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
@@ -59,6 +61,7 @@ from ccpn.util.Logging import getLogger
 
 
 class QuickTable(TableWidget, Base):
+  ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
   def __init__(self, parent=None,
                mainWindow=None,
@@ -70,11 +73,9 @@ class QuickTable(TableWidget, Base):
                **kw):
     """
     Create a new instance of a TableWidget with an attached Pandas dataFrame
-
-    :param parent - parent container:
-    :param dataFrame - attached dataFrame:
-    :param columns:
-    :param objects:
+    :param parent:
+    :param mainWindow:
+    :param dataFrameObject:
     :param actionCallback:
     :param selectionCallback:
     :param multiSelect:
@@ -83,6 +84,7 @@ class QuickTable(TableWidget, Base):
     :param autoResize:
     :param enableExport:
     :param enableDelete:
+    :param hideIndex:
     :param kw:
     """
     TableWidget.__init__(self, parent)
@@ -98,14 +100,10 @@ class QuickTable(TableWidget, Base):
 
     # initialise the internal data storage
     self._dataFrameObject = dataFrameObject
-    # self._dataFrame = dataFrame
-    # self._columns = columns
-    # self._objects = list(objects or [])
 
-    # set the prefered scrolling behaviour
+    # set the preferred scrolling behaviour
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
-    # self._hiddenColumns = hiddenColumns
 
     # define the multiselection behaviour
     self.multiSelect = multiSelect
@@ -151,15 +149,22 @@ class QuickTable(TableWidget, Base):
     self._silenceCallback = False
     self.doubleClicked.connect(self._doubleClickCallback)
 
+    # set the delegate for editing
+    delegate = ObjectTableItemDelegate(self)
+    self.setItemDelegate(delegate)
+
+    # set the callback for changing selection on table
     model = self.selectionModel()
     model.selectionChanged.connect(self._selectionTableCallback)
 
+    # set internal flags
     self._mousePressed = False
     self._tableData = {}
     self._tableNotifier = None
     self._rowNotifier = None
     self._cellNotifiers = []
     self._selectCurrentNotifier = None
+    self._icons = [self.ICON_FILE]
 
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
@@ -196,7 +201,19 @@ class QuickTable(TableWidget, Base):
                         , col = col
                         , rowItem = data)
 
-        self._actionCallback(data)
+        if self._actionCallback and not self._dataFrameObject.columnDefinitions.editValues[col]:    # ejb - editable fields don't actionCallback
+          self._actionCallback(data)
+        elif self._dataFrameObject.columnDefinitions.editValues[col]:    # ejb - editable fields don't actionCallback:
+          item = self.item(row, col)
+          item.setEditable(True)
+          self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+          # item.textChanged.connect(partial(self._changeMe, item))
+          self.editItem(item)         # enter the editing mode
+
+  def _changeMe(self, row, col, widget, endEditHint):
+    text = widget.text()
+    # TODO:ED process setting of object in here
+    pass
 
   def _selectionTableCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
@@ -246,6 +263,20 @@ class QuickTable(TableWidget, Base):
         self.hideColumn(i)
       else:
         self.showColumn(i)
+
+        if dataFrameObject.columnDefinitions.editValues[i]:
+
+          # need to put it into the header
+          header = self.horizontalHeaderItem(i)
+
+          icon = QtGui.QIcon(self._icons[0])
+          # item = self.item(0, i)
+            # TableWidget.QTableWidgetItem(icon, 'Boing')  # Second argument
+          # if item:
+          #   item.setIcon(icon)
+          #   self.setItem(0, i, item)
+          if header:
+            header.setIcon(icon)
 
   def _setDefaultRowHeight(self):
     # set a minimum height to the rows based on the fontmetrics of a generic character
@@ -821,3 +852,8 @@ class QuickTable(TableWidget, Base):
     self._cellNotifiers = []
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
+
+  def cellDoubleClicked(self, *args, **kwargs):
+    # enter for editing if editable
+    pass
+

@@ -62,7 +62,7 @@ class ColumnClass:
 
   @property
   def editValues(self):
-    return [heading.getEditValue for heading in self._columns]
+    return [heading.setEditValue for heading in self._columns]
 
 # TODO:ED add some documentation here
 

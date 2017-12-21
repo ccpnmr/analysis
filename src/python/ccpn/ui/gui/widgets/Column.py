@@ -11,13 +11,13 @@ __reference__ = ("")
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created:
 #=========================================================================================
-__author__ = "$Author$"
+__author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date$"
 #=========================================================================================
 # Start of code
@@ -28,6 +28,7 @@ from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.util.Logging import getLogger
 
 BG_COLOR = QtGui.QColor('#E0E0E0')
+
 
 # TODO:ED add some documentation here
 class ColumnClass:
@@ -61,7 +62,11 @@ class ColumnClass:
     return [heading.tipText for heading in self._columns]
 
   @property
-  def editValues(self):
+  def getEditValues(self):
+    return [heading.getValue for heading in self._columns]
+
+  @property
+  def setEditValues(self):
     return [heading.setEditValue for heading in self._columns]
 
 # TODO:ED add some documentation here

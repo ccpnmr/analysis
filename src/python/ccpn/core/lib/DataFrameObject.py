@@ -11,13 +11,13 @@ __reference__ = ("")
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created:
 #=========================================================================================
-__author__ = "$Author$"
+__author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date$"
 #=========================================================================================
 # Start of code
@@ -95,6 +95,10 @@ class DataFrameObject(object):
     return self._columnDefinitions.headings
 
   @property
+  def setEditValues(self):
+    return self._columnDefinitions.setEditValues
+
+  @property
   def table(self):
     return self._table
 
@@ -111,6 +115,9 @@ class DataFrameObject(object):
       # index = self._objectList[obj.pid]
       # del self._objectList[obj.pid]   # remove from objectList
       # del self._indexList[str(index)]      # remove from indexList
+
+      # remove from internal list
+      self._objects.remove(obj)
 
       # now remove from dataFrame
 
@@ -177,6 +184,8 @@ class DataFrameObject(object):
         # self._indexList[str(listDict['Pid'])] = obj
         # self._objectList[obj.pid] = listDict['Pid']
 
+        # keep internal list uptodate
+        self._objects = [obj]
         self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
         self._table.setData(self._dataFrame.values)
         self._table.setHorizontalHeaderLabels(self.headings)
@@ -192,13 +201,15 @@ class DataFrameObject(object):
         # newIndex = self._dataFrame[0].max()+1       # next free index
         # newIndex = len(self._dataFrame.index)+1
 
-        # TODO:ED Check 'Index'
+        # TODO:ED Check 'Index' - not sure if necessary
         if 'Index' in self._dataFrame:
           newIndex = self._dataFrame['Index'].max()+1
           listDict['Index'] = newIndex
         # self._indexList[str(newIndex)] = obj
         # self._objectList[obj.pid] = newIndex
 
+        # update internal list
+        self._objects.append(obj)
         appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
 
         self._dataFrame = self._dataFrame.append(appendDataFrame)

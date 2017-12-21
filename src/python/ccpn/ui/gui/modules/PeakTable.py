@@ -401,19 +401,18 @@ class PeakListTableWidget(QuickTable):
     else:
       self.clearSelection()
 
-
-  @staticmethod
-  def _getCommentText(peak):
-    if peak.comment == '' or not peak.comment:
-      return ' '
-    else:
-      return peak.comment
-
-  @staticmethod
-  def _setComment(peak, value):
-    PeakListTableWidget._project.blankNotification()
-    peak.comment = value
-    PeakListTableWidget._project.unblankNotification()
+  # @staticmethod
+  # def _getCommentText(peak):
+  #   if peak.comment == '' or not peak.comment:
+  #     return ' '
+  #   else:
+  #     return peak.comment
+  #
+  # @staticmethod
+  # def _setComment(peak, value):
+  #   PeakListTableWidget._project.blankNotification()
+  #   peak.comment = value
+  #   PeakListTableWidget._project.unblankNotification()
 
   def _setPositionUnit(self, value):
     if value in UNITS:

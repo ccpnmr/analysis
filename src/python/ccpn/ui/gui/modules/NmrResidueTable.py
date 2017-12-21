@@ -564,27 +564,29 @@ class NmrResidueTable(QuickTable):
     else:
       self.clearSelection()
 
-  @staticmethod
-  def _getCommentText(nmrResidue):
-    """
-    CCPN-INTERNAL: Get a comment from ObjectTable
-    """
-    try:
-      if nmrResidue.comment == '' or not nmrResidue.comment:
-        return ''
-      else:
-        return nmrResidue.comment
-    except:
-      return ''
+  # @staticmethod
+  # def _getCommentText(nmrResidue):
+  #   """
+  #   CCPN-INTERNAL: Get a comment from ObjectTable
+  #   """
+  #   try:
+  #     if nmrResidue.comment == '' or not nmrResidue.comment:
+  #       return ''
+  #     else:
+  #       return nmrResidue.comment
+  #   except:
+  #     return ''
 
-  @staticmethod
-  def _setComment(nmrResidue, value):
-    """
-    CCPN-INTERNAL: Insert a comment into ObjectTable
-    """
-    NmrResidueTable._project.blankNotification()
-    nmrResidue.comment = value
-    NmrResidueTable._project.unblankNotification()
+  # @staticmethod
+  # def _setComment(nmrResidue, value):
+  #   """
+  #   CCPN-INTERNAL: Insert a comment into ObjectTable
+  #   """
+  #
+  #   # why is it blanking a notification here?
+  #   # NmrResidueTable._project.blankNotification()
+  #   nmrResidue.comment = value
+  #   # NmrResidueTable._project.unblankNotification()
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):

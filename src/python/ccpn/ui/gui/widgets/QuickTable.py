@@ -62,6 +62,29 @@ from ccpn.util.Logging import getLogger
 class QuickTable(TableWidget, Base):
   ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
+  @staticmethod
+  def _getCommentText(obj):
+    """
+    CCPN-INTERNAL: Get a comment from QuickTable
+    """
+    try:
+      if obj.comment == '' or not obj.comment:
+        return ''
+      else:
+        return obj.comment
+    except:
+      return ''
+
+  @staticmethod
+  def _setComment(obj, value):
+    """
+    CCPN-INTERNAL: Insert a comment into QuickTable
+    """
+    # ejb - why is it blanking a notification here?
+    # NmrResidueTable._project.blankNotification()
+    obj.comment = value
+    # NmrResidueTable._project.unblankNotification()
+
   def __init__(self, parent=None,
                mainWindow=None,
                dataFrameObject=None,      # collate into a single object that can be changed quickly
@@ -200,9 +223,9 @@ class QuickTable(TableWidget, Base):
                         , col = col
                         , rowItem = data)
 
-        if self._actionCallback and not self._dataFrameObject.columnDefinitions.editValues[col]:    # ejb - editable fields don't actionCallback
+        if self._actionCallback and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
           self._actionCallback(data)
-        elif self._dataFrameObject.columnDefinitions.editValues[col]:    # ejb - editable fields don't actionCallback:
+        elif self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
           item = self.item(row, col)
           item.setEditable(True)
           # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
@@ -218,7 +241,7 @@ class QuickTable(TableWidget, Base):
     print ('>>>changeMe', row, col)
 
     # obj = self._dataFrameObject.objects[row]
-    # self._dataFrameObject.columnDefinitions.editValues[col](obj, text)
+    # self._dataFrameObject.columnDefinitions.setEditValues[col](obj, text)
     pass
 
   def _selectionTableCallback(self, itemSelection):
@@ -270,7 +293,7 @@ class QuickTable(TableWidget, Base):
       else:
         self.showColumn(i)
 
-        if dataFrameObject.columnDefinitions.editValues[i]:
+        if dataFrameObject.columnDefinitions.setEditValues[i]:
 
           # need to put it into the header
           header = self.horizontalHeaderItem(i)
@@ -863,12 +886,25 @@ class QuickTable(TableWidget, Base):
 EDIT_ROLE = QtCore.Qt.EditRole
 
 class QuickTableDelegate(QtGui.QStyledItemDelegate):
+  """
+  handle the setting of data when editing the table
+  """
   def __init__(self, parent):
+    """
+    Initialise the delegate
+    :param parent - link to the handling table:
+    """
     QtGui.QStyledItemDelegate.__init__(self, parent)
     self.customWidget = False
     self._parent = parent
 
-  def setModelData(self, widget, mode, index):#returns updated data
+  def setModelData(self, widget, mode, index):
+    """
+    Set the object to the new value
+    :param widget - typically a lineedit handling the editing of the cell:
+    :param mode - editing mode:
+    :param index - QModelIndex of the cell:
+    """
     text = widget.text()
     row = index.row()
     col = index.column()
@@ -885,8 +921,12 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
       obj = self._parent.project.getByPid(thisPid)
       print (row, col, obj)
 
-      # good, now set the data which will fire notifiers to populate the tables
+      # set the data which will fire notifiers to populate the tables
+      func = self._parent._dataFrameObject.setEditValues[col]
+      if func:
+        func(obj, text)
+
     except Exception as es:
-      print ('>>>error', str(es))
+      getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))
 
     # return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)

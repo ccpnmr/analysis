@@ -875,7 +875,7 @@ class QuickTable(TableWidget, Base):
     if self._rowNotifier is not None:
       self._rowNotifier.unRegister()
     if self._cellNotifiers:
-      for cell in self.cellNotifiers:
+      for cell in self._cellNotifiers:
         if cell is not None:
           cell.unRegister()
     self._cellNotifiers = []
@@ -917,11 +917,9 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
 
       pidCol = self._parent._dataFrameObject.headings.index('Pid')
       thisPid = rowData[pidCol]
-
       obj = self._parent.project.getByPid(thisPid)
-      print (row, col, obj)
 
-      # set the data which will fire notifiers to populate the tables
+      # set the data which will fire notifiers to populate all tables
       func = self._parent._dataFrameObject.setEditValues[col]
       if func:
         func(obj, text)

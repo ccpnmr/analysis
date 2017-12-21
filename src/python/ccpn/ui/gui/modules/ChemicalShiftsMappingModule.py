@@ -46,6 +46,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
@@ -107,13 +108,28 @@ class CustomNmrResidueTable(NmrResidueTable):
   # columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
   # columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
 
-  def __init__(self, parent, application, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+  def __init__(self, parent, mainWindow, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
 
-    NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
+    # NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
+    #                          selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
+    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow, actionCallback=actionCallback,
                              selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
-    self.NMRcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
-                       colName, func, tipText, editValue in self.columnDefs]
+    self.NMRcolumns = ColumnClass([
+        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+        ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+        ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+         , 'Number of spectra selected for calculating the delta shift', None),
+        ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
+        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+
     self.multiSelect = True
+
+
+
 
   @staticmethod
   def _getNmrResidueSpectraCount(nmrResidue):
@@ -204,7 +220,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid=(0, 0))
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
-      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, application=self.application,
+      self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack,
                                                    setLayout=True, grid=(1, 0))
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, text='Show on Molecular Viewer',
@@ -335,9 +351,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-    self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
+    # self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
 
-    self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._deltaShift])
+    # self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._deltaShift])
     self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
@@ -364,20 +380,21 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.barGraphWidget.xLine:
       self.thresholdLinePos = self.thresholdSpinBox.value()
 
-      for nmrResidue in self.nmrResidueTable.objects:
-        x = int(nmrResidue.sequenceCode)
-        y = float(nmrResidue._deltaShift)
-        xs.append(x)
-        ys.append(y)
-        obs.append(nmrResidue)
-        if y > self.thresholdLinePos:
-          self.aboveY.append(y)
-          self.aboveX.append(x)
-          aboveObjects.append(nmrResidue)
-        else:
-          self.belowX.append(x)
-          self.belowY.append(y)
-          belowObjects.append(nmrResidue)
+      if self.nmrResidueTable._dataFrameObject:
+        for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
+          x = int(nmrResidue.sequenceCode)
+          y = float(nmrResidue._deltaShift)
+          xs.append(x)
+          ys.append(y)
+          obs.append(nmrResidue)
+          if y > self.thresholdLinePos:
+            self.aboveY.append(y)
+            self.aboveX.append(x)
+            aboveObjects.append(nmrResidue)
+          else:
+            self.belowX.append(x)
+            self.belowY.append(y)
+            belowObjects.append(nmrResidue)
 
     selectedNameColourA = self.aboveThresholdColourBox.getText()
     for code, name in spectrumColours.items():

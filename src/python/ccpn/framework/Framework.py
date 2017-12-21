@@ -1051,6 +1051,16 @@ class Framework:
   def _loadNefFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
+    # TODO:ED example for Chris
+    # import ccpn.util.nef.NefImporter as NefImporter
+    # tempDict = NefImporter.loadFile(path)
+    #
+    # NefImporter.export(object.path)
+    # tempDict = NefImporter()
+    # tempDict.loadFile(path)
+    #
+    # tempReadToString = tempDict.toString()
+
     dataBlock = self.nefReader.getNefData(path)
 
     if makeNewProject:
@@ -1064,6 +1074,8 @@ class Framework:
 
     try:
       self.nefReader.importNewProject(self.project, dataBlock)
+    except Exception as es:
+      getLogger().warning('Error loading Nef file: %s' % str(es))
     finally:
       self.project._wrappedData.shiftAveraging = True
       self._echoBlocking -= 1
@@ -1087,6 +1099,8 @@ class Framework:
 
     try:
       self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+    except Exception as es:
+      getLogger().warning('Error loading NMRStar file: %s' % str(es))
     finally:
       self.project._wrappedData.shiftAveraging = True
       self._echoBlocking -= 1

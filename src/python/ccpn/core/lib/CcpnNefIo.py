@@ -58,6 +58,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Substance import Substance
+from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Chain import Chain
 # from ccpn.core.Residue import Residue
 # from ccpn.core.Atom import Atom
@@ -704,7 +705,6 @@ nef2CcpnMap = {
     ('sequence_code','sequenceCode'),
     # ('residue_name',None),
     ('residue_name','residueType'),
-
     ('serial',None),
     ('comment','comment'),
   )),
@@ -880,8 +880,8 @@ def exportNef(project:Project
     f.write(text)
 
 def convertToDataBlock(project:Project
-                       , path:str
-                       , overwriteExisting:bool=False
+                       # , path:str
+                       # , overwriteExisting:bool=False
                        , skipPrefixes:typing.Sequence=()
                        , expandSelection:bool=True
                        # , exclusionDict={}
@@ -890,6 +890,19 @@ def convertToDataBlock(project:Project
   """export NEF file to path"""
   # ejb - dialog added to allow the changing of the name from the current project name.
 
+  # if path[-4:] != '.nef':
+  #   path = path+'.nef'
+  #   getLogger().debug('Adding .nef extension to filename %s' % path)
+  #
+  # if os.path.exists(path) and not overwriteExisting:
+  #   raise IOError("%s already exists" % path)
+  #
+  dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+                           pidList=pidList)   #, exclusionDict=exclusionDict)
+
+  return dataBlock
+
+def writeDataBlock(dataBlock, path:str, overwriteExisting:bool=False):
   if path[-4:] != '.nef':
     path = path+'.nef'
     getLogger().debug('Adding .nef extension to filename %s' % path)
@@ -897,12 +910,6 @@ def convertToDataBlock(project:Project
   if os.path.exists(path) and not overwriteExisting:
     raise IOError("%s already exists" % path)
 
-  dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
-                           pidList=pidList)   #, exclusionDict=exclusionDict)
-
-  return dataBlock, path       # ejb - will this work here?
-
-def writeDataBlock(dataBlock, path):
   dirPath, fileName = os.path.split(path)
   if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)
@@ -1979,6 +1986,17 @@ class CcpnNefWriter:
       del result[loopName]
     #
     return result
+
+
+  # TODO:ED add the correct function for converting structureEnsemble to Nef
+  # def structureEnsemble2Nef(self, ensemble:StructureEnsemble) -> StarIo.NmrSaveFrame:
+  #   """Convert StructureEnsemble to CCPN NEF saveframe"""
+  #
+  #   # Set up frame
+  #   category = 'ccpn_structure_ensemble'
+  #   result = self._newNefSaveFrame(ensemble, category, ensemble.name)
+  #
+  #   return result
 
 
   def sample2Nef(self, sample:Sample) -> StarIo.NmrSaveFrame:
@@ -3665,7 +3683,6 @@ class CcpnNefReader:
       else:
         nmrChain = creatorFunc(**parameters)
       nmrChain.resetSerial(row['serial'])
-
       nmrChains[parameters['shortName']] = nmrChain
 
     # resume notifiers again

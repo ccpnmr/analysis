@@ -25,22 +25,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import pyqtgraph as pg
+import numpy as np
+import pandas as pd
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.Table import ObjectTable
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from PyQt5 import QtGui, QtWidgets, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
 from ccpn.ui._implementation.Module import Module
-
 from ccpn.util.Logging import getLogger
+
 ALL = '<all>'
 
 
@@ -190,9 +195,9 @@ class StructureTableModule(CcpnModule):
 
     # main window
     self.structureTable = StructureTable(parent=self.mainWidget
-                                        , setLayout=True
-                                        , application=self.application
+                                        , mainWindow=self.mainWindow
                                         , moduleParent=self
+                                        , setLayout=True
                                         , grid=(0,0))
 
     if structureEnsemble is not None:
@@ -232,12 +237,32 @@ class StructureTableModule(CcpnModule):
     """
     self._closeModule()
 
-class StructureTable(ObjectTable):
+class NewStructureTable(pg.TableWidget):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
   #row.modelNumber, etc., may not exist..
-  columnDefs = [
+  columnHeadings = [
+                ('Index', np.uint),
+                ('modelNumber', np.uint),
+                ('chainCode', np.str),
+                ('sequenceId', np.uint),
+                ('insertionCode', np.str),
+                ('residueName', np.str),
+                ('atomName', np.str),
+                ('altLocationCode', np.str),
+                ('element', np.str),
+                ('x', np.float32),
+                ('y', np.float32),
+                ('z', np.float32),
+                ('occupancy', np.float32),
+                ('bFactor', np.float32),
+                ('nmrChainCode', np.str),
+                ('nmrSequenceCode', np.str),
+                ('nmrResidueName', np.str),
+                ('nmrAtomName', np.str)]       # will need to put the comment back in
+
+  columnFunction = [
                 ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
                 ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
                 ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
@@ -260,6 +285,24 @@ class StructureTable(ObjectTable):
                  lambda row, value:StructureTable._setComment(row, 'comment', value))
   ]
 
+        # testing - usage example
+        # w = pg.TableWidget()
+        #
+        # data = np.array([
+        #   (1, 1.6, 'x'),
+        #   (3, 5.4, 'y'),
+        #   (8, 12.5, 'z'),
+        #   (443, 1e-12, 'w'),
+        # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+        #
+        # w.setData(data)
+
+  pass
+
+class StructureTable(QuickTable):
+  """
+  Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
+  """
   className = 'StructureTable'
   objectClass = 'StructureEnsemble'
   attributeName = 'structureEnsembles'
@@ -267,7 +310,7 @@ class StructureTable(ObjectTable):
   OBJECT = 'object'
   TABLE = 'table'
 
-  def __init__(self, parent, application, moduleParent, structureEnsemble=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, structureEnsemble=None, **kwds):
     """
     Initialise the widgets for the module.
     :param parent: parent widget
@@ -276,10 +319,17 @@ class StructureTable(ObjectTable):
     :param itemPid: should be None
     :param kwds:
     """
+
+    # Derive application, project, and current from mainWindow
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
     self.moduleParent=moduleParent
-    self._application = application
-    self._project = application.project
-    self._current = application.current
+
+    # self._application = application
+    # self._project = application.project
+    # self._current = application.current
     self._widget = Widget(parent=parent, **kwds)
     self.thisObj = None
     self.thisDataSet = None
@@ -287,7 +337,33 @@ class StructureTable(ObjectTable):
     StructureTable._project = self._project
 
     # create the column objects
-    self.STcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.STcolumns = ColumnClass([
+      ('#', lambda row:StructureTable._stLamInt(row, 'Index'), 'Index', None),
+      ('modelNumber', lambda row:StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
+      ('chainCode', lambda row:StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
+      ('sequenceId', lambda row:StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
+      ('insertionCode', lambda row:StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode',
+       None),
+      ('residueName', lambda row:StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
+      ('atomName', lambda row:StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
+      ('altLocationCode', lambda row:StructureTable._stLamStr(row, 'altLocationCode'),
+       'altLocationCode', None),
+      ('element', lambda row:StructureTable._stLamStr(row, 'element'), 'element', None),
+      ('x', lambda row:StructureTable._stLamFloat(row, 'x'), 'x', None),
+      ('y', lambda row:StructureTable._stLamFloat(row, 'y'), 'y', None),
+      ('z', lambda row:StructureTable._stLamFloat(row, 'z'), 'z', None),
+      ('occupancy', lambda row:StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
+      ('bFactor', lambda row:StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
+      ('nmrChainCode', lambda row:StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode',
+       None),
+      ('nmrSequenceCode', lambda row:StructureTable._stLamStr(row, 'nmrSequenceCode'),
+       'nmrSequenceCode', None),
+      ('nmrResidueName', lambda row:StructureTable._stLamStr(row, 'nmrResidueName'),
+       'nmrResidueName', None),
+      ('nmrAtomName', lambda row:StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
+      ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
+       lambda row, value:StructureTable._setComment(row, 'comment', value))
+    ])    # [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
@@ -308,13 +384,28 @@ class StructureTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True
-                         , columns=self.STcolumns, objects = []
-                         , autoResize=True, multiSelect=True
-                         , selectionCallback=self._selectionCallback
-                         , actionCallback=self._actionCallback
-                         , grid = (3, 0), gridSpan = (1, 6)
-                         )
+
+    self._widget.setFixedHeight(30)
+
+    # self._columnNames = [header.headerText for header in self.STcolumns]
+    self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
+    self.dataFrameObject = None
+
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=self._mainWindow
+
+                        , dataFrameObject=None    # class collating table and objects and headings
+
+                        # , dataFrame=None
+                        # , columns=self._columnNames
+                        # , hiddenColumns=self._hiddenColumns
+                        # , objects = None
+                        , setLayout=True
+                        , autoResize=True, multiSelect=True
+                        , selectionCallback=self._selectionCallback
+                        , actionCallback=self._actionCallback
+                        , grid = (3, 0), gridSpan = (1, 6)
+                        )
 
     self._ensembleNotifier = None
     self._updateSilence = False
@@ -326,9 +417,14 @@ class StructureTable(ObjectTable):
     if structureEnsemble is not None:
       self._selectStructureEnsemble(structureEnsemble)
 
-    self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
-    for colName in self._hiddenColumns:
-      self.hideColumnName(colName)
+    # data = np.array([
+    #   (1, 1.6, 'x'),
+    #   (3, 5.4, 'y'),
+    #   (8, 12.5, 'z'),
+    #   (443, 1e-12, 'w'),
+    # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+    #
+    # # self.setData(data)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -480,10 +576,89 @@ class StructureTable(ObjectTable):
     Update the table from StructureEnsemble
     """
     if not self._updateSilence:
-      tuples = structureEnsemble.data.as_namedtuples()
-      self.setColumns(self.STcolumns)
-      self.setObjects(tuples)
-      self.show()
+      # tuples = structureEnsemble.data.as_namedtuples()
+      # self.setColumns(self.STcolumns)
+      # self.setObjects(tuples)
+      # self.show()
+
+      # import inspect
+      # attr = inspect.getmembers(StructureEnsemble, lambda a:not (inspect.isroutine(a)))
+      # filteredAttr = [a for a in attr if
+      #                 not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith(
+      #                   '_')]
+      # for i in filteredAttr:
+      #   att, val = i
+      #   try:
+      #     setattr(structureEnsemble, att, val)
+      #   except Exception as e:
+      #     # print(e, att)
+      #     del filteredAttr[att]       # remove the attribute
+      #
+      # data = np.array([
+      #   (1, 1.6, 'x'),
+      #   (3, 5.4, 'y'),
+      #   (8, 12.5, 'z'),
+      #   (443, 1e-12, 'w'),
+      # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+
+      # self.hide()
+      # tuples = structureEnsemble.data.as_namedtuples()
+      # headings = [head[0] for head in self.STcolumns]
+      # data = []
+      # for row in tuples:
+      #   data.append(list(row))
+      #
+      # df = pd.DataFrame(data[0], columns=headings)
+
+      # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
+      #                                       ('modelNumber', int),
+      #                                       ('chainCode', str)])
+
+      # xdata = np.array({'x':10,'y':13.34}, dtype=[('x', np.uint8), ('y', np.float64)])
+      # df = pd.DataFrame(xdata)
+
+      # x = np.empty((10,), dtype=[('x', np.uint8), ('y', np.float64)])
+      # df = pd.DataFrame(x)
+      # t = df.dtypes
+
+        # newArraydata = np.array( [(1, 1.6, 'x'),
+        #       (3, 5.4, 'y'),
+        #       (8, 12.5, 'z'),
+        #       (443, 1e-12, 'w')]
+        #                          , dtype=[('Index', np.uint),
+        #                                       ('modelNumber', np.float32),
+        #                                       ('chainCode', np.str)])
+
+      # temp = [(1, 1.6, 'x'),
+      #         (3, 5.4, 'y'),
+      #         (8, 12.5, 'z'),
+      #         (443, 1e-12, 'w')]
+      # newArraydata = np.array(temp, dtype=[('Index', int),
+      #                                         ('modelNumber', float),
+      #                                         ('chainCode', str)])
+
+      # self._project.blankNotification()
+      #
+      # self.setData(structureEnsemble.data.values)
+      # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
+      #
+      # self._project.unblankNotification()
+      # self.resizeColumnsToContents()
+      # self.show()
+
+      # add a comment field to the Pandas dataFrame?
+
+      # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
+
+      self._dataFrameObject = self.getDataFrameFromRows(table=self
+                                                  , dataFrame=structureEnsemble.data
+                                                  , colDefs=self.STcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
+
+      # new populate from Pandas
+      self._project.blankNotification()
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+      self._project.unblankNotification()
 
   def _updateDataSet(self, structureData):
     """
@@ -525,7 +700,7 @@ class StructureTable(ObjectTable):
       self._getAttachedDataSet(self.thisObj)        # check for a matching dataset, DS.title=SE.label
       self.displayTableForStructure(self.thisObj)
     else:
-      self.clearTable()
+      self.clear()
 
   def _selectionButtonCallback(self):
     """
@@ -539,7 +714,7 @@ class StructureTable(ObjectTable):
       elif item is 'average':
         self.displayTableForDataSetStructure(self.thisObj)
     else:
-      self.clearTable()
+      self.clear()
 
   def _updateCallback(self, data):
     """
@@ -555,7 +730,8 @@ class StructureTable(ObjectTable):
       elif item is 'average':
         self.displayTableForDataSetStructure(self.thisObj)
     else:
-      self.clearTable()
+      # self.clearTable()
+      self.clear()
 
   def navigateToStructureInDisplay(structureEnsemble, display, stripIndex=0, widths=None,
                                     showSequentialStructures=False, markPositions=True):

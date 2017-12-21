@@ -705,7 +705,6 @@ class ObjectTable(QtGui.QTableView, Base):
     if path:
       self.findExportFormats(path)
 
-
   def findExportFormats(self, path):
     formatTypes = OrderedDict([
                                ('.xlsx', self.dataFrameToExcel),

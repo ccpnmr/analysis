@@ -33,7 +33,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-
+from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -257,6 +257,10 @@ class CcpnModule(Dock):
       self.settingsWidget = None
       self.addWidget(self.mainWidget, 0, 0)
 
+    # add an event filter to handle transparency
+    # and to check when the dock has been floated - it needs to have a callback
+    # that fires when the window has been maximised
+    self._maximiseFunc = None
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
 
@@ -268,7 +272,6 @@ class CcpnModule(Dock):
       self.setParent(self.mainWindow.moduleArea)   # ejb
     self.widgetArea.setParent(self)
 
-
   # # Not needed after all - SpectrumDisplay 'name' is renamed to 'title'
   # def getName(self):
   #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
@@ -279,6 +282,9 @@ class CcpnModule(Dock):
   def _eventFilter(self, source, event):
     """
     CCPNInternal
+    Handle events for switching transparency of modules
+    Modules become transparent when dragging to another module.
+    Ensure that the dropAreas become active
     """
     if isinstance(source, CcpnModule):
       if event.type() == QtCore.QEvent.DragEnter:
@@ -306,7 +312,23 @@ class CcpnModule(Dock):
       elif event.type() == QtCore.QEvent.MouseButtonRelease:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
-    return super(CcpnModule, self).eventFilter(source,event)
+    if event.type() == QtCore.QEvent.ParentChange and self._maximiseFunc:
+      try:
+        found = False
+        searchWidget = self.parent()
+        while searchWidget is not None and not found:
+          # print (searchWidget)
+          if isinstance(searchWidget, TempAreaWindow):
+            searchWidget.eventFilter = self._tempAreaWindowEventFilter
+            searchWidget.installEventFilter(searchWidget)
+            found = True
+          else:
+            searchWidget = searchWidget.parent()
+
+      except Exception as es:
+        getLogger().warning('Error setting maximiseFunc', str(es))
+
+    return False
 
   # def _transparentAllModules(self, transparency:bool=True):
   #   if self.area:
@@ -330,6 +352,40 @@ class CcpnModule(Dock):
     # }
     # """)
 
+  def installMaximiseEventHandler(self, maximiseFunc):
+    """
+    Attach a maximise function to the parent window.
+    This is called when the WindowStateChanges to maximises
+
+    :param maximiseFunc:
+    """
+    self._maximiseFunc = maximiseFunc
+
+  def removeMaximiseEventHandler(self):
+    """
+    Clear the attached maximise function
+    :return:
+    """
+    self._maximiseFunc = None
+
+  def _tempAreaWindowEventFilter(self, obj, event):
+    """
+    Window manager event filter to call the attached maximise function.
+    This is required to re-populate the window when it has been maximised
+    """
+    try:
+      if event.type() == QtCore.QEvent.WindowStateChange:
+        if event.oldState() & QtCore.Qt.WindowMinimized:
+
+          # TODO:ED check that this is unique if changed to another window
+          if self._maximiseFunc:
+            self._maximiseFunc()
+
+    except Exception as es:
+      print('>>>TEMP Error', obj, event, str(es))
+    finally:
+      return False
+
   def _settingsCallback(self):
     """
     Toggles display of settings widget in module.
@@ -352,7 +408,9 @@ class CcpnModule(Dock):
       RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def _closeModule(self):
-
+    """
+    Close the module
+    """
     if self.closeFunc:
       self.closeFunc()
 

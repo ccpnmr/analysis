@@ -51,7 +51,7 @@ from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
+from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 #from ccpn.util.Logging import getLogger
@@ -121,6 +121,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     self.statusBar().showMessage('Ready')
     self.show()
+
+  def changeEvent(self, event):
+    if event.type() == QtCore.QEvent.WindowStateChange:
+      if self.windowState() & QtCore.Qt.WindowMinimized:
+
+        # don't do anything on minimising
+        pass
+
+      elif event.oldState() & QtCore.Qt.WindowMinimized:
+
+        # TODO:ED changeEvent: Normal/Maximised/FullScreen - call populate all modules
+        pass
+
+    event.ignore()
 
   def _initProject(self):
     """
@@ -240,11 +254,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     self.sideBar = SideBar(parent=self)
 
     # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
-    self._horizontalSplitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+    self._horizontalSplitter = Splitter(QtCore.Qt.Horizontal)
     # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
     # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-    self._verticalTEMPSPLIT = QtGui.QSplitter(QtCore.Qt.Vertical)
+    self._verticalTEMPSPLIT = Splitter(QtCore.Qt.Vertical)
     self._TESTFRAME = Frame(setLayout=False)
     self._tempLayout = QtWidgets.QVBoxLayout()
     self._TESTFRAME.setLayout(self._tempLayout)

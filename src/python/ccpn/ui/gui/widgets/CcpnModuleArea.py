@@ -27,6 +27,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Container import Container
+from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 
 ModuleArea = DockArea

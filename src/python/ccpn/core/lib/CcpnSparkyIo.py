@@ -41,6 +41,7 @@ except:
 from collections import OrderedDict
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
+from ccpn.util.nef.GenericStarParser import NamedOrderedDict
 
 sparkyReadingOrder = []
 # possibly for later
@@ -85,10 +86,10 @@ SP_TOKEN_COMMENT          = 2
 SP_TOKEN_GLOBAL           = 3
 SP_TOKEN_SPARKY_PROJECT   = 4
 SP_TOKEN_SAVE_FRAME_REF   = 5
-SP_TOKEN_END_SPARKY_BLOCK = 6
+SP_TOKEN_END_SPARKY_DICT  = 6
 SP_TOKEN_VERSION          = 7
-SP_TOKEN_SPARKY_BLOCK     = 8
-SP_TOKEN_TYPE_BLOCK       = 9
+SP_TOKEN_SPARKY_DICT      = 8
+SP_TOKEN_TYPE_DICT        = 9
 SP_TOKEN_TYPE_NESTED      = 10
 SP_TOKEN_END_NESTED       = 11
 SP_TOKEN_BAD_CONSTRUCT    = 12
@@ -130,7 +131,7 @@ MINUSINFINITYSTRING = UnquotedValue('-Infinity')
 SPARKY_ROOT = 'root'
 SPARKY_DATA = 'data'
 SPARKY_VERSION = 'version'
-SPARKY_ENDBLOCK = '<end'
+SPARKY_ENDDICT = '<end'
 SPARKY_PATHNAME = 'pathname'
 SPARKY_SPECTRUM = 'spectrum'
 SPARKY_NAME = 'name'
@@ -161,28 +162,28 @@ def getSparkyTokenIterator(text):
 class SparkySyntaxError(ValueError):
   pass
 
-class NamedOrderedDict(OrderedDict):
-  def __init__(self, name=None):
-    super(NamedOrderedDict, self).__init__()
-    self.name = name
+# class NamedOrderedDict(OrderedDict):
+#   def __init__(self, name=None):
+#     super(NamedOrderedDict, self).__init__()
+#     self.name = name
+#
+#   def __str__(self):
+#     return '%s(name=%s)' % (self.__class__.__name__, self.name)
+#
+#   def __repr__(self):
+#     return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
+#
+#   def addItem(self, tag, value):
+#     if tag in self:
+#       raise ValueError("%s: duplicate key name %s" % (self, tag))
+#     else:
+#       self[tag] = value
 
-  def __str__(self):
-    return '%s(name=%s)' % (self.__class__.__name__, self.name)
 
-  def __repr__(self):
-    return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
-
-  def addItem(self, tag, value):
-    if tag in self:
-      raise ValueError("%s: duplicate key name %s" % (self, tag))
-    else:
-      self[tag] = value
-
-
-class SparkyBlock(NamedOrderedDict):
+class SparkyDict(NamedOrderedDict):
   """Top level container for general STAR object tree"""
   def __init__(self, name=SPARKY_ROOT):
-    super(SparkyBlock, self).__init__(name=name)
+    super(SparkyDict, self).__init__(name=name)
 
   def getParameter(self, name=SPARKY_NAME, firstOnly=False):
     dataBlocks = [self[db] for db in self.keys() if name in db]
@@ -226,7 +227,7 @@ class SparkyBlock(NamedOrderedDict):
       list.append(self)
 
     for ky in self.keys():
-      if isinstance(self[ky], SparkyBlock):
+      if isinstance(self[ky], SparkyDict):
         self[ky]._getBlocks(value, list)
 
     return list
@@ -242,10 +243,10 @@ class SparkyBlock(NamedOrderedDict):
       return None
 
 
-class TypeBlock(SparkyBlock):
-  # cheat and just copy the SparkyBlock under a new name
+class TypeBlock(SparkyDict):
+  # cheat and just copy the SparkyDict under a new name
   def __init__(self, name=SPARKY_ROOT):
-    super(SparkyBlock, self).__init__(name=name)
+    super(SparkyDict, self).__init__(name=name)
 
 
 class CcpnSparkyReader:
@@ -276,7 +277,7 @@ class CcpnSparkyReader:
     stack = self.stack
     last = stack[-1]
 
-    if isinstance(last, SparkyBlock):
+    if isinstance(last, SparkyDict):
       try:
         func = last
       except AttributeError:
@@ -303,7 +304,7 @@ class CcpnSparkyReader:
     last = stack[-1]
 
     # if isinstance(last, SparkyProjectBlock):
-    #   # currently ignore until we have a SparkyBlock
+    #   # currently ignore until we have a SparkyDict
     #   return
 
     if isinstance(last, TypeBlock):   # assume in a type block for now
@@ -316,7 +317,7 @@ class CcpnSparkyReader:
         raise SparkySyntaxError(self._errorMessage('Error processing typeList',
                                                  value))
 
-    if isinstance(last, SparkyBlock):
+    if isinstance(last, SparkyDict):
       return
 
     if isinstance(last, str):
@@ -345,7 +346,7 @@ class CcpnSparkyReader:
   def _processBadToken(self, value, typ):
     raise SparkySyntaxError(self._errorMessage("Illegal token of type% s:  %s" % (typ, value), value))
 
-  def _addSparkyBlock(self, name):
+  def _addSparkyDict(self, name):
     container = self.stack[-1]
 
     currentNames = [ky for ky in container.keys() if name in ky]
@@ -353,7 +354,7 @@ class CcpnSparkyReader:
       name = name+str(len(currentNames))   # add an incremental number to the name
 
     # name is the new named block
-    obj = SparkyBlock(name)
+    obj = SparkyDict(name)
     container.addItem(name, obj)
     self.stack.append(obj)
     self.stack.append(list())     # put a list on as well
@@ -374,7 +375,7 @@ class CcpnSparkyReader:
     self.stack.append(obj)                  # and add a new block to the end
     # self.stack.append(OrderedDict())      # put a list on as well?
 
-  def _closeSparkyBlock(self, value):
+  def _closeSparkyDict(self, value):
 
     stack =  self.stack
     lowerValue = value.lower()
@@ -392,8 +393,8 @@ class CcpnSparkyReader:
     if isinstance(stack[-1], TypeBlock):
       self._closeDict(stack[-1].name)                 # force close, popping the TypeBlock
 
-    # terminate SparkyBlock
-    if isinstance(stack[-1], SparkyBlock):
+    # terminate SparkyDict
+    if isinstance(stack[-1], SparkyDict):
       if stack[-1].name.startswith(value):
         # Simple terminator. Close sparky block
         stack.pop()
@@ -403,40 +404,40 @@ class CcpnSparkyReader:
 
       else:
         # New saveframe start. We are missing the terminator, but close and continue anyway
-        getLogger().warning('Closing sparkyBlock with missing terminator')
+        getLogger().warning('Closing sparkyDict with missing terminator')
         stack.pop()
 
     if stack:
       stack.append(list())          # in case there are more data items to add
 
-      if not isinstance((stack[-1]), SparkyBlock):
-        if lowerValue.startswith(SPARKY_ENDBLOCK):
+      if not isinstance((stack[-1]), SparkyDict):
+        if lowerValue.startswith(SPARKY_ENDDICT):
           raise SparkySyntaxError(self._errorMessage("'%s' found out of context" % value, value))
 
-  def _openSparkyBlock(self, value):
+  def _openSparkyDict(self, value):
     # start a new sparky block, which is everything
     stack = self.stack
 
-    # Add new SparkyBlock
+    # Add new SparkyDict
     if self.lowerCaseTags:
       value = value.lower()
-    if isinstance(stack[-1], SparkyBlock):
-      self._addSparkyBlock(value)
+    if isinstance(stack[-1], SparkyDict):
+      self._addSparkyDict(value)
 
     elif isinstance(stack[-1], list):
       self._closeList(value)                                  # close the list and store
-      self._addSparkyBlock(value)
+      self._addSparkyDict(value)
 
     else:
       raise SparkySyntaxError(
-        self._errorMessage("SparkyBlock start out of context: %s" % value, value)
+        self._errorMessage("SparkyDict start out of context: %s" % value, value)
       )
 
   def _openTypeBlock(self, value):
     # start a new sparky block, which is everything
     stack = self.stack
 
-    # Add new SparkyBlock
+    # Add new SparkyDict
     if self.lowerCaseTags:
       value = value.lower()
 
@@ -445,7 +446,7 @@ class CcpnSparkyReader:
         self._closeDict(value)                                  # close the list and store
       self._addTypeBlock(value)
 
-    elif isinstance(stack[-1], SparkyBlock):
+    elif isinstance(stack[-1], SparkyDict):
       self._addTypeBlock(value)
 
     elif isinstance(stack[-1], list):
@@ -458,15 +459,15 @@ class CcpnSparkyReader:
 
     else:
       raise SparkySyntaxError(
-        self._errorMessage("SparkyBlock start out of context: %s" % value, value)
+        self._errorMessage("SparkyDict start out of context: %s" % value, value)
       )
 
   def _closeDict(self, value):
     stack = self.stack
     data = stack.pop()        # remove the dict from the end
     block = stack[-1]         # point to the last block
-    if not isinstance(block, SparkyBlock):
-      if isinstance(data, SparkyBlock):
+    if not isinstance(block, SparkyDict):
+      if isinstance(data, SparkyDict):
         raise TypeError("Implementation error, loop not correctly put on stack")
       else:
         raise SparkySyntaxError(self._errorMessage("Error: %s outside list" % value, value))
@@ -486,8 +487,8 @@ class CcpnSparkyReader:
     stack = self.stack
     data = stack.pop()        # remove the list from the end
     block = stack[-1]         # point to the last block
-    if not isinstance(block, SparkyBlock):
-      if isinstance(data, SparkyBlock):
+    if not isinstance(block, SparkyDict):
+      if isinstance(data, SparkyDict):
         raise TypeError("Implementation error, loop not correctly put on stack")
       else:
         raise SparkySyntaxError(self._errorMessage("Error: %s outside list" % value, value))
@@ -567,7 +568,7 @@ class CcpnSparkyReader:
     # processFunctions[SP_TOKEN_LOOP] = self._openLoop
     # processFunctions[SP_TOKEN_LOOP_STOP] = self._closeLoop
     # processFunctions[SP_TOKEN_GLOBAL] = self._processGlobal
-    # processFunctions[SP_TOKEN_DATA_BLOCK] = self._processDataBlock
+    # processFunctions[SP_TOKEN_DATA_DICT] = self._processDataBlock
 
     unquotedValueTags = (SP_TOKEN_STRING, SP_TOKEN_NULL, SP_TOKEN_UNKNOWN, SP_TOKEN_SAVE_FRAME_REF)
     # quotedValueTags = (TOKEN_SQUOTE_STRING, TOKEN_DQUOTE_STRING, TOKEN_MULTILINE)
@@ -598,7 +599,7 @@ class CcpnSparkyReader:
 
             if typ == SP_TOKEN_SPARKY_PROJECT:
               # put the first element on the stack
-              result = SparkyBlock(name=name)           # result is the actually object, which SHOULD contain all
+              result = SparkyDict(name=name)           # result is the actually object, which SHOULD contain all
               stack.append(result)
               stack.append(list())  # put an empty list on the stack
 
@@ -606,10 +607,10 @@ class CcpnSparkyReader:
               processValue("name %s" % name)
               processValue("pathname %s" % os.path.dirname(path))
 
-            elif typ == SP_TOKEN_SPARKY_BLOCK:
-              self._openSparkyBlock(value)
+            elif typ == SP_TOKEN_SPARKY_DICT:
+              self._openSparkyDict(value)
 
-            elif typ == SP_TOKEN_TYPE_BLOCK:
+            elif typ == SP_TOKEN_TYPE_DICT:
               self._openTypeBlock(value)
 
             elif typ == SP_TOKEN_TYPE_NESTED:
@@ -618,8 +619,8 @@ class CcpnSparkyReader:
             elif typ == SP_TOKEN_END_NESTED:
               self._closeDict(SPARKY_NESTED)
 
-            elif typ == SP_TOKEN_END_SPARKY_BLOCK:
-              self._closeSparkyBlock(value)
+            elif typ == SP_TOKEN_END_SPARKY_DICT:
+              self._closeSparkyDict(value)
 
             elif typ in (SP_TOKEN_BAD_CONSTRUCT, SP_TOKEN_BAD_TOKEN):
               self._processBadToken(value, typ)
@@ -640,12 +641,12 @@ class CcpnSparkyReader:
       if isinstance(stack[-1], str):
         raise SparkySyntaxError(self._errorMessage("File ends with item name", value))
 
-      self._closeSparkyBlock(name)
+      self._closeSparkyDict(name)
 
       # if isinstance(stack[-1], list):
       #   self._closeList('<End-of-File>')
       #
-      # if isinstance(stack[-1], SparkyBlock):
+      # if isinstance(stack[-1], SparkyDict):
       #   stack.pop()
 
       if stack:
@@ -682,9 +683,9 @@ class CcpnSparkyReader:
     #
     return template % (tags[:-1], tags[-1], ii+1, msg)#
 
-  def _getSparkyDataList(self, sparkyBlock, value):
-    if SPARKY_DATA in sparkyBlock and sparkyBlock[SPARKY_DATA]:
-      spType = sparkyBlock[SPARKY_DATA]
+  def _getSparkyDataList(self, sparkyDict, value):
+    if SPARKY_DATA in sparkyDict and sparkyDict[SPARKY_DATA]:
+      spType = sparkyDict[SPARKY_DATA]
       if spType:
         spType = [re.findall(r'%s\s?(.*)\s*' % value, sT) for sT in spType]
         spType = [ll for x in spType for ll in x]
@@ -693,13 +694,13 @@ class CcpnSparkyReader:
 
     return None
 
-  def _getSparkyBlock(self, sparkyBlock, name, list=[]):
-    if name in sparkyBlock.name:
-      list.append(sparkyBlock)
+  def _getSparkyDict(self, sparkyDict, name, list=[]):
+    if name in sparkyDict.name:
+      list.append(sparkyDict)
 
-    for ky in sparkyBlock.keys():
-      if isinstance(sparkyBlock[ky], SparkyBlock):
-        self._getSparkyBlock(sparkyBlock[ky], name, list)
+    for ky in sparkyDict.keys():
+      if isinstance(sparkyDict[ky], SparkyDict):
+        self._getSparkyDict(sparkyDict[ky], name, list)
 
     return list
 
@@ -807,7 +808,7 @@ class CcpnSparkyReader:
         getLogger().warning("Axes error: axis '%s' is out of bounds" % spectrum.axisCodes[ind])
     return badAxes
 
-  def importPeakLists(self, project, saveBlock, sparkyBlock):
+  def importPeakLists(self, project, saveBlock, sparkyDict):
     # process the save files to get the spectra
     pathName = saveBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
@@ -922,38 +923,38 @@ class CcpnSparkyReader:
       finally:
         project.resumeNotification()
 
-  def importSparkyProject(self, project, sparkyBlock):
+  def importSparkyProject(self, project, sparkyDict):
     """Import entire project from dataBlock into empty Project"""
     t0 = time.time()
 
     self.warnings = []
     self.project = project
 
-    # traverse the sparkyBlock and insert into project
-    sparkyType = sparkyBlock.getDataValues(SPARKY_SPARKY, firstOnly=True)
+    # traverse the sparkyDict and insert into project
+    sparkyType = sparkyDict.getDataValues(SPARKY_SPARKY, firstOnly=True)
 
     if sparkyType == SPARKY_PROJECT:
       # load project file
-      fileName = sparkyBlock.getDataValues(SPARKY_NAME, firstOnly=True)
-      filePath = sparkyBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
+      fileName = sparkyDict.getDataValues(SPARKY_NAME, firstOnly=True)
+      filePath = sparkyDict.getDataValues(SPARKY_PATHNAME, firstOnly=True)
 
-      saveFiles = sparkyBlock.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
+      saveFiles = sparkyDict.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
       loadedBlocks = []
       for sp in saveFiles.getData():
         savefilePath = os.path.abspath(os.path.join(filePath, sp))
         loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
       # now import the molecule from the main project file
-      self.importSparkyMolecule(project, sparkyBlock)
+      self.importSparkyMolecule(project, sparkyDict)
 
       # load spectrum data
       for isf in loadedBlocks:
         self.importSpectra(project, isf)   # modify to load from the project
-        self.importPeakLists(project, isf, sparkyBlock)   # modify to load from the project
+        self.importPeakLists(project, isf, sparkyDict)   # modify to load from the project
 
     elif sparkyType == SPARKY_SAVE:
-      self.importSpectra(project, sparkyBlock)
-      self.importPeakLists(project, sparkyBlock, sparkyBlock)  # modify to load from the project
+      self.importSpectra(project, sparkyDict)
+      self.importPeakLists(project, sparkyDict, sparkyDict)  # modify to load from the project
 
     else:
       getLogger().warning('Unknown Sparky File Type')
@@ -1090,11 +1091,11 @@ class CcpnSparkyReader:
     connectedNmrChain = self._connectNmrResidues(newNmrChain)
     self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
-  def importSparkyMolecule(self, project, sparkyBlock):
+  def importSparkyMolecule(self, project, sparkyDict):
     # read the molecules from the sparky project and load the resonances
-    getLogger().info('Importing Sparky molecular chains: %s' % sparkyBlock.name)
+    getLogger().info('Importing Sparky molecular chains: %s' % sparkyDict.name)
 
-    molecules = sparkyBlock.getBlocks(SPARKY_MOLECULE)
+    molecules = sparkyDict.getBlocks(SPARKY_MOLECULE)
 
     for mol in molecules:
       molName = self._buildName([mol.getDataValues(SPARKY_NAME, firstOnly=True)], default=mol.name)

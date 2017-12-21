@@ -115,7 +115,9 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
       chainLabel = item.nmrResidue.nmrChain.id
       assignedOnlyOneChain = len(peak.project.chains) == 1 and item.nmrResidue.residue
 
-      if chainLabel and not assignedOnlyOneChain:
+      if assignedOnlyOneChain:
+        return ''
+      elif chainLabel:
         chainLabel += '_'
     except:
       chainLabel = ''
@@ -853,7 +855,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
                       QtCore.QPoint(0, 0)).x()),
                0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
                 QtCore.QPoint(0, 0)).y()))
-        w = r = pos[self.minIndex]
+        w = r = max(pos)        # pos[self.minIndex]
         self.annotation.setPos(r, -w)
 
         # if self.hover:
@@ -919,7 +921,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
                       QtCore.QPoint(0, 0)).x()),
                0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
                 QtCore.QPoint(0, 0)).y()))
-        w = r = pos[self.minIndex]
+        w = r = max(pos)        # pos[self.minIndex]
         self.annotation.setPos(r, -w)
 
         painter.drawLine(-r,-w,r,w)

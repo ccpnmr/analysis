@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -24,9 +24,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt5 import QtGui, QtWidgets
 
 import sys
+from PyQt5 import QtGui, QtWidgets
+
 
 class Application(QtWidgets.QApplication):
 

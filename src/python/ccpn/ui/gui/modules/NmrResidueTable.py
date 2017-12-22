@@ -359,6 +359,9 @@ class NmrResidueTable(QuickTable):
       raise RuntimeError('Col has to be >= 2')
     self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
 
+  def _setWidgetHeight(self, height):
+    self._widget.setFixedHeight(height)
+
   def _selectNmrChain(self, nmrChain=None):
     """
     Manually select a NmrChain from the pullDown
@@ -546,7 +549,7 @@ class NmrResidueTable(QuickTable):
     if self.nmrChain is not None:
       self.displayTableForNmrChain(self.nmrChain)
     else:
-      self.clear()
+      self.clearTable()
 
   def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
     """

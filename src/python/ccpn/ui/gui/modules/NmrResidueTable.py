@@ -301,7 +301,7 @@ class NmrResidueTable(QuickTable):
 
     self._widget.setFixedHeight(30)
 
-    # initiaise the currently attached dataFrame
+    # initialise the currently attached dataFrame
     self._hiddenColumns = ['Pid']
     self.dataFrameObject = None
 

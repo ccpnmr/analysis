@@ -76,6 +76,14 @@ class PeakTableModule(CcpnModule):
     if peakList is not None:
       self.selectPeakList(peakList)
 
+    self.installMaximiseEventHandler(self._maximise)
+
+  def _maximise(self):
+    """
+    Maximise the attached table
+    """
+    self.peakListTable._maximise()
+
   def selectPeakList(self, peakList=None):
     """
     Manually select a peakList from the pullDown
@@ -228,6 +236,12 @@ class PeakListTableWidget(QuickTable):
 
 
   ##################   Updates   ##################
+
+  def _maximise(self):
+    """
+    refresh the table on a maximise event
+    """
+    self._updateTable()
 
   def _updateAllModule(self):
     '''Updates the table and the settings widgets'''

@@ -98,29 +98,36 @@ class CustomNmrResidueTable(NmrResidueTable):
   ''' Custon nmrResidue Table with extra Delta Shifts column'''
   deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None)
 
-  columnDefs = [
-    ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-    ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-    ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-    ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-    ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
-    ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-     , 'Number of spectra selected for calculating the delta shift', None),
-    ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
-    ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
-  ]
-
+  # columnDefs = [
+  #   ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+  #   ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
+  #   ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
+  #   ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
+  #   ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+  #   ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+  #    , 'Number of spectra selected for calculating the delta shift', None),
+  #   ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
+  #   ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
+  # ]
+  #
   # columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
   # columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
 
-  def __init__(self, parent, mainWindow, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
 
     # NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
     #                          selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
-    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow, actionCallback=actionCallback,
-                             selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
+
+    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow
+                             , moduleParent=moduleParent
+                             , actionCallback=actionCallback
+                             , selectionCallback=selectionCallback
+                             , nmrChain=nmrChain
+                             , multiSelect=True, **kwds)
+
     self.NMRcolumns = ColumnClass([
         ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
+        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
         ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
         ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
         ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
@@ -131,8 +138,7 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
-    self.multiSelect = True
-
+    self._widget.setFixedHeight(45)
 
   @staticmethod
   def _getNmrResidueSpectraCount(nmrResidue):
@@ -168,7 +174,6 @@ class ChemicalShiftsMapping(CcpnModule):
 
     BarGraph.mouseClickEvent = self._mouseClickEvent
     BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
-
 
     self.mainWindow = mainWindow
     self.application = None

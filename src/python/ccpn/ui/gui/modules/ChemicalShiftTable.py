@@ -212,7 +212,7 @@ class ChemicalShiftTable(QuickTable):
     # create the column objects
     self.CScolumns = ColumnClass(
                 [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
-                 ('Pid', lambda cs:cs.nmrAtom.pid, 'Pid of nmrAtom', None),
+                 ('Pid', lambda cs:cs.pid, 'Pid of chemicalShift', None),
                  ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
                  ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
                  ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
@@ -324,7 +324,7 @@ class ChemicalShiftTable(QuickTable):
     if self.chemicalShiftList in thisChemicalShiftList:
       self.displayTableForChemicalShift(self.chemicalShiftList)
     else:
-      self.clear()
+      self.clearTable()
 
   def _maximise(self):
     """
@@ -395,7 +395,7 @@ class ChemicalShiftTable(QuickTable):
     if self.chemicalShiftList is not None:
       self.displayTableForChemicalShift(self.chemicalShiftList)
     else:
-      self.clear()
+      self.clearTable()
 
   @staticmethod
   def _getShiftPeakCount(chemicalShift):

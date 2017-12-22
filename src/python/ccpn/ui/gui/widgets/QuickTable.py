@@ -688,7 +688,7 @@ class QuickTable(TableWidget, Base):
 
       if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
 
-        self.clear()
+        self.clearTable()
 
       elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
 
@@ -702,7 +702,7 @@ class QuickTable(TableWidget, Base):
           self._tableData['changeFunc'](table)
 
     else:
-      self.clear()
+      self.clearTable()
 
     self._silenceCallback = False
     getLogger().debug('>updateTableCallback>', data['notifier']

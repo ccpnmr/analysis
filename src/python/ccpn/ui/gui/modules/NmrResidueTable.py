@@ -546,7 +546,7 @@ class NmrResidueTable(QuickTable):
     if self.nmrChain is not None:
       self.displayTableForNmrChain(self.nmrChain)
     else:
-      self.clear()
+      self.clearTable()
 
   def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
     """

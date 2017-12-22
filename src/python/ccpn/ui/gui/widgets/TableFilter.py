@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -50,7 +50,7 @@ class ObjectTableFilter(Widget):
                                               partial(self.findOnTable, self.table)])
     self.searchButtons.buttons[1].setEnabled(False)
 
-    self.widgetLayout = QtGui.QHBoxLayout()
+    self.widgetLayout = QtWidgets.QHBoxLayout()
     self.setLayout(self.widgetLayout)
     ws = [labelColumn,self.columnOptions, self.searchLabel,self.edit, self.searchButtons]
     for w in ws:

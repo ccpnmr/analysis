@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 

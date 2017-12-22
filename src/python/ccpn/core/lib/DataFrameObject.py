@@ -26,7 +26,7 @@ __date__ = "$Date$"
 import pandas as pd
 import pyqtgraph as pg
 from ccpn.ui.gui.widgets.Column import Column
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtWidgets
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 

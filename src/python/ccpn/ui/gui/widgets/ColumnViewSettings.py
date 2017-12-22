@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -41,7 +41,7 @@ class ColumnViewSettingsPopup(CcpnDialog):
     # self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
     self.widgetColumnViewSettings = ColumnViewSettings(parent=self, dataFrameObject=dataFrameObject, grid=(0,0))
     buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1,0), hAlign='c')
-    self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
   def _close(self):
     'Save the hidden columns to the table class. So it remembers when you open again the popup'

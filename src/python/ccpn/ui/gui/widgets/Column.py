@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.util.Logging import getLogger
 

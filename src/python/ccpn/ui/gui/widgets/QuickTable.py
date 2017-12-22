@@ -25,7 +25,7 @@ __date__ = "$Date$"
 
 import re
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 import pandas as pd
 from pyqtgraph import TableWidget
 import os
@@ -313,14 +313,21 @@ class QuickTable(TableWidget, Base):
     self.bbox = self.fontMetric.boundingRect
     rowHeight = self.bbox('A').height() + 4
 
+    # pyqt4
+    # headers = self.verticalHeader()
+    # headers.setResizeMode(QtWidgets.QHeaderView.Fixed)
+    # headers.setDefaultSectionSize(rowHeight)
+
+    # pyqt5
     headers = self.verticalHeader()
-    headers.setResizeMode(QtGui.QHeaderView.Fixed)
+    headers.setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
     headers.setDefaultSectionSize(rowHeight)
 
     # and hide the row labels
     if self.hideIndex:
       headers.hide()
 
+    # TODO:ED check pyqt5
     # for qt5 and above
     # QHeaderView * verticalHeader = myTableView->verticalHeader();
     # verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
@@ -351,7 +358,7 @@ class QuickTable(TableWidget, Base):
     headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
 
   def _setContextMenu(self, enableExport=True, enableDelete=True):
-    self.tableMenu = QtGui.QMenu()
+    self.tableMenu = QtWidgets.QMenu()
     if enableExport:
       self.tableMenu.addAction("Export Table", self.exportDialog )
     if enableDelete:
@@ -374,7 +381,7 @@ class QuickTable(TableWidget, Base):
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
-    self.headerContextMenumenu = QtGui.QMenu()
+    self.headerContextMenumenu = QtWidgets.QMenu()
     columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
     searchSettings = None
     if self.searchWidget is not None:
@@ -435,7 +442,7 @@ class QuickTable(TableWidget, Base):
       # if hasattr(self._parent, 'getLayout'):
         parentLayout = self._parent.getLayout()
 
-      if isinstance(parentLayout, QtGui.QGridLayout):
+      if isinstance(parentLayout, QtWidgets.QGridLayout):
         idx = parentLayout.indexOf(self)
         location = parentLayout.getItemPosition(idx)
         if location is not None:
@@ -885,7 +892,7 @@ class QuickTable(TableWidget, Base):
 
 EDIT_ROLE = QtCore.Qt.EditRole
 
-class QuickTableDelegate(QtGui.QStyledItemDelegate):
+class QuickTableDelegate(QtWidgets.QStyledItemDelegate):
   """
   handle the setting of data when editing the table
   """
@@ -894,7 +901,7 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
     Initialise the delegate
     :param parent - link to the handling table:
     """
-    QtGui.QStyledItemDelegate.__init__(self, parent)
+    QtWidgets.QStyledItemDelegate.__init__(self, parent)
     self.customWidget = False
     self._parent = parent
 
@@ -927,4 +934,4 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
     except Exception as es:
       getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))
 
-    # return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
+    # return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)

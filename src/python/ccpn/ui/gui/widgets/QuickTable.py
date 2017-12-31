@@ -686,7 +686,7 @@ class QuickTable(TableWidget, Base):
     :param data:
     """
     thisTableList = getattr(data[Notifier.THEOBJECT]
-                            , self._tableData['className'])   # get the chainList
+                            , self._tableData['className'])   # get the table list
     table = data[Notifier.OBJECT]
 
     self._silenceCallback = True
@@ -695,7 +695,7 @@ class QuickTable(TableWidget, Base):
 
       if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
 
-        self.clear()
+        self.clearTable()
 
       elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
 
@@ -709,7 +709,7 @@ class QuickTable(TableWidget, Base):
           self._tableData['changeFunc'](table)
 
     else:
-      self.clear()
+      self.clearTable()
 
     self._silenceCallback = False
     getLogger().debug('>updateTableCallback>', data['notifier']
@@ -727,7 +727,7 @@ class QuickTable(TableWidget, Base):
     trigger = data[Notifier.TRIGGER]
 
     self._silenceCallback = True
-    thisRow = getattr(row, self._tableData['tableName'])
+    thisTable = getattr(row, self._tableData['tableName'])
 
     try:
       # multiple delete from deleteObjFromTable messes with this
@@ -752,6 +752,7 @@ class QuickTable(TableWidget, Base):
 
           if rows and len(rows) > 1:
             self._dataFrameObject.appendObject(row)
+            self.update()
           else:
 
             # self._update(self.nmrTable)
@@ -770,7 +771,7 @@ class QuickTable(TableWidget, Base):
         self._dataFrameObject.renameObject(row, oldPid)
 
     except Exception as es:
-      pass
+      getLogger().warning(str(es))
 
     self._silenceCallback = False
     getLogger().debug('>updateRowCallback>', data['notifier']

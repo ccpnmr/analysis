@@ -158,7 +158,7 @@ class DataFrameObject(object):
     start = model.index(0, column)
     matches = model.match(
       start, QtCore.Qt.DisplayRole,
-      text, 1, QtCore.Qt.MatchContains)
+      text, 1, QtCore.Qt.MatchExactly)
     if matches:
       return matches[0].row()
       # # index.row(), index.column()
@@ -169,7 +169,8 @@ class DataFrameObject(object):
 
   def appendObject(self, obj):
     # if obj.pid not in self._objectList:
-    if self.find(self._table, str(obj.pid), column='Pid') is None:
+    found = self.find(self._table, str(obj.pid), column='Pid')
+    if found is None:
       self._table.silenceCallBack = True
 
       # the object doesn't exist in list, so can be added
@@ -224,7 +225,8 @@ class DataFrameObject(object):
 
   def renameObject(self, obj, oldPid):
     # if oldPid in self._objectList:
-    if self.find(self._table, str(oldPid), column='Pid') is not None:
+    foundRow = self.find(self._table, str(oldPid), column='Pid')
+    if foundRow is not None:
       self._table.silenceCallBack = True
 
       # get the existing index and remove the items from the lists
@@ -247,8 +249,9 @@ class DataFrameObject(object):
       self._table.setHorizontalHeaderLabels(self.headings)
 
       # needed after setting the column headings
-      # self._table.resizeColumnsToContents()
-      # self._table.showColumns(self)
+      self._table.resizeColumnsToContents()
+      self._table.showColumns(self)
+
       self._table.show()
       self._table.silenceCallBack = False
 

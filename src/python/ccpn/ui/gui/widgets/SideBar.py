@@ -493,7 +493,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
           else:
             obj.delete()
-        except ApiError:
+        # except ApiError:
+        except Exception as es:
           showWarning('Delete', 'Object %s cannot be deleted' % obj.pid)
 
   def _cloneObject(self, objs):

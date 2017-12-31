@@ -475,4 +475,4 @@ class ChemicalShiftTable(QuickTable):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearTableNotifiers()
+    self.clearTableNotifiers()

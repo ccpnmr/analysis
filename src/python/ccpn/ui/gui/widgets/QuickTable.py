@@ -204,8 +204,8 @@ class QuickTable(TableWidget, Base):
 
       data = {}
       for iSelect in selection:
-        col = iSelect.column()
-        colName = self.horizontalHeaderItem(col).text()
+        colPid = iSelect.column()
+        colName = self.horizontalHeaderItem(colPid).text()
         data[colName] = model.model().data(iSelect)
 
       objIndex = data['Pid']

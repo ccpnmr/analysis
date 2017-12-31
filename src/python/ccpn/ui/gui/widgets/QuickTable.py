@@ -170,6 +170,7 @@ class QuickTable(TableWidget, Base):
     self._selectionCallback = selectionCallback
     self._silenceCallback = False
     self.doubleClicked.connect(self._doubleClickCallback)
+    self.cellClicked.connect(self._cellClicked)
 
     # set the delegate for editing
     delegate = QuickTableDelegate(self)
@@ -188,6 +189,10 @@ class QuickTable(TableWidget, Base):
     self._selectCurrentNotifier = None
     self._icons = [self.ICON_FILE]
 
+  def _cellClicked(self, row, col):
+    self._currentRow = row
+    self._currentCol = col
+
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
     # data = OrderedDict()
@@ -201,11 +206,13 @@ class QuickTable(TableWidget, Base):
     if selection:
       row = itemSelection.row()
       col = itemSelection.column()
+      # row = self._currentRow        # read from the cellClicked connect
+      # col = self._currentCol
 
       data = {}
       for iSelect in selection:
-        col = iSelect.column()
-        colName = self.horizontalHeaderItem(col).text()
+        colPid = iSelect.column()
+        colName = self.horizontalHeaderItem(colPid).text()
         data[colName] = model.model().data(iSelect)
 
       objIndex = data['Pid']
@@ -258,8 +265,8 @@ class QuickTable(TableWidget, Base):
       # selection = model.selectedIndexes()
       #
       # if selection:
-      #   # row = itemSelection.row()
-      #   # col = itemSelection.column()
+      # row = itemSelection.row()
+      # col = itemSelection.column()
       #
       #   data = {}
       #   objList = []

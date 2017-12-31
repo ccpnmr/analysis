@@ -28,7 +28,9 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+# from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
 from ccpn.core.IntegralList import IntegralList
@@ -70,23 +72,29 @@ class IntegralTableModule(CcpnModule):
 
     
     self.integralTable = IntegralTable(parent=self.mainWidget
-                                         , setLayout=True
-                                         , application=self.application
-                                         , moduleParent=self
-                                         , grid=(0, 0))
+                                       , mainWindow=self.mainWindow
+                                       , moduleParent=self
+                                       , setLayout=True
+                                       , grid=(0, 0))
     # settingsWidget
-
 
     if integralList is not None:
       self.selectIntegralList(integralList)
+
+    # install the event filter to handle maximising from floated dock
+    self.installMaximiseEventHandler(self._maximise)
+
+  def _maximise(self):
+    """
+    Maximise the attached table
+    """
+    self.integralTable._maximise()
 
   def selectIntegralList(self, integralList=None):
     """
     Manually select a IL from the pullDown
     """
     self.integralTable._selectIntegralList(integralList)
-
-
 
   def _closeModule(self):
     """
@@ -102,38 +110,26 @@ class IntegralTableModule(CcpnModule):
     self._closeModule()
 
 
-class IntegralTable(ObjectTable):
+class IntegralTable(QuickTable):
   """
   Class to present a IntegralTable pulldown list, wrapped in a Widget
   """
-  columnDefs = [
-                ('#', lambda integral: integral.serial, '', None),
-                ('Value', lambda integral: integral.value, '', None),
-                ('Lower Limit', lambda integral: IntegralTable._getLowerLimit(integral), '', None),
-                ('Higher Limit', lambda integral:IntegralTable._getHigherLimit(integral), '', None),
-                ('ValueError', lambda integral: integral.valueError,'', None),
-                ('Bias', lambda integral: integral.bias, '', None),
-                ('FigureOfMerit', lambda integral: integral.figureOfMerit, '', None),
-                ('Slopes', lambda integral: integral.slopes, '', None),
-                ('Annotation', lambda integral: integral.annotation, '', None),
-                ('Comment', lambda integral: integral.annotation, '', None),
-
-
-                 ]
   className = 'IntegralTable'
   attributeName = 'integralLists'
 
   OBJECT = 'object'
   TABLE = 'table'
 
-  def __init__(self, parent, application, moduleParent, integralList=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, integralList=None, **kwds):
     """
     Initialise the widgets for the module.
     """
-    self.moduleParent = moduleParent
-    self._application = application
-    self._project = application.project
-    self._current = application.current
+    # Derive application, project, and current from mainWindow
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
+    self.moduleParent=moduleParent
     IntegralTable._project = self._project
 
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
@@ -141,8 +137,19 @@ class IntegralTable(ObjectTable):
     self.integralList = None
 
     # create the column objects
-    self.ITcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
-                      colName, func, tipText, editValue in self.columnDefs]
+    self.ITcolumns = ColumnClass([
+        ('#', lambda integral:integral.serial, '', None),
+        ('Pid', lambda integral:integral.pid, 'Pid of integral', None),
+        ('Value', lambda integral:integral.value, '', None),
+        ('Lower Limit', lambda integral:IntegralTable._getLowerLimit(integral), '', None),
+        ('Higher Limit', lambda integral:IntegralTable._getHigherLimit(integral), '', None),
+        ('ValueError', lambda integral:integral.valueError, '', None),
+        ('Bias', lambda integral:integral.bias, '', None),
+        ('FigureOfMerit', lambda integral:integral.figureOfMerit, '', None),
+        ('Slopes', lambda integral:integral.slopes, '', None),
+        ('Annotation', lambda integral:integral.annotation, '', None),
+        ('Comment', lambda integral:integral.annotation, '', None), ]
+    )   #      [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForIntegrals method
     self.spacer = Spacer(self._widget, 5, 5
@@ -157,32 +164,48 @@ class IntegralTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=self.ITcolumns, objects=[],
-                         autoResize=True,
-                         selectionCallback=self._selectionCallback,
-                         actionCallback=self._actionCallback,
-                         multiSelect=True,
-                         grid=(3, 0), gridSpan=(1, 6)
-                         )
+
+    self._widget.setFixedHeight(30)
+
+    # initialise the currently attached dataFrame
+    self._hiddenColumns = ['Pid']
+    self.dataFrameObject = None
+
+    # initialise the table
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=self._mainWindow
+                        , dataFrameObject=None
+                        , setLayout=True
+                        , autoResize=True
+                        , selectionCallback=self._selectionCallback
+                        , actionCallback=self._actionCallback
+                        , multiSelect=True
+                        , grid=(3, 0), gridSpan=(1, 6))
 
     # self.linearRegions = LinearRegionsPlot(values=[0,0], orientation='v', bounds=None,
     #                                        brush=None, colour='purple', movable=True)
     # for line in self.linearRegions.lines:
     #   line.sigPositionChanged.connect(self._lineMoved)
 
-
-
-    self._integralListNotifier = None
-    self._integralNotifier = None
-
-
-    self._updateSilence = False  # flag to silence updating of the table
-    self._setNotifiers()
+    # self._integralListNotifier = None
+    # self._integralNotifier = None
+    #
+    # self._updateSilence = False  # flag to silence updating of the table
+    # self._setNotifiers()
 
     if integralList is not None:
       self._selectIntegralList(integralList)
 
+    self.setTableNotifiers(tableClass=IntegralList
+                           , rowClass=Integral
+                           , cellClassNames=None
+                           , tableName='integralList', rowName='integral'
+                           , changeFunc=self.displayTableForIntegralList
+                           , className=self.attributeName
+                           , updateFunc=self._update
+                           , tableSelection='integralList'
+                           , pullDownWidget=self.ITcolumns
+                           , selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback)
 
   def _selectIntegralList(self, integralList=None):
     """
@@ -218,14 +241,32 @@ class IntegralTable(ObjectTable):
     else:
       self.clearTable()
 
+  def _maximise(self):
+    """
+    Redraw the table on a maximise event
+    """
+    if self.integralList:
+      self.displayTableForIntegralList(self.integralList)
+    else:
+      self.clear()
+
   def _update(self, integralList):
     """
     Update the table
     """
     if not self._updateSilence:
-      self.setColumns(self.ITcolumns)
-      self.setObjects(integralList.integrals)
-      self.show()
+      self._project.blankNotification()
+      objs = self.getSelectedObjects()
+
+      self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                  , buildList=integralList.integrals
+                                                  , colDefs=self.ITcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
+
+      # populate from the Pandas dataFrame inside the dataFrameObject
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+      self._highLightObjs(objs)
+      self._project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """
@@ -243,24 +284,26 @@ class IntegralTable(ObjectTable):
     if strip:
       strip.plotWidget.viewBox._showIntegralLines()
 
-  def _selectionCallback(self, integrals, *args):
+  def _selectionCallback(self, data, *args):
     """
-    set as current the selected integrals on the table
+    Set as current the selected integrals on the table
     """
+    integrals = data[Notifier.OBJECT]
+
     self._clearRegions()
     if integrals is None:
       self._current.clearIntegrals()
     else:
       self._current.integrals = integrals
 
-
-  def _actionCallback(self, integral, *kw):
+  def _actionCallback(self, data, *kw):
     """
     Notifier DoubleClick action on item in table
     """
+    integral = data[Notifier.OBJECT]
+
     self._showRegions()
     self._navigateToPosition()
-
 
     logger.debug(str(NotImplemented))
 
@@ -359,67 +402,64 @@ class IntegralTable(ObjectTable):
           return float(min(limits))
 
 
-  @staticmethod
-  def _getCommentText(integral):
-    """
-    CCPN-INTERNAL: Get a comment from ObjectTable
-    """
-    try:
-      if integral.comment == '' or not integral.comment:
-        return ''
-      else:
-        return integral.comment
-    except:
-      return ''
-
-  @staticmethod
-  def _setComment(integral, value):
-    """
-    CCPN-INTERNAL: Insert a comment into ObjectTable
-    """
-    IntegralTable._project.blankNotification()
-    integral.comment = value
-    IntegralTable._project.unblankNotification()
-
-  def _setNotifiers(self):
-    """
-    Set a Notifier to call when an object is created/deleted/renamed/changed
-    rename calls on name
-    change calls on any other attribute
-    """
-    # self._clearNotifiers()
-    self._selectOnTableCurrentIntegralsNotifier = Notifier(self._current, [Notifier.CURRENT], targetName='integrals',
-                                                           callback=self._selectOnTableCurrentIntegralsNotifierCallback)
-
-    self._integralListNotifier = Notifier(self._project
-                                           , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                           , IntegralList.__name__
-                                           , self._updateCallback)
-    self._integralNotifier = Notifier(self._project
-                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-                                       , Integral.__name__
-                                       , self._updateCallback)
-
-
-
-
-  def _clearNotifiers(self):
-    """
-    clean up the notifiers
-    """
-    if self._integralListNotifier is not None:
-      self._integralListNotifier.unRegister()
-    if self._integralNotifier is not None:
-      self._integralNotifier.unRegister()
-    if self._selectOnTableCurrentIntegralsNotifier is not None:
-      self._selectOnTableCurrentIntegralsNotifier.unRegister()
+  # @staticmethod
+  # def _getCommentText(integral):
+  #   """
+  #   CCPN-INTERNAL: Get a comment from ObjectTable
+  #   """
+  #   try:
+  #     if integral.comment == '' or not integral.comment:
+  #       return ''
+  #     else:
+  #       return integral.comment
+  #   except:
+  #     return ''
+  #
+  # @staticmethod
+  # def _setComment(integral, value):
+  #   """
+  #   CCPN-INTERNAL: Insert a comment into ObjectTable
+  #   """
+  #   IntegralTable._project.blankNotification()
+  #   integral.comment = value
+  #   IntegralTable._project.unblankNotification()
+  #
+  # def _setNotifiers(self):
+  #   """
+  #   Set a Notifier to call when an object is created/deleted/renamed/changed
+  #   rename calls on name
+  #   change calls on any other attribute
+  #   """
+  #   # self._clearNotifiers()
+  #   self._selectOnTableCurrentIntegralsNotifier = Notifier(self._current, [Notifier.CURRENT], targetName='integrals',
+  #                                                          callback=self._selectOnTableCurrentIntegralsNotifierCallback)
+  #
+  #   self._integralListNotifier = Notifier(self._project
+  #                                          , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+  #                                          , IntegralList.__name__
+  #                                          , self._updateCallback)
+  #   self._integralNotifier = Notifier(self._project
+  #                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+  #                                      , Integral.__name__
+  #                                      , self._updateCallback)
+  #
+  #
+  #
+  #
+  # def _clearNotifiers(self):
+  #   """
+  #   clean up the notifiers
+  #   """
+  #   if self._integralListNotifier is not None:
+  #     self._integralListNotifier.unRegister()
+  #   if self._integralNotifier is not None:
+  #     self._integralNotifier.unRegister()
+  #   if self._selectOnTableCurrentIntegralsNotifier is not None:
+  #     self._selectOnTableCurrentIntegralsNotifier.unRegister()
 
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearNotifiers()
+    self._clearTableNotifiers()
     self._clearRegions()
-
-
-

@@ -31,7 +31,8 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintsPulldown
 from ccpn.core.RestraintList import RestraintList
@@ -117,14 +118,23 @@ class RestraintTableModule(CcpnModule):
                                             )
 
     self.restraintTable = RestraintTable(parent=self.mainWidget
-                                        , setLayout=True
-                                        , application=self.application
-                                        , moduleParent=self
-                                        , grid=(0,0))
+                                       , mainWindow=self.mainWindow
+                                       , moduleParent=self
+                                       , setLayout=True
+                                       , grid=(0, 0))
     # settingsWidget
 
     if restraintList is not None:
       self.selectRestraintList(restraintList)
+
+    # install the event filter to handle maximising from floated dock
+    self.installMaximiseEventHandler(self._maximise)
+
+  def _maximise(self):
+    """
+    Maximise the attached table
+    """
+    self.restraintTable._maximise()
 
   def selectRestraintList(self, restraintList=None):
     """
@@ -160,12 +170,36 @@ class RestraintTableModule(CcpnModule):
     self._closeModule()
 
 
-class RestraintTable(ObjectTable):
+class RestraintTable(QuickTable):
   """
   Class to present a RestraintTable pulldown list, wrapped in a Widget
   """
-  columnDefs = [('#', '_key', 'Restraint Id', None),
-                 ('Atoms', lambda restraint:RestraintTable._getContributions(restraint),
+  className = 'RestraintTable'
+  attributeName = 'restraintLists'
+
+  OBJECT = 'object'
+  TABLE = 'table'
+
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, restraintList=None, **kwds):
+    """
+    Initialise the widgets for the module.
+    """
+    # Derive application, project, and current from mainWindow
+    self._mainWindow = mainWindow
+    self._application = mainWindow.application
+    self._project = mainWindow.application.project
+    self._current = mainWindow.application.current
+    self.moduleParent=moduleParent
+    RestraintTable._project = self._project
+
+    kwds['setLayout'] = True  ## Assure we have a layout with the widget
+    self._widget = Widget(parent=parent, **kwds)
+    self.restraintList = None
+
+    # create the column objects
+    self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None),
+                                  ('Pid', lambda restraint:restraint.pid, 'Pid of integral', None),
+                                  ('Atoms', lambda restraint:RestraintTable._getContributions(restraint),
                   'Atoms involved in the restraint', None),
                  ('Target Value.', 'targetValue', 'Target value for the restraint', None),
                  ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None),
@@ -176,30 +210,7 @@ class RestraintTable(ObjectTable):
                  # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
                 ('Comment', lambda restraint:RestraintTable._getCommentText(restraint), 'Notes',
                  lambda restraint, value:RestraintTable._setComment(restraint, value))
-                ]
-
-  className = 'RestraintTable'
-  attributeName = 'restraintLists'
-
-  OBJECT = 'object'
-  TABLE = 'table'
-
-  def __init__(self, parent, application, moduleParent, restraintList=None, **kwds):
-    """
-    Initialise the widgets for the module.
-    """
-    self.moduleParent = moduleParent
-    self._application = application
-    self._project = application.project
-    self._current = application.current
-    RestraintTable._project = self._project
-
-    kwds['setLayout'] = True  ## Assure we have a layout with the widget
-    self._widget = Widget(parent=parent, **kwds)
-    self.restraintList = None
-
-    # create the column objects
-    self.RLcolumns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+                ])      # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForRestraints method
     self.spacer = Spacer(self._widget, 5, 5
@@ -214,25 +225,45 @@ class RestraintTable(ObjectTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
-    ObjectTable.__init__(self, parent=self._widget, setLayout=True,
-                         columns=self.RLcolumns, objects=[],
-                         autoResize=True,
-                         selectionCallback=self._selectionCallback,
-                         actionCallback=self._actionCallback,
-                         grid=(3, 0), gridSpan=(1, 6)
-                         )
 
-    self._restraintListNotifier = None
-    self._restraintNotifier = None
-    
-    #TODO: see how to handle peaks as this is too costly at present
-    # Notifier object to update the table if the peaks change
-    self._peaksNotifier = None
-    self._updateSilence = False  # flag to silence updating of the table
-    self._setNotifiers()
+    self._widget.setFixedHeight(30)
+
+    # initialise the currently attached dataFrame
+    self._hiddenColumns = ['Pid']
+    self.dataFrameObject = None
+
+    # initialise the table
+    QuickTable.__init__(self, parent=parent
+                        , mainWindow=self._mainWindow
+                        , dataFrameObject=None
+                        , setLayout=True
+                        , autoResize=True
+                        , selectionCallback=self._selectionCallback
+                        , actionCallback=self._actionCallback
+                        , grid=(3, 0), gridSpan=(1, 6))
+
+    # self._restraintListNotifier = None
+    # self._restraintNotifier = None
+    #
+    # #TODO: see how to handle peaks as this is too costly at present
+    # # Notifier object to update the table if the peaks change
+    # self._peaksNotifier = None
+    # self._updateSilence = False  # flag to silence updating of the table
+    # self._setNotifiers()
 
     if restraintList is not None:
       self._selectRestraintList(restraintList)
+
+    self.setTableNotifiers(tableClass=RestraintList
+                           , rowClass=Restraint
+                           , cellClassNames=None
+                           , tableName='restraintList', rowName='restraint'
+                           , changeFunc=self.displayTableForRestraint
+                           , className=self.attributeName
+                           , updateFunc=self._update
+                           , tableSelection='restraintList'
+                           , pullDownWidget=self.RLcolumns
+                           , selectCurrentCallBack=None)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -276,14 +307,32 @@ class RestraintTable(ObjectTable):
     else:
       self.clearTable()
 
+  def _maximise(self):
+    """
+    Redraw the table on a maximise event
+    """
+    if self.restraintList:
+      self.displayTableForRestraint(self.restraintList)
+    else:
+      self.clear()
+
   def _update(self, restraintList):
     """
     Update the table
     """
     if not self._updateSilence:
-      self.setColumns(self.RLcolumns)
-      self.setObjects(restraintList.restraints)
-      self.show()
+      self._project.blankNotification()
+      objs = self.getSelectedObjects()
+
+      self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                  , buildList=restraintList.restraints
+                                                  , colDefs=self.RLcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
+
+      # populate from the Pandas dataFrame inside the dataFrameObject
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+      self._highLightObjs(objs)
+      self._project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """
@@ -291,18 +340,22 @@ class RestraintTable(ObjectTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, restraint, row, col):
+  def _selectionCallback(self, data, *args):
     """
     Notifier Callback for selecting a row in the table
     """
+    restraint = data[Notifier.OBJECT]
+
     self._current.restraint = restraint
     RestraintTableModule._currentCallback = {'object':self.restraintList, 'table':self}
 
-  def _actionCallback(self, atomRecordTuple, row, column):
+  def _actionCallback(self, data, *args):
     """
     Notifier DoubleClick action on item in table
     """
-    logger.debug('RestraintTable>>>', atomRecordTuple, row, column)
+    restraint = data[Notifier.OBJECT]
+
+    logger.debug(str(NotImplemented))
 
   def _selectionPulldownCallback(self, item):
     """
@@ -353,197 +406,57 @@ class RestraintTable(ObjectTable):
     """
     pass
 
-  @staticmethod
-  def _getCommentText(chemicalShift):
-    """
-    CCPN-INTERNAL: Get a comment from ObjectTable
-    """
-    try:
-      if chemicalShift.comment == '' or not chemicalShift.comment:
-        return ''
-      else:
-        return chemicalShift.comment
-    except:
-      return ''
-
-  @staticmethod
-  def _setComment(chemicalShift, value):
-    """
-    CCPN-INTERNAL: Insert a comment into ObjectTable
-    """
-    RestraintTable._project.blankNotification()
-    chemicalShift.comment = value
-    RestraintTable._project.unblankNotification()
-
-  def _setNotifiers(self):
-    """
-    Set a Notifier to call when an object is created/deleted/renamed/changed
-    rename calls on name
-    change calls on any other attribute
-    """
-    self._clearNotifiers()
-    self._restraintListNotifier = Notifier(self._project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                      , RestraintList.__name__
-                                      , self._updateCallback)
-    self._restraintNotifier = Notifier(self._project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-                                      , Restraint.__name__
-                                      , self._updateCallback)
-
-  def _clearNotifiers(self):
-    """
-    clean up the notifiers
-    """
-    if self._restraintListNotifier is not None:
-      self._restraintListNotifier.unRegister()
-    if self._restraintNotifier is not None:
-      self._restraintNotifier.unRegister()
-    if self._peaksNotifier is not None:
-      self._peaksNotifier.unRegister()
+  # @staticmethod
+  # def _getCommentText(chemicalShift):
+  #   """
+  #   CCPN-INTERNAL: Get a comment from ObjectTable
+  #   """
+  #   try:
+  #     if chemicalShift.comment == '' or not chemicalShift.comment:
+  #       return ''
+  #     else:
+  #       return chemicalShift.comment
+  #   except:
+  #     return ''
+  #
+  # @staticmethod
+  # def _setComment(chemicalShift, value):
+  #   """
+  #   CCPN-INTERNAL: Insert a comment into ObjectTable
+  #   """
+  #   RestraintTable._project.blankNotification()
+  #   chemicalShift.comment = value
+  #   RestraintTable._project.unblankNotification()
+  #
+  # def _setNotifiers(self):
+  #   """
+  #   Set a Notifier to call when an object is created/deleted/renamed/changed
+  #   rename calls on name
+  #   change calls on any other attribute
+  #   """
+  #   self._clearNotifiers()
+  #   self._restraintListNotifier = Notifier(self._project
+  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+  #                                     , RestraintList.__name__
+  #                                     , self._updateCallback)
+  #   self._restraintNotifier = Notifier(self._project
+  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
+  #                                     , Restraint.__name__
+  #                                     , self._updateCallback)
+  #
+  # def _clearNotifiers(self):
+  #   """
+  #   clean up the notifiers
+  #   """
+  #   if self._restraintListNotifier is not None:
+  #     self._restraintListNotifier.unRegister()
+  #   if self._restraintNotifier is not None:
+  #     self._restraintNotifier.unRegister()
+  #   if self._peaksNotifier is not None:
+  #     self._peaksNotifier.unRegister()
 
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearNotifiers()
-
-
-#
-#     tipTexts = ['Restraint Id',
-#                 'Atoms involved in the restraint',
-#                 'Target value for the restraint',
-#                 'Upper limit for the restraint',
-#                 'Lower limitf or the restraint',
-#                 'Error on the restraint',
-#                 'Number of peaks used to derive this restraint'
-#                 ]
-
-# class RestraintTable(CcpnModule):
-#   def __init__(self, mainWindow=None, name='Restraint Table', restraintLists=None, **kw):
-#     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
-# 
-#     self.mainWindow = mainWindow
-#     self.application = mainWindow.application
-#     self.project = mainWindow.application.project
-#     self.current = mainWindow.application.current
-# 
-#     project = kw.get('project')
-# 
-#     if not restraintLists:
-#       if project is None:
-#         restraintLists = []
-#       else:
-#         restraintLists = project.restraintLists
-# 
-#     self.restraintLists = restraintLists
-# 
-#     self._RTwidget = Widget(self.settingsWidget, setLayout=True,
-#                              grid=(0,0), vAlign='top', hAlign='left')
-# 
-#     # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-#     # underpinning the addNotifier call do not allow for it either
-# 
-#     #FIXME:ED - need to check label text and function of these
-#     colwidth = 140
-#     self.displaysWidget = ListCompoundWidget(self._RTwidget,
-#                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
-#                                              vPolicy='minimal',
-#                                              #minimumWidths=(colwidth, 0, 0),
-#                                              fixedWidths=(colwidth, colwidth, colwidth),
-#                                              orientation = 'left',
-#                                              labelText='Display(s):',
-#                                              tipText = 'ResidueList modules to respond to double-click',
-#                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-#                                              )
-#     self.displaysWidget.setFixedHeigths((None, None, 40))
-# 
-#     self.sequentialStripsWidget = CheckBoxCompoundWidget(
-#                                              self._RTwidget,
-#                                              grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
-#                                              #minimumWidths=(colwidth, 0),
-#                                              fixedWidths=(colwidth, 30),
-#                                              orientation = 'left',
-#                                              labelText = 'Show sequential strips:',
-#                                              checked = False
-#                                             )
-# 
-#     self.markPositionsWidget = CheckBoxCompoundWidget(
-#                                              self._RTwidget,
-#                                              grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
-#                                              #minimumWidths=(colwidth, 0),
-#                                              fixedWidths=(colwidth, 30),
-#                                              orientation = 'left',
-#                                              labelText = 'Mark positions:',
-#                                              checked = True
-#                                             )
-#     self.autoClearMarksWidget = CheckBoxCompoundWidget(
-#                                              self._RTwidget,
-#                                              grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
-#                                              #minimumWidths=(colwidth, 0),
-#                                              fixedWidths=(colwidth, 30),
-#                                              orientation = 'left',
-#                                              labelText = 'Auto clear marks:',
-#                                              checked = True
-#                                             )
-# 
-# 
-# 
-# 
-#     label = Label(self, "Restraint List:")
-#     widget1 = QtWidgets.QWidget(self)
-#     widget1.setLayout(QtWidgets.QGridLayout())
-#     widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
-#     self.restraintListPulldown = PulldownList(self, grid=(0, 1))
-#     widget1.layout().addWidget(self.restraintListPulldown, 0, 1)
-#     self.layout.addWidget(widget1, 0, 0)
-# 
-#     columns = [('#', '_key'),
-#                ('Atoms', lambda restraint: self._getContributions(restraint)),
-#                ('Target Value.', 'targetValue'),
-#                ('Upper Limit', 'upperLimit'),
-#                ('Lower Limit', 'lowerLimit'),
-#                ('Error', 'error'),
-#                ('Peaks', lambda restraint: '%3d ' % self._getRestraintPeakCount(restraint))
-#                # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
-#                ]
-# 
-#     tipTexts = ['Restraint Id',
-#                 'Atoms involved in the restraint',
-#                 'Target value for the restraint',
-#                 'Upper limit for the restraint',
-#                 'Lower limitf or the restraint',
-#                 'Error on the restraint',
-#                 'Number of peaks used to derive this restraint '
-#                 ]
-# 
-#     self.restraintTable = GuiTableGenerator(self.mainWidget, restraintLists,
-#                                                 actionCallback=self._callback, columns=columns,
-#                                                 selector=self.restraintListPulldown,
-#                                                 tipTexts=tipTexts, objectType='restraints')
-# 
-#     newLabel = Label(self, '', grid=(2, 0))
-#     self.layout.addWidget(self.restraintTable, 3, 0, 1, 4)
-# 
-#     self.mainWidget.setContentsMargins(5, 5, 5, 5)    # ejb - put into CcpnModule?
-# 
-# 
-#   def _getContributions(self, restraint):
-#     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
-#     using ChemicalShiftList"""
-#     if restraint.restraintContributions[0].restraintItems:
-#       return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
-#
-#
-#   def _getRestraintPeakCount(self, restraint):
-#     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
-#     using ChemicalShiftList"""
-#     peaks = restraint.peaks
-#     if peaks:
-#       return len(peaks)
-#     else:
-#       return 0
-#
-#   def _callback(self):
-#     pass
-# 
+    self._clearTableNotifiers()

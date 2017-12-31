@@ -179,8 +179,8 @@ class PeakListTableWidget(QuickTable):
                            , tableName='peakList', rowName='peak'
                            , changeFunc=self._updateAllModule
                            , className=self.attributeName
-                           , updateFunc=self._updateTableCallback
-                           , tableSelection='_selectedPeakList.peaks'
+                           , updateFunc=self._updateAllModule
+                           , tableSelection='_selectedPeakList'
                            , pullDownWidget=self.pLwidget
                            , selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
 

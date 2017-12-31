@@ -76,13 +76,13 @@ class NmrResiduePopup(CcpnDialog):
 
 
   def _getResidueTypeProb(self, currentNmrResidue):
-    try:
-      self.project.chemicalShiftLists[0]
-    except Exception:
-      getLogger().warning('No chemicalShiftLists in project.')
-      return
+    # try:
+    #   self.project.chemicalShiftLists[0]
+    # except Exception:
+    #   getLogger().warning('No chemicalShiftLists in project.')
+    #   return
 
-    if len(self.project.chemicalShiftLists) > 0:
+    if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
       predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
       preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
       predictedTypes = [x[0] for x in predictions]

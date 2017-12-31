@@ -305,7 +305,16 @@ class RestraintTable(QuickTable):
     if self.restraintList in thisRestraintList:
       self.displayTableForRestraint(self.restraintList)
     else:
-      self.clearTable()
+      self.clear()
+
+  def _maximise(self):
+    """
+    Redraw the table on a maximise event
+    """
+    if self.restraintList:
+      self.displayTableForRestraint(self.restraintList)
+    else:
+      self.clear()
 
   def _update(self, restraintList):
     """
@@ -450,4 +459,4 @@ class RestraintTable(QuickTable):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearTableNotifiers()
+    self.clearTableNotifiers()

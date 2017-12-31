@@ -328,9 +328,12 @@ class ChemicalShiftTable(QuickTable):
 
   def _maximise(self):
     """
-    refresh the table on a maximise event
+    Refresh the table on a maximise event
     """
-    self._update(self.chemicalShiftList)
+    if self.chemicalShiftList:
+      self.displayTableForChemicalShift(self.chemicalShiftList)
+    else:
+      self.clear()
 
   def _update(self, chemicalShiftList):
     """
@@ -472,4 +475,4 @@ class ChemicalShiftTable(QuickTable):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearTableNotifiers()
+    self.clearTableNotifiers()

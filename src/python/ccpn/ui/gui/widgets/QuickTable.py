@@ -405,6 +405,7 @@ class QuickTable(TableWidget, Base):
             # self.blockSignals(True)
             self._silenceCallback = True
 
+            # TODO:ED check why this does not undo as single event
             for obj in selected:
               if hasattr(obj, 'pid'):
 

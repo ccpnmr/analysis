@@ -488,7 +488,10 @@ class NmrResidueTable(QuickTable):
     """
     refresh the table on a maximise event
     """
-    self.displayTableForNmrChain(self.nmrChain)
+    if self.nmrChain:
+      self.displayTableForNmrChain(self.nmrChain)
+    else:
+      self.clear()
 
   def _update(self, nmrChain):
     """

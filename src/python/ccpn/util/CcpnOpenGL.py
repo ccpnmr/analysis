@@ -371,7 +371,35 @@ class CcpnGLWidget(QOpenGLWidget):
       self.zRot = angle
 
   def initializeGL(self):
+
+    # simple shader for standard plotting of contours
     self._vertexShader1 = """
+#version 120
+
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+varying vec4 FC;
+
+void main()
+{
+  gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  FC = gl_Color;
+}
+"""
+
+    self._fragmentShader1 = """
+#version 120
+
+varying vec4  FC;
+
+void main()
+{
+  gl_FragColor = FC;
+}
+"""
+
+    # shader for plotting antialiased text to the screen
+    self._vertexShaderTex = """
 #version 120
 
 uniform mat4 mvMatrix;
@@ -382,45 +410,7 @@ attribute vec2 offset;
 void main()
 {
   gl_Position = pMatrix * mvMatrix * (gl_Vertex + vec4(offset, 0.0, 0.0));
-  gl_TexCoord[0]=gl_MultiTexCoord0;
-  FC = gl_Color;
-}
-"""
-
-    self._fragmentShader1 = """
-#version 120
-
-uniform sampler2D texture;
-uniform int   useTexture;
-varying vec4  FC;
-vec4          filter;
-
-void main()
-{
-  if (useTexture == 1)
-  {
-    filter = texture2D(texture, gl_TexCoord[0].xy);
-    gl_FragColor = vec4(FC.xyz, filter.w);
-  }
-  else
-  {
-    gl_FragColor = FC;
-  }
-}
-"""
-
-    self._vertexShaderTex = """
-#version 120
-
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
-uniform sampler2D texture;
-varying vec4 FC;
-
-void main()
-{
-  gl_Position = pMatrix * mvMatrix * gl_Vertex;
-  gl_TexCoord[0].xy = gl_MultiTexCoord0.xy;
+  gl_TexCoord[0] = gl_MultiTexCoord0;
   FC = gl_Color;
 }
 """
@@ -428,15 +418,19 @@ void main()
     self._fragmentShaderTex = """
 #version 120
 
+uniform sampler2D texture;
 varying vec4 FC;
+vec4         filter;
 
 void main()
 {
-  vec4 current = texture2D(texture, uv);
-  gl_FragColor = FC;
+  // vec4 current = texture2D(texture, uv);
+  filter = texture2D(texture, gl_TexCoord[0].xy);
+  gl_FragColor = vec4(FC.xyz, filter.w);
 }
 """
 
+    # advanced shader for plotting contours
     self._vertexShader2 = """
 #version 120
 
@@ -579,8 +573,8 @@ void main()
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
                                         , fragment=self._fragmentShader1
                                         , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)
-                                                      , 'useTexture':(1, np.uint)})
+                                                      , 'mvMatrix':(16, np.float32)})
+                                                      # , 'useTexture':(1, np.uint)})
     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
                                         , fragment=self._fragmentShader2
                                         , attributes={'pMatrix':(16, np.float32)
@@ -589,6 +583,10 @@ void main()
                                                       , 'negativeContours':(4, np.float32)})
     self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3
                                         , fragment=self._fragmentShader3
+                                        , attributes={'pMatrix':(16, np.float32)
+                                                      , 'mvMatrix':(16, np.float32)})
+    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex
+                                        , fragment=self._fragmentShaderTex
                                         , attributes={'pMatrix':(16, np.float32)
                                                       , 'mvMatrix':(16, np.float32)})
 
@@ -835,6 +833,24 @@ void main()
 
     GL.glCallList(self.GLMarkList[0])
 
+  def _rescalePeakListLabels(self, spectrumView):
+    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    if x <= y:
+      r = 0.05
+      w = 0.05 * y / x
+    else:
+      w = 0.05
+      r = 0.05 * x / y
+
+    # drawList.clearVertices()
+    # drawList.vertices = drawList.attribs
+    offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+    for pp in range(0, 2*drawList.numVertices, 8):
+      drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+
   def _rescalePeakList(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
@@ -1007,18 +1023,24 @@ void main()
     spectrum = spectrumView.spectrum
 
     if spectrum.pid not in self._GLPeakListLabels:
-      self._GLPeakListLabels[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
+      self._GLPeakListLabels[spectrum.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
+                                                      , blendMode=False, drawMode=GL.GL_LINES
+                                                      , dimension=2, GLContext=self)
 
     drawList = self._GLPeakListLabels[spectrum.pid]
-    if drawList[1] == GLRENDERMODE_REBUILD:
-      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
-      drawList[2] = None
-      drawList[3] = None
-      drawList[4] = 0
-      drawList[5] = []
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
-      tempVert = []
-      tempCol = []
+      # drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
+      # drawList[2] = None
+      # drawList[3] = None
+      # drawList[4] = 0
+      # drawList[5] = []
+      drawList.clearArrays()
+      drawList.stringList = []
+
+      # tempVert = []
+      # tempCol = []
 
       # find the correct scale to draw square pixels
       # don't forget to change when the axes change
@@ -1038,15 +1060,18 @@ void main()
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
           p0 = peak.position
+
+          # need to map world coordinate to screen for drawing text
+
           colour = pls.textColour
           colR = int(colour.strip('# ')[0:2], 16)/255.0
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
-          GL.glColor4f(colR, colG, colB, 1.0)
-
-          GL.glPushMatrix()
-          GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
-          GL.glScaled(self.pixelX, self.pixelY, 1.0)
+          # GL.glColor4f(colR, colG, colB, 1.0)
+          #
+          # GL.glPushMatrix()
+          # GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
+          # GL.glScaled(self.pixelX, self.pixelY, 1.0)
 
           if self.peakLabelling == 0:
             text = _getScreenPeakAnnotation(peak, useShortCode=False)
@@ -1057,18 +1082,29 @@ void main()
 
           # TODO:ED change this to a vertex array
           # GL.glCallLists([ord(c) for c in text])
-          for c in text:
-            ch = ord(c)
+          # for c in text:
+          #   ch = ord(c)
 
-          GL.glPopMatrix()
-      GL.glEndList()
+          # TODO:ED concatenate all strings into a single list
+          # add a new string to the list
 
-      drawList[2] = np.array(tempVert, np.float32)
-      drawList[3] = np.array(tempCol, np.float32)
+          self._screenZero = self._uVMatrix.reshape((4, 4)).dot(self.aInv.dot([p0[0], p0[1], 0, 1]))
 
-    elif drawList[1] == GLRENDERMODE_RESCALE:
-      drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
-      self._rescalePeakListLabel(spectrumView=spectrumView)
+          drawList.stringList.append(GLString(text=text
+                                      , font=self.firstFont
+                                      , x=self._screenZero[0], y=self._screenZero[1]
+                                      , color=(colR, colG, colB, 1.0), GLContext=self
+                                      , pid=peak.pid))
+
+          # GL.glPopMatrix()
+      # GL.glEndList()
+      # drawList[2] = np.array(tempVert, np.float32)
+      # drawList[3] = np.array(tempCol, np.float32)
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+
+      # self._rescalePeakListLabels(spectrumView=spectrumView)
 
   def _drawVertexColor(self, drawList):
     # new bit to use a vertex array to draw the peaks, very fast and easy
@@ -1108,6 +1144,11 @@ void main()
 
   def _drawPeakListLabels(self, spectrumView):
     drawList = self._GLPeakListLabels[spectrumView.spectrum.pid]
+
+    for drawString in drawList.stringList:
+      drawString.drawTextArray()
+
+    return
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -1172,8 +1213,8 @@ void main()
     self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-    self._useTexture = 0
-    self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
+    # self._useTexture = 0
+    # self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
 
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
@@ -1311,10 +1352,10 @@ void main()
         # draw the spectrum - call the existing glCallList
         spectrumView._paintContoursNoClip()
 
-        if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
-          self._testSpectrum.renderMode = GLRENDERMODE_DRAW
-
-          # self._makeSpectrumArray(spectrumView, self._testSpectrum)
+        # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
+        #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
+        #
+        #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
       except Exception as es:
         raise es
@@ -1357,6 +1398,9 @@ void main()
         self._buildPeakLists(spectrumView)      # should include rescaling
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
         # self._drawPeakListVertices(spectrumView)
+
+        # self._buildPeakListLabels(spectrumView)      # should include rescaling
+        # self._drawPeakListLabels(spectrumView)
 
       except Exception as es:
         raise es
@@ -1516,15 +1560,17 @@ void main()
     #
     #   GL.glEndList()
 
-    self._useTexture = 1
-    self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
+    # self._useTexture = 1
+    # self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
+
+    GL.glUseProgram(self._shaderProgramTex.program_id)
 
     GL.glEnable(GL.GL_BLEND)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
 
-    GL.glListBase( self.firstFont.base )
+    # GL.glListBase( self.firstFont.base )
 
     # GL.glPushMatrix()
     # GL.glTranslated(50, 300, 0)
@@ -1552,7 +1598,7 @@ void main()
                              0.0, 0.0, 1.0, 0.0,
                              self.worldCoordinate[0]+(25*self.pixelX)
                                   , self.worldCoordinate[1]+(25*self.pixelY), 0.0, 1.0]
-    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
     GL.glCallLists([ord(c) for c in coords])
     # GL.glPopMatrix()
 
@@ -1562,8 +1608,8 @@ void main()
 
       # put the axis labels into the bottom bar
       self.viewports.setViewport('bottomAxisBar')
-      self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
-      self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
       for axLabel in self.axisLabelling['0']:
         axisX = axLabel[2]
@@ -1581,8 +1627,8 @@ void main()
 
       # put the axis labels into the right bar
       self.viewports.setViewport('rightAxisBar')
-      self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
-      self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
+      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
       for axLabel in self.axisLabelling['1']:
         axisY = axLabel[2]
@@ -1604,19 +1650,30 @@ void main()
     # GL.glDisable(GL.GL_BLEND)
 
     # draw the testString to the screen
-    self.viewports.setViewport('fullView')
+    self.viewports.setViewport('mainView')
 
     # TODO:ED check that this is the correct dimensions of the window
-    self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, w, 0, h, -1.0, 1.0)
-    self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
+    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+
+    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                              0.0, 1.0, 0.0, 0.0,
                              0.0, 0.0, 1.0, 0.0,
                              0.0, 0.0, 0.0, 1.0]
-    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     # draw the string
     self._testString.drawTextArray()
+
+    for spectrumView in self.parent.spectrumViews:
+      try:
+        self._buildPeakListLabels(spectrumView)      # should include rescaling
+        self._drawPeakListLabels(spectrumView)
+
+      except Exception as es:
+        raise es
+
 
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
@@ -1650,13 +1707,13 @@ void main()
     #                         0.0,  ob, 0.0,  0.0,
     #                         0.0, 0.0,  oc,  0.0,
     #                         og, oe, od, 1.0]
-
-    # create modelview matrix
+    #
+    # # create modelview matrix
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
     #                         0.0, 1.0, 0.0, 0.0,
     #                         0.0, 0.0, 1.0, 0.0,
     #                         0.0, 0.0, 0.0, 1.0]
-
+    #
     # if (self._contourList.renderMode == GLRENDERMODE_REBUILD):
     #   self._contourList.renderMode = GLRENDERMODE_DRAW
     #
@@ -1716,20 +1773,41 @@ void main()
     #   # GL.glEnd()
     #   # GL.glDisable(GL.GL_BLEND)
     #   # GL.glEndList()
-    #
-    # if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
-    #   GL.glUseProgram(self._shaderProgram2.program_id)
-    #
-    #   # must be called after glUseProgram
-    #   # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
-    #   # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
-    #
-    #   self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-    #   self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-    #
-    #   self.set2DProjectionFlat()
-    #   self._testSpectrum.drawIndexArray()
-    #   GL.glUseProgram(0)
+
+    # don't need the above bit
+    if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
+      GL.glUseProgram(self._shaderProgram2.program_id)
+
+      # must be called after glUseProgram
+      # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
+      # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+
+      of = 1.0
+      on = -1.0
+      oa = 2.0 / (self.axisR - self.axisL)
+      ob = 2.0 / (self.axisT - self.axisB)
+      oc = -2.0 / (of - on)
+      od = -(of + on) / (of - on)
+      oe = -(self.axisT + self.axisB) / (self.axisT - self.axisB)
+      og = -(self.axisR + self.axisL) / (self.axisR - self.axisL)
+      # orthographic
+      self._uPMatrix[0:16] = [oa, 0.0, 0.0, 0.0,
+                              0.0, ob, 0.0, 0.0,
+                              0.0, 0.0, oc, 0.0,
+                              og, oe, od, 1.0]
+
+      # create modelview matrix
+      self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0, 0.0,
+                               0.0, 0.0, 1.0, 0.0,
+                               0.0, 0.0, 0.0, 1.0]
+
+      self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+      self.set2DProjectionFlat()
+      self._testSpectrum.drawIndexArray()
+      GL.glUseProgram(0)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)

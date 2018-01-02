@@ -641,7 +641,7 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
-    self._testString = GLString(text='ABCDEFGH&*#$=[]@^{', font=self.firstFont, x=10, y=10, GLContext=self)
+    self._testString = GLString(text='abcdefghij&*#$=[]@^{', font=self.firstFont, x=10, y=10, GLContext=self)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()

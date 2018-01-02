@@ -632,6 +632,8 @@ void main()
     self.viewports.addViewport('bottomAxisBar', self, (0, 'a'), (0, 'a')
                                                     , (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a'))
 
+    self.viewports.addViewport('fullView', self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
+
     # def set2DProjection                GL.glViewport(0, 35, w - 35, h - 35)
     # def set2DProjectionRightAxis       GL.glViewport(w - 35 - axisLine, 35, axisLine, h - 35)
     # def set2DProjectionRightAxisBar    GL.glViewport(w - AXIS_MARGIN, AXIS_MARGIN, AXIS_MARGIN, h - AXIS_MARGIN)
@@ -639,8 +641,7 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
-    self._testString = GLString(text='Hello World', font=self.firstFont, x=50, y=50)
-
+    self._testString = GLString(text='ABCDEFGH&*#$=[]@^{', font=self.firstFont, x=10, y=10, GLContext=self)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1595,6 +1596,19 @@ void main()
 
     GL.glCallList(self._axisLabels)
 
+    # draw the testString to the screen
+    self.viewports.setViewport('fullView')
+    self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, w/4, 0, h/4, -1.0, 1.0)
+    self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0]
+    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    # draw the string
+    self._testString.drawTextArray()
+
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
 
@@ -2102,6 +2116,15 @@ GlyphYoffset = 'Yoffset'
 GlyphOrigW = 'OrigW'
 GlyphOrigH = 'OrigH'
 GlyphKerns = 'Kerns'
+GlyphTX0 = 'tx0'
+GlyphTY0 = 'ty0'
+GlyphTX1 = 'tx1'
+GlyphTY1 = 'ty1'
+GlyphPX0 = 'px0'
+GlyphPY0 = 'py0'
+GlyphPX1 = 'px1'
+GlyphPY1 = 'py1'
+
 
 class CcpnGLFont():
   def __init__(self, fileName=None, size=12, base=0):
@@ -2117,10 +2140,14 @@ class CcpnGLFont():
     self.fontPNG = imread('/Users/ejb66/Documents/Fonts/'+self.fontFile)
     self.fontName = self.fontInfo[1].split()[0]
     self.fontSize = self.fontInfo[1].split()[1]
+    self.width = 0
+    self.height = 0
 
     row = 2
     exitDims = False
 
+    dx = 1.0 / float(self.fontPNG.shape[1])
+    dy = 1.0 / float(self.fontPNG.shape[0])
     while exitDims is False and row < len(self.fontInfo):
       line = self.fontInfo[row]
       # print (line)
@@ -2144,6 +2171,40 @@ class CcpnGLFont():
               self.fontGlyph[chrNum][GlyphOrigW]= g0
               self.fontGlyph[chrNum][GlyphOrigH] = h0
               self.fontGlyph[chrNum][GlyphKerns] = {}
+
+              # calculate the coordinated within the texture
+              x = a0           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
+              y = b0           # self.fontGlyph[chrNum][GlyphYpos])
+              px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
+              py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
+              w = c0+1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
+              h = d0+1           # self.fontGlyph[chrNum][GlyphHeight]+1
+              gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
+              gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
+
+              # coordinates in the texture
+              self.fontGlyph[chrNum][GlyphTX0] = x*dx
+              self.fontGlyph[chrNum][GlyphTY0] = (y+h)*dy
+              self.fontGlyph[chrNum][GlyphTX1] = (x+w)*dx
+              self.fontGlyph[chrNum][GlyphTY1] = y*dy
+
+              # coordinates mapped to the quad
+              self.fontGlyph[chrNum][GlyphPX0] = px
+              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h)
+              self.fontGlyph[chrNum][GlyphPX1] = px+w
+              self.fontGlyph[chrNum][GlyphPY1] = gh-py
+
+              # draw the quad
+              # GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
+              # GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
+              # GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
+              # GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
+
+              if chrNum == 65:
+                # use 'A' for the referencing the tab size
+                self.width = w
+                self.height = h
+
           else:
             exitDims = True
         except:
@@ -2192,6 +2253,7 @@ class CcpnGLFont():
     GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
     GL.glDisable(GL.GL_TEXTURE_2D)
 
+    # create a list of GLdisplayLists to handle each character - deprecated, changing to VBOs
     self.base = GL.glGenLists(256)
     dx = 1.0 / float(self.fontPNG.shape[1])
     dy = 1.0 / float(self.fontPNG.shape[0])
@@ -2238,6 +2300,13 @@ class CcpnGLFont():
           GL.glEnd()
           GL.glTranslatef(gw, 0.0, 0.0)
         GL.glEndList()
+
+  def get_kerning(self, fromChar, prevChar):
+    if self.fontGlyph[ord(fromChar)]:
+      if prevChar in self.fontGlyph[ord(fromChar)]:
+        return self.fontGlyph[ord(fromChar)][prevChar]
+
+    return 0
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2505,51 +2574,6 @@ class ShaderProgram(object):
     """
     return GL.glGetAttribLocation(self.program_id, name)
 
-class GLString:
-  def __init__(self, text=None, font=None, color=(1.0, 1.0, 1.0, 0.0), x=0, y=0,
-               width=None, height=None):
-    self.text = text
-    self.font = font
-    self.vertices = np.zeros((len(text) * 4, 3), dtype=np.float32)
-    self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
-    self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
-    self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    self.attribs = np.zeros((len(text) * 4, 1), dtype=np.float32)
-    self.indexOffset = 0
-    pen = [x, y]
-    prev = None
-
-    for i, charcode in enumerate(text):
-      glyph = font[charcode]
-      kerning = glyph.get_kerning(prev)
-      x0 = pen[0] + glyph.offset[0] + kerning
-      dx = x0 - int(x0)
-      x0 = int(x0)
-      y0 = pen[1] + glyph.offset[1]
-      x1 = x0 + glyph.size[0]
-      y1 = y0 - glyph.size[1]
-      u0 = glyph.texcoords[0]
-      v0 = glyph.texcoords[1]
-      u1 = glyph.texcoords[2]
-      v1 = glyph.texcoords[3]
-
-      index = i * 4
-      indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-      vertices = [[x0, y0, 1], [x0, y1, 1], [x1, y1, 1], [x1, y0, 1]]
-      texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-      colors = [color, ] * 4
-
-      self.vertices[i * 4:i * 4 + 4] = vertices
-      self.indices[i * 6:i * 6 + 6] = indices
-      self.texcoords[i * 4:i * 4 + 4] = texcoords
-      self.colors[i * 4:i * 4 + 4] = colors
-      self.attribs[i * 4:i * 4 + 4] = dx
-      pen[0] = pen[0] + glyph.advance[0] / 64.0 + kerning
-      pen[1] = pen[1] + glyph.advance[1] / 64.0
-      prev = charcode
-
-    width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
-
 
 class GLVertexArray():
   def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
@@ -2637,6 +2661,35 @@ class GLVertexArray():
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
 
+  def drawTextArray(self):
+    self._GLContext.makeCurrent()
+
+    if self.blendMode:
+      GL.glEnable(GL.GL_BLEND)
+      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+    GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
+
+    # this is for passing extra attributes in
+    # GL.glEnableVertexAttribArray(1)
+    # GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+
+    GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+
+    # GL.glDisableVertexAttribArray(1)
+    GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    # GL.glDisableClientState(GL.GL_TEXTURE_2D)
+
+    if self.blendMode:
+      GL.glDisable(GL.GL_BLEND)
+
   # def bindBuffers(self):
   #   return
   #   # self._vertexBuffer = GL.glGenBuffers(1)
@@ -2653,6 +2706,76 @@ class GLVertexArray():
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexBuffer)
   #   GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, len(self.indices), self.indices, GL.GL_STATIC_DRAW)
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+
+
+class GLString(GLVertexArray):
+  def __init__(self, text=None, font=None, pid=None, color=(1.0, 1.0, 1.0, 1.0), x=0, y=0,
+               width=None, height=None, GLContext=None):
+    super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=False
+                                   , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
+                                   , dimension=2)
+
+    self.text = text
+    self.font = font
+    self.pid = pid
+    self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
+    self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
+    self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    self.indexOffset = 0
+    pen = [x, y]
+    prev = None
+
+    for i, charCode in enumerate(text):
+      c = ord(charCode)
+      glyph = font.fontGlyph[c]
+
+      if glyph or c == 10 or c == 9:    # newline and tab
+
+        if (c == 10):                                 # newline
+          pen[0] = 0
+          pen[1] = pen[1] + font.height
+
+        elif (c == 9):                                # tab
+          pen[0] = pen[0] + 4 * font.width
+
+        elif (c >= 32):
+
+          # kerning = 0
+          # if prev and glyph[GlyphKerns]:
+          #
+          # kerning = glyph._kerning(prev)
+          kerning = font.get_kerning(charCode, prev)
+
+          x0 = pen[0] + glyph[GlyphPX0] + kerning          # pen[0] + glyph.offset[0] + kerning
+          y0 = pen[1] + glyph[GlyphPY0]          # pen[1] + glyph.offset[1]
+          x1 = x0 + glyph[GlyphPX1]          # x0 + glyph.size[0]
+          y1 = y0 + glyph[GlyphPY1]          # y0 - glyph.size[1]
+          u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
+          v0 = glyph[GlyphTY0]          # glyph.texcoords[1]
+          u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
+          v1 = glyph[GlyphTY1]          # glyph.texcoords[3]
+
+          index = i * 4
+          indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+          vertices = [[x0, y0], [x0, y1], [x1, y1], [x1, y0]]
+          texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+          colors = [color, ] * 4
+          attribs = [[x, y], [x, y], [x, y], [x, y]]
+
+          self.vertices[i * 4:i * 4 + 4] = vertices
+          self.indices[i * 6:i * 6 + 6] = indices
+          self.texcoords[i * 4:i * 4 + 4] = texcoords
+          self.colors[i * 4:i * 4 + 4] = colors
+          self.attribs[i * 4:i * 4 + 4] = attribs
+          pen[0] = pen[0] + glyph[GlyphWidth] + kerning
+          # pen[1] = pen[1] + glyph[GlyphHeight]
+          prev = charCode
+
+    pass
+    # total width of text - probably don't need
+    # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
 
 
 if __name__ == '__main__':

@@ -390,14 +390,16 @@ void main()
 #version 120
 
 uniform sampler2D texture;
-uniform int  useTexture;
-varying vec4 FC;
+uniform int   useTexture;
+varying vec4  FC;
+vec4          filter;
 
 void main()
 {
   if (useTexture == 1)
   {
-    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
+    filter = texture2D(texture, gl_TexCoord[0].xy);
+    gl_FragColor = vec4(FC.xyz, filter.w);
   }
   else
   {
@@ -641,7 +643,8 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
-    self._testString = GLString(text='abcdefghij&*#$=[]@^{', font=self.firstFont, x=10, y=10, GLContext=self)
+    self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=20, y=50
+                                , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1596,9 +1599,14 @@ void main()
 
     GL.glCallList(self._axisLabels)
 
+    # # testing text boundaries
+    # GL.glDisable(GL.GL_BLEND)
+
     # draw the testString to the screen
     self.viewports.setViewport('fullView')
-    self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, w/4, 0, h/4, -1.0, 1.0)
+
+    # TODO:ED check that this is the correct dimensions of the window
+    self._shaderProgram1.setProjectionAxes(self._uPMatrix, 0, w, 0, h, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                              0.0, 1.0, 0.0, 0.0,
@@ -2146,8 +2154,12 @@ class CcpnGLFont():
     row = 2
     exitDims = False
 
+    # texture sizes
     dx = 1.0 / float(self.fontPNG.shape[1])
     dy = 1.0 / float(self.fontPNG.shape[0])
+    hdx = dx / 2.0
+    hdy = dy / 2.0
+
     while exitDims is False and row < len(self.fontInfo):
       line = self.fontInfo[row]
       # print (line)
@@ -2173,12 +2185,12 @@ class CcpnGLFont():
               self.fontGlyph[chrNum][GlyphKerns] = {}
 
               # calculate the coordinated within the texture
-              x = a0           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-              y = b0           # self.fontGlyph[chrNum][GlyphYpos])
+              x = a0+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
+              y = b0+0.5           # self.fontGlyph[chrNum][GlyphYpos])
               px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
               py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
-              w = c0+1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-              h = d0+1           # self.fontGlyph[chrNum][GlyphHeight]+1
+              w = c0-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
+              h = d0-1           # self.fontGlyph[chrNum][GlyphHeight]+1
               gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
               gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
 
@@ -2190,8 +2202,8 @@ class CcpnGLFont():
 
               # coordinates mapped to the quad
               self.fontGlyph[chrNum][GlyphPX0] = px
-              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h)
-              self.fontGlyph[chrNum][GlyphPX1] = px+w
+              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h+1)
+              self.fontGlyph[chrNum][GlyphPX1] = px+w+1
               self.fontGlyph[chrNum][GlyphPY1] = gh-py
 
               # draw the quad
@@ -2202,8 +2214,8 @@ class CcpnGLFont():
 
               if chrNum == 65:
                 # use 'A' for the referencing the tab size
-                self.width = w
-                self.height = h
+                self.width = gw
+                self.height = gh
 
           else:
             exitDims = True
@@ -2303,8 +2315,8 @@ class CcpnGLFont():
 
   def get_kerning(self, fromChar, prevChar):
     if self.fontGlyph[ord(fromChar)]:
-      if prevChar in self.fontGlyph[ord(fromChar)]:
-        return self.fontGlyph[ord(fromChar)][prevChar]
+      if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:
+        return self.fontGlyph[ord(fromChar)][GlyphKerns][ord(prevChar)]
 
     return 0
 
@@ -2724,7 +2736,7 @@ class GLString(GLVertexArray):
     self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.indexOffset = 0
-    pen = [x, y]
+    pen = [0, 0]              # [x, y]
     prev = None
 
     for i, charCode in enumerate(text):
@@ -2748,10 +2760,12 @@ class GLString(GLVertexArray):
           # kerning = glyph._kerning(prev)
           kerning = font.get_kerning(charCode, prev)
 
-          x0 = pen[0] + glyph[GlyphPX0] + kerning          # pen[0] + glyph.offset[0] + kerning
-          y0 = pen[1] + glyph[GlyphPY0]          # pen[1] + glyph.offset[1]
-          x1 = x0 + glyph[GlyphPX1]          # x0 + glyph.size[0]
-          y1 = y0 + glyph[GlyphPY1]          # y0 - glyph.size[1]
+          x0 = pen[0] + glyph[GlyphPX0] + kerning     # pen[0] + glyph.offset[0] + kerning
+          y0 = pen[1] + glyph[GlyphPY0]               # pen[1] + glyph.offset[1]
+          # x1 = x0 + glyph[GlyphPX1]                 # x0 + glyph.size[0]
+          # y1 = y0 + glyph[GlyphPY1]                 # y0 - glyph.size[1]
+          x1 = pen[0] + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
+          y1 = pen[1] + glyph[GlyphPY1]               # y0 - glyph.size[1]
           u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
           v0 = glyph[GlyphTY0]          # glyph.texcoords[1]
           u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
@@ -2769,7 +2783,7 @@ class GLString(GLVertexArray):
           self.texcoords[i * 4:i * 4 + 4] = texcoords
           self.colors[i * 4:i * 4 + 4] = colors
           self.attribs[i * 4:i * 4 + 4] = attribs
-          pen[0] = pen[0] + glyph[GlyphWidth] + kerning
+          pen[0] = pen[0] + glyph[GlyphOrigW] + kerning
           # pen[1] = pen[1] + glyph[GlyphHeight]
           prev = charCode
 

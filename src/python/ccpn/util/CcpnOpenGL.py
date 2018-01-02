@@ -377,10 +377,11 @@ class CcpnGLWidget(QOpenGLWidget):
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 varying vec4 FC;
+attribute vec2 offset;
 
 void main()
 {
-  gl_Position = pMatrix * mvMatrix * gl_Vertex;
+  gl_Position = pMatrix * mvMatrix * (gl_Vertex + vec4(offset, 0.0, 0.0));
   gl_TexCoord[0]=gl_MultiTexCoord0;
   FC = gl_Color;
 }
@@ -643,7 +644,7 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
-    self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=20, y=50
+    self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=63, y=117
                                 , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
 
   def mousePressEvent(self, ev):
@@ -2688,8 +2689,8 @@ class GLVertexArray():
     GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
 
     # this is for passing extra attributes in
-    # GL.glEnableVertexAttribArray(1)
-    # GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+    GL.glEnableVertexAttribArray(1)
+    GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
 
     GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
@@ -2697,7 +2698,7 @@ class GLVertexArray():
     GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    # GL.glDisableClientState(GL.GL_TEXTURE_2D)
+    GL.glDisableVertexAttribArray(1)
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)

@@ -639,6 +639,9 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
+    self._testString = GLString(text='Hello World', font=self.firstFont, x=50, y=50)
+
+
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 
@@ -2303,14 +2306,14 @@ class CcpnGLItem():
     self._id = CcpnGLItem._nextId
     CcpnGLItem._nextId += 1
 
-    self.__parent = None
-    self.__view = None
-    self.__children = set()
-    self.__transform = CcpnTransform3D()
-    self.__visible = True
+    self._parent = None
+    self._view = None
+    self._children = set()
+    self._transform = CcpnTransform3D()
+    self._visible = True
     # self.setParentItem(parentItem)
     # self.setDepthValue(0)
-    self.__glOpts = {}
+    self._glOpts = {}
 
 vertex_data = np.array([0.75, 0.75, 0.0,
                         0.75, -0.75, 0.0,
@@ -2503,14 +2506,16 @@ class ShaderProgram(object):
     return GL.glGetAttribLocation(self.program_id, name)
 
 class GLString:
-  def __init__(self, text, font, color=(1.0, 1.0, 1.0, 0.0), x=0, y=0,
+  def __init__(self, text=None, font=None, color=(1.0, 1.0, 1.0, 0.0), x=0, y=0,
                width=None, height=None):
     self.text = text
+    self.font = font
     self.vertices = np.zeros((len(text) * 4, 3), dtype=np.float32)
     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
     self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.attribs = np.zeros((len(text) * 4, 1), dtype=np.float32)
+    self.indexOffset = 0
     pen = [x, y]
     prev = None
 

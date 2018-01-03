@@ -149,21 +149,23 @@ class DataFrameObject(object):
 
     # change column to correct index
     columns = list(range(table.columnCount()))
+    columnNum = None
     for c in columns:
       if column == table.horizontalHeaderItem(c).text():
-        column = c
+        columnNum = c
         break
 
     # search for 'text'
-    start = model.index(0, column)
-    matches = model.match(
-      start, QtCore.Qt.DisplayRole,
-      text, 1, QtCore.Qt.MatchExactly)
-    if matches:
-      return matches[0].row()
-      # # index.row(), index.column()
-      # self.table.selectionModel().select(
-      #   index, QtGui.QItemSelectionModel.Select)
+    if columnNum is not None:
+      start = model.index(0, columnNum)
+      matches = model.match(
+        start, QtCore.Qt.DisplayRole,
+        text, 1, QtCore.Qt.MatchExactly)
+      if matches:
+        return matches[0].row()
+        # # index.row(), index.column()
+        # self.table.selectionModel().select(
+        #   index, QtGui.QItemSelectionModel.Select)
 
     return None
 
@@ -284,7 +286,13 @@ class DataFrameObject(object):
       # self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Pid'] == index]
       # self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != index]
       # df.columns.get_loc('Pid')
-      row = self.find(self._table, str(obj.pid), column='Pid')
-      if row is not None:
-        self._table.setRow(row, list(listDict.values()))
-      self._table.silenceCallBack = False
+      try:
+        row = self.find(self._table, str(obj.pid), column='Pid')
+        if row is not None:
+          self._table.setRow(row, list(listDict.values()))
+      except Exception as es:
+        getLogger().warning(str(es))
+
+      finally:
+        self._table.silenceCallBack = False
+

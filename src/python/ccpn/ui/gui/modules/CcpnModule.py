@@ -30,7 +30,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 
 from PyQt4 import QtCore, QtGui
-
+from weakref import ref
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
@@ -85,6 +85,8 @@ class CcpnModule(Dock):
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
   settingsMinimumSizes = (100, 50)
+
+  _instances = set()
 
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
@@ -278,6 +280,20 @@ class CcpnModule(Dock):
   #   return self.name()
 
     self.update()     # ejb - make sure that the widgetArea starts the correct size
+
+    self._instances.add(ref(self))
+
+  @classmethod
+  def getinstances(cls):
+    dead = set()
+    for ref in cls._instances:
+      obj = ref()
+      if obj is not None:
+        if isinstance(obj, cls):
+          yield obj
+      else:
+        dead.add(ref)
+    cls._instances -= dead
 
   def _eventFilter(self, source, event):
     """

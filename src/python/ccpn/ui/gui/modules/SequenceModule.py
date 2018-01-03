@@ -102,6 +102,20 @@ class SequenceModule(CcpnModule):
 
     self._registerNotifiers()
 
+    # TODO:ED add highlight if an nmrChain already selected
+    # generate a create graph event? and let the response populate the module
+
+    # connect to SequenceModule
+    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
+    seqGraphs = [sg for sg in SequenceGraphModule.getinstances()]
+
+    if seqGraphs:
+      try:
+        seqGraphs[0].setNmrChainDisplay(seqGraphs[0].nmrChain)
+        # self._highlightPossibleStretches(seqGraphs[0].predictedStretch)
+      except Exception as es:
+        getLogger().warning('Error: no predictedStretch found %s' % str(es))
+
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
     CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
@@ -110,20 +124,22 @@ class SequenceModule(CcpnModule):
     for res1 in self.chainLabels[0].residueDict.values():
       res1._styleResidue()
 
-    for residue in residues:
-      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
-      guiResidue._styleResidue()
-    if self.colourScheme == 'dark':
-      colour = '#e4e15b'
-    elif self.colourScheme == 'light':
-      colour = '#009a00'
-    guiResidues = []
-    for residue in residues:
-      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
-      guiResidues.append(guiResidue)
-      guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' % colour+
-                           residue.shortName+'</div>')
-
+    try:
+      for residue in residues:
+        guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+        guiResidue._styleResidue()
+      if self.colourScheme == 'dark':
+        colour = '#e4e15b'
+      elif self.colourScheme == 'light':
+        colour = '#009a00'
+      guiResidues = []
+      for residue in residues:
+        guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+        guiResidues.append(guiResidue)
+        guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' % colour+
+                             residue.shortName+'</div>')
+    except Exception as es:
+      pass
 
   def _addChainLabel(self, chain:Chain, placeholder=False, tryToUseSequenceCodes=False):
     """

@@ -139,7 +139,7 @@ class NmrResidueTableModule(CcpnModule):
                                            , mainWindow=self.mainWindow
                                            , moduleParent=self
                                            , setLayout=True
-                                           , actionCallback=self.navigateToNmrResidue
+                                           , actionCallback=self.navigateToNmrResidueCallBack
                                            , grid=(0,0))
 
     if nmrChain is not None:
@@ -175,7 +175,7 @@ class NmrResidueTableModule(CcpnModule):
     return displays
 
   # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
-  def navigateToNmrResidue(self, data):
+  def navigateToNmrResidueCallBack(self, data):
     """
     Navigate in selected displays to nmrResidue; skip if none defined
     """
@@ -520,11 +520,11 @@ class NmrResidueTable(QuickTable):
     self._project.unblankNotification()
 
 
-  # def setUpdateSilence(self, silence):
-  #   """
-  #   Silences/unsilences the update of the table until switched again
-  #   """
-  #   self._updateSilence = silence
+  def setUpdateSilence(self, silence):
+    """
+    Silences/unsilences the update of the table until switched again
+    """
+    self._updateSilence = silence
 
   def _selectionCallback(self, data):
     """

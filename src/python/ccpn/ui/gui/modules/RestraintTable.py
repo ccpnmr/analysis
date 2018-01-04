@@ -321,19 +321,18 @@ class RestraintTable(QuickTable):
     """
     Update the table
     """
-    if not self._updateSilence:
-      self.project.blankNotification()
-      objs = self.getSelectedObjects()
+    self.project.blankNotification()
+    objs = self.getSelectedObjects()
 
-      self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                  , buildList=restraintList.restraints
-                                                  , colDefs=self.RLcolumns
-                                                  , hiddenColumns=self._hiddenColumns)
+    self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                , buildList=restraintList.restraints
+                                                , colDefs=self.RLcolumns
+                                                , hiddenColumns=self._hiddenColumns)
 
-      # populate from the Pandas dataFrame inside the dataFrameObject
-      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-      self._highLightObjs(objs)
-      self.project.unblankNotification()
+    # populate from the Pandas dataFrame inside the dataFrameObject
+    self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+    self._highLightObjs(objs)
+    self.project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """

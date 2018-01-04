@@ -89,11 +89,14 @@ class PlotWidget(pg.PlotWidget):
       self.foreground = '#080000'
       self.gridColour = '#080000'
       self.highlightColour = '#3333ff'
+      self._labellingColour = (10, 10, 10)
     else:
       self.background = '#080000'
       self.foreground = '#f7ffff'
       self.gridColour = '#f7ffff'
       self.highlightColour = '#00ff00'
+      self._labellingColour = (255, 255, 255)
+
     self.setBackground(self.background)
     #self.setForeground(self.foreground) # does not seem to have this (or typo?)
 
@@ -116,13 +119,13 @@ class PlotWidget(pg.PlotWidget):
     self.crossHair2 = CrossHair(self, show=False, colour=self.foreground)
 
     # add label to show mouse coordinates at the position of the cursor
-    self.mouseLabel = pg.TextItem(text='', color=(255,255,255), anchor=(0,1))
+    self.mouseLabel = pg.TextItem(text='', color=self._labellingColour, anchor=(0,1))
     self.mouseLabel.hide()
     self.addItem(self.mouseLabel)
     self.mouseLabel.setZValue(1.0)      # brings the item to the top (I assume everything else is 0)
 
     # add label to show stripID in the top corner
-    self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=(255,255,255))
+    self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=self._labellingColour)
     self.stripIDLabel.show()
     self.addItem(self.stripIDLabel)
     self.stripIDLabel.setZValue(1.0)

@@ -361,6 +361,9 @@ class ChemicalShiftsMapping(CcpnModule):
     # self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
 
     # self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._deltaShift])
+
+    self.nmrResidueTable._update(nmrChain)
+
     self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
   def _displayTableForNmrChain(self, nmrChain):
@@ -454,9 +457,11 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application.current.clearNmrResidues()
       event.accept()
 
-  def _customActionCallBack(self, nmrResidue, *args):
+  # def _customActionCallBack(self, nmrResidue, *args):
+  def _customActionCallBack(self, data):
     from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio
 
+    nmrResidue = data[Notifier.OBJECT]
 
     if nmrResidue:
       xPos = int(nmrResidue.sequenceCode)

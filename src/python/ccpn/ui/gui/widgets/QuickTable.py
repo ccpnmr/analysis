@@ -606,6 +606,32 @@ class QuickTable(TableWidget, Base):
   def dataFrameToJson(self, dataFrame, path):
     dataFrame.to_json(path, orient = 'split')
 
+  def scrollToSelectedIndex(self):
+    h = self.horizontalHeader()
+    for i in range(h.count()):
+      if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
+        if self.getSelectedRows():
+          self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
+                                        self.PositionAtCenter)
+
+  def getSelectedRows(self):
+
+    model = self.selectionModel()
+
+    # selects all the items in the row
+    selection = model.selectedIndexes()
+
+    # if self.selectRows:
+    #   selection = model.selectedRows(column=0)
+    # else:
+    #   selection = model.selectedIndexes()
+
+    rows = [i.row() for i in selection]
+    #rows = list(set(rows))
+    #rows.sort()
+
+    return rows
+
   def getSelectedObjects(self):
 
     model = self.selectionModel()

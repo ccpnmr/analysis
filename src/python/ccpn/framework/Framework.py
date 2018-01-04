@@ -1725,7 +1725,8 @@ class Framework:
       if action: # should be True
         action.setChecked(True)
 
-      # set the colours of the currently highlighted chain in sequenceGraph
+      # set the colours of the currently highlighted chain in open sequenceGraph
+      # should really be in the class, but doesn't fire correctly during __init__
       self.sequenceModule.populateFromSequenceGraphs()
 
     return self.sequenceModule

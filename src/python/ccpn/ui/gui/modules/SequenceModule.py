@@ -106,14 +106,16 @@ class SequenceModule(CcpnModule):
     # generate a create graph event? and let the response populate the module
 
   def populateFromSequenceGraphs(self):
-    # connect to SequenceModule
+    """
+    Take the selected chain from the first opened sequenceGraph and highlight in module
+    """
+    # get the list of open sequenceGraphs
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
     seqGraphs = [sg for sg in SequenceGraphModule.getinstances()]
 
     if seqGraphs:
       try:
         seqGraphs[0].predictSequencePosition(seqGraphs[0].predictedStretch)
-        # self._highlightPossibleStretches(seqGraphs[0].predictedStretch)
       except Exception as es:
         getLogger().warning('Error: no predictedStretch found %s' % str(es))
 

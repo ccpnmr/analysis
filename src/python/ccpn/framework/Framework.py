@@ -1725,6 +1725,9 @@ class Framework:
       if action: # should be True
         action.setChecked(True)
 
+      # set the colours of the currently highlighted chain in sequenceGraph
+      self.sequenceModule.populateFromSequenceGraphs()
+
     return self.sequenceModule
 
 

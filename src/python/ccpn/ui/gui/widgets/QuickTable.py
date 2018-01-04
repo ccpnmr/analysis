@@ -811,7 +811,7 @@ class QuickTable(TableWidget, Base):
                          , tableName=None, rowName=None, className=None
                          , changeFunc=None, updateFunc=None
                          , tableSelection=None, pullDownWidget=None
-                         , selectCurrentCallBack=None):
+                         , callBackClass=None, selectCurrentCallBack=None):
     """
     Set a Notifier to call when an object is created/deleted/renamed/changed
     rename calls on name
@@ -832,35 +832,35 @@ class QuickTable(TableWidget, Base):
     self.clearTableNotifiers()
 
     if tableClass:
-      self._tableNotifier = Notifier(self._project
+      self._tableNotifier = Notifier(self.project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                       , tableClass.__name__
                                       , self._updateTableCallback)
     if rowClass:
-      self._rowNotifier = Notifier(self._project
+      self._rowNotifier = Notifier(self.project
                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                     , rowClass.__name__
                                     , self._updateRowCallback
                                     , onceOnly=True)
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
-        self._cellNotifiers.append(Notifier(self._project
+        self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClass[0].__name__
                                             , self._updateCellCallback
                                             , onceOnly=True))
     else:
       if cellClassNames:
-        self._cellNotifiers.append(Notifier(self._project
+        self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClassNames[0].__name__
                                             , self._updateCellCallback
                                             , onceOnly=True))
 
     if selectCurrentCallBack:
-      self._selectCurrentNotifier = Notifier(self._current
+      self._selectCurrentNotifier = Notifier(self.current
                                              , [Notifier.CURRENT]
-                                             , rowClass._pluralLinkName
+                                             , callBackClass._pluralLinkName
                                              , self._selectCurrentCallBack)
 
     self._tableData = {'updateFunc': updateFunc

@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
 from PyQt4 import QtGui
 
 
@@ -83,7 +83,10 @@ class BlankDisplay(CcpnModule):
 
       # ejb - quick error trap so that it doesn't destroy window structure
       # try:
-      objects = self.project.loadData(url)
+
+      with progressManager(self.mainWindow, 'Loading...'):
+        objects = self.project.loadData(url)
+
       # except Exception as es:
       #   self.show()
       #   getLogger().warning('Error during Load: %s' % str(es))
@@ -94,7 +97,11 @@ class BlankDisplay(CcpnModule):
         for ii, obj in enumerate(objects):
           if isinstance(obj, Project):
             self.project = obj
-          if isinstance(obj, (Spectrum)):
+            obj._mainWindow.sideBar.fillSideBar(obj)
+            obj._mainWindow.show()
+            success = True
+
+          if isinstance(obj, Spectrum):
             success = self._handlePid(obj.pid)  # pass the object as its pid so we use
                                                            # the same method used to process the pids
     # process pids

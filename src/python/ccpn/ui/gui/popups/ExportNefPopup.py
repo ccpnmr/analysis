@@ -152,7 +152,7 @@ class ExportNefPopup(CcpnDialog):
 
     self.openPathIcon = Icon('icons/directory')
     self.saveLabel = Label(self.saveFrame, text = ' Path: ', grid=(0,0), hAlign = 'c')
-    self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAligment='l')
+    self.saveText = LineEdit(self.saveFrame, grid=(0,1), textAlignment='l')
     self.saveText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
 
     self.saveText.setDisabled(False)   # ejb - enable but need to check path on okay

@@ -97,7 +97,7 @@ class TsarGuiPlugin(PluginModule):
         # Run name
         row = 0
         self.runNameLabel = Label(self.mainWidget, 'Run Name', grid=(row, 0))
-        self.runNameLineEdit = LineEdit(self.mainWidget, 'Run 1', textAligment='l', grid=(row, 1))
+        self.runNameLineEdit = LineEdit(self.mainWidget, 'Run 1', textAlignment='l', grid=(row, 1))
         self.runNameLineEdit.setFixedWidth(fixedColumnWidth)
 
         # Set basis spectrum

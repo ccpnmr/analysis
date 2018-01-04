@@ -26,20 +26,22 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 
-TextAligment = {
+TextAlignment = {
                 'c': QtCore.Qt.AlignHCenter,
                 'l': QtCore.Qt.AlignLeft,
                 'r': QtCore.Qt.AlignRight
                 }
 
+
 class LineEdit(QtGui.QLineEdit, Base):
 
-  def __init__(self, parent, text='', textAligment='c', minimumWidth=100, textColor=None, **kw):
+  def __init__(self, parent, text='', textAlignment='c', minimumWidth=100, textColor=None, **kw):
 
     #text = translator.translate(text)
 
@@ -49,7 +51,7 @@ class LineEdit(QtGui.QLineEdit, Base):
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)
 
-    self.setAlignment(TextAligment[textAligment])
+    self.setAlignment(TextAlignment[textAlignment])
     self.setMinimumWidth(minimumWidth)
     self.setFixedHeight(25)
 

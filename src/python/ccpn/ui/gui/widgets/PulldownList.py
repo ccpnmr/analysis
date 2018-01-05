@@ -268,7 +268,7 @@ class PulldownList(QtGui.QComboBox, Base):
       return
     self.index = index
     
-    if self.objects:
+    if self.objects and index < len(self.objects):
       self.object = self.objects[index]
     else:
       self.object = None

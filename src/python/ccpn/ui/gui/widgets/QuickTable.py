@@ -23,6 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
+import json
 import re
 
 from PyQt4 import QtGui, QtCore
@@ -923,6 +924,27 @@ class QuickTable(TableWidget, Base):
     self._cellNotifiers = []
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
+
+  def dragEnterEvent(self, event):
+    ccpnmrJsonData = 'ccpnmr-json'
+
+    if event.mimeData().hasUrls():
+      event.accept()
+    else:
+      pids = []
+      for item in self.selectedItems():
+        if item is not None:
+
+          # TODO:ED check the list of selected as with getSelectedObjects to get pids..
+          # trouble is, this is working as a dropevent
+          objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+          if objFromPid is not None:
+            pids.append(objFromPid.pid)
+
+      itemData = json.dumps({'pids':pids})
+      event.mimeData().setData(ccpnmrJsonData, itemData)
+      event.mimeData().setText(itemData)
+      event.accept()
 
 
 EDIT_ROLE = QtCore.Qt.EditRole

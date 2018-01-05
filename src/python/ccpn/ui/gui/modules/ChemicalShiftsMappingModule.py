@@ -57,7 +57,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
-
+from ccpn.ui.gui.widgets.Icon import Icon
 
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -212,12 +212,12 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.thresholdLinePos = DefaultThreshould
 
+    self.showStructureIcon = Icon('icons/showStructure')
     self._setWidgets()
     self._setSettingsWidgets()
 
     self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
                                                      , callback=self._selectCurrentNmrResiduesNotifierCallback)
-
     if self.project:
       if len(self.project.nmrChains) > 0:
         self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
@@ -227,21 +227,25 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.application:
       self.splitter = Splitter(QtCore.Qt.Vertical)
 
-      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application)
+      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
 
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack,
-                                                   setLayout=True, )
-      self.showOnViewerButton = Button(self.nmrResidueTable._widget, text='Show on Molecular Viewer',
+                                                   setLayout=True, grid = (0, 0))
+      self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
+                                       icon=self.showStructureIcon,
                                        callback=self._showOnMolecularViewer,
-                                       grid = (1, 2))
+                                       grid = (1, 1), hAlign='l')
+      self.showOnViewerButton.setFixedHeight(25)
+      # self.showOnViewerButton.setFixedWidth(150)
 
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.splitter.addWidget(self.nmrResidueTable)
       self.splitter.addWidget(self.barGraphWidget)
       self.mainWidget.getLayout().addWidget(self.splitter)
+      self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
 
 
@@ -427,7 +431,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget = None
     self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
                                          xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
-                                         grid=(0, 0))
+                                         grid=(10, 0))
     self.barGraphWidget.setMinimumHeight(100)
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)

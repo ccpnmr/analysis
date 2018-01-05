@@ -218,6 +218,13 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
                                                      , callback=self._selectCurrentNmrResiduesNotifierCallback)
+    self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak',
+                                              self._peakDeletedCallBack)
+
+    self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
+                                           self._peakChangedCallBack, onceOnly=True)
+    self._peakChangedNotifier.lastPeakPos = None
+
     if self.project:
       if len(self.project.nmrChains) > 0:
         self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
@@ -382,6 +389,19 @@ class ChemicalShiftsMapping(CcpnModule):
     # self.updateTable(nmrChain)
     # self.updateBarGraph()
 
+  def _peakDeletedCallBack(self, data):
+    if len(self.current.peaks) == 0:
+      self.updateModule()
+
+  def _peakChangedCallBack(self, data):
+
+    peak = data[Notifier.OBJECT]
+    if self._peakChangedNotifier.lastPeakPos != peak.position:
+      self._peakChangedNotifier.lastPeakPos = peak.position
+      self.updateModule()
+
+
+
   def updateBarGraph(self):
     xs = []
     ys = []
@@ -402,19 +422,22 @@ class ChemicalShiftsMapping(CcpnModule):
 
       if self.nmrResidueTable._dataFrameObject:
         for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
-          x = int(nmrResidue.sequenceCode)
-          y = float(nmrResidue._deltaShift)
-          xs.append(x)
-          ys.append(y)
-          obs.append(nmrResidue)
-          if y > self.thresholdLinePos:
-            self.aboveY.append(y)
-            self.aboveX.append(x)
-            aboveObjects.append(nmrResidue)
-          else:
-            self.belowX.append(x)
-            self.belowY.append(y)
-            belowObjects.append(nmrResidue)
+          if nmrResidue:
+            if nmrResidue._deltaShift:
+              if nmrResidue.sequenceCode:
+                x = int(nmrResidue.sequenceCode)
+                y = float(nmrResidue._deltaShift)
+                xs.append(x)
+                ys.append(y)
+                obs.append(nmrResidue)
+                if y > self.thresholdLinePos:
+                  self.aboveY.append(y)
+                  self.aboveX.append(x)
+                  aboveObjects.append(nmrResidue)
+                else:
+                  self.belowX.append(x)
+                  self.belowY.append(y)
+                  belowObjects.append(nmrResidue)
 
     selectedNameColourA = self.aboveThresholdColourBox.getText()
     for code, name in spectrumColours.items():
@@ -496,6 +519,8 @@ class ChemicalShiftsMapping(CcpnModule):
         getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def updateModule(self):
+    print('Updating')
+
     weights = {}
     for atomWSB in self.atomWeightSpinBoxes:
       weights.update({atomWSB.objectName():atomWSB.value()})
@@ -513,6 +538,7 @@ class ChemicalShiftsMapping(CcpnModule):
         nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
       self.updateTable(self.nmrResidueTable.nmrChain)
       self.updateBarGraph()
+
 
   def _updatedPeakCount(self, nmrResidue, spectra):
     if len(nmrResidue.nmrAtoms)>0:
@@ -649,6 +675,7 @@ class ChemicalShiftsMapping(CcpnModule):
     """
     if self._selectCurrentNmrResiduesNotifier is not None:
       self._selectCurrentNmrResiduesNotifier.unRegister()
+    self._peakChangedNotifier.unRegister()
 
     super(ChemicalShiftsMapping, self)._closeModule()
 

@@ -56,6 +56,7 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.Splitter import Splitter
 
 
 
@@ -224,18 +225,23 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
 
     if self.application:
-      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid=(0, 0))
+      self.splitter = Splitter(QtCore.Qt.Vertical)
+
+      self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application)
+
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack,
-                                                   setLayout=True, grid=(1, 0))
+                                                   setLayout=True, )
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, text='Show on Molecular Viewer',
                                        callback=self._showOnMolecularViewer,
                                        grid = (1, 2))
 
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
-
+      self.splitter.addWidget(self.nmrResidueTable)
+      self.splitter.addWidget(self.barGraphWidget)
+      self.mainWidget.getLayout().addWidget(self.splitter)
 
 
 
@@ -422,6 +428,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
                                          xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
                                          grid=(0, 0))
+    self.barGraphWidget.setMinimumHeight(100)
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
     self.barGraphWidget.customViewBox.addSelectionBox()
@@ -436,6 +443,8 @@ class ChemicalShiftsMapping(CcpnModule):
                                    belowBrush=self.belowBrush,
                                    aboveBrush=self.aboveBrush
                                    )
+    self.splitter.addWidget(self.barGraphWidget)
+
 
   def updateThresholdLineValue(self, value):
     self.barGraphWidget.xLine.setPos(value)

@@ -155,6 +155,9 @@ class QuickTable(TableWidget, Base):
     self.setDragDropMode(self.InternalMove)
     self.setDropIndicatorShown(True)
 
+    # set the last column to expanding
+    self.horizontalHeader().setStretchLastSection(True)
+
     # enable the right click menu
     self.searchWidget = None
     self._setHeaderContextMenu()
@@ -188,6 +191,9 @@ class QuickTable(TableWidget, Base):
     self._cellNotifiers = []
     self._selectCurrentNotifier = None
     self._icons = [self.ICON_FILE]
+
+    # set the minimum size the table can collapse to
+    self.setMinimumSize(30, 30)
 
   def _cellClicked(self, row, col):
     self._currentRow = row
@@ -479,8 +485,9 @@ class QuickTable(TableWidget, Base):
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
     # needed after setting the column headings
-    self.resizeColumnsToContents()
     self.showColumns(dataFrameObject)
+    self.resizeColumnsToContents()
+    self.horizontalHeader().setStretchLastSection(True)
     self.show()
     self._silenceCallback = False
 

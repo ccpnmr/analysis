@@ -150,7 +150,7 @@ class QuickTable(TableWidget, Base):
     self.setSortingEnabled(True)
     self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
-    # enable drag and drop operations on the table
+    # enable drag and drop operations on the table - why not working?
     self.setDragEnabled(True)
     self.acceptDrops()
     self.setDragDropMode(self.InternalMove)

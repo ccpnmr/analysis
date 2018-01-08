@@ -259,6 +259,12 @@ class Chain(AbstractWrapperObject):
                                       % (len(changedResidues), start, stop))
 
 
+  def _toNmrChain(self):
+    ''' Makes an Nmr Chain from the chain '''
+    nmrChain = self.project.fetchNmrChain()
+    for residue in self.residues:
+      nmrChain.fetchNmrResidue(sequenceCode= residue.sequenceCode, residueType = residue.residueType)
+
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (MolSystem.Chains) for all Chain children of parent NmrProject.molSystem"""

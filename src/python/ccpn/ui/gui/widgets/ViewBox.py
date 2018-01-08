@@ -71,6 +71,8 @@ import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
 from ccpn.util import Common as commonUtil
+import numpy as np
+
 
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -187,13 +189,6 @@ class ViewBox(pg.ViewBox):
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
 
-    self.pointer = QtGui.QGraphicsSimpleTextItem('X')
-    self.addItem(self.pointer)
-    font = self.pointer.font()
-    font.setPointSize(10)
-    self.pointer.setFont(font)
-    self.pointer.setFlag(self.pointer.ItemIgnoresTransformations)
-    self.pointer.hide()
 
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
@@ -557,42 +552,32 @@ class ViewBox(pg.ViewBox):
                     peaks.append(peak)
         self.current.peaks = peaks
 
-    elif middleMouse(event):
-     # middle drag: moves a selected peak
+    elif rightMouse(event):
+      # middle drag: moves a selected peak
       event.accept()
       self.setMouseEnabled(False, False)
-      self.pointer.show()
-
+      refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
 
       peaks = self.current.peaks
       if not peaks:
         return
-      if len(peaks) == 1:
-        peak = peaks[0]
-        project = peak.project
-        # project.blankNotification()
 
-      else:
-        if event.isFinish():
-          getLogger().warn('Can only move one peak at a time')
-        return
+      deltaPosition = np.subtract(self.current.cursorPosition , refPosition)
+      for peak in peaks:
+        peak.startPosition = peak.position
 
       if event.isFinish():
-        # project.unblankNotification()
-        peak.position =  self.current.cursorPosition
-        peak._finaliseAction('change')
-        self.current.peak = peak
-        project.newUndoPoint()
-        self.setMouseEnabled(True, True)
-        self.pointer.hide()
-        self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
+        for peak in peaks:
+          oldPosition = peak.position
+          peak.position =  oldPosition + deltaPosition
+          peak._finaliseAction('change')
+          self.setMouseEnabled(True, True)
+          self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
             ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
-
-      else:
-        ## this is when the peak is being dragged.
-        ## Don't use peak.position =  self.current.cursorPosition here to simply show the Label moving.
-        ## Because will fire millions of notifications and will not undo to the starting point. Unless (again) nested code.
-        self.pointer.setPos(self.current.cursorPosition[0], self.current.cursorPosition[1])
+        self.current.peaks = peaks
+      else: #this is when is being dragged
+        for peak in peaks:
+          peak.position =  peak.position + deltaPosition
 
       # startPoint = Point(event.buttonDownPos())
       # endPoint = Point(event.pos())

@@ -943,6 +943,7 @@ class PeakNd(QtGui.QGraphicsItem):
       elif symbolType == 1:                     # draw an ellipse at lineWidth
         symbolWidths = list(self.peak.lineWidths)
 
+        # TODO:ED check whether ppm or Hz for the lineWidths - assuming Hz by default
         if None in symbolWidths:
           return
 

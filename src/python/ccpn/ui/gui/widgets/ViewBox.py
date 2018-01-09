@@ -552,7 +552,7 @@ class ViewBox(pg.ViewBox):
                     peaks.append(peak)
         self.current.peaks = peaks
 
-    elif rightMouse(event):
+    elif middleMouse(event):
       # middle drag: moves a selected peak
       event.accept()
       self.setMouseEnabled(False, False)
@@ -576,8 +576,10 @@ class ViewBox(pg.ViewBox):
             ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
         self.current.peaks = peaks
       else: #this is when is being dragged
-        for peak in peaks:
-          peak.position =  peak.position + deltaPosition
+        pass
+        # for peak in peaks:
+        #   # print(peak.position , deltaPosition)
+        #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
 
       # startPoint = Point(event.buttonDownPos())
       # endPoint = Point(event.pos())

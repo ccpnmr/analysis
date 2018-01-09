@@ -356,6 +356,11 @@ class CustomViewBox(pg.ViewBox):
     self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
     self.contextMenu.addAction(self.showAboveThresholdAction)
 
+    ## Selection: Select Above Threshold
+    self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
+                                                  triggered=self.selectAboveThreshold)
+    self.contextMenu.addAction(self.selectAboveThresholdAction)
+
 
     self.contextMenu.addSeparator()
     self.contextMenu.addAction('Export', self.showExportDialog)
@@ -430,6 +435,12 @@ class CustomViewBox(pg.ViewBox):
             label.isBelowThreshold = True
     else:
       print('NOT FOUND')
+
+  def selectAboveThreshold(self):
+    '''Reimplement this in the module subclass'''
+
+    pass
+
 
   def showExportDialog(self):
     if self.exportDialog is None:

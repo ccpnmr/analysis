@@ -465,6 +465,7 @@ class Framework:
 
     if self.ui:
       if not self._isRegistered():
+        self.ui.mainWindow.show()
         QtGui.QApplication.processEvents()
         popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
         QtGui.QApplication.processEvents()

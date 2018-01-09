@@ -34,8 +34,10 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -191,6 +193,20 @@ class PreferencesPopup(CcpnDialog):
     self.pipesPathData.setDisabled(True)
     self.pipesPathDataButton.setDisabled(True)
 
+    row += 1
+    self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
+    try:
+      annType = self.preferences.general.annotationType
+    except:
+      annType = 0
+      self.preferences.general.annotationType = annType
+    self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+                                                       selectedInd=annType,
+                                                       callback=self._setAnnotations,
+                                                       direction='v',
+                                                       grid=(row, 1), hAlign='l',
+                                                       tipTexts=None,
+                                                       )
 
     # row += 1
     # Spacer(parent, row, 1
@@ -236,6 +252,33 @@ class PreferencesPopup(CcpnDialog):
     # Spacer(parent, row, 1
     #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
     #        , grid=(row , 0), gridSpan=(row, 1))
+
+    row += 1
+    self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
+    try:
+      peakSymbol = self.preferences.general.peakSymbolType
+    except:
+      peakSymbol = 0
+      self.preferences.general.peakSymbolType = peakSymbol
+    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths'],
+                                    selectedInd=peakSymbol,
+                                    callback=self._setPeakSymbol,
+                                    direction='h',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    row += 1
+    self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
+    self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
+                                            , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+    self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
+    try:
+      symbolSize = self.preferences.general.peakSymbolSize
+    except:
+      symbolSize = 0.1
+      self.preferences.general.peakSymbolSize = symbolSize
+    self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
+    self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
 
 
   def _setExternalProgramsTabWidgets(self, parent):
@@ -423,5 +466,35 @@ class PreferencesPopup(CcpnDialog):
       return
     self.preferences.general.peakDropFactor = dropFactor
 
+  def _setPeakSymbolSize(self):
+    """
+    Set the size of the peak symbols (ppm)
+    """
+    try:
+      peakSymbolSize = float(self.peakSymbolSizeData.text())
+    except:
+      return
+    self.preferences.general.peakSymbolSize = peakSymbolSize
+
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
+
+  def _setAnnotations(self):
+    """
+    Set the annotation type for the pid labels
+    """
+    try:
+      annotationType = self.annotationsData.getIndex()
+    except:
+      return
+    self.preferences.general.annotationType = annotationType
+
+  def _setPeakSymbol(self):
+    """
+    Set the peak symbol type - current a cross or lineWidths
+    """
+    try:
+      peakSymbol = self.peakSymbol.getIndex()
+    except:
+      return
+    self.preferences.general.peakSymbolType = peakSymbol

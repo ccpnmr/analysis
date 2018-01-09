@@ -30,20 +30,20 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 
 class HLine(Widget, Base):
-  def __init__(self, parent=None, style='SolidLine', **kwds):
-    '''
-
+  def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, **kwds):
+    """
     :param style: Options: 
                           'SolidLine';
                            'DashLine'; 
                            'DashDotLine';
                            'DashDotDotLine'
-    '''
+    """
 
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kwds)
     self.parent = parent
     self.style = style
+    self.colour = colour
 
     self.styles = {
       'SolidLine':          QtCore.Qt.SolidLine,
@@ -65,7 +65,7 @@ class HLine(Widget, Base):
 
     if style in self.styles:
       style = self.styles[style]
-      pen = QtGui.QPen(QtCore.Qt.black, 2, style)
+      pen = QtGui.QPen(self.colour, 2, style)
       qp.setPen(pen)
       qp.drawLine(0, 10, self.geometry().right(), 10)
 

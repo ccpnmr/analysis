@@ -428,5 +428,5 @@ class GuiWindow():
     else:
       getLogger().warning('No current strip. Select a strip first.')
 
-    self.application.project.unblankNotification()
+    # self.application.project.unblankNotification()
     # self.application.project.unblankNotification()

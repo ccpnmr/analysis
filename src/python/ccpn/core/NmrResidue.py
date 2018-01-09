@@ -1330,6 +1330,11 @@ def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, resid
 
   apiNmrChain = self._wrappedData
   nmrProject = apiNmrChain.nmrProject
+
+  # TODO:ED residueType cannot be an empty string
+  if residueType == '':
+    residueType = None
+
   dd = {'name':residueType, 'details':comment,
         'residueType':residueType,'directNmrChain':apiNmrChain}
 

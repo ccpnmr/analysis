@@ -92,7 +92,7 @@ class QuickTable(TableWidget, Base):
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
-               hideIndex=True,
+               hideIndex=True, stretchLastSection=False,
                **kw):
     """
     Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -157,7 +157,7 @@ class QuickTable(TableWidget, Base):
     self.setDropIndicatorShown(True)
 
     # set the last column to expanding
-    self.horizontalHeader().setStretchLastSection(True)
+    self.horizontalHeader().setStretchLastSection(stretchLastSection)
 
     # enable the right click menu
     self.searchWidget = None
@@ -672,6 +672,10 @@ class QuickTable(TableWidget, Base):
       return selectedObjects
     else:
       return None
+
+  def clearSelection(self):
+    selectionModel = self.selectionModel()
+    selectionModel.clearSelection()
 
   def _highLightObjs(self, selection):
 

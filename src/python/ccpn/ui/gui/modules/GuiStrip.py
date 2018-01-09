@@ -192,7 +192,11 @@ class GuiStrip(Frame):
                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDroppedItems)
 
-    self.peakLabelling = 0
+    # set peakLabelling to the default from preferences
+    try:
+      self.peakLabelling = self.application.preferences.general.annotationType
+    except:
+      self.peakLabelling = 0
     self.show()
 
   @property

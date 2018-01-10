@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 
 class HLine(Widget, Base):
-  def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, **kwds):
+  def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, **kwds):
     """
     :param style: Options: 
                           'SolidLine';
@@ -44,6 +44,8 @@ class HLine(Widget, Base):
     self.parent = parent
     self.style = style
     self.colour = colour
+    self.height = height
+    self.lineHeight = int(height/2)
 
     self.styles = {
       'SolidLine':          QtCore.Qt.SolidLine,
@@ -52,8 +54,8 @@ class HLine(Widget, Base):
       'DashDotDotLine':    QtCore.Qt.DashDotDotLine,
     }
 
-    self.setMaximumHeight(10)
-
+    # self.setMaximumHeight(10)
+    self.setFixedHeight(height)
 
   def paintEvent(self, e):
     qp = QtGui.QPainter()
@@ -67,11 +69,7 @@ class HLine(Widget, Base):
       style = self.styles[style]
       pen = QtGui.QPen(self.colour, 2, style)
       qp.setPen(pen)
-      qp.drawLine(0, 10, self.geometry().right(), 10)
-
-
-
-
+      qp.drawLine(0, self.lineHeight, self.geometry().right(), self.lineHeight)
 
 def main():
   app = QtGui.QApplication(sys.argv)

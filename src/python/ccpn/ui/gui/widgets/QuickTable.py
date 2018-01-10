@@ -677,6 +677,38 @@ class QuickTable(TableWidget, Base):
     selectionModel = self.selectionModel()
     selectionModel.clearSelection()
 
+  def selectObjects(self, objList:list, setUpdatesEnabled:bool=False):
+    """
+    Selection the object in the table
+    """
+    # skip if the table is empty
+    if not self._dataFrameObject:
+      return
+
+    selectionModel = self.selectionModel()
+
+    if objList:
+      # disable callbacks while populating the table
+
+      self._silenceCallback = True
+      # self.blockSignals(True)
+      self.setUpdatesEnabled(setUpdatesEnabled)
+
+      if not self._mousePressed:
+        selectionModel.clearSelection()       # causes a clear problem here
+                                              # strange tablewidget cmd/selection problem
+
+      for obj in objList:
+        row = self._dataFrameObject.find(self, str(obj.pid))
+        selectionModel.select(self.model().index(row, 0)
+                                       , selectionModel.Select | selectionModel.Rows)
+
+      self.setUpdatesEnabled(True)
+      # self.blockSignals(False)
+      self._silenceCallback = False
+
+      self.setFocus(QtCore.Qt.OtherFocusReason)
+
   def _highLightObjs(self, selection):
 
     # skip if the table is empty

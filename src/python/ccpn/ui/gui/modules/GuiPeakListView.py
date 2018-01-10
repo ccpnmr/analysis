@@ -834,14 +834,14 @@ class PeakNd(QtGui.QGraphicsItem):
       # check whether exists in the preferences - can remove soon
       try:
         symbolType = self.application.preferences.general.peakSymbolType
-      except:
+      except Exception as es:
         symbolType = 0
 
       if symbolType == 0:    # a cross
         # read symbol size from the preferences file, 0.05 if it doesn't exist
         try:
           symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
-        except:
+        except Exception as es:
           symbolWidth = 0.05
         lw0 = self.peak.lineWidths
 

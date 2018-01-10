@@ -92,7 +92,7 @@ class QuickTable(TableWidget, Base):
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
-               hideIndex=True, stretchLastSection=False,
+               hideIndex=True, stretchLastSection=True,
                **kw):
     """
     Create a new instance of a TableWidget with an attached Pandas dataFrame
@@ -192,6 +192,7 @@ class QuickTable(TableWidget, Base):
     self._cellNotifiers = []
     self._selectCurrentNotifier = None
     self._icons = [self.ICON_FILE]
+    self._stretchLastSection = stretchLastSection
 
     # set the minimum size the table can collapse to
     self.setMinimumSize(30, 30)
@@ -482,13 +483,23 @@ class QuickTable(TableWidget, Base):
 
     # set the table and column headings
     self._silenceCallback = True
+
+    # keep the original sorting method
+    sortOrder = self.horizontalHeader().sortIndicatorOrder()
+    sortColumn = self.horizontalHeader().sortIndicatorSection()
+
     self.setData(dataFrameObject.dataFrame.values)
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
     # needed after setting the column headings
     self.showColumns(dataFrameObject)
     self.resizeColumnsToContents()
-    self.horizontalHeader().setStretchLastSection(True)
+    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
+    # re-sort the table
+    if sortColumn < self.columnCount():
+      self.sortByColumn(sortColumn, sortOrder)
+
     self.show()
     self._silenceCallback = False
 
@@ -749,12 +760,18 @@ class QuickTable(TableWidget, Base):
     "remove all objects from the table"
     self._silenceCallback = True
     self.clear()
+
+    if self._dataFrameObject:
+      self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
+      self.showColumns(self._dataFrameObject)
+      self.resizeColumnsToContents()
+      self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
     self._silenceCallback = False
 
   def _updateTableCallback(self, data):
     """
     Notifier callback for updating the table
-    :param data:
     """
     thisTableList = getattr(data[Notifier.THEOBJECT]
                             , self._tableData['className'])   # get the table list
@@ -763,6 +780,10 @@ class QuickTable(TableWidget, Base):
     self._silenceCallback = True
     if getattr(self, self._tableData['tableSelection']) in thisTableList:
       trigger = data[Notifier.TRIGGER]
+
+      # keep the original sorting method
+      sortOrder = self.horizontalHeader().sortIndicatorOrder()
+      sortColumn = self.horizontalHeader().sortIndicatorSection()
 
       if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
 
@@ -779,6 +800,10 @@ class QuickTable(TableWidget, Base):
           # self.displayTableForNmrTable(table)
           self._tableData['changeFunc'](table)
 
+      # re-sort the table
+      if sortColumn < self.columnCount():
+        self.sortByColumn(sortColumn, sortOrder)
+
     else:
       self.clearTable()
 
@@ -792,8 +817,9 @@ class QuickTable(TableWidget, Base):
     Notifier callback for updating the table for change in nmrRows
     :param data:
     """
-    thisTableList = getattr(data[Notifier.THEOBJECT]
-                            , self._tableData['className'])   # get the tableList
+    # thisTableList = getattr(data[Notifier.THEOBJECT]
+    #                         , self._tableData['className'])   # get the tableList
+
     row = data[Notifier.OBJECT]
     trigger = data[Notifier.TRIGGER]
 
@@ -806,6 +832,10 @@ class QuickTable(TableWidget, Base):
 
       # is the row in the table
       # TODO:ED move these into the table class
+
+      # keep the original sorting method
+      sortOrder = self.horizontalHeader().sortIndicatorOrder()
+      sortColumn = self.horizontalHeader().sortIndicatorSection()
 
       if trigger == Notifier.DELETE:
 
@@ -841,6 +871,10 @@ class QuickTable(TableWidget, Base):
         # modify the oldPid in the objectList, change to newPid
         self._dataFrameObject.renameObject(row, oldPid)
 
+      # re-sort the table
+      if sortColumn < self.columnCount():
+        self.sortByColumn(sortColumn, sortOrder)
+
     except Exception as es:
       getLogger().warning(str(es))
 
@@ -854,16 +888,25 @@ class QuickTable(TableWidget, Base):
     Notifier callback for updating the table
     :param data:
     """
-    thisTableList = getattr(data[Notifier.THEOBJECT]
-                            , self._tableData['className'])   # get the tableList
+    # thisTableList = getattr(data[Notifier.THEOBJECT]
+    #                         , self._tableData['className'])   # get the tableList
+
     cell = data[Notifier.OBJECT]
     row = getattr(cell, self._tableData['rowName'])
 
     self._silenceCallback = True
     if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
 
+      # keep the original sorting method
+      sortOrder = self.horizontalHeader().sortIndicatorOrder()
+      sortColumn = self.horizontalHeader().sortIndicatorSection()
+
       # change the dataFrame for the updated nmrCell
       self._dataFrameObject.changeObject(row)
+
+      # re-sort the table
+      if sortColumn < self.columnCount():
+        self.sortByColumn(sortColumn, sortOrder)
 
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']
@@ -961,26 +1004,26 @@ class QuickTable(TableWidget, Base):
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
 
-  def dragEnterEvent(self, event):
-    ccpnmrJsonData = 'ccpnmr-json'
-
-    if event.mimeData().hasUrls():
-      event.accept()
-    else:
-      pids = []
-      for item in self.selectedItems():
-        if item is not None:
-
-          # TODO:ED check the list of selected as with getSelectedObjects to get pids..
-          # trouble is, this is working as a dropevent
-          objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
-          if objFromPid is not None:
-            pids.append(objFromPid.pid)
-
-      itemData = json.dumps({'pids':pids})
-      event.mimeData().setData(ccpnmrJsonData, itemData)
-      event.mimeData().setText(itemData)
-      event.accept()
+  # def dragEnterEvent(self, event):
+  #   ccpnmrJsonData = 'ccpnmr-json'
+  #
+  #   if event.mimeData().hasUrls():
+  #     event.accept()
+  #   else:
+  #     pids = []
+  #     for item in self.selectedItems():
+  #       if item is not None:
+  #
+  #         # TODO:ED check the list of selected as with getSelectedObjects to get pids..
+  #         # trouble is, this is working as a dropevent
+  #         objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+  #         if objFromPid is not None:
+  #           pids.append(objFromPid.pid)
+  #
+  #     itemData = json.dumps({'pids':pids})
+  #     event.mimeData().setData(ccpnmrJsonData, itemData)
+  #     event.mimeData().setText(itemData)
+  #     event.accept()
 
 
 EDIT_ROLE = QtCore.Qt.EditRole

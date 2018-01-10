@@ -339,7 +339,7 @@ class NmrResidueTable(QuickTable):
                            , changeFunc=self.displayTableForNmrChain
                            , className=self.attributeName
                            , updateFunc=self._update
-                           , tableSelection='nmrChain'
+                           , tableSelection='nmrChain'      # - holds the current list
                            , pullDownWidget=self.ncWidget
                            , callBackClass=NmrResidue
                            , selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)

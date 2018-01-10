@@ -136,6 +136,7 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
          , 'Number of spectra selected for calculating the delta shift', None),
         ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
+        ('Included', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the DeltaShift calculation',  lambda nmr, value: CustomNmrResidueTable._setIncludeValue(nmr, value)),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
@@ -163,6 +164,19 @@ class CustomNmrResidueTable(NmrResidueTable):
     except:
       return None
 
+  @staticmethod
+  def _setIncludeValue(nmrResidue,value):
+
+    """
+    CCPN-INTERNAL: Insert an index into ObjectTable
+    """
+    try:
+      nmrResidue._includeInDeltaShift = value
+      print(nmrResidue._includeInDeltaShift, value)
+    except:
+      nmrResidue._includeInDeltaShift = True #Default
+
+
 class ChemicalShiftsMapping(CcpnModule):
 
   includeSettingsWidget = True
@@ -175,6 +189,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     BarGraph.mouseClickEvent = self._mouseClickEvent
     BarGraph.mouseDoubleClickEvent = self._mouseDoubleClickEvent
+
 
     self.mainWindow = mainWindow
     self.application = None
@@ -225,6 +240,9 @@ class ChemicalShiftsMapping(CcpnModule):
                                            self._peakChangedCallBack, onceOnly=True)
     self._peakChangedNotifier.lastPeakPos = None
 
+    self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',
+                                         self._nmrResidueChanged)
+
     if self.project:
       if len(self.project.nmrChains) > 0:
         self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
@@ -249,6 +267,8 @@ class ChemicalShiftsMapping(CcpnModule):
       # self.showOnViewerButton.setFixedWidth(150)
 
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
+      self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
+
       self.splitter.addWidget(self.nmrResidueTable)
       self.splitter.addWidget(self.barGraphWidget)
       self.mainWidget.getLayout().addWidget(self.splitter)
@@ -400,7 +420,13 @@ class ChemicalShiftsMapping(CcpnModule):
       self._peakChangedNotifier.lastPeakPos = peak.position
       self.updateModule()
 
+  def _nmrResidueChanged(self, data):
+    nmrResidue =  data[Notifier.OBJECT]
+    self.updateModule()
 
+  def _selectNmrResiduesAboveThreshold(self):
+    if self.aboveObjects:
+      self.current.nmrResidues = self.aboveObjects
 
   def updateBarGraph(self):
     xs = []
@@ -409,10 +435,10 @@ class ChemicalShiftsMapping(CcpnModule):
     disappereadPeaks = []
     self.aboveX = []
     self.aboveY = []
-    aboveObjects = []
+    self.aboveObjects = []
     self.belowX = []
     self.belowY = []
-    belowObjects = []
+    self.belowObjects = []
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
     thresholdPos = self.thresholdSpinBox.value()
@@ -433,11 +459,11 @@ class ChemicalShiftsMapping(CcpnModule):
                 if y > self.thresholdLinePos:
                   self.aboveY.append(y)
                   self.aboveX.append(x)
-                  aboveObjects.append(nmrResidue)
+                  self.aboveObjects.append(nmrResidue)
                 else:
                   self.belowX.append(x)
                   self.belowY.append(y)
-                  belowObjects.append(nmrResidue)
+                  self.belowObjects.append(nmrResidue)
 
     selectedNameColourA = self.aboveThresholdColourBox.getText()
     for code, name in spectrumColours.items():
@@ -459,14 +485,14 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
     self.barGraphWidget.customViewBox.addSelectionBox()
-
+    self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
     self.barGraphWidget._lineMoved(aboveX=self.aboveX,
                                    aboveY=self.aboveY,
-                                   aboveObjects=aboveObjects,
+                                   aboveObjects=self.aboveObjects,
                                    belowX=self.belowX,
                                    belowY=self.belowY,
-                                   belowObjects=belowObjects,
+                                   belowObjects=self.belowObjects,
                                    belowBrush=self.belowBrush,
                                    aboveBrush=self.aboveBrush
                                    )
@@ -530,12 +556,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
-        spectra = self.spectraSelectionWidget.getSelections()
-        nmrResidue.spectraCount = len(spectra)
-        self._updatedPeakCount(nmrResidue, spectra)
-        nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-        nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-        nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
+
+        if not nmrResidue._includeInDeltaShift == 'False' or False:
+          spectra = self.spectraSelectionWidget.getSelections()
+          nmrResidue.spectraCount = len(spectra)
+          self._updatedPeakCount(nmrResidue, spectra)
+          nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+          nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+          nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
       self.updateTable(self.nmrResidueTable.nmrChain)
       self.updateBarGraph()
 

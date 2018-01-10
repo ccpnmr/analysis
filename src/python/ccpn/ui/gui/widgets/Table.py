@@ -1583,3 +1583,86 @@ class Column:
   def _defaultIcon(self, obj):
 
     return self.defaultIcon
+
+
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Icon import Icon
+
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+  from ccpn.util import Colour
+
+
+  app = TestApplication()
+
+  class mockObj(object):
+    'Mock object to test the table widget editing properties'
+
+    integer = 3
+    exampleFloat = 3.1 # This will create a double spin box
+    exampleBool = True # This will create a check box
+    string = 'white' # This will create a line Edit
+    exampleList = (('Mock', 'Test'),) # This will create a pulldown
+    color = QtGui.QColor('Red')
+    icon = Icon('icons/warning')
+    r= Colour.colourNameToHexDict['red']
+    y = Colour.colourNameToHexDict['yellow']
+    b = Colour.colourNameToHexDict['blue']
+    colouredIcons = [None, Icon(color=r),Icon(color=y),Icon(color=b)]
+
+    flagsList = [['']*len(colouredIcons),[Icon]*len(colouredIcons),1,colouredIcons ]  # This will create a pulldown. Make a list with the
+                                                                                      # same structure of pulldown setData function: (texts=None, objects=None, index=None,
+                                                                                      # icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None)
+
+    def editBool(self, value):
+      mockObj.exampleBool =  value
+
+    def editFloat(self, value):
+      mockObj.exampleFloat = value
+
+
+    def editPulldown(self, value):
+      mockObj.exampleList = value
+
+
+
+    def editFlags(self, value):
+      print(value)
+
+  popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
+
+
+  cFloat = Column(heading       =   'Float',
+                  getValue      = lambda i: mockObj.exampleFloat,
+                  setEditValue  = lambda mockObj, value: mockObj.editFloat(mockObj, value),
+                  editDecimals  = 3, editStep=0.1
+                  )
+  cBool = Column(heading       = 'Bool',
+                 getValue      = lambda i: mockObj.exampleBool,
+                 setEditValue  = lambda mockObj, value: mockObj.editBool(mockObj, value),
+                 )
+
+  cPulldown = Column(heading='Pulldown',
+                 getValue=lambda i: mockObj.exampleList,
+                 setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+                 )
+  cIcon = Column(heading='Icon',
+                 getValue=None,
+                 getIcon=lambda i: mockObj.icon,
+                )
+  cFlags = Column(heading='Flags',
+                  getValue=lambda i: mockObj.flagsList,
+                  setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
+                 )
+
+  table = ObjectTable(parent=popup, columns=[cFloat, cBool, cPulldown, cIcon, cFlags], objects=[mockObj],  grid=(0, 0))
+
+
+  popup.show()
+  popup.raise_()
+  app.start()
+
+
+

@@ -243,10 +243,11 @@ class DataFrameObject(object):
       # check whether the pid is used anywhere in the table
       # this could be covered by the following change event
       self._table.hide()
-      changeList = self._dataFrame.replace({oldPid:obj.pid}, regex=True)
+      # changeList = self._dataFrame.replace({oldPid:obj.pid}, regex=True, inplace=True)
+      changeList = self._dataFrame.replace(to_replace=oldPid, value=obj.pid, inplace=True)
 
       # self._dataFrame = changeList
-      self._table.setData(changeList.values)
+      self._table.setData(self._dataFrame.values)
       # update table from diff
       self._table.setHorizontalHeaderLabels(self.headings)
 

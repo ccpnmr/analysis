@@ -64,7 +64,8 @@ class QuickTableFilter(Frame):
 
     labelColumn = Label(self,'Search in',)
     self.columnOptions = PulldownList(self,)
-    self.columnOptions.setMinimumWidth(self.columnOptions.sizeHint().width()*2)
+    # self.columnOptions.setMinimumWidth(self.columnOptions.sizeHint().width()*2)
+    self.columnOptions.setMinimumWidth(40)
     self.searchLabel = Label(self,'Search for',)
     self.edit = LineEdit(self,)
     self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
@@ -72,6 +73,7 @@ class QuickTableFilter(Frame):
                                               , partial(self.restoreTable, self.table)
                                               , partial(self.findOnTable, self.table)])
     self.searchButtons.buttons[1].setEnabled(False)
+    self.searchButtons.setMinimumWidth(30)
 
     self.widgetLayout = QtGui.QHBoxLayout()
     self.setLayout(self.widgetLayout)
@@ -142,3 +144,29 @@ class QuickTableFilter(Frame):
       self.searchButtons.buttons[1].setEnabled(False)
       self.restoreTable(table)
       MessageDialog.showWarning('Not found', '')
+
+
+def attachSearchWidget(table):
+  """
+  Attach the search widget to the bottom of the table widget
+  """
+  try:
+    if table.parent is not None:
+      parentLayout = None
+      if isinstance(table._parent, Base):
+      # if hasattr(table.parent, 'getLayout'):
+        parentLayout = table._parent.getLayout()
+
+      if isinstance(parentLayout, QtGui.QGridLayout):
+        idx = parentLayout.indexOf(table)
+        location = parentLayout.getItemPosition(idx)
+        if location is not None:
+          if len(location)>0:
+            row, column, rowSpan, columnSpan = location
+            table.searchWidget = QuickTableFilter(table=table, vAlign='B')
+            parentLayout.addWidget(table.searchWidget, row+1, column, rowSpan+1, columnSpan)
+            table.searchWidget.hide()
+            parentLayout.setVerticalSpacing(0)
+    return True
+  except:
+    return False

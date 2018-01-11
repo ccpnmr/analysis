@@ -49,7 +49,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
-from ccpn.ui.gui.widgets.SearchWidget import QuickTableFilter
+from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
@@ -387,7 +387,8 @@ class QuickTable(TableWidget, Base):
 
   def _raiseHeaderContextMenu(self, pos):
     if self.searchWidget is None:
-      self._addSearchWidget()
+      if not attachSearchWidget(self):
+        getLogger().warning('Search option not available')
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
@@ -410,25 +411,25 @@ class QuickTable(TableWidget, Base):
     if self.searchWidget is not None:
       self.searchWidget.show()
 
-  def _addSearchWidget(self):
-    # TODO:Luca Add search option for any table
-    if self.parent is not None:
-      parentLayout = None
-      if isinstance(self._parent, Base):
-      # if hasattr(self.parent, 'getLayout'):
-        parentLayout = self._parent.getLayout()
-
-      if isinstance(parentLayout, QtGui.QGridLayout):
-        idx = parentLayout.indexOf(self)
-        location = parentLayout.getItemPosition(idx)
-        if location is not None:
-          if len(location)>0:
-            row, column, rowSpan, columnSpan = location
-            self.searchWidget = QuickTableFilter(table=self, grid=(0,0), vAlign='B')
-            parentLayout.addWidget(self.searchWidget, row+1, column, rowSpan+1, columnSpan)
-            self.searchWidget.hide()
-    return True
-
+  # def _addSearchWidget(self):
+  #   # TODO:Luca Add search option for any table
+  #   if self.parent is not None:
+  #     parentLayout = None
+  #     if isinstance(self._parent, Base):
+  #     # if hasattr(self.parent, 'getLayout'):
+  #       parentLayout = self._parent.getLayout()
+  #
+  #     if isinstance(parentLayout, QtGui.QGridLayout):
+  #       idx = parentLayout.indexOf(self)
+  #       location = parentLayout.getItemPosition(idx)
+  #       if location is not None:
+  #         if len(location)>0:
+  #           row, column, rowSpan, columnSpan = location
+  #           self.searchWidget = QuickTableFilter(table=self, grid=(0,0), vAlign='B')
+  #           parentLayout.addWidget(self.searchWidget, row+1, column, rowSpan+1, columnSpan)
+  #           self.searchWidget.hide()
+  #   return True
+  #
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
     if selected:

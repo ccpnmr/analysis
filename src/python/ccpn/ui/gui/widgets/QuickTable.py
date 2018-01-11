@@ -467,28 +467,18 @@ class QuickTable(TableWidget, Base):
     self._dataFrameObject = dataFrameObject
 
     self.hide()
-
-    # TODO:ED this shouldn't need to be here
-    # check for the existence of 'Index' and 'comment' in the values
-    # numRows = len(dataFrame.index)
-    # if 'Index' not in dataFrame:
-    #   dataFrame['Index'] = [x for x in range(1, numRows+1)]
-    # if 'comment' not in dataFrame:
-    #   dataFrame['comment'] = [''] * numRows
-    #
-    # # and reorder the 'Index' to the front
-    # cols = dataFrame.columns.tolist()
-    # cols.insert(0, cols.pop(cols.index('Index')))
-    # dataFrame = dataFrame.reindex(columns=cols)
-
-    # set the table and column headings
     self._silenceCallback = True
 
     # keep the original sorting method
     sortOrder = self.horizontalHeader().sortIndicatorOrder()
     sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-    self.setData(dataFrameObject.dataFrame.values)
+    if not dataFrameObject.dataFrame.empty:
+      self.setData(dataFrameObject.dataFrame.values)
+    else:
+      self.clearTable()
+      self.setColumnCount(dataFrameObject.numColumns)
+
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
     # needed after setting the column headings
@@ -759,7 +749,12 @@ class QuickTable(TableWidget, Base):
   def clearTable(self):
     "remove all objects from the table"
     self._silenceCallback = True
-    self.clear()
+    self.clearContents()
+    self.verticalHeadersSet = True
+    self.horizontalHeadersSet = True
+    self.items = []
+    self.setRowCount(0)
+    self.sortModes = {}
 
     if self._dataFrameObject:
       self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
@@ -951,11 +946,14 @@ class QuickTable(TableWidget, Base):
                                       , tableClass.__name__
                                       , self._updateTableCallback)
     if rowClass:
+
+      # TODO:ED check OnceOnly residue notifiers
+      # 'i-1' residue spawns a rename but the 'i' residue only fires a change
       self._rowNotifier = Notifier(self.project
                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                     , rowClass.__name__
                                     , self._updateRowCallback
-                                    , onceOnly=True)
+                                    , onceOnly=False)
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
         self._cellNotifiers.append(Notifier(self.project

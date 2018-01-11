@@ -79,6 +79,10 @@ class DataFrameObject(object):
     self._hiddenColumns = hiddenColumns
 
   @property
+  def numColumns(self):
+    return self._columnDefinitions.numColumns
+
+  @property
   def columnDefinitions(self):
     return self._columnDefinitions
 

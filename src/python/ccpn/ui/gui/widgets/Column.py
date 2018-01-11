@@ -46,6 +46,13 @@ class ColumnClass:
       self._columns = columnToAdd
 
   @property
+  def numColumns(self):
+    if self._columns:
+      return len(self._columns)
+    else:
+      return None
+
+  @property
   def columns(self):
     return self._columns
 

@@ -29,6 +29,7 @@ import re
 from PyQt4 import QtGui, QtCore
 import pandas as pd
 from pyqtgraph import TableWidget
+from pyqtgraph.widgets.TableWidget import _defersort
 import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
@@ -90,7 +91,7 @@ class QuickTable(TableWidget, Base):
   def __init__(self, parent=None,
                mainWindow=None,
                dataFrameObject=None,      # collate into a single object that can be changed quickly
-               actionCallback=None, selectionCallback=None,
+               actionCallback=None, selectionCallback=None, checkBoxCallback = None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
                hideIndex=True, stretchLastSection=True,
@@ -118,9 +119,14 @@ class QuickTable(TableWidget, Base):
 
     # set the application specfic links
     self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
+    self.application = None
+    self.project = None
+    self.current = None
+
+    if self.mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
 
     # initialise the internal data storage
     self._dataFrameObject = dataFrameObject
@@ -143,6 +149,7 @@ class QuickTable(TableWidget, Base):
     else:
       self.setSelectionBehavior(self.SelectItems)
 
+    self._checkBoxCallback = checkBoxCallback
     # set all the elements to the same size
     self.hideIndex = hideIndex
     self._setDefaultRowHeight()
@@ -174,8 +181,13 @@ class QuickTable(TableWidget, Base):
     self._actionCallback = actionCallback
     self._selectionCallback = selectionCallback
     self._silenceCallback = False
-    self.doubleClicked.connect(self._doubleClickCallback)
-    self.cellClicked.connect(self._cellClicked)
+    if self._actionCallback:
+      self.doubleClicked.connect(self._doubleClickCallback)
+    else:
+      self.doubleClicked.connect(self._defaultDoubleClick)
+    if self._selectionCallback:
+      # self.cellClicked.connect(self._cellClicked)
+      self.itemClicked.connect(self._cellClicked)
 
     # set the delegate for editing
     delegate = QuickTableDelegate(self)
@@ -199,10 +211,45 @@ class QuickTable(TableWidget, Base):
     self.setMinimumSize(30, 30)
     self.searchWidget = None
     self._parent.layout().setVerticalSpacing(0)
+  #
+  # def _cellClicked(self, row, col):
+  #   self._currentRow = row
+  #   self._currentCol = col
 
-  def _cellClicked(self, row, col):
-    self._currentRow = row
-    self._currentCol = col
+  def _cellClicked(self, item):
+    if item:
+      if isinstance(item.value, bool):
+
+        self._checkBoxTableCallback(item)
+      try:
+        if self._selectionCallback:
+          self._currentRow = item.row()
+          self._currentCol = item.column()
+      except:
+        # Fixme
+        # item has been deleted error
+        pass
+    #
+  def _checkBoxCallback(self, data):
+      pass
+
+  def _defaultDoubleClick(self, itemSelection):
+
+    model = self.selectionModel()
+
+    # selects all the items in the row
+    selection = model.selectedIndexes()
+
+    if selection:
+      row = itemSelection.row()
+      col = itemSelection.column()
+      if self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
+
+        item = self.item(row, col)
+        item.setEditable(True)
+        # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+        # item.textChanged.connect(partial(self._changeMe, item))
+        self.editItem(item)
 
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
@@ -249,6 +296,39 @@ class QuickTable(TableWidget, Base):
           # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
           # item.textChanged.connect(partial(self._changeMe, item))
           self.editItem(item)         # enter the editing mode
+
+  @_defersort
+  def setRow(self, row, vals):
+    if row > self.rowCount() - 1:
+      self.setRowCount(row + 1)
+    for col in range(len(vals)):
+      val = vals[col]
+      item = self.itemClass(val, row)
+      item.setEditable(self.editable)
+      sortMode = self.sortModes.get(col, None)
+      if sortMode is not None:
+        item.setSortMode(sortMode)
+      format = self._formats.get(col, self._formats[None])
+      item.setFormat(format)
+      self.items.append(item)
+      self.setItem(row, col, item)
+
+      # item.setValue(val)  # Required--the text-change callback is invoked
+      # when we call setItem.
+      if isinstance(val, bool): # this will create a check box if the value is a bool
+        item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        state = 2 if val else 0
+        item.setCheckState(state)
+
+      if isinstance(val, list or tuple):
+        pulldown = PulldownList(None, )
+        pulldown.setData(*val)
+        self.setCellWidget(row, col, pulldown)
+
+
+      else:
+        item.setValue(val)
+
 
   def _changeMe(self, row, col, widget, endEditHint):
     text = widget.text()
@@ -303,27 +383,66 @@ class QuickTable(TableWidget, Base):
 
         self._selectionCallback(data)
 
+
+  def _checkBoxTableCallback(self, itemSelection):
+    state = True if itemSelection.checkState() == 2 else False
+    value = itemSelection.value
+    if not state == value:
+      if not self._silenceCallback:
+        selectionModel = self.selectionModel()
+        selectionModel.clearSelection()
+        selectionModel.select(self.model().index(itemSelection.row(), 0)
+                              , selectionModel.Select | selectionModel.Rows)
+        objList = self.getSelectedObjects()
+
+        if objList:
+          data = CallBack(theObject = self._dataFrameObject
+                          , object = objList
+                          , index = 0
+                          , targetName = objList[0].className
+                          , trigger = CallBack.DOUBLECLICK
+                          , row = itemSelection.row()
+                          , col = itemSelection.column()
+                          , rowItem = itemSelection
+                          , checked = state)
+          textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
+          if textHeader:
+            self._dataFrameObject.setObjAttr(textHeader, objList[0], state)
+            # setattr(objList[0], textHeader, state)
+        else:
+          data = CallBack(theObject=self._dataFrameObject
+                          , object=None
+                          , index=0
+                          , targetName=None
+                          , trigger=CallBack.DOUBLECLICK
+                          , row=itemSelection.row()
+                          , col=itemSelection.column()
+                          , rowItem=itemSelection
+                          , checked = state)
+        self._checkBoxCallback(data)
+
   def showColumns(self, dataFrameObject):
     # show the columns in the list
     for i, colName in enumerate(dataFrameObject.headings):
-      if colName in dataFrameObject.hiddenColumns:
-        self.hideColumn(i)
-      else:
-        self.showColumn(i)
+      if dataFrameObject.hiddenColumns:
+        if colName in dataFrameObject.hiddenColumns:
+          self.hideColumn(i)
+        else:
+          self.showColumn(i)
 
-        if dataFrameObject.columnDefinitions.setEditValues[i]:
+          if dataFrameObject.columnDefinitions.setEditValues[i]:
 
-          # need to put it into the header
-          header = self.horizontalHeaderItem(i)
+            # need to put it into the header
+            header = self.horizontalHeaderItem(i)
 
-          icon = QtGui.QIcon(self._icons[0])
-          # item = self.item(0, i)
-            # TableWidget.QTableWidgetItem(icon, 'Boing')  # Second argument
-          # if item:
-          #   item.setIcon(icon)
-          #   self.setItem(0, i, item)
-          if header:
-            header.setIcon(icon)
+            icon = QtGui.QIcon(self._icons[0])
+            # item = self.item(0, i)
+              # TableWidget.QTableWidgetItem(icon, 'Boing')  # Second argument
+            # if item:
+            #   item.setIcon(icon)
+            #   self.setItem(0, i, item)
+            if header:
+              header.setIcon(icon)
 
   def _setDefaultRowHeight(self):
     # set a minimum height to the rows based on the fontmetrics of a generic character
@@ -503,6 +622,8 @@ class QuickTable(TableWidget, Base):
       self.clearTable()
       self.setColumnCount(dataFrameObject.numColumns)
 
+    self.setData(dataFrameObject.dataFrame.values)
+
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
 
     # needed after setting the column headings
@@ -531,6 +652,7 @@ class QuickTable(TableWidget, Base):
     """
     allItems = []
     objects = []
+
     # objectList = {}
     # indexList = {}
 
@@ -552,10 +674,10 @@ class QuickTable(TableWidget, Base):
       # objectList[obj.pid] = col
 
     return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
-                           , objectList=objects
+                           , objectList=objects or []
                            # , indexList=indexList
-                           , columnDefs=colDefs
-                           , hiddenColumns=hiddenColumns
+                           , columnDefs=colDefs or []
+                           , hiddenColumns=hiddenColumns or []
                            , table=table)
 
   def getDataFrameFromRows(self, table=None
@@ -1100,3 +1222,105 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
       getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))
 
     # return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Icon import Icon
+
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+  from ccpn.util import Colour
+  from ccpn.ui.gui.widgets.Column import ColumnClass, Column
+
+
+  app = TestApplication()
+
+  class mockObj(object):
+    'Mock object to test the table widget editing properties'
+    pid = ''
+    integer = 3
+    exampleFloat = 3.1 # This will create a double spin box
+    exampleBool = True # This will create a check box
+    string = 'white' # This will create a line Edit
+    exampleList = [('Mock', 'Test'),] # This will create a pulldown
+    color = QtGui.QColor('Red')
+    icon = Icon('icons/warning')
+    r= Colour.colourNameToHexDict['red']
+    y = Colour.colourNameToHexDict['yellow']
+    b = Colour.colourNameToHexDict['blue']
+    colouredIcons = [None, Icon(color=r),Icon(color=y),Icon(color=b)]
+
+    flagsList = [['']*len(colouredIcons),[Icon]*len(colouredIcons),1,colouredIcons ]  # This will create a pulldown. Make a list with the
+                                                                                      # same structure of pulldown setData function: (texts=None, objects=None, index=None,
+                                                                                      # icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None)
+
+    def editBool(self, value):
+      mockObj.exampleBool =  value
+
+    def editFloat(self, value):
+      mockObj.exampleFloat = value
+
+
+    def editPulldown(self, value):
+      mockObj.exampleList = value
+
+
+
+    def editFlags(self, value):
+      print(value)
+
+
+  def _checkBoxCallBack(data):
+    print(data['checked'])
+
+  popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
+
+  columns = ColumnClass([
+                        (
+                        'Float',
+                        lambda i: mockObj.exampleFloat,
+                        'TipText: Float',
+                        lambda mockObj, value: mockObj.editFloat(mockObj, value)
+                        ),
+
+                        (
+                        'Bool',
+                        lambda i: mockObj.exampleBool,
+                        'TipText: Bool',
+                        lambda mockObj, value: mockObj.editBool(mockObj, value),
+                        ),
+
+                        (
+                        'Pulldown',
+                        lambda i: mockObj.exampleList,
+                        'TipText: Pulldown',
+                        lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+                        ),
+
+                        (
+                        'Flags',
+                        lambda i: mockObj.flagsList,
+                        'TipText: Flags',
+                        lambda mockObj, value: mockObj.editFlags(mockObj, value),
+                        )
+                      ])
+  table = QuickTable(parent=popup, dataFrameObject=None, checkBoxCallback=_checkBoxCallBack,  grid=(0, 0))
+  df = table.getDataFrameFromList(table, [mockObj]*5,colDefs=columns )
+
+  table.setTableFromDataFrameObject(dataFrameObject=df)
+  table.item(0,0).setBackground(QtGui.QColor(100,100,150)) #color the first item
+  combo = QtGui.QComboBox()
+  table.setCellWidget(0, 0, combo)
+  # table.item(0, 0).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+  # table.item(0, 0).setCheckState(QtCore.Qt.Unchecked)
+  # table.item(0,0).setFormat(float(table.item(0,0).format))
+  # print(table.item(0,0)._format)
+
+  print('AA',table.horizontalHeaderItem(1).text())
+  table.horizontalHeaderItem(1).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+  table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Checked)
+
+
+  popup.show()
+  popup.raise_()
+  app.start()

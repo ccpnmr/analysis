@@ -76,14 +76,14 @@ class SpectrumGroupEditor(CcpnDialog):
     self.setLayout(self.mainLayout)
     self.setWindowTitle("Spectrum Group Setup")
     self.mainLayout.setContentsMargins(20, 20, 25, 15)  # L,T,R,B
-    self.setFixedWidth(800)
+    # self.setFixedWidth(800)
 
   def _setLeftWidgets(self):
     self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Current SGs'],
                                                   selectedInd=1,
                                                   callback=self._initialOptionsCallBack,
                                                   direction='h',
-                                                  tipTexts=None)
+                                                  tipTexts=None, gridSpan=(1,2))
     self.leftSpectrumGroupLabel = Label(self, 'Name', )
     self.leftSpectrumGroupsLabel = Label(self, 'Current SGs')
     self.spectrumGroupLabel = Label(self, '')

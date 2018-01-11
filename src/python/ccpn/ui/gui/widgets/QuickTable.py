@@ -49,6 +49,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
+from ccpn.ui.gui.widgets.SearchWidget import QuickTableFilter
 from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
 from collections import OrderedDict
@@ -196,6 +197,7 @@ class QuickTable(TableWidget, Base):
 
     # set the minimum size the table can collapse to
     self.setMinimumSize(30, 30)
+    self.searchWidget = None
 
   def _cellClicked(self, row, col):
     self._currentRow = row
@@ -384,8 +386,8 @@ class QuickTable(TableWidget, Base):
     action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
   def _raiseHeaderContextMenu(self, pos):
-    # if self.searchWidget is None:
-      # self._addSearchWidget()
+    if self.searchWidget is None:
+      self._addSearchWidget()
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
@@ -403,6 +405,29 @@ class QuickTable(TableWidget, Base):
 
     if action == searchSettings:
       self.showSearchSettings()
+
+  def showSearchSettings(self):
+    if self.searchWidget is not None:
+      self.searchWidget.show()
+
+  def _addSearchWidget(self):
+    # TODO:Luca Add search option for any table
+    if self.parent is not None:
+      parentLayout = None
+      if isinstance(self._parent, Base):
+      # if hasattr(self.parent, 'getLayout'):
+        parentLayout = self._parent.getLayout()
+
+      if isinstance(parentLayout, QtGui.QGridLayout):
+        idx = parentLayout.indexOf(self)
+        location = parentLayout.getItemPosition(idx)
+        if location is not None:
+          if len(location)>0:
+            row, column, rowSpan, columnSpan = location
+            self.searchWidget = QuickTableFilter(table=self, grid=(0,0), vAlign='B')
+            parentLayout.addWidget(self.searchWidget, row+1, column, rowSpan+1, columnSpan)
+            self.searchWidget.hide()
+    return True
 
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
@@ -443,24 +468,21 @@ class QuickTable(TableWidget, Base):
             if hasattr(obj, 'pid'):
               obj.delete()
 
-  def _addSearchWidget(self):
-    # TODO:Luca Add search option for any table
-    if self._parent is not None:
-      parentLayout = None
-      if isinstance(self._parent, Base):
-      # if hasattr(self._parent, 'getLayout'):
-        parentLayout = self._parent.getLayout()
+  def refreshTable(self):
+    self.setTableFromDataFrameObject(self._dataFrameObject)
 
-      if isinstance(parentLayout, QtGui.QGridLayout):
-        idx = parentLayout.indexOf(self)
-        location = parentLayout.getItemPosition(idx)
-        if location is not None:
-          if len(location)>0:
-            row, column, rowSpan, columnSpan = location
-            self.searchWidget = ObjectTableFilter(table=self, grid=(0,0), vAlign='B')
-            parentLayout.addWidget(self.searchWidget, row+2, column, rowSpan+2, columnSpan)
-            self.searchWidget.hide()
-    return True
+  def refreshHeaders(self):
+    self.hide()
+    self._silenceCallback = True
+
+    self.setColumnCount(self._dataFrameObject.numColumns)
+    self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
+    self.showColumns(self._dataFrameObject)
+    self.resizeColumnsToContents()
+    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
+    self.show()
+    self._silenceCallback = False
 
   def setTableFromDataFrameObject(self, dataFrameObject):
     # populate the table from the the Pandas dataFrame
@@ -834,7 +856,7 @@ class QuickTable(TableWidget, Base):
 
       if trigger == Notifier.DELETE:
 
-          # remove item from self._dataFrameObject
+        # remove item from self._dataFrameObject
 
         self._dataFrameObject.removeObject(row)
 
@@ -842,17 +864,17 @@ class QuickTable(TableWidget, Base):
 
         # insert item into self._dataFrameObject
 
-        tSelect = getattr(self, self._tableData['tableSelection'])
-        if tSelect:
-          rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+        if self._tableData['tableSelection']:
+          tSelect = getattr(self, self._tableData['tableSelection'])
+          if tSelect:
+            rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
 
-          if rows and len(rows) > 1:
-            self._dataFrameObject.appendObject(row)
-            self.update()
-          else:
-
-            # self._update(self.nmrTable)
-            self._tableData['updateFunc'](tSelect)
+            if rows and len(rows) > 1:
+              self._dataFrameObject.appendObject(row)
+              self.update()
+            else:
+              # self._update(self.nmrTable)
+              self._tableData['updateFunc'](tSelect)
 
       elif trigger == Notifier.CHANGE:
 

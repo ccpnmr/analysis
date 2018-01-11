@@ -7,6 +7,8 @@ from typing import List
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
+from ccpn.util.Logging import getLogger
+
 
 def navigateToPeakPosition(project:Project, peak:Peak=None,
    selectedDisplays:List[GuiSpectrumDisplay]=None, strip:GuiStrip=None):
@@ -21,7 +23,7 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
   if peak is None:
     peak = project._appBase.current.peak
     if peak is None:
-      print('No peak passed in')
+      getLogger().warning('No peak selected.')
       return
 
   positions = peak.position

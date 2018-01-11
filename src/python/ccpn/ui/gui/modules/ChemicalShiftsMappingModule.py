@@ -114,7 +114,8 @@ class CustomNmrResidueTable(NmrResidueTable):
   # columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
   # columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
 
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, nmrChain=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
+               checkBoxCallback=None, nmrChain=None, **kwds):
 
     # NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
     #                          selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
@@ -123,8 +124,10 @@ class CustomNmrResidueTable(NmrResidueTable):
                              , moduleParent=moduleParent
                              , actionCallback=actionCallback
                              , selectionCallback=selectionCallback
+                             , checkBoxCallback = checkBoxCallback
                              , nmrChain=nmrChain
-                             , multiSelect=True, **kwds)
+                             , multiSelect=True,
+                             **kwds)
 
     self.NMRcolumns = ColumnClass([
         ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
@@ -136,11 +139,21 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
          , 'Number of spectra selected for calculating the delta shift', None),
         ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
-        ('Included', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the DeltaShift calculation',  lambda nmr, value: CustomNmrResidueTable._setIncludeValue(nmr, value)),
+        ('include in Map', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     self._widget.setFixedHeight(45)
+
+
+  @staticmethod
+  def _setChecked(obj, value):
+    """
+    CCPN-INTERNAL: Insert a comment into QuickTable
+    """
+
+    obj._includeInDeltaShift = value
+    obj._finaliseAction('change')
 
   @staticmethod
   def _getNmrResidueSpectraCount(nmrResidue):
@@ -164,17 +177,6 @@ class CustomNmrResidueTable(NmrResidueTable):
     except:
       return None
 
-  @staticmethod
-  def _setIncludeValue(nmrResidue,value):
-
-    """
-    CCPN-INTERNAL: Insert an index into ObjectTable
-    """
-    try:
-      nmrResidue._includeInDeltaShift = value
-      print(nmrResidue._includeInDeltaShift, value)
-    except:
-      nmrResidue._includeInDeltaShift = True #Default
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -257,7 +259,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
-                                                   actionCallback= self._customActionCallBack,
+                                                   actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
@@ -420,6 +422,26 @@ class ChemicalShiftsMapping(CcpnModule):
       self._peakChangedNotifier.lastPeakPos = peak.position
       self.updateModule()
 
+  def _checkBoxCallback(self, data):
+    '''
+    Callback from checkboxes inside a table
+    '''
+    # objs = data[Notifier.OBJECT]
+
+    # itemSelection = data['rowItem']
+    # att = self.nmrResidueTable.horizontalHeaderItem(itemSelection.column()).text()
+    # if att == 'Included':
+    # objs = data[Notifier.OBJECT]
+    # print(objs)
+    # if objs:
+    #   obj = objs[0]
+    # #     print(obj)
+    # #   obj._includeInDeltaShift = data['checked']
+    #   obj._finaliseAction('change')
+    # self.updateModule()
+    pass
+    # print(data)
+
   def _nmrResidueChanged(self, data):
     nmrResidue =  data[Notifier.OBJECT]
     self.updateModule()
@@ -557,13 +579,15 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
 
-        if not nmrResidue._includeInDeltaShift == 'False' or False:
+        if nmrResidue._includeInDeltaShift:
           spectra = self.spectraSelectionWidget.getSelections()
           nmrResidue.spectraCount = len(spectra)
           self._updatedPeakCount(nmrResidue, spectra)
           nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
           nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
           nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
+        else:
+          nmrResidue._deltaShift = None
       self.updateTable(self.nmrResidueTable.nmrChain)
       self.updateBarGraph()
 

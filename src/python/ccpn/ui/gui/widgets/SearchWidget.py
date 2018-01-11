@@ -73,7 +73,7 @@ class QuickTableFilter(Frame):
                                               , partial(self.restoreTable, self.table)
                                               , partial(self.findOnTable, self.table)])
     self.searchButtons.buttons[1].setEnabled(False)
-    self.searchButtons.setMinimumWidth(30)
+    self.searchButtons.setFixedHeight(30)
 
     self.widgetLayout = QtGui.QHBoxLayout()
     self.setLayout(self.widgetLayout)
@@ -83,6 +83,8 @@ class QuickTableFilter(Frame):
     self.setColumnOptions()
     self.widgetLayout.setContentsMargins(0,0,0,0)
     self.setContentsMargins(0,0,0,0)
+
+    self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
 
   def setColumnOptions(self):
     # columns = self.table._dataFrameObject.columns
@@ -151,7 +153,7 @@ def attachSearchWidget(table):
   Attach the search widget to the bottom of the table widget
   """
   try:
-    if table.parent is not None:
+    if table._parent is not None:
       parentLayout = None
       if isinstance(table._parent, Base):
       # if hasattr(table.parent, 'getLayout'):
@@ -166,7 +168,9 @@ def attachSearchWidget(table):
             table.searchWidget = QuickTableFilter(table=table, vAlign='B')
             parentLayout.addWidget(table.searchWidget, row+1, column, rowSpan+1, columnSpan)
             table.searchWidget.hide()
-            parentLayout.setVerticalSpacing(0)
+
+            # TODO:ED move this to the tables
+            # parentLayout.setVerticalSpacing(0)
     return True
   except:
     return False

@@ -198,6 +198,7 @@ class QuickTable(TableWidget, Base):
     # set the minimum size the table can collapse to
     self.setMinimumSize(30, 30)
     self.searchWidget = None
+    self._parent.layout().setVerticalSpacing(0)
 
   def _cellClicked(self, row, col):
     self._currentRow = row

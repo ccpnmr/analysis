@@ -264,6 +264,16 @@ class DataFrameObject(object):
 
       # TODO:ED new functionality may be to use the label types in preferences in the tables
 
+  def objAttr(self, headerText, obj):
+    for header in self._columnDefinitions.columns:
+      if header.headerText == headerText:
+        return header.getValue(obj)
+
+  def setObjAttr(self, headerText, obj, value):
+    for header in self._columnDefinitions.columns:
+      if header.headerText == headerText:
+        header.setEditValue(obj, value)
+
   def changeObject(self, obj):
     # if obj.pid in self._objectList:
     if self.find(self._table, str(obj.pid), column='Pid') is not None:

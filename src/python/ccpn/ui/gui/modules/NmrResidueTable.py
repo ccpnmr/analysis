@@ -249,7 +249,8 @@ class NmrResidueTable(QuickTable):
     except:
       return None
 
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, nmrChain=None,  multiSelect = False,
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
+               checkBoxCallback = None, nmrChain=None,  multiSelect = False,
                **kwds):
     """
     Initialise the widgets for the module.
@@ -314,6 +315,7 @@ class NmrResidueTable(QuickTable):
                         , autoResize=True,  multiSelect=multiSelect
                         , actionCallback=actionCallback
                         , selectionCallback=selectionCallback
+                        , checkBoxCallback = checkBoxCallback
                         , grid = (3, 0), gridSpan = (1, 6)
                         , enableDelete=True
                         )

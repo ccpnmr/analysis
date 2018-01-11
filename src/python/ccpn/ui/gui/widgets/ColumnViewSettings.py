@@ -71,7 +71,7 @@ class ColumnViewSettings(Widget):
 
   def initCheckBoxes(self):
     columns = self.dataFrameObject.headings   #   self.table._columns
-    hiddenColumns = self.dataFrameObject.hiddenColumns
+    hiddenColumns = self.dataFrameObject.hiddenColumns or []
 
     if columns:
       for i, colum in enumerate(columns):

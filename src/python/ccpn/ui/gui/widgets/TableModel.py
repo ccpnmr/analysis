@@ -351,10 +351,10 @@ class ObjectTableModel(TableModel):
     elif role == BG_ROLE:
       obj = self.objects[index.row()]
       objCol = self.columns[index.column()]
-      # color = objCol.getColor(obj)
+      color = objCol.getColor(obj)
       
-      # if color:
-      #   return QColor(color)
+      if color:
+        return QColor(color)
 
     elif role == CHECK_ROLE:
       obj = self.objects[index.row()]

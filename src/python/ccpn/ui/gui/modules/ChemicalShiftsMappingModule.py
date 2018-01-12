@@ -58,6 +58,7 @@ from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.util import Colour
 import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -144,6 +145,7 @@ class CustomNmrResidueTable(NmrResidueTable):
          , 'Number of spectra selected for calculating the delta shift', None),
         ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
         ('include in Map', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
+        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
@@ -235,6 +237,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     self.showStructureIcon = Icon('icons/showStructure')
     self.updateIcon = Icon('icons/update')
+
     self._setWidgets()
     self._setSettingsWidgets()
 
@@ -257,7 +260,7 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
 
     if self.application:
-      # self.splitter = Splitter(QtCore.Qt.Vertical)
+      self.splitter = Splitter(QtCore.Qt.Vertical)
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
 
@@ -281,9 +284,9 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
-      # self.splitter.addWidget(self.nmrResidueTable)
-      # self.splitter.addWidget(self.barGraphWidget)
-      # self.mainWidget.getLayout().addWidget(self.splitter)
+      self.splitter.addWidget(self.nmrResidueTable)
+      self.splitter.addWidget(self.barGraphWidget)
+      self.mainWidget.getLayout().addWidget(self.splitter)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
   def _checkSpectraWithPeakListsOnly(self):
@@ -517,7 +520,13 @@ class ChemicalShiftsMapping(CcpnModule):
             if len(nmrResidue._spectraWithMissingPeaks) != 0:
               if nmrResidue.sequenceCode:
                 x = int(nmrResidue.sequenceCode)
-                y = self.disappearedBarThresholdSpinBox.value()
+                if nmrResidue._deltaShift:
+                  y = nmrResidue._deltaShift
+                else:
+                  if nmrResidue._includeInDeltaShift:
+                    y = self.disappearedBarThresholdSpinBox.value()
+                  else:
+                    y = 0
                 self.disappereadY.append(y)
                 self.disappereadX.append(x)
                 self.disappereadObjects.append(nmrResidue)
@@ -579,8 +588,12 @@ class ChemicalShiftsMapping(CcpnModule):
                                    disappearedObjects = self.disappereadObjects,
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
-    # self.splitter.addWidget(self.barGraphWidget)
+    self.splitter.addWidget(self.barGraphWidget)
+    # self._colourDeltaShiftTableValues()
 
+  # def _colourDeltaShiftTableValues(self):
+  #   print(self.nmrResidueTable.deltaShiftsColumn)
+    # self.nmrResidueTable.item(0, 0).setBackground(QtGui.QColor(100, 100, 150))
 
   def updateThresholdLineValue(self, value):
     self.barGraphWidget.xLine.setPos(value)
@@ -660,8 +673,6 @@ class ChemicalShiftsMapping(CcpnModule):
       spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
       spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
       nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
-      if len(nmrResidue._spectraWithMissingPeaks) >0:
-        nmrResidue.comment = 'Missing'
       return nmrResidue._spectraWithMissingPeaks
 
 

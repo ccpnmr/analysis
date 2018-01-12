@@ -61,7 +61,8 @@ from ccpn.ui.gui.widgets.Icon import Icon
 import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                  colourAboveThreshold, colourBelowThreshold):
+                                      missingdResidues, colourMissing, colourAboveThreshold,
+                                      colourBelowThreshold):
 
   if os.path.exists(pdbPath):
     warn = 'This script is auto-generated. Any changes here will be lost.'
@@ -79,6 +80,9 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
       f.write('''\ncmd.select('belowThreshold', 'res  ''' + belowThresholdResidues + ''' ')''')
       f.write('''\ncmd.set_color("BelowColour", " ''' + str(colourBelowThreshold) + ''' ")''')
       f.write('''\ncmd.color('BelowColour', 'belowThreshold')''')
+      f.write('''\ncmd.select('missing', 'res  ''' + missingdResidues + ''' ')''')
+      f.write('''\ncmd.set_color("MissingColour", " ''' + str(colourMissing) + ''' ")''')
+      f.write('''\ncmd.color('MissingColour', 'missing')''')
       f.write('''\ncmd.deselect()''')
 
   return filePath
@@ -230,6 +234,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.thresholdLinePos = DefaultThreshould
 
     self.showStructureIcon = Icon('icons/showStructure')
+    self.updateIcon = Icon('icons/update')
     self._setWidgets()
     self._setSettingsWidgets()
 
@@ -238,9 +243,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak',
                                               self._peakDeletedCallBack)
 
-    self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
-                                           self._peakChangedCallBack, onceOnly=True)
-    self._peakChangedNotifier.lastPeakPos = None
+    # self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
+    #                                        self._peakChangedCallBack, onceOnly=True)
+    # self._peakChangedNotifier.lastPeakPos = None
 
     self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',
                                          self._nmrResidueChanged)
@@ -266,6 +271,11 @@ class ChemicalShiftsMapping(CcpnModule):
                                        callback=self._showOnMolecularViewer,
                                        grid = (1, 1), hAlign='l')
       self.showOnViewerButton.setFixedHeight(25)
+
+      self.updateButton1 = Button(self.nmrResidueTable._widget, text='', icon=self.updateIcon,
+                                  tipText='Update all', callback=self.updateModule,
+                                 grid=(1, 2), hAlign='r' )
+      self.updateButton1.setFixedHeight(25)
       # self.showOnViewerButton.setFixedWidth(150)
 
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
@@ -276,8 +286,16 @@ class ChemicalShiftsMapping(CcpnModule):
       # self.mainWidget.getLayout().addWidget(self.splitter)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
-
-
+  def _checkSpectraWithPeakListsOnly(self):
+    for cb in self.spectraSelectionWidget.allSpectraCheckBoxes:
+      sp = self.project.getByPid(cb.text())
+      lsts = []
+      if sp:
+        for pl in sp.peakLists:
+          if len(pl.peaks)>0:
+            lsts.append(True)
+      if not any(lsts):
+        cb.setChecked(False)
 
   def _setSettingsWidgets(self):
 
@@ -293,6 +311,8 @@ class ChemicalShiftsMapping(CcpnModule):
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
+    self._checkSpectraWithPeakListsOnly()
+
     # self.spectraSelectionWidget.setMaximumHeight(150)
     i += 2
     self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Relative Contribution ', grid=(i, 0))
@@ -434,12 +454,12 @@ class ChemicalShiftsMapping(CcpnModule):
     if len(self.current.peaks) == 0:
       self.updateModule()
 
-  def _peakChangedCallBack(self, data):
-
-    peak = data[Notifier.OBJECT]
-    if self._peakChangedNotifier.lastPeakPos != peak.position:
-      self._peakChangedNotifier.lastPeakPos = peak.position
-      self.updateModule()
+  # def _peakChangedCallBack(self, data):
+  #
+  #   peak = data[Notifier.OBJECT]
+  #   if self._peakChangedNotifier.lastPeakPos != peak.position:
+  #     self._peakChangedNotifier.lastPeakPos = peak.position
+  #     self.updateModule()
 
   def _checkBoxCallback(self, data):
     '''
@@ -473,7 +493,9 @@ class ChemicalShiftsMapping(CcpnModule):
     xs = []
     ys = []
     obs = []
-    disappereadPeaks = []
+    self.disappereadX = []
+    self.disappereadY = []
+    self.disappereadObjects = []
     self.aboveX = []
     self.aboveY = []
     self.aboveObjects = []
@@ -482,6 +504,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.belowObjects = []
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
+    self.disappearedPeakBrush = 'b'
     thresholdPos = self.thresholdSpinBox.value()
 
     if self.barGraphWidget.xLine:
@@ -490,21 +513,32 @@ class ChemicalShiftsMapping(CcpnModule):
       if self.nmrResidueTable._dataFrameObject:
         for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:
           if nmrResidue:
-            if nmrResidue._deltaShift:
+            nmrResidue.missingPeaks = False
+            if len(nmrResidue._spectraWithMissingPeaks) != 0:
               if nmrResidue.sequenceCode:
                 x = int(nmrResidue.sequenceCode)
-                y = float(nmrResidue._deltaShift)
-                xs.append(x)
-                ys.append(y)
-                obs.append(nmrResidue)
-                if y > self.thresholdLinePos:
-                  self.aboveY.append(y)
-                  self.aboveX.append(x)
-                  self.aboveObjects.append(nmrResidue)
-                else:
-                  self.belowX.append(x)
-                  self.belowY.append(y)
-                  self.belowObjects.append(nmrResidue)
+                y = self.disappearedBarThresholdSpinBox.value()
+                self.disappereadY.append(y)
+                self.disappereadX.append(x)
+                self.disappereadObjects.append(nmrResidue)
+                nmrResidue.missingPeaks = True
+            if nmrResidue._deltaShift:
+              if not nmrResidue.missingPeaks:
+                if nmrResidue.sequenceCode:
+                  x = int(nmrResidue.sequenceCode)
+                  y = float(nmrResidue._deltaShift)
+                  xs.append(x)
+                  ys.append(y)
+                  obs.append(nmrResidue)
+                  if y > self.thresholdLinePos:
+                    self.aboveY.append(y)
+                    self.aboveX.append(x)
+                    self.aboveObjects.append(nmrResidue)
+                  else:
+                    self.belowX.append(x)
+                    self.belowY.append(y)
+                    self.belowObjects.append(nmrResidue)
+
 
     selectedNameColourA = self.aboveThresholdColourBox.getText()
     for code, name in spectrumColours.items():
@@ -516,6 +550,10 @@ class ChemicalShiftsMapping(CcpnModule):
       if name == selectedNameColourB:
         self.belowBrush = code
 
+    selectedNameColourC = self.disappearedColourBox.getText() #disappeared peaks
+    for code, name in spectrumColours.items():
+      if name == selectedNameColourC:
+        self.disappearedPeakBrush = code
 
     self.barGraphWidget.deleteLater()
     self.barGraphWidget = None
@@ -535,7 +573,11 @@ class ChemicalShiftsMapping(CcpnModule):
                                    belowY=self.belowY,
                                    belowObjects=self.belowObjects,
                                    belowBrush=self.belowBrush,
-                                   aboveBrush=self.aboveBrush
+                                   aboveBrush=self.aboveBrush,
+                                   disappearedX = self.disappereadX,
+                                   disappearedY=self.disappereadY,
+                                   disappearedObjects = self.disappereadObjects,
+                                   disappearedBrush = self.disappearedPeakBrush,
                                    )
     # self.splitter.addWidget(self.barGraphWidget)
 
@@ -586,7 +628,6 @@ class ChemicalShiftsMapping(CcpnModule):
         getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def updateModule(self):
-    print('Updating')
 
     weights = {}
     for atomWSB in self.atomWeightSpinBoxes:
@@ -598,10 +639,10 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.nmrResidueTable.nmrChain:
       for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
 
+        spectra = self.spectraSelectionWidget.getSelections()
+        self._updatedPeakCount(nmrResidue, spectra)
         if nmrResidue._includeInDeltaShift:
-          spectra = self.spectraSelectionWidget.getSelections()
           nmrResidue.spectraCount = len(spectra)
-          self._updatedPeakCount(nmrResidue, spectra)
           nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
           nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
           nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
@@ -614,8 +655,14 @@ class ChemicalShiftsMapping(CcpnModule):
   def _updatedPeakCount(self, nmrResidue, spectra):
     if len(nmrResidue.nmrAtoms)>0:
       peaks = [p for p in nmrResidue.nmrAtoms[0].assignedPeaks if p.peakList.spectrum in spectra]
-      nmrResidue.peakCount = len(peaks)
 
+
+      spectraWithPeaks = [peak.peakList.spectrum for peak in peaks]
+      spectraWithMissingPeaks = [spectrum for spectrum in spectra if spectrum not in spectraWithPeaks]
+      nmrResidue._spectraWithMissingPeaks = spectraWithMissingPeaks
+      if len(nmrResidue._spectraWithMissingPeaks) >0:
+        nmrResidue.comment = 'Missing'
+      return nmrResidue._spectraWithMissingPeaks
 
 
   def _showOnMolecularViewer(self):
@@ -652,12 +699,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
     aboveThresholdResidues = "+".join([str(x) for x in self.aboveX])
     belowThresholdResidues = "+".join([str(x) for x in self.belowX])
+    missingdResidues = "+".join([str(x) for x in self.disappereadX])
 
     colourAboveThreshold = hexToRgb(self.aboveBrush)
     colourBelowThreshold = hexToRgb(self.belowBrush)
+    colourMissing = hexToRgb(self.disappearedPeakBrush)
 
     scriptPath = chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                                      colourAboveThreshold, colourBelowThreshold)
+                                                   missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold)
 
 
     try:
@@ -746,7 +795,7 @@ class ChemicalShiftsMapping(CcpnModule):
     """
     if self._selectCurrentNmrResiduesNotifier is not None:
       self._selectCurrentNmrResiduesNotifier.unRegister()
-    self._peakChangedNotifier.unRegister()
+    # self._peakChangedNotifier.unRegister()
 
     super(ChemicalShiftsMapping, self)._closeModule()
 

@@ -21,7 +21,9 @@
         "peakDropFactor": 0.1,
         "annotationType": 0,
         "peakSymbolSize": 0.1,
-        "peakSymbolType": 0
+        "peakSymbolType": 0,
+        "zoomCentreType": 0,
+        "zoomPercent": 5.0
     },
 
     "externalPrograms": {

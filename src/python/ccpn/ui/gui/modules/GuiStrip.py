@@ -674,6 +674,48 @@ class GuiStrip(Frame):
     else:
       self.resetZoom()
 
+  def _zoomIn(self):
+    """
+    zoom in to the strip.
+    """
+    if not self._finaliseDone: return
+    zoomPercent = -self.application.preferences.general.zoomPercent/100.0
+    padding = self.application.preferences.general.stripRegionPadding
+    currentRange = self.viewBox.viewRange()
+    l = currentRange[0][0]
+    r = currentRange[0][1]
+    b = currentRange[1][0]
+    t = currentRange[1][1]
+    dx = (r-l)/2.0
+    dy = (t-b)/2.0
+    nl = l-zoomPercent*dx
+    nr = r+zoomPercent*dx
+    nt = t+zoomPercent*dy
+    nb = b-zoomPercent*dy
+    self.plotWidget.setXRange(nl, nr, padding=padding)
+    self.plotWidget.setYRange(nb, nt, padding=padding)
+
+  def _zoomOut(self):
+    """
+    zoom out of the strip.
+    """
+    if not self._finaliseDone: return
+    zoomPercent = +self.application.preferences.general.zoomPercent/100.0
+    padding = self.application.preferences.general.stripRegionPadding
+    currentRange = self.viewBox.viewRange()
+    l = currentRange[0][0]
+    r = currentRange[0][1]
+    b = currentRange[1][0]
+    t = currentRange[1][1]
+    dx = (r-l)/2.0
+    dy = (t-b)/2.0
+    nl = l-zoomPercent*dx
+    nr = r+zoomPercent*dx
+    nt = t+zoomPercent*dy
+    nb = b-zoomPercent*dy
+    self.plotWidget.setXRange(nl, nr, padding=padding)
+    self.plotWidget.setYRange(nb, nt, padding=padding)
+
   def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
     # NBNB TBD 1) we should not always display all peak lists together

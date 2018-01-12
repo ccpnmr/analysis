@@ -263,7 +263,7 @@ class PreferencesPopup(CcpnDialog):
     self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths'],
                                     selectedInd=peakSymbol,
                                     callback=self._setPeakSymbol,
-                                    direction='h',
+                                    direction='v',
                                     grid=(row, 1), hAlign='l',
                                     tipTexts=None,
                                     )
@@ -279,6 +279,25 @@ class PreferencesPopup(CcpnDialog):
       self.preferences.general.peakSymbolSize = symbolSize
     self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
     self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
+
+    row += 1
+    self.zoomCentreLabel = Label(parent, text="Zoom Centring", grid=(row, 0))
+    zoomCentre = self.preferences.general.zoomCentreType
+    self.zoomCentre = RadioButtons(parent, texts=['Centre on Mouse', 'Centre on Screen'],
+                                    selectedInd=zoomCentre,
+                                    callback=self._setZoomCentre,
+                                    direction='v',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    row += 1
+    zoomPercent = self.preferences.general.zoomPercent
+    self.zoomPercentLabel = Label(parent, text="Manual zoom (%)", grid=(row, 0))
+    self.zoomPercentData = DoubleSpinbox(parent, step=1
+                                            , min=1, max=100, grid=(row, 1), hAlign='l')
+    self.zoomPercentData.setValue(int(zoomPercent))
+    self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+    self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
 
 
   def _setExternalProgramsTabWidgets(self, parent):
@@ -498,3 +517,24 @@ class PreferencesPopup(CcpnDialog):
     except:
       return
     self.preferences.general.peakSymbolType = peakSymbol
+
+  def _setZoomCentre(self):
+    """
+    Set the zom centring method to either mouse position or centre of the screen
+    """
+    try:
+      zoomCentre = self.zoomCentre.getIndex()
+    except:
+      return
+    self.preferences.general.zoomCentreType = zoomCentre
+
+  def _setZoomPercent(self):
+    """
+    Set the value for manual zoom
+    """
+    try:
+      zoomPercent = float(self.zoomPercentData.text())
+    except:
+      return
+    self.preferences.general.zoomPercent = zoomPercent
+

@@ -84,6 +84,8 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
@@ -403,7 +405,7 @@ class GuiWindow():
 
   def storeZoom(self):
     """
-    store the zoom of the currently selected strip onto a queue
+    store the zoom of the currently selected strip
     """
     if self.current.strip:
       self.current.strip.spectrumDisplay._storeZoom()
@@ -412,10 +414,28 @@ class GuiWindow():
 
   def restoreZoom(self):
     """
-    restore the zoom of the currently selected strip to the top item of the queue
+    restore the zoom of the currently selected strip
     """
     if self.current.strip:
       self.current.strip.spectrumDisplay._restoreZoom()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def zoomIn(self):
+    """
+    zoom in to the currently selected strip
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._zoomIn()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def zoomOut(self):
+    """
+    zoom out of the currently selected strip
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._zoomOut()
     else:
       getLogger().warning('No current strip. Select a strip first.')
 

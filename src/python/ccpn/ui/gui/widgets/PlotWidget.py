@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence
 
 import pyqtgraph as pg
+import numpy as np
 from PyQt4 import QtCore, QtGui, QtOpenGL
 
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
@@ -323,6 +324,25 @@ class PlotWidget(pg.PlotWidget):
     axisOrder = self.strip.axisOrder
     self.xAxisTextItem = AxisTextItem(self, orientation='top', axisCode=axisOrder[0])
     self.yAxisTextItem = AxisTextItem(self, orientation='left', axisCode=axisOrder[1])
+
+  # TODO:ED this does override but acnnot change the zoom centre
+  # def wheelEvent(self, ev, axis=None):
+  #   mask = np.array(self.state['mouseEnabled'], dtype=np.float)
+  #   if axis is not None and axis >= 0 and axis < len(mask):
+  #     mv = mask[axis]
+  #     mask[:] = 0
+  #     mask[axis] = mv
+  #   s = ((mask * 0.02) + 1) ** (
+  #       ev.delta() * self.state['wheelScaleFactor'])  # actual scaling factor
+  #
+  #   center = None   # Point(fn.invertQTransform(self.childGroup.transform()).map(ev.pos()))
+  #   # center = ev.pos()
+  #
+  #   self._resetTarget()
+  #   self.scaleBy(s, center)
+  #   self.sigRangeChangedManually.emit(self.state['mouseEnabled'])
+  #   ev.accept()
+
 
 class AxisTextItem(pg.TextItem):
 

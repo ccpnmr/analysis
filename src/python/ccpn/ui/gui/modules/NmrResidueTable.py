@@ -335,7 +335,7 @@ class NmrResidueTable(QuickTable):
 
     self.setTableNotifiers(tableClass=NmrChain
                            , rowClass=NmrResidue
-                           , cellClassNames=(NmrAtom, 'nmrAtom')
+                           , cellClassNames=(NmrAtom, 'nmrResidue')
                            , tableName='nmrChain', rowName='nmrResidue'
                            , changeFunc=self.displayTableForNmrChain
                            , className=self.attributeName

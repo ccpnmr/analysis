@@ -725,8 +725,9 @@ class QuickTable(TableWidget, Base):
 
       for obj in objList:
         row = self._dataFrameObject.find(self, str(obj.pid))
-        selectionModel.select(self.model().index(row, 0)
-                                       , selectionModel.Select | selectionModel.Rows)
+        if row:
+          selectionModel.select(self.model().index(row, 0)
+                                         , selectionModel.Select | selectionModel.Rows)
 
       self.setUpdatesEnabled(True)
       # self.blockSignals(False)
@@ -903,7 +904,7 @@ class QuickTable(TableWidget, Base):
                       , self._tableData['tableSelection']
                       , data['trigger'], data['object'])
 
-  def _updateCellCallback(self, data):
+  def _updateCellCallback(self, attr, data):
     """
     Notifier callback for updating the table
     :param data:
@@ -912,21 +913,26 @@ class QuickTable(TableWidget, Base):
     #                         , self._tableData['className'])   # get the tableList
 
     cell = data[Notifier.OBJECT]
-    row = getattr(cell, self._tableData['rowName'])
+    # row = getattr(cell, self._tableData['rowName'])
+    rows = getattr(cell, attr)
+
+    if not isinstance(rows, (list, tuple)):
+      rows = [rows]
 
     self._silenceCallback = True
-    if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
+    for row in rows:
+      if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
 
-      # keep the original sorting method
-      sortOrder = self.horizontalHeader().sortIndicatorOrder()
-      sortColumn = self.horizontalHeader().sortIndicatorSection()
+        # keep the original sorting method
+        sortOrder = self.horizontalHeader().sortIndicatorOrder()
+        sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-      # change the dataFrame for the updated nmrCell
-      self._dataFrameObject.changeObject(row)
+        # change the dataFrame for the updated nmrCell
+        self._dataFrameObject.changeObject(row)
 
-      # re-sort the table
-      if sortColumn < self.columnCount():
-        self.sortByColumn(sortColumn, sortOrder)
+        # re-sort the table
+        if sortColumn < self.columnCount():
+          self.sortByColumn(sortColumn, sortOrder)
 
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']
@@ -983,15 +989,15 @@ class QuickTable(TableWidget, Base):
         self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClass[0].__name__
-                                            , self._updateCellCallback
-                                            , onceOnly=True))
+                                            , partial(self._updateCellCallback, cellClass[1])
+                                            , onceOnly=False))
     else:
       if cellClassNames:
         self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClassNames[0].__name__
-                                            , self._updateCellCallback
-                                            , onceOnly=True))
+                                            , partial(self._updateCellCallback, cellClassNames[1])
+                                            , onceOnly=False))
 
     if selectCurrentCallBack:
       self._selectCurrentNotifier = Notifier(self.current

@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
 
 logger = getLogger()
@@ -175,7 +176,7 @@ class PeakListTableWidget(QuickTable):
 
     self.setTableNotifiers(tableClass=PeakList
                            , rowClass=Peak
-                           , cellClassNames=None
+                           , cellClassNames=(NmrAtom, 'assignedPeaks')
                            , tableName='peakList', rowName='peak'
                            , changeFunc=self._updateAllModule
                            , className=self.attributeName

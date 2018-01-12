@@ -58,7 +58,7 @@ from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
-
+import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                   colourAboveThreshold, colourBelowThreshold):
@@ -252,7 +252,7 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setWidgets(self):
 
     if self.application:
-      self.splitter = Splitter(QtCore.Qt.Vertical)
+      # self.splitter = Splitter(QtCore.Qt.Vertical)
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
 
@@ -271,9 +271,9 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
-      self.splitter.addWidget(self.nmrResidueTable)
-      self.splitter.addWidget(self.barGraphWidget)
-      self.mainWidget.getLayout().addWidget(self.splitter)
+      # self.splitter.addWidget(self.nmrResidueTable)
+      # self.splitter.addWidget(self.barGraphWidget)
+      # self.mainWidget.getLayout().addWidget(self.splitter)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
 
@@ -360,7 +360,26 @@ class ChemicalShiftsMapping(CcpnModule):
       pix.fill(QtGui.QColor(item[0]))
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     self.belowThresholdColourBox.setCurrentIndex(0)
+
     i += 1
+    disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'
+    self.disappearedColourLabel = Label(self.scrollAreaWidgetContents, text='Disappeared Peaks Colour', grid=(i, 0))
+    self.disappearedColourBox = PulldownList(self.scrollAreaWidgetContents, grid=(i, 1))
+    for item in spectrumColours.items():
+      pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      self.disappearedColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    try:
+      self.disappearedColourBox.select('dark grey')
+    except:
+      self.disappearedColourBox.select(random.choice(self.disappearedColourBox.texts))
+
+    i += 1
+    self.disappearedBarThreshold = Label(self.scrollAreaWidgetContents, text='Disappeared value', grid=(i, 0))
+    self.disappearedBarThresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=1, step=0.01,
+                                          decimals=3, callback=None, grid=(i, 1))
+    i += 1
+
 
     # molecular Structure
     self.molecularStructure= Label(self.scrollAreaWidgetContents, text='Molecular Structure', grid=(i, 0))
@@ -518,7 +537,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                    belowBrush=self.belowBrush,
                                    aboveBrush=self.aboveBrush
                                    )
-    self.splitter.addWidget(self.barGraphWidget)
+    # self.splitter.addWidget(self.barGraphWidget)
 
 
   def updateThresholdLineValue(self, value):

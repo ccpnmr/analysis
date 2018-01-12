@@ -121,7 +121,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # setVisible and that in turn expects there to be a border item
     self._setupBorderItem()
 
-    self._setDefaultLimits()
+    # TODO. Set limit range properly for each case: 1D/nD, flipped axis
+    # self._setDefaultLimits()
 
     GuiSpectrumView.__init__(self)
 
@@ -145,14 +146,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     # override of Qt setVisible
 
-  def _setDefaultLimits(self):
-    '''
-    Sets the default limits on the viewBox.
-    '''
-
-    xLimits = self.strip.viewBox.viewRange()[0]
-    yLimits = self.strip.viewBox.viewRange()[1]
-    self.strip.setZoomLimits(xLimits, yLimits, factor=5)
+  # def _setDefaultLimits(self):
+  #   '''
+  #   Sets the default limits on the viewBox.
+  #   # TODO. Set limit range properly for each case: 1D/nD, flipped axis
+  #   '''
+  #
+  #   xLimits = self.strip.viewBox.viewRange()[0]
+  #   yLimits = self.strip.viewBox.viewRange()[1]
+  #   self.strip.setZoomLimits(xLimits, yLimits, factor=5)
 
 
   def setVisible(self, visible):

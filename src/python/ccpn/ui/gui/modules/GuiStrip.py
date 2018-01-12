@@ -74,8 +74,8 @@ class GuiStrip(Frame):
 
     getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
-                         acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
-                  )
+                   acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                   )
 
     # it appears to be required to explicitly set these, otherwise
     # the Widget will not fill all available space
@@ -88,7 +88,7 @@ class GuiStrip(Frame):
     self.setMinimumHeight(200)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
-                                 #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
+    #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
@@ -105,8 +105,8 @@ class GuiStrip(Frame):
 
     # Widgets for _stripIdLabel and _stripLabel
     self._labelWidget = Widget(parent=self, setLayout=True,
-                                     hPolicy='expanding', vAlign='center',
-                                     grid=(0, 0), spacing=(0,0))
+                               hPolicy='expanding', vAlign='center',
+                               grid=(0, 0), spacing=(0,0))
     self._labelWidget.layout().setHorizontalSpacing(0)
     self._labelWidget.layout().setVerticalSpacing(0)
 
@@ -155,7 +155,7 @@ class GuiStrip(Frame):
     ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)    # update mouse cursors
     self.storedZooms = []
-    
+
     self.beingUpdated = False
     self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
 
@@ -189,8 +189,8 @@ class GuiStrip(Frame):
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
     self._droppedNotifier = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                       self.spectrumDisplay._processDroppedItems)
+                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                        self.spectrumDisplay._processDroppedItems)
 
     # set peakLabelling to the default from preferences
     try:
@@ -307,7 +307,7 @@ class GuiStrip(Frame):
   def _newPhasingTrace(self):
     for spectrumView in self.spectrumViews:
       spectrumView._newPhasingTrace()
-      
+
   """
   def newHPhasingTrace(self):
     
@@ -319,17 +319,17 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView.newVPhasingTrace(self.mousePosition[0])
   """
-   
+
   def _setPhasingPivot(self):
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
     phasingFrame.pivotEntry.set(position)
     self._updatePivot()
-      
+
   def removePhasingTraces(self):
-    
+
     for spectrumView in self.spectrumViews:
       spectrumView.removePhasingTraces()
 
@@ -339,9 +339,9 @@ class GuiStrip(Frame):
     self.hPhasingPivot.setPos(self.mousePosition[0])
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
   """
-  
+
   def _updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
-  
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     position = phasingFrame.pivotEntry.get()
     direction = phasingFrame.getDirection()
@@ -350,37 +350,37 @@ class GuiStrip(Frame):
     else:
       self.vPhasingPivot.setPos(position)
     self._updatePhasing()
-  
+
   def _movedPivot(self): # this is called if pivot on screen is dragged
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     if direction == 0:
       position = self.hPhasingPivot.getXPos()
     else:
       position = self.vPhasingPivot.getYPos()
-      
+
     phasingFrame.pivotEntry.set(position)
     self._updatePhasing()
-    
+
   def turnOnPhasing(self):
-    
+
     self.hPhasingPivot.setVisible(True)
     self.vPhasingPivot.setVisible(True)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._turnOnPhasing()
-      
+
   def turnOffPhasing(self):
-    
+
     self.hPhasingPivot.setVisible(False)
     self.vPhasingPivot.setVisible(False)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()
-      
+
   def _changedPhasingDirection(self):
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     if direction == 0:
@@ -389,10 +389,10 @@ class GuiStrip(Frame):
     else:
       self.hPhasingPivot.setVisible(False)
       self.vPhasingPivot.setVisible(True)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._changedPhasingDirection()
-      
+
   def _updatePhasing(self):
     #
     # TODO:GEERTEN: Fix with proper stylesheet
@@ -401,7 +401,7 @@ class GuiStrip(Frame):
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
       spectrumView._updatePhasing()
-      
+
   def _updateXRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     # this code is complicated because need to keep viewBox region and axis region in sync
@@ -515,7 +515,7 @@ class GuiStrip(Frame):
 
   # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
   def _initRulers(self):
-    
+
     for mark in self._project.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
@@ -541,8 +541,8 @@ class GuiStrip(Frame):
     # )
 
     self.plotWidget.mouseLabel.setText(format %
-      (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
-    )
+                                       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+                                       )
     self.plotWidget.mouseLabel.setPos(position.x(), position.y())
     self.plotWidget.mouseLabel.show()
 
@@ -611,48 +611,48 @@ class GuiStrip(Frame):
 
     zoomPopup.exec_()
 
-  def setZoomLimits(self, xLimits, yLimits, factor=5):
-    '''
-    
-    :param xLimits: List [min, max] , e.g ppm [0,15] 
-    :param yLimits:  List [min, max]  eg. intensities [-300,2500]
-    :param factor: 
-    :return: Limits the viewBox from zooming in too deeply(crashing the program) to zooming out too far.
-    '''
-    ratio = (abs(xLimits[0] - xLimits[1])/abs(yLimits[0] - yLimits[1]))/factor
-    if max(yLimits)>max(xLimits):
-      self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
-                             xMax=max(xLimits) * factor,
-                             yMin=-abs(min(yLimits)) * factor,
-                             yMax=max(yLimits) * factor,
-                             minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) * ratio,
-                             maxXRange=max(xLimits) * factor,
-                             minYRange=(((max(yLimits) - min(yLimits))/max(yLimits))),
-                             maxYRange=max(yLimits) * factor
-                             )
-    else:
-      self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
-                             xMax=max(xLimits) * factor,
-                             yMin=-abs(min(yLimits)) * factor,
-                             yMax=max(yLimits) * factor,
-                             minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) ,
-                             maxXRange=max(xLimits) * factor,
-                             minYRange=(((max(yLimits) - min(yLimits))/max(yLimits)))*ratio,
-                             maxYRange=max(yLimits) * factor
-                             )
+  # TODO. Set limit range properly for each case: 1D/nD, flipped axis
+  # def setZoomLimits(self, xLimits, yLimits, factor=5):
+  #   '''
+  #
+  #   :param xLimits: List [min, max] , e.g ppm [0,15]
+  #   :param yLimits:  List [min, max]  eg. intensities [-300,2500]
+  #   :param factor:
+  #   :return: Limits the viewBox from zooming in too deeply(crashing the program) to zooming out too far.
+  #   '''
+  #   ratio = (abs(xLimits[0] - xLimits[1])/abs(yLimits[0] - yLimits[1]))/factor
+  #   if max(yLimits)>max(xLimits):
+  #     self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+  #                            xMax=max(xLimits) * factor,
+  #                            yMin=-abs(min(yLimits)) * factor,
+  #                            yMax=max(yLimits) * factor,
+  #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) * ratio,
+  #                            maxXRange=max(xLimits) * factor,
+  #                            minYRange=(((max(yLimits) - min(yLimits))/max(yLimits))),
+  #                            maxYRange=max(yLimits) * factor
+  #                            )
+  #   else:
+  #     self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+  #                            xMax=max(xLimits) * factor,
+  #                            yMin=-abs(min(yLimits)) * factor,
+  #                            yMax=max(yLimits) * factor,
+  #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) ,
+  #                            maxXRange=max(xLimits) * factor,
+  #                            minYRange=(((max(yLimits) - min(yLimits))/max(yLimits)))*ratio,
+  #                            maxYRange=max(yLimits) * factor
+  #                            )
 
-
-  def removeZoomLimits(self):
-    self.viewBox.setLimits(xMin=None,
-                           xMax=None,
-                           yMin=None,
-                           yMax=None,
-                           # Zoom Limits
-                           minXRange=None,
-                           maxXRange=None,
-                           minYRange=None,
-                           maxYRange=None
-                           )
+  # def removeZoomLimits(self):
+  #   self.viewBox.setLimits(xMin=None,
+  #                          xMax=None,
+  #                          yMin=None,
+  #                          yMax=None,
+  #                          # Zoom Limits
+  #                          minXRange=None,
+  #                          maxXRange=None,
+  #                          minYRange=None,
+  #                          maxYRange=None
+  #                          )
 
   def _storeZoom(self):
     """

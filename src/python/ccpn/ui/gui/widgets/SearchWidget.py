@@ -156,8 +156,11 @@ def attachSearchWidget(table):
     if table._parent is not None:
       parentLayout = None
       if isinstance(table._parent, Base):
-      # if hasattr(table.parent, 'getLayout'):
-        parentLayout = table._parent.getLayout()
+        if hasattr(table.parent, 'getLayout'):
+          parentLayout = table._parent.getLayout()
+        else:
+          # TODO Add the search widget somewhere. Popup?
+          return False
 
       if isinstance(parentLayout, QtGui.QGridLayout):
         idx = parentLayout.indexOf(table)

@@ -30,6 +30,7 @@ from functools import partial
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 import os
+import numpy as np
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
@@ -256,6 +257,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.project:
       if len(self.project.nmrChains) > 0:
         self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+        self._setThresholdLineBySTD()
 
   def _setWidgets(self):
 
@@ -365,7 +367,8 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, step=0.01,
-                                          decimals=3, callback=self.updateThresholdLineValue, grid=(i, 1))
+                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Deafult: STD of delta shifts',
+                                          grid=(i, 1))
     i += 1
     self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
     self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents,  grid=(i, 1))
@@ -429,6 +432,15 @@ class ChemicalShiftsMapping(CcpnModule):
     Spacer(self.scrollAreaWidgetContents, 3, 3
            , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
            , grid=(i,3), gridSpan=(1,1))
+
+  def _setThresholdLineBySTD(self):
+    nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
+    if nc:
+      deltaShifts = [ n._deltaShift for n in nc.nmrResidues]
+      std = np.std(deltaShifts)
+      if std:
+        self.thresholdLinePos = std
+        self.thresholdSpinBox.set(std)
 
   def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):
     texts = sorted(atoms, key=CcpnSorting.stringSortKey)

@@ -137,10 +137,12 @@ class PlotWidget(pg.PlotWidget):
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=self.highlightColour)
+        self.stripIDLabel.setColor(color=self.highlightColour)
     else:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=self.foreground)
+        self.stripIDLabel.setColor(color=self.foreground)
 
   def toggleGrid(self):
     "Toggle grid state"

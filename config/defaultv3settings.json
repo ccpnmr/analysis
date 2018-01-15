@@ -23,7 +23,8 @@
         "peakSymbolSize": 0.1,
         "peakSymbolType": 0,
         "zoomCentreType": 0,
-        "zoomPercent": 5.0
+        "zoomPercent": 5.0,
+        "lastAxisOnly": true
     },
 
     "externalPrograms": {

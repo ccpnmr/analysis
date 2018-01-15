@@ -210,6 +210,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
     # the module to another location
     self.hoverEvent = self._hoverEvent
+    self.lastAxisOnly = True
 
   def _hoverEvent(self, event):
     event.accept()
@@ -423,6 +424,7 @@ class GuiSpectrumDisplay(CcpnModule):
       strip._unDelete()
     finally:
       self._endCommandEchoBlock()
+      self.showAxes()
 
   def _removeIndexStrip(self, value):
     self.removeStrip(self.strips[value])
@@ -472,6 +474,8 @@ class GuiSpectrumDisplay(CcpnModule):
     #   # TODO:ED this may not be the correct strip to Redo:remove
     #   _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
 
+    self.showAxes()
+
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"
     if self.current.strip is None:
@@ -486,6 +490,20 @@ class GuiSpectrumDisplay(CcpnModule):
   #   newStrip = self.strips[-1].clone()
 
   # def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
+
+  def setLastAxisOnly(self, lastAxisOnly:bool=True):
+    self.lastAxisOnly = lastAxisOnly
+
+  def showAxes(self):
+    if self.strips:
+      if self.lastAxisOnly:
+        for ss in self.strips[:-1]:
+          ss.plotWidget.plotItem.axes['right']['item'].hide()
+        self.strips[-1].plotWidget.plotItem.axes['right']['item'].show()
+      else:
+        for ss in self.strips:
+          ss.plotWidget.plotItem.axes['right']['item'].show()
+
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
@@ -494,6 +512,8 @@ class GuiSpectrumDisplay(CcpnModule):
     newStrip = self.strips[stripIndex].clone()
 
     newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+
+    self.showAxes()
 
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)
@@ -510,6 +530,8 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     stripIndex = self.strips.index(strip)
     newStrip = strip.clone()
+
+    self.showAxes()
 
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)

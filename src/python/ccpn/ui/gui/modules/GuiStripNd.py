@@ -189,6 +189,7 @@ class GuiStripNd(GuiStrip):
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
       (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
+      (tType.item, 'Last Axis Only',        '',                       '',                         True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
 
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
@@ -238,6 +239,7 @@ class GuiStripNd(GuiStrip):
 
     self.crossHairAction.setChecked(self.crossHairIsVisible)
     self.gridAction.setChecked(self.gridIsVisible)
+    self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
 
     return self.contextMenu
 
@@ -355,6 +357,10 @@ class GuiStripNd(GuiStrip):
 
     GuiStrip._updateRegion(self, viewBox)
     self._updateTraces()
+
+  def _toggleLastAxisOnly(self):
+    self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
+    self.spectrumDisplay.showAxes()
 
   def _updateTraces(self):
 

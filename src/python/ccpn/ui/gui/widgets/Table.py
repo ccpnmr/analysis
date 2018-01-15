@@ -911,7 +911,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     selectedObjects = self.getSelectedObjects()    # get current selection
     getIndex = self.model.sourceModel().index
-    print('FRFF', getIndex)
+    # print('FRFF', getIndex)
 
     model = self.model
     sourceModel = model.sourceModel()

@@ -73,6 +73,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, a"), self, partial(self.toggleLastAxisOnly, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
@@ -263,6 +264,13 @@ class GuiWindow():
 """
     if self.application.current.strip:
       self.application.current.strip.toggleVerticalTrace()
+
+  def toggleLastAxisOnly(self, window:'GuiWindow'):
+    """
+    Toggles whether the axis is displayed in the last strip of the display
+    """
+    if self.application.current.strip:
+      self.application.current.strip.toggleLastAxisOnly()
 
   def togglePhaseConsole(self, window:'GuiWindow'):
     """

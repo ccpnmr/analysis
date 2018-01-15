@@ -391,6 +391,13 @@ class GuiStripNd(GuiStrip):
     self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
     self._updateTraces()
 
+  def toggleLastAxisOnly(self):
+    """
+    Toggles whether the axis is displayed in the last strip of the display.
+    """
+    self.lastAxisOnlyCheckBox.setChecked(not self.lastAxisOnlyCheckBox.isChecked())
+    self._toggleLastAxisOnly()
+
   def _mouseMoved(self, positionPixel):
 
     if self.isDeleted:

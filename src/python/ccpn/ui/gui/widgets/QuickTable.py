@@ -1096,7 +1096,8 @@ class QuickTable(TableWidget, Base):
       self._tableNotifier = Notifier(self.project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                       , tableClass.__name__
-                                      , self._updateTableCallback)
+                                      , self._updateTableCallback
+                                      , onceOnly=True)
     if rowClass:
 
       # TODO:ED check OnceOnly residue notifiers
@@ -1105,7 +1106,8 @@ class QuickTable(TableWidget, Base):
                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                     , rowClass.__name__
                                     , self._updateRowCallback
-                                    , onceOnly=False)
+                                    , onceOnly=False)           # should be True, be doesn't work
+                                                                # for 'i-1' nmrResidues
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
         self._cellNotifiers.append(Notifier(self.project

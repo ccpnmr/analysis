@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
@@ -255,11 +256,7 @@ class PreferencesPopup(CcpnDialog):
 
     row += 1
     self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
-    try:
-      peakSymbol = self.preferences.general.peakSymbolType
-    except:
-      peakSymbol = 0
-      self.preferences.general.peakSymbolType = peakSymbol
+    peakSymbol = self.preferences.general.peakSymbolType
     self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths'],
                                     selectedInd=peakSymbol,
                                     callback=self._setPeakSymbol,
@@ -272,16 +269,21 @@ class PreferencesPopup(CcpnDialog):
     self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
                                             , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
     self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
-    try:
-      symbolSize = self.preferences.general.peakSymbolSize
-    except:
-      symbolSize = 0.1
-      self.preferences.general.peakSymbolSize = symbolSize
+    symbolSize = self.preferences.general.peakSymbolSize
     self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
     self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
 
     row += 1
-    self.zoomCentreLabel = Label(parent, text="Zoom Centring", grid=(row, 0))
+    self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
+    self.peakSymbolThicknessData = Spinbox(parent, step=1
+                                            , min=1, max=20, grid=(row, 1), hAlign='l')
+    self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+    symbolThickness = self.preferences.general.peakSymbolThickness
+    self.peakSymbolThicknessData.setValue(int(symbolThickness))
+    self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
+
+    row += 1
+    self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
     zoomCentre = self.preferences.general.zoomCentreType
     self.zoomCentre = RadioButtons(parent, texts=['Centre on Mouse', 'Centre on Screen'],
                                     selectedInd=zoomCentre,
@@ -290,6 +292,8 @@ class PreferencesPopup(CcpnDialog):
                                     grid=(row, 1), hAlign='l',
                                     tipTexts=None,
                                     )
+    self.zoomCentre.setEnabled(False)
+
     row += 1
     zoomPercent = self.preferences.general.zoomPercent
     self.zoomPercentLabel = Label(parent, text="Manual zoom (%)", grid=(row, 0))
@@ -494,6 +498,16 @@ class PreferencesPopup(CcpnDialog):
     except:
       return
     self.preferences.general.peakSymbolSize = peakSymbolSize
+
+  def _setPeakSymbolThickness(self):
+    """
+    Set the Thickness of the peak symbols (ppm)
+    """
+    try:
+      peakSymbolThickness = int(self.peakSymbolThicknessData.text())
+    except:
+      return
+    self.preferences.general.peakSymbolThickness = peakSymbolThickness
 
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)

@@ -331,7 +331,8 @@ class GuiStripNd(GuiStrip):
     return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
-    if not axis:
+    # if not axis:
+    if axis is None:
       return
 
     positionArray = []

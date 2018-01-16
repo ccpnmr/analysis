@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import pyqtgraph as pg
 import numpy as np
 import pandas as pd
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -72,74 +73,74 @@ class StructureTableModule(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # # add test structure Ensembles
-    # try:
-    #   StructureTableModule.defined
-    # except:
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-    #     , 'CB', 'HB1', 'HB2', 'HB3'
-    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-    #     , 'CE', 'HE1', 'HE2', 'HE3'
-    #     , 'CG', 'HG1', 'HG2', 'HG3'
-    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.comment = ['Test'] * 33
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-    #     , 'CB', 'HB1', 'HB2', 'HB3'
-    #     , 'CE', 'HE1', 'HE2', 'HE3'
-    #     , 'CG', 'HG1', 'HG2', 'HG3'
-    #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-    #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
-    #
-    #   # make a test dataset in here
-    #
-    #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
-    #
-    #   self.dataItem = self.dataSet.newData('derivedConformers')
-    #   self.dataSet.attachedObject = self.ensemble       # the newest object
-    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
-    #
-    #   StructureTableModule.defined=True
-    #   # should be a DataSet with the corresponding stuff in it
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # finally:
-    #   pass
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # add test structure Ensembles
+    try:
+      StructureTableModule.defined
+    except:
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.comment = ['Test'] * 33
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+      self.data['comment'] = self.comment
+
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+      self.ensemble = self.project.newStructureEnsemble()
+      self.data = self.ensemble.data
+
+      self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
+        , 'CB', 'HB1', 'HB2', 'HB3'
+        , 'CE', 'HE1', 'HE2', 'HE3'
+        , 'CG', 'HG1', 'HG2', 'HG3'
+        , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
+        , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+      self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+                                                                                                     'VAL'] * 8
+      self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+      self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+      self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+
+      self.data['atomName'] = self.testAtomName
+      self.data['residueName'] = self.testResidueName
+      self.data['chainCode'] = self.testChainCode
+      self.data['sequenceId'] = self.testSequenceId
+      self.data['modelNumber'] = self.testModelNumber
+      self.data['comment'] = self.comment
+
+      self.ensemble = self.project.newStructureEnsemble()
+      self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+
+      # make a test dataset in here
+
+      self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+
+      self.dataItem = self.dataSet.newData('derivedConformers')
+      self.dataSet.attachedObject = self.ensemble       # the newest object
+      self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+
+      StructureTableModule.defined=True
+      # should be a DataSet with the corresponding stuff in it
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    finally:
+      pass
 
     # settings
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
@@ -237,69 +238,146 @@ class StructureTableModule(CcpnModule):
     """
     self._closeModule()
 
-class NewStructureTable(pg.TableWidget):
+# class NewStructureTable(pg.TableWidget):
+#   """
+#   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
+#   """
+#   #row.modelNumber, etc., may not exist..
+#   columnHeadings = [
+#                 ('Index', np.uint),
+#                 ('modelNumber', np.uint),
+#                 ('chainCode', np.str),
+#                 ('sequenceId', np.uint),
+#                 ('insertionCode', np.str),
+#                 ('residueName', np.str),
+#                 ('atomName', np.str),
+#                 ('altLocationCode', np.str),
+#                 ('element', np.str),
+#                 ('x', np.float32),
+#                 ('y', np.float32),
+#                 ('z', np.float32),
+#                 ('occupancy', np.float32),
+#                 ('bFactor', np.float32),
+#                 ('nmrChainCode', np.str),
+#                 ('nmrSequenceCode', np.str),
+#                 ('nmrResidueName', np.str),
+#                 ('nmrAtomName', np.str)]       # will need to put the comment back in
+#
+#   columnFunction = [
+#                 ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
+#                 ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
+#                 ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
+#                 ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
+#                 ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
+#                 ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
+#                 ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
+#                 ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
+#                 ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
+#                 ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
+#                 ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
+#                 ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
+#                 ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
+#                 ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
+#                 ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
+#                 ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
+#                 ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
+#                 ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
+#                 ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
+#                  lambda row, value:StructureTable._setComment(row, 'comment', value))
+#   ]
+#
+#         # testing - usage example
+#         # w = pg.TableWidget()
+#         #
+#         # data = np.array([
+#         #   (1, 1.6, 'x'),
+#         #   (3, 5.4, 'y'),
+#         #   (8, 12.5, 'z'),
+#         #   (443, 1e-12, 'w'),
+#         # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+#         #
+#         # w.setData(data)
+#
+#   pass
+
+class QuickTableStructure(QuickTable):
   """
-  Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
+  QuickTable specific to tables that only contain a single pid for the pandas dataframe
   """
-  #row.modelNumber, etc., may not exist..
-  columnHeadings = [
-                ('Index', np.uint),
-                ('modelNumber', np.uint),
-                ('chainCode', np.str),
-                ('sequenceId', np.uint),
-                ('insertionCode', np.str),
-                ('residueName', np.str),
-                ('atomName', np.str),
-                ('altLocationCode', np.str),
-                ('element', np.str),
-                ('x', np.float32),
-                ('y', np.float32),
-                ('z', np.float32),
-                ('occupancy', np.float32),
-                ('bFactor', np.float32),
-                ('nmrChainCode', np.str),
-                ('nmrSequenceCode', np.str),
-                ('nmrResidueName', np.str),
-                ('nmrAtomName', np.str)]       # will need to put the comment back in
+  def __init__(self, *args, **kwargs):
+    super(QuickTableStructure, self).__init__(*args, **kwargs)
 
-  columnFunction = [
-                ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
-                ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
-                ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
-                ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
-                ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
-                ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
-                ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
-                ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
-                ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
-                ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
-                ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
-                ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
-                ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
-                ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
-                ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
-                ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
-                ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
-                ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
-                ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
-                 lambda row, value:StructureTable._setComment(row, 'comment', value))
-  ]
+  def _selectionTableCallback(self, itemSelection):
+    if not self._silenceCallback:
 
-        # testing - usage example
-        # w = pg.TableWidget()
-        #
-        # data = np.array([
-        #   (1, 1.6, 'x'),
-        #   (3, 5.4, 'y'),
-        #   (8, 12.5, 'z'),
-        #   (443, 1e-12, 'w'),
-        # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
-        #
-        # w.setData(data)
+      rowList = self.getSelectedRows()
 
-  pass
+      if rowList:
+        data = CallBack(theObject = self._dataFrameObject
+                        , object = rowList
+                        , index = 0
+                        , targetName = self.className
+                        , trigger = CallBack.DOUBLECLICK
+                        , row = 0
+                        , col = 0
+                        , rowItem = None)
 
-class StructureTable(QuickTable):
+        self._selectionCallback(data)
+
+  def _doubleClickCallback(self, itemSelection):
+    model = self.selectionModel()
+
+    # selects all the items in the row
+    selection = model.selectedIndexes()
+
+    if itemSelection:
+      row = itemSelection.row()
+      col = itemSelection.column()
+
+      # build the equivalent of atomRecord
+      data = {}
+      for iSelect in selection:
+        colPid = iSelect.column()
+        colName = self.horizontalHeaderItem(colPid).text()
+        data[colName] = model.model().data(iSelect)
+
+        # QModelIndexList
+        # indexList = yourTableView->selectionModel()->selectedIndexes();
+        # int
+        # row;
+        # foreach(QModelIndex
+        # index, indexList) {
+        #   row = index.row();
+        # ....
+        # }
+
+      # print (selection[0].at(0))
+
+      df = self._dataFrameObject.dataFrame
+      ind = self.model().index(row, 0)
+      ind = self.model().getHeaderData(row)
+
+      if data:
+        data = CallBack(theObject = self._dataFrameObject
+                        , object = data
+                        , index = None
+                        , targetName = self.className
+                        , trigger = CallBack.DOUBLECLICK
+                        , row = row
+                        , col = col
+                        , rowItem = data)
+
+        if self._actionCallback and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
+          self._actionCallback(data)
+        elif self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
+          item = self.item(row, col)
+          item.setEditable(True)
+          # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+          # item.textChanged.connect(partial(self._changeMe, item))
+          self.editItem(item)         # enter the editing mode
+
+
+class StructureTable(QuickTableStructure):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
@@ -393,13 +471,7 @@ class StructureTable(QuickTable):
 
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self._mainWindow
-
                         , dataFrameObject=None    # class collating table and objects and headings
-
-                        # , dataFrame=None
-                        # , columns=self._columnNames
-                        # , hiddenColumns=self._hiddenColumns
-                        # , objects = None
                         , setLayout=True
                         , autoResize=True, multiSelect=True
                         , selectionCallback=self._selectionCallback
@@ -677,18 +749,23 @@ class StructureTable(QuickTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, structureData, row, col):
+  def _selectionCallback(self, data):      #structureData, row, col):
     """
     Notifier Callback for selecting a row in the table
     """
-    self._current.structureData = structureData
-    StructureTable._currentCallback = {'object':self.thisObj, 'table':self}
+    obj = data[CallBack.OBJECT]
 
-  def _actionCallback(self, atomRecordTuple, row, column):
+    # self._current.structureData = obj
+    # StructureTable._currentCallback = {'object':self.thisObj, 'table':self}
+
+  def _actionCallback(self, data):      # atomRecordTuple, row, column):
     """
     Notifier DoubleClick action on item in table
     """
-    getLogger().debug('StructureTable>>>', atomRecordTuple, row, column)
+    obj = data[CallBack.OBJECT]
+
+    # getLogger().debug('StructureTable>>>', atomRecordTuple, row, column)
+    getLogger().debug('StructureTable>>>', obj)
 
   def _selectionPulldownCallback(self, item):
     """
@@ -878,3 +955,4 @@ class StructureTable(QuickTable):
   #   getLogger().info('table.paint '+str(self.paintCount))
   #   self.paintCount+=1
   #   return super(StructureTable, self).paintEvent(event)
+

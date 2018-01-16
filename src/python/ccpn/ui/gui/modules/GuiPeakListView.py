@@ -831,19 +831,12 @@ class PeakNd(QtGui.QGraphicsItem):
       else:
         colour = self.peakListView.peakList.symbolColour
 
-      # check whether exists in the preferences - can remove soon
-      try:
-        symbolType = self.application.preferences.general.peakSymbolType
-      except Exception as es:
-        symbolType = 0
+      symbolType = self.application.preferences.general.peakSymbolType
 
+      peakOkay = True
       if symbolType == 0:    # a cross
-        # read symbol size from the preferences file, 0.05 if it doesn't exist
-        try:
-          symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
-        except Exception as es:
-          symbolWidth = 0.05
-        lw0 = self.peak.lineWidths
+        symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
+        lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
 
         if self._isInPlane:
           # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
@@ -880,18 +873,15 @@ class PeakNd(QtGui.QGraphicsItem):
           ###self.setPos(xPpm, yPpm)
           #colour = self.peakListView.peakList.symbolColour
           if widget:
-            painter.setPen(QtGui.QColor(colour))
-            # if self.colourScheme == 'light':
-            #   painter.setPen(QtGui.QColor('#080000'))
-            # else:
-            #   painter.setPen(QtGui.QColor('#f7ffff'))
+            pen = QtGui.QPen(QtGui.QColor(colour))
           else:
-            painter.setPen(QtGui.QColor('black'))
-          # painter.drawEllipse(box)
+            pen = QtGui.QPen(QtGui.QColor('black'))
 
           # else:
           #   painter.setPen(self.color)
           #   self.setZValue(0)
+          pen.setWidth(lineThickness)
+          painter.setPen(pen)
           painter.drawLine(-r,-w,r,w)
           painter.drawLine(-r,w,r,-w)
           ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
@@ -912,6 +902,7 @@ class PeakNd(QtGui.QGraphicsItem):
           #colour = self.peakListView.peakList.symbolColour
           pen = QtGui.QPen(QtGui.QColor(colour))
           pen.setStyle(QtCore.Qt.DotLine)
+          pen.setWidth(lineThickness)
           painter.setPen(pen)
           # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
           ###self.annotation.setupPeakAnnotationItem(self)
@@ -939,49 +930,75 @@ class PeakNd(QtGui.QGraphicsItem):
             painter.drawLine(-r,w,r,w)
             painter.drawLine(r,w,r,-w)
             painter.drawLine(r,-w,-r,-w)
+        return
 
-      elif symbolType == 1:                     # draw an ellipse at lineWidth
+      if symbolType == 1:                     # draw an ellipse at lineWidth
         symbolWidths = list(self.peak.lineWidths)
 
         # TODO:ED check whether ppm or Hz for the lineWidths - assuming Hz by default
-        if None in symbolWidths:
-          return
+        if symbolWidths[0] and symbolWidths[1]:
+          symbolWidths[0] = symbolWidths[0] / self.peak.peakList.spectrum.spectrometerFrequencies[0]
+          symbolWidths[1] = symbolWidths[1] / self.peak.peakList.spectrum.spectrometerFrequencies[1]
+          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
 
-        symbolWidths[0] = symbolWidths[0] / self.peak.peakList.spectrum.spectrometerFrequencies[0]
-        symbolWidths[1] = symbolWidths[1] / self.peak.peakList.spectrum.spectrometerFrequencies[1]
+          if self._isInPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+            pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            # w = r = max(pos)        # pos[self.minIndex]
+            # self.annotation.setPos(r, -w)
 
-        if self._isInPlane:
-          vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
-          pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-                        QtCore.QPoint(0, 0)).x()),
-                 symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-                  QtCore.QPoint(0, 0)).y()))
-          # w = r = max(pos)        # pos[self.minIndex]
-          # self.annotation.setPos(r, -w)
+            if widget:
+              pen = QtGui.QPen(QtGui.QColor(colour))
+            else:
+              pen = QtGui.QPen(QtGui.QColor('black'))
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
 
-          if widget:
-            painter.setPen(QtGui.QColor(colour))
-          else:
-            painter.setPen(QtGui.QColor('black'))
-          painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
+          elif self._isInFlankingPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+            pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            # w = r = max(pos)        # pos[self.minIndex]
+            # self.annotation.setPos(r, -w)
 
-        elif self._isInFlankingPlane:
-          vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
-          pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-                        QtCore.QPoint(0, 0)).x()),
-                 symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-                  QtCore.QPoint(0, 0)).y()))
-          # w = r = max(pos)        # pos[self.minIndex]
-          # self.annotation.setPos(r, -w)
+            if widget:
+              pen = QtGui.QPen(QtGui.QColor(colour))
+            else:
+              pen = QtGui.QPen(QtGui.QColor('black'))
+            pen.setStyle(QtCore.Qt.DotLine)
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
 
-          if widget:
-            painter.setPen(QtGui.QColor(colour))
-          else:
-            painter.setPen(QtGui.QColor('black'))
-          pen = QtGui.QPen(QtGui.QColor(colour))
-          pen.setStyle(QtCore.Qt.DotLine)
-          painter.setPen(pen)
-          painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
+        else:
+          # lineWidths undefined; draw a dotted circle
+          symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
+          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
+
+          if self._isInPlane or self._isInFlankingPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+
+            pos = (symbolWidth / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidth / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            w = r = max(pos)        # pos[self.minIndex]
+            self.annotation.setPos(r, -w)
+
+            pen = QtGui.QPen(QtGui.QColor(colour))
+            pen.setStyle(QtCore.Qt.DashLine)
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            painter.drawEllipse(-r/2.0, -w/2.0, r, w)
+
+      # other symbols here
+      pass
 
 ###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
 ###FONT_METRIC = QtGui.QFontMetricsF(FONT)

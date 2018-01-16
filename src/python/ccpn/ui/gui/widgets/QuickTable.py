@@ -618,18 +618,15 @@ class QuickTable(TableWidget, Base):
 
     if not dataFrameObject.dataFrame.empty:
       self.setData(dataFrameObject.dataFrame.values)
+      # needed after setting the column headings
+      self.setHorizontalHeaderLabels(dataFrameObject.headings)
+      self.showColumns(dataFrameObject)
+      self.resizeColumnsToContents()
+      self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
     else:
       self.clearTable()
       self.setColumnCount(dataFrameObject.numColumns)
 
-    self.setData(dataFrameObject.dataFrame.values)
-
-    self.setHorizontalHeaderLabels(dataFrameObject.headings)
-
-    # needed after setting the column headings
-    self.showColumns(dataFrameObject)
-    self.resizeColumnsToContents()
-    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
     # re-sort the table
     if sortColumn < self.columnCount():

@@ -22,6 +22,7 @@
         "annotationType": 0,
         "peakSymbolSize": 0.1,
         "peakSymbolType": 0,
+        "peakSymbolThickness": 5,
         "zoomCentreType": 0,
         "zoomPercent": 5.0,
         "lastAxisOnly": true

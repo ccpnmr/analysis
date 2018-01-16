@@ -45,7 +45,7 @@ class HLine(Widget, Base):
     self.style = style
     self.colour = colour
     self.height = height
-    self.lineHeight = int(height/2)
+    self.lineHeight = int(height/3)
 
     self.styles = {
       'SolidLine':          QtCore.Qt.SolidLine,

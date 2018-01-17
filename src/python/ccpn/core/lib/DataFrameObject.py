@@ -311,3 +311,13 @@ class DataFrameObject(object):
       finally:
         self._table.silenceCallBack = False
 
+  def emptyRow(self):
+    """
+    Create a blank row for populating undefined tables
+    :return dict - based on headings:
+    """
+    headerDict = {}
+    for h, header in enumerate(self._columnDefinitions.headings):
+      headerDict[header] = h
+
+    return headerDict

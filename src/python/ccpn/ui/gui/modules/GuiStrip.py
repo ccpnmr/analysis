@@ -437,11 +437,19 @@ class GuiStrip(Frame):
 
     if not self._finaliseDone: return
 
+    # this only wants to get the scaling of the modified strip and not the actual values
+
     xRange = list(self.viewBox.viewRange()[0])
     for strip in self.spectrumDisplay.strips:
       if strip is not self:
         stripXRange = list(strip.viewBox.viewRange()[0])
         if _widthsChangedEnough(stripXRange, xRange):
+
+          # TODO:ED check whether the strip has a range set yet
+          diff = (xRange[1]-xRange[0])/2.0
+          mid = (stripXRange[1]+stripXRange[0])/2.0
+          xRange = (mid-diff, mid+diff)
+
           strip.viewBox.setXRange(*xRange, padding=0)
 
   def _updateY(self):

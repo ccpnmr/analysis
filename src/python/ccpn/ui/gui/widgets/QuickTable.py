@@ -175,7 +175,6 @@ class QuickTable(TableWidget, Base):
     # populate if a dataFrame has been passed in
     if dataFrameObject:
       self.setTableFromDataFrame(dataFrameObject.dataFrame)
-      self.showColumns()
 
     # enable callbacks
     self._actionCallback = actionCallback
@@ -596,11 +595,11 @@ class QuickTable(TableWidget, Base):
     self.hide()
     self._silenceCallback = True
 
-    self.setColumnCount(self._dataFrameObject.numColumns)
     self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
     self.showColumns(self._dataFrameObject)
     self.resizeColumnsToContents()
     self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+    self.setColumnCount(self._dataFrameObject.numColumns)
 
     self.show()
     self._silenceCallback = False
@@ -618,18 +617,16 @@ class QuickTable(TableWidget, Base):
 
     if not dataFrameObject.dataFrame.empty:
       self.setData(dataFrameObject.dataFrame.values)
+      # needed after setting the column headings
+      self.setHorizontalHeaderLabels(dataFrameObject.headings)
+      self.showColumns(dataFrameObject)
+      self.resizeColumnsToContents()
+      self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
+      # required to make the header visible
+      self.setColumnCount(dataFrameObject.numColumns)
     else:
       self.clearTable()
-      self.setColumnCount(dataFrameObject.numColumns)
-
-    self.setData(dataFrameObject.dataFrame.values)
-
-    self.setHorizontalHeaderLabels(dataFrameObject.headings)
-
-    # needed after setting the column headings
-    self.showColumns(dataFrameObject)
-    self.resizeColumnsToContents()
-    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
     # re-sort the table
     if sortColumn < self.columnCount():
@@ -656,13 +653,14 @@ class QuickTable(TableWidget, Base):
     # objectList = {}
     # indexList = {}
 
-    for col, obj in enumerate(buildList):
-      listItem = OrderedDict()
-      for header in colDefs.columns:
-        listItem[header.headerText] = header.getValue(obj)
+    if buildList:
+      for col, obj in enumerate(buildList):
+        listItem = OrderedDict()
+        for header in colDefs.columns:
+          listItem[header.headerText] = header.getValue(obj)
 
-      allItems.append(listItem)
-      objects.append(obj)
+        allItems.append(listItem)
+        objects.append(obj)
 
       # indexList[str(listItem['Index'])] = obj
       # objectList[obj.pid] = listItem['Index']
@@ -899,16 +897,22 @@ class QuickTable(TableWidget, Base):
     self.clearContents()
     self.verticalHeadersSet = True
     self.horizontalHeadersSet = True
-    self.items = []
-    self.setRowCount(0)
     self.sortModes = {}
 
     if self._dataFrameObject:
+      # there must be something in the table to set the headers against
+      self.setData([list(range(self._dataFrameObject.numColumns)),])
+
       self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
       self.showColumns(self._dataFrameObject)
       self.resizeColumnsToContents()
       self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
+      # required to make the header visible
+      self.setColumnCount(self._dataFrameObject.numColumns)
+
+    self.setRowCount(0)
+    self.items = []
     self._silenceCallback = False
 
   def _updateTableCallback(self, data):
@@ -920,7 +924,9 @@ class QuickTable(TableWidget, Base):
     table = data[Notifier.OBJECT]
 
     self._silenceCallback = True
-    if getattr(self, self._tableData['tableSelection']) in thisTableList:
+    tableSelect = self._tableData['tableSelection']
+
+    if tableSelect and getattr(self, tableSelect) in thisTableList:
       trigger = data[Notifier.TRIGGER]
 
       # keep the original sorting method
@@ -937,7 +943,7 @@ class QuickTable(TableWidget, Base):
         self._tableData['changeFunc'](table)
 
       elif trigger == Notifier.RENAME:
-        if table == getattr(self, self._tableData['tableSelection']):
+        if table == getattr(self, tableSelect):
 
           # self.displayTableForNmrTable(table)
           self._tableData['changeFunc'](table)
@@ -951,7 +957,7 @@ class QuickTable(TableWidget, Base):
 
     self._silenceCallback = False
     getLogger().debug('>updateTableCallback>', data['notifier']
-                      , self._tableData['tableSelection']
+                      , tableSelect
                       , data['trigger'], data['object'])
 
   def _updateRowCallback(self, data):

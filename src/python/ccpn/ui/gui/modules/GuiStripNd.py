@@ -189,7 +189,7 @@ class GuiStripNd(GuiStrip):
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
       (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
-      (tType.item, 'Last Axis Only',        '',                       '',                         True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
+      (tType.item, 'Share Y Axis',        '',                       '',                         True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
 
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
@@ -331,7 +331,9 @@ class GuiStripNd(GuiStrip):
     return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
-    if not axis:
+    # if not axis:
+    # TODO:ED check why this was here
+    if axis is None:
       return
 
     positionArray = []

@@ -1,5 +1,8 @@
 """
 Module Documentation here
+# TODO : when update module, keep focus on selected item in the table, keep same zoom on the plot
+check zoom
+
 """
 #=========================================================================================
 # Licence, Reference and Credits

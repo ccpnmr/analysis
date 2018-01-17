@@ -24,6 +24,7 @@
         "peakSymbolType": 0,
         "zoomCentreType": 0,
         "zoomPercent": 5.0,
+        "mouseMode": "select",
         "lastAxisOnly": true
     },
 

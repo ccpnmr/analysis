@@ -38,6 +38,11 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util.Logging import getLogger
 
+# mouse modes for single click:
+PICK = 'pick'
+SELECT = 'select'
+MouseModes = [PICK, SELECT]
+
 def doDebug(msg):
   if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
     sys.stderr.write(msg +'\n')

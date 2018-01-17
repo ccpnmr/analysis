@@ -50,6 +50,8 @@ class GuiWindow():
     self.application = application
     self.current = self.application.current
 
+
+
   def _setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar
@@ -82,6 +84,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
@@ -458,3 +461,35 @@ class GuiWindow():
 
     # self.application.project.unblankNotification()
     # self.application.project.unblankNotification()
+
+
+  def switchMouseMode(self):
+    from ccpn.ui.gui.lib.mouseEvents import MouseModes
+    from ccpn.ui.gui.widgets.Icon import Icon
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    import time
+    mode = self.application.preferences.general.mouseMode
+    modesCount = len(MouseModes)
+    if mode in MouseModes:
+      i = MouseModes.index(mode)
+      if i + 1 < modesCount:
+        mode = MouseModes[i + 1]
+        self.application.preferences.general.mouseMode = mode
+      else:
+        i = 0
+        mode = MouseModes[i]
+        self.application.preferences.general.mouseMode = mode
+    mouseModeText = ' Mouse Mode:'
+    # icon = QtGui.QMessageBox.Information
+    # widget = MessageDialog.MessageDialog('',  mouseModeText, mode, icon=icon)
+    # widget.setWindowFlags(QtCore.Qt.FramelessWindowHint )
+    # widget.raise_()
+    # widget.exec_()
+    self.statusBar().showMessage(mouseModeText + mode)
+    project = self.application.project
+    for strip in project.strips:
+      strip.viewBox._setMouseCursor()
+
+
+
+

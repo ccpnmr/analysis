@@ -83,7 +83,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.mouseEvents import \
   leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 
 class CrossHair:
@@ -171,7 +171,12 @@ class ViewBox(pg.ViewBox):
     # Override pyqtgraph ViewBoxMenu
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
     self.strip = strip
-    self.current = strip.spectrumDisplay.mainWindow.application.current
+    self.application = self.current = strip.spectrumDisplay.mainWindow.application
+    self.current = self.application.current
+    self.preferences = self.application.preferences
+
+    self._setMouseCursor()
+
 
     # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
@@ -236,6 +241,25 @@ class ViewBox(pg.ViewBox):
     if self.menu is None:
       self.menu = Menu('', self.parent(), isFloatWidget=True)
       return self.menu
+  def _setMouseCursor(self):
+
+    if self.preferences.general.mouseMode == PICK:
+      self.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
+    else:
+      self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+  def _pickAtMousePosition(self, event):
+    ''
+    event.accept()
+    self._resetBoxes()
+    mousePosition = self.mapSceneToView(event.pos())
+    position = [mousePosition.x(), mousePosition.y()]
+    orderedAxes = self.current.strip.orderedAxes
+    for orderedAxis in orderedAxes[2:]:
+      position.append(orderedAxis.position)
+
+    newPeaks = self.current.strip.peakPickPosition(position)
+    self.current.peaks = newPeaks
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
@@ -250,18 +274,14 @@ class ViewBox(pg.ViewBox):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
+    if self.preferences.general.mouseMode == PICK:
+      self._pickAtMousePosition(event)
+
+
+
     if controlShiftLeftMouse(event):
       # Control-Shift-left-click: pick peak
-      event.accept()
-      self._resetBoxes()
-      mousePosition=self.mapSceneToView(event.pos())
-      position = [mousePosition.x(), mousePosition.y()]
-      orderedAxes = self.current.strip.orderedAxes
-      for orderedAxis in orderedAxes[2:]:
-        position.append(orderedAxis.position)
-
-      newPeaks = self.current.strip.peakPickPosition(position)
-      self.current.peaks = newPeaks
+      self._pickAtMousePosition(event)
 
       # peaks = list(self.current.peaks)
       # peakLists = []

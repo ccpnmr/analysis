@@ -332,6 +332,7 @@ class GuiStripNd(GuiStrip):
 
   def resetAxisRange(self, axis):
     # if not axis:
+    # TODO:ED check why this was here
     if axis is None:
       return
 

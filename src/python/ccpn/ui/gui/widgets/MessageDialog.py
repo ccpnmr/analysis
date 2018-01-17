@@ -265,6 +265,7 @@ class progressPopup(CcpnDialog):
     # vlayout.addStretch()
     # self.setLayout(vlayout)
 
+    # self.setWindowFlags(QtCore.Qt.WindowTitleHint)
     self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
     self.show()
     self.raise_()

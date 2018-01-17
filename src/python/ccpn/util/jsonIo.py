@@ -168,7 +168,7 @@ def _ccpnObjectPairHook(pairs):
         return pandas.read_json(data, typ='series', orient='split')
 
       elif typ == 'numpy.ndarray':
-        return numpy.ndarray(data)
+        return numpy.array(data)
 
       elif typ == 'ccpncore.Tensor':
         # Put here to avoid circular imports

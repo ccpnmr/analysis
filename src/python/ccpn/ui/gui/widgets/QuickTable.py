@@ -1019,6 +1019,8 @@ class QuickTable(TableWidget, Base):
         # modify the oldPid in the objectList, change to newPid
         self._dataFrameObject.renameObject(row, oldPid)
 
+        # TODO:ED check whether the new object is still in the active list - delete otherwise
+
       self.update()
       # re-sort the table
       if sortColumn < self.columnCount():

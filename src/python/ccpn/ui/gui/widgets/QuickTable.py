@@ -772,7 +772,7 @@ class QuickTable(TableWidget, Base):
     model = self.selectionModel()
 
     # selects all the items in the row
-    selection = model.selectedIndexes()
+    selection = model.selectedRows()
 
     # if self.selectRows:
     #   selection = model.selectedRows(column=0)
@@ -1217,14 +1217,19 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
       for ii in range(self._parent.columnCount()):
         rowData.append(self._parent.item(row, ii).text())
 
-      pidCol = self._parent._dataFrameObject.headings.index('Pid')
-      thisPid = rowData[pidCol]
-      obj = self._parent.project.getByPid(thisPid)
+      if 'Pid' in self._parent._dataFrameObject.headings:
+        pidCol = self._parent._dataFrameObject.headings.index('Pid')
+        thisPid = rowData[pidCol]
+        obj = self._parent.project.getByPid(thisPid)
 
-      # set the data which will fire notifiers to populate all tables
-      func = self._parent._dataFrameObject.setEditValues[col]
-      if func:
-        func(obj, text)
+        # set the data which will fire notifiers to populate all tables
+        func = self._parent._dataFrameObject.setEditValues[col]
+        if func:
+          func(obj, text)
+      else:
+        # TODO:ED write into the table
+        # index.model().setItem(row, col, QtGui.QTableWidgetItem(text))
+        pass
 
     except Exception as es:
       getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))

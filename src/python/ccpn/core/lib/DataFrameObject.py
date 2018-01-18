@@ -278,29 +278,12 @@ class DataFrameObject(object):
     # if obj.pid in self._objectList:
     if self.find(self._table, str(obj.pid), column='Pid') is not None:
       self._table.silenceCallBack = True
-      # update the values as 'Pid' may have changed
-      # index = self._objectList[obj.pid]
-      # del self._objectList[obj.pid]
-      # del self._indexList[str(index)]
 
       # generate a new row
       listDict = OrderedDict()
       for header in self._columnDefinitions.columns:
         listDict[header.headerText] = header.getValue(obj)
 
-      # update the pointers incase they have changed - set to original index
-      # listDict['Pid'] = index
-      # self._indexList[str(index)] = obj
-      # self._objectList[obj.pid] = index
-
-      # update the dataFrame
-      self._dataFrame.loc[self._dataFrame['Pid'] == obj.pid] = list(listDict.values())
-      # appendDataFrame = pd.DataFrame([listItem], columns=self.headings)
-
-      # change row in table
-      # self._removeDataFrame = self._dataFrame.ix[self._dataFrame['Pid'] == index]
-      # self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != index]
-      # df.columns.get_loc('Pid')
       try:
         row = self.find(self._table, str(obj.pid), column='Pid')
         if row is not None:

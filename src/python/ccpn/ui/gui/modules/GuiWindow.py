@@ -479,7 +479,7 @@ class GuiWindow():
         i = 0
         mode = MouseModes[i]
         self.application.preferences.general.mouseMode = mode
-    mouseModeText = ' Mouse Mode:'
+    mouseModeText = ' Mouse Mode: '
     # icon = QtGui.QMessageBox.Information
     # widget = MessageDialog.MessageDialog('',  mouseModeText, mode, icon=icon)
     # widget.setWindowFlags(QtCore.Qt.FramelessWindowHint )

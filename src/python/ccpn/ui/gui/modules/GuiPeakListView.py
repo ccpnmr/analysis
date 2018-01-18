@@ -133,12 +133,49 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
 
   peakLabel = []
   pdNA = peak.dimensionNmrAtoms
+
+  # # create a list for each residue
+  # peakNmrDict = {}
+  # for atoms in pdNA:
+  #   # if len(atom) != 0:
+  #   for thisAtom in atoms:
+  #     thisID = thisAtom.nmrResidue.id
+  #     if thisID not in peakNmrDict.keys():
+  #       peakNmrDict[thisID] = [thisAtom]
+  #     else:
+  #       peakNmrDict[thisID].append(thisAtom)
+  #
+  # for pdNA in peakNmrDict.values():
+  #   resLabel = []
+  #   if pdNA:
+  #     try:
+  #       for item in pdNA:
+  #         if len(resLabel) > 0 and useShortCode:
+  #           label = item.name
+  #         else:
+  #           label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+  #         resLabel.append(label)
+  #
+  #     except:
+  #       resLabel.append('-')
+  #   else:
+  #     if len(pdNA) == 1:
+  #       resLabel.append('1H')
+  #     else:
+  #       resLabel.append('_')
+  #
+  #   peakLabel.append(', '.join(resLabel))
+  #
+  # peakLabel = '; '.join(peakLabel)
+  # return peakLabel
+
   for dimension in range(peak.peakList.spectrum.dimensionCount):
 
     # TODO:ED add a sequence of labels that can be cycled through
     if pdNA[dimension]:
       try:
         peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0]
+
         if all(x==peakNmrResidues[0] for x in peakNmrResidues):
           for item in pdNA[dimension]:
             if len(peakLabel) > 0 and useShortCode:
@@ -148,9 +185,34 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
             peakLabel.append(label)
 
         else:
-          for item in pdNA[dimension]:
-            label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
-            peakLabel.append(label)
+          # for item in pdNA[dimension]:
+          #   label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+          #   peakLabel.append(label)
+
+          peakNmrDict = {}
+          for atom in pdNA[dimension]:
+            thisID = atom.nmrResidue.id
+            if thisID not in peakNmrDict.keys():
+              peakNmrDict[thisID] = [atom]
+            else:
+              peakNmrDict[thisID].append(atom)
+
+          resLabels = []
+          for thispdNA in peakNmrDict.values():
+            resLabel = []
+            try:
+              for item in thispdNA:
+                if len(resLabel) > 0 and useShortCode:
+                  label = item.name
+                else:
+                  label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+                resLabel.append(label)
+            except:
+              resLabel.append('-')
+
+            resLabels.append(', '.join(resLabel))
+
+          peakLabel.append('; '.join(resLabels))
 
       except:
         peakLabel.append('-')

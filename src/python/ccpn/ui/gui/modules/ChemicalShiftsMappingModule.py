@@ -67,7 +67,7 @@ import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                                       missingdResidues, colourMissing, colourAboveThreshold,
-                                      colourBelowThreshold):
+                                      colourBelowThreshold, selection):
 
   if os.path.exists(pdbPath):
     warn = 'This script is auto-generated. Any changes here will be lost.'
@@ -88,7 +88,10 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
       f.write('''\ncmd.select('missing', 'res  ''' + missingdResidues + ''' ')''')
       f.write('''\ncmd.set_color("MissingColour", " ''' + str(colourMissing) + ''' ")''')
       f.write('''\ncmd.color('MissingColour', 'missing')''')
-      f.write('''\ncmd.deselect()''')
+      if len(selection)>0:
+        f.write('''\ncmd.select('Selected', 'res  ''' + selection + ''' ')''')
+      else:
+        f.write('''\ncmd.deselect()''')
 
   return filePath
 
@@ -729,13 +732,16 @@ class ChemicalShiftsMapping(CcpnModule):
     aboveThresholdResidues = "+".join([str(x) for x in self.aboveX])
     belowThresholdResidues = "+".join([str(x) for x in self.belowX])
     missingdResidues = "+".join([str(x) for x in self.disappereadX])
+    selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])
 
     colourAboveThreshold = hexToRgb(self.aboveBrush)
     colourBelowThreshold = hexToRgb(self.belowBrush)
     colourMissing = hexToRgb(self.disappearedPeakBrush)
 
+
     scriptPath = chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                                                   missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold)
+                                                   missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
+                                                   selection)
 
 
     try:

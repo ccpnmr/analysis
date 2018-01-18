@@ -89,13 +89,27 @@ class PeakListPropertiesPopup(CcpnDialog):
       self.symbolColourLabel = Label(self, 'Peak Symbol Colour', grid=(3, 0))
       self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
       self._fillColourPulldown(self.symbolColourPulldownList)
-      self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.symbolColour))
+      # FIXME BROKEN .index(peakList.symbolColour) is not in list
+      c = peakList.symbolColour
+      if c in spectrumColourKeys:
+        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
+      else:
+        # FIXME
+        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+
       self.symbolColourPulldownList.currentIndexChanged.connect(self._applyChanges)
 
       self.textColourLabel = Label(self, 'Peak Text Colour', grid=(4, 0))
       self.textColourPulldownList = PulldownList(self, grid=(4, 1))
       self._fillColourPulldown(self.textColourPulldownList)
-      self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.textColour))
+      # FIXME BROKEN .index(peakList.symbolColour) is not in list
+      c = peakList.textColour
+      if c in spectrumColourKeys:
+        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
+      else:
+        # FIXME
+        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+      # self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.textColour))
       self.textColourPulldownList.currentIndexChanged.connect(self._applyChanges)
 
       self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self.accept)

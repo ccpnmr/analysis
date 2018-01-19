@@ -1114,34 +1114,34 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     colour = peakItem.peakListView.peakList.textColour
     self.setBrush(QtGui.QColor(colour))
 
-    if self.parentWidget().strip.peakLabelling == 1:
-      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)  # full
-    elif self.parentWidget().strip.peakLabelling == 0:
-      text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)   # short
-    else:
-      text = _getPeakAnnotation(peakItem.peak)                            # original 'pid'
-
-    self.setText(text)
-
-    project = peakItem.peak.project
-    project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
-    undo = project._undo
-    if undo is not None:
-      undo.increaseBlocking()
-    try:
-      if clearLabel:
-        self.setText(text)
+    if self.parentWidget():
+      if self.parentWidget().strip.peakLabelling == 1:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)  # full
+      elif self.parentWidget().strip.peakLabelling == 0:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)   # short
       else:
-        self.setText(text)
+        text = _getPeakAnnotation(peakItem.peak)                            # original 'pid'
 
-    finally:
+      self.setText(text)
+
+      project = peakItem.peak.project
+      project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
+      undo = project._undo
       if undo is not None:
-        undo.decreaseBlocking()
-      project._endCommandEchoBlock()
+        undo.increaseBlocking()
+      try:
+        if clearLabel:
+          self.setText(text)
+        else:
+          self.setText(text)
 
-    undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
-                 redoArgs=(peakItem, clearLabel))
+      finally:
+        if undo is not None:
+          undo.decreaseBlocking()
+        project._endCommandEchoBlock()
 
+      undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                   redoArgs=(peakItem, clearLabel))
 
   def clearPeakAnnotationItem(self, peakItem):
 

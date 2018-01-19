@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.QuickTable import QuickTable, QuickTableFrame
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Blank import Blank
@@ -96,7 +96,7 @@ class NmrResidueTableModule(CcpnModule):
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
-                                             fixedWidths=(colwidth, 2*colwidth, None),
+                                             fixedWidths=(colwidth, colwidth, colwidth),
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',

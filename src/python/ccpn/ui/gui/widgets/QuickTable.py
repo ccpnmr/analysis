@@ -1033,7 +1033,7 @@ class QuickTable(TableWidget, Base):
 
             if rows and len(rows) > 1:
               self._dataFrameObject.appendObject(row)
-              self.update()
+              # self.update()
             else:
               # self._update(self.nmrTable)
               self._tableData['updateFunc'](tSelect)
@@ -1051,8 +1051,24 @@ class QuickTable(TableWidget, Base):
         self._dataFrameObject.renameObject(row, oldPid)
 
         # TODO:ED check whether the new object is still in the active list - remove otherwise
-        if not self._dataFrameObject.objectExists(row):
-          self.clearSelection()
+        if self._tableData['tableSelection']:
+          tSelect = getattr(self, self._tableData['tableSelection'])    # eg self.nmrChain
+          if tSelect:                                                   # eg self.nmrChain.nmrResidues
+            objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+
+            if objList and row not in objList:
+              # TODO:ED Check currect deletion
+              # print ('>>> deleting spare object %s' % row)
+              self._dataFrameObject.removeObject(row)
+              self.clearSelection()
+            else:
+              # print('>>> creating spare object %s' % row)
+              if objList and len(objList) > 1:
+                self._dataFrameObject.appendObject(row)
+                # self.update()
+              else:
+                # self._update(self.nmrTable)
+                self._tableData['updateFunc'](tSelect)
 
       self.update()
       # re-sort the table
@@ -1272,6 +1288,15 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
 
     # return QtGui.QStyledItemDelegate.setModelData(self, widget, mode, index)
 
+class QuickTableFrame(Frame):
+  def __init__(self, *args, **kwargs):
+    super(QuickTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0,0)
+                                , showBorder=False, fShape='noFrame'
+                                , grid=(1,0)
+                                , hPolicy='expanding', vPolicy='expanding')
+
+    self.quickTable = QuickTable(self, *args, **kwargs)
+    self.searchWidget = None
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Icon import Icon

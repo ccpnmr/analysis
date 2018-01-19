@@ -147,33 +147,38 @@ class QuickTableFilter(Frame):
       self.restoreTable(table)
       MessageDialog.showWarning('Not found', '')
 
-
 def attachSearchWidget(table):
   """
   Attach the search widget to the bottom of the table widget
   """
+  returnVal = False
   try:
-    if table._parent is not None:
-      parentLayout = None
-      if isinstance(table._parent, Base):
-        if hasattr(table.parent, 'getLayout'):
-          parentLayout = table._parent.getLayout()
-        else:
-          # TODO Add the search widget somewhere. Popup?
-          return False
+    # if table._parent is not None:
+    #   parentLayout = None
+    #   if isinstance(table._parent, Base):
+    #     if hasattr(table.parent, 'getLayout'):
+    #       parentLayout = table._parent.getLayout()
+    #     else:
+    #       # TODO Add the search widget somewhere. Popup?
+    #       return False
 
-      if isinstance(parentLayout, QtGui.QGridLayout):
-        idx = parentLayout.indexOf(table)
-        location = parentLayout.getItemPosition(idx)
-        if location is not None:
-          if len(location)>0:
-            row, column, rowSpan, columnSpan = location
-            table.searchWidget = QuickTableFilter(table=table, vAlign='B')
-            parentLayout.addWidget(table.searchWidget, row+1, column, rowSpan+1, columnSpan)
-            table.searchWidget.hide()
+    parentLayout = table.parent().getLayout()
 
-            # TODO:ED move this to the tables
-            # parentLayout.setVerticalSpacing(0)
-    return True
-  except:
-    return False
+    if isinstance(parentLayout, QtGui.QGridLayout):
+      idx = parentLayout.indexOf(table)
+      location = parentLayout.getItemPosition(idx)
+      if location is not None:
+        if len(location)>0:
+          row, column, rowSpan, columnSpan = location
+          table.searchWidget = QuickTableFilter(table=table, vAlign='b')
+          parentLayout.addWidget(table.searchWidget, row+1, column, 1, columnSpan)
+          table.searchWidget.setFixedHeight(30)
+          table.searchWidget.hide()
+
+          # TODO:ED move this to the tables
+          # parentLayout.setVerticalSpacing(0)
+        returnVal = True
+  except Exception as es:
+    getLogger().warning('Error attaching search widget: %s' % str(es))
+  finally:
+    return returnVal

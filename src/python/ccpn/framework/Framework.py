@@ -882,6 +882,11 @@ class Framework:
                                                     ('checked', False)
                                                     ]),
       (),
+      ("Show/hide Modules", ([
+                              ("None", None, [('checkable', True),
+                                               ('checked', False)])
+                            ])),
+      (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
@@ -913,8 +918,6 @@ class Framework:
                ))
 
     ms.append(('Plugins', ()))
-
-    ms.append(('Modules', ()))
 
     ms.append(('Help',      [
       ("Tutorials",([
@@ -1056,16 +1059,6 @@ class Framework:
 
   def _loadNefFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
-
-    # TODO:ED example for Chris
-    import ccpn.util.nef.NefImporter as NefImporter
-    tempDict = NefImporter.loadFile(path)
-
-    NefImporter.export(object.path)
-    tempDict = NefImporter()
-    tempDict.loadFile(path)
-
-    tempReadToString = tempDict.toString()
 
     dataBlock = self.nefReader.getNefData(path)
 

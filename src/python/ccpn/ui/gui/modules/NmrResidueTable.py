@@ -543,7 +543,9 @@ class NmrResidueTable(QuickTable):
       else:
         self.current.nmrResidue = selected[0]
     else:
+      # TODO:ED this should never be called, and where is it?
       self.current.clearNmrResidues()
+
     NmrResidueTableModule.currentCallback = {'object':self.nmrChain, 'table':self}
 
 

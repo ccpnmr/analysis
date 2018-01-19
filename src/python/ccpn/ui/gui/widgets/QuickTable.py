@@ -588,6 +588,8 @@ class QuickTable(TableWidget, Base):
             if hasattr(obj, 'pid'):
               obj.delete()
 
+    self.clearSelection()
+
   def refreshTable(self):
     self.setTableFromDataFrameObject(self._dataFrameObject)
 
@@ -819,8 +821,36 @@ class QuickTable(TableWidget, Base):
       return None
 
   def clearSelection(self):
+    """
+    clear the cxurrent selection in the table
+    and remove objects form the current list
+    """
+    objList = self.getSelectedObjects()
     selectionModel = self.selectionModel()
     selectionModel.clearSelection()
+
+    # remove from the current list
+    # TODO:ED check whether this is robust
+    multiple = self._tableData['classCallBack']
+    if multiple:        # None if no table callback defined
+      singular = multiple[:-1]
+      multipleAttr = getattr(self.current, multiple)
+      singularAttr = getattr(self.current, singular)
+
+      if self.multiSelect:
+        if isinstance(objList, list):
+          for obj in objList:
+            try:
+              multipleAttr.remove(obj)
+            except:
+              getLogger().warning('%s not found in the list' % obj)
+        else:
+          try:
+            multipleAttr.remove(objList)
+          except:
+            getLogger().warning('%s not found in the list' % objList)
+      else:
+        setattr(self.current, singular, None)
 
   def selectObjects(self, objList:list, setUpdatesEnabled:bool=False):
     """
@@ -990,6 +1020,7 @@ class QuickTable(TableWidget, Base):
         # remove item from self._dataFrameObject
 
         self._dataFrameObject.removeObject(row)
+        self.clearSelection()
 
       elif trigger == Notifier.CREATE:
 
@@ -1019,7 +1050,9 @@ class QuickTable(TableWidget, Base):
         # modify the oldPid in the objectList, change to newPid
         self._dataFrameObject.renameObject(row, oldPid)
 
-        # TODO:ED check whether the new object is still in the active list - delete otherwise
+        # TODO:ED check whether the new object is still in the active list - remove otherwise
+        if not self._dataFrameObject.objectExists(row):
+          self.clearSelection()
 
       self.update()
       # re-sort the table
@@ -1147,6 +1180,7 @@ class QuickTable(TableWidget, Base):
                         , 'tableName': tableName
                         , 'rowName': rowName
                         , 'className': className
+                        , 'classCallBack': callBackClass._pluralLinkName if callBackClass else None
                         , 'selectCurrentCallBack': selectCurrentCallBack}
 
   def clearTableNotifiers(self):

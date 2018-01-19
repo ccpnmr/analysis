@@ -175,6 +175,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if len(splitMenuString) > 1:
       topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
     for a in topMenuAction.actions():
+      # print ('>>>', menuString, a.text())
       if a.text() == splitMenuString[-1]:
         return a.menu() or a
     raise ValueError('Menu item not found.')
@@ -190,8 +191,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if len(splitMenuString) > 1:
       topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
     for a in topMenuAction.actions():
-      # temp = a.text()
-      # print (temp)
+      # print ('>>>', menuString, a.text())
       if a.text() == splitMenuString[-1]:
         found = a.menu() if a.menu() else a
         break
@@ -302,7 +302,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _attachModulesMenuAction(self):
     # add a connect to call _fillModulesMenu when the menu item is about to show
     # so it is always uptodate
-    modulesMenu = self.getMenuAction('Modules')
+    modulesMenu = self.searchMenuAction('Show/hide Modules')
+    # modulesMenu = self.getMenuAction('Show/hide Modules')
     modulesMenu.aboutToShow.connect(self._fillModulesMenu)
 
   def _createMenu(self, spec, targetMenu=None):
@@ -486,7 +487,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def _fillModulesMenu(self):
-    modulesMenu = self.getMenuAction('Modules')
+    # modulesMenu = self.getMenuAction('Modules')
+    modulesMenu = self.searchMenuAction('Show/hide Modules')
     modulesMenu.clear()
 
     for module in self.moduleArea.currentModules:

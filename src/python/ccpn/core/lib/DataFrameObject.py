@@ -294,6 +294,9 @@ class DataFrameObject(object):
       finally:
         self._table.silenceCallBack = False
 
+  def objectExists(self, obj):
+    return self.find(self._table, str(obj.pid), column='Pid') is not None
+
   def emptyRow(self):
     """
     Create a blank row for populating undefined tables

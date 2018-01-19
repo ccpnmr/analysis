@@ -1002,7 +1002,6 @@ class QuickTable(TableWidget, Base):
     trigger = data[Notifier.TRIGGER]
 
     self._silenceCallback = True
-    thisTable = getattr(row, self._tableData['tableName'])
 
     try:
       # multiple delete from deleteObjFromTable messes with this
@@ -1076,7 +1075,7 @@ class QuickTable(TableWidget, Base):
         self.sortByColumn(sortColumn, sortOrder)
 
     except Exception as es:
-      getLogger().warning(str(es))
+      getLogger().warning(str(es)+str(data))
 
     self._silenceCallback = False
     getLogger().debug('>updateRowCallback>', data['notifier']

@@ -31,18 +31,18 @@ import sys
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 
-class FileDialog(QtGui.QFileDialog):
+class FileDialog(QtWidgets.QFileDialog):
 
-  # def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-  #              acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
+  # def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
+  #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kw):
 
-  def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None, **kw):
+  def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
+               acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None, **kw):
 
     # ejb - added selectFile to suggest a filename in the file box
     #       this is not passed to the super class
 
-    QtGui.QFileDialog.__init__(self, parent, caption=text, **kw)
+    QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kw)
 
     staticFunctionDict = {
       (0, 0): 'getOpenFileName',
@@ -113,7 +113,7 @@ class FileDialog(QtGui.QFileDialog):
   def selectedFiles(self):
 
     if self.result and not self.useNative:
-      return QtGui.QFileDialog.selectedFiles(self)
+      return QtWidgets.QFileDialog.selectedFiles(self)
     elif self.result and self.useNative:
       return [self.result]
     else:
@@ -129,15 +129,15 @@ class FileDialog(QtGui.QFileDialog):
       return None
 
 
-class NefFileDialog(QtGui.QFileDialog):
+class NefFileDialog(QtWidgets.QFileDialog):
 
-  def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
+  def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
+               acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
 
     # ejb - added selectFile to suggest a filename in the file box
     #       this is not passed to the super class
 
-    QtGui.QFileDialog.__init__(self, parent, caption=text, **kw)
+    QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kw)
 
     staticFunctionDict = {
       (0, 0): 'getOpenFileName',
@@ -160,7 +160,7 @@ class NefFileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
-    self.setLabelText(QtGui.QFileDialog.Accept, 'Select')
+    self.setLabelText(QtWidgets.QFileDialog.Accept, 'Select')
 
     if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
       self.selectFile(selectFile)
@@ -187,7 +187,7 @@ class NefFileDialog(QtGui.QFileDialog):
     else:
       # the selectFile works and returns the file in the current directory
       if self.result and not self.useNative:
-        return QtGui.QFileDialog.selectedFiles(self)
+        return QtWidgets.QFileDialog.selectedFiles(self)
       elif self.result and self.useNative:
         return [self.result]
       else:
@@ -214,8 +214,8 @@ class NefFileDialog(QtGui.QFileDialog):
     # self.acceptFunc(self.selectedFile())
 
   def setLabels(self, save='Save', cancel='Cancel'):
-    self.setLabelText(QtGui.QFileDialog.Accept, save)
-    self.setLabelText(QtGui.QFileDialog.Reject, cancel)
+    self.setLabelText(QtWidgets.QFileDialog.Accept, save)
+    self.setLabelText(QtWidgets.QFileDialog.Reject, cancel)
 
   def _setResult(self, value):
     self.thisAccepted = value
@@ -244,7 +244,7 @@ class LineEditButtonDialog(Widget, Base):
       self.textLineEdit = textLineEdit
 
     if fileMode is None:
-      self.fileMode = QtGui.QFileDialog.AnyFile
+      self.fileMode = QtWidgets.QFileDialog.AnyFile
     else:
       self.fileMode = fileMode
 
@@ -262,7 +262,7 @@ class LineEditButtonDialog(Widget, Base):
 
   def _openFileDialog(self):
     self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
-               acceptMode=QtGui.QFileDialog.AcceptOpen, directory=self.directory, filter=self.filter)
+               acceptMode=QtWidgets.QFileDialog.AcceptOpen, directory=self.directory, filter=self.filter)
 
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:

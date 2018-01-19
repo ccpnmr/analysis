@@ -113,7 +113,7 @@ class OutputPipelineGuiPipe(GuiPipe):
     row += 1
     self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
     setattr(self, SavePath,
-            LineEditButtonDialog(self.pipeFrame, fileMode=QtGui.QFileDialog.Directory,  grid=(row,1)))
+            LineEditButtonDialog(self.pipeFrame, fileMode=QtWidgets.QFileDialog.Directory,  grid=(row,1)))
     self._setDefaultDataPath()
 
 

@@ -4,11 +4,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
-class Splitter(QtGui.QSplitter, Base):
+class Splitter(QtWidgets.QSplitter, Base):
 
   def __init__(self, parent=None, splitterDirection=QtCore.Qt.Horizontal, **kw):
 
-    QtGui.QSplitter.__init__(self, splitterDirection, parent)
+    QtWidgets.QSplitter.__init__(self, splitterDirection, parent)
     Base.__init__(self, parent, **kw)
     
     self.doResize = False
@@ -20,26 +20,26 @@ class Splitter(QtGui.QSplitter, Base):
   def resizeEvent(self, event):
     
     self.doResize = True
-    eventResult = QtGui.QSplitter.resizeEvent(self, event)
+    eventResult = QtWidgets.QSplitter.resizeEvent(self, event)
     self.doResize = False
     
     return eventResult
     
-class SplitterHandle(QtGui.QSplitterHandle):
+class SplitterHandle(QtWidgets.QSplitterHandle):
   
   def __init__(self, parent, orientation):
     
-    QtGui.QSplitterHandle.__init__(self, orientation, parent)
+    QtWidgets.QSplitterHandle.__init__(self, orientation, parent)
     
   def mousePressEvent(self, event):
     
     self.parent().doResize = True
-    return QtGui.QSplitter.mousePressEvent(self, event)
+    return QtWidgets.QSplitter.mousePressEvent(self, event)
     
   def mouseReleaseEvent(self, event):
     
     self.parent().doResize = False
-    return QtGui.QSplitter.mouseReleaseEvent(self, event)
+    return QtWidgets.QSplitter.mouseReleaseEvent(self, event)
 
 if __name__ == '__main__':
 

@@ -528,7 +528,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
       printer.setSize(QtCore.QSize(paperWidth*resolution, paperHeight*resolution))
 
       fType = 'SVG (*.svg)'
-      dialog = QtGui.QFileDialog
+      dialog = QtWidgets.QFileDialog
       filePath = dialog.getSaveFileName(self,filter=fType)
 
       if filePath:

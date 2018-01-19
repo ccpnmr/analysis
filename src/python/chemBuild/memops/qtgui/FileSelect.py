@@ -61,14 +61,14 @@ class FileType:
 
       
 
-class FileDialog(QtGui.QFileDialog):
+class FileDialog(QtWidgets.QFileDialog):
 
   def __init__(self, parent, caption='Select file',
                directory=None, doSave=False,
                showDetails=False, multiFile=False, suffix=None,
                default=None, fileTypes=None, sideBarUrls=None):
   
-    QtGui.QFileDialog.__init__(self, parent, caption, directory)
+    QtWidgets.QFileDialog.__init__(self, parent, caption, directory)
     
     self.default = default
     
@@ -76,21 +76,21 @@ class FileDialog(QtGui.QFileDialog):
       self.setDirectory(directory)
     
     if doSave:
-      self.setAcceptMode(QtGui.QFileDialog.AcceptSave)
-      self.setFileMode(QtGui.QFileDialog.AnyFile)
+      self.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+      self.setFileMode(QtWidgets.QFileDialog.AnyFile)
     
     else:
-      self.setAcceptMode(QtGui.QFileDialog.AcceptOpen)
+      self.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
       
       if multiFile:
-        self.setFileMode(QtGui.QFileDialog.ExistingFiles)
+        self.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
       else:
-        self.setFileMode(QtGui.QFileDialog.ExistingFile)
+        self.setFileMode(QtWidgets.QFileDialog.ExistingFile)
     
     if showDetails:
-      self.setViewMode(QtGui.QFileDialog.Detail)
+      self.setViewMode(QtWidgets.QFileDialog.Detail)
     else:
-      self.setViewMode(QtGui.QFileDialog.List)
+      self.setViewMode(QtWidgets.QFileDialog.List)
     
     if suffix:
       self.setDefaultSuffix(suffix)
@@ -166,10 +166,10 @@ class DirectoryDialog(FileDialog):
     FileDialog.__init__(self, parent, caption, directory=directory, doSave=doSave,
                         showDetails=showDetails, *kw)
     
-    self.setFileMode(QtGui.QFileDialog.Directory)
+    self.setFileMode(QtWidgets.QFileDialog.Directory)
     
     if not showFiles:
-      self.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+      self.setOptions(QtWidgets.QFileDialog.ShowDirsOnly)
 
     
     

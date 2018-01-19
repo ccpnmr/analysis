@@ -187,14 +187,14 @@ class BasePopup(QtWidgets.QWidget, _PopupCore):
     _PopupCore.__init__(self, parent, title, location, hide,
                         modal, transient, quitFunc, tipText)
 
-class DockPopup(QtGui.QDockWidget, _PopupCore):
+class DockPopup(QtWidgets.QDockWidget, _PopupCore):
 
   def __init__(self, parent=None, title='', location=None, hide=False,
                modal=False, transient=False, quitFunc=None,
                tipText=None):
     
 
-    QtGui.QDockWidget.__init__(self, parent=None)
+    QtWidgets.QDockWidget.__init__(self, parent=None)
     _PopupCore.__init__(self, parent, title, location, hide,
                         modal, transient, quitFunc, tipText)
     

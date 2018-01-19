@@ -256,7 +256,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
     self._horizontalSplitter = Splitter(QtCore.Qt.Horizontal)
     # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
-    # self._verticalSplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+    # self._verticalSplitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
     self._verticalTEMPSPLIT = Splitter(QtCore.Qt.Vertical)
     self._TESTFRAME = Frame(setLayout=False)

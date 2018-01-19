@@ -158,7 +158,7 @@ from ccpn.util.Logging import getLogger
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 
 
-class ObjectTable(QtGui.QTableView, Base):
+class ObjectTable(QtWidgets.QTableView, Base):
 
   columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums)
   rowSizeHint = 200  # total size hint (total size for all rows)
@@ -170,7 +170,7 @@ class ObjectTable(QtGui.QTableView, Base):
                enableExport=True, enableDelete=True,
                **kw):
 
-    QtGui.QTableView.__init__(self, parent)
+    QtWidgets.QTableView.__init__(self, parent)
     Base.__init__(self, **kw)
     self.parent = parent
     self.graphPanel = None
@@ -321,7 +321,7 @@ class ObjectTable(QtGui.QTableView, Base):
     # This helps avoiding infinite repaint loops.
     if not (isinstance(self.parent, Splitter) or self.parent.__class__.__name__ == Splitter.__name__) or \
            self.parent.doResize == True:
-      return QtGui.QTableView.resizeEvent(self, event)
+      return QtWidgets.QTableView.resizeEvent(self, event)
 
   def clearSelection(self):
 
@@ -632,7 +632,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self.hideGraph()
     self.hideFilter()
-    QtGui.QTableView.closeEvent(self, event)
+    QtWidgets.QTableView.closeEvent(self, event)
 
   def destroy(self, *args):
 
@@ -642,7 +642,7 @@ class ObjectTable(QtGui.QTableView, Base):
     if self.graphPanel:
       self.graphPanel.destroy()
 
-    QtGui.QTableView.destroy(self, *args)
+    QtWidgets.QTableView.destroy(self, *args)
 
   def _raiseHeaderContextMenu(self, pos):
     if self.searchWidget is None:
@@ -1075,7 +1075,7 @@ class ObjectTable(QtGui.QTableView, Base):
   #       print("mousePressEvent called")
   #       self.startDrag(event)
   #   else:
-  #     QtGui.QTableView.mousePressEvent(self, event)
+  #     QtWidgets.QTableView.mousePressEvent(self, event)
 
 
 EDIT_ROLE = QtCore.Qt.EditRole

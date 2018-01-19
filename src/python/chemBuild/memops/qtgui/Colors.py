@@ -20,14 +20,14 @@ def inverseGrey(color):
   return QColor(m, m, m)
  
 
-class ColorDialog(QtGui.QColorDialog):
+class ColorDialog(QtWidgets.QColorDialog):
 
   def __init__(self, parent=None, doAlpha=False, **kw):
     
-    QtGui.QColorDialog.__init__(self, parent)
+    QtWidgets.QColorDialog.__init__(self, parent)
        
     self.setOption(self.ShowAlphaChannel, doAlpha)
-    self.setOption(QtGui.QColorDialog.DontUseNativeDialog,  True)
+    self.setOption(QtWidgets.QColorDialog.DontUseNativeDialog,  True)
     self.aborted = False
     self.rejected.connect(self.quit)
   
@@ -183,7 +183,7 @@ class ColorPulldown(PulldownList):
     
     nCols = int(len(objects) // self.numRows) + 1
 
-    self.view = view = QtGui.QTableView()
+    self.view = view = QtWidgets.QTableView()
     
     view.setModel(self.model())
     view.horizontalHeader().setVisible(False)

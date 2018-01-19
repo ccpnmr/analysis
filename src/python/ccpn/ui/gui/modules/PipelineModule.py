@@ -634,7 +634,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     #
     self.savePipelineLabel = Label(self, 'Save in: directory path', tipText='Select path where to save your Pipeline file')
     self.settingsWidgets.append(self.savePipelineLabel)
-    self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtGui.QFileDialog.Directory)
+    self.savePipelineLineEdit = LineEditButtonDialog(self, fileMode=QtWidgets.QFileDialog.Directory)
     self.settingsWidgets.append(self.savePipelineLineEdit)
     #
 

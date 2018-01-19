@@ -1,5 +1,5 @@
 
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebKit
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 
 from .BasePopup import BasePopup
 from .Base import Base
@@ -13,11 +13,10 @@ from .Base import Base
 #
 # Remove HelpPopup
 
-class WebViewPanel(QtWebKit.QWebView, Base):
+class WebViewPanel(QtWebEngineWidgets.QWebEngineView, Base):
 
   def __init__(self, parent, **kw):
-  
-    QtWebKit.QWebView.__init__(self, parent=parent)
+    QtWebEngineWidgets.QWebEngineView.__init__(self, parent=parent)
     Base.__init__(self, parent, **kw)
     
 class WebViewPopup(BasePopup):

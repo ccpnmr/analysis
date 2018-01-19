@@ -1,14 +1,14 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
 
 from .Base import Base
 
-class PrintDialog(QtGui.QPrintDialog):
+class PrintDialog(QtPrintSupport.QPrintDialog):
 
   def __init__(self, parent=None, printer=None):
     
-    QtGui.QPrintDialog.__init__(self, parent)
+    QtPrintSupport.QPrintDialog.__init__(self, parent)
     
-    self.setOption(QtWidgets.QAbstractPrintDialog.PrintToFile)
+    self.setOption(QtPrintSupport.QAbstractPrintDialog.PrintToFile)
     
   def getPrinter(self):
   

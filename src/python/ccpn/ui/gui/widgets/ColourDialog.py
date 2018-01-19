@@ -45,14 +45,14 @@ def inverseGrey(colour):
   return QtGui.QColor(m, m, m)
 
 
-class ColourDialog(QtGui.QColorDialog):
+class ColourDialog(QtWidgets.QColorDialog):
 
   def __init__(self, parent=None, doAlpha=False, **kw):
 
-    QtGui.QColorDialog.__init__(self, parent)
+    QtWidgets.QColorDialog.__init__(self, parent)
 
     self.setOption(self.ShowAlphaChannel, doAlpha)
-    self.setOption(QtGui.QColorDialog.DontUseNativeDialog,  True)
+    self.setOption(QtWidgets.QColorDialog.DontUseNativeDialog,  True)
     self.aborted = False
     self.rejected.connect(self.quit)
 

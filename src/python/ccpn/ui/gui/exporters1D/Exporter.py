@@ -45,8 +45,8 @@ class Exporter(object):
         if opts is None:
             opts = {}
         self.fileDialog = FileDialog()
-        self.fileDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        self.fileDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
+        self.fileDialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
+        self.fileDialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         if filter is not None:
             if isinstance(filter, str):
                 self.fileDialog.setNameFilter(filter)

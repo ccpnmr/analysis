@@ -41,6 +41,6 @@ class Console(console.ConsoleWidget):
   #
   def runMacro(self):
     print('runMacro')
-    # macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro")
+    # macroFile = QtWidgets.QFileDialog.getOpenFileName(self, "Run Macro")
     # print(macroFile)
 

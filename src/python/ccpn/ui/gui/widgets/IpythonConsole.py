@@ -73,7 +73,7 @@ class IpythonConsole(Widget, Base):
 
         self.layout().setSpacing(1)
 
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.splitter.addWidget(self.textEditor)
 
         self.consoleFrame = Frame(self, setLayout=True)

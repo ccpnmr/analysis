@@ -55,6 +55,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     self.setFont(messageFont)
     self.setWindowModality(QtCore.Qt.WindowModal)
 
+    self._parent = parent
     self.setWindowTitle(title)
     self.setText(basicText)
     self.setInformativeText(message)
@@ -69,6 +70,20 @@ class MessageDialog(QtWidgets.QMessageBox):
       scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
       self.setIconPixmap(scaledImage)
 
+  def resizeEvent(self, ev):
+    """
+    required to set the initial position of the message box on the centre of the screen
+    """
+    # must be the first event outside of the __init__ otherwise frameGeometries are not valid
+    super(MessageDialog, self).resizeEvent(ev)
+
+    activeWindow = QtGui.QApplication.activeWindow()
+    if activeWindow:
+      point = activeWindow.rect().center()
+      global_point = activeWindow.mapToGlobal(point)
+      self.move(global_point
+                - self.frameGeometry().center()
+                + self.frameGeometry().topLeft())
 
 def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
   """Display an info message

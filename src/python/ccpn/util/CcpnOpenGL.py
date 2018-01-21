@@ -1173,21 +1173,30 @@ void main()
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
+  # TODO:ED the blending isn't working when the dock is popped out of the mainwindow
+  # def paintEvent(self, event):
+  #   self.makeCurrent()
+  # 
+  #   painter = QPainter(self)
+  #   painter.setRenderHint(QPainter.Antialiasing)
+  #   painter.end()
+
   def paintGL(self):
+    
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
 
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
+    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
     GL.glDisable(GL.GL_BLEND)
-    GL.glDisable(GL.GL_ALPHA_TEST)
+    # GL.glDisable(GL.GL_ALPHA_TEST)
     GL.glClearColor(0.05, 0.05, 0.05, 1.0)
-    # GL.glBlendColor(0.0, 0.0, 0.0, 1.0)
-    # # GL.glClearIndex()
-    # GL.glColorMask(GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE, GL.GL_FALSE)
-    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    # GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+    GL.glBlendColor(0.0, 0.0, 0.0, 1.0)
+    # GL.glClearIndex()
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT)  # | GL.GL_DEPTH_BUFFER_BIT)
 
+    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
     GL.glDisable(GL.GL_BLEND)
 
     # getGLvector = (GL.GLfloat * 2)()
